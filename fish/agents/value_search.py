@@ -43,7 +43,7 @@ class ValueSearchAgent(ProbabilisticAgent):
                  n_candidates: int = 6, n_samples: int = 32,
                  claim_threshold: float = 0.97, t_threshold: float = 1.0,
                  blend_static: float = 0.25, suit_bonus: float = 0.06,
-                 quiesce: bool = True):
+                 quiesce: bool = False):   # measured WORSE; see _quiesce
         super().__init__(n_samples=n_samples, claim_threshold=claim_threshold,
                          suit_bonus=suit_bonus)
         self.quiesce = quiesce
@@ -78,9 +78,16 @@ class ValueSearchAgent(ProbabilisticAgent):
         is strictly worse than the prior it was meant to improve.
 
         So we extend until the turn actually leaves our team, the direct
-        analogue of quiescence search. Inside a determinized world the
-        continuation is deterministic and greedy, which adds no variance to
-        the comparison between candidate actions.
+        analogue of quiescence search.
+
+        RESULT: the hypothesis was REJECTED. Quiescence made value search
+        WORSE (pair score 0.125 vs 0.25 without, 40 paired deals). The
+        likely reason is that the perfect-information greedy continuation
+        used here is too strong and too uniform: inside a determinized world
+        almost any successful ask leads to draining the same cards, so every
+        candidate converges to a similar leaf and the comparison loses its
+        discrimination. Kept behind ``quiesce=False`` as a documented
+        negative result and an ablation handle.
         """
         my_team = team_of(self.player)
         for _ in range(max_depth):

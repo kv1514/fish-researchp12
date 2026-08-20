@@ -161,6 +161,72 @@ with the optimum" is a real, checkable claim.
 
 ---
 
+## Session 3 - absolute strength, and where the remaining gap actually is
+
+### DEMONSTRATED - agreement with EXACT optimal play
+
+The first metric in this project that is absolute rather than relative.
+188 solvable endgame positions (one live half-suit, <= 8 live cards) drawn
+from real games; each solved exactly; each agent asked for its action from
+its legal observation only.
+
+Two regimes are reported separately, because they mean different things:
+- **resolved**: every remaining card's location is already publicly
+  determined, so the perfect-information optimum IS the optimum and a strong
+  agent should reach 100%.
+- **uncertain**: genuine hidden information remains, so agreement is a
+  comparative signal, not a target.
+
+| agent | resolved | uncertain | mean value loss |
+|---|---|---|---|
+| random | 47.2% (34/72) | 19.8% (23/116) | 0.404 sets |
+| heuristic | 61.1% (44/72) | 36.2% (42/116) | 0.298 sets |
+| **memory** | **100.0% (72/72)** | 61.2% (71/116) | 0.133 sets |
+
+**This is the strongest correctness result the project has.** When
+information is fully determined, the belief-tracking agent plays *exactly
+optimally, in every single position tested*. Not "beats the previous
+version": provably right.
+
+### The key strategic implication
+Because the strong agents are already optimal in solvable endgames, **the
+remaining strength gap is NOT in the endgame**. It lives in midgame
+positions that are too large to solve exactly. Any future search work should
+be aimed there, and endgame-focused search has little headroom to win back.
+
+This also explains the value-search failures below: in the regime where
+search was being measured, there was very little left to gain, so added
+estimation noise could only hurt.
+
+### FAILED - quiescence extension for value search
+Hypothesis: evaluating immediately after our own action cannot see
+turn-retention value (the strongest measured skill statistic), so extend
+until the turn leaves our team, then evaluate.
+
+Result: **rejected**. Pair score for value search fell to 0.125 (34W/2T/4L
+against it over 40 paired deals), worse than the 0.25 without quiescence.
+Diagnosis: the perfect-information greedy continuation is too strong and too
+uniform. Inside a determinized world almost any successful ask drains the
+same cards, so all candidates converge to similar leaves and the comparison
+loses discrimination. Kept behind `quiesce=False` as a documented negative
+result.
+
+### Standing score for search variants vs the probabilistic prior
+| variant | pair score for search | reading |
+|---|---|---|
+| PIMC v1 | 0.146 | clearly worse |
+| ISMCTS | 0.062 | clearly worse |
+| value search (belief features) | 0.150 | clearly worse |
+| value search (PI features) | 0.250 | worse |
+| value search (PI + quiescence) | 0.125 | worse |
+| **paired search (CRN)** | **0.387-0.438**, CI straddles 0.5 | **neutral** |
+
+Common random numbers remain the only intervention that has removed the
+search deficit. Nothing has yet produced a search that is significantly
+BETTER than the belief prior. That is the honest current state.
+
+---
+
 ## Performance
 
 | component | before | after | how |
