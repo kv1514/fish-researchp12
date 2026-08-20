@@ -153,6 +153,17 @@ class ExactSolver:
         config = tuple(root.set_winner)
         if config in self._layer_done:
             return
+        # Cheap upfront tractability check. A layer with k live cards has at
+        # most 6^k placements times 6 turns; without this we would enumerate
+        # all the way to max_nodes before giving up, wasting tens of seconds
+        # per hopeless position.
+        live = live_card_count(root)
+        if live > 0:
+            est = 6 ** min(live, 20) * NUM_PLAYERS
+            if est > self.max_nodes * 8:
+                raise SubgameTooLarge(
+                    f"layer with {live} live cards is ~6^{live} placements, "
+                    f"far beyond the {self.max_nodes}-state budget")
         # --- 1. enumerate the layer via ask/pass edges
         states: dict[tuple, GameState] = {}
         stack = [root]

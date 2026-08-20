@@ -79,8 +79,10 @@ class ExactBenchResult:
 
 def collect_solvable_positions(n_games: int = 200, seed: int = 0,
                                generator: str = "probabilistic",
-                               max_live_cards: int = 8,
+                               max_live_cards: int = 7,
                                max_per_game: int = 3) -> list:
+    """Default max_live_cards is 7: at 8 the layer is ~1.7M placements, which
+    exceeds the solver budget and merely wastes time before being refused."""
     """Play games and snapshot positions small enough to solve exactly."""
     rules = RuleConfig()
     rng = random.Random(seed)
