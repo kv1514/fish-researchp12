@@ -1,0 +1,25 @@
+{
+  "name": "search",
+  "description": "Search variants against the belief prior they are built on",
+  "rules": {
+    "variant": "54",
+    "claims_any_time": false,
+    "allow_bluff_asks": false,
+    "wrong_distribution_outcome": "null",
+    "mandatory_claim_known": false,
+    "starting_player": 0
+  },
+  "agents": [
+    {"agent": "probabilistic", "kwargs": {}},
+    {"agent": "paired_search",
+     "kwargs": {"n_worlds": 12, "n_candidates": 5, "rollout_depth": 30}},
+    {"agent": "value_search",
+     "kwargs": {"model_path": "checkpoints/pi_value_v1.pt",
+                "n_worlds": 16, "n_candidates": 6, "quiesce": false}}
+  ],
+  "n_deals": 40,
+  "base_seed": 2024,
+  "agent_seed_base": 11,
+  "n_jobs": 8,
+  "notes": "Standing result: paired_search is neutral vs the prior; no search variant is yet significantly better. quiesce=true was measured worse and is retained only as an ablation."
+}

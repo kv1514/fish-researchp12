@@ -106,6 +106,37 @@ def test_sampled_worlds_always_replay_validate():
             step += 1
 
 
+def test_sampling_is_a_pure_function_of_constraints_and_seed():
+    """Two belief states with identical constraints must produce identical
+    worlds from identical seeds, regardless of how many draws each has
+    already served. The cached sampler once shuffled its group ordering in
+    place, making draws depend on call history."""
+    rules = RuleConfig()
+    state = GameState.deal(rules, seed=23, debug=False)
+    agents = [MemoryAgent() for _ in range(6)]
+    rng = random.Random(23)
+    for p, ag in enumerate(agents):
+        ag.begin_game(p, rules, rng.getrandbits(64))
+    for _ in range(30):
+        if state.is_terminal:
+            break
+        p = state.turn
+        state.apply(p, agents[p].act(Observation.from_state(state, p)))
+    seat = state.turn
+    obs = Observation.from_state(state, seat)
+
+    warm = BeliefState(rules, observer=seat)
+    warm.update(obs)
+    for _ in range(25):                       # exercise the sampler first
+        warm.sample_current_hands(random.Random(999))
+    fresh = BeliefState(rules, observer=seat)
+    fresh.update(obs)
+
+    a = [warm.sample_current_hands(random.Random(5)) for _ in range(3)]
+    b = [fresh.sample_current_hands(random.Random(5)) for _ in range(3)]
+    assert a == b, "sampling depends on prior call history"
+
+
 def test_belief_rejects_midgame_attachment():
     """Attaching to a truncated transcript must fail loudly, not silently
     produce wrong beliefs."""

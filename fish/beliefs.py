@@ -429,9 +429,16 @@ class BeliefState:
                 quota[p] -= 1
             if not ok:
                 continue
-            # 2) fill the rest, most-constrained group first
-            for group in groups:
+            # 2) fill the rest, most-constrained group first.
+            # Shuffle a COPY: mutating the cached ordering in place made
+            # sampling depend on how many draws had happened before, so two
+            # belief states with identical constraints and identical seeds
+            # produced different worlds. Sampling must be a pure function of
+            # (constraints, rng).
+            for cached_group in groups:
+                group = cached_group
                 if len(group) > 1:
+                    group = list(cached_group)
                     shuffle(group)
                 for c in group:
                     if deal[c] != -1:
