@@ -1,0 +1,8 @@
+[project]
+name = "fish-engine"
+version = "0.2.0"
+description = "Research engine for Literature (Fish / Canadian Fish)"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
