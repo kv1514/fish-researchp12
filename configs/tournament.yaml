@@ -1,0 +1,15 @@
+experiment: baseline_league_v1
+ruleset: nine_suit_54
+seed: 20260822
+games_per_pairing: 2000
+paired_deals: true
+rotate_seats: true
+policies:
+  - random
+  - heuristic
+  - memory
+  - probabilistic
+  - search
+confidence_level: 0.95
+detailed_logging: false
+stalemate_claim_after: 256

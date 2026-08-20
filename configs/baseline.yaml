@@ -1,0 +1,12 @@
+# Reference baseline experiment. The runner accepts these values as CLI flags;
+# this file is also a reproducibility record for larger experiment tooling.
+experiment: baseline_v1
+ruleset: nine_suit_54
+seed: 20260820
+games: 10000
+paired_deals: true
+rotate_seats: true
+team_a: heuristic
+team_b: random
+detailed_logging: false
+stalemate_claim_after: 256

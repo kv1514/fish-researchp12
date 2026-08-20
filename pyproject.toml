@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fish-research-engine"
+version = "0.1.0"
+description = "Information-safe Literature / Canadian Fish simulator and research engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Fish Engine Research Project"}]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5"]
+
+[project.scripts]
+fish = "fish.cli:main"
+
+[tool.setuptools]
+packages = ["fish"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
