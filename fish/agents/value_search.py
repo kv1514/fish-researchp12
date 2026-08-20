@@ -42,9 +42,11 @@ class ValueSearchAgent(ProbabilisticAgent):
     def __init__(self, model_path: Optional[str] = None, n_worlds: int = 16,
                  n_candidates: int = 6, n_samples: int = 32,
                  claim_threshold: float = 0.97, t_threshold: float = 1.0,
-                 blend_static: float = 0.25, suit_bonus: float = 0.06):
+                 blend_static: float = 0.25, suit_bonus: float = 0.06,
+                 quiesce: bool = True):
         super().__init__(n_samples=n_samples, claim_threshold=claim_threshold,
                          suit_bonus=suit_bonus)
+        self.quiesce = quiesce
         self.model_path = model_path
         self.n_worlds = n_worlds
         self.n_candidates = n_candidates
@@ -61,6 +63,67 @@ class ValueSearchAgent(ProbabilisticAgent):
                 from ..learning.value_net import load_value_net
                 self._model = load_value_net(p)
                 self.uses_model = True
+
+    # -- quiescence ---------------------------------------------------------------
+
+    def _quiesce(self, state: GameState, max_depth: int = 12) -> GameState:
+        """Play out the rest of the current POSSESSION before evaluating.
+
+        Motivation, measured: turn retention is the strongest single skill
+        statistic in this game (1.61 vs 0.68 cards per possession between
+        skill tiers, STRATEGY_BOOK.md). Evaluating immediately after our own
+        action cannot see it: the position right after a successful ask
+        always looks good and right after a failure always looks bad, so a
+        zero-ply evaluator collapses to P(success) plus network noise, which
+        is strictly worse than the prior it was meant to improve.
+
+        So we extend until the turn actually leaves our team, the direct
+        analogue of quiescence search. Inside a determinized world the
+        continuation is deterministic and greedy, which adds no variance to
+        the comparison between candidate actions.
+        """
+        my_team = team_of(self.player)
+        for _ in range(max_depth):
+            if state.is_terminal or team_of(state.turn) != my_team:
+                break
+            p = state.turn
+            act = self._greedy_in_world(state, p)
+            if act is None:
+                break
+            try:
+                state.apply(p, act)
+            except Exception:
+                break
+        return state
+
+    def _greedy_in_world(self, state: GameState, p: int):
+        """Cheap perfect-information greedy move inside a hypothesized world:
+        claim a set the team provably holds, else take a card we know is
+        there. Deterministic, so it contributes zero comparison variance."""
+        from ..cards import CARDS_PER_HALF_SUIT, half_suit_mask
+        from ..engine import Claim
+        team = team_of(p)
+        if state.hands[p] == 0:
+            passes = state.legal_passes(p)
+            return passes[0] if passes else None
+        for hs in state.claimable_half_suits(p):
+            holders = []
+            for i in range(CARDS_PER_HALF_SUIT):
+                h = state.holder_of(hs * CARDS_PER_HALF_SUIT + i)
+                if h is None or team_of(h) != team:
+                    holders = None
+                    break
+                holders.append(h)
+            if holders:
+                return Claim(hs, tuple(holders))
+        best, best_k = None, -1
+        for a in state.legal_asks(p):
+            if not state.hands[a.target] & (1 << a.card):
+                continue                      # would fail; never chosen
+            k = (state.hands[p] & half_suit_mask(a.card // 6)).bit_count()
+            if k > best_k:
+                best, best_k = a, k
+        return best
 
     # -- leaf evaluation ---------------------------------------------------------
 
@@ -121,7 +184,7 @@ class ValueSearchAgent(ProbabilisticAgent):
                     valid.append(False)
                     continue
                 valid.append(True)
-                states.append(st)
+                states.append(self._quiesce(st) if self.quiesce else st)
             vals = self._leaf_values(states)
             it = iter(vals)
             values.append([next(it) if ok else math.nan for ok in valid])

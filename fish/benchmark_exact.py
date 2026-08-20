@@ -114,19 +114,45 @@ def collect_solvable_positions(n_games: int = 200, seed: int = 0,
     return out
 
 
-def benchmark_agent(agent_name: str, positions: list, kwargs: dict | None = None,
-                    seed: int = 0) -> ExactBenchResult:
+def solve_positions(positions: list) -> list:
+    """Solve every position ONCE and attach the solution.
+
+    Solving dominates benchmark runtime, so doing it per-agent wasted a
+    factor equal to the number of agents compared.
+    """
     rules = RuleConfig()
-    res = ExactBenchResult(agent=agent_name)
-    rng = random.Random(seed)
+    solved = []
     for pos in positions:
         state = GameState.from_components(
             rules, pos["hands"], pos["turn"], pos["set_winner"])
         state.history = list(pos["history"])
         try:
             sol = solve_position(state)
-        except (SubgameTooLarge, Exception):
+        except Exception:
             continue
+        if not sol["optimal_actions"]:
+            continue
+        solved.append({**pos, "state": state, "solution": sol})
+    return solved
+
+
+def benchmark_agent(agent_name: str, positions: list, kwargs: dict | None = None,
+                    seed: int = 0) -> ExactBenchResult:
+    """``positions`` may be raw snapshots or the output of solve_positions."""
+    rules = RuleConfig()
+    res = ExactBenchResult(agent=agent_name)
+    rng = random.Random(seed)
+    for pos in positions:
+        if "solution" in pos:
+            state, sol = pos["state"], pos["solution"]
+        else:
+            state = GameState.from_components(
+                rules, pos["hands"], pos["turn"], pos["set_winner"])
+            state.history = list(pos["history"])
+            try:
+                sol = solve_position(state)
+            except Exception:
+                continue
         solver = sol["solver"]
         optimal = sol["optimal_actions"]
         if not optimal:
