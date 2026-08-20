@@ -1,0 +1,58 @@
+[
+  {
+    "agent": "random",
+    "resolved_rate": 0.4846153846153846,
+    "resolved_n": 130,
+    "unresolved_rate": 0.2893401015228426,
+    "unresolved_n": 197,
+    "mean_value_loss": 0.4648318042813456
+  },
+  {
+    "agent": "heuristic",
+    "resolved_rate": 0.6615384615384615,
+    "resolved_n": 130,
+    "unresolved_rate": 0.47715736040609136,
+    "unresolved_n": 197,
+    "mean_value_loss": 0.27522935779816515
+  },
+  {
+    "agent": "memory",
+    "resolved_rate": 1.0,
+    "resolved_n": 130,
+    "unresolved_rate": 0.6903553299492385,
+    "unresolved_n": 197,
+    "mean_value_loss": 0.13761467889908258
+  },
+  {
+    "agent": "probabilistic",
+    "resolved_rate": 1.0,
+    "resolved_n": 130,
+    "unresolved_rate": 0.7563451776649747,
+    "unresolved_n": 197,
+    "mean_value_loss": 0.10397553516819572
+  },
+  {
+    "agent": "ev_claim",
+    "resolved_rate": 1.0,
+    "resolved_n": 130,
+    "unresolved_rate": 0.7563451776649747,
+    "unresolved_n": 197,
+    "mean_value_loss": 0.10397553516819572
+  },
+  {
+    "agent": "paired_search",
+    "resolved_rate": 1.0,
+    "resolved_n": 130,
+    "unresolved_rate": 0.7360406091370558,
+    "unresolved_n": 197,
+    "mean_value_loss": 0.12232415902140673
+  },
+  {
+    "agent": "value_search",
+    "resolved_rate": 0.9769230769230769,
+    "resolved_n": 130,
+    "unresolved_rate": 0.6802030456852792,
+    "unresolved_n": 197,
+    "mean_value_loss": 0.17737003058103976
+  }
+]

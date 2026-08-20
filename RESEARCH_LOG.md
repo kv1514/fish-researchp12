@@ -177,16 +177,40 @@ Two regimes are reported separately, because they mean different things:
 - **uncertain**: genuine hidden information remains, so agreement is a
   comparative signal, not a target.
 
+327 positions, 130 of them information-resolved:
+
 | agent | resolved | uncertain | mean value loss |
 |---|---|---|---|
-| random | 47.2% (34/72) | 19.8% (23/116) | 0.404 sets |
-| heuristic | 61.1% (44/72) | 36.2% (42/116) | 0.298 sets |
-| **memory** | **100.0% (72/72)** | 61.2% (71/116) | 0.133 sets |
+| random | 48.5% (63/130) | 28.9% (57/197) | 0.465 sets |
+| heuristic | 66.2% (86/130) | 47.7% (94/197) | 0.275 sets |
+| **memory** | **100.0% (130/130)** | 69.0% (136/197) | 0.138 sets |
+| **probabilistic** | **100.0% (130/130)** | **75.6% (149/197)** | **0.104 sets** |
+| ev_claim | 100.0% (130/130) | 75.6% (149/197) | 0.104 sets |
+| paired_search | 100.0% (130/130) | 73.6% (145/197) | 0.122 sets |
+| **value_search** | **97.7% (127/130)** | 68.0% (134/197) | 0.177 sets |
 
 **This is the strongest correctness result the project has.** When
-information is fully determined, the belief-tracking agent plays *exactly
-optimally, in every single position tested*. Not "beats the previous
+information is fully determined, both belief-tracking agents play *exactly
+optimally in every single position tested*. Not "beats the previous
 version": provably right.
+
+**And it localizes the search defect precisely.** `value_search` is the
+only agent that fails information-resolved positions (127/130). Those are
+positions with NO hidden information, where the right move is unambiguous
+and its own prior already had it. The learned evaluation is overriding a
+correct choice with a wrong estimate. That is direct, absolute evidence of a
+defect rather than a preference, and it is exactly what this benchmark was
+built to expose. Any fix must at minimum restore 130/130 before the agent
+can be taken seriously.
+
+`paired_search` shows the same effect in weaker form: identical on resolved
+positions but slightly *worse* than its prior under uncertainty (73.6% vs
+75.6%, value loss 0.122 vs 0.104), consistent with its neutral-to-slightly-
+negative match results. Search is still subtracting, not adding.
+
+`ev_claim` scores identically to `probabilistic` here, which independently
+corroborates the bimodality finding: in endgames the claim confidence is
+never in the band where the threshold rule differs.
 
 ### The key strategic implication
 Because the strong agents are already optimal in solvable endgames, **the

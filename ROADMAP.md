@@ -11,17 +11,27 @@ that bottleneck?**
 
 ## Where strength is currently lost (measured)
 
-Agreement with exact optimal play, on solvable endgames:
+Agreement with exact optimal play, 327 solvable endgame positions:
 
-| agent | information already resolved | genuine uncertainty |
-|---|---|---|
-| memory | **100%** | 61.2% |
-| heuristic | 61.1% | 36.2% |
-| random | 47.2% | 19.8% |
+| agent | information already resolved | genuine uncertainty | value loss |
+|---|---|---|---|
+| probabilistic | **100%** | 75.6% | 0.104 |
+| memory | **100%** | 69.0% | 0.138 |
+| paired_search | 100% | 73.6% | 0.122 |
+| value_search | **97.7%** | 68.0% | 0.177 |
+| heuristic | 66.2% | 47.7% | 0.275 |
+| random | 48.5% | 28.9% | 0.465 |
 
-The load-bearing consequence: **in positions we can verify, the strong
-agents are already optimal.** So the remaining gap is not in the endgame,
-and endgame search has almost no headroom. Work aimed there will not pay.
+Two load-bearing consequences:
+
+1. **In positions we can verify, the belief agents are already optimal.**
+   The remaining gap is not in the endgame, so endgame search has almost no
+   headroom and work aimed there will not pay.
+2. **`value_search` has a locatable defect**, not just a tuning problem: it
+   is the only agent that misses information-resolved positions, where the
+   correct move is unambiguous and its own prior already had it. Fixing
+   that is a hard prerequisite, and it now has a precise pass condition
+   (130/130) instead of a vague one.
 
 The gap lives in midgame positions that are too large to solve exactly, and
 in the two decisions that are still made by formula rather than by
@@ -31,11 +41,22 @@ reasoning: which ask to make, and when to claim.
 
 ## Next, in order
 
+### 0. Make value_search stop breaking unambiguous positions
+It fails 3 of 130 information-resolved endgames, where there is nothing to
+guess. Concrete diagnosis path: dump those three positions, check whether
+the learned value or the paired significance test is responsible, and gate
+the network so it cannot override a prior choice that is provably forced
+(e.g. skip search entirely when the belief state pins every relevant card).
+Pass condition: 130/130. This is the cheapest well-defined bug in the
+project and it blocks trusting the evaluator anywhere else.
+
 ### 1. Beat the prior at least once (open problem)
 No search variant has yet been significantly BETTER than the belief policy;
-common random numbers only removed the deficit. Until search adds value,
-every downstream plan (teacher/student, league, massive self-play) is
-building on a teacher no stronger than its student.
+common random numbers only removed the deficit, and on the exact benchmark
+search is still slightly *behind* its prior under uncertainty (73.6% vs
+75.6%). Until search adds value, every downstream plan (teacher/student,
+league, massive self-play) is building on a teacher no stronger than its
+student.
 
 Concrete next attempts:
 - Search only in positions where the prior is *uncertain* (small margin
