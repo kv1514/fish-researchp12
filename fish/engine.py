@@ -264,6 +264,13 @@ class GameState:
                 raise IllegalAction("not your turn")
             if self.hands[player] != 0:
                 raise IllegalAction("only a cardless player may pass")
+            # Bounds check FIRST: without it, Pass(-1) slipped through because
+            # team_of(-1) == 1 and hands[-1] negative-indexes into hands[5],
+            # corrupting state.turn to -1; Pass(7) raised IndexError instead of
+            # IllegalAction. check_legal is the safety boundary, so it must
+            # reject both cleanly.
+            if not 0 <= action.teammate < NUM_PLAYERS:
+                raise IllegalAction("bad teammate id")
             if action.teammate == player or team_of(action.teammate) != team_of(player):
                 raise IllegalAction("must pass to a teammate")
             if self.hands[action.teammate] == 0:
@@ -308,7 +315,13 @@ class GameState:
             revealed.append(holder)
         revealed_t = tuple(revealed)
         team = team_of(player)
-        if revealed_t == action.assignment:
+        # Coerce before comparing: a factually exact claim submitted as a list
+        # (natural for RL action decoding) compared unequal to the revealed
+        # tuple and was scored as a wrong distribution, nulling a correct
+        # claim and emitting a transcript where declared == revealed but
+        # nobody scored.
+        declared = tuple(action.assignment)
+        if revealed_t == declared:
             winner = team
         elif any(team_of(h) != team for h in revealed_t):
             winner = 1 - team
@@ -320,7 +333,7 @@ class GameState:
         for p in range(NUM_PLAYERS):
             self.hands[p] &= ~hs_mask
         self.set_winner[hs] = winner
-        return ClaimEvent(player, hs, tuple(action.assignment), revealed_t, winner)
+        return ClaimEvent(player, hs, declared, revealed_t, winner)
 
     def _apply_pass(self, player: int, action: Pass) -> PassEvent:
         self.turn = action.teammate

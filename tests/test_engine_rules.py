@@ -183,6 +183,35 @@ def test_cannot_claim_resolved_half_suit_twice():
         s.apply(0, Claim(0, (0, 0, 2, 4, 4, 4)))
 
 
+def test_claim_assignment_accepts_any_sequence_type():
+    """A factually exact claim must score for the claiming team regardless of
+    how the assignment was built. Comparing a tuple to a list is always False
+    in Python, which once nulled perfectly correct claims from any caller
+    that produced lists (e.g. RL action decoding)."""
+    s = _low_clubs_split_state()
+    ev = s.apply(0, Claim(0, [0, 0, 2, 4, 4, 4]))   # list, not tuple
+    assert ev.winner == 0
+    assert ev.declared == ev.revealed == (0, 0, 2, 4, 4, 4)
+
+
+def test_pass_rejects_out_of_range_teammate():
+    """check_legal is the safety boundary: bad ids must raise IllegalAction,
+    never corrupt the turn (Pass(-1) once wrapped to seat 5) or crash."""
+    s = make_state([
+        ["2C", "3C", "4C", "5C", "6C", "7C"], ["9D", "TD"],
+        ["2H", "3H", "4H"], ["9H", "JD", "QD", "KD", "AD"],
+        ["5H", "6H", "7H"], ["TH", "JH", "QH", "KH", "AH"],
+    ], turn=0)
+    s.apply(0, Claim(0, (0,) * 6))     # P0 is now cardless and must pass
+    assert s.hand_count(0) == 0
+    for bad in (-1, 6, 7, 99):
+        with pytest.raises(IllegalAction):
+            s.apply(0, Pass(bad))
+    assert s.turn == 0                 # state uncorrupted
+    s.apply(0, Pass(2))
+    assert s.turn == 2
+
+
 def test_opponent_claim_of_set_you_hold_awards_your_team():
     s = make_state([
         ["2C", "2H"], ["3C", "4C"], ["3H"], ["5C", "6C"],

@@ -5,6 +5,7 @@ from .memory import MemoryAgent
 from .probabilistic import ProbabilisticAgent
 from .search import SearchAgent
 from .paired_search import PairedSearchAgent
+from .value_search import ValueSearchAgent
 
 AGENT_REGISTRY = {
     "random": RandomAgent,
@@ -13,8 +14,9 @@ AGENT_REGISTRY = {
     "probabilistic": ProbabilisticAgent,
     "search": SearchAgent,
     "paired_search": PairedSearchAgent,
+    "value_search": ValueSearchAgent,
 }
 
 __all__ = ["Agent", "RandomAgent", "HeuristicAgent", "MemoryAgent",
            "ProbabilisticAgent", "SearchAgent", "PairedSearchAgent",
-           "AGENT_REGISTRY"]
+           "ValueSearchAgent", "AGENT_REGISTRY"]
