@@ -95,6 +95,38 @@ often. The long tail is real though: a p90 of 55 actions means even good
 agents sometimes sit on a completed set, usually because they hold the cards
 but cannot yet prove *which teammate* holds what.
 
+### DEMONSTRATED - Do not claim early. Claim confidence is effectively bimodal.
+
+A direct sweep of the claim-confidence threshold, 150 paired deals per cell,
+everything else held identical:
+
+| threshold vs baseline 0.97 | pair score for 0.97 | set diff per pair | reading |
+|---|---|---|---|
+| vs 0.60 | 0.590 [0.510, 0.666] | **+0.71 [+0.34, +1.08]** | 0.97 clearly better |
+| vs 0.70 | 0.570 [0.490, 0.647] | **+0.45 [+0.18, +0.72]** | 0.97 better on differential |
+| vs 0.85 | 0.497 [0.418, 0.576] | -0.01 [-0.09, +0.06] | indistinguishable |
+| vs 0.999 | 0.500 [0.421, 0.579] | +0.00 [+0.00, +0.00] | **identical play** |
+
+Two findings, one of which refutes a prediction this project made:
+
+1. **Claiming eagerly is a real, measurable mistake.** Dropping the bar to
+   0.70 costs about 0.45 sets per deal-pair; 0.60 costs 0.71. An
+   expected-value model built here had predicted an optimal threshold near
+   0.70. The experiment **falsified it**. The model treated waiting as
+   roughly a coin flip on resolving the split, when in practice continued
+   play localizes teammate holdings much more reliably than that.
+
+2. **Anywhere from 0.85 to near-certainty plays the same.** The 0.97 vs
+   0.999 comparison produced a differential of *exactly zero* across 150
+   paired deals: the two never diverged. That means strong agents essentially
+   never hold a claim whose confidence sits in that band. Claim confidence
+   is **bimodal**: you either know the split or you do not, and the
+   in-between case that threshold-tuning worries about barely occurs.
+
+Practical advice for a human: do not agonize over your claim threshold. Wait
+until you actually know the distribution. The cost of guessing early is
+real; the benefit of shaving your confidence bar is zero.
+
 ### DEMONSTRATED - Null sets are a skill signal
 
 Sets nulled per deal-pair: random ~2.5, heuristic ~1.4, belief-tracking

@@ -198,6 +198,38 @@ This also explains the value-search failures below: in the regime where
 search was being measured, there was very little left to gain, so added
 estimation noise could only hurt.
 
+### DEMONSTRATED - claim threshold sweep, and a falsified prediction
+
+150 paired deals per cell, one variable changed:
+
+| vs baseline 0.97 | pair score for 0.97 | set diff per pair | verdict |
+|---|---|---|---|
+| 0.60 | 0.590 [0.510, 0.666] | +0.71 [+0.34, +1.08] | 0.97 better |
+| 0.70 | 0.570 [0.490, 0.647] | +0.45 [+0.18, +0.72] | 0.97 better (differential) |
+| 0.85 | 0.497 [0.418, 0.576] | -0.01 [-0.09, +0.06] | indistinguishable |
+| 0.999 | 0.500 [0.421, 0.579] | +0.00 [+0.00, +0.00] | identical play |
+
+**The EV claim model's prediction was FALSIFIED.** It derived an optimal
+threshold near 0.70; the experiment shows 0.70 is measurably *worse* than
+0.97 (+0.45 sets/pair). The model's error is identifiable: `wait_ev` used
+`p_improve = 0.55`, treating the resolution of an unknown teammate split as
+roughly a coin flip. In real play continued asking localizes teammate
+holdings far more reliably, so waiting is worth much more than modeled.
+Correcting `p_improve` from data is a concrete follow-up.
+
+**Structural finding:** 0.97 vs 0.999 produced a differential of *exactly*
+0.00 across 150 pairs, i.e. the two never once diverged. Claim confidence is
+**bimodal**: a strong agent either knows the split or does not, and almost
+never sits in the 0.97-0.999 band. This means threshold tuning in that range
+is not merely unhelpful, it is a no-op, and effort should go to *increasing
+how often the split becomes known* rather than to when to pull the trigger.
+
+Note on statistics: the pair-score Wilson CI and the differential t-CI
+disagreed for the 0.70 cell (score CI straddles 0.5, differential CI
+excludes 0). The differential is the more sensitive statistic because it
+uses magnitude rather than only sign; both are reported to avoid
+cherry-picking.
+
 ### FAILED - quiescence extension for value search
 Hypothesis: evaluating immediately after our own action cannot see
 turn-retention value (the strongest measured skill statistic), so extend

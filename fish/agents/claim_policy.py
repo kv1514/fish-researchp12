@@ -24,11 +24,20 @@ EV of waiting is the same set's value later, discounted by:
 - the chance opponents resolve it against us first,
 - the chance our information improves (which is what makes waiting good).
 
-We estimate the "wait" branch empirically rather than assuming it: the
-probability that a set currently held entirely by our team is still ours
-later, and how much claim accuracy improves per extra action, are both
-measurable from self-play. Until those numbers exist the policy uses a
-conservative model and exposes every coefficient for ablation.
+STATUS: this model's headline prediction has been FALSIFIED and the module
+is retained as an ablation handle, not as the recommended policy.
+
+It derived an optimal claim threshold near 0.70. A direct sweep (150 paired
+deals per cell) showed 0.70 is measurably WORSE than 0.97, by +0.45 sets per
+deal-pair [+0.18, +0.72], and that any threshold from 0.85 to near-certainty
+plays identically. See RESEARCH_LOG.md.
+
+The error is identifiable: ``p_improve`` below defaults to 0.55, treating
+the resolution of an unknown teammate split as roughly a coin flip. In real
+play, continued asking localizes teammate holdings far more reliably, so
+waiting is worth substantially more than this model credits. Fitting
+``p_improve`` and ``p_opponent_takes`` from self-play data is the concrete
+fix; until then the fixed-threshold policy is the better default.
 """
 
 from __future__ import annotations
