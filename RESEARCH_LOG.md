@@ -254,6 +254,61 @@ excludes 0). The differential is the more sensitive statistic because it
 uses magnitude rather than only sign; both are reported to avoid
 cherry-picking.
 
+### DEMONSTRATED - the search defect was localized, then fixed
+
+The three failures were dissected (`scripts/diagnose_value_search.py`).
+**All 3/3 were search overriding a CORRECT prior**, and each time it chose an
+action worth -1.00 when +1.00 was available. Example: P4 to move, P1 holding
+only 8D, P5 holding 8C 8H RJ BJ. Every steal wins the set; value search
+asked P1 for 8C, which provably fails, handing the turn to the opponents who
+then held everything.
+
+Root cause: in a fully-determined position every sampled world is identical,
+so the paired difference has zero variance and the significance test degrades
+to "trust the network". The network was extrapolating badly on lopsided
+endgames that rarely appear in self-play training data.
+
+FIX (`fish/agents/tablebase.py`): when an agent's own beliefs pin every live
+card, the position contains no hidden information, so solve it exactly
+instead of estimating. This is the Fish analogue of chess tablebases, and it
+is leak-free by construction: the reconstruction uses only public events plus
+the agent's own hand, and refuses unless every live card is pinned AND the
+reconstruction reproduces every public fact.
+
+Result: **every agent now scores 100.0% on information-resolved positions**,
+value search included.
+
+### DEMONSTRATED - search's overrides are net harmful, and the cause is the objective
+
+With the tablebase in place, a threshold sweep on the exact benchmark
+isolates what search actually contributes under genuine uncertainty:
+
+| configuration | agreement (uncertain) | mean value loss |
+|---|---|---|
+| **prior, no search** | **76.0%** | **0.104** |
+| paired search t=1.0 | 73.5% | 0.116 |
+| paired search t=1.5 | 74.0% | 0.122 |
+| paired search t=2.5 | 75.5% | 0.110 |
+| paired search t=4.0 | 75.5% | 0.110 |
+| paired search t=8.0 | 75.5% | 0.110 |
+| paired search 24 worlds, t=2.5 | 75.5% | 0.110 |
+| value search t=1.0 | 70.5% | 0.147 |
+| value search t=2.5 | 72.0% | 0.141 |
+
+Agreement rises monotonically as the override bar is raised, converging on
+the prior **from below**. That is the exact signature predicted if search's
+overrides were false positives from multiple comparisons. At t >= 2.5 search
+essentially stops overriding and simply becomes the prior.
+
+But the stronger reading is this: **no setting of the search makes it better
+than not searching.** Doubling the world count changes nothing. So the
+problem is not the search machinery, the sample size, or the statistics.
+**The problem is the evaluation target.** Neither depth-limited rollouts nor
+the learned value function ranks candidate asks better than the prior's
+simple P(success). Until the thing being maximized is improved, more search
+cannot help, and this is why the roadmap now points at the ask objective
+rather than at deeper search.
+
 ### FAILED - quiescence extension for value search
 Hypothesis: evaluating immediately after our own action cannot see
 turn-retention value (the strongest measured skill statistic), so extend
