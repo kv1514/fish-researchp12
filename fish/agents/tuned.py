@@ -84,7 +84,11 @@ class TunedAgent(ProbabilisticAgent):
                    revealed: set[int], worlds) -> float:
         hs = ask.card // 6
         score = p_success
-        score += self.w_suit * (obs.hand & half_suit_mask(hs)).bit_count() / 6.0
+        # NOTE: this must match ProbabilisticAgent's term EXACTLY (raw card
+        # count, not normalized), so that all-zero weights reproduce the
+        # baseline. An earlier version divided by 6, which silently changed
+        # two things at once and made every ablation a confounded comparison.
+        score += self.w_suit * (obs.hand & half_suit_mask(hs)).bit_count()
         if self.w_turn:
             # only the failure branch hands over the turn
             score += self.w_turn * (1.0 - p_success) * self._turn_risk(
