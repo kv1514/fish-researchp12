@@ -1,0 +1,39 @@
+[
+  {
+    "label": "turn0.6+scarce0.2",
+    "kwargs": {
+      "w_turn": 0.6,
+      "w_scarce": 0.2
+    },
+    "gain": 1.275,
+    "gain_ci": [
+      1.0290193984484206,
+      1.5209806015515792
+    ],
+    "n_pairs": 800,
+    "candidate_pair_score": 0.625625,
+    "candidate_ci": [
+      0.5915626842858227,
+      0.6584865791511529
+    ]
+  },
+  {
+    "label": "turn0.6+scarce0.2+s96",
+    "kwargs": {
+      "w_turn": 0.6,
+      "w_scarce": 0.2,
+      "n_samples": 96
+    },
+    "gain": 1.53,
+    "gain_ci": [
+      1.2805664544057795,
+      1.7794335455942205
+    ],
+    "n_pairs": 800,
+    "candidate_pair_score": 0.65,
+    "candidate_ci": [
+      0.6163021177039385,
+      0.682264166996928
+    ]
+  }
+]
