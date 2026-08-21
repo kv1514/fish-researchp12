@@ -430,6 +430,30 @@ rather than re-ranking the same ones. This combined policy is a substantial
 improvement over the prior champion, and it was obtained purely by adding
 neglected terms to the objective, with no search at all.
 
+#### Why margins against a common baseline are not a ranking
+
+Belief precision and the new ask terms turned out **not** to be additive,
+and the way we discovered that is worth stating.
+
+Measured against the same baseline over 800 duplicate deal-pairs each, the
+combined policy with 96 sampled layouts gained +1.53 sets per pair while the
+same policy with 32 gained +1.28. The natural reading is that more sampling
+is better. Played **directly against each other** over 400 pairs, they are
+indistinguishable: +0.10 [-0.25, +0.44], pair score 0.49.
+
+So the extra sampling, worth +0.54 sets per pair on top of the *plain*
+belief policy, is worth nothing measurable once the ask-scoring terms are in
+place. The two improvements were substitutes rather than complements: better
+ranking of asks and sharper estimates of where cards are were, to a large
+extent, buying the same thing.
+
+The methodological point generalizes. Two candidates measured against a
+shared baseline can have overlapping intervals and non-overlapping margins,
+and neither tells you how they fare against each other. Our promotion rule
+requires beating the *incumbent* directly, which is what caught this. We
+therefore rejected the 96-sample variant: three times the inference cost for
+no demonstrable gain, and slower advice in the live coach.
+
 #### A methodological warning
 
 The first version of this experiment reported the **opposite** conclusion

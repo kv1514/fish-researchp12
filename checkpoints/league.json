@@ -128,6 +128,35 @@
         }
       ],
       "is_champion": true
+    },
+    "tuned-v2-96s": {
+      "version": "tuned-v2-96s",
+      "agent": "tuned",
+      "kwargs": {
+        "w_turn": 0.6,
+        "w_scarce": 0.2,
+        "n_samples": 96
+      },
+      "rating": null,
+      "rating_stderr": null,
+      "separated": false,
+      "created": "2026-08-21 03:30:23",
+      "commit": "75c805a",
+      "notes": "REJECTED: 3x belief sampling, no measurable gain head-to-head vs tuned-v1 (+0.10 [-0.25,+0.44], 400 pairs)",
+      "evidence": [
+        {
+          "vs": "tuned-v1",
+          "v2_gain": 0.095,
+          "ci": [
+            -0.249,
+            0.439
+          ],
+          "pair_score": 0.49,
+          "n_pairs": 400,
+          "verdict": "no difference"
+        }
+      ],
+      "is_champion": false
     }
   }
 }

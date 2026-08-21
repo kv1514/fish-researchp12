@@ -164,18 +164,35 @@ interval only barely excluding zero; a weaker penalty (0.05) showed nothing
 small, and it needs a larger sample before it belongs alongside the
 demonstrated effects.
 
-### DEMONSTRATED - Precision of card-tracking has not hit diminishing returns
+### DEMONSTRATED - Better judgement and sharper tracking are substitutes, not additions
 
-Sampling more possible layouts before deciding keeps paying:
+Careful card-tracking and good ask-selection turn out to buy much the same
+thing, so doing both is not worth twice as much.
+
+Sampling more possible layouts (32 to 96) is worth **+0.54 sets per pair**
+on top of the plain belief policy. Add it on top of the improved ask
+scoring, though, and it is worth **nothing measurable**: played directly
+against the same policy with 32 samples, +0.10 [-0.25, +0.44] over 400
+duplicate deal-pairs.
+
+For a human this is quietly encouraging. If you are already choosing your
+asks well, you do not also need to hold a perfect probability distribution
+over every unseen card. The two skills overlap, and the cheaper one is
+enough.
+
+### DEMONSTRATED - Card-tracking precision pays, up to a point
+
+Sampling more possible layouts before deciding keeps paying for a policy
+that is otherwise plain:
 
 | comparison | result |
 |---|---|
 | 32 samples vs 8 | 32 better by **+0.93** [+0.63, +1.22] |
 | 96 samples vs 32 | 96 better by **+0.54** [+0.25, +0.82] |
 
-For a human the analogue is simple and unglamorous: the more carefully you
-enumerate who *could* hold what before choosing, the better you play, and
-you are probably not yet at the point where extra care stops paying.
+For a human the analogue is unglamorous: the more carefully you enumerate
+who *could* hold what before choosing, the better you play. But see the
+finding above, this stops paying once your ask-selection is good.
 
 ### DEMONSTRATED - Failed asks are normal, not a mistake
 
