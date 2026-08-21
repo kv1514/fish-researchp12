@@ -7,6 +7,8 @@ toward understanding what near-optimal Fish actually looks like.
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
 - Research log: [RESEARCH_LOG.md](RESEARCH_LOG.md)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
+- Research paper: [PAPER.md](PAPER.md)
+- Roadmap: [ROADMAP.md](ROADMAP.md)
 
 ## Main variant
 
@@ -19,15 +21,24 @@ classic 48-card (no-8s) variant is also supported.
 ## Quickstart
 
 ```bash
-py -m pytest tests -q
-```
-
-```bash
 py -m fish.cli serve
 ```
-Then open http://127.0.0.1:8777 to watch engine-vs-engine games live, step
-or play through them, run the position analyzer, and run luck-controlled
-matchups between any two policies.
+
+Then open two pages:
+
+- **http://127.0.0.1:8777** — the simulator. Watch engine-vs-engine games
+  live, step through them, analyze any position, and run luck-controlled
+  matchups between any two policies.
+- **http://127.0.0.1:8777/coach** — the **live coach**. Playing a real game?
+  Enter your seat and your dealt hand, then log each ask as it happens at
+  the table. It tells you what to play, with success probabilities, claim
+  confidence, which cards it can *prove* are where, and the deductions
+  behind them. It also catches typos in a way you can act on ("You are
+  holding 2C, so you could not have said no to P1").
+
+```bash
+py -m pytest tests -q
+```
 
 Other entry points:
 
@@ -62,15 +73,40 @@ fish/
   analysis.py        offline strategy analytics
   runner.py          game loop connecting agents to the engine
   agents/            random, heuristic, memory, probabilistic,
-                     search (PIMC), paired_search, value_search
+                     search (PIMC), paired_search, value_search,
+                     tuned (current champion), ev_claim
   learning/          self-play datasets and the value network
   eval/              paired-deal tournaments, Bradley-Terry ratings, league
   web/               dependency-free simulation platform (stdlib HTTP + JS)
+  coach.py           live coaching from a player's legal view
+  registry.py        append-only experiment manifests
+  gamelog.py         byte-packed transcripts (<1KB/game)
   cli.py, play.py    analysis CLI, interactive play, replays
 tests/               rules, fuzz, leakage proofs, belief soundness,
-                     statistics, exact solver  (140+ tests)
+                     statistics, exact solver, coach  (188 tests)
 scripts/             tournaments, ablations, profiling, search diagnostics
 ```
+
+## What the engine learned
+
+The current champion (`tuned-v1`) beats the previous best belief policy by
+**+1.28 sets per duplicate deal-pair** (95% CI [1.03, 1.52], 800 pairs). It
+gets there from two considerations the old policy ignored completely:
+
+1. **Which opponent gets the turn when your ask fails.** Prefer the ask that,
+   if it misses, hands the turn to the opponent holding fewer cards.
+2. **Fight hardest for suits your team is already winning.**
+
+Both are **tie-breakers**, not primary criteria: they help when weighted
+lightly and actively hurt when weighted heavily enough to override a
+materially better chance of getting the card.
+
+Notably, no search was involved. Two search designs (PIMC and ISMCTS) each
+lost decisively to the very policy they were built on, for a measured
+reason: the spread of a position's value across possible hidden layouts is
+about 2.4x the gap between the best and worst candidate move, so evaluating
+different moves against different guessed layouts ranks luck. See
+[PAPER.md](PAPER.md).
 
 ## Three things this engine gets right that are easy to get wrong
 
