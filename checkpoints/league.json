@@ -48,7 +48,7 @@
       "separated": false,
       "created": "2026-08-20 03:36:40",
       "commit": "de9ab0c",
-      "notes": "belief sampling over deal-consistent worlds; current champion",
+      "notes": "belief sampling over deal-consistent worlds; previous champion",
       "evidence": [
         {
           "vs": "memory-v1",
@@ -62,7 +62,7 @@
           "note": "probabilistic beat memory decisively over 120 paired deals"
         }
       ],
-      "is_champion": true
+      "is_champion": false
     },
     "paired-search-v1": {
       "version": "paired-search-v1",
@@ -96,6 +96,38 @@
       "notes": "perfect-information value net leaves; currently LOSES to the prior (0.25)",
       "evidence": [],
       "is_champion": false
+    },
+    "tuned-v1": {
+      "version": "tuned-v1",
+      "agent": "tuned",
+      "kwargs": {
+        "w_turn": 0.6,
+        "w_scarce": 0.2
+      },
+      "rating": null,
+      "rating_stderr": null,
+      "separated": false,
+      "created": "2026-08-21 01:40:00",
+      "commit": "5ac315d",
+      "notes": "turn-risk 0.6 + scarcity 0.2; first policy to beat the belief prior",
+      "evidence": [
+        {
+          "wilson_ci": [
+            0.592,
+            0.658
+          ],
+          "pair_score": 0.626,
+          "set_diff_gain": 1.275,
+          "gain_ci": [
+            1.029,
+            1.521
+          ],
+          "n_pairs": 800,
+          "vs": "probabilistic-v1",
+          "note": "confirmed on fresh seeds after a 12-cell search"
+        }
+      ],
+      "is_champion": true
     }
   }
 }

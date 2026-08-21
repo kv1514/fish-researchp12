@@ -349,7 +349,7 @@ class Handler(BaseHTTPRequestHandler):
                 for k in list(_coaches)[:-60]:
                     _coaches.pop(k, None)
         return self._json({"id": s.id, "state": s.advise(
-            engine=body.get("engine", "probabilistic"))})
+            engine=body.get("engine"))})
 
     def _coach_action(self, cid: str, verb: str, body: dict):
         from ..coach import CoachError
@@ -357,7 +357,7 @@ class Handler(BaseHTTPRequestHandler):
         if s is None:
             return self._json({"error": "That coaching session has expired; "
                                         "start a new one."}, 404)
-        engine = body.get("engine", "probabilistic")
+        engine = body.get("engine")
         try:
             if verb == "ask":
                 s.add_ask(int(body["asker"]), int(body["target"]),

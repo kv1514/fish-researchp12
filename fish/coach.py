@@ -181,7 +181,13 @@ class CoachSession:
 
     # -- advice ------------------------------------------------------------
 
-    def advise(self, engine: str = "probabilistic", n_samples: int = 64,
+    #: Current champion policy (see checkpoints/league.json). Beat the plain
+    #: belief prior by +1.275 sets per duplicate deal-pair [+1.03, +1.52]
+    #: over 800 pairs, by weighting turn-risk and suit scarcity as
+    #: tie-breakers among asks of similar success probability.
+    CHAMPION = ("tuned", {"w_turn": 0.6, "w_scarce": 0.2})
+
+    def advise(self, engine: Optional[str] = None, n_samples: int = 64,
                engine_kwargs: Optional[dict] = None) -> dict:
         obs = self.observation()
         bel = BeliefState(self.rules, observer=self.seat)
@@ -189,7 +195,11 @@ class CoachSession:
         rng = random.Random(12345)          # deterministic advice
         worlds = [bel.sample_current_hands(rng) for _ in range(n_samples)]
 
-        agent = AGENT_REGISTRY[engine](**(engine_kwargs or {}))
+        if engine is None:
+            engine, default_kwargs = self.CHAMPION
+        else:
+            default_kwargs = {}
+        agent = AGENT_REGISTRY[engine](**(engine_kwargs or default_kwargs))
         agent.begin_game(self.seat, self.rules, 999)
         on_move = obs.turn == self.seat
         best = None

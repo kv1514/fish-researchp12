@@ -1,0 +1,28 @@
+﻿[   302s] turn 0.6                               gain +0.563 [+0.271,+0.855]  candidate stronger
+[   307s] turn 1.0                               gain +0.098 [-0.191,+0.388]  no difference
+[   398s] turn 1.6                               gain -1.508 [-1.820,-1.197]  baseline stronger
+[   381s] scarce 0.2                             gain +0.648 [+0.370,+0.927]  candidate stronger
+[   423s] scarce 0.4                             gain +0.572 [+0.288,+0.856]  candidate stronger
+[   469s] scarce 0.8                             gain -1.322 [-1.614,-1.029]  baseline stronger
+[   505s] turn 0.6 + scarce 0.2                  gain +1.407 [+1.112,+1.701]  candidate stronger
+[   512s] turn 1.0 + scarce 0.4                  gain +1.028 [+0.747,+1.309]  candidate stronger
+[   535s] turn 1.6 + scarce 0.4                  gain -0.058 [-0.356,+0.239]  no difference
+[   457s] turn 1.0 + scarce 0.4 + reveal 0.15    gain +1.213 [+0.906,+1.521]  candidate stronger
+[   478s] samples 96                             gain +0.343 [+0.070,+0.617]  candidate stronger
+[  1318s] turn 1.0 + scarce 0.4 + samples 96     gain +1.258 [+0.973,+1.543]  candidate stronger
+
+=== ranked ===
+  turn 0.6 + scarce 0.2                  +1.407 [+1.112,+1.701]
+  turn 1.0 + scarce 0.4 + samples 96     +1.258 [+0.973,+1.543]
+  turn 1.0 + scarce 0.4 + reveal 0.15    +1.213 [+0.906,+1.521]
+  turn 1.0 + scarce 0.4                  +1.028 [+0.747,+1.309]
+  scarce 0.2                             +0.648 [+0.370,+0.927]
+  scarce 0.4                             +0.572 [+0.288,+0.856]
+  turn 0.6                               +0.563 [+0.271,+0.855]
+  samples 96                             +0.343 [+0.070,+0.617]
+  turn 1.0                               +0.098 [-0.191,+0.388]
+  turn 1.6 + scarce 0.4                  -0.058 [-0.356,+0.239]
+  scarce 0.8                             -1.322 [-1.614,-1.029]
+  turn 1.6                               -1.508 [-1.820,-1.197]
+
+Saved C:\Users\vel_k\Documents\fish-engine\results\champion_search.json  (6090s total)

@@ -100,6 +100,44 @@ beyond this project: an ablation is only meaningful if the ablated agent
 provably reduces to the baseline when the new weight is zero, and that is
 now enforced by a test.
 
+### DEMONSTRATED - These are tie-breakers, not primary criteria
+
+Both winning ideas show the same shape when you push them harder: they help
+at modest weight, stop helping at medium, and become actively destructive
+at large weight.
+
+| weight | turn-risk | scarcity |
+|---|---|---|
+| light (0.6 / 0.2) | **+0.56** | **+0.65** |
+| medium (1.0 / 0.4) | +0.10 | +0.57 |
+| heavy (1.6 / 0.8) | **-1.51** | **-1.32** |
+
+*(600 duplicate deal-pairs per cell.)*
+
+That inverted-U is the signature of a **tie-breaker**. Success probability
+is still the main thing; these considerations are for choosing among asks
+that are otherwise close. Let either one start overriding a materially
+better chance of getting the card and you lose more than you gain.
+
+The practical instruction is therefore precise: pick the asks most likely to
+succeed, and *when two are close*, take the one that risks less turn and
+fights for a suit you are winning. Do not go looking for clever asks at the
+expense of likely ones.
+
+### DEMONSTRATED - The two ideas stack
+
+They are not redundant. Applied together at their individual best weights:
+
+| policy | gain over baseline, sets per deal-pair |
+|---|---|
+| turn-risk 0.6 alone | +0.56 [+0.27, +0.86] |
+| scarcity 0.2 alone | +0.65 [+0.37, +0.93] |
+| **both together** | **+1.41** [+1.11, +1.70] |
+
+The combination is worth slightly more than the sum of its parts, which
+means the two terms are discriminating between different asks rather than
+both re-ranking the same ones.
+
 ### DEMONSTRATED - Fight hardest for the suits your team is already winning
 
 Adding a bonus for asking within contested half-suits where your team

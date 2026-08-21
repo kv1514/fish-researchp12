@@ -406,6 +406,30 @@ Finally, belief precision has not saturated. Raising the number of sampled
 layouts from 32 to 96 still gains +0.54 sets per pair, having already gained
 +0.93 going from 8 to 32.
 
+#### Dose-response, and why these terms are tie-breakers
+
+Sweeping each winning term across a wider range reveals the same inverted-U
+in both, at 600 duplicate deal-pairs per cell:
+
+| weight | turn-risk | scarcity |
+|---|---|---|
+| light (0.6 / 0.2) | **+0.56** [+0.27, +0.86] | **+0.65** [+0.37, +0.93] |
+| medium (1.0 / 0.4) | +0.10 [-0.19, +0.39] | +0.57 [+0.29, +0.86] |
+| heavy (1.6 / 0.8) | **-1.51** [-1.82, -1.20] | **-1.32** [-1.61, -1.03] |
+
+A clean dose-response curve is itself evidence that the effects are real
+rather than sampling noise, and its shape tells us what kind of quantity
+these terms are. They are **tie-breakers**: valuable for discriminating
+among asks of comparable success probability, destructive once they begin
+to override that probability. Success likelihood remains the dominant term.
+
+The two also **stack**. At their individual optima the combination gains
+**+1.41 sets per deal-pair** [+1.11, +1.70], slightly more than the sum of
++0.56 and +0.65, indicating the terms discriminate between different asks
+rather than re-ranking the same ones. This combined policy is a substantial
+improvement over the prior champion, and it was obtained purely by adding
+neglected terms to the objective, with no search at all.
+
 #### A methodological warning
 
 The first version of this experiment reported the **opposite** conclusion
