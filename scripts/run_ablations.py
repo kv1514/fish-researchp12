@@ -34,6 +34,29 @@ SUITES = {
         (("probabilistic", {}), ("ev_claim", {})),
         (("probabilistic", {"claim_threshold": 0.70}), ("ev_claim", {})),
     ],
+    # "Does it matter WHICH opponent receives the turn when an ask fails?"
+    # The baseline prior ignores this entirely, scoring asks by success
+    # probability and suit depth only.
+    "turn_risk": [
+        (("probabilistic", {}), ("tuned", {"w_turn": 0.15})),
+        (("probabilistic", {}), ("tuned", {"w_turn": 0.30})),
+        (("probabilistic", {}), ("tuned", {"w_turn": 0.60})),
+    ],
+    # "Is revealing a new half-suit a real cost?"
+    "reveal": [
+        (("probabilistic", {}), ("tuned", {"w_reveal": 0.05})),
+        (("probabilistic", {}), ("tuned", {"w_reveal": 0.15})),
+    ],
+    # "Should you preferentially drain opponents toward zero cards?"
+    "deplete": [
+        (("probabilistic", {}), ("tuned", {"w_deplete": 0.15})),
+    ],
+    # Does the exact endgame tablebase actually win games, or only
+    # benchmark points?
+    "tablebase": [
+        (("probabilistic", {"use_tablebase": True}),
+         ("probabilistic", {"use_tablebase": False})),
+    ],
     # How much does belief precision buy?
     "samples": [
         (("probabilistic", {"n_samples": 32}),

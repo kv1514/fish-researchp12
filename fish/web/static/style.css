@@ -108,3 +108,34 @@ td,th{text-align:left;padding:5px 7px;border-bottom:1px solid var(--line)}
   .board{grid-template-columns:repeat(2,1fr)}
   .seatpickers{grid-template-columns:repeat(3,1fr)}
 }
+
+/* ---- coach ---- */
+a.tab{text-decoration:none;padding:7px 13px;border-radius:7px;
+  border:1px solid var(--line);color:var(--muted);font-size:13px}
+a.tab:hover{border-color:var(--accent)}
+.handpick{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.suitrow{display:flex;align-items:center;gap:10px}
+.suitlabel{width:170px;font-size:12px;color:var(--muted);flex:none}
+.card.pick{cursor:pointer;opacity:.42;user-select:none}
+.card.pick:hover{opacity:.75}
+.card.pick.on{opacity:1;box-shadow:0 0 0 2px var(--accent)}
+.advice{background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:16px;margin-bottom:16px}
+.bigadvice{font-size:24px;font-weight:700;margin:12px 0 6px;
+  color:var(--gold);line-height:1.25}
+.bigadvice.muted{color:var(--muted);font-size:18px}
+.claimhint{margin-top:10px;padding:9px 11px;border-radius:8px;
+  background:var(--panel2);border-left:3px solid var(--teamA);font-size:13px}
+.asktable{margin-top:12px;max-width:560px}
+.claimbox{margin-top:10px;padding:12px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:10px}
+.claimgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin:10px 0}
+.claimcell{display:flex;align-items:center;gap:8px;color:var(--text)}
+.claimcell select{flex:1}
+.certain{color:var(--teamA);font-weight:600}
+.chip.err{border-color:var(--teamB);color:var(--teamB)}
+@media(max-width:800px){
+  .suitlabel{width:110px}
+  .claimgrid{grid-template-columns:repeat(2,1fr)}
+}

@@ -41,6 +41,7 @@ STATIC = Path(__file__).parent / "static"
 ROOT = Path(__file__).resolve().parents[2]
 
 _games: dict[str, "LiveGame"] = {}
+_coaches: dict[str, object] = {}
 _lock = threading.Lock()
 _counter = [0]
 
@@ -186,6 +187,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self._file(STATIC / "app.js", "application/javascript")
             if p == "/style.css":
                 return self._file(STATIC / "style.css", "text/css")
+            if p == "/coach" or p == "/coach.html":
+                return self._file(STATIC / "coach.html",
+                                  "text/html; charset=utf-8")
+            if p == "/coach.js":
+                return self._file(STATIC / "coach.js", "application/javascript")
+            if p == "/api/cards":
+                from ..cards import CARD_NAMES, card_long_name, is_red
+                return self._json({"cards": [
+                    {"id": i, "name": n, "long": card_long_name(i),
+                     "red": is_red(i), "hs": i // 6}
+                    for i, n in enumerate(CARD_NAMES)]})
             if p == "/api/agents":
                 return self._json({"agents": sorted(AGENT_REGISTRY)})
             if p == "/api/games":
@@ -228,6 +240,10 @@ class Handler(BaseHTTPRequestHandler):
                         self._analyze(g, int(body.get("seat", g.state.turn))))
             if p == "/api/match":
                 return self._match(body)
+            if p == "/api/coach":
+                return self._coach_new(body)
+            if len(parts) >= 5 and parts[1] == "api" and parts[2] == "coach":
+                return self._coach_action(parts[3], parts[4], body)
             return self._json({"error": "not found"}, 404)
         except Exception as e:
             traceback.print_exc()
@@ -312,6 +328,58 @@ class Handler(BaseHTTPRequestHandler):
         return {"seat": seat, "best": best, "asks": rows[:12],
                 "claims": claims, "beliefs": beliefs[:16],
                 "uses_model": agent.uses_model}
+
+    # -- live coaching ------------------------------------------------------
+
+    def _coach_new(self, body: dict):
+        from ..coach import CoachError, CoachSession
+        try:
+            s = CoachSession.create(
+                seat=int(body.get("seat", 0)),
+                hand_names=body.get("hand") or [],
+                variant=body.get("variant", "54"),
+                starting_player=int(body.get("starting_player", 0)))
+        except CoachError as e:
+            return self._json({"error": str(e)}, 400)
+        with _lock:
+            s.id = f"c{_counter[0]}"
+            _counter[0] += 1
+            _coaches[s.id] = s
+            if len(_coaches) > 60:
+                for k in list(_coaches)[:-60]:
+                    _coaches.pop(k, None)
+        return self._json({"id": s.id, "state": s.advise(
+            engine=body.get("engine", "probabilistic"))})
+
+    def _coach_action(self, cid: str, verb: str, body: dict):
+        from ..coach import CoachError
+        s = _coaches.get(cid)
+        if s is None:
+            return self._json({"error": "That coaching session has expired; "
+                                        "start a new one."}, 404)
+        engine = body.get("engine", "probabilistic")
+        try:
+            if verb == "ask":
+                s.add_ask(int(body["asker"]), int(body["target"]),
+                          str(body["card"]), bool(body["success"]))
+            elif verb == "claim":
+                s.add_claim(int(body["claimer"]), int(body["half_suit"]),
+                            [int(h) for h in body["holders"]],
+                            body.get("winner"))
+            elif verb == "pass":
+                s.add_pass(int(body["player"]), int(body["teammate"]))
+            elif verb == "undo":
+                s.undo()
+            elif verb == "state":
+                pass
+            else:
+                return self._json({"error": "unknown action"}, 404)
+        except CoachError as e:
+            return self._json({"error": str(e)}, 400)
+        except (KeyError, ValueError, TypeError):
+            return self._json({"error": "Missing or malformed fields for "
+                                        f"'{verb}'."}, 400)
+        return self._json({"id": cid, "state": s.advise(engine=engine)})
 
     def _match(self, body: dict):
         from ..eval.tournament import play_matchup
