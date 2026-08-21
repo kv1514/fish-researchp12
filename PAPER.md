@@ -35,6 +35,13 @@ below*: no configuration of search beats not searching, and doubling the
 sampled-world count changes nothing. The bottleneck is the evaluation
 target, not the search machinery.
 
+Acting on that diagnosis produced the study's largest single improvement,
+from a term the baseline ignored entirely: penalizing asks that would hand
+the turn to a card-rich opponent if they fail is worth **0.81 sets per
+duplicate deal-pair** (95% CI [0.53, 1.08]). That elaborate search machinery
+could not recover a tenth of what one neglected term in the objective
+supplies is the practical form of our central claim.
+
 Third, we establish **absolute rather than relative strength**. Small
 endgames are solved exactly, which requires noting that the Literature state
 graph is *cyclic* — two opponents can trade a card indefinitely and return to
@@ -362,7 +369,62 @@ knows the distribution or does not, and essentially never occupies the
 narrow band that threshold-tuning is meant to arbitrate. Effort is better
 spent making the split *knowable* than deciding when to gamble on it.
 
-### 5.5 Findings about the game itself
+### 5.5 What actually improves the strongest policy
+
+Having established that search does not help, we attacked the evaluation
+target directly, adding candidate terms to the ask score one at a time. Each
+was measured against the identical baseline over 600 duplicate deal-pairs
+(14,400 games in total). Positive values favour the new term.
+
+| added term | gain, sets per deal-pair | 95% CI | verdict |
+|---|---|---|---|
+| turn-risk, weight 0.60 | **+0.81** | [+0.53, +1.08] | real |
+| belief samples 32 to 96 | **+0.54** | [+0.25, +0.82] | real |
+| scarcity, weight 0.20 | **+0.55** | [+0.26, +0.83] | real |
+| turn-risk, weight 0.15 | **+0.48** | [+0.21, +0.75] | real |
+| reveal cost, weight 0.15 | +0.29 | [+0.01, +0.57] | marginal |
+| reveal cost, weight 0.05 | +0.14 | [-0.14, +0.42] | none |
+| depletion bonus, weight 0.15 | -0.01 | [-0.26, +0.24] | none |
+
+The largest single gain comes from a term the baseline ignored entirely:
+**which opponent receives the turn when an ask fails**. Penalizing asks that
+would hand the turn to a card-rich opponent, applied only to the failure
+branch, is worth 0.81 sets per deal-pair. That the strongest policy was
+throwing this away, while elaborate search machinery could not find a
+tenth of it, is the clearest illustration of the paper's central claim: in
+this game the objective, not the depth of search, is what binds.
+
+Two null results are worth stating because they contradict common intuition.
+A bonus for draining an opponent toward zero cards did **nothing**
+(-0.01 [-0.26, +0.24]); what matters about hand size is the danger of arming
+a large hand, not the appeal of emptying a small one. And information
+leakage, though detectable, is small: penalizing the exposure of a
+previously unshown half-suit gained only +0.29 with an interval barely
+excluding zero.
+
+Finally, belief precision has not saturated. Raising the number of sampled
+layouts from 32 to 96 still gains +0.54 sets per pair, having already gained
++0.93 going from 8 to 32.
+
+#### A methodological warning
+
+The first version of this experiment reported the **opposite** conclusion
+for turn-risk, at n=1000 per cell, with tight intervals: all three weights
+appeared clearly harmful. The ablated agent had accidentally normalized a
+different term by a factor of six, so setting the new weight to zero did not
+reproduce the baseline and every cell compared two changes at once. The
+confound was caught only by noticing an implausible monotonic pattern in the
+magnitudes.
+
+We now enforce by test that an ablated agent reduces decision-for-decision
+to the baseline when its new weights are zero, and that a non-zero weight
+demonstrably changes some decision. The affected results are marked
+RETRACTED in the experiment registry rather than deleted. We report this
+because a large sample size and a narrow confidence interval provide no
+protection whatsoever against a confounded comparison, and the failure is
+easy to miss precisely because the output looks authoritative.
+
+### 5.6 Findings about the game itself
 
 **Turn retention is the single best summary statistic of skill.** Measuring
 "possessions" (runs of consecutive successful asks before losing the turn)
@@ -450,19 +512,28 @@ informative than the positive ones.
 
 ## 8. What we would do next
 
-The bottleneck is now specific: **the evaluation target for an ask**.
-Candidate asks are currently ranked by success probability plus a small
-suit-depth bonus, and neither rollouts nor a learned value function improves
-on that ranking. The obvious missing terms are the ones a strong human
-weighs and our prior ignores entirely — above all *which opponent receives
-the turn* when an ask fails, along with information leaked by asking,
-information gained on failure, and the value of retaining the turn.
+The diagnosis in Section 5.2 pointed at the ask objective, and Section 5.5
+confirmed it pays: three terms the baseline ignored are each worth roughly
+half a set per deal-pair, and belief precision has not saturated. The
+immediate work is to find where those terms peak and whether they combine
+rather than duplicate each other, since two individually good terms can
+easily push toward the same asks.
 
-Beyond that: correcting the sampler's non-uniformity, widening the class of
-exactly solvable subgames to obtain more ground truth, and only then
-returning to search, teacher-student distillation, and population play.
-Those later stages are currently blocked, in the precise sense that a
-teacher no stronger than its student cannot teach.
+Beyond that, in order of expected value:
+
+- **Learn the ask objective rather than hand-weighting it.** The terms that
+  worked were guessed. A model trained to predict the value of an ask from
+  its features should dominate any hand-tuned combination, and unlike the
+  value functions tried here it would be trained on the quantity actually
+  being ranked.
+- **Correct the sampler's non-uniformity.** Every probability the engine
+  reports inherits this bias, including the ones the winning terms consume.
+- **Widen exactly solvable subgames** for more absolute ground truth, which
+  is the only validation that cannot flatter us.
+- **Only then return to search**, teacher-student distillation and
+  population play. Those stages remain blocked in a precise sense: a teacher
+  no stronger than its student cannot teach, and search is not yet stronger
+  than the policy it would be distilling from.
 
 ---
 

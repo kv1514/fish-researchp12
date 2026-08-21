@@ -1,0 +1,482 @@
+{
+  "strategy": [
+    {
+      "spec_x": [
+        "probabilistic",
+        {}
+      ],
+      "spec_y": [
+        "tuned",
+        {
+          "w_turn": 0.15
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 218,
+      "y_pair_wins": 274,
+      "pair_ties": 108,
+      "sum_diff": -290.0,
+      "sum_diff_sq": 6912.0,
+      "x_sets": 5016,
+      "y_sets": 5306,
+      "null_sets": 478,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 138110,
+      "pair_score": 0.4533333333333333,
+      "wilson_ci": [
+        0.41392233266659423,
+        0.4933381144440388
+      ],
+      "diff_mean_ci": [
+        -0.48333333333333334,
+        -0.7529151499788486,
+        -0.2137515166878181
+      ],
+      "label": "turn-risk w=0.15",
+      "study": "strategy",
+      "verdict": "Y stronger",
+      "x": "probabilistic{}",
+      "y": "tuned{'w_turn': 0.15}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {}
+      ],
+      "spec_y": [
+        "tuned",
+        {
+          "w_turn": 0.3
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 239,
+      "y_pair_wins": 289,
+      "pair_ties": 72,
+      "sum_diff": -286.0,
+      "sum_diff_sq": 8042.0,
+      "x_sets": 5017,
+      "y_sets": 5303,
+      "null_sets": 480,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 137964,
+      "pair_score": 0.4583333333333333,
+      "wilson_ci": [
+        0.4188553820891988,
+        0.4983414456881521
+      ],
+      "diff_mean_ci": [
+        -0.4766666666666667,
+        -0.767944139358492,
+        -0.18538919397484133
+      ],
+      "label": "turn-risk w=0.30",
+      "study": "strategy",
+      "verdict": "Y stronger",
+      "x": "probabilistic{}",
+      "y": "tuned{'w_turn': 0.3}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {}
+      ],
+      "spec_y": [
+        "tuned",
+        {
+          "w_turn": 0.6
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 200,
+      "y_pair_wins": 316,
+      "pair_ties": 84,
+      "sum_diff": -483.0,
+      "sum_diff_sq": 7289.0,
+      "x_sets": 4929,
+      "y_sets": 5412,
+      "null_sets": 459,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 136893,
+      "pair_score": 0.4033333333333333,
+      "wilson_ci": [
+        0.36481505038159207,
+        0.44308159006186204
+      ],
+      "diff_mean_ci": [
+        -0.805,
+        -1.07712461808343,
+        -0.5328753819165701
+      ],
+      "label": "turn-risk w=0.60",
+      "study": "strategy",
+      "verdict": "Y stronger",
+      "x": "probabilistic{}",
+      "y": "tuned{'w_turn': 0.6}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {}
+      ],
+      "spec_y": [
+        "tuned",
+        {
+          "w_reveal": 0.05
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 254,
+      "y_pair_wins": 249,
+      "pair_ties": 97,
+      "sum_diff": -82.0,
+      "sum_diff_sq": 7264.0,
+      "x_sets": 5124,
+      "y_sets": 5206,
+      "null_sets": 470,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 136984,
+      "pair_score": 0.5041666666666667,
+      "wilson_ci": [
+        0.4642606703433743,
+        0.5440196468788906
+      ],
+      "diff_mean_ci": [
+        -0.13666666666666666,
+        -0.4156576171311256,
+        0.14232428379779227
+      ],
+      "label": "reveal-cost w=0.05",
+      "study": "strategy",
+      "verdict": "no difference",
+      "x": "probabilistic{}",
+      "y": "tuned{'w_reveal': 0.05}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {}
+      ],
+      "spec_y": [
+        "tuned",
+        {
+          "w_reveal": 0.15
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 250,
+      "y_pair_wins": 276,
+      "pair_ties": 74,
+      "sum_diff": -173.0,
+      "sum_diff_sq": 7503.0,
+      "x_sets": 5058,
+      "y_sets": 5231,
+      "null_sets": 511,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 136223,
+      "pair_score": 0.47833333333333333,
+      "wilson_ci": [
+        0.4386275338450723,
+        0.5183148165991502
+      ],
+      "diff_mean_ci": [
+        -0.28833333333333333,
+        -0.5711509600082061,
+        -0.005515706658460573
+      ],
+      "label": "reveal-cost w=0.15",
+      "study": "strategy",
+      "verdict": "Y stronger",
+      "x": "probabilistic{}",
+      "y": "tuned{'w_reveal': 0.15}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {}
+      ],
+      "spec_y": [
+        "tuned",
+        {
+          "w_deplete": 0.15
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 239,
+      "y_pair_wins": 239,
+      "pair_ties": 122,
+      "sum_diff": 6.0,
+      "sum_diff_sq": 5624.0,
+      "x_sets": 5179,
+      "y_sets": 5173,
+      "null_sets": 448,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 138472,
+      "pair_score": 0.5,
+      "wilson_ci": [
+        0.46011913576597613,
+        0.5398808642340238
+      ],
+      "diff_mean_ci": [
+        0.01,
+        -0.23567321232049088,
+        0.2556732123204909
+      ],
+      "label": "deplete w=0.15",
+      "study": "strategy",
+      "verdict": "no difference",
+      "x": "probabilistic{}",
+      "y": "tuned{'w_deplete': 0.15}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {}
+      ],
+      "spec_y": [
+        "tuned",
+        {
+          "w_scarce": 0.2
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 240,
+      "y_pair_wins": 286,
+      "pair_ties": 74,
+      "sum_diff": -328.0,
+      "sum_diff_sq": 7676.0,
+      "x_sets": 4982,
+      "y_sets": 5310,
+      "null_sets": 508,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 136698,
+      "pair_score": 0.46166666666666667,
+      "wilson_ci": [
+        0.42214630686003246,
+        0.5016747746951304
+      ],
+      "diff_mean_ci": [
+        -0.5466666666666666,
+        -0.8303098415961585,
+        -0.2630234917371747
+      ],
+      "label": "scarcity w=0.20",
+      "study": "strategy",
+      "verdict": "Y stronger",
+      "x": "probabilistic{}",
+      "y": "tuned{'w_scarce': 0.2}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.97
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.7
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 137,
+      "y_pair_wins": 69,
+      "pair_ties": 394,
+      "sum_diff": 173.0,
+      "sum_diff_sq": 1367.0,
+      "x_sets": 5237,
+      "y_sets": 5064,
+      "null_sets": 499,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 137685,
+      "pair_score": 0.5566666666666666,
+      "wilson_ci": [
+        0.5166806044415179,
+        0.595931709781285
+      ],
+      "diff_mean_ci": [
+        0.28833333333333333,
+        0.16944209169889968,
+        0.407224574967767
+      ],
+      "label": "claim 0.97 vs 0.70",
+      "study": "strategy",
+      "verdict": "X stronger",
+      "x": "probabilistic{'claim_threshold': 0.97}",
+      "y": "probabilistic{'claim_threshold': 0.7}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.97
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.9
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 11,
+      "y_pair_wins": 6,
+      "pair_ties": 583,
+      "sum_diff": 19.0,
+      "sum_diff_sq": 133.0,
+      "x_sets": 5188,
+      "y_sets": 5169,
+      "null_sets": 443,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 137970,
+      "pair_score": 0.5041666666666667,
+      "wilson_ci": [
+        0.4642606703433743,
+        0.5440196468788906
+      ],
+      "diff_mean_ci": [
+        0.03166666666666667,
+        -0.006027897324324828,
+        0.06936123065765817
+      ],
+      "label": "claim 0.97 vs 0.90",
+      "study": "strategy",
+      "verdict": "no difference",
+      "x": "probabilistic{'claim_threshold': 0.97}",
+      "y": "probabilistic{'claim_threshold': 0.9}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "n_samples": 32
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "n_samples": 8
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 334,
+      "y_pair_wins": 208,
+      "pair_ties": 58,
+      "sum_diff": 556.0,
+      "sum_diff_sq": 8488.0,
+      "x_sets": 5459,
+      "y_sets": 4903,
+      "null_sets": 438,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 141720,
+      "pair_score": 0.605,
+      "wilson_ci": [
+        0.5653346990798305,
+        0.6433292949212452
+      ],
+      "diff_mean_ci": [
+        0.9266666666666666,
+        0.6341556860340223,
+        1.219177647299311
+      ],
+      "label": "belief samples 32 vs 8",
+      "study": "strategy",
+      "verdict": "X stronger",
+      "x": "probabilistic{'n_samples': 32}",
+      "y": "probabilistic{'n_samples': 8}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "n_samples": 32
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "n_samples": 96
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 227,
+      "y_pair_wins": 291,
+      "pair_ties": 82,
+      "sum_diff": -322.0,
+      "sum_diff_sq": 7774.0,
+      "x_sets": 4996,
+      "y_sets": 5318,
+      "null_sets": 486,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 136776,
+      "pair_score": 0.44666666666666666,
+      "wilson_ci": [
+        0.40735118075092785,
+        0.4866607588040814
+      ],
+      "diff_mean_ci": [
+        -0.5366666666666666,
+        -0.822279918946732,
+        -0.2510534143866012
+      ],
+      "label": "belief samples 32 vs 96",
+      "study": "strategy",
+      "verdict": "Y stronger",
+      "x": "probabilistic{'n_samples': 32}",
+      "y": "probabilistic{'n_samples': 96}"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "use_tablebase": true
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "use_tablebase": false
+        }
+      ],
+      "n_pairs": 600,
+      "x_pair_wins": 0,
+      "y_pair_wins": 0,
+      "pair_ties": 600,
+      "sum_diff": 0.0,
+      "sum_diff_sq": 0.0,
+      "x_sets": 5172,
+      "y_sets": 5172,
+      "null_sets": 456,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 139322,
+      "pair_score": 0.5,
+      "wilson_ci": [
+        0.46011913576597613,
+        0.5398808642340238
+      ],
+      "diff_mean_ci": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "label": "tablebase on vs off",
+      "study": "strategy",
+      "verdict": "no difference",
+      "x": "probabilistic{'use_tablebase': True}",
+      "y": "probabilistic{'use_tablebase': False}"
+    }
+  ]
+}

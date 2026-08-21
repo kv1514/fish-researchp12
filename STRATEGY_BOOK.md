@@ -68,6 +68,77 @@ attrition erodes the edge slightly.
 accuracy. The opening is where an engine should be most willing to trade an
 uncertain ask for information; the midgame is where accuracy is cashed in.
 
+### DEMONSTRATED - Think about who gets the turn when your ask fails
+
+This is the first change that made our strongest agent measurably stronger.
+
+The baseline policy ranks asks by success probability and how many cards it
+already holds in that half-suit. It does not consider *which opponent
+receives the turn* if the ask fails. Adding a penalty proportional to the
+target's hand size (large hands convert a turn into more asks and more
+claims; a player down to one or two cards can do little with it), applied
+only to the failure branch, gains:
+
+| penalty weight | gain over baseline, sets per deal-pair | 95% CI |
+|---|---|---|
+| 0.15 | **+0.48** | [+0.21, +0.75] |
+| 0.30 | **+0.48** | [+0.19, +0.77] |
+| 0.60 | **+0.81** | [+0.53, +1.08] |
+
+*(600 duplicate deal-pairs per cell; all intervals exclude zero.)*
+
+**Practical advice:** when two asks look equally likely to land, prefer the
+one that, if it misses, hands the turn to the opponent holding fewer cards.
+The cost of arming a card-rich opponent is real and measurable, and it is
+the sort of thing a strong human already senses but rarely quantifies.
+
+A caution about how this was measured: the first version of this experiment
+reported the *opposite* conclusion with tight confidence intervals at n=1000
+per cell. The agent used for the ablation had accidentally also weakened a
+different term, so it compared two changes at once. The lesson generalizes
+beyond this project: an ablation is only meaningful if the ablated agent
+provably reduces to the baseline when the new weight is zero, and that is
+now enforced by a test.
+
+### DEMONSTRATED - Fight hardest for the suits your team is already winning
+
+Adding a bonus for asking within contested half-suits where your team
+already holds the majority gains **+0.55 sets per deal-pair**
+[+0.26, +0.83] at weight 0.20 (600 pairs). Concentrating effort where you
+are ahead converts near-misses into completed sets faster than spreading
+attention evenly.
+
+### DEMONSTRATED - Do NOT go hunting for players who are nearly out of cards
+
+A term rewarding asks that drain an opponent toward zero produced
+**+0.01 sets per deal-pair** [-0.24, +0.26] at weight 0.15: no effect
+whatsoever. The popular intuition that you should "finish off" a
+short-handed opponent is not supported. What matters about an opponent's
+hand size is the *turn-risk* effect above (avoid arming a card-rich
+opponent), not a bonus for emptying a poor one.
+
+### PROMISING - Revealing a new half-suit has a small real cost
+
+Penalizing asks that expose a half-suit you have not previously shown gains
+**+0.29 sets per deal-pair** [+0.01, +0.57] at weight 0.15, with the
+interval only barely excluding zero; a weaker penalty (0.05) showed nothing
+[-0.14, +0.42]. So the cost of telegraphing your holdings appears real but
+small, and it needs a larger sample before it belongs alongside the
+demonstrated effects.
+
+### DEMONSTRATED - Precision of card-tracking has not hit diminishing returns
+
+Sampling more possible layouts before deciding keeps paying:
+
+| comparison | result |
+|---|---|
+| 32 samples vs 8 | 32 better by **+0.93** [+0.63, +1.22] |
+| 96 samples vs 32 | 96 better by **+0.54** [+0.25, +0.82] |
+
+For a human the analogue is simple and unglamorous: the more carefully you
+enumerate who *could* hold what before choosing, the better you play, and
+you are probably not yet at the point where extra care stops paying.
+
 ### DEMONSTRATED - Failed asks are normal, not a mistake
 
 Failure share: **59.2%** of asks at `memory` level, **37.8%** at
