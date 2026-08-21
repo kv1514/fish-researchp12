@@ -12,10 +12,17 @@ from ..cards import half_suit_cards, half_suit_mask, team_of, teammates
 from ..engine import Action, Ask, Claim
 from ..observation import Observation
 from .base import Agent
+from .tablebase import ExactEndgameMixin
 
 
-class MemoryAgent(Agent):
+class MemoryAgent(ExactEndgameMixin, Agent):
     name = "memory"
+
+    def __init__(self, use_tablebase: bool = True,
+                 tablebase_max_cards: int = 8):
+        super().__init__()
+        self.use_tablebase = use_tablebase
+        self.tablebase_max_cards = tablebase_max_cards
 
     def begin_game(self, player, rules, seed):
         super().begin_game(player, rules, seed)
@@ -63,6 +70,9 @@ class MemoryAgent(Agent):
         if obs.must_pass():
             return max(obs.legal_passes(),
                        key=lambda p: obs.hand_counts[p.teammate])
+        exact = self.tablebase_action(obs)
+        if exact is not None:
+            return exact          # nothing hidden: solve, do not guess
         claim = self._certain_claim(obs)
         if claim is not None:
             return claim

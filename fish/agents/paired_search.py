@@ -68,6 +68,9 @@ class PairedSearchAgent(ProbabilisticAgent):
         if obs.must_pass():
             return max(obs.legal_passes(),
                        key=lambda p: obs.hand_counts[p.teammate])
+        exact = self.tablebase_action(obs)
+        if exact is not None:
+            return exact          # nothing hidden: solve, do not estimate
         worlds = self._sample_worlds()
         claim_cands = self._claim_candidates(obs, worlds)
         best_claim = max(claim_cands, key=lambda t: t[0]) if claim_cands else None

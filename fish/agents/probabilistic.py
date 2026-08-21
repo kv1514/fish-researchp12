@@ -16,17 +16,21 @@ from ..cards import (NUM_PLAYERS, half_suit_cards, half_suit_mask, team_of,
 from ..engine import Action, Ask, Claim
 from ..observation import Observation
 from .base import Agent
+from .tablebase import ExactEndgameMixin
 
 
-class ProbabilisticAgent(Agent):
+class ProbabilisticAgent(ExactEndgameMixin, Agent):
     name = "probabilistic"
 
     def __init__(self, n_samples: int = 32, claim_threshold: float = 0.97,
-                 suit_bonus: float = 0.06):
+                 suit_bonus: float = 0.06, use_tablebase: bool = True,
+                 tablebase_max_cards: int = 8):
         super().__init__()
         self.n_samples = n_samples
         self.claim_threshold = claim_threshold
         self.suit_bonus = suit_bonus
+        self.use_tablebase = use_tablebase
+        self.tablebase_max_cards = tablebase_max_cards
 
     def begin_game(self, player, rules, seed):
         super().begin_game(player, rules, seed)
@@ -81,6 +85,12 @@ class ProbabilisticAgent(Agent):
         if obs.must_pass():
             return max(obs.legal_passes(),
                        key=lambda p: obs.hand_counts[p.teammate])
+        # If our own beliefs already determine every remaining card, the
+        # position has no hidden information left: solve it instead of
+        # guessing at it.
+        exact = self.tablebase_action(obs)
+        if exact is not None:
+            return exact
         worlds = self._sample_worlds()
         claim_cands = self._claim_candidates(obs, worlds)
         best_claim = max(claim_cands, key=lambda t: t[0]) if claim_cands else None
