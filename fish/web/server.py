@@ -365,7 +365,8 @@ class Handler(BaseHTTPRequestHandler):
             elif verb == "claim":
                 s.add_claim(int(body["claimer"]), int(body["half_suit"]),
                             [int(h) for h in body["holders"]],
-                            body.get("winner"))
+                            body.get("winner"),
+                            bool(body.get("nulled", False)))
             elif verb == "pass":
                 s.add_pass(int(body["player"]), int(body["teammate"]))
             elif verb == "undo":

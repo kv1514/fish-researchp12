@@ -154,6 +154,17 @@ function openClaimBox() {
     grid.append(cell);
   });
   box.append(grid);
+
+  // A claim where the team held all six but named the wrong teammate is
+  // NULLED: nobody scores. That is indistinguishable from a correct claim
+  // if you only look at where the cards were, so the player has to tell us.
+  const nullWrap = el('label', 'small');
+  const nullBox = el('input');
+  nullBox.type = 'checkbox';
+  nullWrap.append(nullBox,
+    el('span', null, ' Nobody scored it (claimer named the wrong teammate)'));
+  box.append(nullWrap);
+
   const go = el('button', 'primary', 'Record claim');
   go.onclick = async () => {
     const holders = [...grid.querySelectorAll('select')]
@@ -161,6 +172,7 @@ function openClaimBox() {
     try {
       const d = await post(`/api/coach/${sessionId}/claim`, {
         claimer: Number($('#c_claimer').value), half_suit: hs, holders,
+        nulled: nullBox.checked,
       });
       state = d.state;
       box.hidden = true;

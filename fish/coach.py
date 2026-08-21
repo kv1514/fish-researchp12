@@ -27,7 +27,8 @@ from .cards import (CARD_NAMES, HALF_SUIT_NAMES, card_id, card_long_name,
                     card_name, cards_per_player, deck_size, half_suit_cards,
                     half_suit_mask, is_red, mask_to_cards, num_half_suits,
                     team_of)
-from .engine import (Ask, AskEvent, Claim, ClaimEvent, Event, PassEvent)
+from .engine import (Ask, AskEvent, Claim, ClaimEvent, Event, NULL_TEAM,
+                     PassEvent)
 from .observation import Observation
 from .rules import RuleConfig
 
@@ -138,10 +139,20 @@ class CoachSession:
         self._push(AskEvent(asker, target, cid, bool(success)))
 
     def add_claim(self, claimer: int, half_suit: int, holders: list[int],
-                  winner: Optional[int] = None):
-        """``holders`` is the ACTUAL holder of each of the six cards, which
-        is public once a claim resolves. ``winner`` may be given explicitly;
-        otherwise it is derived from the revealed holders."""
+                  winner: Optional[int] = None, nulled: bool = False):
+        """Record a resolved claim.
+
+        ``holders`` is where each of the six cards ACTUALLY turned out to be,
+        which becomes public when a claim resolves.
+
+        ``winner`` should be given when known, because it cannot always be
+        derived: if every card was within the claiming team but the claimer
+        named the wrong teammate for one of them, the half-suit is NULLED and
+        nobody scores, which looks identical from the holders alone. Pass
+        ``nulled=True`` (or ``winner=-1``) for that case. Getting this wrong
+        would silently credit a set to a team that did not score it, and the
+        scoreboard drives claim decisions later in the game.
+        """
         if not 0 <= claimer < 6:
             raise CoachError("The claimer must be a seat from 0 to 5.")
         n_hs = num_half_suits(self.rules.variant)
@@ -149,9 +160,37 @@ class CoachSession:
             raise CoachError(f"Half-suit must be between 0 and {n_hs - 1}.")
         if len(holders) != 6 or any(not 0 <= h < 6 for h in holders):
             raise CoachError("A claim reveals six holders, each a seat 0-5.")
+        obs = self.observation()
+        if obs.set_winner[half_suit] is not None:
+            raise CoachError(
+                f"{HALF_SUIT_NAMES[half_suit]} has already been claimed.")
+        # Friendly check against the one thing we can verify directly: what
+        # the player themself is holding. Otherwise the belief engine reports
+        # "player 0 count infeasible", which tells nobody anything.
+        base = half_suit * 6
+        for i, h in enumerate(holders):
+            card = base + i
+            if h == self.seat and not obs.hand & (1 << card):
+                raise CoachError(
+                    f"You are not holding {card_long_name(card)}, so it "
+                    "cannot have been revealed with you.")
+            if h != self.seat and obs.hand & (1 << card):
+                raise CoachError(
+                    f"You are holding {card_long_name(card)}, so it cannot "
+                    f"have been revealed with P{h}.")
         team = team_of(claimer)
-        if winner is None:
-            winner = team if all(team_of(h) == team for h in holders) else 1 - team
+        all_in_team = all(team_of(h) == team for h in holders)
+        if nulled:
+            if not all_in_team:
+                raise CoachError(
+                    "A half-suit can only be nulled when the claiming team "
+                    "held all six cards. Here an opponent held one, so the "
+                    "opposing team scores it.")
+            winner = NULL_TEAM
+        elif winner is None:
+            winner = team if all_in_team else 1 - team
+        elif winner not in (0, 1, NULL_TEAM):
+            raise CoachError("Winner must be team 0, team 1, or -1 for null.")
         self._push(ClaimEvent(claimer, half_suit, tuple(holders),
                               tuple(holders), winner))
 

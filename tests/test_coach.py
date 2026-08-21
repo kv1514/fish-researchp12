@@ -140,3 +140,47 @@ def test_advice_names_a_legal_action_when_on_move():
     assert a["recommendation_kind"] in ("ask", "claim", "pass")
     for row in a["asks"]:
         assert 0.0 <= row["p_success"] <= 1.0
+
+
+def test_nulled_claim_credits_nobody():
+    """A team can hold all six cards and still score nothing by naming the
+    wrong teammate. That outcome is invisible in the revealed holders, so the
+    player must tell us; recording it as a win would corrupt the scoreboard
+    that later claim decisions depend on."""
+    s = CoachSession.create(seat=0, hand_names=HAND)
+    s.add_claim(claimer=1, half_suit=3, holders=[1, 1, 3, 3, 5, 5],
+                nulled=True)
+    a = s.advise()
+    assert a["set_winner"][3] == -1
+    assert a["scores"]["team1"] == 0
+    assert a["scores"]["null"] == 1
+
+
+def test_null_is_rejected_when_an_opponent_held_a_card():
+    s = CoachSession.create(seat=0, hand_names=HAND)
+    with pytest.raises(CoachError, match="only be nulled"):
+        s.add_claim(claimer=1, half_suit=3, holders=[1, 1, 3, 3, 5, 2],
+                    nulled=True)
+
+
+def test_claim_outcome_defaults_are_still_correct():
+    s = CoachSession.create(seat=0, hand_names=HAND)
+    # P2 (team A) held one, so team B's claim loses them the set
+    s.add_claim(claimer=1, half_suit=3, holders=[1, 1, 3, 3, 5, 2])
+    assert s.advise()["set_winner"][3] == 0
+
+
+def test_claim_rejects_holders_that_contradict_my_own_hand():
+    s = CoachSession.create(seat=0, hand_names=HAND)
+    with pytest.raises(CoachError, match="not holding"):
+        s.add_claim(claimer=0, half_suit=3, holders=[0, 0, 2, 2, 4, 4])
+    with pytest.raises(CoachError, match="You are holding"):
+        # 2C is mine, so it cannot be revealed with P2
+        s.add_claim(claimer=0, half_suit=0, holders=[2, 0, 0, 0, 0, 0])
+
+
+def test_cannot_claim_the_same_half_suit_twice():
+    s = CoachSession.create(seat=0, hand_names=HAND)
+    s.add_claim(claimer=1, half_suit=3, holders=[1, 1, 3, 3, 5, 5])
+    with pytest.raises(CoachError, match="already been claimed"):
+        s.add_claim(claimer=3, half_suit=3, holders=[1, 1, 3, 3, 5, 5])
