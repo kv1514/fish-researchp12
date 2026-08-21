@@ -83,7 +83,7 @@ fish/
   gamelog.py         byte-packed transcripts (<1KB/game)
   cli.py, play.py    analysis CLI, interactive play, replays
 tests/               rules, fuzz, leakage proofs, belief soundness,
-                     statistics, exact solver, coach  (188 tests)
+                     statistics, exact solver, coach  (193 tests)
 scripts/             tournaments, ablations, profiling, search diagnostics
 ```
 

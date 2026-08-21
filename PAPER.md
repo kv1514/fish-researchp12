@@ -622,7 +622,7 @@ random seed streams, the agent specifications and the result, and flags
 whether it was run from a modified working tree.
 
 ```
-py -m pytest tests -q            # 188 tests: rules, fuzz, leakage proofs,
+py -m pytest tests -q            # 193 tests: rules, fuzz, leakage proofs,
                                  # belief soundness, statistics, exact solver,
                                  # coaching, ablation-equivalence guards
 py scripts/run_large_study.py    # the duplicate-deal experiments
