@@ -508,6 +508,35 @@ natural half-suits, and null rate 4.75% versus 6.0% (n=400 versus 3,200).
 Neither difference is meaningful, at either skill tier. We note the caveat
 that this is measured under agents that do not deliberately conceal suits.
 
+### 5.7 External validity: the classic 48-card game
+
+Every result above was obtained on our 54-card variant, whose ninth
+half-suit is a synthetic assembly of four 8s and two jokers. A reasonable
+objection is that the findings might be artifacts of that construction
+rather than properties of Literature. We therefore repeated the key
+measurements on the classic 48-card ruleset:
+
+| measure | 54-card | 48-card |
+|---|---|---|
+| gain from the improved ask objective | **+1.51** [+1.17, +1.85] | **+1.37** [+1.01, +1.72] |
+| cards per possession | 1.72 | 1.74 |
+| ask success (early / mid / late thirds) | 60% / 67% / 64% | 59% / 67% / 66% |
+| failed-ask share | 36.3% | 36.0% |
+| seat advantage | +0.03 [-0.26, +0.33] | +0.08 [-0.21, +0.38] |
+| median claim delay | 0 | 0 |
+
+*(300 games and 400 duplicate deal-pairs per variant.)*
+
+The rulesets are near-indistinguishable strategically. The only clear
+difference is game length (107 asks per game versus 93), which follows
+directly from one extra half-suit and one extra card per player. The
+improvement to the ask objective, the phase structure of ask accuracy, the
+absence of seat advantage, and the claim-timing behaviour all transfer.
+
+This strengthens the earlier finding that the synthetic half-suit is not
+treated differently *within* a game: adding it does not change the game
+either.
+
 ---
 
 ## 6. Failed experiments

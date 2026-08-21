@@ -308,6 +308,31 @@ across deals:
 Both intervals comfortably contain zero at n=400. Six-player Literature
 appears **seat-balanced**: moving first is worth nothing detectable.
 
+### DEMONSTRATED - None of this is specific to our 54-card variant
+
+Everything above was measured on the nine-half-suit deck (with the 8s and
+jokers). If those findings were artifacts of adding a synthetic half-suit
+rather than facts about Literature, they should evaporate on the classic
+48-card game. They do not.
+
+| measure | 54-card | 48-card (classic) |
+|---|---|---|
+| gain from the improved policy | **+1.51** [+1.17, +1.85] | **+1.37** [+1.01, +1.72] |
+| cards per possession | 1.72 | 1.74 |
+| ask success (early / mid / late) | 60% / 67% / 64% | 59% / 67% / 66% |
+| failed-ask share | 36.3% | 36.0% |
+| seat advantage | +0.03 [-0.26, +0.33] | +0.08 [-0.21, +0.38] |
+| median claim delay | 0 | 0 |
+
+*(300 games and 400 duplicate deal-pairs per variant.)*
+
+The two rulesets play remarkably alike. The only clear difference is
+length: 107 asks per game on 54 cards versus 93 on 48, which is simply the
+extra half-suit and the extra card each. Everything strategic transfers.
+
+So if you play the classic no-8s game, all the advice in this book applies
+to you unchanged.
+
 ### DEMONSTRATED - Fish positions can repeat forever
 
 The exact solver proved the state graph is **cyclic**: two opponents can
