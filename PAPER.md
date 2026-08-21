@@ -569,8 +569,9 @@ random seed streams, the agent specifications and the result, and flags
 whether it was run from a modified working tree.
 
 ```
-py -m pytest tests -q            # 176 tests: rules, fuzz, leakage proofs,
-                                 # belief soundness, statistics, exact solver
+py -m pytest tests -q            # 188 tests: rules, fuzz, leakage proofs,
+                                 # belief soundness, statistics, exact solver,
+                                 # coaching, ablation-equivalence guards
 py scripts/run_large_study.py    # the duplicate-deal experiments
 py scripts/diagnose_search.py    # the variance measurement of Section 5.2
 py -m fish.cli solve             # exact ground truth on a sample endgame
