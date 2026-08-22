@@ -1,0 +1,253 @@
+{
+  "toy_nonunique_fixpoint": {
+    "value_iteration_from_zero": [
+      0,
+      0
+    ],
+    "attractor": [
+      0,
+      0
+    ],
+    "optimistic_vector": [
+      5,
+      5
+    ],
+    "optimistic_vector_after_a_sweep": [
+      5,
+      5
+    ],
+    "optimistic_vector_is_also_a_fixpoint": true
+  },
+  "fixpoint_m1": {
+    "m": 1,
+    "n_states": 2604,
+    "every_initialisation_agrees": true,
+    "results": {
+      "zeros/jacobi": {
+        "converged": true,
+        "sweeps": 8,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "optimistic/jacobi": {
+        "converged": true,
+        "sweeps": 8,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "very_optimistic/jacobi": {
+        "converged": true,
+        "sweeps": 12,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "pessimistic/jacobi": {
+        "converged": true,
+        "sweeps": 8,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "very_pessimistic/jacobi": {
+        "converged": true,
+        "sweeps": 12,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "random_1/jacobi": {
+        "converged": true,
+        "sweeps": 9,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "random_2/jacobi": {
+        "converged": true,
+        "sweeps": 9,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "random_3/jacobi": {
+        "converged": true,
+        "sweeps": 10,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "zeros/gauss_seidel_order_0": {
+        "converged": true,
+        "sweeps": 6,
+        "states_differing_from_the_attractor_value": 0
+      },
+      "zeros/gauss_seidel_order_1": {
+        "converged": true,
+        "sweeps": 7,
+        "states_differing_from_the_attractor_value": 0
+      },
+      "zeros/gauss_seidel_order_2": {
+        "converged": true,
+        "sweeps": 7,
+        "states_differing_from_the_attractor_value": 0
+      }
+    }
+  },
+  "fixpoint_m2": {
+    "m": 2,
+    "n_states": 1275960,
+    "every_initialisation_agrees": true,
+    "results": {
+      "zeros/jacobi": {
+        "converged": true,
+        "sweeps": 8,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "optimistic/jacobi": {
+        "converged": true,
+        "sweeps": 8,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "very_optimistic/jacobi": {
+        "converged": true,
+        "sweeps": 17,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "pessimistic/jacobi": {
+        "converged": true,
+        "sweeps": 8,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "very_pessimistic/jacobi": {
+        "converged": true,
+        "sweeps": 17,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "random_1/jacobi": {
+        "converged": true,
+        "sweeps": 17,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "random_2/jacobi": {
+        "converged": true,
+        "sweeps": 17,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      },
+      "random_3/jacobi": {
+        "converged": true,
+        "sweeps": 17,
+        "states_differing_from_the_attractor_value": 0,
+        "examples": []
+      }
+    }
+  },
+  "closed_form": {
+    "m=1": {
+      "states": 2604,
+      "closed_form_exact": true,
+      "agreement": 1.0,
+      "value_histogram": {
+        "-1": 1302,
+        "1": 1302
+      }
+    },
+    "m=2": {
+      "states": 1275960,
+      "closed_form_exact": true,
+      "agreement": 1.0,
+      "value_histogram": {
+        "-2": 565068,
+        "0": 145824,
+        "2": 565068
+      }
+    },
+    "m=3": {
+      "sampled": 90,
+      "checked": 61,
+      "agreeing": 61,
+      "refused_as_too_large": 29,
+      "failures": [],
+      "median_reachable_states": 33569,
+      "max_reachable_states": 323789,
+      "median_seconds": 2.591288900002837,
+      "max_seconds": 49.95463770000788
+    }
+  },
+  "giveaway": {
+    "m=1": {
+      "states": 2604,
+      "states_where_value_changes": 0,
+      "value_histogram_with_giveaway": {
+        "-1": 1302,
+        "1": 1302
+      }
+    },
+    "m=2": {
+      "states": 1275960,
+      "states_where_value_changes": 0,
+      "value_histogram_with_giveaway": {
+        "-2": 565068,
+        "0": 145824,
+        "2": 565068
+      }
+    },
+    "ties": {
+      "m=1": {
+        "valid_states": 2604,
+        "states_where_a_giveaway_claim_ties_the_optimum": 0,
+        "fraction": 0.0
+      },
+      "m=2": {
+        "valid_states": 1275960,
+        "states_where_a_giveaway_claim_ties_the_optimum": 84672,
+        "fraction": 0.06611570247933884
+      }
+    }
+  },
+  "timing": {
+    "table_build_seconds": {
+      "m=1": 0.013463900002534501,
+      "m=2": 17.846527700006845
+    },
+    "v2_value_m=1_seconds_per_position": 1.2803333326398085e-05,
+    "v2_optimal_actions_m=1_seconds_per_position": 9.95250001627331e-05,
+    "v2_value_m=2_seconds_per_position": 1.3758333322281639e-05,
+    "v2_optimal_actions_m=2_seconds_per_position": 0.0002700916666071862,
+    "v1_m=1_seconds_per_position": 6.155687881667836,
+    "v1_m=1_solved": 60,
+    "v1_m=1_wall_seconds_3_workers": 238.03134320001118,
+    "v1_m=1_mean_nodes": 7419.916666666667,
+    "v1_m=2_solved": 0,
+    "v1_m=2_refusal_example": "SubgameTooLarge: layer with 12 live cards is ~6^12 placements, far beyond the 400000-state budget",
+    "v1_m=2_wall_seconds_3_workers": 0.010854000007384457
+  },
+  "playout": {
+    "positions": 160,
+    "mismatches": 0,
+    "examples": []
+  },
+  "abstraction_fuzz": {
+    "trials": 600,
+    "mismatches": [],
+    "n_mismatches": 0
+  },
+  "representative_invariance": {
+    "trials": 300,
+    "n_mismatches": 0,
+    "examples": []
+  },
+  "stalling": {
+    "m=1": {
+      "decided_states": 2604,
+      "with_a_value_preserving_move_that_makes_no_progress": 0,
+      "fraction": 0.0
+    },
+    "m=2": {
+      "decided_states": 1130136,
+      "with_a_value_preserving_move_that_makes_no_progress": 366660,
+      "fraction": 0.2863
+    }
+  }
+}
