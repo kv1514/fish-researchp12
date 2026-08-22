@@ -1,0 +1,44 @@
+{
+  "normal": {
+    "games": 200,
+    "mean_plies": 104.395,
+    "timeouts": 0,
+    "games_reaching_a_dead_position": 200,
+    "games_with_a_stuck_team": 110,
+    "games_with_a_repeated_state": 200,
+    "max_times_one_state_repeated": 8,
+    "share_of_plies_in_a_dead_position": 0.04243498251831984,
+    "share_of_plies_with_no_landing_ask": 0.04243498251831984,
+    "mean_actions_after_first_dead_position": 4.43,
+    "mean_dead_half_suits_at_peak": 3.135,
+    "nulls_per_game": 0.275
+  },
+  "no_progress_rule": {
+    "games": 200,
+    "mean_plies": 104.395,
+    "timeouts": 0,
+    "games_reaching_a_dead_position": 200,
+    "games_with_a_stuck_team": 110,
+    "games_with_a_repeated_state": 200,
+    "max_times_one_state_repeated": 8,
+    "share_of_plies_in_a_dead_position": 0.04243498251831984,
+    "share_of_plies_with_no_landing_ask": 0.04243498251831984,
+    "mean_actions_after_first_dead_position": 4.43,
+    "mean_dead_half_suits_at_peak": 3.135,
+    "nulls_per_game": 0.275
+  },
+  "signalling": {
+    "games": 200,
+    "mean_plies": 104.84,
+    "timeouts": 0,
+    "games_reaching_a_dead_position": 200,
+    "games_with_a_stuck_team": 116,
+    "games_with_a_repeated_state": 200,
+    "max_times_one_state_repeated": 8,
+    "share_of_plies_in_a_dead_position": 0.04559328500572301,
+    "share_of_plies_with_no_landing_ask": 0.04559328500572301,
+    "mean_actions_after_first_dead_position": 4.78,
+    "mean_dead_half_suits_at_peak": 3.155,
+    "nulls_per_game": 0.22
+  }
+}

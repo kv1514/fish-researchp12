@@ -97,7 +97,9 @@ class FishBot4(Tablebase4Mixin, Agent):
                  tablebase_max_half_suits: int = 2,
                  # -- misc
                  stall_window: int = 80,
-                 smart_pass: bool = False):
+                 smart_pass: bool = False,
+                 signal_mode: str = "off",
+                 signal_max_p: float = 0.15):
         super().__init__()
         self.n_worlds = n_worlds
         self.n_draws = n_draws
@@ -122,6 +124,8 @@ class FishBot4(Tablebase4Mixin, Agent):
         self.tablebase_max_half_suits = tablebase_max_half_suits
         self.stall_window = stall_window
         self.smart_pass = smart_pass
+        self.signal_mode = signal_mode
+        self.signal_max_p = signal_max_p
         self.stats = PosteriorStats()
         self.bel: Optional[BeliefState] = None
 
@@ -191,6 +195,26 @@ class FishBot4(Tablebase4Mixin, Agent):
         # certain. A claim is only better if it is more likely right than wrong;
         # otherwise it gifts a set on top of the lost turn, which is strictly
         # worse than a doomed ask. v0.3 used the same 0.5 bar.
+        # Signalling. An ask placed in a half-suit our own team fully owns
+        # cannot land, so it throws the turn away - but under the no-bluff rule
+        # it publicly proves we do not hold the card we asked for, which is the
+        # one fact a partner needs to place a split. Measured: a half-suit that
+        # is provably ours but unplaceable is nulled 17.5% of the time against
+        # 2.8% otherwise, and such half-suits are 27% of all nulls.
+        #   "dead"  - only when NO ask anywhere can land, so the turn is free.
+        #   "stuck" - also when our best ask is unlikely to land anyway, which
+        #             makes the turn cheap rather than free.
+        if self.signal_mode != "off":
+            from .perpetual import signalling_ask, stuck_half_suits
+            cheap = p[order[0]] <= (self.signal_max_p
+                                    if self.signal_mode == "stuck" else 0.0)
+            if cheap and stuck_half_suits(obs, self.bel, ctx):
+                sig = signalling_ask(
+                    obs, self.bel, ctx,
+                    require_dead=(self.signal_mode == "dead"))
+                if sig is not None:
+                    return sig
+
         if p[order[0]] <= 0.0:
             best = claims.best_candidate()
             if best is not None and best[0] >= 0.5:
