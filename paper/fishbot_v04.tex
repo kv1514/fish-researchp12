@@ -1,0 +1,1989 @@
+% =====================================================================
+% FishBot v0.4
+% Exact Combinatorial Inference and Opponent Modelling in Six-Player
+% Literature
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{natbib}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{multirow}
+\usepackage{xcolor}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+
+\newcommand{\halfsuit}{\ensuremath{H}}
+\newcommand{\Prob}{\ensuremath{\mathbb{P}}}
+\newcommand{\Ex}{\ensuremath{\mathbb{E}}}
+\newcommand{\ind}[1]{\ensuremath{\mathbf{1}\!\left[#1\right]}}
+\newcommand{\sets}{\ensuremath{\Delta}}
+
+\title{\textbf{FishBot v0.4}\\[0.4em]
+\large Exact Combinatorial Inference, Opponent Modelling, and the Limits of
+the Uniform Posterior in Six-Player Literature}
+
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+% =====================================================================
+\begin{abstract}
+Literature (also called Fish) is a six-player, two-team,
+imperfect-information card game in which players interrogate opponents for
+specific cards and score by declaring the exact distribution of a six-card
+half-suit among their own team. It is a team game with hidden information and
+no legal communication channel, so neither the two-player zero-sum machinery
+that solved poker nor the fully cooperative machinery developed for Hanabi
+applies directly.
+
+The previous version of this engine ended by naming its own bottleneck: its
+belief sampler was documented as \emph{not uniform} over the deals consistent
+with the public record, so every probability it reported inherited an
+unquantified bias. This paper removes that bias, and reports what happened.
+
+We first show that hidden-state inference in Literature reduces to counting
+assignments in a degree-constrained bipartite system, which is $\#P$-complete
+in general but tiny in the dimension that matters here: real positions have
+$25.6$ unlocated cards on average but only $4.0$ \emph{distinct candidate
+sets}, so cards are exchangeable and the problem collapses onto an $8 \times 6$
+count matrix. A dynamic program over that structure returns the exact partition
+function, exact marginals, exact uniform sampling and exact joint probabilities,
+validated against exhaustive enumeration. The one part it cannot absorb --- the
+disjunctive constraints certifying that an asker held a card of the half-suit
+--- we handle by importance sampling with closed-form proposal densities, after
+measuring why the two obvious alternatives fail.
+
+The result is that the inference is now provably correct, and \textbf{it changed
+nothing}: against the previous champion, with the ask objective held fixed, the
+set differential was $-0.22$ per duplicate deal-pair, 95\% CI
+$[-0.96, +0.52]$.
+
+To find out why, we built a benchmark the previous version lacked: because the
+hidden hands exist in simulation, a posterior can be scored directly on how much
+probability it places on where the cards actually are. Over 517 decisions and
+13{,}640 uncertain-card predictions, the \emph{exactly uniform} posterior was
+\emph{worse} at predicting reality than the biased sampler it replaced
+(negative log-likelihood $1.362$ against $1.341$ at a matched budget). The
+uniform posterior is a correct theorem about a false hypothesis --- that
+players' choices carry no information beyond legality --- and the old sampler's
+bias happened to encode a crude opponent model.
+
+Replacing the accident with an explicit one --- a single parameter modelling the
+hypothesis that a player asks in a half-suit in proportion to how many cards of
+it they hold --- beats both on posterior accuracy ($1.325$) and is worth
+$\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair} in play, 95\% CI
+$[+1.23, +2.46]$, essentially flat over a threefold range of the parameter. For
+scale, the entire objective improvement separating the previous champion from
+its own baseline was $1.26$ sets per pair.
+
+The resulting engine beats the previous champion by \textbf{+1.85 sets per
+deal-pair} $[+1.54, +2.17]$ over 500 duplicate deals, wins every pair against
+the two weakest policies in the ladder, and improves agreement with provably
+optimal play in exactly solved positions from $67.6\%$ to $72.5\%$. Nothing else
+we tried helped: an eleven-term ask objective, a learned half-suit value, a
+rollout-regression objective, and a widened exact endgame solver are all
+reported as nulls, and the one screening cell that did resolve failed to
+replicate twice. We also report several
+methodological corrections, including a bias in the previous harness's handling
+of timed-out games that we demonstrate can place the true value outside a
+reported 95\% confidence interval, and a measurement showing that the previous
+version's 600-pair experiment cells could not resolve effects below about
+$0.44$ sets per pair --- so its smaller null results were uninformative rather
+than negative.
+\end{abstract}
+
+% =====================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Literature --- also called Fish or Canadian Fish --- is a six-player,
+two-team, imperfect-information card game. Players interrogate opponents for
+specific cards and score by \emph{declaring} the exact distribution of a
+six-card half-suit among the members of their own team. It sits in a corner of
+the game-AI landscape that is unusually poorly served: it is a team game with
+hidden information and \emph{no legal communication channel}, so neither the
+two-player zero-sum machinery that solved poker nor the fully cooperative
+machinery developed for Hanabi applies directly.
+
+This paper is the fourth iteration of an engine for the game. The previous
+version, v0.3, established three results that frame everything here. First,
+exact belief tracking dominates: an agent that merely chains every logical
+implication of the public record beats a public-information heuristic by
+$11.86$ sets per duplicate deal-pair. Second, and more surprisingly, search
+does not help, and the reason is measurable: the standard deviation of a
+position's value across possible hidden layouts is about $2.4\times$ the gap
+between the best and the worst candidate move, so any search that evaluates
+different candidates against different sampled layouts is ranking luck. Third,
+acting on that diagnosis --- by improving the \emph{objective} rather than the
+depth of search --- produced the study's largest single gain.
+
+v0.3 closed by naming its own bottlenecks, and this paper attacks them
+directly. Its belief sampler was documented as \emph{not uniform} over the set
+of deals consistent with the public record, so every probability the engine
+reported inherited an unquantified bias. Its ask objective was a hand-weighted
+sum of three terms. Its claim policy was a fixed confidence threshold. The
+obvious research programme is therefore: make the inference exact, widen and
+then learn the objective, and make claiming decision-theoretic.
+
+We carried that programme out, and the headline result is not the one we
+expected.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item \textbf{Exact combinatorial inference.} We show that hidden-state
+inference in Literature reduces to counting assignments in a
+degree-constrained bipartite system, and that although the general problem is
+$\#P$-complete, the specific instances arising in this game are tiny in the
+dimension that matters: the number of \emph{distinct candidate sets} is on
+average $4.0$ even when $25.6$ cards are unlocated. We give an exact dynamic
+program over that structure that returns the partition function, exact
+marginals, and exact uniform sampling, and validate it against exhaustive
+enumeration (Section~\ref{sec:counting}).
+
+\item \textbf{A measured account of the disjunctive constraints.} The
+constraint set contains clauses (``the asker held at least one card of that
+half-suit'') that the dynamic program does not absorb. We quantify three ways
+of handling them and show why the obvious two fail, then give an importance
+sampler whose proposal density is computable in closed form and whose
+self-normalised weights are consistent for the target
+(Section~\ref{sec:clauses}).
+
+\item \textbf{Posterior quality measured against ground truth.} Every belief
+metric in the previous version was indirect. Because the hidden hands exist in
+the simulator, we can score a posterior directly on how much probability it
+places on where the cards actually are. We report negative log-likelihood,
+Brier score, top-1 accuracy and calibration for every inference configuration
+(Section~\ref{sec:posterior-quality}).
+
+\item \textbf{The central negative-then-positive result.} Making the posterior
+\emph{exactly} correct under the standard assumption --- that players' choices
+carry no information beyond legality --- made it measurably \emph{worse} at
+predicting reality than the biased sampler it replaced, and produced no
+improvement in play. The reason is identifiable: the old sampler's bias was
+accidentally informative, encoding a crude opponent model. Replacing the
+accident with an explicit, single-parameter model of how players choose which
+half-suit to ask in recovers the loss and then beats both
+(Sections~\ref{sec:oppmodel} and~\ref{sec:results}).
+
+\item \textbf{A wider, ablatable ask objective}, including two terms that the
+literature suggests are unstudied: the \emph{exposure} of one's own already-
+public cards to the opponent who would receive the turn on a failed ask, and
+the \emph{signalling} value of an ask, since the choice of half-suit is the
+only legal communication channel in the game and is simultaneously read by the
+opposition (Section~\ref{sec:objective}).
+
+\item \textbf{Methodological corrections} to the previous evaluation harness,
+including a bias in how timed-out games were handled that we demonstrate can
+put the true value outside a reported 95\% confidence interval
+(Section~\ref{sec:eval}); a measurement showing the previous version's
+experiment cells could not resolve effects below about $0.44$ sets per pair, so
+several of its reported nulls were uninformative rather than negative; and a
+worked example of a screening study manufacturing a false positive, caught by
+replication (Section~\ref{sec:res-replication}).
+
+\item \textbf{A widened exact solver}, which is the source of two structural
+facts about the game: the number of live cards is always exactly six times the
+number of unresolved half-suits, and the perfect-information value has the
+closed form $\mathrm{sign}(\text{mover}) \times (2f - m)$. The second means the
+previous version's headline absolute result --- 100\% agreement with optimal
+play in information-resolved positions --- was a shallower certificate than it
+read, and we reproduce it on a corpus that is 79\% two-half-suit
+(Section~\ref{sec:exact}).
+\end{enumerate}
+
+% =====================================================================
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Literature itself.} We could find no peer-reviewed AI work on
+Literature, Canadian Fish or Russian Fish. Several open-source implementations
+with bots exist; the best documented uses Q-learning on a four-player variant
+with a first-order knowledge encoding. The game family did recently enter a
+standardised testbed: \citet{goadrich2026valet} include Go Fish, and report that
+``Go Fish and Crazy Eights show little separation between MCTS and random play,
+likely because CardStock's determinizations account only for visibility and not
+for information inferred from action history.'' That is a published negative
+result about exactly the failure mode this paper attacks from the other side ---
+they identify that action history carries information their determinizations
+ignore; we quantify how much, and put it in.
+
+\paragraph{Determinization and its pathologies.} Evaluating an
+imperfect-information position by sampling consistent worlds and solving each
+one perfectly is the standard technique, and its two failure modes are named:
+\emph{strategy fusion}, where the searcher implicitly assumes it can act
+differently in states it cannot distinguish, and \emph{non-locality}
+\citep{frank1998search}. \citet{long2010understanding} give the conditions under
+which it nonetheless works, parameterised by leaf correlation, bias, and a
+disambiguation factor. Two consequences shape this work. First, our
+disambiguation factor is unusually high --- every ask is a hard constraint on the
+deal --- which is favourable. Second, and decisively, the \textsc{Claim} action
+is a strategy-fusion trap: inside a determinization the searcher knows the true
+layout, so every claim evaluates as a certain gain and the declared assignment
+differs between sampled worlds. Claims in v0.4 are therefore never selected by
+search. \citet{cowling2012ismcts} introduce Information Set MCTS and state
+plainly that they do not consider belief distributions; v0.3's own experiments
+found ISMCTS losing badly to its own prior, which is consistent with both that
+and with the variance diagnosis it measured.
+
+\paragraph{Inference from what opponents chose.} The closest published line is
+\citet{solinas2019improving} and \citet{rebstock2019policy}, who infer hidden
+cards in trick-taking games from the actions players took, using a learned
+policy as the likelihood. Their factorised belief does not enforce hand-size
+constraints; they note the constraint could be added and do not add it. Our
+setting lets us do both at once: the quota constraints are handled exactly by
+the dynamic program of Section~\ref{sec:counting}, and the choice likelihood
+enters as an importance weight on top. \citet{solinas2023history} prove that
+exhaustive history filtering is polynomial only when the public tree is sparse;
+Literature's is dense, so their route does not port --- but the count abstraction
+makes the constraint side tractable anyway.
+
+\paragraph{Counting and sampling with fixed margins.} The combinatorial problem
+underneath is counting bipartite degree-constrained subgraphs, equivalently a
+restricted permanent, $\#P$-complete in general \citep{valiant1979complexity},
+with a celebrated approximation scheme \citep{jerrum2004polynomial} and a
+literature on sequential importance sampling for contingency tables
+\citep{chen2005sequential} --- along with cautionary results showing SIS can be
+exponentially bad on some instances \citep{bezakova2012negative}. We need none
+of that machinery, because the instances here are small in the dimension that
+matters. The constraint-programming counterpart is Régin's global cardinality
+constraint \citep{regin1996generalized}, which achieves arc consistency by a
+flow argument; our dynamic program is stronger in that it also \emph{counts},
+which is what claim probabilities require.
+
+\paragraph{Team games without communication.} Literature is a two-team zero-sum
+game with pre-play agreement and no in-play communication, which is exactly
+\citeauthor{celli2018computational}'s regime; the solution concept is a team
+maximin equilibrium with correlation, not a Nash equilibrium
+\citep{vonstengel1997team,celli2018computational}. The convergence guarantees
+that underwrite two-player zero-sum solvers do not transfer. Hanabi
+\citep{bard2020hanabi} is the closest studied game in spirit, and one of its
+methodological contributions transfers cleanly: cross-play between
+independently trained partners as the instrument for detecting conventions that
+work only against copies of oneself \citep{hu2020otherplay}. What does not
+transfer is the remedy, because Hanabi is fully cooperative while Literature's
+only communication channel --- the choice of which half-suit to ask in --- is
+\emph{costly} and read by the opposition as well as by one's partner. We found
+no published treatment of that combination, and it is the motivation for the
+\texttt{signal} term of Section~\ref{sec:objective}.
+
+% =====================================================================
+\section{The game}
+\label{sec:game}
+
+Six players sit in a circle in alternating team order: seats $\{0,2,4\}$
+against $\{1,3,5\}$. The deck is partitioned into \emph{half-suits} of six
+cards each. Our primary variant uses 54 cards and nine half-suits: the eight
+natural half-suits ($2$--$7$ and $9$--$A$ of each suit) plus a ninth composed
+of the four $8$s and two individually identified jokers, a Red Joker and a
+Black Joker. Each player is dealt nine cards. The classic 48-card,
+eight-half-suit variant is also supported.
+
+On turn, a player either \textbf{asks} or \textbf{claims}.
+
+An \textbf{ask} names an opponent and a specific card. It is legal only if the
+asker holds at least one card of that card's half-suit and does not hold the
+card itself. If the opponent has it, the card transfers \emph{face up} and the
+asker keeps the turn; otherwise the turn passes to the opponent who was asked.
+
+A \textbf{claim} names a half-suit and declares which teammate holds each of
+its six cards. If the declaration is exactly right, the claiming team scores
+the half-suit. If any of the six is with an opponent, the opposing team scores
+it. If all six are within the claiming team but the declared distribution is
+wrong, the half-suit is nulled and nobody scores. The requirement to name the
+exact distribution, not merely to assert possession, is what makes Literature
+a game about inference rather than collection.
+
+A player with no cards on move passes the turn to a teammate who has cards. If
+an entire team is out of cards, the other team must claim out the remaining
+half-suits without asking.
+
+\begin{remark}[Termination is a property of the players, not the rules]
+Nothing in the rules forces progress: two opponents can pass a card back and
+forth and return to an identical position, so the state graph contains cycles.
+Consequently any claim that ``every game ends'' describes an agent's stalling
+rule rather than Literature itself. Our agents carry an explicit progress rule
+and our harness imposes an action cap; Section~\ref{sec:eval} explains why the
+cap must be \emph{scored} rather than discarded.
+\end{remark}
+
+\begin{remark}[Solution concept]
+Literature is a two-team zero-sum game with pre-play agreement and no in-play
+communication. The appropriate solution concept is therefore a team-maximin
+equilibrium with correlation (TMECor) in the sense of
+\citet{celli2018computational}, not a Nash equilibrium, and the convergence
+guarantees available for two-player zero-sum games do not transfer. We compute
+no equilibrium and make no equilibrium claim; every strength statement in this
+paper is either relative (against a named opponent) or absolute against an
+exactly solved subgame.
+\end{remark}
+
+% =====================================================================
+\section{Information integrity}
+\label{sec:integrity}
+
+An imperfect-information study is worthless if the agents can see the hidden
+state, and the failure mode is usually subtle rather than flagrant. The
+boundary is enforced four ways.
+
+\paragraph{Structural.} The engine's \texttt{GameState} never reaches a
+policy. Policies consume only an \texttt{Observation}: their own hand, the
+public event log, public hand counts, resolved half-suits, whose turn it is,
+and the rules.
+
+\paragraph{Proved by reconstruction.} \texttt{Observation.reconstruct} rebuilds
+a seat's entire view from nothing but (rules, that seat's initial hand, the
+public event log). Tests assert the engine-provided observation is
+\emph{identical} to that reconstruction at every step of full games, for all
+six seats. In an audit conducted for this paper the property was re-verified
+over $183{,}750$ seat-plies across eight rule configurations with zero
+mismatches.
+
+\paragraph{Proved by invariance.} Every quantity v0.4 computes --- posterior
+marginals, all eleven ask-objective terms, and the end-to-end policy action ---
+is asserted to be bit-identical when the hidden cards of the other five seats
+are permuted into a different layout that is equally consistent with the public
+record. Candidate permutations are drawn from the acting seat's own belief
+sampler and then validated by an \emph{independent} replay of the entire public
+history, so the test does not merely assume the sampler is correct.
+
+\paragraph{Separation of training from acting.} Ground truth may be used to
+\emph{score} (Section~\ref{sec:posterior-quality} scores posteriors against the
+true hands) and to train; no acting policy ever sees it. That line is what
+makes the distinction meaningful rather than decorative.
+
+% =====================================================================
+\section{Exact combinatorial inference}
+\label{sec:counting}
+
+\subsection{The inference problem, stated exactly}
+
+The observation that shapes the whole engine is that \emph{every card movement
+in Literature is public}. A successful ask names the card that moved; a claim
+reveals all six locations; nothing changes hands unobserved. It follows that
+the current location of every card is a deterministic function of the
+\emph{initial deal} and the public log, so all hidden-state inference reduces
+to constraints on the initial deal. Those constraints are of exactly three
+kinds:
+
+\begin{enumerate}
+\item \textbf{Candidate sets.} Per card $c$, a set $S_c \subseteq \{0,\dots,5\}$
+of players who may have been dealt it. A failed ask excludes the target;
+a successful ask pins the card; asking for a card excludes the asker (under
+standard no-bluff rules); a claim pins all six.
+\item \textbf{Exact counts.} Every player was dealt exactly $q$ cards ($9$ or
+$8$); after propagation, player $p$ has a residual quota $q_p$ of the cards
+that remain unlocated.
+\item \textbf{Disjunctions.} A legal ask certifies that the asker held
+\emph{at least one} card of that half-suit at that moment: an OR-constraint
+over the cards of the half-suit not yet publicly located.
+\end{enumerate}
+
+Write $F$ for the set of \emph{free} cards (those not publicly located and not
+pinned by propagation). A \emph{world} is a map $f : F \to \{0,\dots,5\}$ with
+\begin{equation}
+f(c) \in S_c \quad \forall c \in F,
+\qquad
+|f^{-1}(p)| = q_p \quad \forall p,
+\label{eq:world}
+\end{equation}
+that additionally satisfies every OR-constraint. Let $\Omega$ denote the set of
+such worlds and $\Omega_0 \supseteq \Omega$ the set satisfying only
+\eqref{eq:world}.
+
+\begin{proposition}[Uniform posterior under uninformative choice]
+\label{prop:uniform}
+Suppose the deal is uniform over all $\binom{54}{9,9,9,9,9,9}$ partitions, and
+suppose that at every decision point each player's choice of action depends on
+their private hand only through which actions are legal. Then the posterior
+over worlds given the public history is uniform on $\Omega$.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Let $h$ denote the public history and $w$ a world. The prior is uniform, so
+$\Prob(w \mid h) \propto \Prob(h \mid w)$. Factor $\Prob(h \mid w)$ over the
+actions in $h$. Under the stated assumption each factor depends on $w$ only
+through the legality of the taken action, and card transfers are deterministic
+given $w$ and the action. Hence $\Prob(h \mid w)$ takes the same value for
+every $w$ that makes all of $h$ legal and reproduces every observed outcome,
+which is precisely $\Omega$, and is $0$ otherwise.
+\end{proof}
+
+Proposition~\ref{prop:uniform} is the target that v0.3's sampler was
+\emph{intended} to hit and, by its own documentation, missed. It is also, as
+Section~\ref{sec:posterior-quality} shows, not the target one should want ---
+because its hypothesis is false, and interestingly so.
+
+\subsection{Why the counting is tractable}
+
+Counting the elements of $\Omega_0$ is an instance of counting perfect
+matchings in a degree-constrained bipartite graph, equivalently a restricted
+permanent, which is $\#P$-complete in general \citep{valiant1979complexity}.
+The instances arising here, however, are small in the only dimension that
+matters. Measured over $901$ decision points from real games:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+quantity & mean & median & p90 & max\\
+\midrule
+free cards $|F|$                 & 25.6 & 26 & 43 & 45\\
+\textbf{distinct candidate sets} & \textbf{3.9} & \textbf{4} & \textbf{6} & \textbf{8}\\
+active OR-constraints            & 5.4 & 4 & 12 & 18\\
+cards per OR-constraint          & 3.35 & 3 & 5 & 5\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cards sharing a candidate set are \emph{exchangeable}. Grouping them collapses
+the problem from an assignment over $|F| \le 45$ labelled cards onto a
+\emph{group-count matrix} $k \in \mathbb{N}^{G\times 6}$ with $G \le 8$, where
+$k_{gp}$ is the number of cards of group $g$ dealt to player $p$.
+
+\subsection{The dynamic program}
+
+Let group $g$ have candidate set $S_g$ and size $n_g$, so $\sum_g n_g = |F|$.
+The number of worlds realising a given $k$ is a product of multinomials, hence
+\begin{equation}
+Z \;=\; |\Omega_0| \;=\;
+\sum_{\substack{k \,:\, \sum_p k_{gp} = n_g \ \forall g \\
+\sum_g k_{gp} = q_p \ \forall p, \ \ k_{gp}=0 \text{ if } p \notin S_g}}
+\;\prod_{g=1}^{G} \frac{n_g!}{\prod_p k_{gp}!}.
+\label{eq:Z}
+\end{equation}
+
+We evaluate \eqref{eq:Z} by dynamic programming over \emph{players}, carrying
+as state the vector $r \in \prod_g \{0,\dots,n_g\}$ of cards still unassigned
+in each group. Define $\Phi_0(r) = \ind{r = (n_1,\dots,n_G)}$ and
+\begin{equation}
+\Phi_{p+1}(r') \;=\;
+\sum_{\substack{\kappa \,:\, \sum_{g \in A_p}\kappa_g = q_p\\ r' = r - \kappa,\ \kappa_g \le r_g}}
+\Phi_p(r) \prod_{g \in A_p} \binom{r_g}{\kappa_g},
+\qquad A_p = \{g : p \in S_g\},
+\label{eq:dp}
+\end{equation}
+so that $Z = \Phi_6(0)$. The product of binomials telescopes across the six
+player steps to exactly the multinomial in \eqref{eq:Z}, so the recursion is
+exact rather than approximate.
+
+Two implementation notes make \eqref{eq:dp} fast. First, the constraint
+$\sum_g \kappa_g = q_p$ is enforced with an auxiliary axis counting cards taken
+so far, so the compositions $\kappa$ are never enumerated: player $p$'s step is
+$O(\sum_{g \in A_p} \min(n_g,q_p))$ array operations. Second, the state space
+$\prod_g (n_g+1)$ is small in practice --- median $272$, mean $577$ over real
+positions --- because $G$ is small, not because $|F|$ is.
+
+\paragraph{What the dynamic program yields.}
+\begin{itemize}
+\item \textbf{Partition function} $Z = |\Omega_0|$, i.e. the exact size of the
+information set, computed in closed form. This makes quantities that are
+normally estimated (such as the disambiguation factor of
+\citealp{long2010understanding}) directly computable.
+\item \textbf{Exact marginals.} A backward pass $B_p$ mirroring \eqref{eq:dp}
+gives $\Ex[k_{gp}]$ by a forward-backward sweep that carries one accumulator
+per group, so all $6G$ expectations come out of a single pass. Since cards
+within a group are exchangeable,
+$\Prob(f(c) = p) = \Ex[k_{g(c)p}] / n_{g(c)}$.
+\item \textbf{Exact uniform sampling.} With $B$ available, each player's whole
+take is drawn from its exact conditional, so a draw is exactly uniform on
+$\Omega_0$.
+\item \textbf{Exact joint probabilities.} Pinning named cards reduces $n_g$ and
+$q_p$ by one each, so $\Prob(\text{a declared claim distribution is exactly
+right})$ is a ratio of two evaluations of \eqref{eq:Z}. Because cards are
+labelled throughout, no extra combinatorial factor is needed.
+\end{itemize}
+
+\paragraph{Validation.} On $400$ randomly generated systems the dynamic program
+reproduced the brute-force count \emph{and} every per-card marginal to within
+$10^{-9}$, $400/400$; the pinned-count routine matched brute force on $200/200$.
+An exact uniform sampler drawn $40{,}000$ times matched the exact marginals to
+$0.0000$ at four decimal places.
+
+\begin{remark}[Completeness]
+Because a marginal of zero is a proof of impossibility, the dynamic program is
+a \emph{complete} propagator for the candidate-set-plus-quota subsystem: any
+placement it assigns probability zero is genuinely impossible, and any
+placement it assigns probability one is genuinely forced. v0.3's propagator was
+explicitly documented as sound but not complete for this subsystem. The
+disjunctive constraints remain outside this guarantee.
+\end{remark}
+
+% =====================================================================
+\section{The disjunctive constraints}
+\label{sec:clauses}
+
+The OR-constraints are the part of the system \eqref{eq:world} that the
+dynamic program does not absorb. Three routes are available, and we measured
+all three rather than choosing on intuition.
+
+\paragraph{(a) Ignore them.} On $40$ real positions, exact marginals computed
+on $\Omega_0$ differed from the truth on $\Omega$ by a mean $L_1$ error of
+$0.127$ per card --- \emph{worse} than v0.3's biased sampler at $0.074$. So the
+clauses carry a great deal of information and cannot be dropped.
+
+\paragraph{(b) Rejection.} Draws that are exactly uniform on $\Omega_0$ can be
+filtered to be exactly uniform on $\Omega$. A typical clause covers $3.35$ live
+cards, each landing with the relevant player about one time in five, so a
+clause holds with probability roughly $0.53$ and five independent clauses hold
+about $4\%$ of the time. Measured acceptance on real positions: mean $0.30$,
+median $0.18$, and below $0.05$ on $16\%$ of positions. Rejection is therefore
+exact but unaffordable.
+
+\paragraph{(c) Fold them into the dynamic program.} Refining the groups by
+OR-membership keeps the cards within a block exchangeable and makes each clause
+a local condition on one player's step, which can be enforced by inclusion--
+exclusion over that player's clauses. The refined state space, however, has a
+bad tail: median $5{,}760$ but p90 $230{,}000$ and p99 $2.7\times10^{7}$. Exact
+in the median case, hopeless in the tail.
+
+\subsection{Sequential importance sampling with closed-form densities}
+
+We therefore sample. Cards are assigned in a fixed order, so each world has
+exactly one generating path and its proposal density $q(w)$ is the product of
+the per-card choice probabilities. The proposal is quota-proportional --- the
+natural approximation to uniform --- multiplied by a boost for choices that
+would satisfy an as-yet-unsatisfied clause, and forced when a clause has a
+single live card left. Self-normalised importance weights
+\begin{equation}
+\tilde{w}_i \;\propto\; \frac{L(w_i)}{q(w_i)},
+\qquad
+\widehat{\Ex}[\varphi] = \frac{\sum_i \tilde{w}_i \varphi(w_i)}{\sum_i \tilde{w}_i}
+\label{eq:snis}
+\end{equation}
+are then consistent for any target $\propto L$; with $L \equiv 1$ the target is
+the uniform posterior of Proposition~\ref{prop:uniform}.
+
+Two properties are required and both are verified against exhaustive
+enumeration rather than argued:
+
+\begin{itemize}
+\item \textbf{Support completeness.} Every world in $\Omega$ must have
+$q(w) > 0$, since a weight cannot repair mass the sampler never reaches. We
+check this \emph{analytically} for every world of every small system --- random
+hit-testing cannot distinguish ``unreachable'' from ``rare'' --- over $55$
+systems and $1{,}797$ worlds, all reachable.
+\item \textbf{Density correctness.} The density used to build the weights must
+be the density the sampler realises. Analytic and empirical path densities
+agree to a worst gap of $0.0097$ over $20$ systems.
+\end{itemize}
+
+Weighted marginals then matched exhaustive enumeration to a worst error of
+$0.029$ at $4{,}000$ draws, while the \emph{unweighted} estimator over the same
+draws was measurably biased --- a control without which the test would not be
+known to discriminate. The Kish effective sample size is $\mathrm{ESS}/N = 0.81$
+on real positions, so the cost of steering the proposal is small and, more
+importantly, is reported rather than assumed. Drawing the batch one card at a
+time across all draws in lockstep, rather than one draw at a time, makes this
+$5$--$6\times$ faster for identical output; before that change the scalar loop
+was 67\% of the policy's total runtime.
+
+\subsection{A correction: option (c) is in fact tractable}
+\label{sec:clauses-correction}
+
+Our estimate above that folding the clauses into the dynamic program is
+unaffordable was measured on the wrong decomposition, and a separate study
+overturned it. Refining by \emph{half-suit} is coarser than necessary: what
+actually needs to stay together is a connected component of clauses that share
+cards, and OR-free cards can be processed one at a time. With that
+decomposition and a dynamic program over the residual-quota lattice, an exact
+backend refused none of 349 real positions at a work budget of $10^7$, costing
+a median of $7.5$\,ms and a p90 of $18.5$\,ms.
+
+That result is worth stating in its own right, because it inverts the usual
+shape of an accuracy-versus-compute study: \emph{the frontier here is not a
+curve, it is a point}. The exact backend sits below and to the left of every
+sampled one, and there is no compute budget above roughly $8$\,ms at which a
+sampler is the right answer. Below that budget the best available option is a
+hybrid --- exact where it fits, sampled where it does not --- which still beats
+every pure sampler at matched cost ($L_1$ error $0.133$ at $5.5$\,ms against
+$0.258$ for v0.3's sampler at $3.2$\,ms).
+
+We nevertheless ship the importance sampler, and the reason is the subject of
+Section~\ref{sec:oppmodel}: the exact backend computes the \emph{uniform}
+posterior, and the uniform posterior is not the target we want. What the
+measurements in Section~\ref{sec:res-null} add is that the difference between an
+exact posterior and a well-sampled one is worth nothing measurable in play,
+while the difference between the uniform target and an opponent-model target is
+worth $1.9$ sets per deal-pair. Exactness was the cheaper thing to buy and the
+less valuable one.
+
+The natural synthesis is available and untried: the choice model
+\eqref{eq:oppmodel} is a product of per-(player, half-suit) depth factors, and a
+depth is a function of one half-suit's count vector. So if the items of the
+dynamic program are taken to be whole half-suits rather than clause components,
+the likelihood factorises over exactly the same structure as the constraints do,
+and exact inference \emph{under the opponent model} costs the same dynamic
+program with reweighted item tables. We did not build it, because the evidence
+above says it would buy approximately nothing in strength; we state it because
+it is the right thing to build if that evidence ever changes.
+
+% =====================================================================
+\section{Opponent modelling: relaxing the false hypothesis}
+\label{sec:oppmodel}
+
+Proposition~\ref{prop:uniform} rests on a hypothesis that is plainly false:
+that a player's choice of action depends on their hand only through legality.
+It does not. A player who asks in a half-suit is more likely to be deep in it.
+
+Under the simplest defensible choice model --- a player picks which half-suit
+to ask in in proportion to how many cards of it they hold ---
+\begin{equation}
+\Prob(\text{ask in } \halfsuit \mid \text{hand } h)
+\;=\; \frac{d_\halfsuit(h)}{|h|},
+\label{eq:choice}
+\end{equation}
+and the denominator is public, hence identical across worlds. The likelihood of
+the whole observed ask sequence is therefore proportional to a product of
+depths, giving the importance weight
+\begin{equation}
+\log L(w) \;=\; \gamma \sum_{(a,\halfsuit)} n_{a\halfsuit} \,
+\log\big( d_{a\halfsuit}(w) \big),
+\label{eq:oppmodel}
+\end{equation}
+where $n_{a\halfsuit}$ counts asks by player $a$ in half-suit $\halfsuit$ and
+$d_{a\halfsuit}(w)$ is $a$'s depth in $\halfsuit$ under world $w$. The single
+parameter $\gamma$ controls how sharply the model is believed;
+$\gamma = 0$ recovers Proposition~\ref{prop:uniform} exactly, so the entire
+idea is one ablatable number. Because \eqref{eq:oppmodel} decomposes over
+cards, it costs one integer increment per card inside a draw.
+
+\begin{remark}[The obvious refinement does not help]
+Depth in \eqref{eq:oppmodel} is evaluated on the initial deal, whereas the
+choice model is really about what the player held \emph{at the moment they
+asked}. Cards move, so the two differ. We implemented the at-ask-time version
+--- which needs only one replay of the public log per decision, not per
+candidate world, because a card the propagator has not pinned was never located
+at any time and so is exactly the card the sampler draws --- and it is not
+better. Posterior negative log-likelihood is $1.3536$ against $1.3522$ for the
+initial-deal version at matched settings, and $1.3391$ against $1.3373$ at the
+best settings of each. In duplicate-deal play the two are likewise
+indistinguishable. The theoretically-correct quantity buys nothing over the
+simpler one, so the simpler one ships.
+
+We flag one methodological point here because it nearly became a false finding.
+Our first at-ask-time implementation counted only cards that had \emph{visibly}
+changed hands, silently omitting every card the propagator had \emph{deduced} to
+be someone's --- the large majority. Depths came out far too small, and the
+variant measured as catastrophic on both instruments (posterior NLL $2.14$
+against $1.35$; $-1.54$ sets per deal-pair in play). Two independent instruments
+agreeing on a large effect is normally reassuring; here they were agreeing about
+a bug. What caught it was that the magnitude was implausible for a refinement,
+not that either measurement looked wrong.
+\end{remark}
+
+% =====================================================================
+\section{Scoring a posterior against the truth}
+\label{sec:posterior-quality}
+
+Every belief metric in v0.3 was indirect: sampler cost, agreement with an exact
+endgame solver, or downstream win rate. In simulation the hidden hands are
+available, so a posterior can be scored on the question it is actually trying
+to answer: how much probability does it place on where the cards really are?
+
+We score over cards that are still genuinely uncertain for the acting seat --- a
+card the propagator has already pinned is scored perfectly by every
+configuration and would only dilute the comparison --- using mean negative
+log-likelihood of the true holder, the six-way Brier score, top-1 accuracy, and
+a reliability curve in deciles. Reliability must bin the probability assigned
+to a \emph{fixed} outcome; binning by the probability assigned to the true
+holder would make every entry a hit by construction and report perfect
+calibration for any model whatsoever.
+
+% =====================================================================
+\section{Exact solving, and a closed form}
+\label{sec:exact}
+
+The exact solver is the project's only source of \emph{absolute} truth: in a
+position small enough to solve, there is a right answer, so an engine that
+disagrees has a defect rather than a preference. v0.3's solver enumerated card
+placements and stopped at roughly seven live cards. Widening it produced three
+results that change how the previous version's absolute benchmark should be
+read.
+
+\subsection{There is no such thing as a seven-card position}
+
+Claims strip all six cards of a half-suit from every hand, so
+\begin{equation}
+\text{live cards} \;=\; 6 \times (\text{unresolved half-suits}) \qquad
+\text{exactly, always.}
+\end{equation}
+Every ``maximum live cards'' threshold in the previous codebase was therefore a
+binary switch: any value from 6 to 11 selects the same policy. v0.3 solved the
+one-half-suit layer and refused everything else, and the two-half-suit layer is
+$6^{12}\times 6 \approx 1.3\times10^{10}$ card placements, which is why.
+
+\subsection{The count abstraction}
+
+\begin{proposition}[Card identity is irrelevant under perfect information]
+\label{prop:abstraction}
+Let $\sigma$ be any permutation of the deck that maps each half-suit onto
+itself. Then $\sigma$ is an automorphism of the perfect-information game, and
+consequently the value of a position depends only on how many cards of each
+live half-suit each player holds.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+$\sigma$ acts on states by relabelling hands. \textsc{Ask}$(t,c)$ is legal in
+$s$ iff \textsc{Ask}$(t,\sigma(c))$ is legal in $\sigma(s)$: the target and all
+hand counts are unchanged, ``the asker holds a card of this half-suit'' is
+preserved because $\sigma$ fixes half-suits setwise, and ``the asker does not
+hold $c$'' is preserved because $\sigma$ is a bijection of each hand. The ask
+succeeds iff the target holds $c$ iff $\sigma(\text{target})$ holds
+$\sigma(c)$, and the transfer commutes with $\sigma$. \textsc{Claim}$(h,a)$ maps
+to \textsc{Claim}$(h, a\circ\pi^{-1})$ with $\pi$ the restriction of $\sigma$ to
+$h$; exactness, the ``some card sits with an opponent'' case and the
+wrong-distribution case are all preserved, and both states lose exactly the six
+cards of $h$. \textsc{Pass} and turn normalisation depend only on which hands
+are empty. Hence $V(\sigma(s)) = V(s)$, and two states have equal
+per-(half-suit, player) counts iff some such $\sigma$ relates them.
+\end{proof}
+
+A half-suit's counts are a composition of 6 into 6 ordered parts, of which there
+are 462, so a layer with $m$ unresolved half-suits has at most $462^m \times 6$
+abstract states: $2{,}772$ for $m=1$ and $1{,}280{,}664$ for $m=2$, against
+$279{,}936$ and $1.3\times10^{10}$ card placements. Both are solved once, in
+full, as dense tables --- a genuine Fish tablebase, after which a query is an
+array lookup. Measured on 300 one-half-suit positions: $2{,}240$ CPU-seconds for
+the old solver against $0.052$ seconds for the new one. An independent
+cross-check on 131 further positions found agreement on both the value and the
+complete optimal-action set in $131/131$ cases, at a $4{,}205\times$ speedup.
+
+\subsection{A closed form for the perfect-information value}
+
+Both full tables match, exactly, the formula
+\begin{equation}
+V \;=\; \mathrm{sign}(\text{mover's team}) \times (2f - m),
+\label{eq:closedform}
+\end{equation}
+where $m$ is the number of live half-suits and $f$ the number of them in which
+the team on move holds at least one card. The mechanism is that footholds only
+ever shrink and a perfectly-informed asker never misses, so the team on move
+takes every half-suit it can reach and the opponents take the rest.
+
+This has an uncomfortable consequence for the previous version's headline
+absolute result. v0.3 reported that its belief agents choose a provably optimal
+move in 100\% of information-resolved positions --- but every one of those
+positions had a single live half-suit, where \eqref{eq:closedform} reduces to
+``the team on move wins it''. The score was real, and it is reproduced here, but
+it is a shallower certificate than it reads. The two-half-suit slice is the one
+with teeth, and the corpus used in Section~\ref{sec:res-absolute} is 79\%
+two-half-suit for that reason.
+
+\subsection{Bellman-optimal is not optimal in a loopy game}
+
+Fish's state graph is cyclic, so the Bellman operator has many fixpoints and
+value-preservation is not optimality: if a side can force $+1$, every action
+keeping the value at $+1$ looks optimal, including one that walks a cycle
+forever and banks nothing. Measured on the full tables, in \textbf{28.6\%} of
+decided two-half-suit states some value-preserving action makes no progress. At
+one half-suit the figure is $0\%$, which is why v0.3 never noticed. The solver
+therefore carries an attractor rank and the agent asks for a
+\emph{progress-optimal} action, and Section~\ref{sec:res-absolute} reports
+agreement against that stricter criterion.
+
+Two further corrections to v0.3. First, although the state graph is cyclic,
+\emph{optimal play always terminates} under perfect information: cycles exist,
+but no optimal line needs one. Second, the fixpoint reached by value iteration
+was checked to be unique in real Fish layers --- eight different initialisations
+(zeros, $\pm m$, $\pm 5$, three random) and three sweep orders at $m=1$ and
+$m=2$ all land on the attractor value --- so v0.3's zero-initialisation and
+dictionary ordering were never load-bearing, even though in general they could
+have been.
+
+% =====================================================================
+\section{The ask objective}
+\label{sec:objective}
+
+\subsection{A wider basis}
+
+v0.3 scored an ask as $\Prob(\text{success}) + 0.06 \cdot \text{depth}$, later
+adding a turn-risk and a scarcity term. Those terms are in incommensurable
+units --- a probability, a card count, a normalised hand-size difference, a
+share --- so the weights combining them have no meaning beyond ``what won a
+sweep''. That is consistent with what v0.3 measured: a clean inverted-U in each
+weight, which is the signature of a \emph{tie-breaker} rather than an objective.
+
+v0.4 keeps the additive form, because it is ablatable and because the previous
+version's evidence says the success probability really is dominant, but widens
+the basis to eleven terms and computes all of them from the posterior in a
+single vectorised pass. Writing $\pi$ for $\Prob(\text{success})$ and $H$ for
+the asked card's half-suit, the score is
+\begin{equation}
+\text{score}(a) \;=\; \pi \;+\; \sum_{j} w_j\, f_j(a),
+\label{eq:objective}
+\end{equation}
+with the terms in Table~\ref{tab:terms}. Two deserve comment because they are,
+as far as the surveyed literature shows, unstudied.
+
+\paragraph{Exposure.} v0.3's turn-risk term penalised handing the turn to an
+opponent with many cards. Hand size is a proxy; the quantity that actually
+matters is how much that opponent can \emph{immediately take from us}, which we
+can compute: cards of ours whose location is already \emph{public} and that sit
+in a half-suit the opponent can legally ask in. Both parts are public knowledge,
+so using them is inference, not leakage.
+
+\paragraph{Signalling.} An ask publicly certifies that the asker holds a card of
+that half-suit. In a game with no legal communication channel, that is the only
+channel there is --- and it is simultaneously read by the opposition. v0.3
+modelled only the cost (its \texttt{reveal} term, worth a marginal $+0.29$). The
+benefit is that a teammate learns where a card of a half-suit our team is
+winning must be, which is exactly the localisation that lets a set be declared.
+So the sign should depend on who gains more, and the natural proxy is our team's
+share of the half-suit. Cost and benefit are carried as independent weights so
+that the data, not the story, decides.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llp{7.4cm}}
+\toprule
+term & origin & feature value \\
+\midrule
+\texttt{suit}    & v0.3 & own depth in $H$ (raw card count) \\
+\texttt{turn}    & v0.3 & $(1-\pi) \cdot$ negated normalised hand-size excess of the target \\
+\texttt{scarce}  & v0.3 & $2(\bar{s}_H - \tfrac12)$, with $\bar{s}_H$ our team's expected share of $H$ \\
+\texttt{reveal}  & v0.3 & $-1$ if $H$ has not previously been shown by us \\
+\texttt{deplete} & v0.3 & $\pi \cdot (1 - \text{target hand}/q)$ \\
+\texttt{expose}  & new  & $-(1-\pi) \cdot$ our publicly located cards the target could take \\
+\texttt{claim}   & new  & $\pi \cdot \big(\prod_{c \in H}\Prob(\text{$c$ with our team})\big)^{1/6}$ \\
+\texttt{info}    & new  & $4\pi(1-\pi) \cdot$ holder entropy of $H$ \\
+\texttt{certain} & new  & $1$ if $\pi = 1$ \\
+\texttt{concent} & new  & largest single teammate share of our team's holding in $H$ \\
+\texttt{signal}  & new  & $2(\bar{s}_H - \tfrac12)$ if $H$ has not previously been shown by us \\
+\bottomrule
+\end{tabular}
+\caption{The ask objective basis. Every term is zero by default, so setting a
+weight to zero ablates exactly that idea and nothing else --- a property
+enforced by test, for the reason given in Section~\ref{sec:eval}.}
+\label{tab:terms}
+\end{table}
+
+\subsection{An alternative in the units that are actually paid out}
+
+The additive form has a principled competitor. What the game pays is half-suits,
+so define, for each unresolved half-suit,
+\begin{equation}
+V(H) \;=\; \Prob(\text{our team ends up scoring } H) - \Prob(\text{they do}),
+\label{eq:hsvalue}
+\end{equation}
+which is measured in sets, is bounded in $[-1,1]$, and whose sum over half-suits
+is the final differential. An ask is then worth the expected change it produces,
+\begin{equation}
+\text{score}(a) \;=\; \pi\,\big[V(H \mid \text{success}) - V(H)\big]
+\;+\; (1-\pi)\,\big[V(H \mid \text{failure}) - V(H)\big],
+\label{eq:valobjective}
+\end{equation}
+with every quantity in the same unit. The substantive difference is that this is
+a \emph{marginal} value rather than a level: ``our team is winning this
+half-suit'' is a level, and what should drive a decision is how much one more
+card moves the outcome.
+
+$V$ is obtained by supervised learning rather than by guessing a functional form:
+self-play games supply, for every unresolved half-suit at every decision, a
+feature vector computable from the acting seat's posterior alone, labelled with
+how that half-suit eventually resolved. That is roughly nine labels per
+decision, which is abundant and cheap, in contrast to the rollout regression
+that v0.3's variance analysis made expensive. The counterfactual posteriors in
+\eqref{eq:valobjective} are local updates on the half-suit's marginal block: a
+success pins the asked card to us, a failure removes the target from that card's
+candidate set.
+
+% =====================================================================
+\section{Claiming}
+\label{sec:claiming}
+
+v0.3 swept the claim-confidence threshold directly and found two things. First,
+claiming eagerly is a real, measurable mistake: dropping the bar from $0.97$ to
+$0.70$ costs $0.45$ sets per deal-pair. Second, and more usefully, thresholds
+from $0.85$ to near-certainty play \emph{identically}: over 150 duplicate deals
+the $0.97$ and $0.999$ policies never once diverged.
+
+The mechanism is worth stating, because it justifies the design rather than
+leaving $0.97$ as a magic number. Suppose our team genuinely holds all six cards
+of a half-suit but we cannot place them within the team. What does waiting cost?
+An opponent cannot take the set by claiming it --- a claim by a player whose team
+does not hold all six \emph{gives} the set to us. So the only cost of waiting is
+running out of opportunity, and the benefit is that continued play localises
+teammate holdings. Waiting is close to free, which is exactly what the sweep
+measured and what v0.3's expected-value model missed by treating the resolution
+of a split as a coin flip.
+
+The corollary is that the leverage in claiming is not the threshold. It is
+(i)~getting the declared distribution right, since nulls cost roughly $0.6$ sets
+per deal-pair and a null is a bookkeeping failure rather than an unlucky gamble;
+and (ii)~playing the forced claims well, where no threshold is involved at all.
+v0.4 therefore keeps a high threshold and changes what happens underneath it:
+
+\begin{itemize}
+\item The declared distribution is the posterior MAP, found by shortlisting on
+the per-card marginals and scoring the shortlist with the \emph{joint}
+posterior. The product of marginals is not the joint --- cards compete for the
+same quota slots, so per-card modes can be jointly impossible.
+\item Where the clause set is empty the joint probability is computed exactly by
+the dynamic program of Section~\ref{sec:counting}; where it is not, deduction
+still settles the extremes exactly, because a zero under the OR-free system
+implies a zero under the smaller OR-constrained one, and likewise for one.
+\item Forced claims maximise expected sets, $\Prob(\text{exact}) -
+\Prob(\text{an opponent holds one})$, rather than confidence.
+\end{itemize}
+
+Finally, a hard architectural constraint taken from the literature: a claim must
+never be selected by determinized search. Inside any determinization the
+searcher knows the true layout, so every claim evaluates as a certain gain and
+the declared assignment differs between sampled worlds --- textbook strategy
+fusion \citep{frank1998search}. Claims in v0.4 are always decided from the
+posterior.
+
+% =====================================================================
+\section{Evaluation methodology}
+\label{sec:eval}
+
+\subsection{Duplicate deals}
+
+Raw win rates in a card game are dominated by the deal. Every result here uses
+\textbf{duplicate (paired) deals}: each deal is played twice with the teams
+swapped, on identical cards, an identical rotated starting seat, and identical
+agent randomness. Only the policy assignment differs, so per-pair set
+differentials are i.i.d.\ across deals and confidence intervals mean what they
+say.
+
+\subsection{How much can an experiment of size \texorpdfstring{$n$}{n} resolve?}
+
+The per-pair standard deviation of the set differential between two policies of
+the strength we compare (v0.3's champion against its own baseline) is
+\textbf{3.869 sets}, measured over 300 pairs. The distribution is wide: the
+theoretical bound is $\pm 18$ and observed pairs stayed within $\pm 11$, but a
+single pair says almost nothing. The consequences are stark:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+effect (sets/pair) & pairs @ 80\% power & pairs @ 90\% & hours @ 80\% \\
+\midrule
+0.10 & 11\,751 & 15\,731 & 3.9 \\
+0.20 & 2\,938 & 3\,933 & 0.98 \\
+0.30 & 1\,306 & 1\,748 & 0.44 \\
+0.50 & 471 & 630 & 0.16 \\
+1.00 & 118 & 158 & 0.04 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Read the other way: the 600-pair cells of the v0.3 champion search could resolve
+effects down to about $0.44$ sets per pair, so every ``no significant
+difference'' it reported below that size was \emph{uninformative rather than
+negative}. We therefore report, alongside every interval, the smallest effect
+the run could have detected.
+
+\subsection{Anytime-valid stopping}
+
+Screening many candidate terms invites peeking. A fixed-$n$ 95\% $t$-interval,
+monitored after every deal, rejects a \emph{true null} 68.8\% of the time on an
+empirical null and 92.1\% on a skewed one, with a median false stop after 11 and
+3 deals respectively. We therefore use anytime-valid procedures: an
+empirical-Bernstein confidence sequence and a betting test supermartingale
+\citep{waudbysmith2024estimating}. Measured type-I error under continuous
+monitoring over $4000$ null experiments each monitored at every one of $4000$
+deals: 2.1--2.4\% for the betting test and 0.3--0.5\% for the confidence
+sequence, against a nominal 5\%.
+
+\subsection{Two corrections to the previous harness}
+
+\paragraph{Timed-out games must be scored, not dropped.} Nothing in Literature
+forces progress, so a harness needs an action cap. v0.3 dropped any deal-pair
+containing a capped game. Dropping conditions on the outcome, which is precisely
+what a paired design exists to avoid, and an audit conducted for this paper
+found it biases rather than merely blunts: replaying the same 60 deals at
+reduced caps, the dropped pairs had a true mean differential of $-7.14$ against
+$-10.13$ for the kept ones, and at one cap the reported 95\% interval
+\emph{excluded} the true value. v0.4 scores a capped game on the half-suits
+actually resolved, with the unresolved ones counting for nobody --- the same
+semantics the exact solver gives an unbroken cycle.
+
+\paragraph{An ablation must reduce to its baseline.} v0.3's most instructive
+methodological failure was a confounded ablation: the ablated agent silently
+normalised a second term differently, so every cell compared two changes at once
+and produced tight, confident, and completely wrong intervals. The confound was
+caught only by noticing an implausible monotonic pattern in the magnitudes. We
+therefore enforce by test that a zero weight reproduces the baseline
+\emph{decision for decision} over real positions, and separately that a non-zero
+weight demonstrably changes some decision. Every term in
+Table~\ref{tab:terms} passes both.
+
+% =====================================================================
+\section{Results}
+\label{sec:results}
+
+\subsection{Exact inference alone changes nothing}
+\label{sec:res-exact}
+
+The first experiment is the one the research programme predicted would pay.
+Holding the ask objective at v0.3's champion weights and changing \emph{only}
+the inference --- exact counting where the clause set is empty, unbiased
+importance sampling where it is not, in place of a sampler documented as
+non-uniform --- gives a set differential of $-0.22$ per deal-pair,
+95\% CI $[-0.96, +0.52]$, over 100 duplicate deals. Statistically
+indistinguishable, and the interval is wide enough that only effects above
+about $1.1$ sets per pair could have been detected.
+
+This is a genuine negative result about a change that is provably correct. The
+explanation is in the next subsection.
+
+\subsection{Posterior quality against ground truth}
+\label{sec:res-posterior}
+
+Scoring posteriors against the true hidden hands over 517 decisions and 13{,}640
+uncertain-card predictions (Table~\ref{tab:posterior}) shows what happened.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+inference & NLL $\downarrow$ & Brier $\downarrow$ & top-1 $\uparrow$ & ms/decision \\
+\midrule
+exact DP, clauses ignored          & 1.4776 & 0.7568 & 0.287 & 50.4 \\
+v0.3 sampler, 32 draws             & 1.4399 & 0.7065 & 0.386 & 5.9 \\
+v0.4 importance sampler, 160       & 1.3731 & 0.7006 & 0.396 & 29.5 \\
+v0.4 importance sampler, 512       & 1.3618 & 0.6955 & 0.403 & 92.3 \\
+v0.3 sampler, 96 draws             & 1.3552 & 0.6891 & 0.406 & 16.6 \\
+\textbf{v0.3 sampler, 512 draws}   & \textbf{1.3408} & 0.6833 & 0.416 & 87.8 \\
+v0.4 + opponent model, 160, $\gamma{=}0.45$ & 1.3476 & 0.6856 & 0.401 & 31.9 \\
+v0.4 + opponent model, 512, $\gamma{=}0.30$ & 1.3332 & 0.6791 & 0.415 & 99.8 \\
+\textbf{v0.4 + opponent model, 512, $\gamma{=}0.45$} & \textbf{1.3251} & \textbf{0.6747} & 0.413 & 98.6 \\
+v0.4 + opponent model, 512, $\gamma{=}0.60$ & 1.3248 & 0.6744 & 0.411 & 100.8 \\
+\bottomrule
+\end{tabular}
+\caption{How much probability each inference configuration places on where the
+cards actually are. Lower NLL and Brier are better. The row that matters is the
+comparison between the two bold entries: the \emph{exactly correct} uniform
+posterior at 512 draws (1.3618) is worse than v0.3's \emph{biased} sampler at
+the same budget (1.3408).}
+\label{tab:posterior}
+\end{table}
+
+Two things stand out.
+
+First, the exactly-uniform posterior is \emph{worse} at predicting reality than
+the heuristic sampler it replaced: $1.3618$ against $1.3408$ at a matched draw
+budget. That is not a contradiction. Proposition~\ref{prop:uniform} is a correct
+theorem about a false hypothesis. v0.3's sampler seeded the OR-clauses by
+picking a live card of the asked half-suit for the asker, which systematically
+over-weights worlds in which askers are deep in the suits they asked in --- an
+accidental opponent model. Removing the bias removed the model with it.
+
+Second, making the model explicit and tunable recovers the loss and passes both:
+$1.3251$ at $\gamma = 0.45$. And the improvement is not a large-budget artefact.
+At 160 draws the opponent model takes the sampler from $1.3731$ to $1.3476$,
+which is better than v0.3's deployed 32-draw configuration ($1.4399$) by a wide
+margin.
+
+Third, and separately: ignoring the OR-clauses is by far the worst option
+tested, confirming the design decision of Section~\ref{sec:clauses} from the
+other direction.
+
+\subsection{The opponent model in play}
+\label{sec:res-oppmodel}
+
+Posterior accuracy is not strength. Table~\ref{tab:gamma} measures the model by
+duplicate-deal play against the otherwise-identical $\gamma = 0$ policy.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrl}
+\toprule
+$\gamma$ & pair score & set diff / pair & 95\% CI \\
+\midrule
+0.10 & 0.613 & $+0.993$ & $[+0.470, +1.517]$ \\
+0.30 & 0.667 & $+1.847$ & $[+1.230, +2.463]$ \\
+0.45 & 0.700 & $+1.860$ & $[+1.336, +2.384]$ \\
+0.60 & 0.657 & $+1.300$ & $[+0.795, +1.805]$ \\
+0.90 & 0.723 & $+1.827$ & $[+1.199, +2.455]$ \\
+\bottomrule
+\end{tabular}
+\caption{Opponent model against the identical policy with the model disabled,
+150 duplicate deal-pairs per cell. Every cell excludes zero. The dose-response
+rises to a plateau by $\gamma = 0.30$ and stays there over a threefold range,
+which is what one wants from a model with a single free parameter --- and unlike
+the ask-objective terms of v0.3, which showed a sharp inverted-U, there is no
+weight at which this becomes destructive within the range tested.}
+\label{tab:gamma}
+\end{table}
+
+\paragraph{The cleanest attribution.} Tables~\ref{tab:gamma} measures the model
+against copies of itself. The sharper experiment holds the \emph{opponent} fixed
+at the v0.3 champion and varies only whether the model is on, at identical deal
+seeds and identical agent seeds, 250 duplicate deal-pairs each:
+
+\begin{center}
+\small
+\begin{tabular}{lrrl}
+\toprule
+v0.4 configuration & pair score & set diff / pair & 95\% CI \\
+\midrule
+exact inference, $\gamma = 0$ & 0.502 & $-0.008$ & $[-0.482, +0.466]$ \\
+exact inference, $\gamma = 0.30$ & 0.684 & $\mathbf{+1.920}$ & $[+1.479, +2.361]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The first row is as close to exactly zero as a 250-pair experiment can report.
+Provably correct inference, replacing a sampler its own authors documented as
+biased, moved the result by eight thousandths of a set per deal-pair. The second
+row differs from the first in one parameter.
+
+\subsection{The strength ladder}
+\label{sec:res-ladder}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrll}
+\toprule
+v0.4 champion versus & pairs & pair score & set diff / pair & 95\% CI \\
+\midrule
+\textbf{v0.3 champion (\texttt{tuned})} & \textbf{500} & \textbf{0.705} & $\mathbf{+1.854}$ & $\mathbf{[+1.542, +2.166]}$ \\
+\quad --- replication & 300 & 0.758 & $+2.440$ & $[+2.052, +2.828]$ \\
+\quad --- replication, $\gamma = 0.30$ & 250 & 0.684 & $+1.920$ & $[+1.479, +2.361]$ \\
+v0.3 \texttt{probabilistic}    & 200 & 0.792 & $+2.785$ & $[+2.274, +3.296]$ \\
+\bottomrule
+\end{tabular}
+\caption{The v0.4 champion is
+\texttt{fishbot4($\gamma$=0.35)}: exact/unbiased inference, the opponent choice
+model, and v0.3's own ask weights. No new objective term is enabled.}
+\label{tab:ladder}
+\end{table}
+
+Against the two weakest rungs the champion wins every pair: $120/120$ against
+the public-information heuristic ($+14.09$ sets per pair) and $80/80$ against
+random ($+16.30$). Those are reported for completeness rather than as evidence;
+a shutout means the rating gap is a bound, not a measurement.
+
+The headline comparison was run three times at different seeds, and the three
+estimates span $+1.85$ to $+2.44$ --- wider than their individual intervals
+suggest, which is a useful reminder that a 95\% interval covers the mean of the
+deals actually played, and that three such intervals will occasionally fail to
+overlap. We take the largest experiment as the headline and report the others
+rather than the most flattering one.
+
+\paragraph{Do v0.3's objective terms survive better inference?} A reasonable
+worry about the whole result is that v0.3's hand-tuned tie-breakers were
+compensating for a poor posterior and would become redundant once it improved.
+They do not become redundant, but they do become \emph{worth less}. Removing
+both --- setting $w_{\mathrm{turn}}$ and $w_{\mathrm{scarce}}$ to zero and
+changing nothing else --- costs, over 250 duplicate deals each:
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+inference & cost of removing both terms & 95\% CI \\
+\midrule
+without the opponent model & $1.660$ sets/pair & $[+1.240, +2.080]$ \\
+with the opponent model    & $1.084$ sets/pair & $[+0.611, +1.557]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+v0.3 measured the same pair at $+1.41$ against its own inference, which sits
+between the two. So the terms and the opponent model are partially substitutable:
+about a third of what the tie-breakers were contributing is absorbed once the
+posterior knows more about opponents' holdings, and the remaining two-thirds is
+positional judgement that no amount of card-reading supplies. That is the
+expected shape if the tie-breakers were doing two jobs --- compensating for a
+blurry posterior, and encoding something genuinely strategic --- and it is worth
+noting that the gains do \emph{not} simply add: $1.85$ (the headline) is less
+than $1.92$ (the model alone against the v0.3 champion) plus anything.
+
+\subsection{Absolute strength: agreement with provably optimal play}
+\label{sec:res-absolute}
+
+Every number above is relative. Table~\ref{tab:exact} is not. It reports, over
+988 exactly solved positions harvested from 260 real games by four different
+generator policies, how often each agent chooses a \emph{progress-optimal}
+action --- the stricter criterion of Section~\ref{sec:exact}, which excludes
+value-preserving moves that make no progress.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+agent & resolved & uncertain & $m{=}1$ & $m{=}2$ \\
+\midrule
+random             & 60.8\% & 32.7\% & 28.3\% & 43.9\% \\
+heuristic          & 71.6\% & 46.8\% & 34.4\% & 59.0\% \\
+memory             & \textbf{100.0\%} & 61.7\% & 81.1\% & 70.1\% \\
+probabilistic      & \textbf{100.0\%} & 66.9\% & 86.8\% & 73.3\% \\
+v0.3 champion      & \textbf{100.0\%} & 67.6\% & 86.8\% & 74.0\% \\
+v0.4, no opponent model & \textbf{100.0\%} & 67.5\% & 85.4\% & 74.2\% \\
+\textbf{v0.4 champion}  & \textbf{100.0\%} & \textbf{72.5\%} & 85.8\% & \textbf{78.7\%} \\
+v0.4 champion, tablebase disabled & \textbf{100.0\%} & 72.5\% & 85.8\% & 78.7\% \\
+\bottomrule
+\end{tabular}
+\caption{Agreement with progress-optimal play over 988 solved positions, 278 of
+them information-resolved and 776 with two live half-suits. ``resolved'' and
+``uncertain'' mean what they did in v0.3; $m$ is the number of live half-suits.}
+\label{tab:exact}
+\end{table}
+
+Four things are worth drawing out.
+
+\textbf{Every belief-tracking agent is progress-optimal in every
+information-resolved position}, on a corpus four times the size of v0.3's and
+79\% of it two-half-suit, and against the stricter criterion. This reproduces
+v0.3's strongest correctness claim on harder ground --- while
+Section~\ref{sec:exact} explains why the one-half-suit version of that claim was
+shallower than it read.
+
+\textbf{The absolute metric confirms the relative one, independently.} Exact
+inference without the opponent model scores $67.5\%$ under uncertainty against
+the v0.3 champion's $67.6\%$: no change, exactly as the duplicate-deal
+experiment found and exactly as the ground-truth posterior scores predicted.
+Adding the opponent model moves it to $72.5\%$. Three different instruments ---
+paired play, posterior likelihood against the true hands, and agreement with an
+exact solver --- agree on which component does the work.
+
+\textbf{The tablebase contributes nothing here}, and we report that rather than
+claiming the speedup as strength. Disabling it changes not one of the 988
+decisions. In an information-resolved position the marginals are one-hot and the
+ordinary policy already plays it correctly; in an uncertain position the
+tablebase refuses by construction. Its value is a $4{,}205\times$ reduction in
+the cost of the endgame path and insurance against a class of error v0.3
+demonstrably suffered, not extra strength.
+
+\textbf{Where the remaining gap is.} At $m{=}2$ under uncertainty the champion
+agrees with optimal play $78.7\%$ of the time. The missing fifth is not in the
+endgame in the sense v0.3 meant --- these positions \emph{are} the endgame --- it
+is in choosing correctly when the hidden information genuinely has not resolved.
+
+\subsection{Everything else we tried}
+\label{sec:res-null}
+
+Table~\ref{tab:nulls} is the rest of the study. It is mostly nulls, and it is
+reported in full because a table of only the things that worked would
+misrepresent how much was tried. Each cell is a duplicate-deal duel against the
+champion with exactly one thing changed, and the last column is the smallest
+effect that cell could have resolved at 80\% power given the measured per-pair
+standard deviation of 3.869 sets.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrl}
+\toprule
+what changed & setting & pairs & set diff & 95\% CI \\
+\midrule
+\multicolumn{5}{l}{\emph{inference precision}}\\
+draws per decision & 96 (from 160) & 160 & $-0.300$ & $[-0.852, +0.252]$ \\
+draws per decision & 320 (from 160) & 200 & $-0.035$ & $[-0.578, +0.508]$ \\
+count mode & $\sqrt{\cdot}$, $\gamma{=}0.70$, 160 & 200 & $+0.480$ & $[-0.042, +1.002]$ \\
+count mode & $\sqrt{\cdot}$, $\gamma{=}0.70$, 320 & 200 & $-0.165$ & $[-0.701, +0.371]$ \\
+no-declaration signal & $\lambda = 0.9$ & 200 & $+0.205$ & $[-0.301, +0.711]$ \\
+no-declaration signal & $\lambda = 1.8$ & 200 & $+0.190$ & $[-0.313, +0.693]$ \\
+\midrule
+\multicolumn{5}{l}{\emph{new ask-objective terms}}\\
+exposure & $0.40$ & 160 & $-0.113$ & $[-0.660, +0.435]$ \\
+claim progress & $0.30$ & 160 & $-0.206$ & $[-0.807, +0.395]$ \\
+signalling & $+0.25$ & 160 & $-0.300$ & $[-0.890, +0.290]$ \\
+signalling & $-0.25$ (conceal) & 160 & $+0.056$ & $[-0.530, +0.642]$ \\
+information gain & $0.10$ & 160 & $-0.394$ & $[-0.932, +0.144]$ \\
+concentration & $0.15$ & 160 & $-0.037$ & $[-0.653, +0.578]$ \\
+turn-risk retune & $0.35$ (from $0.60$) & 160 & $-0.075$ & $[-0.670, +0.520]$ \\
+scarcity retune & $0.35$ (from $0.20$) & 160 & $+0.125$ & $[-0.381, +0.631]$ \\
+\midrule
+\multicolumn{5}{l}{\emph{claiming and the endgame}}\\
+claim threshold & $0.99$ (from $0.97$) & 200 & $+0.010$ & $[-0.010, +0.030]$ \\
+informed pass choice & on & 160 & $+0.013$ & $[-0.012, +0.037]$ \\
+tablebase & one half-suit only & 200 & $+0.005$ & $[-0.005, +0.015]$ \\
+tablebase & disabled entirely & 200 & $+0.005$ & $[-0.005, +0.015]$ \\
+\midrule
+\multicolumn{5}{l}{\emph{the learned half-suit value objective}}\\
+blended & $w_{\mathrm{value}} = 0.5$ & 200 & $+0.410$ & $[-0.086, +0.906]$ \\
+blended & $w_{\mathrm{value}} = 1.5$ & 200 & $+0.040$ & $[-0.502, +0.582]$ \\
+\textbf{replacing the objective} & pure $\Delta V$ & 200 & $\mathbf{-7.355}$ & $[-7.875, -6.835]$ \\
+\bottomrule
+\end{tabular}
+\caption{Everything else. Only the last row resolves, and it resolves against
+us. Every other interval contains zero at a minimum detectable effect of
+roughly $0.8$ sets per pair, so these are ``not shown to matter at this budget'',
+not ``shown not to matter''.}
+\label{tab:nulls}
+\end{table}
+
+Four of these deserve comment.
+
+\textbf{Precision has saturated, and that is new.} v0.3 found that raising the
+sampled-world count from 32 to 96 was worth $+0.54$ sets per pair and concluded
+that belief precision had not saturated. Under v0.4's inference it plainly has:
+halving or doubling the draw budget around 160 changes nothing measurable. The
+natural reading is that v0.3 was buying accuracy, not precision --- more draws
+partially averaged out a \emph{bias} --- and once the bias is gone, the
+remaining sampling noise is no longer the binding constraint.
+
+\textbf{The claim threshold and the tablebase are exact no-ops.} The intervals
+$[-0.010, +0.030]$ and $[-0.005, +0.015]$ are not small effects; they are almost
+no divergence at all. Raising the claim bar from $0.97$ to $0.99$ changes
+essentially no decisions, reproducing v0.3's bimodality finding on a much better
+posterior. Disabling the exact endgame solver entirely changes essentially
+nothing, which agrees exactly with the absolute benchmark
+(Section~\ref{sec:res-absolute}), where it changed not one of 988 decisions.
+
+\textbf{Replacing the objective with the learned value is catastrophic.} The
+half-suit value model is good --- held-out log-loss $0.727$ against $0.821$ for
+the class prior and $0.743$ for the best single feature, mean calibration bias
+$-0.006$, reliable across every decile. Scoring asks by the expected change in
+it, in units of sets, loses $7.4$ sets per deal-pair. Blending it in at low
+weight is harmless and does nothing. This is the sharpest confirmation of v0.3's
+central claim about this game that we have: the probability that an ask lands is
+not one term among several, it is the objective, and a well-calibrated model of
+what a half-suit is worth is no substitute for it.
+
+\textbf{The eleven-term basis bought nothing.} Neither the two terms motivated
+by the literature survey (exposure, signalling) nor the four motivated by
+inspection improved on v0.3's three. The signalling term is worth singling out
+because its sign was the interesting question: $+0.25$ (advertise a holding in a
+half-suit our team is winning) scored $-0.300$ and $-0.25$ (conceal it) scored
+$+0.056$, so if anything the concealment direction is favoured, but neither
+interval comes close to excluding zero.
+
+\subsection{The near-misses, and the one that resolved}
+\label{sec:res-replication}
+
+Two cells in Table~\ref{tab:nulls} had positive point estimates whose intervals
+only just included zero, which is exactly the situation in which a screening
+study manufactures a false positive if the best cell is promoted without
+re-measurement. We reran both at 500 pairs on fresh seeds --- minimum detectable
+effect $0.48$ rather than $0.77$ --- together with their combination:
+
+\begin{center}
+\small
+\begin{tabular}{lrrl}
+\toprule
+candidate & screen (200 pairs) & retest (500 pairs) & retest 95\% CI \\
+\midrule
+blended value objective, $0.5$ & $+0.410$ & $-0.208$ & $[-0.534, +0.118]$ \\
+$\sqrt{\cdot}$ counting, $\gamma = 0.70$ & $+0.480$ & $+0.212$ & $[-0.092, +0.516]$ \\
+\textbf{both together} & --- & $\mathbf{+0.490}$ & $\mathbf{[+0.184, +0.796]}$ \\
+\quad replication, fresh seeds & --- & $+0.068$ & $[-0.254, +0.390]$ \
+\quad replication again & --- & $-0.066$ & $[-0.395, +0.263]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The combination is the only cell in this entire study, out of more than
+twenty-five, whose interval excluded zero in the improvement direction. On a
+fresh set of 500 deals it returned $+0.068$, and on a second fresh set
+$-0.066$. It was noise.
+
+We report this at length because it is the single most useful methodological
+observation the study produced. Twenty-five screening cells at a nominal 95\%
+level will produce roughly one apparent winner under a complete null, and this
+one arrived with a respectable-looking interval, a plausible story (two
+independently-motivated changes that stack, exactly as v0.3's two winning terms
+had) and a point estimate twice the sum of its parts --- which should have been
+the tell. Promoting it would have shipped a change worth nothing and, worse,
+would have anchored the next version's baseline on it.
+
+\subsection{Is the opponent model just fitting its own kind?}
+\label{sec:res-robust}
+
+The model is a hypothesis about how opponents choose, and the opponents it was
+measured against in Table~\ref{tab:gamma} are copies of the same policy. Two
+tests separate a real effect from self-play overfitting.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrl}
+\toprule
+opponent & agent & pairs & set diff / pair & 95\% CI \\
+\midrule
+\multirow{2}{*}{\texttt{memory} (off-distribution)}
+  & $\gamma = 0.30$ & 150 & $+4.727$ & $[+4.119, +5.335]$ \\
+  & $\gamma = 0$    & 150 & $+3.793$ & $[+3.247, +4.340]$ \\
+\midrule
+\multirow{2}{*}{anti-model exploiter}
+  & $\gamma = 0.30$ & 200 & $+6.570$ & $[+6.113, +7.027]$ \\
+  & $\gamma = 0$    & 200 & $+5.735$ & $[+5.237, +6.233]$ \\
+\bottomrule
+\end{tabular}
+\caption{The opponent model against opponents it was not shaped by.
+\texttt{memory} acts only on facts it can prove and has no probabilistic
+component at all. The anti-model exploiter is the v0.4 policy with the depth
+term \emph{inverted} ($w_{\mathrm{suit}} = -0.35$), so it deliberately asks in
+half-suits it is shallow in --- the exact behaviour the model assumes does not
+happen.}
+\label{tab:robust}
+\end{table}
+
+Against \texttt{memory}, a policy with no probabilistic component whatsoever,
+the model is still worth about $+0.93$ sets per pair. Against an opponent built
+specifically to violate its assumption it is still worth about $+0.84$. The
+second number deserves care: the exploiter is a weak policy in absolute terms
+(inverting the depth term costs it a great deal), so what the comparison shows
+is that the model is not \emph{harmed} by an opponent designed to mislead it,
+not that it cannot be exploited by a stronger adversary. A genuinely coordinated
+best-responder is future work.
+
+\subsection{Does it survive the rule variants?}
+\label{sec:res-rules}
+
+The engine supports several rule options, and a result that only holds under one
+configuration is a weaker result. Table~\ref{tab:rules} repeats the headline
+comparison under three of them.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{llrrl}
+\toprule
+rule & comparison & pairs & set diff & 95\% CI \\
+\midrule
+declare at any time & v0.4 vs v0.3 champion & 200 & $+2.175$ & $[+1.647, +2.703]$ \\
+declare at any time & $\gamma$ vs no $\gamma$ & 200 & $+1.935$ & $[+1.450, +2.420]$ \\
+48-card deck & v0.4 vs v0.3 champion & 200 & $+1.080$ & $[+0.557, +1.603]$ \\
+wrong split $\to$ opponents & v0.4 vs v0.3 champion & 200 & $+1.690$ & $[+1.191, +2.189]$ \\
+\bottomrule
+\end{tabular}
+\caption{The result holds under every rule variant tested, including the
+declare-at-any-time rule as the game is usually written down. Note the 48-card
+row: with eight half-suits instead of nine, the margin roughly halves, which is
+what one would expect if the advantage is inferential --- a smaller deck leaves
+less to infer.}
+\label{tab:rules}
+\end{table}
+
+The declare-at-any-time rows required an engine change. v0.3's game loop only
+ever asked the player on move, so although the rule was accepted by the
+configuration it could not be exercised by any policy --- and it matters most
+precisely where it is unreachable, for a seat that has run out of cards and
+therefore never gets a turn of its own while a teammate still has some. v0.4
+polls off-turn seats for a claim they can make \emph{by deduction alone}, which
+costs a belief update rather than a posterior per seat, and offers it identically
+to both generations so that the comparison stays a comparison of one thing.
+
+\subsection{Learning the ask objective}
+\label{sec:res-learn}
+
+v0.3's stated top priority for this version was to learn the ask objective
+rather than hand-weight it. We did, by common-random-numbers paired rollout
+regression: 874 positions, 83{,}168 games played to the end, all pairs of
+candidate asks within a position regressed on the difference of their feature
+vectors, with standard errors clustered by position (the naive standard errors
+are on average $2.00\times$ too small, since pairs from one position share
+candidates, worlds and rollout seeds).
+
+The machinery works: common random numbers cut the variance of a pairwise
+comparison to $0.64$ of independent worlds, bringing the noise-to-signal ratio
+from v0.3's $2.4$ to $1.19$; a permutation test over position-level sign flips
+gives $p = 0.003$ against a null $R^2$ of $0.005$; and a torch MLP on the same
+paired target improves validation $R^2$ from $0.234$ to $0.249$, so the
+objective's \emph{shape} is not the limitation either.
+
+The learned weights lose. Played against the incumbent over 120 duplicate
+deal-pairs, the best of three variants scored $-2.183$ sets per pair
+$[-2.746, -1.621]$.
+
+The diagnosis is specific, and it is a calibration failure of the target rather
+than of the fit. Three of the eleven coefficients have answers already
+established by \emph{play}: v0.3's 600-pair sweeps put \texttt{turn} at $0.60$
+and \texttt{scarce} at $0.20$ and measured the pair as worth $+1.41$ sets per
+deal-pair. The regression returns \texttt{turn} $= 0.157$ with a clustered
+standard error of $0.058$ --- so an effect the size play has already measured
+would sit ten standard errors from zero, and the dataset does not see it. More
+starkly, position-centred rollout value rises by only $+0.101$ sets across the
+entire range of $\Prob(\text{success})$, and an unpinned fit puts that
+coefficient at $0.063$.
+
+The likeliest mechanism is the continuation policy. A rollout has to be finished
+by a policy that can attach to a determinized mid-game position, and the
+belief tracker cannot: it is anchored on the initial deal and refuses. That
+leaves a public-information heuristic, which throws away most of the value of a
+marginal card, so a card won by a good ask is largely squandered before the game
+ends and the ask stops mattering to the final differential. The binding
+constraint is not precision --- pairing already fixed that --- it is that the
+continuation is too weak for the difference between two asks to survive to the
+end of the game.
+
+This is the same shape as v0.3's search failure, one level up. There, the
+problem was that the evaluation target could not rank asks; here, a much more
+careful attempt to build a better target hits the same wall, and locates it in
+the rollout policy rather than in the statistics.
+
+\subsection{Game statistics, and a statistic that stops working}
+\label{sec:res-analytics}
+
+Homogeneous tables of each champion, 100 games each, on the measures v0.3 used
+to characterise skill:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& v0.3 champion & v0.4 champion \\
+\midrule
+cards gained per possession & 1.419 & 1.295 \\
+possessions gaining nothing & 44.5\% & 48.8\% \\
+failed-ask share & 40.9\% & 43.2\% \\
+asks per game & 100.3 & 96.5 \\
+ask accuracy, thirds of the game & 54.1 / 59.7 / 64.2\% & 52.2 / 58.0 / 60.8\% \\
+null rate (natural half-suits) & 4.4\% & 3.1\% \\
+claim delay, median / p90 (actions) & 0 / 58 & 0 / 49 \\
+first-move advantage & $+0.23$ $[-0.27, +0.73]$ & $+0.32$ $[-0.22, +0.86]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Three of these reproduce v0.3 and one contradicts it.
+
+Reproduced: there is still no measurable first-move or seat advantage, both
+intervals comfortably containing zero with the starting seat rotated across
+deals; the synthetic ``eights and jokers'' half-suit still behaves like any
+other (mean resolution rank $4.08$ against $3.99$, null rate $3.0\%$ against
+$3.1\%$); and ask accuracy still rises from the opening into the later game,
+so the opening remains the least-informed phase.
+
+Contradicted, and worth stating carefully: v0.3 named cards-per-possession
+``the single best summary statistic of skill'', on the evidence that it doubled
+from the \texttt{memory} tier to the \texttt{probabilistic} tier. The stronger
+engine here scores \emph{lower} on it. The mechanism is visible in the other
+rows: v0.4 nulls fewer sets ($3.1\%$ against $4.4\%$) and claims sooner (p90 $49$
+against $58$), so half-suits resolve faster and the game contains fewer, harder
+asks --- $96.5$ per game against $100.3$. Cards-per-possession compares two
+tables on how easy their asks were, and how easy the asks are depends on how
+quickly the claiming policy is removing the resolved material. Within a tier
+that shares a claim policy it tracks skill; across engines whose claiming
+differs, it does not. A statistic that inverts when the thing it is measuring
+improves is not a measure of skill, and we would retract the v0.3 claim rather
+than qualify it.
+
+% =====================================================================
+\section{What this says about playing Fish}
+\label{sec:strategy}
+
+The results have readings that do not require an engine, and we state them
+because a study of a game people play ought to say something to the people
+playing it.
+
+\paragraph{Watch where opponents ask, not just what they ask for.} This is the
+finding of the paper, and it is actionable at the table. A player who asks in a
+half-suit is probably deep in it, in rough proportion to how many of its cards
+they hold, and that single inference is worth more than every other improvement
+we made combined. Concretely: when an opponent asks in hearts, do not only note
+the hard fact that they hold at least one heart --- shift weight toward their
+holding several. The engine's version of this is one parameter, and it is worth
+about $1.9$ sets per duplicate deal-pair against a strong opponent that ignores
+it.
+
+\paragraph{An exact rule for the perfect-information endgame.} Once every
+remaining card is public, the game is solved in closed form: the team on move
+scores every live half-suit in which it holds at least one card, and the
+opponents score the rest. Footholds only shrink and a well-informed asker never
+misses. The practical corollary is that in a fully-known endgame the only thing
+that matters is \emph{how many live half-suits your team has a foothold in when
+it is your turn} --- not how many cards, not which cards.
+
+\paragraph{Do not agonise over when to declare.} Reproducing v0.3's finding on a
+much better posterior: raising the claim bar from $0.97$ to $0.99$ changes
+essentially no decisions. The reason is structural rather than statistical. If
+your team genuinely holds all six cards of a half-suit, no opponent holds any
+card of it, so no opponent can legally ask in it --- and a claim by a team that
+does not hold all six gives the set to you. Waiting is close to free. Wait until
+you know the split.
+
+\paragraph{Two tie-breakers really do hold up.} When two asks look about equally
+likely to land, prefer the one that, if it misses, hands the turn to the
+opponent with fewer cards, and prefer to fight in half-suits your team is
+already winning. v0.3 measured that pair at $+1.41$ sets per deal-pair; with an
+inference layer good enough to make the primary criterion much sharper, they are
+still worth $+1.08$. Better card-reading does not make positional judgement
+redundant.
+
+\paragraph{And a warning about the obvious idea.} Scoring asks by ``how much
+does this improve my team's chance of winning this half-suit'' --- which sounds
+like the right objective, is measured in the right units, and rests on a
+well-calibrated model --- is a disaster: $-7.4$ sets per deal-pair against simply
+asking for the card most likely to be there. In this game, the probability that
+the ask lands is not one consideration among several. It is the objective, and
+everything else is a tie-break.
+
+% =====================================================================
+\section{Failed and abandoned experiments}
+\label{sec:failures}
+
+Recorded deliberately, because in this project the negative results have
+repeatedly been the informative ones.
+
+\paragraph{Exact inference, on its own.} The headline effort of this version ---
+replacing a documented-biased sampler with provably correct inference --- bought
+nothing in play (Section~\ref{sec:res-exact}) and was measurably worse at
+predicting reality (Section~\ref{sec:res-posterior}). We report it as a failure
+of the \emph{hypothesis}, not of the implementation: the implementation is
+validated against exhaustive enumeration in four separate ways. What failed was
+the assumption that the uniform posterior is the right target.
+
+\paragraph{Rejection sampling for the disjunctive clauses.} Exactly correct, and
+unaffordable: measured acceptance mean $0.30$, median $0.18$, below $0.05$ on
+16\% of positions. Abandoned in favour of importance sampling with closed-form
+densities.
+
+\paragraph{Folding the clauses into the exact dynamic program.} Sound, and
+tractable in the median case (refined state space $5{,}760$), but with a tail
+that makes it unusable as a default: p90 $230{,}000$ and p99
+$2.7 \times 10^{7}$. Retained as an option, not as the path.
+
+\paragraph{A na\"ive batch rewrite of the sampler.} Vectorising the draw across
+the batch gave only $1.4\times$ until the dictionary materialisation of the
+draws was removed as well; the correct fix was to carry the whole batch as an
+integer matrix end to end, after which the same change gave $5.1\times$. Worth
+recording because the first measurement would have justified abandoning a
+change that was in fact the right one.
+
+\paragraph{An under-converged fit that looked plausible.} The first half-suit
+value model was fitted by plain gradient descent on unstandardised features and
+reported a held-out log-loss \emph{worse than the class prior} while producing
+entirely reasonable-looking coefficients. Feature scales spanning two orders of
+magnitude were the cause. This is the reason the fitting routine now reports
+against two baselines (the class prior and a single-feature model) rather than
+against nothing.
+
+\paragraph{A false positive, caught.} Of more than twenty-five screening cells,
+exactly one produced an interval excluding zero in the improvement direction
+($+0.490$, $[+0.184, +0.796]$, 500 pairs). It failed to replicate twice on fresh
+seeds ($+0.068$ and $-0.066$). We record it as a failed experiment rather than
+burying it in a methodology note, because it is the shape of the mistake this
+project is most likely to make next.
+
+\paragraph{Inherited from v0.3, and not revisited.} Determinized search (PIMC
+and Information-Set MCTS) lost to its own prior; a value network trained on
+belief features and applied inside determinized worlds lost 34--6 to a
+train/inference distribution mismatch; quiescence extension made search worse;
+and an expected-value claim model predicted an optimal threshold near $0.70$
+that direct measurement falsified. None of these were re-attempted here, because
+v0.3's diagnosis --- that the binding constraint is the objective, not the depth
+of search --- was the premise of this version and is not contradicted by
+anything we measured.
+
+% =====================================================================
+\section{Limitations}
+\label{sec:limitations}
+
+\paragraph{The opponent model is a model.} Everything else in the inference
+stack is deduction, validated against enumeration. Equation~\eqref{eq:oppmodel}
+is a hypothesis about how people choose, fitted with one parameter. Against
+opponents whose ask policy is unrelated to their depth in a half-suit it could
+in principle hurt, and against an opponent who deliberately inverts the
+heuristic it is exploitable in the ordinary sense that any model is. We measure
+both cases rather than assert robustness, and $\gamma$ is a single number that
+can be set to zero.
+
+\paragraph{Depth is evaluated on the initial deal.} The choice model is really
+about what a player held \emph{when they asked}. Cards move, so the two diverge
+late in a game. The exact quantity would need a replay of the public history per
+candidate world, turning an $O(1)$ update into $O(|h|)$.
+
+\paragraph{The uniform-posterior result is about \emph{this} game and
+\emph{these} opponents.} We show that exact inference under an uninformative-
+choice assumption is worse than a biased sampler that accidentally encodes a
+choice model. That is a statement about which approximation is closer to the
+truth, not a general licence to prefer biased inference.
+
+\paragraph{Exact solving is still bounded.} Absolute ground truth reaches
+positions with one, and now two, unresolved half-suits. Midgame positions remain
+out of reach, which is exactly where v0.3 localised the remaining gap.
+
+\paragraph{No equilibrium claim.} We compute no equilibrium and no
+exploitability bound. The appropriate solution concept for a game with pre-play
+agreement and no in-play communication is TMECor
+\citep{celli2018computational}, and nothing here approximates it. Every strength
+statement is relative to a named opponent or absolute against an exactly solved
+subgame.
+
+\paragraph{A rules discrepancy, stated.} The printed rules allow a set to be
+declared at any point, including during an opponent's turn. v0.3's game loop
+only ever asked the player on move, so the rule was accepted by the engine but
+unreachable by any policy --- which matters most for a seat that has run out of
+cards and therefore never gets a turn of its own while a teammate still has
+some. v0.4 adds off-turn declaration, offered identically to both generations
+so that the comparison stays a comparison of one thing. The primary evaluation
+is nevertheless run under v0.3's own configuration, so that the numbers are
+comparable with the previous version, with the variant reported separately.
+
+% =====================================================================
+\section{Conclusions}
+\label{sec:conclusions}
+
+We set out to remove a defect the previous version had documented in its own
+code: a belief sampler that was not uniform over the deals consistent with the
+public record. We removed it, exactly. Hidden-state inference in Literature
+reduces to counting assignments in a degree-constrained bipartite system, and
+although that is $\#P$-complete in general, the instances the game produces are
+tiny in the dimension that matters --- roughly four distinct candidate sets even
+when twenty-six cards are unlocated --- so a dynamic program returns the exact
+partition function, exact marginals, exact uniform sampling and exact joint
+probabilities. The disjunctive constraints that the program cannot absorb are
+handled by importance sampling with closed-form proposal densities, verified
+against exhaustive enumeration for support, density and marginals, with a
+control demonstrating that dropping the weights visibly breaks the estimate.
+
+And it changed nothing. Against the previous champion, at matched seeds over 250
+duplicate deal-pairs, provably correct inference moved the set differential by
+$-0.008$ per pair.
+
+The instructive part is why, and that we could find out. Because the hidden
+hands exist in simulation, a posterior can be scored on the question it is
+actually trying to answer, and that measurement says the exactly-uniform
+posterior is \emph{worse} at predicting reality than the biased sampler it
+replaced. Proposition~\ref{prop:uniform} is a correct theorem about a false
+hypothesis: it assumes players' choices carry no information beyond legality.
+The old sampler's bias, an artefact of how it seeded the disjunctive
+constraints, happened to encode a crude model of how players choose. Removing
+the bias removed the model with it.
+
+Replacing the accident with one line of modelling --- a player asks in a
+half-suit in proportion to how many cards of it they hold --- recovers the loss
+and goes past it, on all three instruments we have: posterior likelihood against
+the true hands, agreement with an exact solver, and duplicate-deal play. The
+last of these puts it at $+1.9$ sets per deal-pair against the previous
+champion, which is larger than the entire objective improvement that separated
+that champion from its own baseline.
+
+Three lessons generalise beyond this game.
+
+\textbf{Correct is not the same as good.} An inference procedure is correct
+relative to a model. When a cheaper, wronger procedure beats an exact one, the
+exact procedure's \emph{assumptions} are the thing that is failing, and the
+productive response is to find which assumption and relax it --- not to add
+compute to the correct-but-misspecified thing.
+
+\textbf{Measure the intermediate quantity, not only the outcome.} Every belief
+metric in the previous version was indirect, and a change that was provably
+correct and empirically useless would have been very hard to diagnose from win
+rates alone. Scoring the posterior directly against ground truth turned a
+puzzling null result into an identified cause in one experiment. Where a
+simulator gives access to the hidden state, refusing to use it for
+\emph{evaluation} is a false economy; the discipline that matters is not letting
+it reach the acting policy.
+
+\textbf{Know what your experiment could not have found.} The measured per-pair
+standard deviation of the set differential here is $3.869$ sets, which means the
+previous version's 600-pair cells could not resolve effects below about $0.44$
+sets per pair. Several of its reported nulls were therefore uninformative rather
+than negative. We report the minimum detectable effect alongside every interval
+for that reason.
+
+\textbf{Replicate the winner, not the losers.} A screening study over
+twenty-five cells will hand you an apparent winner under a complete null, and it
+will arrive with a plausible mechanism attached --- ours came with a story about
+two independently-motivated changes stacking, which is exactly what the previous
+version had genuinely found for a different pair of terms. The cheap defence is
+not a multiplicity correction, it is one more run on fresh seeds. Ours cost forty
+minutes and saved a wrong champion.
+
+\subsection{What we would do next}
+
+\begin{itemize}
+\item \textbf{A proper likelihood, not a proxy.} The choice model uses depth in
+the asked half-suit on the initial deal. The right object is the acting
+policy's own probability of the observed action given the hand, evaluated at the
+time of the ask. That is a fixpoint --- the model of the opponent is the policy
+--- and it is expensive, but it is the principled version of the thing that
+already works.
+\item \textbf{A coordinated best-responder.} The robustness tests here show the
+model is not harmed by an opponent built to violate its assumption, which is
+weaker than showing it cannot be exploited. Training a genuine best response,
+and reporting the value it extracts, is the only route to an absolute claim
+about how good the champion is.
+\item \textbf{Cross-play.} Once anything in this engine is \emph{learned} from
+self-play rather than configured, cross-play between independently seeded runs
+becomes necessary rather than optional, for the reason Hanabi established: an
+agent that only wins alongside copies of itself has not solved the game.
+\item \textbf{Search, once more, but differently.} Every search this project has
+tried has sampled worlds, and the measured noise-to-signal ratio of $2.4$ across
+sampled layouts is why they all failed. With exact marginals available, a
+lookahead that operates on the \emph{belief} rather than on sampled
+determinizations is deterministic given the belief, so the variance that killed
+the previous attempts is structurally absent. That is the one search design this
+project has not yet tested.
+\end{itemize}
+
+% =====================================================================
+\appendix
+
+\section{Reproducing this work}
+\label{app:repro}
+
+The engine, agents, experiments and this paper are in one repository. v0.3's
+code is untouched, so its results remain reproducible alongside these; v0.4
+lives in \texttt{fish4/}.
+
+\begin{verbatim}
+py -m pytest tests  -q     # v0.3: rules, fuzz, leakage proofs, belief
+                           # soundness, statistics, exact solver
+py -m pytest tests4 -q     # v0.4: exact counting vs brute force, sampler
+                           # support/density/marginals, batch equivalence,
+                           # information-boundary invariance, exact solver v2
+
+py scripts4/duel.py jobs/j6_ladder.json 4      # the strength ladder
+py scripts4/duel.py jobs/j11_final.json 6      # headline + ablations
+py scripts4/summarise_duels.py                 # every duel, with its MDE
+
+py scripts4/posterior_accuracy.py 14 3   # posteriors scored on the true hands
+py scripts4/exact_bench4.py              # agreement with provably optimal play
+py scripts4/fit_hsvalue.py 200 3         # fit the half-suit value model
+py scripts4/analytics4.py 120 3          # strategy statistics
+py scripts4/check_tex.py                 # structural check on this document
+\end{verbatim}
+
+Every duel appends to \texttt{results/v04\_duels.jsonl} recording both random
+seed streams, the full agent specifications, the rule configuration and the
+result. \texttt{summarise\_duels.py} prints, alongside every interval, the
+smallest effect that run could have detected --- which is the column that stops
+a null being read as a negative.
+
+\section{The champion}
+\label{app:champion}
+
+\begin{verbatim}
+from fish4.registry4 import make_agent
+agent = make_agent(("fishbot4", {"opponent_gamma": 0.35}))
+\end{verbatim}
+
+Everything else is at its default, and the defaults are deliberately v0.3's own
+ask objective ($w_{\mathrm{suit}} = 0.06$, $w_{\mathrm{turn}} = 0.60$,
+$w_{\mathrm{scarce}} = 0.20$). The improvement reported here comes from
+inference, not from re-tuning the objective on top of it --- and
+Section~\ref{sec:res-null} is the record of trying to re-tune it and failing.
+
+\section{Information-boundary tests}
+\label{app:leak}
+
+The property asserted is that every quantity v0.4 computes is bit-identical when
+the hidden cards of the other five seats are permuted into a different layout
+equally consistent with the public record. Candidate permutations are drawn from
+the acting seat's own belief sampler --- uniform permutation almost never lands
+on a consistent world, because the public record is very constraining --- and
+each candidate is then validated by an \emph{independent} replay of the whole
+public history, so the test does not assume the sampler is correct. Checked
+quantities: posterior marginals under four combinations of the opponent-model
+parameters, all eleven ask-objective terms, and the end-to-end policy action.
+
+% =====================================================================
+\bibliographystyle{plainnat}
+\begin{thebibliography}{99}
+
+\bibitem[Celli and Gatti(2018)]{celli2018computational}
+Andrea Celli and Nicola Gatti.
+\newblock Computational results for extensive-form adversarial team games.
+\newblock In \emph{AAAI Conference on Artificial Intelligence}, 2018.
+
+\bibitem[Long et al.(2010)]{long2010understanding}
+Jeffrey Richard Long, Nathan R. Sturtevant, Michael Buro, and Timothy Furtak.
+\newblock Understanding the success of perfect information Monte Carlo sampling
+in game playing.
+\newblock In \emph{AAAI Conference on Artificial Intelligence}, pages 134--140,
+2010.
+
+\bibitem[Bard et al.(2020)]{bard2020hanabi}
+Nolan Bard, Jakob N. Foerster, Sarath Chandar, Neil Burch, Marc Lanctot,
+H.~Francis Song, et al.
+\newblock The Hanabi challenge: a new frontier for AI research.
+\newblock \emph{Artificial Intelligence}, 280:103216, 2020.
+
+\bibitem[Bez\'akov\'a et al.(2012)]{bezakova2012negative}
+Ivona Bez\'akov\'a, Alistair Sinclair, Daniel \v{S}tefankovi\v{c}, and Eric
+Vigoda.
+\newblock Negative examples for sequential importance sampling of binary
+contingency tables.
+\newblock \emph{Algorithmica}, 64(4):606--620, 2012.
+
+\bibitem[Chen et al.(2005)]{chen2005sequential}
+Yuguo Chen, Persi Diaconis, Susan P. Holmes, and Jun S. Liu.
+\newblock Sequential Monte Carlo methods for statistical analysis of tables.
+\newblock \emph{Journal of the American Statistical Association},
+100(469):109--120, 2005.
+
+\bibitem[Cowling et al.(2012)]{cowling2012ismcts}
+Peter I. Cowling, Edward J. Powley, and Daniel Whitehouse.
+\newblock Information set Monte Carlo tree search.
+\newblock \emph{IEEE Transactions on Computational Intelligence and AI in
+Games}, 4(2):120--143, 2012.
+
+\bibitem[Frank and Basin(1998)]{frank1998search}
+Ian Frank and David Basin.
+\newblock Search in games with incomplete information: a case study using Bridge
+card play.
+\newblock \emph{Artificial Intelligence}, 100(1--2):87--123, 1998.
+
+\bibitem[Goadrich et al.(2026)]{goadrich2026valet}
+Mark Goadrich, Aiden Morenville, and \'Eric Piette.
+\newblock Valet: a standardized testbed of traditional imperfect-information
+card games.
+\newblock arXiv:2603.03252, 2026.
+
+\bibitem[Hu et al.(2020)]{hu2020otherplay}
+Hengyuan Hu, Adam Lerer, Alex Peysakhovich, and Jakob N. Foerster.
+\newblock ``Other-play'' for zero-shot coordination.
+\newblock In \emph{International Conference on Machine Learning}, 2020.
+
+\bibitem[Jerrum et al.(2004)]{jerrum2004polynomial}
+Mark Jerrum, Alistair Sinclair, and Eric Vigoda.
+\newblock A polynomial-time approximation algorithm for the permanent of a
+matrix with nonnegative entries.
+\newblock \emph{Journal of the ACM}, 51(4):671--697, 2004.
+
+\bibitem[R\'egin(1996)]{regin1996generalized}
+Jean-Charles R\'egin.
+\newblock Generalized arc consistency for global cardinality constraint.
+\newblock In \emph{AAAI Conference on Artificial Intelligence}, pages
+209--215, 1996.
+
+\bibitem[Rebstock et al.(2019)]{rebstock2019policy}
+Douglas Rebstock, Christopher Solinas, Michael Buro, and Nathan R. Sturtevant.
+\newblock Policy based inference in trick-taking card games.
+\newblock In \emph{IEEE Conference on Games}, 2019.
+
+\bibitem[Solinas et al.(2019)]{solinas2019improving}
+Christopher Solinas, Douglas Rebstock, and Michael Buro.
+\newblock Improving search with supervised learning in trick-based card games.
+\newblock In \emph{AAAI Conference on Artificial Intelligence}, volume 33,
+pages 1158--1165, 2019.
+
+\bibitem[Solinas et al.(2023)]{solinas2023history}
+Christopher Solinas, Douglas Rebstock, Nathan R. Sturtevant, and Michael Buro.
+\newblock History filtering in imperfect information games: algorithms and
+complexity.
+\newblock arXiv:2311.14651, 2023.
+
+\bibitem[von Stengel and Koller(1997)]{vonstengel1997team}
+Bernhard von Stengel and Daphne Koller.
+\newblock Team-maxmin equilibria.
+\newblock \emph{Games and Economic Behavior}, 21(1--2):309--321, 1997.
+
+\bibitem[Waudby-Smith and Ramdas(2024)]{waudbysmith2024estimating}
+Ian Waudby-Smith and Aaditya Ramdas.
+\newblock Estimating means of bounded random variables by betting.
+\newblock \emph{Journal of the Royal Statistical Society Series B},
+86(1):1--27, 2024.
+
+\bibitem[Valiant(1979)]{valiant1979complexity}
+Leslie G. Valiant.
+\newblock The complexity of computing the permanent.
+\newblock \emph{Theoretical Computer Science}, 8(2):189--201, 1979.
+
+\end{thebibliography}
+
+\end{document}
