@@ -1,0 +1,11 @@
+[
+ {"label": "stall window 200 (gamble later)", "n_pairs": 400, "base_seed": 6500000, "agent_seed": 65000,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "stall_window": 200}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "stall window 40 (gamble sooner)", "n_pairs": 400, "base_seed": 6500000, "agent_seed": 65000,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "stall_window": 40}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "claim threshold 0.90", "n_pairs": 400, "base_seed": 6500000, "agent_seed": 65000,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "claim_threshold": 0.90}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]}
+]

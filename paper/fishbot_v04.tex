@@ -1333,6 +1333,17 @@ natural reading is that v0.3 was buying accuracy, not precision --- more draws
 partially averaged out a \emph{bias} --- and once the bias is gone, the
 remaining sampling noise is no longer the binding constraint.
 
+\textbf{One cell technically resolves, and should still be ignored.} Lowering
+the claim bar from $0.97$ to $0.90$ gives $+0.035$ $[+0.007, +0.063]$: an
+interval excluding zero, and an effect of one fortieth of a set per deal-pair.
+After forty-odd cells at a nominal 95\% level, an interval that narrowly
+excludes zero at a magnitude this small is not evidence of anything, and we
+report it rather than promoting it --- particularly having already watched a
+larger apparent effect fail to replicate twice
+(Section~\ref{sec:res-replication}). The neighbouring cell in the other
+direction ($0.99$) gives $+0.010$ $[-0.010, +0.030]$, which is the shape of a
+policy that barely changes its decisions at all.
+
 \textbf{The claim threshold and the tablebase are exact no-ops.} The intervals
 $[-0.010, +0.030]$ and $[-0.005, +0.015]$ are not small effects; they are almost
 no divergence at all. Raising the claim bar from $0.97$ to $0.99$ changes
@@ -1523,6 +1534,79 @@ problem was that the evaluation target could not rank asks; here, a much more
 careful attempt to build a better target hits the same wall, and locates it in
 the rollout policy rather than in the statistics.
 
+\subsection{Perpetual states, measured}
+\label{sec:res-perpetual}
+
+Two hundred games per column, with ground truth used for analysis only.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+& normal & no progress rule & signalling on \\
+\midrule
+actions per game & 104.4 & 104.4 & 104.8 \\
+games hitting the 4{,}000-action cap & \textbf{0} & \textbf{0} & \textbf{0} \\
+games in which a position repeated & \textbf{200} & \textbf{200} & \textbf{200} \\
+most repeats of a single position & 8 & 8 & 8 \\
+games reaching a \emph{dead} position & \textbf{200} & \textbf{200} & \textbf{200} \\
+share of plies fully dead & 4.24\% & 4.24\% & 4.56\% \\
+actions played after going dead & 4.4 & 4.4 & 4.8 \\
+games where a team held an unplaceable set & 110 & 110 & 116 \\
+dead half-suits at peak & 3.13 & 3.13 & 3.15 \\
+nulls per game & 0.275 & 0.275 & \textbf{0.220} \\
+\bottomrule
+\end{tabular}
+\caption{Repetition and dead positions in 200 games of champion self-play.}
+\label{tab:perpetual}
+\end{table}
+
+\paragraph{Repetition is universal, not exotic.} A position repeated in
+\emph{every one} of 200 games, and some position recurred eight times in a
+single game. v0.3 established cyclicity by search, as a possibility; it is in
+fact a routine feature of ordinary play.
+
+\paragraph{Every game dies before it ends.} All 200 games reached a position in
+which no ask anywhere on the board could succeed. It happens late --- about 4.4
+actions from the end, roughly 4.2\% of plies --- but it is universal. The last
+phase of a game of Fish is not a contest at all; it is a bookkeeping exercise in
+which the sets are already decided and only the declarations remain.
+
+\paragraph{Termination is not the progress rule's doing.} With the agents'
+stalling rule fully disabled, not one game in 200 hit the action cap, and the
+mean game length was identical to four significant figures. So although the
+rules genuinely permit non-termination, and although positions genuinely repeat,
+in practice a strong policy walks out of every cycle on its own. The convention
+is insurance, not the mechanism. Consistent with this, widening the stall window
+from 80 to 200 actions produced 367 exact ties in 400 duplicate deals: the rule
+almost never fires.
+
+\paragraph{The deadlock is real, and it is expensive.} In 110 of 200 games
+(55\%) a team reached a position where it could prove it held an entire
+half-suit and still could not place the split. Those half-suits are nulled
+\textbf{17.5\%} of the time against \textbf{2.8\%} for half-suits that never get
+stuck --- a factor of $6.3$ --- and they account for \textbf{27\% of all nulls}
+despite being only 11\% of half-suits.
+
+\paragraph{The free-signalling escape works, and does not pay.} Turning on the
+protocol of Section~\ref{sec:perpetual} cuts nulls from $0.275$ to $0.220$ per
+game, a 20\% reduction, which confirms the mechanism does what the theory says.
+It buys no wins: against the identical policy with signalling off, over 500
+duplicate deals, $+0.002$ sets per pair $[-0.086, +0.090]$; restricted to
+strictly dead positions, $+0.012$ $[-0.000, +0.024]$. Those intervals are far
+tighter than the usual $\pm 0.48$ because the change is a near-no-op --- it alters
+so few decisions that most pairs come out identical.
+
+Two things are going on, and both are worth stating. The strictly-free version
+of the protocol applies only when the \emph{whole board} is dead, which the seat
+can prove on about 0.3\% of plies --- too rare to matter. The relaxed version
+fires more often but is no longer free: it spends a turn to send one bit, and
+the tempo it concedes cancels the sets it saves. So the escape is real theory
+with a null in practice, and the honest summary is that Fish's stalemate is a
+genuine structural feature of the game that a strong engine is already handling
+adequately by other means.
+
 \subsection{Game statistics, and a statistic that stops working}
 \label{sec:res-analytics}
 
@@ -1571,6 +1655,140 @@ improves is not a measure of skill, and we would retract the v0.3 claim rather
 than qualify it.
 
 % =====================================================================
+\section{The engine as an instrument}
+\label{sec:engine}
+
+A strong policy that can only be measured in aggregate is a weak research
+instrument, and an unusable one. The three things a chess engine gives a user
+all exist here; they just mean something different in a game whose hidden state
+is the entire problem.
+
+\paragraph{Evaluation, in sets.} The banked differential plus, for every
+unresolved half-suit, the learned probability that our team scores it minus the
+probability that theirs does \eqref{eq:hsvalue}. So $+1.4$ reads as ``expect to
+finish 1.4 sets ahead of the current score''. Because the underlying model is
+fitted to outcomes and checked for calibration --- held-out log-loss $0.727$
+against $0.821$ for the class prior, mean bias $-0.006$, reliable in every
+decile --- the number means what it says. This is the one component that is a
+good \emph{predictor} and a disastrous \emph{objective}
+(Section~\ref{sec:res-null}), which is itself worth knowing: an evaluation
+function and an objective function are not the same object.
+
+\paragraph{A ranked move list with attribution.} Every legal ask, with the
+probability it lands, the evaluation on each branch, and a per-term breakdown of
+the policy's score. The breakdown matters for a research instrument rather than
+a toy: when a human disagrees with the engine, the disagreement can be
+attributed to a named term instead of left as an oracle's verdict.
+
+\paragraph{A principal variation.} In chess the PV is the expected line. The
+Fish analogue is the \emph{possession}: the chain of asks the engine would make
+if each landed, since a turn in Fish is a run of successful asks. It is computed
+by pinning each card as it is won and re-ranking, so it is the engine's actual
+plan rather than a static list.
+
+Two things a chess engine never has to show, and this one must. The
+\textbf{card table} is the posterior over who holds every unresolved card ---
+where the strength of this version actually lives, so it is displayed rather
+than hidden. The \textbf{declaration table} gives, per live half-suit, the
+probability our team holds all six, the most likely split, and the exact
+probability that split is right, which is the quantity the claim decision turns
+on.
+
+The information boundary survives the user interface. Every panel is built from
+the seat's own \texttt{Observation}; the posterior shown is an inference from the
+public record, not a look behind it. The only exception is the reveal after the
+last card is public anyway.
+
+Analysis costs 130--270\,ms, which is interactive, and the same objects drive
+the terminal client, the browser client and the batch experiments, so what a
+user sees is what the experiments measured.
+
+% =====================================================================
+\section{Perpetual states: does Fish have a stalemate?}
+\label{sec:perpetual}
+
+Chess has stalemate and threefold repetition. The natural question is whether
+Literature has an analogue --- a position the game cannot get out of --- and the
+answer comes in three layers, of which only the third is interesting.
+
+\subsection{Layer 1: the state graph is cyclic}
+
+Nothing in the rules forces progress. Two opponents can trade a card back and
+forth and return to a bit-identical position, so positions can repeat. This is a
+property of the rules, not of any implementation. It follows immediately that
+\emph{termination is a property of the players}: any claim that ``every game of
+Fish ends'' describes a convention rather than the game. Our policies carry an
+explicit progress rule and our harness a cap, and Section~\ref{sec:res-perpetual}
+measures how much of ``games end'' those conventions are actually doing.
+
+\subsection{Layer 2: under perfect information it does not matter}
+
+Cycles exist, but the exact solver of Section~\ref{sec:exact} shows that no
+\emph{optimal} line needs one: with all cards visible, optimal play always
+terminates. Cyclicity on its own is therefore not a strategic phenomenon. The
+reason is the closed form \eqref{eq:closedform} --- footholds only shrink, so the
+mover simply collects everything reachable and the position marches forward.
+
+\subsection{Layer 3: dead positions}
+
+This layer has no chess counterpart, and it is the one worth having.
+
+\begin{proposition}[Dead half-suits]
+\label{prop:dead}
+Call a live half-suit \emph{dead} when all six of its cards sit with one team.
+Then no ask in that half-suit can ever succeed.
+\end{proposition}
+
+\begin{proof}
+A legal ask in half-suit $H$ requires the asker to hold a card of $H$. If one
+team holds all six, no member of the other team holds any card of $H$, so no
+opponent of the holding team may ask in it at all. And a member of the holding
+team may only ask an \emph{opponent}, who by hypothesis holds no card of $H$, so
+such an ask fails. No card of $H$ therefore ever changes hands again.
+\end{proof}
+
+Call a position \emph{dead} when every live half-suit is dead. By
+Proposition~\ref{prop:dead} the material is then frozen for the remainder of the
+game: every legal ask is guaranteed to fail, the turn merely circulates, and the
+only state changes left are declarations. This is as close to a stalemate as
+Fish gets --- and, unlike a chess stalemate, it is not a draw. The sets are
+already decided; they have simply not been claimed.
+
+\subsection{The apparent deadlock, and why it is not one}
+
+A dead position looks like a genuine trap for a team that holds a half-suit but
+cannot place the split among its own members. No card will move again, so
+--- the argument runs --- no new information can arrive, so the team must either
+gamble on a declaration or stall forever.
+
+That argument is wrong, and the way it is wrong is a strategy.
+
+Information does not only arrive when cards move. Under the no-bluff rule a
+player may not ask for a card they hold, so \textbf{asking for a card proves
+publicly that you do not hold it}. In a dead position that ask is guaranteed to
+fail, which means it costs no material whatsoever: there is no card to lose, and
+the turn it concedes is worthless because no opponent can win a card either. The
+ask is a \emph{free one-bit broadcast to your partners}.
+
+A team stuck in a dead position can therefore talk its way out. Each member asks
+for cards of the contested half-suit that they do not hold; after a few such
+asks the split is common knowledge within the team and the declaration is safe.
+Literature's only communication channel is normally costly and read by the
+opposition; in a dead position it becomes free, and the opposition can do
+nothing with what it hears, because the half-suit is already beyond their reach.
+
+\begin{remark}[A definition that made the phenomenon invisible]
+Our first implementation defined ``our team provably holds this half-suit'' as
+``every card's holder is pinned and all six are teammates''. That makes ``we hold
+it but cannot place the split'' a contradiction in terms, since pinning the
+holders \emph{is} placing the split, and the condition never fired once in 1,047
+measured plies. The correct condition is weaker and is the whole point: every
+\emph{possible} holder of every card is a teammate, which does not require
+knowing which teammate. Under that definition the situation occurs on 2.6\% of
+plies.
+\end{remark}
+
+% =====================================================================
 \section{What this says about playing Fish}
 \label{sec:strategy}
 
@@ -1611,6 +1829,27 @@ already winning. v0.3 measured that pair at $+1.41$ sets per deal-pair; with an
 inference layer good enough to make the primary criterion much sharper, they are
 still worth $+1.08$. Better card-reading does not make positional judgement
 redundant.
+
+\paragraph{The endgame is bookkeeping, so do the bookkeeping.} Every one of 200
+measured games reached a position where no ask anywhere could succeed: the sets
+were decided and only the declarations were left. Two consequences for a human.
+First, the last few turns are not a contest, so spend your attention earlier.
+Second --- and this is the one people get wrong --- if your team holds a half-suit
+outright, \emph{no opponent can legally ask in it}, so it cannot be taken from
+you. There is never a reason to rush that declaration. In our games, half-suits
+that reached "ours but we cannot place the split" were nulled 17.5\% of the
+time against 2.8\% otherwise, and accounted for 27\% of all nulls. Almost every
+one of those is a self-inflicted wound.
+
+\paragraph{You can talk, and most players do not realise it.} You may not ask
+for a card you hold. So asking for a card \emph{proves to the table} that you do
+not have it --- and when your team already owns the half-suit, the ask cannot
+lose you anything, because no opponent holds a card of it to give. In that
+situation an ask is a free, legal message to your partners telling them exactly
+where a card is not. Use it when you are stuck on a split. (Our engine gains
+about 20\% fewer nulls doing this; it does not gain games, because the turn it
+spends is worth about as much as the sets it saves. For a human, who is far more
+likely to misplace a split than an engine is, the trade is probably better.)
 
 \paragraph{And a warning about the obvious idea.} Scoring asks by ``how much
 does this improve my team's chance of winning this half-suit'' --- which sounds
