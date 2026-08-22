@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FishBot v0.4</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <h1>FishBot <span class="v">v0.4</span></h1>
+  <div class="setup">
+    <label>seat <select id="seat"></select></label>
+    <label>seed <input id="seed" size="8" placeholder="random"></label>
+    <label>opponent
+      <select id="opponent">
+        <option value="champion">champion (opponent model on)</option>
+        <option value="nomodel">model off</option>
+      </select></label>
+    <button id="new">new game</button>
+  </div>
+</header>
+
+<main>
+  <section id="left">
+    <div id="board" class="panel"></div>
+    <div id="hand" class="panel"></div>
+    <div id="action" class="panel"></div>
+    <div id="log" class="panel"></div>
+  </section>
+
+  <section id="right">
+    <div id="engine" class="panel"></div>
+  </section>
+</main>
+
+<div id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
