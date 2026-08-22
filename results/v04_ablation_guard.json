@@ -1,0 +1,284 @@
+{
+  "generated": "2026-08-21T02:58:13",
+  "n_games": 8,
+  "seed": 90210,
+  "baseline": [
+    "probabilistic",
+    {}
+  ],
+  "ablated": [
+    "tuned",
+    {}
+  ],
+  "identity": {
+    "baseline_spec": [
+      "probabilistic",
+      {}
+    ],
+    "candidate_spec": [
+      "tuned",
+      {}
+    ],
+    "n_games": 8,
+    "n_positions": 855,
+    "n_divergences": 0,
+    "divergence_rate": 0.0,
+    "identical": true,
+    "first_divergence": null,
+    "seconds": 11.616812467575073,
+    "errors": []
+  },
+  "terms": [
+    {
+      "baseline_spec": [
+        "tuned",
+        {}
+      ],
+      "candidate_spec": [
+        "tuned",
+        {
+          "w_turn": 0.6
+        }
+      ],
+      "n_games": 8,
+      "n_positions": 855,
+      "n_divergences": 107,
+      "divergence_rate": 0.12514619883040937,
+      "identical": false,
+      "first_divergence": {
+        "game_index": 0,
+        "deal_seed": 9021270630,
+        "ply": 13,
+        "seat": 4,
+        "baseline_action": "ASK p5 for 2C",
+        "candidate_action": "ASK p3 for TS",
+        "hand": "3C 4C 5C 4H 7H 5S 9C JS QS",
+        "hand_counts": [
+          8,
+          9,
+          7,
+          9,
+          9,
+          12
+        ],
+        "unresolved": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "n_legal_asks": 63
+      },
+      "seconds": 9.752153396606445,
+      "errors": [],
+      "term": "w_turn",
+      "value": 0.6
+    },
+    {
+      "baseline_spec": [
+        "tuned",
+        {}
+      ],
+      "candidate_spec": [
+        "tuned",
+        {
+          "w_turn": 1.6
+        }
+      ],
+      "n_games": 8,
+      "n_positions": 855,
+      "n_divergences": 220,
+      "divergence_rate": 0.2573099415204678,
+      "identical": false,
+      "first_divergence": {
+        "game_index": 0,
+        "deal_seed": 9021270630,
+        "ply": 13,
+        "seat": 4,
+        "baseline_action": "ASK p5 for 2C",
+        "candidate_action": "ASK p3 for TS",
+        "hand": "3C 4C 5C 4H 7H 5S 9C JS QS",
+        "hand_counts": [
+          8,
+          9,
+          7,
+          9,
+          9,
+          12
+        ],
+        "unresolved": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "n_legal_asks": 63
+      },
+      "seconds": 9.593770503997803,
+      "errors": [],
+      "term": "w_turn",
+      "value": 1.6
+    },
+    {
+      "baseline_spec": [
+        "tuned",
+        {}
+      ],
+      "candidate_spec": [
+        "tuned",
+        {
+          "w_scarce": 0.2
+        }
+      ],
+      "n_games": 8,
+      "n_positions": 855,
+      "n_divergences": 102,
+      "divergence_rate": 0.11929824561403508,
+      "identical": false,
+      "first_divergence": {
+        "game_index": 0,
+        "deal_seed": 9021270630,
+        "ply": 1,
+        "seat": 5,
+        "baseline_action": "ASK p0 for QD",
+        "candidate_action": "ASK p2 for JS",
+        "hand": "2D 7D 2S 6S 9D 9S AS 8D 8S",
+        "hand_counts": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "unresolved": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "n_legal_asks": 63
+      },
+      "seconds": 11.304936408996582,
+      "errors": [],
+      "term": "w_scarce",
+      "value": 0.2
+    },
+    {
+      "baseline_spec": [
+        "tuned",
+        {}
+      ],
+      "candidate_spec": [
+        "tuned",
+        {
+          "w_reveal": 0.15
+        }
+      ],
+      "n_games": 8,
+      "n_positions": 855,
+      "n_divergences": 72,
+      "divergence_rate": 0.08421052631578947,
+      "identical": false,
+      "first_divergence": {
+        "game_index": 0,
+        "deal_seed": 9021270630,
+        "ply": 16,
+        "seat": 4,
+        "baseline_action": "ASK p5 for 9S",
+        "candidate_action": "ASK p3 for 2C",
+        "hand": "3C 4C 5C 4H 7H 5S 9C JS QS",
+        "hand_counts": [
+          7,
+          9,
+          7,
+          9,
+          9,
+          13
+        ],
+        "unresolved": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "n_legal_asks": 63
+      },
+      "seconds": 11.410629272460938,
+      "errors": [],
+      "term": "w_reveal",
+      "value": 0.15
+    },
+    {
+      "baseline_spec": [
+        "tuned",
+        {}
+      ],
+      "candidate_spec": [
+        "tuned",
+        {
+          "w_deplete": 0.3
+        }
+      ],
+      "n_games": 8,
+      "n_positions": 855,
+      "n_divergences": 61,
+      "divergence_rate": 0.07134502923976609,
+      "identical": false,
+      "first_divergence": {
+        "game_index": 0,
+        "deal_seed": 9021270630,
+        "ply": 13,
+        "seat": 4,
+        "baseline_action": "ASK p5 for 2C",
+        "candidate_action": "ASK p3 for TS",
+        "hand": "3C 4C 5C 4H 7H 5S 9C JS QS",
+        "hand_counts": [
+          8,
+          9,
+          7,
+          9,
+          9,
+          12
+        ],
+        "unresolved": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "n_legal_asks": 63
+      },
+      "seconds": 8.643669843673706,
+      "errors": [],
+      "term": "w_deplete",
+      "value": 0.3
+    }
+  ],
+  "wall_clock_s": 62.32860565185547
+}

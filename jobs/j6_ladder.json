@@ -1,0 +1,12 @@
+[
+ {"label": "ladder: v04-champ vs v03-champ", "n_pairs": 300, "base_seed": 1600000, "agent_seed": 9001,
+  "x": ["fishbot4", {"opponent_gamma": 0.35}], "y": ["tuned", {"w_turn": 0.6, "w_scarce": 0.2}]},
+ {"label": "ladder: v04-champ vs probabilistic", "n_pairs": 200, "base_seed": 1610000, "agent_seed": 9002,
+  "x": ["fishbot4", {"opponent_gamma": 0.35}], "y": ["probabilistic", {}]},
+ {"label": "ladder: v04-champ vs memory", "n_pairs": 200, "base_seed": 1620000, "agent_seed": 9003,
+  "x": ["fishbot4", {"opponent_gamma": 0.35}], "y": ["memory", {}]},
+ {"label": "ladder: v04-champ vs heuristic", "n_pairs": 120, "base_seed": 1630000, "agent_seed": 9004,
+  "x": ["fishbot4", {"opponent_gamma": 0.35}], "y": ["heuristic", {}]},
+ {"label": "ladder: v04-champ vs random", "n_pairs": 80, "base_seed": 1640000, "agent_seed": 9005,
+  "x": ["fishbot4", {"opponent_gamma": 0.35}], "y": ["random", {}]}
+]

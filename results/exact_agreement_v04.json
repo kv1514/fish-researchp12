@@ -1,0 +1,158 @@
+{
+  "n_positions": 988,
+  "n_resolved": 278,
+  "rows": [
+    {
+      "label": "random",
+      "spec": [
+        "random",
+        {}
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 171,
+      "res_prog": 169,
+      "unc_total": 710,
+      "unc_opt": 256,
+      "unc_prog": 232,
+      "m1_total": 212,
+      "m1_prog": 60,
+      "m2_total": 776,
+      "m2_prog": 341
+    },
+    {
+      "label": "heuristic",
+      "spec": [
+        "heuristic",
+        {}
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 200,
+      "res_prog": 199,
+      "unc_total": 710,
+      "unc_opt": 396,
+      "unc_prog": 332,
+      "m1_total": 212,
+      "m1_prog": 73,
+      "m2_total": 776,
+      "m2_prog": 458
+    },
+    {
+      "label": "memory",
+      "spec": [
+        "memory",
+        {}
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 278,
+      "res_prog": 278,
+      "unc_total": 710,
+      "unc_opt": 497,
+      "unc_prog": 438,
+      "m1_total": 212,
+      "m1_prog": 172,
+      "m2_total": 776,
+      "m2_prog": 544
+    },
+    {
+      "label": "probabilistic",
+      "spec": [
+        "probabilistic",
+        {}
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 278,
+      "res_prog": 278,
+      "unc_total": 710,
+      "unc_opt": 545,
+      "unc_prog": 475,
+      "m1_total": 212,
+      "m1_prog": 184,
+      "m2_total": 776,
+      "m2_prog": 569
+    },
+    {
+      "label": "v0.3 champion",
+      "spec": [
+        "tuned",
+        {
+          "w_turn": 0.6,
+          "w_scarce": 0.2
+        }
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 278,
+      "res_prog": 278,
+      "unc_total": 710,
+      "unc_opt": 546,
+      "unc_prog": 480,
+      "m1_total": 212,
+      "m1_prog": 184,
+      "m2_total": 776,
+      "m2_prog": 574
+    },
+    {
+      "label": "v0.4 no-gamma",
+      "spec": [
+        "fishbot4",
+        {}
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 278,
+      "res_prog": 278,
+      "unc_total": 710,
+      "unc_opt": 546,
+      "unc_prog": 479,
+      "m1_total": 212,
+      "m1_prog": 181,
+      "m2_total": 776,
+      "m2_prog": 576
+    },
+    {
+      "label": "v0.4 champion",
+      "spec": [
+        "fishbot4",
+        {
+          "opponent_gamma": 0.35
+        }
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 278,
+      "res_prog": 278,
+      "unc_total": 710,
+      "unc_opt": 585,
+      "unc_prog": 515,
+      "m1_total": 212,
+      "m1_prog": 182,
+      "m2_total": 776,
+      "m2_prog": 611
+    },
+    {
+      "label": "v0.4 no-tablebase",
+      "spec": [
+        "fishbot4",
+        {
+          "opponent_gamma": 0.35,
+          "use_tablebase": false
+        }
+      ],
+      "errors": 0,
+      "res_total": 278,
+      "res_opt": 278,
+      "res_prog": 278,
+      "unc_total": 710,
+      "unc_opt": 585,
+      "unc_prog": 515,
+      "m1_total": 212,
+      "m1_prog": 182,
+      "m2_total": 776,
+      "m2_prog": 611
+    }
+  ]
+}

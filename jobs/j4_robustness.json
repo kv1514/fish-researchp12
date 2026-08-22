@@ -1,0 +1,18 @@
+[
+ {"label": "gamma vs v03-champion", "n_pairs": 250, "base_seed": 1400000, "agent_seed": 8001,
+  "x": ["fishbot4", {"opponent_gamma": 0.30}],
+  "y": ["tuned", {"w_turn": 0.6, "w_scarce": 0.2}]},
+ {"label": "no-gamma vs v03-champion", "n_pairs": 250, "base_seed": 1400000, "agent_seed": 8001,
+  "x": ["fishbot4", {}],
+  "y": ["tuned", {"w_turn": 0.6, "w_scarce": 0.2}]},
+ {"label": "gamma vs memory (off-distribution)", "n_pairs": 150, "base_seed": 1410000, "agent_seed": 8101,
+  "x": ["fishbot4", {"opponent_gamma": 0.30}], "y": ["memory", {}]},
+ {"label": "no-gamma vs memory (off-distribution)", "n_pairs": 150, "base_seed": 1410000, "agent_seed": 8101,
+  "x": ["fishbot4", {}], "y": ["memory", {}]},
+ {"label": "gamma vs anti-model exploiter", "n_pairs": 200, "base_seed": 1420000, "agent_seed": 8201,
+  "x": ["fishbot4", {"opponent_gamma": 0.30}],
+  "y": ["fishbot4", {"w_suit": -0.35}]},
+ {"label": "no-gamma vs anti-model exploiter", "n_pairs": 200, "base_seed": 1420000, "agent_seed": 8201,
+  "x": ["fishbot4", {}],
+  "y": ["fishbot4", {"w_suit": -0.35}]}
+]

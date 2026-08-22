@@ -1,0 +1,216 @@
+[
+ {
+  "label": "sqrt g0.70 d320",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.7,
+    "count_mode": "sqrt",
+    "n_draws": 320
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "sqrt g0.70 d160",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.7,
+    "count_mode": "sqrt"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "draws 320",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 320
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "opp_lambda 0.9",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "opp_lambda": 0.9
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "opp_lambda 1.8",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "opp_lambda": 1.8
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "value blend 0.5",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_value": 0.5,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "value blend 1.5",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_value": 1.5,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "value pure",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "objective": "value",
+    "value_turn": 0.15,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "claim threshold 0.99",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_threshold": 0.99
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "tablebase m=1 only",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "tablebase_max_half_suits": 1
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "no tablebase",
+  "n_pairs": 200,
+  "base_seed": 2000000,
+  "agent_seed": 11000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "use_tablebase": false
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]
