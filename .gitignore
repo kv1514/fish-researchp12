@@ -9,3 +9,6 @@ observation_*.json
 results/logs/
 # Stale lock files from the experiment registry.
 *.lock
+
+# Generated: the Overleaf upload bundle, rebuilt by scripts4/prepare_overleaf.py
+paper/*_overleaf.zip

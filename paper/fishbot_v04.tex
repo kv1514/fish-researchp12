@@ -5,15 +5,14 @@
 % =====================================================================
 \documentclass[11pt,a4paper]{article}
 
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
-\usepackage{graphicx}
 \usepackage{microtype}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{natbib}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
 \usepackage{multirow}
 \usepackage{xcolor}
 
@@ -256,7 +255,7 @@ literature on sequential importance sampling for contingency tables
 \citep{chen2005sequential} --- along with cautionary results showing SIS can be
 exponentially bad on some instances \citep{bezakova2012negative}. We need none
 of that machinery, because the instances here are small in the dimension that
-matters. The constraint-programming counterpart is Régin's global cardinality
+matters. The constraint-programming counterpart is R\'egin's global cardinality
 constraint \citep{regin1996generalized}, which achieves arc consistency by a
 flow argument; our dynamic program is stronger in that it also \emph{counts},
 which is what claim probabilities require.
@@ -2121,7 +2120,6 @@ quantities: posterior marginals under four combinations of the opponent-model
 parameters, all eleven ask-objective terms, and the end-to-end policy action.
 
 % =====================================================================
-\bibliographystyle{plainnat}
 \begin{thebibliography}{99}
 
 \bibitem[Celli and Gatti(2018)]{celli2018computational}
