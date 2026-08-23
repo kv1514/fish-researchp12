@@ -54,19 +54,48 @@ hand.
 
 ``gamma_schedule`` scales the per-ask weight by where in the game the ask
 happened, measured by the fraction of half-suits already resolved at that moment
-- a public quantity, recoverable from the log alone:
+- a public quantity, recoverable from the log alone.
 
-    gamma_eff(ask) = gamma * (1 + s * (1 - 2 * resolved_fraction))
+THE PROFILE IS MEASURED, NOT CHOSEN
+-----------------------------------
+The first version of this used a symmetric tilt, ``1 + s*(1 - 2*frac)``, picked
+for being the simplest thing with the right sign. It is the wrong shape.
 
-so an opening ask counts ``gamma*(1+s)`` and a closing one ``gamma*(1-s)``. At
-``s = 0`` every factor is 1 and the model is the incumbent, exactly.
+``scripts4/choice_curve.py`` fits the exponent directly from self-play: at every
+ask it records which half-suits were legal, the asker's initial-deal depth in
+each, and which was chosen, then fits ``P(ask in H) ~ depth_H ** alpha`` by
+exact conditional likelihood. Over 200 games and 17,005 decisions with a genuine
+choice, with standard errors block-bootstrapped over games - which doubles them,
+because decisions inside one deal are not independent draws:
 
-This is the third thing tried on this axis. The at-ask-time depth refinement was
-a null and the within-half-suit card choice was refuted by direct measurement.
-What is different here is that it does not add a new signal - it re-weights the
-one that already pays 1.9 sets per deal-pair, which is the largest effect in the
-engine and therefore the one where a better-specified likelihood has the most to
-gain.
+    half-suits resolved   0      1      2      3      4      5     6-8
+    alpha                 2.00   1.28   1.20   0.68   0.30   0.41  -0.02
+    clustered SE          0.08   0.08   0.12   0.12   0.13   0.18   0.16
+
+So the shipped constant is wrong at both ends, in opposite directions. At the
+opening the true exponent is about 2 and the model understates the signal; by
+the endgame it is 0 and the model applies a tilt that is not there. Pooled, the
+constant that best fits everything is 1.207 +/- 0.046 - close enough to 1 to
+explain why a constant never looked obviously broken, and far enough from either
+end to explain why it could not be right.
+
+The mechanism is the one this term was built for, and it is now measured rather
+than argued: a player asks where they are deep only if they had a choice, and
+late, holding two cards with most of the deck resolved, legality binds.
+
+``ALPHA_*`` below is a weighted quadratic through those seven bands (chi-square
+8.3 on 4 dof), clamped flat past its vertex because past there the parabola
+turns up and the measurements do not. ``gamma_schedule`` is the strength with
+which that profile replaces the constant:
+
+    gamma_eff(ask) = gamma * [(1 - s) + s * alpha(frac) / ALPHA_MEAN]
+
+``ALPHA_MEAN`` is the profile averaged over the observed distribution of asks,
+so ``s = 1`` redistributes the model's belief across the game without changing
+how much of it there is in total. That matters: gamma was tuned by duels to a
+broad plateau, and this term is a claim about SHAPE, not strength. Confounding
+the two would leave a positive result unattributable. ``s = 0`` is the
+incumbent, exactly.
 """
 
 from __future__ import annotations
@@ -79,18 +108,44 @@ from fish.engine import AskEvent, ClaimEvent
 from .sis import OpponentModel
 
 
+#: Weighted quadratic through the seven measured bands (see the module
+#: docstring). Fitted on the 54-card variant; the argument is a fraction, so it
+#: carries to the 48-card one under the assumption that what matters is how far
+#: the deal has run rather than how many half-suits it had.
+ALPHA_Q, ALPHA_L, ALPHA_C = 3.0281, -4.7983, 1.9344
+
+#: The parabola's vertex. Past it the fit turns upward; the measurements do not,
+#: they flatten, so the profile is held at its vertex value beyond this point.
+ALPHA_FLAT = 0.7923
+
+#: The profile averaged over the observed distribution of asks (17,005 of them),
+#: so dividing by it leaves the model's total strength alone and moves only its
+#: distribution across the game.
+ALPHA_MEAN = 1.0626
+
+
+def measured_alpha(frac: float) -> float:
+    """The fitted depth exponent for an ask at this point in the game."""
+    f = frac if frac < ALPHA_FLAT else ALPHA_FLAT
+    v = ALPHA_C + ALPHA_L * f + ALPHA_Q * f * f
+    return v if v > 0.0 else 0.0
+
+
 def schedule_factor(resolved: int, n_half_suits: int, s: float) -> float:
     """Weight for an ask made when ``resolved`` half-suits were already decided.
 
-    ``1 + s * (1 - 2 * resolved/n)``: an opening ask counts ``1 + s``, a closing
-    one ``1 - s``, and ``s = 0`` gives 1 everywhere. Clamped at zero because past
-    it a late ask would count as evidence of the *opposite* proposition, which is
-    a different model rather than a weaker form of this one.
+    ``s`` interpolates between the shipped constant and the measured profile:
+    ``0`` returns 1 everywhere and is the incumbent exactly, ``1`` is the profile
+    normalised to leave the model's average strength unchanged. Clamped at zero,
+    because a negative weight is the claim that asking in a half-suit is evidence
+    of being SHALLOW in it - a different model rather than a weaker form of this
+    one, and not what the measurement found even at the end of the game.
     """
     if not s:
         return 1.0
     frac = (resolved / n_half_suits) if n_half_suits else 0.0
-    return max(0.0, 1.0 + s * (1.0 - 2.0 * frac))
+    v = (1.0 - s) + s * measured_alpha(frac) / ALPHA_MEAN
+    return v if v > 0.0 else 0.0
 
 
 def build(bel, obs, gamma: float, include_self: bool = False,
