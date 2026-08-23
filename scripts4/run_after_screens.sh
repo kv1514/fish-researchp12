@@ -6,14 +6,22 @@
 cd /home/user/fish-researchp12 || exit 1
 LOG=/tmp/claude-0/-home-user-fish-researchp12/993de2cf-d12a-5e1b-8404-c20bdce05164/scratchpad/at_ask_confirm.log
 
+# Count against the JOB FILE's own labels, not against a substring guess.
+# The first version matched 'SCREEN at_ask' or 'SCREEN gamma 1.0', which covers
+# four of the five cells in jobs/j23_at_ask.json -- the fifth is called
+# 'SCREEN gamma profile under at_ask' and matches neither. All five finished and
+# the gate stayed shut, which would have blocked the at-ask run and everything
+# chained behind it indefinitely. A supervisor whose completion test is a
+# substring guess at labels it does not own can wait forever for finished work.
 count() {
-  python - <<'PY' 2>/dev/null || echo -1
-import json
-rows = [json.loads(l) for l in open('results/v04_duels.jsonl') if l.strip()]
-print(sum(1 for r in rows
-          if 'SCREEN at_ask' in (r.get('label') or '')
-          or 'SCREEN gamma 1.0' in (r.get('label') or '')))
-PY
+  python - <<'PYEOF' 2>/dev/null || echo -1
+import json, pathlib
+want = {j['label'] for j in
+        json.loads(pathlib.Path('jobs/j23_at_ask.json').read_text())}
+done = {json.loads(l).get('label') for l in
+        open('results/v04_duels.jsonl') if l.strip()}
+print(len(want & done))
+PYEOF
 }
 regen() {
   python - <<'PY'
