@@ -70,6 +70,7 @@ class FishBot4(Tablebase4Mixin, Agent):
                  depth_mode: str = "initial",
                  count_mode: str = "linear",
                  opp_lambda: float = 0.0,
+                 gamma_schedule: float = 0.0,
                  # -- ask objective
                  w_suit: float = 0.06,
                  w_turn: float = 0.6,
@@ -117,6 +118,7 @@ class FishBot4(Tablebase4Mixin, Agent):
         self.depth_mode = depth_mode
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda
+        self.gamma_schedule = gamma_schedule
         self.weights = AskWeights(
             suit=w_suit, turn=w_turn, scarce=w_scarce, reveal=w_reveal,
             deplete=w_deplete, expose=w_expose, claim=w_claim, info=w_info,
@@ -169,6 +171,7 @@ class FishBot4(Tablebase4Mixin, Agent):
                          depth_mode=self.depth_mode,
                          count_mode=self.count_mode,
                          opp_lambda=self.opp_lambda,
+                         gamma_schedule=self.gamma_schedule,
                          stats=self.stats)
         ctx = DecisionContext(obs, self.bel, post)
 

@@ -40,7 +40,33 @@ A known limitation, stated rather than hidden: depth is evaluated on the INITIAL
 deal, not at the moment of the ask. Cards move, so late in a game the two
 diverge. Modelling the depth at ask time would require replaying each candidate
 world through the whole public history, which costs O(history) per draw instead
-of O(1).
+of O(1). Measured, that refinement is a null (paper, Remark 1).
+
+WHY AN ASK EARLY IS BETTER EVIDENCE THAN AN ASK LATE
+----------------------------------------------------
+The model treats every ask as equally informative about depth. It should not.
+The hypothesis is that a player asks in a half-suit *in proportion to how many
+cards of it they hold* - which presumes they had a choice. Early, with nine cards
+across many live half-suits, they do. Late, holding two cards in one half-suit
+with most of the deck resolved, legality binds: they ask where they *can*, not
+where they are deep, and the same observation carries far less signal about their
+hand.
+
+``gamma_schedule`` scales the per-ask weight by where in the game the ask
+happened, measured by the fraction of half-suits already resolved at that moment
+- a public quantity, recoverable from the log alone:
+
+    gamma_eff(ask) = gamma * (1 + s * (1 - 2 * resolved_fraction))
+
+so an opening ask counts ``gamma*(1+s)`` and a closing one ``gamma*(1-s)``. At
+``s = 0`` every factor is 1 and the model is the incumbent, exactly.
+
+This is the third thing tried on this axis. The at-ask-time depth refinement was
+a null and the within-half-suit card choice was refuted by direct measurement.
+What is different here is that it does not add a new signal - it re-weights the
+one that already pays 1.9 sets per deal-pair, which is the largest effect in the
+engine and therefore the one where a better-specified likelihood has the most to
+gain.
 """
 
 from __future__ import annotations
@@ -48,14 +74,29 @@ from __future__ import annotations
 import math
 
 from fish.cards import NUM_PLAYERS, half_suit_of
-from fish.engine import AskEvent
+from fish.engine import AskEvent, ClaimEvent
 
 from .sis import OpponentModel
 
 
+def schedule_factor(resolved: int, n_half_suits: int, s: float) -> float:
+    """Weight for an ask made when ``resolved`` half-suits were already decided.
+
+    ``1 + s * (1 - 2 * resolved/n)``: an opening ask counts ``1 + s``, a closing
+    one ``1 - s``, and ``s = 0`` gives 1 everywhere. Clamped at zero because past
+    it a late ask would count as evidence of the *opposite* proposition, which is
+    a different model rather than a weaker form of this one.
+    """
+    if not s:
+        return 1.0
+    frac = (resolved / n_half_suits) if n_half_suits else 0.0
+    return max(0.0, 1.0 + s * (1.0 - 2.0 * frac))
+
+
 def build(bel, obs, gamma: float, include_self: bool = False,
           depth_mode: str = "initial", count_mode: str = "linear",
-          opp_lambda: float = 0.0, order=None):
+          opp_lambda: float = 0.0, order=None,
+          gamma_schedule: float = 0.0):
     """Build an ``(OpponentModel, card_slot)`` pair, or ``(None, None)``.
 
     ``card_slot`` maps ``(player, card)`` to the model slot for that player and
@@ -97,14 +138,26 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     if gamma <= 0.0 and opp_lambda <= 0.0:
         return None, None
     counts: dict[tuple[int, int], int] = {}
+    #: Sum of per-ask schedule factors per slot, for gamma_schedule. Left equal
+    #: to the raw count when the schedule is off, so the mean factor is 1.
+    sched: dict[tuple[int, int], float] = {}
     me = obs.player
+    n_hs = len(obs.set_winner)
+    resolved = 0
     for ev in obs.history:
+        if isinstance(ev, ClaimEvent):
+            # The game clock: how much of the deck is already decided. Public,
+            # and recoverable from the log alone.
+            resolved += 1
+            continue
         if not isinstance(ev, AskEvent):
             continue
         if not include_self and ev.asker == me:
             continue
         key = (ev.asker, half_suit_of(ev.card))
         counts[key] = counts.get(key, 0) + 1
+        sched[key] = sched.get(key, 0.0) + schedule_factor(
+            resolved, n_hs, gamma_schedule)
     if not counts and opp_lambda <= 0.0:
         return None, None
     slots = {key: i for i, key in enumerate(counts)}
@@ -112,11 +165,14 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     base = [0] * len(slots)
     for key, i in slots.items():
         n = counts[key]
+        # The schedule enters as the MEAN factor over that slot's asks, so it
+        # rescales the weight without disturbing how count_mode shapes it.
+        mean_f = (sched[key] / n) if n else 1.0
         if count_mode == "sqrt":
             n = math.sqrt(n)
         elif count_mode == "capped":
             n = 1.0
-        weight[i] = gamma * n
+        weight[i] = gamma * n * mean_f
     # base[i] = cards of that half-suit already pinned to that player by the
     # propagator, i.e. depth contributed by cards the sampler will not re-draw
     if depth_mode == "attime":
