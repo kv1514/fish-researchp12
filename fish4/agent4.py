@@ -210,10 +210,26 @@ class FishBot4(Tablebase4Mixin, Agent):
                 beam=self.lookahead_beam, couple=self.lookahead_couple)
         order = sorted(range(len(asks)), key=lambda i: -scores[i])
         top = scores[order[0]]
-        # If no ask can possibly land, every ask hands over the turn for
-        # certain. A claim is only better if it is more likely right than wrong;
-        # otherwise it gifts a set on top of the lost turn, which is strictly
-        # worse than a doomed ask. v0.3 used the same 0.5 bar.
+        # If the ask we are ABOUT TO MAKE cannot land, it hands over the turn
+        # for certain, so a claim is worth considering instead - but only if it
+        # is more likely right than wrong, since otherwise it gifts a set on top
+        # of the lost turn, which is strictly worse than a doomed ask. v0.3 used
+        # the same 0.5 bar.
+        #
+        # Note what this is NOT. An earlier version of this comment said "if no
+        # ask can possibly land", which is a stricter condition - max(p) <= 0 -
+        # and not what the line below tests. p[order[0]] is the probability of
+        # the highest-SCORING ask, so the gate can open while some other ask
+        # could still have landed, and it depends on every objective weight
+        # rather than on a fact about the position. The two readings disagree on
+        # roughly one decision in a few hundred.
+        #
+        # The code is left as it is deliberately. Both readings are defensible -
+        # "the move I would make is doomed" is a reasonable trigger, not only
+        # "every move is doomed" - and which plays better is an empirical
+        # question nobody has measured. Changing it would silently move the
+        # champion out from under every number in the paper to settle a question
+        # by fiat. If it is ever measured, max(p) is the other arm.
         # Signalling. An ask placed in a half-suit our own team fully owns
         # cannot land, so it throws the turn away - but under the no-bluff rule
         # it publicly proves we do not hold the card we asked for, which is the
