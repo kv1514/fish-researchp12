@@ -29,13 +29,18 @@ length of the game.
 
 WHAT THE CLIENT IS NOT GIVEN
 ----------------------------
-The seed determines the deal, so handing it to the browser would hand over every
-hidden hand. The local server does exactly that - acceptable when the only
-person who could cheat is the one running it, and not acceptable on a public
-URL. Here the seed travels as an opaque HMAC-signed token, and the action log,
-which is public information by construction, travels in clear. A tampered token
-is rejected rather than trusted, so the log cannot be replayed against a deal of
-the client's choosing.
+The seed determines the deal, so handing it to the browser hands over every
+hidden hand: ``GameState.deal`` is deterministic and this repository is public.
+The local server does hand it over - acceptable when the only person who could
+cheat is the one running it, and not acceptable on a public URL.
+
+An HMAC signature alone does not fix that. Signing authenticates a payload; it
+does not conceal one, and a base64 token is readable by whoever holds it. So the
+seed is not in the token. The token carries a random *nonce*, and the seed is
+derived from it server-side as ``HMAC(secret, nonce)``. The client therefore
+holds a value that identifies its game and reveals nothing about the deal, the
+server needs no storage to recover it, and a tampered token fails its signature
+rather than selecting a deal of the client's choosing.
 """
 
 from __future__ import annotations
@@ -46,6 +51,7 @@ import hmac
 import json
 import os
 import random
+import secrets
 
 from fish.cards import (HALF_SUIT_NAMES, NUM_PLAYERS, card_name,
                         half_suit_cards, is_red, mask_to_cards, team_of,
@@ -69,17 +75,30 @@ MAX_ADVANCE = 400
 MAX_LOG = 1200
 
 
+#: Used when FISH_SECRET is unset. Random per process, deliberately: the
+#: obvious fallbacks are all things an attacker can read. VERCEL_URL is in the
+#: address bar, and a secret derived from it is not a secret - it would let
+#: anyone derive every deal. Random means tokens do not survive a cold start, so
+#: a game in progress ends when the instance recycles. That is a bad experience
+#: and a safe one, and it is the right way round. Set FISH_SECRET to avoid it.
+_EPHEMERAL_SECRET = secrets.token_bytes(32)
+
+
 def _secret() -> bytes:
     s = os.environ.get("FISH_SECRET")
-    if s:
-        return s.encode()
-    # No secret configured: fall back to a value derived from the deployment so
-    # tokens are at least unforgeable by an outsider guessing at the scheme.
-    # A real deployment sets FISH_SECRET; this keeps a preview build working.
-    return hashlib.sha256(
-        (os.environ.get("VERCEL_DEPLOYMENT_ID")
-         or os.environ.get("VERCEL_URL")
-         or "fish-local-development").encode()).digest()
+    return s.encode() if s else _EPHEMERAL_SECRET
+
+
+def seed_from_nonce(nonce: str) -> int:
+    """The deal for a game, recovered from its public nonce.
+
+    Deterministic given the secret, so the server never stores a seed; and
+    opaque without it, so the nonce the client carries says nothing about the
+    hands. Domain-separated from the signature so the same key cannot be made to
+    serve both purposes.
+    """
+    d = hmac.new(_secret(), b"fish-deal:" + nonce.encode(), hashlib.sha256).digest()
+    return int.from_bytes(d[:8], "big") % (1 << 30)
 
 
 def seal(payload: dict) -> str:
@@ -99,7 +118,11 @@ def unseal(token: str) -> dict:
     # Constant time: a timing oracle on the signature is the one way an attacker
     # could work toward a token that decodes to a deal they already know.
     if not hmac.compare_digest(sig, want):
-        raise ValueError("bad session token")
+        # Either the token was tampered with, or the signing key changed under
+        # it - which is what a cold start does when FISH_SECRET is unset. The
+        # two are indistinguishable here and the remedy is the same, so the
+        # message is written for the player rather than for the attacker.
+        raise ValueError("this game has expired - start a new one")
     pad = "=" * (-len(body) % 4)
     return json.loads(base64.urlsafe_b64decode(body + pad))
 
@@ -175,10 +198,12 @@ def narrate(ev) -> dict:
 class Session:
     """A game rebuilt from a sealed seed plus the public action log."""
 
-    def __init__(self, seat: int, seed: int, rules: RuleConfig, gamma: float,
+    def __init__(self, seat: int, nonce: str, rules: RuleConfig, gamma: float,
                  draws: int = WEB_DRAWS):
         self.seat = seat
-        self.seed = seed
+        self.nonce = nonce
+        #: Never sent anywhere. Derived here and used here.
+        seed = self.seed = seed_from_nonce(nonce)
         self.rules = rules
         self.gamma = gamma
         self.draws = draws
@@ -201,7 +226,7 @@ class Session:
     def restore(cls, token: str, actions) -> "Session":
         d = unseal(token)
         rules = RuleConfig(variant=d["v"], claims_any_time=bool(d["a"]))
-        s = cls(int(d["s"]), int(d["d"]), rules, float(d["g"]))
+        s = cls(int(d["s"]), str(d["n"]), rules, float(d["g"]))
         if actions:
             if len(actions) > MAX_LOG:
                 raise ValueError("action log too long")
@@ -214,7 +239,7 @@ class Session:
         return s
 
     def token(self) -> str:
-        return seal({"s": self.seat, "d": self.seed, "g": self.gamma,
+        return seal({"s": self.seat, "n": self.nonce, "g": self.gamma,
                      "v": self.rules.variant,
                      "a": int(bool(self.rules.claims_any_time))})
 
@@ -299,13 +324,18 @@ class Session:
 
 
 def new_session(body: dict) -> Session:
+    """A fresh game. The client does not get to choose the deal.
+
+    The local server accepts a seed so a position can be reproduced while
+    debugging. Honouring that here would let anyone pick a deal they had already
+    solved offline, which is the whole thing the nonce exists to prevent, so the
+    field is ignored rather than trusted.
+    """
     seat = int(body.get("seat", 0)) % NUM_PLAYERS
-    seed = body.get("seed")
-    seed = random.randrange(1 << 30) if seed in (None, "") else int(seed)
     rules = RuleConfig(variant=str(body.get("variant", "54")),
                        claims_any_time=bool(body.get("any_time", False)))
     gamma = max(0.0, min(2.0, float(body.get("gamma", 0.35))))
-    return Session(seat, seed, rules, gamma)
+    return Session(seat, secrets.token_urlsafe(12), rules, gamma)
 
 
 def parse_action(body: dict):

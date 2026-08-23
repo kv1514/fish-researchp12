@@ -68,6 +68,14 @@ async function send(path, body) {
     return j;
   } catch (e) {
     toast(e.message);
+    // A session the server can no longer verify is not recoverable by retrying,
+    // so send the player somewhere they can act instead of leaving them on a
+    // table whose every button will fail.
+    if (/expired/i.test(e.message)) {
+      S.token = null;
+      S.actions = [];
+      setTimeout(() => show("start"), 1200);
+    }
     return null;
   } finally {
     S.busy = false;

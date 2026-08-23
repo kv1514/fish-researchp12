@@ -81,17 +81,22 @@ the session and the function replays it. Replay *applies* the recorded actions
 rather than re-deciding them, so the work per request is constant in the length
 of the game instead of quadratic over it.
 
-The seed is the deal, so it travels as an HMAC-sealed token rather than in
-clear: the local server hands the seed to the page, which is fine when the only
-person who could cheat is the one running it, and not fine on a public URL.
+The seed is the deal — `GameState.deal` is deterministic and this repository is
+public — so the browser never receives it. Signing it would not have been
+enough: an HMAC authenticates a payload, it does not conceal one, and a base64
+token is readable by whoever holds it. Instead the token carries a random
+*nonce* and the seed is derived server-side as `HMAC(secret, nonce)`. The client
+holds something that identifies its game and reveals nothing about the hands.
 
 ```bash
 py scripts4/devserve.py         # serve public/ + api/ exactly as deployed
 ```
 
-Set `FISH_SECRET` in the deployment environment. Without it the signing key is
-derived from the deployment id, which is stable within a deployment but changes
-on redeploy, so games in progress end at a release.
+**Set `FISH_SECRET` in the deployment environment.** Without it the key is
+random per process, which is safe but means a game ends when the instance
+recycles — the fallback is deliberately not derived from anything an attacker
+can read, and every candidate (the deployment URL, the deployment id) is either
+public or unstable.
 
 Other v0.4 entry points:
 
