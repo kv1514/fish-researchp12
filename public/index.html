@@ -87,12 +87,25 @@
       <span class="them"><b id="t-them">0</b> them</span>
       <span class="void" id="t-void"></span>
     </div>
-    <button id="t-think" class="ghost">Think</button>
+    <div class="pacebar">
+      <button id="t-pause" class="ghost" title="Freeze the clock">Pause</button>
+      <button id="t-next" class="ghost" title="Play the pending move now">Next</button>
+      <select id="t-pace" title="Seconds between engine moves">
+        <option value="0">instant</option>
+        <option value="5">5s</option>
+        <option value="10">10s</option>
+        <option value="12" selected>12s</option>
+        <option value="15">15s</option>
+        <option value="20">20s</option>
+      </select>
+      <button id="t-think" class="ghost">Think</button>
+    </div>
   </div>
 
   <div id="t-seats" class="seats"></div>
 
   <div id="t-turn" class="turnline"></div>
+  <div id="t-last" class="lastmove"></div>
 
   <div class="tablegrid">
     <div class="col-main">

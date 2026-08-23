@@ -305,12 +305,22 @@ class Session:
 
     # -- driving --------------------------------------------------------------
 
-    def advance(self):
-        """Let the engines play up to the human's turn, recording every move."""
+    def advance(self, max_moves: int = MAX_ADVANCE):
+        """Let the engines play, recording every move.
+
+        ``max_moves`` stops after that many engine moves rather than running to
+        the human's turn. That is what lets the table be paced: a move a client
+        never saw arrive is a move the player cannot read, and an engine's whole
+        possession delivered as one jump is exactly the thing the local server
+        spent a daemon thread avoiding. Here the client asks for one move at a
+        time and does the waiting itself, which costs a request per move and no
+        server state at all.
+        """
         played = []
         n = 0
+        cap = min(int(max_moves), MAX_ADVANCE)
         while (not self.state.is_terminal and self.state.turn != self.seat
-               and n < MAX_ADVANCE):
+               and n < cap):
             p = self.state.turn
             action = self.bots[p].act(Observation.from_state(self.state, p))
             ev = self.state.apply(p, action)
@@ -322,13 +332,13 @@ class Session:
             n += 1
         return played
 
-    def play(self, action):
+    def play(self, action, max_moves: int = MAX_ADVANCE):
         ev = self.state.apply(self.seat, action)
         self.log.append(narrate(ev))
         self.note_reveal(ev)
         w = wire_action(ev)
         self.wire_log.append(w)
-        return [w] + self.advance()
+        return [w] + self.advance(max_moves)
 
     def suggest(self):
         """What the actual policy would do from our seat - not a re-ranking."""

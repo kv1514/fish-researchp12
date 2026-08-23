@@ -91,9 +91,20 @@ class handler(BaseHTTPRequestHandler):
         try:
             body = self._body()
 
+            # A paced client asks for one engine move at a time and does the
+            # waiting itself; one that omits the field gets the whole possession
+            # in a single response, as before.
+            step = body.get("step")
+            cap = int(step) if step not in (None, "", False) else None
+            capkw = {"max_moves": cap} if cap is not None else {}
+
             if op == "new":
                 s = new_session(body)
-                played = s.advance()
+                # Pacing has to cover the opening possession too. Without it the
+                # first thing a player ever sees is the whole opening arriving as
+                # one jump, which is the exact thing the pacing exists to prevent
+                # at the moment it matters most.
+                played = s.advance(cap) if cap is not None else s.advance()
                 out = s.snapshot()
                 out["actions"] = played
                 return self._send(out)
@@ -114,7 +125,19 @@ class handler(BaseHTTPRequestHandler):
             if op == "act":
                 if not s.snapshot()["your_turn"]:
                     return self._send({"error": "not your turn"}, 400)
-                played = s.play(parse_action(body.get("action") or {}))
+                played = s.play(parse_action(body.get("action") or {}), **capkw)
+                out = s.snapshot()
+                out["actions"] = played
+                return self._send(out)
+
+            if op == "step":
+                # One engine move, for a paced table. Idempotent like every
+                # other route: the log decides the position, so a repeated or
+                # lost request costs nothing.
+                snap = s.snapshot()
+                if snap["your_turn"] or snap["terminal"]:
+                    return self._send(snap)
+                played = s.advance(cap if cap is not None else 1)
                 out = s.snapshot()
                 out["actions"] = played
                 return self._send(out)
@@ -122,7 +145,8 @@ class handler(BaseHTTPRequestHandler):
             if op == "auto":
                 if not s.snapshot()["your_turn"]:
                     return self._send({"error": "not your turn"}, 400)
-                played = s.play(s.suggest())
+                played = s.play(s.suggest(),
+                                **({"max_moves": cap} if cap is not None else {}))
                 out = s.snapshot()
                 out["actions"] = played
                 return self._send(out)

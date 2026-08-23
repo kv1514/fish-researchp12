@@ -31,6 +31,10 @@ const S = {
   gamma: 0.35,
   busy: false,
   hint: null,
+  pace: 12,          // seconds the table waits between engine moves
+  paused: false,
+  pacing: false,     // a pacing loop is running
+  wake: null,        // resolve() of the current wait, so Next can cut it short
 };
 
 const $ = (id) => document.getElementById(id);
@@ -80,6 +84,39 @@ async function send(path, body) {
   } finally {
     S.busy = false;
     document.body.classList.remove("busy");
+  }
+}
+
+/* Wait `sec` seconds, unless Next cuts it short. Resolves either way. */
+function hold(sec) {
+  return new Promise((resolve) => {
+    if (sec <= 0) return resolve();
+    const t = setTimeout(() => { S.wake = null; resolve(); }, sec * 1000);
+    S.wake = () => { clearTimeout(t); S.wake = null; resolve(); };
+  });
+}
+
+/* Play the engines out one move at a time, so a possession can be read.
+ *
+ * The local server did this with a daemon thread holding the table. There is no
+ * thread here and no server state to hold, so the waiting happens in the tab:
+ * the client asks for exactly one move, renders it, waits, and asks again. The
+ * cost is one request per move, and the benefit is that every intermediate
+ * position is real rather than reconstructed. */
+async function pace() {
+  if (S.pacing) return;
+  S.pacing = true;
+  try {
+    while (S.snap && !S.snap.terminal && !S.snap.your_turn) {
+      while (S.paused) await hold(0.25);
+      const j = await send("step", { step: 1 });
+      if (!j) break;
+      if (j.terminal || j.your_turn) break;
+      await hold(S.paused ? 0 : S.pace);
+    }
+  } finally {
+    S.pacing = false;
+    render();
   }
 }
 
@@ -213,6 +250,27 @@ function renderHand() {
   if (!s.hand.length) box.appendChild(el("p", "dim", "No cards. You pass."));
 }
 
+/* The move just played, big enough to read across the room, with the card it
+ * was about drawn as a real face. This is what the pause is FOR - a wait with
+ * nothing to look at is just a wait. */
+function renderLastMove() {
+  const box = $("t-last");
+  box.innerHTML = "";
+  const e = (S.snap.log || [])[S.snap.log.length - 1];
+  if (!e) { box.className = "lastmove"; return; }
+  box.className = "lastmove " + e.t
+    + (e.ok === true ? " hit" : e.ok === false ? " miss" : "");
+  if (e.card) {
+    const f = el("span", "card");
+    f.innerHTML = face(e.card);
+    box.appendChild(f);
+  }
+  const txt = el("div", "lmtext");
+  txt.appendChild(el("div", "lmwhat", e.text));
+  if (e.proved) txt.appendChild(el("div", "lmproved", e.proved));
+  box.appendChild(txt);
+}
+
 function renderLog() {
   const box = $("t-log");
   box.innerHTML = "";
@@ -221,8 +279,15 @@ function renderLog() {
   for (const e of items) {
     const d = el("div", "logrow " + e.t + (e.ok === false ? " miss" : "")
       + (e.ok === true ? " hit" : ""));
-    d.appendChild(el("div", "what", e.text));
-    if (e.proved) d.appendChild(el("div", "proved", e.proved));
+    if (e.card) {
+      const f = el("span", "card xs");
+      f.innerHTML = face(e.card);
+      d.appendChild(f);
+    }
+    const w = el("div", "wrap");
+    w.appendChild(el("div", "what", e.text));
+    if (e.proved) w.appendChild(el("div", "proved", e.proved));
+    d.appendChild(w);
     box.appendChild(d);
   }
 }
@@ -271,7 +336,8 @@ function renderAction() {
     const row = el("div", "btnrow");
     for (const t of s.teammates) {
       const b = el("button", null, `Pass to P${t}`);
-      b.onclick = () => send("act", { action: { type: "pass", teammate: t } });
+      b.onclick = () => send("act", { action: { type: "pass", teammate: t },
+                                      step: 1 }).then(() => pace());
       row.appendChild(b);
     }
     box.appendChild(el("p", null, "You are out of cards. Hand the turn on."));
@@ -287,7 +353,7 @@ function renderAction() {
   dec.onclick = openDeclare;
   row.appendChild(dec);
   const auto = el("button", "ghost", "Let the engine move");
-  auto.onclick = () => send("auto", {});
+  auto.onclick = () => send("auto", { step: 1 }).then(() => pace());
   row.appendChild(auto);
   box.appendChild(row);
 
@@ -453,58 +519,105 @@ function openAsk() {
     go.disabled = true;
     go.onclick = () => {
       closeModal();
-      send("act", { action: { type: "ask", target, card } });
+      send("act", { action: { type: "ask", target, card }, step: 1 })
+        .then(() => pace());
     };
     box.appendChild(go);
   });
 }
 
-function openDeclare() {
+async function openDeclare() {
   const s = S.snap;
   const team = [s.seat, ...s.teammates].sort((a, b) => a - b);
+
+  // THE DEFAULTS ARE THE WHOLE POINT OF THIS DIALOG.
+  //
+  // They used to be whatever the <select> picked first, which is the lowest
+  // team seat - and for seat 0 that is *you*. So every card you did not hold
+  // defaulted to you, which is guaranteed wrong, and declaring without touching
+  // all six dropdowns voided the set. That is not the game being harsh: right
+  // team, wrong split scores for nobody, and the form was steering the player
+  // into it. Engine-vs-engine play voids nothing in 54 declarations; every void
+  // a human saw was this.
+  //
+  // The engine already computes the posterior MAP for exactly this decision, so
+  // the dialog opens on the engine's best guess and shows the probability
+  // behind every option. You can still overrule it - you know things it does
+  // not - but the starting point is now the best available answer.
+  let an = S.hint;
+  if (!an) {
+    try { an = await api("analyse", { token: S.token, actions: S.actions }); }
+    catch (e) { an = null; }
+  }
+  const table = {};
+  for (const r of (an && an.card_table) || []) table[r.card] = r.probs;
+  const best = {};
+  for (const c of (an && an.claims) || []) best[c.half_suit] = c;
+
   openModal((box) => {
     box.appendChild(el("h3", null, "Declare a set"));
     box.appendChild(el("p", "dim",
       "Name who on your team holds each of the six cards. Exactly right scores "
-      + "it; right team but wrong split makes it void; any card with an "
-      + "opponent gives it away."));
+      + "it; right team but wrong split scores for nobody; any card with an "
+      + "opponent hands it over."));
 
     const pick = el("select");
     s.half_suits.forEach((hs, i) => {
       if (s.set_winner[i]) return;
-      const o = el("option", null, hs.name);
+      const c = best[i];
+      const p = c ? ` — engine: ${(100 * c.p_declaration_exact).toFixed(0)}%` : "";
+      const o = el("option", null, hs.name + p);
       o.value = String(i);
       pick.appendChild(o);
     });
+    if (!pick.children.length) {
+      box.appendChild(el("p", null, "Every set has already been resolved."));
+      return;
+    }
     box.appendChild(el("label", null, "Which set"));
     box.appendChild(pick);
 
+    const verdict = el("p", "dim declverdict");
+    box.appendChild(verdict);
     const rows = el("div", "declrows");
     box.appendChild(rows);
 
     const draw = () => {
-      const hs = s.half_suits[+pick.value];
+      const idx = +pick.value;
+      const hs = s.half_suits[idx];
+      const c = best[idx];
+      verdict.textContent = c
+        ? `The engine puts your team holding all six at `
+          + `${(100 * c.p_team_holds_all).toFixed(0)}%, and this exact split at `
+          + `${(100 * c.p_declaration_exact).toFixed(0)}%. ${c.verdict}.`
+        : "";
       rows.innerHTML = "";
-      for (const c of hs.cards) {
+      hs.cards.forEach((card, k) => {
         const r = el("div", "declrow");
-        // Named `cell`, not `face`: `face` is the module-level card renderer,
-        // and a local of that name shadowed it here, so this line called a DOM
-        // node. The throw escaped openModal before the modal was shown, which
-        // made the Declare button do nothing at all - in every game.
         const cell = el("span", "card sm");
-        cell.innerHTML = face(c.name);
+        cell.innerHTML = face(card.name);
         r.appendChild(cell);
         const sel = el("select");
-        sel.dataset.card = String(c.id);
-        for (const p of team) {
-          const o = el("option", null, p === s.seat ? "you" : "P" + p);
-          o.value = String(p);
-          if (c.mine && p === s.seat) o.selected = true;
+        sel.dataset.card = String(card.id);
+        const probs = table[card.id] || [];
+        // The engine's MAP for this half-suit, falling back to the per-card
+        // most likely teammate, falling back to whoever holds it if that is us.
+        let want = c && c.declaration ? c.declaration[k]
+          : (card.mine ? s.seat : null);
+        if (want == null && probs.length) {
+          let bp = -1;
+          for (const q of team) if ((probs[q] || 0) > bp) { bp = probs[q]; want = q; }
+        }
+        for (const q of team) {
+          const pct = probs.length ? ` · ${(100 * (probs[q] || 0)).toFixed(0)}%` : "";
+          const o = el("option", null, (q === s.seat ? "you" : "P" + q) + pct);
+          o.value = String(q);
+          if (q === (want != null ? want : team[0])) o.selected = true;
           sel.appendChild(o);
         }
         r.appendChild(sel);
         rows.appendChild(r);
-      }
+      });
     };
     pick.onchange = draw;
     draw();
@@ -513,9 +626,8 @@ function openDeclare() {
     go.onclick = () => {
       const assignment = [...rows.querySelectorAll("select")].map((x) => +x.value);
       closeModal();
-      send("act", {
-        action: { type: "claim", half_suit: +pick.value, assignment },
-      });
+      send("act", { action: { type: "claim", half_suit: +pick.value,
+                              assignment }, step: 1 }).then(() => pace());
     };
     box.appendChild(go);
   });
@@ -532,6 +644,7 @@ function render() {
   $("t-turn").textContent = s.terminal ? "Game over"
     : s.your_turn ? "Your turn." : `P${s.turn} to move.`;
   $("t-turn").className = "turnline" + (s.your_turn && !s.terminal ? " you" : "");
+  renderLastMove();
   renderSeats();
   renderSets();
   renderHand();
@@ -539,6 +652,21 @@ function render() {
   renderAction();
   renderPosterior();
 }
+
+$("t-pace").addEventListener("change", (e) => { S.pace = +e.target.value; });
+$("t-pause").addEventListener("click", () => {
+  S.paused = !S.paused;
+  $("t-pause").textContent = S.paused ? "Resume" : "Pause";
+  $("t-pause").classList.toggle("on", S.paused);
+  if (!S.paused && S.wake) S.wake();
+  if (!S.paused) pace();
+});
+$("t-next").addEventListener("click", () => {
+  // Cut the current wait short. Together with Pause this is a step-through: a
+  // frozen table advances exactly one engine move per click and stays frozen.
+  if (S.wake) S.wake();
+  else if (!S.pacing) pace();
+});
 
 $("t-quit").addEventListener("click", () => show("start"));
 $("t-think").addEventListener("click", async () => {

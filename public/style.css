@@ -323,3 +323,47 @@ button:hover:not(:disabled) { border-color: var(--accent); }
   .setname { flex-basis: 5.5rem; }
   .seats { gap: .25rem; }
 }
+
+
+/* ---------------------------------------------------- paced table controls */
+
+.pacebar { display: flex; align-items: center; gap: .3rem; }
+.pacebar select {
+  font: inherit; font-size: .82rem; padding: .3rem .4rem; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+}
+button.ghost.on {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+
+/* The move just played, sized to be read from across the room. This is what
+   the wait is for; a pause with nothing in it is only a delay. */
+.lastmove {
+  display: flex; align-items: center; gap: .9rem; justify-content: center;
+  max-width: 70rem; margin: 0 auto; padding: .5rem 1rem;
+  min-height: 3.2rem;
+}
+.lastmove .card { width: 46px; flex: 0 0 auto; }
+.lmtext { max-width: 46ch; }
+.lmwhat { font-size: 1.05rem; font-weight: 600; }
+.lmproved { font-size: .84rem; color: var(--dim); margin-top: .1rem; }
+.lastmove.hit .lmwhat { color: var(--hit); }
+.lastmove.miss .lmwhat { color: var(--miss); }
+.lastmove.claim .lmwhat { color: var(--accent); }
+
+/* A seat about to be asked, or asking, should be findable at a glance. */
+.seat.active { border-color: #f0c05a; box-shadow: 0 0 0 3px rgba(240,192,90,.22); }
+
+.logrow { display: flex; gap: .5rem; align-items: flex-start; }
+.logrow .wrap { flex: 1; min-width: 0; }
+.card.xs { width: 26px; flex: 0 0 auto; }
+
+.declverdict { font-size: .85rem; margin: .5rem 0 .2rem; }
+.declrow select { flex: 1; }
+
+@media (max-width: 560px) {
+  .pacebar { gap: .2rem; }
+  .pacebar select { font-size: .75rem; padding: .25rem; }
+  .lastmove .card { width: 36px; }
+  .lmwhat { font-size: .95rem; }
+}
