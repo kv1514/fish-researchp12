@@ -9,6 +9,26 @@ that bottleneck?**
 
 ---
 
+## Status as of v0.4 — read this first
+
+Everything below this section is **v0.3's roadmap**, kept because its reasoning
+is still worth reading. Four of its items have since been settled, so a reader
+picking them up today would be redoing finished work:
+
+| v0.3 item | what v0.4 found |
+|---|---|
+| 1. Beat the prior at least once | Still open, but narrowed. A belief-space possession-chain search is a null at 500 pairs (paper §"Belief-space search"). More usefully, Proposition 1 there proves that such a search whose transition edits only the asked card's row is *exactly* greedy at every depth — so that branch was never going to work, by construction rather than by measurement. |
+| 2. Learn the ask objective | Done, and it **lost**: paired rollout regression over 874 positions and 83,168 games gives weights that score −2.183 sets/pair against the incumbent. The binding constraint was located in the rollout continuation policy, not the statistics. |
+| 3. Finish the claim study | Done. The EV model's predicted 0.70 threshold was **falsified** by direct measurement; 0.85 to 0.999 play near-identically, and the leverage is in the declared distribution, not the threshold. |
+| 4. Fix sampler bias | Done, exactly — and it changed nothing in play (−0.008 sets/pair). The uniform posterior turned out to be a correct theorem about a false hypothesis; what paid was modelling *why* opponents ask where they do (+1.9 sets/pair). |
+
+The live question v0.4 leaves is not on this list: the opponent choice model is a
+one-parameter proxy, and the principled version — the acting policy's own
+probability of the observed action given the hand — is a fixpoint nobody has
+built.
+
+---
+
 ## Where strength is currently lost (measured)
 
 Agreement with exact optimal play, 327 solvable endgame positions:
