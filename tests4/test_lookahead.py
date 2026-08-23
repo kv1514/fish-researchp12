@@ -169,6 +169,50 @@ def _ctx(rules, hands, set_winner, turn, history, seat):
     return obs, DecisionContext(obs, bel, post)
 
 
+def test_column_mass_equals_hand_count_which_is_what_the_sweep_assumes():
+    """The premise under _rebalance, pinned rather than assumed.
+
+    The quota sweep scales the target's column by ``want / mass``, where
+    ``mass`` is the column sum and ``want`` the hand count they now have. That
+    ratio is only the right correction if the two are the same kind of quantity
+    to begin with - i.e. if summing P(p holds c) over every card really does
+    give the number of cards p holds. It does, exactly, because hand sizes are
+    public and the posterior is built to respect them. But it is a property of
+    the *posterior*, not of the lookahead, so a change over in posterior.py
+    could break the sweep silently from a distance. This is the tripwire.
+    """
+    worst = 0.0
+    seen = 0
+    for rules, hands, sw, turn, hist, seat in collect_positions(3, 3, 12):
+        obs, ctx = _ctx(rules, hands, sw, turn, hist, seat)
+        err = np.abs(ctx.M.sum(axis=0) - np.array(obs.hand_counts, dtype=float))
+        worst = max(worst, float(err.max()))
+        seen += 1
+    assert seen > 0
+    assert worst < 1e-9, f"column mass drifted from hand counts by {worst}"
+
+
+def test_the_sweep_moves_the_column_toward_the_new_count():
+    """After a success the target's column mass falls, and by about one card."""
+    for rules, hands, sw, turn, hist, seat in collect_positions(2, 4, 8):
+        obs, ctx = _ctx(rules, hands, sw, turn, hist, seat)
+        asks = [a for a in obs.legal_asks() if 0.0 < ctx.M[a.card, a.target] < 1.0]
+        if not asks:
+            continue
+        a = asks[0]
+        live = [w is None for w in obs.set_winner]
+        st = ChainState(ctx.M, obs.hand, obs.hand_counts, obs.player, live,
+                        ctx.n_hs, couple=True)
+        before = float(st.M[:, a.target].sum())
+        st.apply_success(a.target, a.card)
+        after = float(st.M[:, a.target].sum())
+        assert after < before, "the target's holdings did not shrink"
+        # One sweep, not convergence, so this lands near 1 rather than on it.
+        assert 0.2 < (before - after) < 2.0, before - after
+        return
+    pytest.skip("no position with an uncertain ask was harvested")
+
+
 def test_bonus_is_identically_zero_at_depth_one():
     for rules, hands, sw, turn, hist, seat in collect_positions(2, 4, 8):
         obs, ctx = _ctx(rules, hands, sw, turn, hist, seat)
