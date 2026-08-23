@@ -13,7 +13,13 @@ worthless or wrong rather than merely unhelpful:
   position, the design would have reintroduced the variance it exists to avoid.
 * **It cannot see the hidden state.** The search builds hypothetical futures by
   editing a posterior. Editing a *belief* is inference; editing a layout would
-  be a peek. The invariance test is what tells the two apart.
+  be a peek. Note carefully what carries this: the primary guarantee is
+  structural - ``lookahead_bonus``'s signature admits no ``GameState``, and
+  everything it reads is observation-derived. The invariance test below
+  *supports* that but cannot substitute for it, because the belief is a pure
+  function of the observation and the permutation holds the observation fixed,
+  so any test comparing two beliefs is comparing one belief to itself. That is
+  why it runs the whole policy per world rather than a shared context.
 """
 
 from __future__ import annotations
@@ -68,6 +74,68 @@ def _toy_state(couple: bool, n_hs: int = 9):
     live[0] = True
     return ChainState(M, hand=1 << 0, counts=counts, me=0, live=live,
                       n_hs=n_hs, couple=couple)
+
+
+def _rising_toy(couple: bool, n_hs: int = 9):
+    """Same shape as _toy_state, but with p ASCENDING in card index.
+
+    _toy_state happens to list its probabilities in descending index order, so
+    an implementation that skipped the sort entirely would still pick the right
+    branch there by coincidence. Here index order and p order disagree, so the
+    sort is load-bearing and its removal is visible.
+    """
+    M = np.zeros((n_hs * 6, NUM_PLAYERS))
+    M[0, 0] = 1.0
+    M[1, 1], M[1, 3] = 0.5, 0.5
+    M[2, 1], M[2, 3] = 0.7, 0.3
+    M[3, 1], M[3, 3] = 0.8, 0.2
+    counts = [1, 2, 0, 1, 0, 0]
+    live = [False] * n_hs
+    live[0] = True
+    return ChainState(M, hand=1 << 0, counts=counts, me=0, live=live,
+                      n_hs=n_hs, couple=couple)
+
+
+def test_the_beam_takes_the_likeliest_branch_not_the_first_one():
+    """Pins the sort at the head of possession_value.
+
+    With beam=1 the search may expand exactly one candidate, so it had better be
+    the one with the highest probability rather than whichever the candidate
+    generator happened to emit first.
+    """
+    st = _rising_toy(couple=False)
+    assert possession_value(st, depth=1, beam=1) == pytest.approx(0.8)
+
+
+def test_the_beam_width_is_load_bearing():
+    """A wider beam must actually change the value somewhere.
+
+    Without this, ``scored[:beam]`` could be ``scored[:1]`` - search width
+    removed outright - and every other test here would still pass, because they
+    either fix the position or compute their expectation through the same code.
+
+    It has to sweep several depths and a decent spread of positions to see it.
+    Measured over 120 (position, depth) cells, beam 1 and beam 8 differ on about
+    one in six, and the largest difference anywhere is 3.7e-3 sets - which is
+    itself worth knowing: even where a wider beam finds more, it finds almost
+    nothing more, because descending-p order stays near-optimal under the
+    perturbation the quota coupling introduces. Proposition 1 does not survive
+    the coupling exactly, but it survives it closely.
+    """
+    differed = 0
+    for rules, hands, sw, turn, hist, seat in collect_positions(5, 2, 30):
+        obs, ctx = _ctx(rules, hands, sw, turn, hist, seat)
+        asks = obs.legal_asks()
+        if not asks:
+            continue
+        for depth in (2, 3, 4):
+            narrow = lookahead_bonus(ctx, asks, depth=depth, beam=1)
+            wide = lookahead_bonus(ctx, asks, depth=depth, beam=8)
+            # A wider beam can only ever find at least as much banked value.
+            assert np.all(wide >= narrow - 1e-12), depth
+            if not np.array_equal(narrow, wide):
+                differed += 1
+    assert differed > 0, "beam width never changed the bonus on any position"
 
 
 def test_depth_one_is_the_greedy_maximum():
@@ -303,31 +371,50 @@ def test_bonus_is_deterministic_given_the_belief():
         assert np.array_equal(first, second)
 
 
-def test_bonus_is_invariant_under_a_consistent_relabelling():
-    """Permute the five hidden hands into another world the record allows.
+def test_the_policy_action_is_invariant_under_a_consistent_relabelling():
+    """The information boundary, tested where a breach could actually show.
 
-    The acting seat's own hand and the entire public log are held fixed, so a
-    bonus that moved would be reading something no policy is entitled to.
+    An earlier version of this test compared ``lookahead_bonus`` across two
+    worlds and asserted the results matched. That could never go red. The belief
+    is a pure *function* of the observation, and the permutation holds the
+    observation fixed by construction, so both arms built a bit-identical
+    ``DecisionContext`` and the assertion reduced to ``f(x) == f(x)`` - which
+    ``test_bonus_is_deterministic_given_the_belief`` already says. A peek at
+    hidden state inside lookahead.py would have passed it.
+
+    What has teeth is running the whole policy per world, so the belief is
+    re-derived from that world rather than shared, and comparing the action. The
+    ``obs_a == obs_b`` assertion is the part that makes the construction
+    meaningful: it is the claim that the two worlds really are indistinguishable
+    to this seat, which is what makes a differing action a leak rather than a
+    different question.
     """
     rng = random.Random(97)
     checked = 0
-    for rules, hands, sw, turn, hist, seat in collect_positions(3, 3, 16):
+    for rules, hands, sw, turn, hist, seat in collect_positions(4, 3, 24):
         alt_init = alternative_world(rules, hands, sw, hist, seat, rng)
         if alt_init is None:
             continue
-        # alternative_world proposes an *initial deal*; the current layout is
-        # what the public log makes of it, so it has to be replayed forward.
         alt = list(replay(rules, alt_init, hist).hands)
         assert alt[seat] == hands[seat], "the permutation moved our own hand"
+        assert any(alt[p] != hands[p] for p in range(NUM_PLAYERS) if p != seat), \
+            "the permutation did not actually change any hidden hand"
 
-        obs_a, ctx_a = _ctx(rules, hands, sw, turn, hist, seat)
-        asks = obs_a.legal_asks()
-        if not asks:
-            continue
-        obs_b, ctx_b = _ctx(rules, alt, sw, turn, hist, seat)
-        assert obs_b.legal_asks() == asks, "the candidate set itself moved"
-        got = lookahead_bonus(ctx_a, asks, depth=3, beam=4)
-        alt_got = lookahead_bonus(ctx_b, asks, depth=3, beam=4)
-        assert np.array_equal(got, alt_got)
+        actions = []
+        for world in (hands, alt):
+            obs = Observation(player=seat, rules=rules, hand=world[seat],
+                              turn=turn,
+                              hand_counts=tuple(h.bit_count() for h in world),
+                              set_winner=tuple(sw), history=hist)
+            if not actions:
+                first_obs = obs
+            else:
+                assert obs == first_obs, "the seat can tell the worlds apart"
+            agent = make_agent(("fishbot4", LOOK))
+            agent.begin_game(seat, rules, 2024)
+            actions.append(agent.act(obs))
+        assert actions[0] == actions[1], "the action moved with the hidden cards"
         checked += 1
-    assert checked > 0, "no alternative world was found to test against"
+        if checked >= 5:
+            break
+    assert checked >= 5, f"only {checked} alternative worlds found; need 5"
