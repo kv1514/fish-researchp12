@@ -67,6 +67,32 @@ py -m fish4 serve --public
 That opens a temporary public URL through a third-party SSH relay. There is no
 password on the table: anyone with the link can sit down.
 
+## FishBot v0.4 on the web
+
+`api/` and `public/` are a deployed, always-on version of the single-player
+table. It is a separate front end rather than the lobby above, because a
+serverless platform has neither a process to hold a game dict nor a thread to
+pace bot moves.
+
+It does not need a database either. Every card movement in Literature is public,
+so a position is the initial deal plus the action log — and the log is already
+in the browser, because it is what the move panel renders. The client carries
+the session and the function replays it. Replay *applies* the recorded actions
+rather than re-deciding them, so the work per request is constant in the length
+of the game instead of quadratic over it.
+
+The seed is the deal, so it travels as an HMAC-sealed token rather than in
+clear: the local server hands the seed to the page, which is fine when the only
+person who could cheat is the one running it, and not fine on a public URL.
+
+```bash
+py scripts4/devserve.py         # serve public/ + api/ exactly as deployed
+```
+
+Set `FISH_SECRET` in the deployment environment. Without it the signing key is
+derived from the deployment id, which is stable within a deployment but changes
+on redeploy, so games in progress end at a release.
+
 Other v0.4 entry points:
 
 ```bash

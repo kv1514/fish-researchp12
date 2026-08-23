@@ -944,6 +944,120 @@ fusion \citep{frank1998search}. Claims in v0.4 are always decided from the
 posterior.
 
 % =====================================================================
+\section{Search over the belief}
+\label{sec:lookahead}
+
+Every search this project has tried --- PIMC, Information-Set MCTS, and two
+value-network variants --- evaluates a candidate move by sampling hidden layouts
+and solving each one, and every one of them lost to its own prior. v0.3 did not
+leave that as a mystery: it measured the standard deviation of a position's
+value across possible layouts at about $2.4\times$ the gap between the best and
+the worst candidate move, so a searcher scoring different candidates against
+different sampled worlds is ranking sampling noise. Common random numbers
+removed the deficit and never produced a surplus.
+
+That diagnosis rules out a family of designs, not search itself. What it rules
+out is sampling. So the design it leaves open is a lookahead whose state is the
+\emph{posterior} rather than a sample from it: the marginal matrix
+$M[c,p] = \Prob(\text{player } p \text{ holds card } c)$, with transitions that
+are local edits of that matrix. Given a belief such a search is a deterministic
+function --- run it twice on one position and it returns the same vector --- so
+the variance that killed the previous attempts is structurally absent rather
+than merely reduced.
+
+\subsection{What it computes}
+
+A Literature turn is a run of asks that ends the instant one misses. Greedy
+scoring maximises the immediate success probability; what a possession is
+actually worth is how many cards it banks before the turn flips. Define
+\begin{equation}
+W(B, d) \;=\; \max_{a \,\in\, \mathcal{A}(B)}\;
+p_a \,\bigl[\, 1 + W(B \mid a \text{ succeeded},\, d-1) \,\bigr],
+\qquad W(B, 0) = 0,
+\label{eq:chain}
+\end{equation}
+where $\mathcal{A}(B)$ is the legal-ask set implied by the belief and
+$p_a = M[\text{card}(a), \text{target}(a)]$. The failure branch contributes
+nothing to $W$ because a miss ends the possession; what a miss costs
+positionally is already priced by the incumbent objective's turn-risk and
+exposure terms, and duplicating it here would double-count.
+
+$W$ is in units of cards expected to be banked in the rest of this possession.
+It enters the policy as an additive bonus, not as a replacement:
+\begin{equation}
+\text{score}(a) \;=\; \underbrace{\pi_a + \textstyle\sum_j w_j f_j(a)}
+_{\text{the incumbent objective, unchanged}}
+\;+\; w_{\mathrm{look}} \cdot p_a \, W(B \mid a \text{ succeeded},\, d-1).
+\label{eq:lookscore}
+\end{equation}
+The reason it is additive is Section~\ref{sec:res-null}: replacing
+$\Prob(\text{success})$ with a learned half-suit value --- correct units, a
+calibrated model --- costs $7.4$ sets per deal-pair. Whatever else this game
+rewards, the probability that the ask lands is the objective and not a term in
+one. At $d \le 1$ the bonus is identically zero, so the policy reproduces the
+incumbent decision for decision; that is enforced by test, for the reason
+Section~\ref{sec:eval} gives.
+
+\subsection{Why the obvious version is provably a no-op}
+
+The natural transition is to collapse the asked card's row to a point mass on
+us. That is exact, and on its own it is \emph{inert}, which is worth stating
+because it determines whether the design can do anything at all.
+
+\begin{proposition}[Greedy optimality under an inert transition]
+\label{prop:greedy}
+Suppose the transition edits only the asked card's row, so that $p_{a'}$ is
+unchanged for every $a' \ne a$, and suppose every candidate remains available
+after any other is taken. Then \eqref{eq:chain} is maximised by taking
+candidates in descending order of $p$, and its value equals that of the greedy
+policy at every depth.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Under the hypotheses, a depth-$d$ chain is a choice of an ordered $d$-subset of
+a \emph{fixed} multiset of probabilities, with value
+$p_{1}(1 + p_{2}(1 + \dots))= \sum_{k=1}^{d} \prod_{i \le k} p_{i}$. Exchanging
+an adjacent pair $(p_i, p_{i+1})$ with $p_i < p_{i+1}$ changes the value by
+$\bigl(\prod_{j<i} p_j\bigr)(p_{i+1} - p_i) \ge 0$, so descending order is
+optimal; and the greedy policy selects exactly that order.
+\end{proof}
+
+Proposition~\ref{prop:greedy} is the null this section is tested against, and it
+is why a lookahead built only on the point-mass update would be worth measuring
+only as a bug-check. Its hypotheses fail in three places, of which the third is
+the substantive one:
+
+\begin{enumerate}
+\item a card taken cannot be asked for again, and one card is askable from
+several targets, so candidates do disappear in correlated groups;
+\item a target can run out of cards, which removes every candidate aimed at
+them;
+\item \textbf{the quota system couples the candidates.} Learning that the target
+held this card makes it less likely they hold the others --- they are now known
+to hold one card fewer, and that probability mass has to go somewhere.
+\end{enumerate}
+
+The third is handled by scaling the target's column down to the count they now
+have and renormalising each affected row across the remaining players: one sweep
+of the same proportional fitting the exact posterior does globally. A row whose
+whole mass sits on the shrunk column renormalises straight back to where it
+started, which is correct --- a publicly located card cannot be made less
+certain by a counting argument. The sweep costs one column scale and one row
+normalisation per node, and it is separately ablatable, so
+Proposition~\ref{prop:greedy} is not merely argued but measured: the
+no-coupling cell in Table~\ref{tab:lookahead} is the experiment.
+
+\subsection{Cost}
+
+The branching factor of a real position averages $8$, so the tree is bounded by
+a beam of $4$ candidates per ply, ranked by immediate $p$. At depth $3$ that is
+at most $84$ node expansions, and measured over real positions the whole bonus
+vector costs a median of about $14$\,ms per decision on the contended host of
+Section~\ref{sec:counting} --- roughly a $15\%$ addition to a $100$-ms
+posterior, and the one part of v0.4 whose cost is a search rather than an
+inference.
+
+% =====================================================================
 \section{Evaluation methodology}
 \label{sec:eval}
 
