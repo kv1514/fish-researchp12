@@ -2010,7 +2010,13 @@ selected cell --- the inflated estimate. Against the unbiased $+0.153$, a
 correctly powered test needs roughly $5000$ pairs. We committed the winner's
 curse in the power calculation for the experiment whose purpose was to correct
 for the winner's curse, which is the third time in this study the same error has
-appeared one level up from where it was last caught.
+appeared one level up from where it was last caught. It appears a fourth time in
+Section~\ref{sec:res-regret}, inside the estimator built to measure the ask
+objective, where taking a maximum over eighteen noisy action values would have
+reported two thirds of a set of regret that does not exist. The pattern is worth
+naming: each occurrence is not a repetition of the last but a level above it,
+and none was caught by being more careful --- each was caught by measuring the
+thing that had been reasoned about.
 
 The implementation ships disabled, which remains the right default for an effect
 that is probably real and is not demonstrated.
