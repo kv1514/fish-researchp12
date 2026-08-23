@@ -316,13 +316,58 @@ function renderHint(box) {
       `Best declaration: ${best.half_suit_name} — your team holds all six with `
       + `${(100 * best.p_team_holds_all).toFixed(1)}% probability, and the split `
       + `it would name is right with ${(100 * best.p_declaration_exact).toFixed(1)}%. `
-      + `${best.verdict}.`));
+      + best.verdict.charAt(0).toUpperCase() + best.verdict.slice(1) + "."));
   }
 
   for (const n of (h.notes || []).slice(0, 3)) {
     p.appendChild(el("p", "dim", n));
   }
   box.appendChild(p);
+}
+
+/* The posterior, as the engine holds it.
+ *
+ * This is the one thing a spectator can be shown that a player could not work
+ * out for themselves only because the arithmetic is tedious - it is an
+ * inference from the public log, not a peek at the layout. Rows are drawn only
+ * for cards that are still genuinely uncertain: a card already pinned by
+ * deduction would be a solid bar at 100% in every configuration and would tell
+ * the reader nothing about what the inference is doing.
+ */
+function renderPosterior() {
+  const panel = $("t-postpanel");
+  const rows = (S.hint && S.hint.card_table) || [];
+  const live = rows.filter((r) => !r.certain && !r.mine);
+  if (!live.length) { panel.hidden = true; return; }
+  panel.hidden = false;
+
+  const box = $("t-post");
+  box.innerHTML = "";
+  const seat = S.snap.seat;
+  let lastHs = -1;
+  for (const r of live) {
+    if (r.half_suit !== lastHs) {
+      const hs = S.snap.half_suits[r.half_suit];
+      box.appendChild(el("div", "posthead", hs ? hs.name : ""));
+      lastHs = r.half_suit;
+    }
+    const row = el("div", "postrow");
+    row.appendChild(el("span", "postcard", r.name));
+    const bar = el("span", "postbar");
+    r.probs.forEach((p, who) => {
+      if (p <= 0.004) return;
+      const seg = el("i", "seg" + ((who % 2) === (seat % 2) ? " ours" : " theirs"));
+      seg.style.flexGrow = String(p);
+      seg.title = `P${who}: ${(100 * p).toFixed(1)}%`;
+      if (p >= 0.18) seg.textContent = who === seat ? "you" : "P" + who;
+      bar.appendChild(seg);
+    });
+    row.appendChild(bar);
+    const top = r.probs[r.most_likely];
+    row.appendChild(el("span", "postbest",
+      `P${r.most_likely} ${(100 * top).toFixed(0)}%`));
+    box.appendChild(row);
+  }
 }
 
 /* -- modals -------------------------------------------------------------- */
@@ -477,6 +522,7 @@ function render() {
   renderHand();
   renderLog();
   renderAction();
+  renderPosterior();
 }
 
 $("t-quit").addEventListener("click", () => show("start"));
