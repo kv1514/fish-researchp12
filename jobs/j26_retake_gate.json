@@ -16,7 +16,7 @@
     "opponent_gamma": 0.35
    }
   ],
-  "base_seed": 14000000,
+  "base_seed": 20000000,
   "agent_seed": 9900
  },
  {
@@ -36,7 +36,7 @@
     "opponent_gamma": 0.35
    }
   ],
-  "base_seed": 14200000,
+  "base_seed": 20200000,
   "agent_seed": 9901
  }
 ]

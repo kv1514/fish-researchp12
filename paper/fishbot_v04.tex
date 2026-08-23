@@ -1167,6 +1167,49 @@ difference'' it reported below that size was \emph{uninformative rather than
 negative}. We therefore report, alongside every interval, the smallest effect
 the run could have detected.
 
+\paragraph{That standard deviation is not a property of the game.} The table
+above, and every power calculation in this paper up to this point, treats
+$3.8$ sets per pair as a constant of the deal population. It is not. It is a
+property of a \emph{pair of policies} that disagree constantly, and the
+experiments most in need of careful sizing are the ones whose arms barely
+disagree at all. We noticed this only when a screening cell measured a per-pair
+standard deviation of $2.328$ --- seven standard errors from the figure it had
+been sized against.
+
+The mechanism is immediate once stated. Under common random numbers, a deal-pair
+on which the two arms play \emph{identically} contributes a difference of
+exactly zero. Writing $s$ for the share of pairs on which they diverge at all,
+\[
+  \operatorname{Var}(D) \;\approx\; s \cdot \operatorname{Var}(D \mid \text{diverge}),
+  \qquad\text{so}\qquad
+  \mathrm{sd} \;\approx\; \sqrt{s}\;\cdot\;\mathrm{sd}(D \mid \text{diverge}).
+\]
+That much is arithmetic and follows from the design. The empirical content is
+what the second factor does, and across the $28$ cells of this study that store
+their per-pair differentials --- spanning a belief-space search, a sampling
+budget, an opponent-model exponent and a history-dependent penalty, features
+with nothing in common but the harness --- it barely moves: $3.88 \pm 0.23$, a
+relative spread of $5.9\%$ against $9.6\%$ for the raw standard deviation. The
+correlation between $s$ and the raw standard deviation is $+0.858$, and $+0.824$
+with the single least-divergent cell removed, so it is not one point.
+
+Sizing therefore reduces to predicting one quantity, $s$, which can be counted
+from \emph{decisions} rather than from finished pairs and is correspondingly
+cheap. The consequence is not cosmetic. A candidate that perturbs $10\%$ of pairs
+has $\mathrm{sd} \approx 1.23$, not $3.80$: sized on the constant it would need
+$9.5\times$ the pairs, which is the difference between an experiment that looks
+impossible and one that is routine. We used exactly this to decline a run --- a
+sixth cell in a family of five failures, whose largest possible effect we could
+show in advance was inside what the cell would resolve, so that it would have
+returned a null whatever the truth was --- and to size its honest replacement at
+$2000$ pairs rather than the $6200$ the constant demanded.
+
+The direction of the error is worth naming: sizing on the A/A figure is
+\emph{conservative}, so nothing already published here is too narrow. What it
+cost was experiments never run, and nulls recorded from cells that could not
+have found anything. Those are the expensive kind of mistake precisely because
+they leave no trace in any interval.
+
 \subsection{Anytime-valid stopping}
 
 Screening many candidate terms invites peeking. A fixed-$n$ 95\% $t$-interval,
@@ -1336,8 +1379,52 @@ Two things follow. The exponent is the pure Monte Carlo law, which independently
 confirms the sampler is unbiased --- a bias floor would show as the curve
 flattening, and it does not. And precision at the operating point of 160 draws is
 nowhere near saturated: the prize is real and can be bought directly with draws
-rather than with a cleverer proposal. Whether the policy can \emph{feel} it is a
-duel and is not claimed here.
+rather than with a cleverer proposal.
+
+\paragraph{The policy can feel it, and it is the largest effect in this study.}
+The duel that paragraph declined to claim was pre-registered before its
+screening cell finished --- deliberately, because the belief-space search had
+already cost four rounds partly by being sized against a number a screen had
+inflated, and the only reliable defence is to fix the design before the number
+exists. It was sized against a \emph{minimum interesting effect} of $+0.15$ sets
+per deal-pair rather than against any estimate, on the ground that an effect
+smaller than the already-shipped search delivers, for triple the sampling
+budget, is not one this engine should adopt.
+
+Six blocks of $1000$ duplicate deal-pairs, $\texttt{n\_draws} = 480$ against
+$160$, everything else identical:
+\[
+  +0.340 \text{ sets per deal-pair}, \quad 95\%\ [+0.243,\, +0.436].
+\]
+All six blocks are positive, Cochran's $Q = 2.92$ on $5$ degrees of freedom
+($p = 0.71$), $I^2 = 0\%$, $\hat\tau = 0$. The entire interval clears the
+threshold fixed in advance. For scale, this is more than three times the
+belief-space search, which took four rounds and $6000$ pre-registered pairs to
+establish at $+0.104$.
+
+The $400$-pair screen of this same cell had read $+0.160$. The confirmatory run
+reads $+0.340$ --- \emph{higher}. That is what an unselected screen looks like,
+and it is worth stating only because every screen this project \emph{selected}
+on inflated instead.
+
+\paragraph{What it costs, and why that is a separate decision.} The
+pre-registration committed in advance that a demonstrated effect would not
+automatically move the default, because $\texttt{n\_draws}$ trades strength
+against latency and the public table has a request budget. Measured on $90$
+positions, a decision costs
+\[
+  3.52\,\mathrm{ms} \;+\; 5.84\,\mu\mathrm{s} \text{ per draw},
+\]
+a fit whose residuals stay within $\pm 0.21$\,ms across $40$ to $1920$ draws. At
+the shipped $160$ the sampler is only a fifth of a decision, so tripling it costs
+$+1.7$\,ms --- $1.35\times$, not $3\times$. That headroom is finite and the same
+fit says so: by $1920$ draws a decision is already $3.2\times$ the shipped one.
+With the effect and the price both measured, the default moved to $480$.
+
+Two of this paper's four documented winner's curses were paid for by sizing an
+experiment against an inflated screen. This is the case where pre-registering
+against a threshold instead cost nothing and returned the study's largest
+result.
 
 \subsection{The opponent model in play}
 \label{sec:res-oppmodel}
@@ -2337,6 +2424,54 @@ This is the same shape as v0.3's search failure, one level up. There, the
 problem was that the evaluation target could not rank asks; here, a much more
 careful attempt to build a better target hits the same wall, and locates it in
 the rollout policy rather than in the statistics.
+
+\paragraph{The mechanism was right and the wall was not there.} Everything above
+stands except one clause, and that clause carried the whole line. ``The belief
+tracker cannot'' is false. \texttt{BeliefState} is anchored on the initial deal,
+but it does not have to be \emph{handed} one: given the current hand and the
+real public history, \texttt{initial\_hand()} back-computes a deal consistent
+with both, and the tracker attaches to that. The stored positions did not carry
+the public history --- they recorded its \emph{length} --- so the strong policy
+had nothing to attach to, and a property of the dataset was read as a property
+of the engine.
+
+Repeating the paper's own measurement with the full v0.4 policy finishing every
+rollout, over $110$ positions and $3056$ scored candidate asks: position-centred
+rollout value rises by $+0.681 \pm 0.142$ across the range of
+$\Prob(\text{success})$, against the $+0.101$ above --- a difference of $4.1$
+standard errors. No single position carries it (the largest leave-one-out move
+is $0.06$), and the run's first $40$ positions, which had been measured on their
+own first, agree with the remaining $80$ within $1.7$ standard errors, so it is
+one slope rather than an average of two regimes. Per-position slopes nonetheless
+run from $-6.4$ to $+3.7$: it is that between-position spread, and not the
+number of asks scored, that sets the interval, which is why tripling the run
+barely narrowed it.
+
+So the diagnosis was correct about the mechanism --- a weak continuation does
+flatten the target --- and wrong about it being a wall. The target the
+regression could not learn from was flat because of what finished the game, and
+finishing the game properly un-flattens it by a factor of nearly seven. The
+learning line is re-opened rather than abandoned, at a cost: with six belief
+trackers in the loop a rollout takes $240$--$500$\,ms against $17$--$23$\,ms for
+the heuristic, roughly $20\times$.
+
+Two further things had to be true and only one of them was obvious. The stored
+worlds must satisfy everything the public log implies --- not merely preserve
+hand counts, which is all the public heuristic ever needed. A successful ask
+locates a card; a \emph{failed} ask asserts, under the no-bluff rule, that the
+asker holds at least one card of that half-suit, and a count-preserving shuffle
+violates that constraint routinely. Worlds must therefore come from the belief
+sampler. And the failure had to stay loud: seeding a rollout with an empty
+history does not error, it anchors six trackers on a determinized mid-game hand
+as though it were the deal and returns a number computed from a game that could
+not have happened. That configuration is refused rather than run.
+
+We record this as the fifth appearance of the pattern this paper keeps
+documenting, and the first in which reasoning about a quantity did not merely
+inflate it but retired an entire research direction. The diagnosis was
+well-argued, specific, mechanistic, and supported by a number. It was also never
+tested, because testing it required exactly the thing it asserted was
+impossible.
 
 \subsection{Perpetual states, measured}
 \label{sec:res-perpetual}

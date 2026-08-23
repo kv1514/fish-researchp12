@@ -59,11 +59,26 @@ not being re-estimated by this one. No cell of this run contributes to it.
 
 - **6 blocks × 1000 pairs = 6000 duplicate deal-pairs**, fresh seeds throughout,
   disjoint from every seed used by the lookahead and precision runs.
-- Per-pair standard deviation **3.796**, from the 4800 A/A pairs.
-- **MDE at 80% power is 0.137.** That is above the +0.104 being sized against,
-  and this is stated here rather than discovered later: at 6000 pairs the run
-  has roughly 65% power against its own hypothesis. Six more blocks would reach
-  80%, and the reason for not running them is cost, not evidence.
+- Per-pair standard deviation **3.323**, the measured mean of the eight
+  recorded lookahead-vs-champion cells, rather than the 3.796 of the A/A pairs.
+  `results/pair_sd_model.json` explains the gap: under common random numbers a
+  pair whose arms play identically differs by exactly zero, so the sd tracks how
+  often the two policies diverge -- 0.806 for this contrast against 1.0 for two
+  identical policies. Sizing on the A/A figure would call this run 12% noisier
+  than it is.
+- **MDE at 80% power is 0.120**, above the +0.104 being sized against: at 6000
+  pairs the run has **68% power** against its own hypothesis. Six more blocks
+  would reach 80%, and the reason for not running them is cost, not evidence.
+
+  > **Amended before any pair of this run was played**, and recorded rather
+  > than silently corrected. The original text said "MDE 0.137 ... roughly 65%
+  > power", which was wrong twice. It took the per-pair sd as the A/A figure of
+  > 3.796, when the eight recorded lookahead-vs-champion cells -- the same
+  > contrast this run makes, on top of a different sampler -- measure **3.323**;
+  > and 65% was not the power implied even by 3.796, which gives 56%. Both
+  > numbers are now computed from the measurement. Nothing about the design,
+  > the hypothesis, the seeds or the analysis changes; only the honest
+  > description of what this many pairs can see.
 - Because the run is underpowered against its stated alternative, **an interval
   including zero will not be reported as "the lookahead does not pay on top of
   precision."** It will be reported as what it is: an interval, with its width,
