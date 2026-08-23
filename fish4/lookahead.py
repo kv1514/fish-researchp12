@@ -86,10 +86,30 @@ DEFAULT_DEPTH = 3
 #: ~45^3 nodes for a quantity dominated by its best few branches.
 #:
 #: The root ply is deliberately not beamed: lookahead_bonus has to return a
-#: bonus for every candidate the policy is ranking, so the cost is n(1 + b + b^2)
-#: = 21n, about 945 expansions at the median n, not the 84 a uniformly-beamed
-#: tree would give.
+#: bonus for every candidate the policy is ranking. A naive depth-3 tree would
+#: therefore cost n(1 + b + b^2) = 21n, about 945 expansions at the median n,
+#: not the 84 a uniformly-beamed tree would give. Short-circuiting the inert
+#: last ply (see possession_value) brings that to n(1 + b) = 225.
 DEFAULT_BEAM = 4
+
+# WHERE THE TIME ACTUALLY GOES, AND ONE OPTIMISATION NOT TO ATTEMPT
+# -----------------------------------------------------------------
+# Rebuilding the candidate list at every internal node, and sorting all ~45 of
+# them to read 4, looks like the dominant cost and profiles at ~40% of
+# possession_value under cProfile. It is not, and the obvious fix is a no-op.
+# Recorded here so the next person does not spend a day on it:
+#
+#   * Wall-clock (perf_counter, not cProfile) splits it as generation 9.8% and
+#     ranking 12.6% - about half the profiled figure. cProfile over-charges
+#     per-call overhead across ~1.9M lambda calls.
+#   * Since the last ply short-circuits before legal_asks is reached, most
+#     nodes never build a list at all.
+#   * An incremental-candidate implementation, verified exact, measured
+#     0.998x / 1.003x / 1.015x - break-even. The delta maintenance at every
+#     apply_success costs what the avoided rebuild saves.
+#
+# The real hot spot was apply_success -> _rebalance -> _renormalise_rows, which
+# is what the two optimisations above address.
 
 
 class ChainState:
@@ -216,9 +236,11 @@ class ChainState:
         than turned into a division by zero.
         """
         M = self.M
-        tot = M.sum(axis=1)
-        live = tot > 1e-12
-        M[live] /= tot[live][:, None]
+        # Fused: `M[live] /= tot[live][:, None]` is a get-copy, divide and
+        # scatter-back through boolean fancy indexing, allocating two
+        # temporaries per call in the hottest function in the module.
+        tot = M.sum(axis=1)[:, None]
+        np.divide(M, tot, out=M, where=tot > 1e-12)
 
     def undo(self) -> None:
         card, target, M, hand = self._undo.pop()
@@ -243,6 +265,15 @@ def possession_value(state: ChainState, depth: int, beam: int,
         return 0.0
 
     M = state.M
+    if depth == 1:
+        # The last ply is inert. Its continuation is possession_value(.., 0),
+        # which is 0 unconditionally, so q = p * (1 + 0) = p and the maximum
+        # over the beam is just the largest probability - which the sort key
+        # would compute anyway. Expanding it did up to `beam` full
+        # apply_success/undo cycles, each an M.copy() plus a column scale and a
+        # 54-row renormalise, to rediscover a number already in hand. With
+        # depth 3 and beam 4 roughly three quarters of all expansions sit here.
+        return max([0.0] + [float(M[c, t]) for t, c in asks])
     scored = sorted(asks, key=lambda a: -float(M[a[1], a[0]]))
     best = 0.0
     for target, card in scored[:beam]:

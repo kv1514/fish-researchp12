@@ -1084,26 +1084,35 @@ the \emph{exact-solver corpus} in
 \texttt{results/exact\_positions\_v2.json}, which consists of endgame positions
 with one or two live half-suits --- an endgame statistic read as a general one.)
 
-Continuations are therefore beamed to the best $4$ candidates by immediate $p$.
-The root ply is \emph{not} beamed, because the policy needs a bonus for every
-candidate it is ranking, so the cost is $n\,(1 + b + b^2) = 21n$ node expansions
-rather than the $b + b^2 + b^3 = 84$ a uniformly-beamed tree would give. At the
-median $n = 45$ that is about $945$ expansions, and the measured median of about
-$14$\,ms per decision on the contended host of Section~\ref{sec:counting} is
-consistent with that rather than with $84$ nodes, which at the same per-node cost
-would be nearer $1.4$\,ms.
+Continuations are beamed to the best $4$ candidates by immediate $p$. The root
+ply is \emph{not} beamed, because the policy needs a bonus for every candidate it
+is ranking, so a naive depth-3 tree costs $n\,(1 + b + b^2) = 21n$ expansions ---
+about $945$ at the median $n = 45$ --- rather than the $b + b^2 + b^3 = 84$ a
+uniformly-beamed tree would give.
+
+Three quarters of those expansions were doing no work. At the last ply the
+continuation is $W(\cdot, 0) = 0$ by definition, so $q = p\,(1 + 0) = p$ and the
+maximum over the beam is simply the largest probability --- a number the sort key
+has already computed. The implementation nonetheless performed up to $b$ full
+transition/undo cycles there, each copying the marginal matrix and running a
+column scale and a $54$-row renormalisation, to rediscover it. Short-circuiting
+that ply, and fusing the row renormalisation to avoid a boolean-index round trip,
+leaves the returned vector bit-identical (maximum absolute difference $0.0$ over
+$24$ real positions and every candidate) and costs $n\,(1 + b) = 225$ expansions
+instead of $945$. Measured median cost falls from about $14$\,ms per decision to
+$6.7$\,ms (mean $8.3$, p90 $18.1$, over $40$ positions, minimum of three
+repetitions each) on the contended host of Section~\ref{sec:counting}.
 
 Against the configuration the lookahead runs actually used --- $160$ draws, the
 \texttt{fish4/agent4.py} default, since no lookahead cell in
 \texttt{results/v04\_duels.jsonl} overrides \texttt{n\_draws} --- the relevant
 posterior cost is the $31.9$\,ms row of Table~\ref{tab:posterior}, not the
-$\sim\!100$\,ms rows, which are all $512$-draw. So the bonus adds roughly $44\%$
-to a decision, not the $15\%$ an earlier draft claimed by comparing against a
-budget these runs never ran at. The wall clock agrees and is harsher: the
-champion-family cells average about $2.1$\,ms per action while the depth-3
-lookahead cell runs $319.70$\,s over $42{,}373$ actions, i.e. about $7.5$\,ms per
-action across both sides. This is the one part of v0.4 whose cost is a search
-rather than an inference, and it is not cheap.
+$\sim\!100$\,ms rows, which are all $512$-draw. So the bonus now adds roughly a
+fifth to a decision. An earlier draft of this section claimed $15\%$ by comparing
+the pre-optimisation cost against a $512$-draw budget these runs never used,
+which was wrong twice in opposite directions; the duelling results in
+Table~\ref{tab:lookahead} were all produced at the slower $945$-expansion cost,
+since the optimisation is exact and postdates them.
 
 % =====================================================================
 \section{Evaluation methodology}
