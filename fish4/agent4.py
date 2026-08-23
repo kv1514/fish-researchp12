@@ -92,6 +92,10 @@ class FishBot4(Tablebase4Mixin, Agent):
                  claim_threshold: float = 0.97,
                  claim_exact: bool = True,
                  claim_exact_candidates: int = 3,
+                 # -- adaptive style
+                 w_retake: float = 0.0,
+                 retake_window: int = 8,
+                 w_behind: float = 0.0,
                  # -- belief-space lookahead
                  w_lookahead: float = 0.0,
                  lookahead_depth: int = 1,
@@ -125,6 +129,9 @@ class FishBot4(Tablebase4Mixin, Agent):
         self.claim_cfg = ClaimConfig(threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
                                      use_exact=claim_exact)
+        self.w_retake = w_retake
+        self.retake_window = retake_window
+        self.w_behind = w_behind
         self.w_lookahead = w_lookahead
         self.lookahead_depth = lookahead_depth
         self.lookahead_beam = lookahead_beam
@@ -194,7 +201,14 @@ class FishBot4(Tablebase4Mixin, Agent):
                                          expose_weight=self.value_expose)
             _, p = score_asks(ctx, asks, AskWeights.zeros())
         else:
-            scores, p = score_asks(ctx, asks, self.weights)
+            # Style adapts to the match before the ask is scored: a team that
+            # is behind weighs its tie-breakers differently from one that is
+            # ahead. Zero leaves the incumbent weights untouched.
+            wts = self.weights
+            if self.w_behind:
+                from .adaptive import adjust_weights
+                wts = adjust_weights(wts, obs, self.w_behind)
+            scores, p = score_asks(ctx, asks, wts)
             if self.w_value and model is not None:
                 scores = scores + self.w_value * score_asks_by_value(
                     ctx, asks, model)
@@ -203,6 +217,14 @@ class FishBot4(Tablebase4Mixin, Agent):
         # baseline is reproduced decision for decision and the weight ablates
         # exactly one idea. See fish4/lookahead.py for why this is the one
         # search design the variance diagnosis does not rule out.
+        # Breaking a duel: penalise taking back a card this seat just lost to
+        # this same opponent. See fish4/adaptive.py for why this is expected to
+        # lose and why it is worth measuring regardless.
+        if self.w_retake:
+            from .adaptive import retake_flags
+            scores = scores - self.w_retake * retake_flags(
+                obs, asks, self.retake_window)
+
         if self.w_lookahead and self.lookahead_depth > 1:
             from .lookahead import lookahead_bonus
             scores = scores + self.w_lookahead * lookahead_bonus(
