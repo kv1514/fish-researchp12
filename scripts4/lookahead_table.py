@@ -1,0 +1,109 @@
+"""Emit the belief-space lookahead results table, as LaTeX, from the results file.
+
+The table in the paper is generated rather than typed, for the same reason
+``summarise_duels.py`` exists: a number transcribed by hand is a number that can
+drift from the run that produced it, and this project has already lost one
+result to a confounded cell that nobody could reconstruct afterwards.
+
+    py scripts4/lookahead_table.py            # LaTeX, for paper/fishbot_v04.tex
+    py scripts4/lookahead_table.py --plain    # the same rows, readable
+
+Every row carries the minimum effect its own cell could have resolved, so a
+"null" is never read as evidence of absence when it is only absence of evidence.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SD = 3.869              # measured per-pair SD, see fish4/evalx/README.md
+
+#: (substring of the label, how the paper should name the cell). Order is the
+#: order of the table; the screening cells first, then the replications, so the
+#: reader meets the apparent winner before they meet its retest.
+ROWS = [
+    ("lookahead d3 w0.25 vs champion",              r"depth 3, $w=0.25$",              "screen"),
+    ("lookahead d2 w0.25 vs champion",              r"depth 2, $w=0.25$",              "screen"),
+    ("lookahead d3 w0.60 vs champion",              r"depth 3, $w=0.60$",              "screen"),
+    ("lookahead d3 w0.25 NO coupling",              r"depth 3, \emph{no quota coupling}", "screen"),
+    ("REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)",       r"depth 3, $w=0.25$ --- retest", "retest"),
+    ("REPLICATE lookahead d3 w0.25 vs champion (second fresh set)",  r"\quad --- retest again",       "retest"),
+    ("REPLICATE coupling ablation d3",              r"\emph{no coupling} --- retest",  "retest"),
+]
+
+
+def mde(n: int, sd: float = SD) -> float:
+    """Smallest effect this many pairs could resolve at 80% power."""
+    return float("inf") if not n else (1.959964 + 0.8416212) * sd / math.sqrt(n)
+
+
+def load() -> list[dict]:
+    p = ROOT / "results" / "v04_duels.jsonl"
+    return [json.loads(l) for l in p.read_text().splitlines() if l.strip()]
+
+
+def pick(rows: list[dict], needle: str):
+    """The most recent run carrying this label, or None if it has not run."""
+    hits = [r for r in rows if needle in (r.get("label") or "")]
+    return hits[-1] if hits else None
+
+
+def verdict(lo: float, hi: float) -> str:
+    if lo > 0:
+        return "resolves"
+    if hi < 0:
+        return "resolves against"
+    return "null"
+
+
+def main(plain: bool = False) -> int:
+    rows = load()
+    found = [(name, kind, pick(rows, needle)) for needle, name, kind in ROWS]
+    missing = [n for n, _, r in found if r is None]
+
+    if plain:
+        for name, kind, r in found:
+            if r is None:
+                print(f"{name:44s}  (not run)")
+                continue
+            lo, hi = r["diff_ci"]
+            print(f"{name:44s} n={r['n_pairs']:<4d} {r['diff_mean']:+7.3f} "
+                  f"[{lo:+.3f},{hi:+.3f}] MDE={mde(r['n_pairs']):.2f}  "
+                  f"{verdict(lo, hi)}")
+        if missing:
+            print("\nnot yet run:", "; ".join(missing))
+        return 1 if missing else 0
+
+    out = [r"\begin{table}[t]", r"\centering", r"\small",
+           r"\begin{tabular}{lrrlr}", r"\toprule",
+           r"cell & pairs & set diff & 95\% CI & MDE \\", r"\midrule"]
+    for name, kind, r in found:
+        if r is None:
+            continue
+        if kind == "retest" and out[-1] != r"\midrule":
+            out.append(r"\midrule")
+        lo, hi = r["diff_ci"]
+        bold = lo > 0 or hi < 0
+        d = f"$\\mathbf{{{r['diff_mean']:+.3f}}}$" if bold else f"${r['diff_mean']:+.3f}$"
+        out.append(f"{name} & {r['n_pairs']} & {d} & "
+                   f"$[{lo:+.3f}, {hi:+.3f}]$ & {mde(r['n_pairs']):.2f} \\\\")
+    out += [r"\bottomrule", r"\end{tabular}",
+            r"\caption{Belief-space lookahead against the v0.4 champion, which is"
+            r" the identical policy with the bonus disabled. MDE is the smallest"
+            r" effect that cell could have resolved at 80\% power given the"
+            r" measured per-pair standard deviation of 3.869 sets, so a null row"
+            r" says the run did not detect an effect of that size, not that there"
+            r" is none.}",
+           r"\label{tab:lookahead}", r"\end{table}"]
+    print("\n".join(out))
+    if missing:
+        print("\n% NOT YET RUN: " + "; ".join(missing), file=sys.stderr)
+    return 1 if missing else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(plain="--plain" in sys.argv))
