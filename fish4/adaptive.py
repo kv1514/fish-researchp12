@@ -76,10 +76,33 @@ def recent_losses(obs, window: int = DEFAULT_WINDOW) -> set:
     return out
 
 
-def retake_flags(obs, asks, window: int = DEFAULT_WINDOW) -> np.ndarray:
-    """1.0 for each candidate ask that would take back a recently lost card."""
+def retake_flags(obs, asks, window: int = DEFAULT_WINDOW,
+                 min_depth: int = 0) -> np.ndarray:
+    """1.0 for each candidate ask that would take back a recently lost card.
+
+    ``min_depth`` gates the penalty on the exchange being RECURRING. At 0 --
+    the default, and what every measurement so far used -- every retake is
+    flagged, including the first one.
+
+    That default does not match the argument in this module's docstring, and
+    noticing the mismatch is the only reason this parameter exists. The case
+    against re-taking is about a repeated public exchange teaching the table
+    that a half-suit is contested while neither side nets a card across the
+    cycle. None of that applies to the FIRST retake: taking back a card you
+    just watched leave your hand is a certain ask, it keeps your turn, and it
+    reveals nothing the table did not just witness. Penalising it is paying the
+    cost of the theory without being in the situation the theory describes.
+
+    Five screening cells measured the ungated version and all five lost, two of
+    them decisively and monotonically in the penalty. That is what the theory
+    predicted for a penalty applied to certain asks. Gating on ``duel_depth``
+    is not a sixth guess at the same idea; it is the first version that
+    penalises what the argument actually objects to.
+    """
     lost = recent_losses(obs, window)
     if not lost:
+        return np.zeros(len(asks))
+    if min_depth and duel_depth(obs, window) < min_depth:
         return np.zeros(len(asks))
     return np.array([1.0 if (a.target, a.card) in lost else 0.0 for a in asks])
 

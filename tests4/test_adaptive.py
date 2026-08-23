@@ -171,3 +171,63 @@ def test_a_nonzero_weight_changes_some_decision(on):
         if _act(BASE, *pos) != _act(dict(BASE, **on), *pos):
             differed += 1
     assert differed > 0, f"{on} never changed a decision"
+
+
+# ---------------------------------------------------------------------------
+# Gating the penalty on the exchange being recurring
+# ---------------------------------------------------------------------------
+
+def test_min_depth_zero_is_exactly_the_ungated_flags():
+    """The default must reproduce every measurement already taken."""
+    from fish.engine import Ask
+    o = _obs([AskEvent(asker=1, target=0, card=7, success=True)])
+    asks = [Ask(1, 7), Ask(1, 8), Ask(3, 7)]
+    assert list(retake_flags(o, asks, min_depth=0)) == \
+           list(retake_flags(o, asks))
+
+
+def test_min_depth_spares_the_first_retake():
+    """One exchange is not a duel, and the argument only objects to duels."""
+    from fish.engine import Ask
+    o = _obs([AskEvent(asker=1, target=0, card=7, success=True)])
+    asks = [Ask(1, 7), Ask(1, 8)]
+    assert duel_depth(o) == 1
+    assert list(retake_flags(o, asks, min_depth=0)) == [1.0, 0.0]
+    assert list(retake_flags(o, asks, min_depth=2)) == [0.0, 0.0]
+
+
+def test_min_depth_still_penalises_a_recurring_exchange():
+    from fish.engine import Ask
+    o = _obs([AskEvent(asker=1, target=0, card=7, success=True),
+              AskEvent(asker=0, target=1, card=7, success=True),
+              AskEvent(asker=1, target=0, card=7, success=True)])
+    asks = [Ask(1, 7), Ask(1, 8)]
+    assert duel_depth(o) == 3
+    assert list(retake_flags(o, asks, min_depth=2)) == [1.0, 0.0]
+    assert list(retake_flags(o, asks, min_depth=4)) == [0.0, 0.0]
+
+
+def test_retake_min_depth_ablates_exactly_at_zero_weight():
+    """The gate cannot change anything while the penalty is off."""
+    positions = collect_positions(3, 3, 18)
+    assert positions
+    for pos in positions:
+        assert _act(BASE, *pos) == _act(dict(BASE, retake_min_depth=2), *pos)
+
+
+def test_a_gated_penalty_differs_from_an_ungated_one_somewhere():
+    """Otherwise the gate is decoration and a duel would measure nothing.
+
+    Needs a wide sample, and the width is not a guess: the gate can only act
+    where a retake is on the menu AND the duel is exactly one deep, which
+    ``results/duel_depth_base_rate.json`` measures at 3.3% of positions. A
+    60-position check expects two such positions and routinely finds none --
+    which is how this test first failed, and what sizing it properly fixes.
+    """
+    ungated = dict(BASE, w_retake=0.5)
+    gated = dict(BASE, w_retake=0.5, retake_min_depth=2)
+    differed = 0
+    for pos in collect_positions(20, 2, 400):
+        if _act(ungated, *pos) != _act(gated, *pos):
+            differed += 1
+    assert differed > 0, "the depth gate never changed a decision"

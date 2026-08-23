@@ -97,6 +97,7 @@ class FishBot4(Tablebase4Mixin, Agent):
                  # -- adaptive style
                  w_retake: float = 0.0,
                  retake_window: int = 8,
+                 retake_min_depth: int = 0,
                  w_behind: float = 0.0,
                  # -- belief-space lookahead
                  w_lookahead: float = 0.0,
@@ -135,6 +136,7 @@ class FishBot4(Tablebase4Mixin, Agent):
                                      use_exact=claim_exact)
         self.w_retake = w_retake
         self.retake_window = retake_window
+        self.retake_min_depth = retake_min_depth
         self.w_behind = w_behind
         self.w_lookahead = w_lookahead
         self.lookahead_depth = lookahead_depth
@@ -229,7 +231,7 @@ class FishBot4(Tablebase4Mixin, Agent):
         if self.w_retake:
             from .adaptive import retake_flags
             scores = scores - self.w_retake * retake_flags(
-                obs, asks, self.retake_window)
+                obs, asks, self.retake_window, self.retake_min_depth)
 
         if self.w_lookahead and self.lookahead_depth > 1:
             from .lookahead import lookahead_bonus
