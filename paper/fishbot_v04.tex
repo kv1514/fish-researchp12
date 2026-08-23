@@ -113,13 +113,42 @@ estimated between-run standard deviation is $0.0000$. The intervals are honest
 and the three-cell disagreement was the one-in-thirty event. Establishing that
 required giving the harness the ability to observe its own null, which it did not
 have: under seat-based seeding an A/A is bit-identical in both halves of a
-duplicate pair and its differential is exactly zero for every deal. We also report several
+duplicate pair and its differential is exactly zero for every deal. Two later results bear on where the remaining strength is. Tripling the
+posterior sampling budget, from 160 draws to 480, is worth
+$\mathbf{+0.340}$ \textbf{sets per deal-pair}, 95\% CI $[+0.243, +0.436]$ over a
+pre-registered 6000-pair run with all six blocks positive and $I^2 = 0\%$ --- the
+largest effect in this study after the opponent model itself, and more than three
+times the belief-space search. It is affordable because a decision costs
+$3.57$\,ms of fixed work plus $6.3\,\mu$s per draw, so tripling the sampler costs
+$1.38\times$ rather than $3\times$; profiling locates that fixed term in per-card
+dispatch inside a sequential sampler, where there is nothing to hoist. Since the
+objective ranks barely better than $\Prob(\text{success})$ alone and nearly every
+term added beside it is null, we read this as evidence that the leverage in this
+game is in the belief rather than in what is computed from it.
+
+The second is a retraction. This paper closed its objective-learning line on the
+claim that the belief tracker \emph{cannot} attach to a determinized mid-game
+position. It can, in a few lines. On identical positions, worlds and root asks,
+finishing rollouts with the full engine instead of a public-information
+heuristic raises the target's slope on $\Prob(\text{success})$ from
+$+0.040 \pm 0.045$ to $+0.681 \pm 0.142$, a paired difference of
+$+0.641 \pm 0.145$; the heuristic needs $181$ plies to finish a position the
+engine finishes in $26$. The diagnosis was right about the mechanism and wrong
+that it was a wall. We report it as the fifth appearance in this study of the
+same error --- reasoning about a quantity instead of measuring it --- and the
+first in which it closed a research direction rather than merely inflating a
+number, because a negative claim generates no experiment.
+
+We also report several
 methodological corrections, including a bias in the previous harness's handling
 of timed-out games that we demonstrate can place the true value outside a
-reported 95\% confidence interval, and a measurement showing that the previous
+reported 95\% confidence interval; a measurement showing that the previous
 version's 600-pair experiment cells could not resolve effects below about
-$0.44$ sets per pair --- so its smaller null results were uninformative rather
-than negative.
+$0.44$ sets per pair, so its smaller null results were uninformative rather
+than negative; and the finding that the per-pair standard deviation those
+calculations rest on is not a property of the game at all but of how often the
+two policies being compared diverge, which systematically over-sizes exactly the
+near-identical comparisons that most need care.
 \end{abstract}
 
 % =====================================================================
