@@ -5,7 +5,11 @@ working toward the strongest practical engine for six-player Literature and
 toward understanding what near-optimal Fish actually looks like.
 
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
-- Research log: [RESEARCH_LOG.md](RESEARCH_LOG.md)
+- Research log, v0.3: [RESEARCH_LOG.md](RESEARCH_LOG.md) (v0.4 keeps its record in
+  the paper, in the per-module notes [fish4/infer/FRONTIER.md](fish4/infer/FRONTIER.md),
+  [fish4/EXACT2.md](fish4/EXACT2.md), [fish4/learn/FIT.md](fish4/learn/FIT.md),
+  [fish4/evalx/README.md](fish4/evalx/README.md), and in the raw duel records at
+  `results/v04_duels.jsonl`)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
 - Research paper, v0.4 (current): [paper/fishbot_v04.tex](paper/fishbot_v04.tex)
 - Research paper, v0.3 (superseded, kept because its results still reproduce):
