@@ -12,9 +12,17 @@ so every published interval is at least as wide as it should be. But
 question that matters is whether any cell reported as an uninformative null was
 in fact resolvable. That is checkable, so it is checked here rather than argued.
 
-A cell's verdict changes exactly when its estimate is smaller than the MDE
-computed from the constant but larger than the MDE computed from its own
-measured standard deviation.
+TWO CRITERIA, and the first version of this script used only the stricter one.
+``|est| > MDE`` is a test at alpha ~ 0.005, because ``MDE = 2.8016 * se`` and
+2.8016 is ``z_{0.975} + z_{0.80}``. Everywhere else this project defines a cell
+as having resolved something when its **95% interval excludes zero**, which is
+``|est| > 1.96 * se`` -- that is what both verdict scripts say and what the duel
+harness prints. Checking revisions against a bar 43% higher than the project's
+own definition made "no verdict changes" nearly automatic, and it was: the band
+between the two MDEs is a median 8% of the MDE wide.
+
+Both are reported below. The second is the one that matters, and it changes
+several cells.
 
 Only cells that stored their per-pair differentials can be re-examined; the
 earlier ones recorded a mean and an interval only, and no re-derivation can
@@ -34,8 +42,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 Z = 1.959964
 Z_BETA = 0.8416212
-#: The single figure the nulls table's MDE column was computed from.
+#: The single figure the nulls table's MDE column was computed from. The
+#: lookahead pre-registration later replaced it with 3.796 measured over 4800
+#: A/A pairs, but the table in the paper was built with this one, so this is the
+#: number a recheck of that table has to start from.
 CONSTANT_SD = 3.869
+#: The project's own definition of "this cell resolved something".
+Z95 = 1.959964
 
 
 def mde(sd: float, n: int) -> float:
@@ -54,9 +67,15 @@ def main():
             continue
         a = np.array(d, dtype=float)
         own = float(a.std(ddof=1))
+        ci = r.get("diff_ci") or [float("nan"), float("nan")]
         cells.append({
             "label": r["label"], "n": int(a.size), "sd": own,
-            "est": float(a.mean()),
+            "est": float(a.mean()), "se": float(own / np.sqrt(a.size)),
+            # The interval the harness recorded, built with a t critical on
+            # n-1 df. Used as-is rather than reconstructed: the question is
+            # what this cell REPORTED, and reconstructing it with a normal
+            # critical would answer a slightly different one.
+            "lo": float(ci[0]), "hi": float(ci[1]),
             "mde_constant": float(mde(CONSTANT_SD, a.size)),
             "mde_own": float(mde(own, a.size)),
         })
@@ -79,16 +98,35 @@ def main():
     flipped = [c for c in cells
                if abs(c["est"]) < c["mde_constant"]
                and abs(c["est"]) > c["mde_own"]]
-    print(f"\ncells whose verdict changes: {len(flipped)}")
+    print(f"\nunder the strict bar (|est| > MDE, alpha ~ 0.005): "
+          f"{len(flipped)} change")
     for c in flipped:
         print(f"  {c['label'][:52]:<52} est {c['est']:+.3f}   "
               f"MDE {c['mde_constant']:.3f} -> {c['mde_own']:.3f}")
     if not flipped:
-        print("  None. Every cell reported as an uninformative null stays one")
-        print("  when scored against its own measured noise, and every cell")
-        print("  that resolved still resolves. The correction changes how the")
-        print("  NEXT experiment should be sized; it revises no reading already")
-        print("  published.")
+        print("  None -- and the band between the two MDEs is a median "
+              f"{100 * (1 - np.median(ratio)):.0f}% of the\n  MDE wide, so "
+              "that was close to guaranteed. This is the check being vacuous,\n"
+              "  not the correction being harmless.")
+
+    # The criterion the rest of the project actually uses.
+    resolved = [c for c in cells if c["lo"] > 0 or c["hi"] < 0]
+    called_null = [c for c in cells if abs(c["est"]) < c["mde_constant"]]
+    both = [c for c in resolved if abs(c["est"]) < c["mde_constant"]]
+    print(f"\nunder the project's own bar (95% interval excludes zero): "
+          f"{len(both)} change")
+    for c in sorted(both, key=lambda c: -abs(c["est"])):
+        print(f"  {c['label'][:46]:<46} {c['est']:>+7.3f} "
+              f"[{c['lo']:+.3f}, {c['hi']:+.3f}]")
+    print(f"\n  {len(called_null)} cells sit below the MDE the nulls table "
+          f"quotes for them, and {len(both)} of\n  those have intervals that "
+          f"exclude zero. The table's MDE column is a\n  statement about what "
+          f"the cell could DETECT at 80% power, which is a\n  different and "
+          f"stricter thing than what it did resolve -- and reading the\n  "
+          f"column as 'this cell found nothing' understates several cells. One "
+          f"of\n  them, the retake penalty at -0.340, is treated as an "
+          f"established effect by\n  jobs/PREREGISTRATION_retake_gate.md, "
+          f"which is the contradiction that made\n  this worth re-checking.")
 
     cells.sort(key=lambda c: c["mde_own"] / c["mde_constant"])
     print(f"\n{'cell':<46}{'n':>6}{'sd':>7}{'MDE con':>9}{'MDE own':>9}"
@@ -101,8 +139,11 @@ def main():
            "cells_with_pair_data": len(cells),
            "ratio_median": float(np.median(ratio)),
            "ratio_min": float(ratio.min()), "ratio_max": float(ratio.max()),
-           "verdicts_changed": len(flipped),
-           "changed": flipped, "cells": cells}
+           "verdicts_changed_strict": len(flipped),
+           "verdicts_changed_project_bar": len(both),
+           "changed_strict": flipped,
+           "changed_project_bar": [c["label"] for c in both],
+           "cells": cells}
     dest = ROOT / "results" / "mde_recheck.json"
     dest.write_text(json.dumps(out, indent=1))
     print(f"\nwrote {dest}")

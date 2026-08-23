@@ -108,6 +108,30 @@ def main() -> int:
             print(f"    {p['re']:+.4f}  95% [{rlo:+.4f}, {rhi:+.4f}]   "
                   f"{'excludes zero' if (rlo > 0 or rhi < 0) else 'INCLUDES ZERO'}")
 
+    # How much of "excludes zero" rests on any one block? With I^2 = 61% this
+    # is not a formality: the interval clears zero by a small fraction of its
+    # own half-width, and a reader is entitled to know whether that survives
+    # dropping a block.
+    print("\nleave-one-block-out (diagnostic)")
+    fragile = []
+    for drop in cs:
+        rest = [c for c in cs if c["label"] != drop["label"]]
+        q = pool(rest)
+        rlo = q["fe"] - Z * q["fe_se"]
+        rhi = q["fe"] + Z * q["fe_se"]
+        keeps = rlo > 0 or rhi < 0
+        if not keeps:
+            fragile.append(drop["label"][-1])
+        print(f"  without block {drop['label'][-1]}  {q['fe']:>+7.4f}  "
+              f"[{rlo:+.4f}, {rhi:+.4f}]  "
+              f"{'still excludes zero' if keeps else 'INCLUDES ZERO'}")
+    if fragile:
+        print(f"  Dropping block {' or '.join(fragile)} alone puts zero back "
+              f"inside the interval.\n  The pre-registered pool is the pool "
+              f"and no block may be dropped for its\n  result -- but the "
+              f"verdict rests on {len(fragile)} of the six, and saying so costs "
+              f"nothing.")
+
     sc = cells(SCREENS)
     if sc:
         print("\nSCREENS -- context only, contributed nothing to the design")
@@ -152,6 +176,7 @@ def main() -> int:
     print("=" * 70)
 
     out = {"blocks": cs, "pooled": p, "n_pairs": n_tot, "mde_80": mde,
+           "fragile_without_blocks": fragile,
            "half_width": half, "min_interesting": MIN_INTERESTING,
            "demonstrated": bool(demonstrated), "screens": sc}
     dest = ROOT / "results" / "at_ask_verdict.json"

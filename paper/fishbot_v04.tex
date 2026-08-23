@@ -1214,14 +1214,48 @@ exactly zero. Writing $s$ for the share of pairs on which they diverge at all,
   \mathrm{sd} \;\approx\; \sqrt{s}\;\cdot\;\mathrm{sd}(D \mid \text{diverge}).
 \]
 That much is arithmetic and follows from the design. The empirical content is
-what the second factor does, and across the $34$ cells of this study that store
-their per-pair differentials --- spanning a belief-space search, a sampling
-budget, an opponent-model exponent and a history-dependent penalty, features
-with nothing in common but the harness --- it barely moves:
-$3.91 \\pm 0.22$, a relative spread of $5.6\\%$ against
-$9.0\\%$ for the raw standard deviation. That
-comparison is the claim: if the conditional factor were as variable as the raw
-standard deviation, the decomposition would explain nothing.
+what the second factor does. Across the $35$ cells of this study that store
+their per-pair differentials it moves little in absolute terms --- $3.91 \pm
+0.22$, a relative spread of $5.5\%$ against $9.0\%$ for the raw standard
+deviation --- and our first draft stopped there and called that the finding. It
+does not survive being looked at properly.
+
+Three things weaken it, and the third matters for use. \emph{Most of the
+residual spread is not structure}: the sampling noise of an $\mathrm{sd}$
+estimate at these sample sizes is alone $3.0\%$, leaving about $4.6\%$ genuine
+between-cell variation. \emph{The comparison is carried by a handful of cells}:
+restricted to the $22$ cells with divergence share above $0.83$ --- where most of
+this study lives --- the raw spread is $3.49\%$ and the conditional spread is
+$3.48\%$, the same number, and the correlation between share and $\mathrm{sd}$
+collapses from $+0.87$ to $+0.09$. Where share barely varies the decomposition
+has nothing to explain, and it explains nothing. And \emph{the conditional term
+is not constant}: it drifts with share, $\mathrm{corr} = +0.59$, fitted as
+$2.48 + 1.72\,s$.
+
+That drift matters precisely where the rule gets used, because the rule is only
+useful when extrapolated to a low-divergence contrast. At $s = 0.31$ the flat
+model predicts $\mathrm{sd} = 2.18$ and the fitted line predicts $1.68$ --- a
+$30\%$ over-estimate. The direction is the saving grace: over-predicting noise
+asks for more pairs than are needed, never fewer, so a run sized this way is
+over-powered rather than under-powered. But a rule invoked to justify a
+\emph{smaller} experiment than the A/A figure implies should not be quoted as
+though it were calibrated at the point where it is used, and it is not.
+
+One further caveat on what $s$ means. It is measured as $\Prob(D \neq 0)$, and
+$D$ is zero on many pairs where the two arms genuinely diverged and the deal
+still ended level --- zero is not an isolated atom in these histograms. So the
+cheap substitute the rule advertises, counting disagreements at the level of
+decisions rather than of finished pairs, is a strictly larger quantity than the
+one the constant was calibrated against, and using it directly would inflate the
+predicted noise further.
+
+What survives is narrower than we first wrote and still worth having: the
+per-pair standard deviation is a property of the comparison rather than of the
+game, the $\sqrt{s}$ scaling is exact by construction, and sizing every
+experiment against a figure measured between two maximally-different policies is
+systematically conservative for the near-identical comparisons that most need
+care. The calibration of the constant across a wide range of $s$ is \emph{not}
+established here, because this study has almost no cells at low $s$.
 
 The correlation between $s$ and the raw standard deviation is $+0.862$, and we
 report it only to say that it is \emph{not} evidence. If $\mathrm{sd}$ really is
@@ -1755,6 +1789,13 @@ implicit: four homogeneity tests at the $5\%$ level give roughly a one-in-five
 chance of at least one significant result under a complete null, so one
 significant $Q$ out of four points at where to look and does not settle it.
 
+The verdict rests on \emph{two of the six blocks}. Leaving out block 0 gives
+$[-0.041, +0.168]$ and leaving out block 4 gives $[-0.060, +0.148]$; dropping
+either one alone puts zero back inside. No block may be dropped for its result
+and none is --- the pre-registered pool is the pool --- but under $I^2 = 61\%$,
+with the interval clearing zero by $13\%$ of its own half-width, saying so costs
+nothing and omitting it would be a choice.
+
 The random-effects interval is $[-0.052, +0.255]$ and \emph{includes zero}. We
 report it and it decides nothing. The fixed-effect pool was fixed as primary
 before any of this was known, and adopting a wider estimator once the narrow one
@@ -2052,14 +2093,36 @@ That column uses one standard deviation for every row, and we now know it is a
 property of the comparison rather than of the game. Since the correction is
 conservative --- the constant is the noisiest case --- it can only have made
 these cells look \emph{less} informative than they were, which raises the
-question of whether any of them was in fact resolvable. Of the $31$ cells that
-stored their per-pair differentials, rescoring each against its own measured
-noise moves the resolvable effect by a median factor of $0.92$ and by $0.60$ in
-the quietest, and changes \textbf{no verdict at all}: every cell reported here as
-an uninformative null remains one, and every cell that resolved still resolves.
-The remaining $72$ cells recorded only a mean and an interval, and nothing can
-recover what was not written down --- which is itself the argument for storing
-per-pair data, and why v0.4 does.
+question of whether any of them was in fact resolvable. Rescoring each cell that
+stored its per-pair differentials against its own measured noise moves the
+resolvable effect by a median factor of $0.92$, and by $0.60$ in the quietest,
+and changes no verdict at all.
+
+That last clause was where we stopped, and it was the wrong check. ``$|{\rm
+est}| > {\rm MDE}$'' is a test at $\alpha \approx 0.005$, because the MDE is
+$(z_{0.975} + z_{0.80})\,\mathrm{se} = 2.80\,\mathrm{se}$; everywhere else in
+this paper a cell is said to have resolved something when its \emph{95\%
+interval excludes zero}, which is $1.96\,\mathrm{se}$. We had been auditing the
+table against a bar $43\%$ higher than our own definition, and since the gap
+between the two MDEs is a median $5\%$ of the MDE, finding no change was close
+to arithmetically guaranteed.
+
+Under the definition the rest of the paper uses, \textbf{five cells change}: the
+retake penalty at $-0.340\ [-0.663, -0.017]$, a decisive lookahead cell at
+$+0.307$, and three blocks of pre-registered runs. All five sit below the MDE
+their row quotes and have intervals excluding zero. The MDE column says what a
+cell could \emph{detect} at $80\%$ power, which is a stricter and different thing
+from what it did \emph{resolve}, and reading the column as ``this cell found
+nothing'' understates them. The retake cell is the sharpest case: another
+pre-registration in this study treats that $-0.340$ as an established effect and
+designs a follow-up against it, while this table files it as a null. Both
+readings cannot be right, and the interval is the one that governs.
+
+None of this widens a published interval --- each cell's interval was always
+computed from its own sample variance, and the constant only ever fed the MDE
+column. What it corrects is how that column should be read. The cells that
+recorded only a mean and an interval cannot be re-examined at all, which is
+itself the argument for storing per-pair data, and why v0.4 does.
 
 \begin{table}[t]
 \centering
@@ -2625,13 +2688,26 @@ So the continuation is the cause, and the earlier comparison was right for a
 reason rather than by a coincidence of position mix.
 
 One caution on that pairing, because it briefly said the opposite. Averaging the
-per-position slope \emph{differences} without weights gives $+0.194 \pm 0.160$,
-apparently a null. That is a different estimand, not a more careful version of
-the same one: a single position's slope is very noisy (they run from $-6$ to
-$+4$), and an unweighted average is dominated by positions carrying almost no
-contrast in $\Prob(\text{success})$, whereas the reported slopes weight each
-position by its own sum of squared centred $\Prob(\text{success})$. A pairing
-that changes the weighting is not a pairing. No single position carries it (the largest leave-one-out move
+per-position slope \emph{differences} without weights gives
+$+0.020 \pm 0.246$, apparently a null. That is a different estimand, not a more
+careful version of the same one: an unweighted average is dominated by positions
+carrying almost no contrast in $\Prob(\text{success})$, whereas the reported
+slopes weight each position by its own sum of squared centred
+$\Prob(\text{success})$. One position with four scored asks contributes a slope
+difference of $-21.7$, because a slope fitted to four points is not an estimate
+of anything. The robust summaries agree with the weighted one: the \emph{median}
+per-position difference is $+0.299$ and the engine's slope is the larger at
+$63\%$ of positions. A pairing that changes the weighting is not a pairing.
+
+We first computed that unweighted figure as $+0.194 \pm 0.160$, which is what a
+silent bug produced. Positions were being kept only when their clustered
+standard error came out positive --- ordinary-looking defensive code, and wrong,
+because within a single cluster the CR0 numerator is $(x'e)^2$ and $x'e$ is the
+OLS normal equation, hence exactly zero in exact arithmetic. The filter kept the
+$97$ of $110$ positions where floating-point roundoff happened to leave a
+nonzero residual dot product, and among the $13$ it discarded was the $-21.7$
+outlier. A defensive filter on a quantity that is analytically zero selects on
+roundoff, and it flattered the comparison it was printed to stress-test. No single position carries it (the largest leave-one-out move
 is $0.06$), and the run's first $40$ positions, which had been measured on their
 own first, agree with the remaining $80$ within $1.7$ standard errors, so it is
 one slope rather than an average of two regimes. Per-position slopes nonetheless

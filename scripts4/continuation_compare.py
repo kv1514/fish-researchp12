@@ -37,13 +37,27 @@ PUBLIC = ROOT / "results" / "rollout_target_public.json"
 
 
 def per_position_slopes(rows):
+    """Each position's own within-slope, with NO filter on its standard error.
+
+    The filter that used to sit here -- keep a position only if its clustered
+    standard error is positive -- looked like ordinary defensive coding and was
+    a bug. Within one cluster the CR0 numerator is (x . e)^2, and x . e is the
+    OLS normal equation, so it is EXACTLY ZERO in exact arithmetic. The filter
+    therefore kept only the positions where floating-point roundoff happened to
+    leave a nonzero residual dot product: 97 of 110 here, chosen by nothing.
+
+    It mattered, and in the flattering direction. Dropping those 13 removed the
+    largest outlier -- one position with four scored asks and a slope difference
+    of -21.7 -- and turned an unweighted mean of +0.020 into +0.194, which made
+    the weighted and unweighted estimators look far closer than they are.
+    """
     by = {}
     for r in rows:
         by.setdefault(r["position"], []).append(r)
     out = {}
     for pid, group in by.items():
         s = centred_slope(group)
-        if s is not None and s["se_clustered"] > 0:
+        if s is not None:
             out[pid] = s["slope"]
     return out
 
@@ -110,10 +124,17 @@ def main() -> int:
     common = sorted(set(sa) & set(sb))
     share = float(np.mean([sa[p] > sb[p] for p in common])) if common else 0.0
     naive = np.array([sa[p] - sb[p] for p in common])
-    print(f"  share of positions where the engine's slope is the larger: "
-          f"{share:.2f}")
-    print(f"  unweighted mean of per-position differences, for contrast: "
-          f"{naive.mean():+.4f} +/- {naive.std(ddof=1) / np.sqrt(naive.size):.4f}")
+    print(f"  positions with a per-position slope on both arms: {len(common)}")
+    print(f"  share where the engine's slope is the larger: {share:.2f}")
+    print(f"  median per-position difference: {np.median(naive):+.4f}")
+    print(f"  unweighted MEAN, for contrast: {naive.mean():+.4f} "
+          f"+/- {naive.std(ddof=1) / np.sqrt(naive.size):.4f}")
+    print("  The mean is the wrong summary and is printed to show how wrong: a")
+    print("  single position with four scored asks contributes a slope")
+    print(f"  difference of {naive.min():+.1f}, because a slope fitted to four")
+    print("  points is not an estimate of anything. The median and the share")
+    print("  are the robust statements; the weighted estimate above is the one")
+    print("  the design earns.")
 
     print()
     if m - 1.96 * se > 0:
@@ -136,7 +157,10 @@ def main() -> int:
            "paired": {"delta": m, "se": se, "z": m / se,
                       "n_positions": int(sd["n_positions"]),
                       "share_v04_larger": share,
-                      "unweighted_mean": float(naive.mean())}}
+                      "n_positions_both_arms": len(common),
+                      "median_per_position": float(np.median(naive)),
+                      "unweighted_mean": float(naive.mean()),
+                      "worst_per_position": float(naive.min())}}
     dest = ROOT / "results" / "continuation_compare.json"
     dest.write_text(json.dumps(out, indent=1))
     print(f"\nwrote {dest}")

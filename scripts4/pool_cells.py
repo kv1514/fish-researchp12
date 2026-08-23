@@ -32,10 +32,15 @@ from __future__ import annotations
 
 import json
 import math
+import statistics
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from fish4.match import _t_critical                      # noqa: E402
+
 Z = 1.959964
 
 #: The three runs of the identical lookahead configuration: one screen at 200
@@ -48,6 +53,23 @@ LOOKAHEAD = [
 
 
 def cells(labels: list[str]) -> list[dict]:
+    """Load each named cell, with its standard error obtained EXACTLY.
+
+    Two things here were wrong and both were quiet.
+
+    The standard error used to be back-solved from the recorded interval as
+    ``(hi - lo) / (2 * 1.959964)``. But ``fish4.match.MatchResult.diff_ci``
+    builds that interval with a **t** critical on ``n - 1`` degrees of freedom,
+    not a normal one, so every recovered standard error came out inflated -- by
+    0.12% at n=1000 and 0.6% at n=200. Small, and it propagated: the same cell's
+    per-pair SD came out as 3.796 here and 3.791 in the divergence model, from
+    the same thousand numbers. Where the per-pair differentials are stored, the
+    standard error is now computed from them directly and nothing is inverted.
+
+    And a repeated label used to resolve silently to ``hits[-1]``. Three labels
+    in the results file are duplicated. Silently preferring the last is a way to
+    pool a cell nobody meant to pool, so it raises.
+    """
     rows = [json.loads(l) for l in
             (ROOT / "results" / "v04_duels.jsonl").read_text().splitlines()
             if l.strip()]
@@ -57,15 +79,26 @@ def cells(labels: list[str]) -> list[dict]:
         if not hits:
             print(f"no run with label {label!r}", file=sys.stderr)
             continue
-        r = hits[-1]
+        if len(hits) > 1:
+            raise ValueError(
+                f"{len(hits)} runs share the label {label!r}. Pooling would "
+                f"silently pick one; give them distinct labels.")
+        r = hits[0]
         lo, hi = r["diff_ci"]
-        se = (hi - lo) / (2 * Z)
-        out.append({"label": label, "n": r["n_pairs"], "est": r["diff_mean"],
+        n = int(r["n_pairs"])
+        d = r.get("diffs")
+        if d and len(d) == n and n > 1:
+            se = math.sqrt(statistics.variance(d) / n)
+        else:
+            # No per-pair data: invert the interval with the SAME critical
+            # value the harness used to build it.
+            se = (hi - lo) / (2 * _t_critical(n - 1, 0.95)) if n > 1 else 0.0
+        out.append({"label": label, "n": n, "est": r["diff_mean"],
                     "lo": lo, "hi": hi, "se": se,
-                    # Each cell's own per-pair SD, recovered from its interval.
-                    # If these agree across cells then the within-run intervals
-                    # are fine and any disagreement is genuinely between runs.
-                    "sd": se * math.sqrt(r["n_pairs"])})
+                    # Each cell's own per-pair SD. If these agree across cells
+                    # then the within-run intervals are fine and any
+                    # disagreement is genuinely between runs.
+                    "sd": se * math.sqrt(n)})
     return out
 
 

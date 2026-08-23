@@ -54,10 +54,21 @@ removes its share of the harm) and 0 or above (the depth-1 exemption was the
 whole problem).
 
 Per-pair sd is **not** taken as the A/A 3.796. `results/pair_sd_model.json`
-measures, over 28 cells, that `sd ≈ 3.88 · √(share of pairs on which the arms
-diverge)`, with the conditional part varying by only 5.9%. The ungated arms
-diverged on 0.440 of pairs; the gate keeps 71% of the flagged positions, so the
-estimate is 0.31 and **sd ≈ 2.16**.
+decomposes it as `sd = √s · sd(D | diverge)`. The ungated arms diverged on 0.440
+of pairs; the gate keeps 71% of the flagged positions, so the estimate is
+`s ≈ 0.31`, and with a flat conditional term of 3.9 that gives **sd ≈ 2.16**.
+
+> **Amended before any pair of this run was played.** Auditing that model
+> afterwards showed the conditional term is *not* flat: it drifts with share
+> (`corr = +0.59`, fitted `2.48 + 1.72·s`), and at `s = 0.31` the flat model
+> predicts 2.18 where the fitted line predicts 1.68 — roughly a 30%
+> over-estimate. The design below is **not changed**, for two reasons. The bias
+> runs the safe way: over-predicting noise asks for more pairs than needed,
+> never fewer, so 2000 pairs is over-powered rather than under-powered against
+> the +0.02 threshold. And changing a design after inspecting the model that
+> sized it, when nothing about the hypothesis has changed, is the kind of
+> adjustment this protocol exists to prevent. The number is left as it was and
+> its bias is recorded here.
 
 - **2 blocks × 1000 pairs = 2000 duplicate deal-pairs**, fresh seeds throughout.
 - **MDE at 80% power ≈ 0.135**, which separates −0.340 from 0 comfortably and

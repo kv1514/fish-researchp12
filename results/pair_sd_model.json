@@ -1,16 +1,24 @@
 {
  "aa_sd": 3.796,
- "n_cells": 34,
- "corr_share_sd": 0.8624879378506466,
- "corr_share_sd_trimmed": 0.8421104055993874,
- "corr_share_cond_sd": 0.585207347108677,
- "cond_sd_mean": 3.9107587324159265,
- "cond_sd_spread": 0.05574241637385431,
- "raw_sd_spread": 0.08993188942808003,
+ "n_cells": 35,
+ "corr_share_sd": 0.8649580606701269,
+ "corr_share_sd_trimmed": 0.8346789657336907,
+ "corr_share_cond_sd": 0.5903212944342965,
+ "cond_sd_mean": 3.9072057346148377,
+ "cond_sd_spread": 0.05522913530807097,
+ "raw_sd_spread": 0.0895402733829632,
  "share_range": [
   0.44,
   0.877
  ],
+ "sampling_floor": 0.029936567746921154,
+ "genuine_cond_spread": 0.04641184437631424,
+ "band_raw_spread": 0.03485348230430787,
+ "band_cond_spread": 0.03479229496726391,
+ "cond_drift": {
+  "intercept": 2.481910062116692,
+  "slope": 1.7159621510718484
+ },
  "cells": [
   {
    "label": "retake penalty w0.30 vs champion",
@@ -18,6 +26,13 @@
    "sd": 2.3284130942958647,
    "share": 0.44,
    "cond_sd": 3.4731392031942643
+  },
+  {
+   "label": "STACK lookahead on top of n_draws 480 block 0",
+   "n": 1000,
+   "sd": 3.3248948744172235,
+   "share": 0.771,
+   "cond_sd": 3.786403809377828
   },
   {
    "label": "SETTLE lookahead d3 w0.25 block 5",

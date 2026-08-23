@@ -103,6 +103,18 @@ def check(path: Path) -> int:
         problems.append(f"reference to a missing label: {k}")
 
     # -- a few common breakages
+    # Doubled backslashes in front of a command are almost always a Python
+    # escaping slip from a script that edited this file: "\\\\pm" reaches LaTeX as
+    # a line break followed by the letters "pm". Nothing else here catches it,
+    # and one shipped in the paper for two commits before anyone read the line.
+    # "\\\\" alone is legitimate (a row break), so only flag it when a command
+    # name or a percent follows immediately.
+    for m in re.finditer(r"\\\\(?=[A-Za-z%])", text):
+        line = text.count("\n", 0, m.start()) + 1
+        frag = text[m.start():m.start() + 14].replace("\n", " ")
+        problems.append(f"line {line}: doubled backslash before a command: "
+                        f"{frag!r}")
+
     if "\\begin{document}" not in text:
         problems.append("no \\begin{document}")
     if "\\end{document}" not in text:

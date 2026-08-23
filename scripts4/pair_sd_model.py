@@ -122,6 +122,57 @@ def main():
           f"drifts a little\n  with divergence and the rule below is a good "
           f"approximation rather than a law.")
 
+    # How much of the conditional spread could be sampling noise in the sd
+    # estimate itself, and does the decomposition explain anything inside the
+    # band where the cells actually live?
+    n = np.array([c["n"] for c in cells], dtype=float)
+    floor = float(np.mean(1.0 / np.sqrt(2 * (n - 1))))
+    obs = float(cs.std(ddof=1) / cs.mean())
+    genuine = float(np.sqrt(max(0.0, obs ** 2 - floor ** 2)))
+    print(f"\n  of that {100 * obs:.1f}%, {100 * floor:.1f}% is the sampling "
+          f"noise of an sd estimate itself\n  ({100 * genuine:.1f}% is genuine "
+          f"between-cell variation).")
+
+    band = sh > 0.83
+    if band.sum() > 5:
+        print(f"\n  AND INSIDE THE BAND WHERE THE CELLS LIVE, IT EXPLAINS "
+              f"NOTHING.")
+        print(f"  Restricting to the {band.sum()} cells with share > 0.83:")
+        print(f"    raw sd spread   {100 * sd[band].std(ddof=1) / sd[band].mean():5.2f}%")
+        print(f"    cond sd spread  {100 * cs[band].std(ddof=1) / cs[band].mean():5.2f}%")
+        print(f"    corr(share, sd) {np.corrcoef(sh[band], sd[band])[0, 1]:+.3f}")
+        print("  Those two spreads are the same number. The headline comparison")
+        print(f"  ({100 * sd.std(ddof=1) / sd.mean():.1f}% against "
+              f"{100 * obs:.1f}%) is carried by the "
+              f"{int((~band).sum())} cells outside the band,\n"
+              "  and there are very few of them. The decomposition earns its "
+              "keep only\n  where share actually varies, which in this study "
+              "is barely anywhere.")
+
+    # The conditional term is not constant, and the drift matters exactly where
+    # the model gets extrapolated.
+    A = np.column_stack([np.ones(sh.size), sh])
+    b0, b1 = np.linalg.lstsq(A, cs, rcond=None)[0]
+    print(f"\n  WORSE: the conditional term DRIFTS with share.")
+    print(f"    corr(share, cond sd) {r_cond:+.3f}   fit  cond = {b0:.2f} + "
+          f"{b1:.2f} * share")
+    print(f"    {'share':>7}{'flat model':>13}{'drift model':>13}")
+    for s0 in (0.31, 0.44, 0.85):
+        print(f"    {s0:>7.2f}{cs.mean() * s0 ** 0.5:>13.3f}"
+              f"{(b0 + b1 * s0) * s0 ** 0.5:>13.3f}")
+    print("  At the low-share end the flat model over-predicts the standard")
+    print("  deviation by about 30%. That direction is conservative for sizing")
+    print("  -- it asks for more pairs than needed, never fewer -- but a rule")
+    print("  used to justify a SMALLER run than the A/A figure implies should")
+    print("  not be quoted as if it were calibrated there.")
+
+    print(f"\n  AND `share` IS NOT WHAT IT SOUNDS LIKE. It is P(D != 0), and D")
+    print("  is zero on plenty of pairs where the two arms genuinely diverged")
+    print("  and the deal still ended level -- zero is not an isolated atom in")
+    print("  these histograms. So a decision-level disagreement count, the")
+    print("  cheap substitute this script advertises, is a strictly larger")
+    print("  quantity than the one the constant was calibrated against.")
+
     print(f"\nWHERE THIS IS MEASURED, AND WHERE IT IS NOT")
     print(f"  divergence share across these cells runs "
           f"{sh.min():.2f} to {sh.max():.2f}.")
@@ -132,7 +183,7 @@ def main():
     print("  should not be trusted to size such a run; use the cell's own")
     print("  interval, which implies its standard deviation to within 1%.")
 
-    print(f"\nHOW TO SIZE THE NEXT EXPERIMENT")
+    print(f"\nHOW TO SIZE THE NEXT EXPERIMENT -- with the caveats above")
     print(f"  sd ~= {cs.mean():.2f} * sqrt(share of pairs on which the arms "
           f"diverge)")
     for s in (0.10, 0.25, 0.50, 0.85):
@@ -159,6 +210,12 @@ def main():
            "cond_sd_spread": float(cs.std(ddof=1) / cs.mean()),
            "raw_sd_spread": float(sd.std(ddof=1) / sd.mean()),
            "share_range": [float(sh.min()), float(sh.max())],
+           "sampling_floor": floor, "genuine_cond_spread": genuine,
+           "band_raw_spread": float(sd[band].std(ddof=1) / sd[band].mean())
+           if band.sum() > 5 else None,
+           "band_cond_spread": float(cs[band].std(ddof=1) / cs[band].mean())
+           if band.sum() > 5 else None,
+           "cond_drift": {"intercept": float(b0), "slope": float(b1)},
            "cells": cells}
     dest = ROOT / "results" / "pair_sd_model.json"
     dest.write_text(json.dumps(out, indent=1))

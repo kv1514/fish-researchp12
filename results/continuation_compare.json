@@ -25,7 +25,10 @@
   "se": 0.14458483487213605,
   "z": 4.4335099228273505,
   "n_positions": 110,
-  "share_v04_larger": 0.6391752577319587,
-  "unweighted_mean": 0.1936977501048319
+  "share_v04_larger": 0.6272727272727273,
+  "n_positions_both_arms": 110,
+  "median_per_position": 0.29932613643586603,
+  "unweighted_mean": 0.020154335759132197,
+  "worst_per_position": -21.66666666666674
  }
 }
