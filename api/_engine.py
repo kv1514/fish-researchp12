@@ -77,11 +77,22 @@ from fish4.registry4 import make_agent
 #: serverless request budget.
 WEB_DRAWS = 480
 
-#: The table plays the strongest measured configuration, not the paper's fixed
-#: reference. The belief-space lookahead is worth +0.104 sets per deal-pair,
-#: 95% CI [+0.020, +0.189], over a pre-registered 6000-pair run; it costs about
-#: 6.7 ms per decision, which is nothing against this function's budget because
-#: the client asks for one move at a time.
+#: The table plays the strongest configuration this project can assemble from
+#: separately demonstrated parts, which is not the same as the strongest
+#: measured one and should not be described as it. The belief-space lookahead is
+#: worth +0.104 sets per deal-pair, 95% CI [+0.020, +0.189], over a
+#: pre-registered 6000-pair run, and it costs about 6.7 ms per decision -- both
+#: measured against the champion ALONE. WEB_DRAWS = 480 was demonstrated the
+#: same way, also against the champion alone. Their COMBINATION, which is what
+#: this table actually runs, has never been played: see
+#: jobs/PREREGISTRATION_stack.md, which exists precisely because the lookahead
+#: searches a belief the sampler draws and there is a specific reason the two
+#: might overlap rather than add.
+#:
+#: Shipping the combination anyway is a deliberate choice, not an oversight. It
+#: is the best available guess, both parts are independently demonstrated, and
+#: the visitor is not an experiment. But the comment that used to sit here said
+#: "strongest measured", and that was a claim nobody had earned.
 #:
 #: Deliberately NOT expressed as registry4.V04_STRONGEST: that constant carries
 #: opponent_gamma, and gamma is a choice the visitor makes in the lobby. Only

@@ -60,6 +60,8 @@ POOLS = {
         [f"PRECISION2 n_draws 1440 vs 480 block {i}" for i in range(6)],
     "claim threshold, two blocks":
         [f"CLAIM THRESHOLD 0.90 vs 0.97 block {i}" for i in range(2)],
+    "learned weights, two blocks":
+        [f"LEARNED WEIGHTS v2 vs champion block {i}" for i in range(2)],
 }
 
 

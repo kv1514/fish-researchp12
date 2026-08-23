@@ -780,5 +780,6 @@
     ],
     "n_blocks": 91
   },
-  "run": "v2"
+  "run": "v2",
+  "_note": "DRY RUN. Fitted on the first 91 positions of the v2 rollout pass while it was still running, purely to check that the fit stage works end to end on schema-2 records. It is NOT the fit jobs/PREREGISTRATION_learned_weights.md names, which uses every position completed when the duel queue drains, and it must not be used to arm the validation duel."
 }

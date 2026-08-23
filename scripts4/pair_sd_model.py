@@ -92,8 +92,12 @@ def main():
     print(f"corr(divergence share, sd)          {r_all:+.3f}  "
           f"over all {len(cells)} cells")
     print(f"                                    {r_trim:+.3f}  "
-          f"excluding the {(~keep).sum()} least-divergent, so it is not one "
-          f"point")
+          f"excluding the {(~keep).sum()} least-divergent")
+    print("  Those correlations are nearly mechanical and are NOT the evidence.")
+    print("  If sd = c*sqrt(s) with c anything like constant, corr(s, sd) is")
+    print("  just the correlation of s with sqrt(s), which is close to 1 over")
+    print("  any range. They are printed because a reader will compute them")
+    print("  anyway, and should know they carry almost nothing.")
 
     print(f"\nthe part that is arithmetic:  sd = sqrt(share) * sd(D | diverge)")
     print(f"  raw sd              mean {sd.mean():.3f}  "
@@ -103,6 +107,10 @@ def main():
           f"{100 * (sd / np.sqrt(sh)).std(ddof=1) / (sd / np.sqrt(sh)).mean():4.1f}%")
 
     print(f"\nthe part that is a finding:  sd(D | diverge) barely moves")
+    print("  This is the whole claim, and the comparison that carries it is the")
+    print("  spread of the conditional term against the spread of the raw sd:")
+    print("  if the conditional part were as variable as the raw sd, the")
+    print("  decomposition would explain nothing.")
     print(f"  mean {cs.mean():.3f}   sd {cs.std(ddof=1):.3f}   "
           f"range [{cs.min():.3f}, {cs.max():.3f}]   "
           f"spread {100 * cs.std(ddof=1) / cs.mean():.1f}%")

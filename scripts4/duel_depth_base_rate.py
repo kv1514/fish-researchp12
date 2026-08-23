@@ -42,7 +42,24 @@ UNGATED_W030 = -0.340
 #: described by ``sd = COND_SD * sqrt(share of pairs on which the arms
 #: diverge)``, with the conditional part varying by only 5.9%. Sizing therefore
 #: needs the divergence share, not the A/A figure.
-COND_SD = 3.88
+def _cond_sd(default: float = 3.88) -> float:
+    """The conditional term of the divergence model, read rather than pinned.
+
+    Hard-coding it meant the constant went stale the moment another run landed
+    and stored its per-pair differentials. The conclusion below does not turn on
+    the third digit, but a number quoted in a power calculation should be the
+    one the results file actually holds.
+    """
+    p = ROOT / "results" / "pair_sd_model.json"
+    if p.exists():
+        try:
+            return float(json.loads(p.read_text())["cond_sd_mean"])
+        except Exception:
+            pass
+    return default
+
+
+COND_SD = _cond_sd()
 #: The ungated w=0.30 cell diverged on 44.0% of pairs. The gate un-flags 29% of
 #: the flagged positions, so its arms diverge on strictly fewer -- this scales
 #: the measured share by that fraction, which is an estimate and is labelled as

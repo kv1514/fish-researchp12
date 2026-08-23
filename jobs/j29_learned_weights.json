@@ -1,0 +1,40 @@
+[
+ {
+  "label": "LEARNED WEIGHTS v2 vs champion block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "__weights__": "from fit"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 30000000,
+  "agent_seed": 9990
+ },
+ {
+  "label": "LEARNED WEIGHTS v2 vs champion block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "__weights__": "from fit"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 30200000,
+  "agent_seed": 9991
+ }
+]

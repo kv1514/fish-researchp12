@@ -1,12 +1,12 @@
 {
  "aa_sd": 3.796,
- "n_cells": 31,
- "corr_share_sd": 0.8603722962681364,
- "corr_share_sd_trimmed": 0.833444527825359,
- "corr_share_cond_sd": 0.573918619450836,
- "cond_sd_mean": 3.8961018813764157,
- "cond_sd_spread": 0.05720534072886235,
- "raw_sd_spread": 0.09276219540324455,
+ "n_cells": 34,
+ "corr_share_sd": 0.8624879378506466,
+ "corr_share_sd_trimmed": 0.8421104055993874,
+ "corr_share_cond_sd": 0.585207347108677,
+ "cond_sd_mean": 3.9107587324159265,
+ "cond_sd_spread": 0.05574241637385431,
+ "raw_sd_spread": 0.08993188942808003,
  "share_range": [
   0.44,
   0.877
@@ -118,6 +118,13 @@
    "cond_sd": 4.101079008551295
   },
   {
+   "label": "AT_ASK g1.0 vs champion block 3",
+   "n": 1000,
+   "sd": 3.721802764228085,
+   "share": 0.851,
+   "cond_sd": 4.0348420330369175
+  },
+  {
    "label": "SCREEN measured gamma profile 0.5",
    "n": 400,
    "sd": 3.5279016745884384,
@@ -195,6 +202,13 @@
    "cond_sd": 4.129232176054401
   },
   {
+   "label": "AT_ASK g1.0 vs champion block 5",
+   "n": 1000,
+   "sd": 3.7770181182866818,
+   "share": 0.87,
+   "cond_sd": 4.049555471230087
+  },
+  {
    "label": "AT_ASK g1.0 vs champion block 1",
    "n": 1000,
    "sd": 3.7964842015070066,
@@ -207,6 +221,13 @@
    "sd": 3.4408681949236435,
    "share": 0.8725,
    "cond_sd": 3.684383219598115
+  },
+  {
+   "label": "AT_ASK g1.0 vs champion block 4",
+   "n": 1000,
+   "sd": 3.8378796646482183,
+   "share": 0.874,
+   "cond_sd": 4.102241075205596
   },
   {
    "label": "retake penalty w1.00 vs champion",

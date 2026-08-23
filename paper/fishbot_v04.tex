@@ -1185,13 +1185,21 @@ exactly zero. Writing $s$ for the share of pairs on which they diverge at all,
   \mathrm{sd} \;\approx\; \sqrt{s}\;\cdot\;\mathrm{sd}(D \mid \text{diverge}).
 \]
 That much is arithmetic and follows from the design. The empirical content is
-what the second factor does, and across the $28$ cells of this study that store
+what the second factor does, and across the $34$ cells of this study that store
 their per-pair differentials --- spanning a belief-space search, a sampling
 budget, an opponent-model exponent and a history-dependent penalty, features
-with nothing in common but the harness --- it barely moves: $3.88 \pm 0.23$, a
-relative spread of $5.9\%$ against $9.6\%$ for the raw standard deviation. The
-correlation between $s$ and the raw standard deviation is $+0.858$, and $+0.824$
-with the single least-divergent cell removed, so it is not one point.
+with nothing in common but the harness --- it barely moves:
+$3.91 \\pm 0.22$, a relative spread of $5.6\\%$ against
+$9.0\\%$ for the raw standard deviation. That
+comparison is the claim: if the conditional factor were as variable as the raw
+standard deviation, the decomposition would explain nothing.
+
+The correlation between $s$ and the raw standard deviation is $+0.862$, and we
+report it only to say that it is \emph{not} evidence. If $\mathrm{sd}$ really is
+$c\sqrt{s}$ for roughly constant $c$, that correlation is the correlation of $s$
+with $\sqrt{s}$, which is near $1$ over any range --- it is implied by the
+identity rather than a test of it. A reader will compute it anyway, so it is
+better stated and defused than omitted.
 
 Sizing therefore reduces to predicting one quantity, $s$, which can be counted
 from \emph{decisions} rather than from finished pairs and is correspondingly
