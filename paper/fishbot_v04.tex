@@ -1915,6 +1915,27 @@ slightly better than its dominant term, by an amount well inside noise --- which
 is what Section~\ref{sec:res-ladder}'s tie-break story predicts, and is not on
 this evidence more than that.
 
+\paragraph{What this says about where to spend effort.} Three measurements point
+the same way, and they are worth stating together because the conclusion is not
+visible in any of them alone. The objective ranks barely better than
+$\Prob(\text{success})$ by itself. Almost every term added \emph{beside}
+$\Prob(\text{success})$ --- Table~\ref{tab:nulls} --- is a null. And the largest
+single effect in this study, $+0.340$ sets per deal-pair, comes from tripling the
+sampling budget, which does not touch the objective at all: it makes the
+$\Prob(\text{success})$ the objective is already dominated by more accurate.
+
+The reading we take is that in this game the leverage is in the belief rather
+than in what is computed from it. That is a claim about where the remaining
+strength is, and it is the reason the next experiments in this line buy
+posterior quality rather than richer ask features.
+
+We are explicit that the regret bound above contributes \emph{nothing} to this
+argument. It is per decision, while the play results are per deal-pair, and the
+two are not commensurable by any factor we can defend --- a deal contains dozens
+of decisions, and one-step improvements do not add. A regret under half a set per
+decision is compatible with enormous headroom. The argument rests only on the
+three measurements that are in the same units as each other.
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 
@@ -1922,8 +1943,21 @@ Table~\ref{tab:nulls} is the rest of the study. It is mostly nulls, and it is
 reported in full because a table of only the things that worked would
 misrepresent how much was tried. Each cell is a duplicate-deal duel against the
 champion with exactly one thing changed, and the last column is the smallest
-effect that cell could have resolved at 80\% power given the measured per-pair
-standard deviation of 3.869 sets.
+effect that cell could have resolved at 80\% power given a per-pair standard
+deviation of 3.869 sets.
+
+That column uses one standard deviation for every row, and we now know it is a
+property of the comparison rather than of the game. Since the correction is
+conservative --- the constant is the noisiest case --- it can only have made
+these cells look \emph{less} informative than they were, which raises the
+question of whether any of them was in fact resolvable. Of the $31$ cells that
+stored their per-pair differentials, rescoring each against its own measured
+noise moves the resolvable effect by a median factor of $0.92$ and by $0.60$ in
+the quietest, and changes \textbf{no verdict at all}: every cell reported here as
+an uninformative null remains one, and every cell that resolved still resolves.
+The remaining $72$ cells recorded only a mean and an interval, and nothing can
+recover what was not written down --- which is itself the argument for storing
+per-pair data, and why v0.4 does.
 
 \begin{table}[t]
 \centering

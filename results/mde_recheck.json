@@ -1,0 +1,260 @@
+{
+ "constant_sd": 3.869,
+ "cells_recorded": 103,
+ "cells_with_pair_data": 31,
+ "ratio_median": 0.920195456650765,
+ "ratio_min": 0.6018126374504691,
+ "ratio_max": 1.0173503555237622,
+ "verdicts_changed": 0,
+ "changed": [],
+ "cells": [
+  {
+   "label": "retake penalty w0.30 vs champion",
+   "n": 200,
+   "sd": 2.3284130942958647,
+   "est": -0.34,
+   "mde_constant": 0.7664565965985545,
+   "mde_own": 0.46126326589028627
+  },
+  {
+   "label": "score-adaptive w_behind 0.50 vs champion",
+   "n": 200,
+   "sd": 3.1735044750663786,
+   "est": -0.185,
+   "mde_constant": 0.7664565965985545,
+   "mde_own": 0.6286775495605218
+  },
+  {
+   "label": "SETTLE lookahead d3 w0.25 block 3",
+   "n": 1000,
+   "sd": 3.241207247990234,
+   "est": 0.241,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.28715120024023016
+  },
+  {
+   "label": "DECISIVE lookahead d3 w0.25 vs champion (B)",
+   "n": 700,
+   "sd": 3.252158647355001,
+   "est": 0.0014285714285714286,
+   "mde_constant": 0.40968828375779953,
+   "mde_own": 0.3443709730532326
+  },
+  {
+   "label": "SETTLE lookahead d3 w0.25 block 5",
+   "n": 1000,
+   "sd": 3.273214006130661,
+   "est": 0.028,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.28998680386339293
+  },
+  {
+   "label": "DECISIVE lookahead d3 w0.25 vs champion (A)",
+   "n": 700,
+   "sd": 3.2849777917942213,
+   "est": 0.30714285714285716,
+   "mde_constant": 0.40968828375779953,
+   "mde_own": 0.3478461911870407
+  },
+  {
+   "label": "SCREEN at_ask depth g0.35 vs champion",
+   "n": 400,
+   "sd": 3.3317038623752886,
+   "est": -0.05,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.4667026115806722
+  },
+  {
+   "label": "SETTLE lookahead d3 w0.25 block 2",
+   "n": 1000,
+   "sd": 3.3384459290545987,
+   "est": 0.118,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.29576595450956084
+  },
+  {
+   "label": "SETTLE lookahead d3 w0.25 block 1",
+   "n": 1000,
+   "sd": 3.3559173382521177,
+   "est": -0.009,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.2973138148397099
+  },
+  {
+   "label": "SETTLE lookahead d3 w0.25 block 4",
+   "n": 1000,
+   "sd": 3.4025698349161746,
+   "est": 0.064,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.30144694159968305
+  },
+  {
+   "label": "score-adaptive w_behind -0.50 (play safe when behind) vs champion",
+   "n": 200,
+   "sd": 3.4231513002087133,
+   "est": -0.075,
+   "mde_constant": 0.7664565965985545,
+   "mde_own": 0.6781330822434446
+  },
+  {
+   "label": "SETTLE lookahead d3 w0.25 block 0",
+   "n": 1000,
+   "sd": 3.4349319873554642,
+   "est": 0.179,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.304314030990854
+  },
+  {
+   "label": "SCREEN gamma profile under at_ask (prediction test)",
+   "n": 400,
+   "sd": 3.4408681949236435,
+   "est": 0.005,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.4819942705024397
+  },
+  {
+   "label": "SCREEN measured gamma profile 0.5",
+   "n": 400,
+   "sd": 3.5279016745884384,
+   "est": -0.245,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.49418585592910924
+  },
+  {
+   "label": "score-adaptive w_behind 1.00 vs champion",
+   "n": 200,
+   "sd": 3.544108282429861,
+   "est": -0.89,
+   "mde_constant": 0.7664565965985545,
+   "mde_own": 0.7020949010410802
+  },
+  {
+   "label": "SCREEN measured gamma profile 1.0",
+   "n": 400,
+   "sd": 3.56023622178181,
+   "est": 0.2625,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.4987152553723918
+  },
+  {
+   "label": "AT_ASK g1.0 vs champion block 0",
+   "n": 1000,
+   "sd": 3.656299704281301,
+   "est": 0.279,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.3239258610116306
+  },
+  {
+   "label": "PRECISION n_draws 480 vs 160 block 2",
+   "n": 1000,
+   "sd": 3.744626313295657,
+   "est": 0.214,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.33175106003503424
+  },
+  {
+   "label": "AT_ASK g1.0 vs champion block 2",
+   "n": 1000,
+   "sd": 3.768238795992582,
+   "est": 0.024,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.333842982034554
+  },
+  {
+   "label": "PRECISION n_draws 480 vs 160 block 4",
+   "n": 1000,
+   "sd": 3.7799190186811926,
+   "est": 0.25,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.33487777854939804
+  },
+  {
+   "label": "PRECISION n_draws 480 vs 160 block 3",
+   "n": 1000,
+   "sd": 3.7880364597268885,
+   "est": 0.377,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.3355969343332796
+  },
+  {
+   "label": "PRECISION n_draws 480 vs 160 block 1",
+   "n": 1000,
+   "sd": 3.791412112367344,
+   "est": 0.413,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.3358959965755666
+  },
+  {
+   "label": "SCREEN precision triple n_draws 480 vs 160",
+   "n": 400,
+   "sd": 3.7914823414945062,
+   "est": 0.16,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.5311080406996177
+  },
+  {
+   "label": "SCREEN at_ask depth g0.60 vs champion",
+   "n": 400,
+   "sd": 3.7930808594090157,
+   "est": 0.0775,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.531331959906179
+  },
+  {
+   "label": "AT_ASK g1.0 vs champion block 1",
+   "n": 1000,
+   "sd": 3.7964842015070066,
+   "est": -0.011,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.3363453527483577
+  },
+  {
+   "label": "SCREEN at_ask depth g1.0 vs champion",
+   "n": 400,
+   "sd": 3.8249273094146203,
+   "est": 0.3225,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.5357929870565911
+  },
+  {
+   "label": "PRECISION n_draws 480 vs 160 block 5",
+   "n": 1000,
+   "sd": 3.8370167705781135,
+   "est": 0.345,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.33993629123734365
+  },
+  {
+   "label": "PRECISION n_draws 480 vs 160 block 0",
+   "n": 1000,
+   "sd": 3.850702781559739,
+   "est": 0.446,
+   "mde_constant": 0.34276981035950044,
+   "mde_own": 0.3411487883654775
+  },
+  {
+   "label": "SCREEN gamma 1.0 exact normaliser (initial depth)",
+   "n": 400,
+   "sd": 3.8925898369976952,
+   "est": -0.125,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.5452711038501578
+  },
+  {
+   "label": "retake penalty w1.00 vs champion",
+   "n": 200,
+   "sd": 3.923230004516904,
+   "est": -1.015,
+   "mde_constant": 0.7664565965985545,
+   "mde_own": 0.777199668373057
+  },
+  {
+   "label": "SCREEN precision half n_draws 80 vs 160",
+   "n": 400,
+   "sd": 3.9361285255214367,
+   "est": -0.375,
+   "mde_constant": 0.54196665694,
+   "mde_own": 0.5513699711199339
+  }
+ ]
+}
