@@ -40,6 +40,24 @@ V04_CHAMPION = ("fishbot4", {"opponent_gamma": 0.35})
 V04_STRONGEST = ("fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25,
                               "lookahead_depth": 3, "lookahead_beam": 4})
 
+#: The champion with a tripled sampling budget. A pre-registered run over 6000
+#: duplicate deal-pairs puts it at +0.340 sets per deal-pair, 95% CI
+#: [+0.243, +0.436], with all six blocks positive and Cochran's Q at p = 0.71
+#: (jobs/PREREGISTRATION_precision.md). That is the largest effect measured in
+#: this project, more than three times the lookahead's, and it costs
+#: +1.7 ms per decision -- 1.35x, not 3x, because at 160 draws the sampler is
+#: only a fifth of a decision (results/precision_cost.json).
+V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
+
+#: NOT DEFINED, and the omission is the point. Both V04_STRONGEST and
+#: V04_PRECISE beat V04_CHAMPION by a pre-registered margin, but each was
+#: measured against the champion ALONE. Their combination has never been played,
+#: so a constant naming it would assert an additivity nobody here has tested --
+#: and the lookahead's whole mechanism is to search a belief that the sampler
+#: draws, which is exactly the sort of coupling that does not add. The run that
+#: would settle it is pre-registered in jobs/PREREGISTRATION_stack.md; until it
+#: reports, the strongest CLAIM this module can make is two separate ones.
+
 REGISTRY = dict(_V03)
 REGISTRY["fishbot4"] = FishBot4
 

@@ -393,3 +393,169 @@ def test_build_blocks_drops_illegal_sentinels():
            "p": [0.5, 0.2], "f": [[0.0] * F.N_TERMS, [1.0] * F.N_TERMS]}
     V = np.array([[0.0, 1.0], [ILLEGAL_VALUE, ILLEGAL_VALUE]])
     assert F.build_blocks([rec], {"x:0": V}) == []
+
+
+# ---------------------------------------------------------------------------
+# 8. The strong continuation
+#
+# The module used to assert that the v0.4 policy could not finish a rollout,
+# and the paper's whole objective-learning line was written off on that basis.
+# It can. These tests pin the two halves of the correction: the strong policy
+# really does attach to a determinized mid-game position, and turning it on
+# changes nothing for anybody who did not ask for it.
+# ---------------------------------------------------------------------------
+
+def _posterior_worlds(st: GameState, seat: int, n: int = 2, seed: int = 3):
+    """Worlds drawn the way production draws them: from the belief sampler.
+
+    Hand-rolling a determinized world by shuffling hidden cards under a
+    hand-count constraint is not enough for the strong continuation, and finding
+    that out was the useful part of writing these tests. Each of its seats
+    reconstructs an initial deal from its own hand plus the public log, so a
+    world must satisfy everything the log implies: cards a successful ask
+    publicly located sit with their holder, and -- the one that is easy to
+    forget -- every FAILED ask asserts, under the no-bluff rule, that the asker
+    holds at least one card of that half-suit. A count-preserving shuffle
+    violates the second constraint routinely and the tracker refuses the world.
+
+    ``BeliefState`` enforces both, so sampling from it is the only sound way to
+    produce worlds for this continuation, and it is what ``dataset.py`` already
+    stores at harvest time.
+    """
+    from fish4.posterior import Posterior
+    from fish.beliefs import BeliefState
+    obs = Observation.from_state(st, seat)
+    bel = BeliefState(st.rules, observer=seat)
+    bel.update(obs)
+    post = Posterior(bel, random.Random(seed), n_draws=160, n_worlds=n,
+                     obs=obs, gamma=0.35)
+    return [list(w) for w in post.worlds()]
+
+
+def _v04_cfg(**kw):
+    from fish4.learn.rollout import POLICY_V04
+    kw.setdefault("max_actions", 400)
+    return RolloutConfig(policy=POLICY_V04, seed_history=True, **kw)
+
+
+def test_v04_continuation_requires_the_real_history():
+    """The refused combination is refused, and says why."""
+    from fish4.learn.rollout import POLICY_V04
+    with pytest.raises(ValueError, match="seed_history"):
+        RolloutConfig(policy=POLICY_V04)
+    with pytest.raises(ValueError, match="unknown continuation policy"):
+        RolloutConfig(policy="mystery")
+
+
+def test_rollout_config_roundtrips_and_reads_legacy_files():
+    """A rollout file written before ``policy`` existed still loads as itself."""
+    from fish4.learn.rollout import POLICY_PUBLIC
+    legacy = {"max_actions": 900, "stall_window": 80, "use_negative": False,
+              "policy": "rollout-public"}
+    assert RolloutConfig.from_dict(legacy) == RolloutConfig()
+    for cfg in (RolloutConfig(), RolloutConfig(use_negative=True), _v04_cfg()):
+        assert RolloutConfig.from_dict(cfg.to_dict()) == cfg
+    assert RolloutConfig().policy == POLICY_PUBLIC
+
+
+def test_public_continuation_ignores_a_history_it_was_not_asked_to_use():
+    """Default config is byte-identical whether or not a history is passed.
+
+    Every rollout batch already on disk was produced without this argument
+    existing. If passing one could change the default path, those files would
+    silently stop being reproducible, so this is the compatibility guarantee
+    rather than a style preference.
+    """
+    st = _midgame(seed=11, plies=18)
+    seat = st.turn
+    asks = Observation.from_state(st, seat).legal_asks()[:3]
+    if not asks:
+        pytest.skip("no legal asks at this position")
+    worlds = [list(st.hands), _permute_others(st.hands, seat, random.Random(3))]
+    kw = dict(seed=99, cfg=RolloutConfig(max_actions=200))
+    a = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds, asks, **kw)
+    b = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds, asks,
+                       history=tuple(st.history), **kw)
+    assert np.array_equal(a, b)
+
+
+def test_v04_continuation_attaches_to_a_determinized_position():
+    """The claim the paper's diagnosis rested on, tested directly.
+
+    ``FishBot4.act`` raises ``BeliefContradiction`` rather than degrading, so a
+    tracker that could not attach would surface here as an exception and not as
+    a quietly worse number. Reaching the end of the matrix IS the assertion.
+    """
+    st = _midgame(seed=7, plies=22)
+    seat = st.turn
+    asks = Observation.from_state(st, seat).legal_asks()[:2]
+    if not asks:
+        pytest.skip("no legal asks at this position")
+    worlds = _posterior_worlds(st, seat, n=1, seed=4)
+    V = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds, asks,
+                       seed=4, cfg=_v04_cfg(), history=tuple(st.history))
+    assert V.shape == (len(asks), 1)
+    assert np.all(np.abs(V) <= 9), V          # a set differential, not a sentinel
+    assert not np.any(V == -99.0), "an ask was rejected as illegal"
+
+
+def test_v04_continuation_keeps_common_random_numbers():
+    """Identical candidates must still give identical columns under v0.4.
+
+    The CRN guarantee is what makes every paired difference in the learning
+    target meaningful, and it is a property of the harness rather than of the
+    policy -- so switching the policy has to preserve it.
+    """
+    st = _midgame(seed=13, plies=16)
+    seat = st.turn
+    asks = Observation.from_state(st, seat).legal_asks()[:1]
+    if not asks:
+        pytest.skip("no legal asks at this position")
+    worlds = _posterior_worlds(st, seat, n=2, seed=8)
+    if len(worlds) < 2:
+        pytest.skip("posterior gave fewer than two distinct worlds")
+    V = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds,
+                       list(asks) * 2, seed=21, cfg=_v04_cfg(),
+                       history=tuple(st.history))
+    assert np.array_equal(V[0], V[1])
+
+
+def test_v04_continuation_refuses_a_world_the_public_log_forbids():
+    """A world inconsistent with the log must crash, not quietly play on.
+
+    This is the failure mode the whole design depends on being loud. The public
+    continuation cannot detect such a world -- it has no model to contradict --
+    so it would finish the rollout and return a number computed from a game that
+    could not have happened. The strong continuation raises instead, and this
+    test exists so that nobody later "fixes" it by catching.
+    """
+    from fish.beliefs import BeliefContradiction
+    st = _midgame(seed=13, plies=24)
+    seat = st.turn
+    asks = Observation.from_state(st, seat).legal_asks()[:1]
+    if not asks:
+        pytest.skip("no legal asks at this position")
+    for t in range(40):
+        bad = _permute_others(st.hands, seat, random.Random(100 + t))
+        if bad == list(st.hands):
+            continue
+        try:
+            rollout_matrix(st.rules, seat, st.set_winner, seat, [bad], asks,
+                           seed=2, cfg=_v04_cfg(), history=tuple(st.history))
+        except BeliefContradiction:
+            return                            # the loud failure, as designed
+    pytest.fail("40 count-preserving shuffles and not one was refused; the "
+                "strong continuation is no longer checking its worlds")
+
+
+def test_v04_continuation_is_reproducible():
+    st = _midgame(seed=17, plies=20)
+    seat = st.turn
+    asks = Observation.from_state(st, seat).legal_asks()[:2]
+    if not asks:
+        pytest.skip("no legal asks at this position")
+    worlds = _posterior_worlds(st, seat, n=1, seed=5)
+    kw = dict(seed=5, cfg=_v04_cfg(), history=tuple(st.history))
+    a = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds, asks, **kw)
+    b = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds, asks, **kw)
+    assert np.array_equal(a, b)

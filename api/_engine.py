@@ -62,11 +62,20 @@ from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.registry4 import make_agent
 
-#: Engine strength on the web. The research default is 320 draws; a browser move
-#: has to come back inside a serverless request budget, and the posterior study
-#: puts 160 draws within noise of 320 in play, so this costs nothing measurable
-#: in strength and roughly halves the latency.
-WEB_DRAWS = 160
+#: Engine strength on the web.
+#:
+#: This was 160, on the grounds that a 200-pair cell put 320 draws "within noise"
+#: of it. That cell could not have found the effect: at 200 pairs its interval
+#: was half a set wide and the effect is a third of one. A pre-registered
+#: 6000-pair run since measured 480 draws against 160 at +0.340 sets per
+#: deal-pair, 95% CI [+0.243, +0.436] -- the largest gain in the project.
+#:
+#: The reason it can be taken here is that the latency argument survived the
+#: correction: a decision is 3.5 ms of fixed work plus 5.8 us per draw, so
+#: tripling the sampler costs +1.7 ms, not +9 (results/precision_cost.json).
+#: The client asks for one move at a time, so that is invisible against a
+#: serverless request budget.
+WEB_DRAWS = 480
 
 #: The table plays the strongest measured configuration, not the paper's fixed
 #: reference. The belief-space lookahead is worth +0.104 sets per deal-pair,

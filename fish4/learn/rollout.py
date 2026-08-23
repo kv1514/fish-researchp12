@@ -20,29 +20,67 @@ search (noise-to-signal 2.4); the paired differences ``V[a,k] - V[a',k]``
 computed here share the world and the seeds, so the position's own value level
 - which is the dominant variance term - cancels exactly.
 
-**No information leaks into the continuation.** The rollout is run on a FRESH
-``GameState`` built by ``GameState.from_components``, whose history starts
-empty. Each rollout seat is handed an ``Observation`` for its own seat and
-nothing else, so it sees its own hand in the determinized world plus whatever
-becomes public during the rollout. The knowledge set of the continuation policy
-is spelled out on ``PublicInfoHeuristic`` and audited by
-``tests4/test_learn.py``.
+**No information leaks into the continuation.** Each rollout seat is handed an
+``Observation`` for its own seat and nothing else, so it sees its own hand in
+the determinized world plus the public log. Nothing inside a rollout consults
+the world it is being played in; the world only generates observations. That is
+what separates determinization from strategy fusion, and it holds under both
+continuations below. The knowledge set of the public one is spelled out on
+``PublicInfoHeuristic`` and audited by ``tests4/test_learn.py``.
 
 WHY THE WORLDS COME FROM OUTSIDE
 --------------------------------
-``fish.beliefs.BeliefState`` is anchored on the initial deal and refuses to
-attach to a mid-game position (it raises ``BeliefContradiction``). So a
-posterior cannot be rebuilt from a stored position after the fact. Worlds are
-therefore drawn at harvest time, inside the game, from the acting agent's own
+Worlds are drawn at harvest time, inside the game, from the acting agent's own
 live ``BeliefState`` (see ``dataset.py``), and stored with the position. That is
-also the leak-free choice: the worlds are a function of the acting seat's own
+the leak-free choice: the worlds are a function of the acting seat's own
 information only.
+
+The original reason given here was stronger and was wrong. It said a posterior
+"cannot be rebuilt from a stored position after the fact", because
+``fish.beliefs.BeliefState`` is anchored on the initial deal. It is anchored on
+the initial deal, but it does not have to be handed one: given the current hand
+and the real public history, ``initial_hand()`` back-computes a deal consistent
+with both, and the tracker attaches to that. ``scripts4/ask_regret.py`` does
+exactly this and ``scripts4/rollout_target.py`` runs it over 110 positions
+without a single ``BeliefContradiction``. Harvest-time sampling is therefore a
+convenience, not a necessity, and it is kept because the stored worlds make
+every rollout batch reproducible from the file alone.
 
 WHY THE CONTINUATION POLICY IS WHAT IT IS
 -----------------------------------------
-The strong v0.4 policy cannot be used as a continuation: it needs a
-``BeliefState`` attached from the start of the game, which does not exist for a
-determinized mid-game position. ``fish.agents.heuristic.HeuristicAgent`` is the
+For the same reason, the claim that once stood here - that the strong v0.4
+policy cannot be used as a continuation - is false, and it mattered. The paper
+diagnosed the failure of the whole objective-learning line on the continuation
+being weak, and that diagnosis was correct: with the full v0.4 policy finishing
+the rollout, position-centred value rises by +0.681 +/- 0.142 sets across the
+range of P(success), against +0.101 for the public-information heuristic
+(``results/rollout_target.json``, 110 positions, robustness in
+``results/rollout_target_robust.json``). The target the regression could not
+learn from was flat because of what finished the game, and finishing it properly
+un-flattens it.
+
+``RolloutConfig.policy`` therefore selects the continuation, and
+``POLICY_PUBLIC`` remains the default so that every rollout file already on disk
+still means what it meant. ``POLICY_V04`` requires ``seed_history=True``: the
+strong policy attaches to the position through the real public log, so a
+configuration that withheld it would silently anchor the tracker on a game that
+never happened. That combination is refused rather than run.
+
+``POLICY_V04`` ALSO CONSTRAINS THE WORLDS, and the constraint is stronger than
+it looks. The public continuation accepts any determinized world that preserves
+hand counts, because it has no model to contradict. The strong one has six of
+them: every seat rebuilds an initial deal from its own hand plus the public log,
+so a world must satisfy everything that log implies -- cards a successful ask
+located sit with their holder, and every FAILED ask asserts, under the no-bluff
+rule, that the asker holds at least one card of that half-suit. A count-
+preserving shuffle violates the second constraint routinely. ``BeliefState``
+enforces both, so worlds for this continuation must come from the belief
+sampler, which is what ``dataset.py`` stores at harvest time anyway. A world
+that does not qualify raises ``BeliefContradiction`` from inside the rollout,
+loudly, and ``tests4/test_learn.py`` pins that it keeps doing so.
+
+The public continuation and its knobs, below, are unchanged.
+``fish.agents.heuristic.HeuristicAgent`` is the
 documented starting point - it tracks only publicly-established card locations -
 but it is slow to terminate, because it will happily shuttle a card back and
 forth until its stall rule fires. ``PublicInfoHeuristic`` therefore offers two
