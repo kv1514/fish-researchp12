@@ -69,19 +69,72 @@ class OpponentModel:
     """
 
     __slots__ = ("weight", "base", "n_slots", "set_cols", "opp_lambda",
-                 "my_team")
+                 "my_team", "tilt")
+
+    #: Cap on a single step's twist factor. The depth-0 term of the likelihood
+    #: is ``log(1e-9)``, so the 0 -> 1 ratio is ``1e9 ** w`` and would otherwise
+    #: make the proposal effectively deterministic at that step. Capping costs
+    #: variance reduction, never correctness: whatever the proposal does, the
+    #: density used in the weight is the one actually sampled from.
+    TILT_CAP = 1e4
+
+    #: Depth is bounded by the cards in a half-suit, so the whole tilt table is
+    #: this many entries per slot and is built once per decision.
+    TILT_MAX_DEPTH = 7
 
     def __init__(self, weight, base, set_cols=None, opp_lambda: float = 0.0,
-                 my_team: int = 0):
+                 my_team: int = 0, tilt_strength: float = 0.0):
         self.weight = list(weight)
         self.base = list(base)
         self.n_slots = len(self.weight)
+        self.tilt = self._build_tilt(tilt_strength)
         # Columns (in sampler order) of the still-unlocated cards of each
         # half-suit that COULD be entirely with the opposing team. See the
         # "no-declaration" signal in oppmodel.py.
         self.set_cols = set_cols or []
         self.opp_lambda = opp_lambda
         self.my_team = my_team
+
+    def _build_tilt(self, strength: float):
+        """Per-slot table of ``L(depth+1)/L(depth)``, raised to ``strength``.
+
+        The sampler's proposal is quota-proportional and knows nothing about the
+        choice model, so at ``gamma > 0`` the entire tilt of the target lands in
+        the importance weights and the batch degenerates. Measured on real
+        positions, 160 draws were worth 99.9 effective at ``gamma = 0`` but only
+        83.7 at ``gamma = 0.35``.
+
+        This is the standard remedy: fold one step of the likelihood into the
+        proposal, so the weight carries only the residual. ``strength = 0``
+        returns ``None`` and the sampler takes the untouched incumbent path;
+        ``strength = 1`` is the locally optimal twist.
+
+        This term is unlike every other weight in the engine. It changes the
+        *proposal*, not the target, so it cannot change what the policy computes
+        - only how precisely it computes it. The test is therefore not "does it
+        change a decision" but "do the marginals agree while the ESS rises".
+        """
+        if not strength or not self.n_slots:
+            return None
+        cap = self.TILT_CAP
+        table = []
+        for i in range(self.n_slots):
+            w = self.weight[i] * strength
+            if not w:
+                table.append(None)
+                continue
+            base = self.base[i]
+            row = []
+            for d in range(self.TILT_MAX_DEPTH):
+                lo = base + d
+                ratio = (lo + 1) / (lo if lo > 0 else 1e-9)
+                try:
+                    f = ratio ** w
+                except OverflowError:
+                    f = cap
+                row.append(f if f < cap else cap)
+            table.append(tuple(row))
+        return table
 
     def log_likelihood_from_depths(self, depth) -> float:
         total = 0.0
@@ -182,6 +235,8 @@ class SISSampler:
         oclause = self._oclause
         ocp = self._oc_player
         otilt = self._otilt
+        om = self.opponent_model
+        tilt = om.tilt if (om is not None and otilt is not None) else None
         boost = self.boost
         n_or = len(self.ors)
         live_left = [len(live) for live, _ in self.ors]
@@ -223,6 +278,17 @@ class SISSampler:
                                 if not satisfied[ci] and cps[j] == p:
                                     w *= boost
                                     break
+                        if tilt is not None:
+                            # One step of the choice-model likelihood, folded
+                            # into the proposal. prodq below still records the
+                            # density actually sampled from, so the estimator is
+                            # untouched and only its variance moves.
+                            slot = otilt[i][k]
+                            if slot >= 0:
+                                row = tilt[slot]
+                                if row is not None:
+                                    d = depth[slot]
+                                    w *= row[d] if d < len(row) else row[-1]
                         wbuf[k] = w
                         total += w
                     k += 1

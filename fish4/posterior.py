@@ -84,13 +84,14 @@ class Posterior:
                  "stats", "n", "_sys", "_card_group", "_free", "_marg",
                  "_worlds", "_batch", "_sampler", "_exact_ok", "_idx",
                  "_free_pos", "depth_mode", "count_mode", "opp_lambda",
-                 "gamma_schedule")
+                 "gamma_schedule", "sis_tilt")
 
     def __init__(self, belief: BeliefState, rng: random.Random,
                  n_draws: int = 128, n_worlds: int = 32,
                  mode: str = "auto", obs=None, gamma: float = 0.0,
                  depth_mode: str = "initial", count_mode: str = "linear",
                  opp_lambda: float = 0.0, gamma_schedule: float = 0.0,
+                 sis_tilt: float = 0.0,
                  stats: Optional[PosteriorStats] = None):
         self.bel = belief
         self.obs = obs
@@ -99,6 +100,7 @@ class Posterior:
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda
         self.gamma_schedule = gamma_schedule
+        self.sis_tilt = sis_tilt
         self.rng = rng
         self.n_draws = n_draws
         self.n_worlds = n_worlds
@@ -160,6 +162,7 @@ class Posterior:
                                        count_mode=self.count_mode,
                                        opp_lambda=self.opp_lambda,
                                        gamma_schedule=self.gamma_schedule,
+                                       sis_tilt=self.sis_tilt,
                                        order=free)
         # The exact DP answers the uniform-target question only. An opponent
         # model changes the target, so it forces the sampling path even when no

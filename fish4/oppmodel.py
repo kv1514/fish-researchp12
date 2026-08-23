@@ -96,7 +96,7 @@ def schedule_factor(resolved: int, n_half_suits: int, s: float) -> float:
 def build(bel, obs, gamma: float, include_self: bool = False,
           depth_mode: str = "initial", count_mode: str = "linear",
           opp_lambda: float = 0.0, order=None,
-          gamma_schedule: float = 0.0):
+          gamma_schedule: float = 0.0, sis_tilt: float = 0.0):
     """Build an ``(OpponentModel, card_slot)`` pair, or ``(None, None)``.
 
     ``card_slot`` maps ``(player, card)`` to the model slot for that player and
@@ -229,7 +229,8 @@ def build(bel, obs, gamma: float, include_self: bool = False,
             if possible and cols:
                 set_cols.append(tuple(cols))
     return (OpponentModel(weight, base, set_cols=set_cols,
-                          opp_lambda=opp_lambda, my_team=obs.player & 1),
+                          opp_lambda=opp_lambda, my_team=obs.player & 1,
+                          tilt_strength=sis_tilt),
             card_slot)
 
 

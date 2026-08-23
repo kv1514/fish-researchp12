@@ -97,11 +97,28 @@ def draw_batch(sampler, rng, n: int):
     rows = np.arange(n)
     randoms = gen.random((n_free, n))
 
+    # Proposal twist (see OpponentModel._build_tilt). One row per slot plus a
+    # trailing all-ones row, so a candidate with no slot indexes a no-op instead
+    # of needing a mask in the inner loop.
+    om0 = sampler.opponent_model
+    tiltT = None
+    if om0 is not None and getattr(om0, "tilt", None) is not None and n_slots:
+        maxd = om0.TILT_MAX_DEPTH
+        tiltT = np.ones((n_slots + 1, maxd), dtype=np.float64)
+        for si, row in enumerate(om0.tilt):
+            if row is not None:
+                tiltT[si, :len(row)] = row
+
     for i in range(n_free):
         cand, clauses, cps, cols, slots = plan[i]
         m = cand.size
         W = quota[:, cand].copy()
         np.maximum(W, 0.0, out=W)
+        if tiltT is not None and slots is not None:
+            have = slots >= 0
+            dcol = depth[:, np.where(have, slots, 0)]
+            np.clip(dcol, 0, tiltT.shape[1] - 1, out=dcol)
+            W *= tiltT[np.where(have, slots, n_slots)[None, :], dcol]
 
         forced = None
         if clauses:
