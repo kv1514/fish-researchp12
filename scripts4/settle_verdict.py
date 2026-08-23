@@ -87,9 +87,18 @@ def main() -> int:
         return 1
 
     n_tot = sum(c["n"] for c in cs)
-    mde = Z * PER_PAIR_SD / math.sqrt(n_tot)
-    print(f"\ntotal pairs {n_tot}, MDE {mde:.3f} against an assumed effect of "
-          f"{ASSUMED_EFFECT:+.3f}")
+    # The minimum DETECTABLE effect is the 80%-power figure the
+    # pre-registration was sized against, (z_{0.975} + z_{0.80}) * sd / sqrt(n),
+    # not the 95% interval half-width. The two differ by 43% and an earlier
+    # draft of this script printed the half-width under the MDE's name, which
+    # would have made the run look better powered than it was designed to be.
+    half = Z * PER_PAIR_SD / math.sqrt(n_tot)
+    mde = (Z + 0.8416212) * PER_PAIR_SD / math.sqrt(n_tot)
+    print(f"\ntotal pairs {n_tot}")
+    print(f"  MDE at 80% power        {mde:.3f}  "
+          f"(pre-registered as 0.137)")
+    print(f"  95% interval half-width {half:.3f}")
+    print(f"  effect the run was sized against {ASSUMED_EFFECT:+.3f}")
 
     p = pool(cs)
     demonstrated = _verdict(p["fe"], p["fe_se"],
