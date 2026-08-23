@@ -42,6 +42,13 @@ from fish4.learn import rollout as R                      # noqa: E402
 from fish4.learn.dataset import (MAX_WORKERS, HarvestConfig, harvest,  # noqa: E402
                                  load_positions)
 
+#: The run whose outputs keep the original, unsuffixed filenames. Every number
+#: the paper quotes for the objective-learning line came from this run, so a
+#: second run must not be able to land on top of them: the stages here MERGE
+#: into the results file, so a v2 fit written to v1's path would leave a file
+#: that is partly one experiment and partly another, with nothing in it saying
+#: so. Any other run gets its own suffixed pair of files.
+PRIMARY_RUN = "v1"
 RESULTS = ROOT / "results" / "ask_objective_fit.json"
 REPORT = ROOT / "fish4" / "learn" / "FIT.md"
 
@@ -50,15 +57,30 @@ def data_root(run: str) -> Path:
     return ROOT / "data" / "learn" / run
 
 
-def load_results() -> dict:
-    if RESULTS.exists():
-        return json.loads(RESULTS.read_text(encoding="utf-8"))
+def results_path(run: str) -> Path:
+    if run == PRIMARY_RUN:
+        return RESULTS
+    return RESULTS.with_name(f"ask_objective_fit_{run}.json")
+
+
+def report_path(run: str) -> Path:
+    if run == PRIMARY_RUN:
+        return REPORT
+    return REPORT.with_name(f"FIT_{run}.md")
+
+
+def load_results(run: str = PRIMARY_RUN) -> dict:
+    p = results_path(run)
+    if p.exists():
+        return json.loads(p.read_text(encoding="utf-8"))
     return {}
 
 
-def save_results(d: dict) -> None:
-    RESULTS.parent.mkdir(parents=True, exist_ok=True)
-    RESULTS.write_text(json.dumps(d, indent=2), encoding="utf-8")
+def save_results(d: dict, run: str = PRIMARY_RUN) -> None:
+    p = results_path(run)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    d = dict(d, run=run)
+    p.write_text(json.dumps(d, indent=2), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -71,10 +93,10 @@ def stage_harvest(args) -> dict:
                         n_eval=args.candidates)
     summary = harvest(root, cfg, n_workers=args.workers)
     print(json.dumps(summary, indent=2))
-    res = load_results()
+    res = load_results(args.run)
     res["harvest"] = {"config": cfg.to_dict(), "summary": summary,
                       "run": args.run}
-    save_results(res)
+    save_results(res, args.run)
     return summary
 
 
@@ -94,7 +116,7 @@ def stage_rollout(args) -> dict:
     summary = R.evaluate_positions(root, cfg=cfg, n_workers=args.workers,
                                    seed=args.seed, limit=args.limit)
     print(json.dumps(summary, indent=2))
-    res = load_results()
+    res = load_results(args.run)
     prev = res.get("rollout", {})
     # Accumulate across resumed passes so the reported totals are the totals.
     for k in ("evaluated", "seconds"):
@@ -103,7 +125,7 @@ def stage_rollout(args) -> dict:
         for k, v in prev["rollout_stats"].items():
             summary["rollout_stats"][k] = summary["rollout_stats"].get(k, 0) + v
     res["rollout"] = summary
-    save_results(res)
+    save_results(res, args.run)
     return summary
 
 
@@ -147,7 +169,7 @@ def stage_fit(args) -> dict:
         print(f"MLP val MSE {mlp['val_mse_mlp']:.4f} vs linear "
               f"{mlp['val_mse_linear']:.4f} (zero {mlp['val_mse_zero']:.4f})")
 
-    res = load_results()
+    res = load_results(args.run)
     res["rollout_totals"] = R.rollout_summary(root)
     res["fit"] = {"linear": lin, "linear_top8": lin_top, "mlp": mlp,
                   "noise_to_signal": nts, "p_response": pr,
@@ -160,14 +182,14 @@ def stage_fit(args) -> dict:
                   # detectable rather than merely wrong.
                   "term_names": list(TERM_NAMES),
                   "n_blocks": len(blocks)}
-    save_results(res)
+    save_results(res, args.run)
     return res["fit"]
 
 
 def stage_validate(args) -> dict:
     from fish4.match import play_matchup
 
-    res = load_results()
+    res = load_results(args.run)
     if "fit" not in res:
         raise SystemExit("run 'fit' first")
     if args.weights == "pinned":
@@ -198,7 +220,7 @@ def stage_validate(args) -> dict:
                 "base_seed": args.base_seed, "agent_seed_base": args.agent_seed,
                 "wall_seconds": time.time() - t0})
     res.setdefault("validation", []).append(rec)
-    save_results(res)
+    save_results(res, args.run)
     return rec
 
 
@@ -216,7 +238,7 @@ def _verdict(rec: dict) -> str:
 
 
 def stage_report(args) -> None:
-    res = load_results()
+    res = load_results(args.run)
     if "fit" not in res:
         raise SystemExit("nothing to report; run 'fit' first")
     lin = res["fit"]["linear"]
@@ -620,8 +642,9 @@ def stage_report(args) -> None:
       f"append-only data files are resumable: re-running a stage picks up where "
       f"it stopped rather than starting over.")
     a("")
-    REPORT.write_text("\n".join(L) + "\n", encoding="utf-8")
-    print(f"wrote {REPORT}")
+    dest = report_path(args.run)
+    dest.write_text("\n".join(L) + "\n", encoding="utf-8")
+    print(f"wrote {dest}")
 
 
 # ---------------------------------------------------------------------------

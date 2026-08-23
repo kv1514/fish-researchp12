@@ -30,7 +30,15 @@ wrong and something else is flattening the target; if it is much larger, the
 continuation really was the wall, and the whole learning line is worth re-running
 against a target that now carries signal.
 
-Usage: python scripts4/rollout_target.py [n_pos] [n_worlds] [min_resolved] [out]
+Usage: python scripts4/rollout_target.py [n_pos] [n_worlds] [min_resolved]
+                                        [continuation] [out]
+
+``continuation`` is ``v04`` (the engine) or ``public`` (the incumbent
+heuristic). The second is the control: the published +0.101 was measured on a
+DIFFERENT position distribution -- the learning harvest, which spans the whole
+deal -- so comparing it to a number from late positions attributes to the
+continuation what may be position mix. Running both arms on the same positions
+is the only version of the comparison the numbers support.
 """
 
 from __future__ import annotations
@@ -59,7 +67,50 @@ from ask_regret import GAMMA, SPEC, _legal_asks, _rollout, harvest
 PAPER_SLOPE = 0.101
 
 
-def gather(n_pos: int, n_worlds: int, min_resolved: int, seed0: int = 8821):
+def _public_rollout(rules, world, turn, set_winner, history, root_action,
+                    root_seat, seat_seeds):
+    """The CONTROL arm: finish the deal with the public-information heuristic.
+
+    Same positions, same worlds, same seeds, same root action as ``_rollout``.
+    The only difference is who plays the rest of the game -- and, necessarily,
+    that the determinized state starts with an empty public log, which is the
+    knowledge set ``PublicInfoHeuristic`` is defined and audited against and
+    what the original learning rollouts gave it.
+
+    This arm exists because without it the comparison is confounded. The
+    published +0.101 was measured over the LEARNING harvest, whose positions run
+    the whole deal (median two half-suits resolved); this script harvests late
+    positions (four or more, by construction). Attributing a difference between
+    the two to the continuation policy, when the position distributions also
+    differ, is not something the numbers support. Running both arms here holds
+    the positions fixed so that the continuation is the only thing that moves.
+    """
+    from fish.cards import team_of
+    from fish.engine import GameState, IllegalAction
+    from fish4.learn.rollout import PublicInfoHeuristic
+
+    from ask_regret import MAX_ACTIONS, NUM_PLAYERS, _score
+
+    state = GameState.from_components(rules, list(world), turn,
+                                      list(set_winner))
+    agents = [PublicInfoHeuristic() for _ in range(NUM_PLAYERS)]
+    for pl, a in enumerate(agents):
+        a.begin_game(pl, rules, seat_seeds[pl])
+    try:
+        state.apply(root_seat, root_action)
+    except IllegalAction:
+        return None
+    n = 0
+    while not state.is_terminal and n < MAX_ACTIONS:
+        pl = state.turn
+        state.apply(pl, agents[pl].act(Observation.from_state(state, pl)))
+        n += 1
+    return _score(state, team_of(root_seat))
+
+
+def gather(n_pos: int, n_worlds: int, min_resolved: int, seed0: int = 8821,
+           continuation: str = "v04"):
+    roll = _rollout if continuation == "v04" else _public_rollout
     rows = []
     positions = harvest(80, min_resolved, n_pos)
     t0 = time.time()
@@ -84,7 +135,7 @@ def gather(n_pos: int, n_worlds: int, min_resolved: int, seed0: int = 8821):
         for ai, a in enumerate(asks):
             vals = []
             for wi, w in enumerate(worlds):
-                v = _rollout(rules, w, turn, sw, hist, a, seat, seeds[wi])
+                v = roll(rules, w, turn, sw, hist, a, seat, seeds[wi])
                 if v is not None:
                     vals.append(v)
             if not vals:
@@ -143,13 +194,18 @@ def main(argv):
     n_pos = int(argv[0]) if argv else 40
     n_worlds = int(argv[1]) if len(argv) > 1 else 12
     min_resolved = int(argv[2]) if len(argv) > 2 else 4
-    dest = (Path(argv[3]) if len(argv) > 3
-            else ROOT / "results" / "rollout_target.json")
+    continuation = argv[3] if len(argv) > 3 else "v04"
+    default = ("rollout_target.json" if continuation == "v04"
+               else f"rollout_target_{continuation}.json")
+    dest = (Path(argv[4]) if len(argv) > 4
+            else ROOT / "results" / default)
 
+    named = ("full v0.4" if continuation == "v04"
+             else "public-information heuristic")
     print("does a marginal card survive to the end of the deal?")
     print(f"{n_pos} positions | {n_worlds} worlds | "
-          f">= {min_resolved} half-suits resolved | full v0.4 continuation\n")
-    rows = gather(n_pos, n_worlds, min_resolved)
+          f">= {min_resolved} half-suits resolved | {named} continuation\n")
+    rows = gather(n_pos, n_worlds, min_resolved, continuation=continuation)
     if not rows:
         print("no usable positions")
         return
@@ -177,6 +233,7 @@ def main(argv):
               "been identified yet.")
 
     out = {"n_positions": n_pos, "n_worlds": n_worlds,
+           "continuation": continuation,
            "min_resolved": min_resolved, "paper_slope": PAPER_SLOPE,
            "p_success_slope": s, "rows": rows}
     for j, name in enumerate(TERM_NAMES):
