@@ -1272,6 +1272,69 @@ Third, and separately: ignoring the OR-clauses is by far the worst option
 tested, confirming the design decision of Section~\ref{sec:clauses} from the
 other direction.
 
+\subsection{How much of the sampling budget survives reweighting}
+\label{sec:res-ess}
+
+Table~\ref{tab:posterior} scores the posterior. This asks what it costs to get
+there, and finds a diagnostic that has been computed on every decision this
+engine has ever made and reported on none of them.
+
+The posterior is drawn by importance sampling and self-normalised.
+Self-normalisation is consistent, not free: if the proposal is a poor match for
+the target, a few draws carry most of the weight and the batch behaves like far
+fewer than $n$ independent worlds. Kish's effective sample size measures that,
+and the sampler already computes it.
+
+At the champion configuration, 160 draws are worth $83.7$ effective --- $52\%$
+efficiency --- against $99.9$ with the opponent model disabled. And the exact DP
+is essentially never reached: 9 decisions against 632, because any $\gamma > 0$
+changes the target and forces the sampling path. The precision of every
+$\Prob(\text{success})$ in this engine is the precision of that one batch.
+
+The gap has an obvious explanation and an obvious remedy, and the remedy is a
+trap. The proposal is quota-proportional and knows nothing about the choice
+model, so the whole tilt of the target lands in the weights; folding one step of
+the likelihood into the proposal is textbook, and it does exactly what the
+textbook says --- effective sample size rises to $105.8$, past even the untilted
+$\gamma = 0$ figure. Partial strengths are worse than either end, the signature
+of a proposal distorted but not matched.
+
+Measured against a high-precision reference, the twist makes the marginals
+$3.4\times$ worse.
+
+Effective sample size measures how \emph{flat} the weights are, and a proposal
+that covers one corner of the target well and the rest not at all has beautifully
+flat weights over the corner it covers. The one-step twist overshoots because the
+likelihood's depth-zero term is a numerical floor of $\log 10^{-9}$: the
+astronomical $0 \to 1$ ratio makes the proposal read ``this slot is empty now''
+as ``this slot ends empty'' and drives nearly every draw into one configuration.
+The parameter ships at zero, verified bit-identical to the untwisted sampler, and
+the tests pin both halves of the result so that the next person to notice the
+efficiency gap does not have to rediscover why closing it fails.
+
+\paragraph{Is precision still worth buying?} v0.3 found belief precision
+unsaturated, but with a biased sampler and a different estimator, so it does not
+transfer. Measured here against a 16{,}000-draw reference, L1 error per card falls
+as $n^{-0.475}$ from 40 draws to 1280 with no bias floor anywhere:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+draws & 40 & 80 & 160 & 320 & 640 & 1280 \\
+\midrule
+L1 per card & 0.248 & 0.174 & 0.128 & 0.091 & 0.066 & 0.048 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Two things follow. The exponent is the pure Monte Carlo law, which independently
+confirms the sampler is unbiased --- a bias floor would show as the curve
+flattening, and it does not. And precision at the operating point of 160 draws is
+nowhere near saturated: the prize is real and can be bought directly with draws
+rather than with a cleverer proposal. Whether the policy can \emph{feel} it is a
+duel and is not claimed here.
+
 \subsection{The opponent model in play}
 \label{sec:res-oppmodel}
 
