@@ -376,15 +376,26 @@ function renderHint(box) {
   if (h.moves && h.moves.length) {
     const t = el("table", "hinttable");
     t.innerHTML = "<tr><th>ask</th><th>lands</th><th>score</th></tr>";
-    for (const m of h.moves.slice(0, 6)) {
-      const tr = el("tr");
+    const rows = [];
+    const shown = h.moves.slice(0, 6);
+    shown.forEach((m, i) => {
+      const tr = el("tr", i === 0 ? "sel" : null);
       tr.innerHTML =
         `<td>P${m.target} · ${pretty(m.card_name)}</td>`
         + `<td>${(100 * m.p_success).toFixed(0)}%</td>`
         + `<td>${m.score.toFixed(2)}</td>`;
+      tr.onclick = () => {
+        rows.forEach((r) => r.classList.remove("sel"));
+        tr.classList.add("sel");
+        renderWhy(why, m);
+      };
+      rows.push(tr);
       t.appendChild(tr);
-    }
+    });
     p.appendChild(t);
+    const why = el("div", "why");
+    p.appendChild(why);
+    renderWhy(why, shown[0]);
   }
 
   const best = (h.claims || [])[0];
@@ -400,6 +411,70 @@ function renderHint(box) {
     p.appendChild(el("p", "dim", n));
   }
   box.appendChild(p);
+}
+
+/* Why one ask outscores another.
+ *
+ * The score is a sum with no hidden parts: P(success) enters with weight one and
+ * every other consideration enters as a weighted term, so the bar below IS the
+ * arithmetic, not an illustration of it. That is worth showing because the
+ * decomposition is the project's sharpest finding made visible: ablating the
+ * other terms costs almost nothing, so they function as tie-breaks between asks
+ * that P(success) has already brought level, rather than as rival objectives.
+ * The bar shows that directly - on a near-certain ask the first row swamps the
+ * rest, and it is only when P(success) is low and flat across candidates that
+ * the tie-breaks decide anything.
+ *
+ * Terms can be negative (a card that hands the turn to a dangerous seat), so
+ * gains and costs are drawn on opposite sides of a common baseline rather than
+ * stacked into a single misleading length.
+ */
+const TERM_BLURB = {
+  suit: "cards you already hold in the half-suit",
+  turn: "risk of handing the turn to a strong seat",
+  scarce: "how few places the card can still be",
+  reveal: "what the ask tells the table about your hand",
+  deplete: "drawing down a dangerous opponent",
+  expose: "how much it exposes your own half-suit",
+  claim: "progress toward a claimable set",
+  info: "information gained whether or not it lands",
+};
+
+function renderWhy(box, m) {
+  box.innerHTML = "";
+  if (!m) return;
+  const rest = Object.entries(m.terms || {})
+    .filter(([, v]) => Math.abs(v) > 1e-9)
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+    .map(([k, v]) => [k, v, TERM_BLURB[k] || k]);
+  const parts = [["lands", m.p_success, "P(success), which carries weight 1"]]
+    .concat(rest);
+  const scale = Math.max(...parts.map(([, v]) => Math.abs(v)), 1e-6);
+  // Only spend half the track on a centre line when something actually sits on
+  // the left of it; with every term positive that would halve the resolution
+  // of the comparison the panel exists to make.
+  const signed = parts.some(([, v]) => v < 0);
+
+  box.appendChild(el("h5", null,
+    `Why P${m.target} · ${pretty(m.card_name)} scores ${m.score.toFixed(3)}`));
+  for (const [k, v, blurb] of parts) {
+    const row = el("div", "whyrow");
+    row.appendChild(el("span", "whyname", k));
+    const track = el("span", signed ? "whytrack signed" : "whytrack");
+    const bar = el("span", v >= 0 ? "whybar pos" : "whybar neg");
+    bar.style.width =
+      (100 * Math.abs(v) / scale / (signed ? 2 : 1)).toFixed(1) + "%";
+    track.appendChild(bar);
+    row.appendChild(track);
+    row.appendChild(el("span", "whyval", (v >= 0 ? "+" : "") + v.toFixed(3)));
+    row.title = blurb;
+    box.appendChild(row);
+  }
+  box.appendChild(el("p", "dim",
+    parts.length > 1
+      ? "Hover a row for what it means. Click any ask above to break it down."
+      : "Nothing but P(success) is moving this one. "
+        + "Click any ask above to break it down."));
 }
 
 /* The posterior, as the engine holds it.

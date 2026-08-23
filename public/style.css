@@ -367,3 +367,52 @@ button.ghost.on {
   .lastmove .card { width: 36px; }
   .lmwhat { font-size: .95rem; }
 }
+
+/* Why one ask outscores another.
+ *
+ * A common centre line rather than a stacked bar, because terms are signed: a
+ * card that hands the turn to a dangerous seat contributes a negative number,
+ * and stacking would draw a longer bar for a worse ask. Gains run right from
+ * the centre, costs run left, and every bar shares one scale so the shape of
+ * the sum is readable at a glance - which is the point, since the shape (one
+ * sum is readable at a glance.
+ */
+.hinttable tr { cursor: default; }
+.hinttable tr:has(td) { cursor: pointer; }
+.hinttable tr.sel td { background: rgba(27,79,143,.09); font-weight: 600; }
+
+.why { margin-top: .7rem; }
+.why h5 {
+  margin: 0 0 .4rem; font-size: .82rem; font-weight: 600; color: var(--dim);
+  letter-spacing: .02em; text-transform: uppercase;
+}
+.whyrow {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .8rem; margin-bottom: .18rem;
+}
+.whyname { flex: 0 0 4.6rem; color: var(--dim); }
+.whytrack {
+  flex: 1; position: relative; height: 10px; min-width: 60px;
+  background: rgba(0,0,0,.045); border-radius: 5px;
+}
+/* The centre line, drawn only when a bar can fall to the left of it. */
+.whytrack.signed::before {
+  content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px;
+  width: 1px; background: var(--line);
+}
+.whybar {
+  position: absolute; top: 0; left: 0; height: 10px; border-radius: 5px;
+  min-width: 1px; background: var(--ours);
+}
+.whytrack.signed .whybar.pos { left: 50%; }
+.whytrack.signed .whybar.neg { left: auto; right: 50%; }
+.whybar.neg { background: var(--theirs); }
+.whyval {
+  flex: 0 0 3.6rem; text-align: right;
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+
+@media (max-width: 560px) {
+  .whyname { flex-basis: 3.8rem; }
+  .whyval { flex-basis: 3rem; }
+}
