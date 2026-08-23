@@ -72,16 +72,35 @@ because decisions inside one deal are not independent draws:
     alpha                 2.00   1.28   1.20   0.68   0.30   0.41  -0.02
     clustered SE          0.08   0.08   0.12   0.12   0.13   0.18   0.16
 
-So the shipped constant is wrong at both ends, in opposite directions. At the
-opening the true exponent is about 2 and the model understates the signal; by
-the endgame it is 0 and the model applies a tilt that is not there. Pooled, the
-constant that best fits everything is 1.207 +/- 0.046 - close enough to 1 to
-explain why a constant never looked obviously broken, and far enough from either
-end to explain why it could not be right.
+So against the covariate the model actually uses, the shipped constant is wrong
+at both ends and in opposite directions. Pooled, the best constant is
+1.207 +/- 0.046.
 
-The mechanism is the one this term was built for, and it is now measured rather
-than argued: a player asks where they are deep only if they had a choice, and
-late, holding two cards with most of the deck resolved, legality binds.
+WHAT THAT DECAY TURNED OUT TO BE
+--------------------------------
+The first reading was behavioural: late asks carry no depth signal, because
+legality binds and a player asks where they can rather than where they are deep.
+Refitting on depth AT THE MOMENT OF THE ASK - see the ``"at_ask"`` mode below -
+says most of it was not behaviour:
+
+    covariate                 opening   1-2     3-4     5-8    pooled
+    initial-deal depth          2.00    1.25    0.52    0.23    1.207
+    depth at the ask            2.90    2.32    1.72    1.34    2.195
+
+The decay survives and shrinks. Late asks do carry depth signal, about the hand
+the asker held; what decays is how well the initial deal still describes that
+hand. Noise in a covariate attenuates its coefficient, and here the noise grows
+monotonically with the game - mean absolute disagreement between the two rises
+from 0.16 cards to 0.66 - which manufactures a decay out of drift.
+
+That is not an argument against ``gamma_schedule``, it is a better argument for
+it. The engine conditions on initial-deal depth, and a covariate that degrades as
+the game runs on SHOULD be believed less as the game runs on; the profile below
+is a dilution correction for the covariate in use, which is a modest and
+defensible thing rather than the claim about player behaviour it was first
+written up as. It should also become unnecessary under ``"at_ask"``, where the
+covariate does not drift - and if it does not, that is evidence the behavioural
+reading had something in it after all.
 
 ``ALPHA_*`` below is a weighted quadratic through those seven bands (chi-square
 8.3 on 4 dof), clamped flat past its vertex because past there the parabola
