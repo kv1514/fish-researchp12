@@ -92,3 +92,82 @@ def test_the_propensity_ratio_rises_with_depth_when_the_truth_does():
             if c["expected"] >= 50]
     assert len(vals) >= 3
     assert vals[-1] > vals[0] * 1.5
+
+
+# ---------------------------------------------------------------------------
+# Clustering over games
+#
+# The likelihood's curvature treats every decision as an independent draw, and
+# they are not: the real measurement takes 17,000 decisions from 200 deals, and
+# decisions inside one deal share a layout, six hands and one set of policies.
+# The block bootstrap over games exists to price that in, and it has to pass two
+# tests, not one -- it must widen the interval when there IS between-game
+# variation, and it must leave it alone when there is not. A correction that
+# fires unconditionally is not a correction.
+#
+# On the real data it widens by 2.00x. On synthetic decisions where each game
+# draws its own exponent it widens by about the same, which is what makes that
+# 2.00x interpretable rather than merely observed.
+# ---------------------------------------------------------------------------
+
+from choice_curve import bootstrap_alpha                        # noqa: E402
+
+
+def by_game(n_games, per_game, spread, seed=3):
+    """Decisions grouped into games, each game with its own true exponent."""
+    rng = np.random.default_rng(seed)
+    recs = []
+    for g in range(n_games):
+        a_g = 1.0 + rng.normal(0.0, spread)
+        for _ in range(per_game):
+            m = int(rng.integers(2, 6))
+            d = rng.integers(1, 6, size=m)
+            w = d.astype(float) ** a_g
+            j = int(rng.choice(m, p=w / w.sum()))
+            recs.append({"alts": [{"hs": i, "depth0": int(d[i])}
+                                  for i in range(m)],
+                         "picked": j, "resolved": 0, "n_hs": 9, "game": g})
+    return recs
+
+
+def test_clustering_leaves_an_independent_sample_alone():
+    recs = by_game(60, 25, 0.0)
+    naive = fit_alpha(recs)["se"]
+    clustered = bootstrap_alpha(recs, reps=60)["se_clustered"]
+    assert clustered < 1.6 * naive, (
+        f"clustered SE {clustered:.4f} against naive {naive:.4f} with no "
+        "between-game variation to find")
+
+
+def test_clustering_widens_when_games_genuinely_differ():
+    recs = by_game(60, 60, 0.6)
+    naive = fit_alpha(recs)["se"]
+    clustered = bootstrap_alpha(recs, reps=60)["se_clustered"]
+    assert clustered > 1.5 * naive, (
+        f"clustered SE {clustered:.4f} barely exceeds naive {naive:.4f} "
+        "although each game had its own exponent")
+
+
+def test_more_decisions_per_game_buy_precision_the_naive_fit_only_imagines():
+    """The signature of a design limited by clusters rather than observations.
+
+    Adding decisions to a fixed set of games shrinks the naive standard error
+    the way more data always does, and leaves the clustered one almost alone:
+    with the between-game component fixed, the extra decisions refine estimates
+    of games that were already sampled rather than sampling new ones. A fixed
+    threshold on the ratio would be arbitrary -- it runs from 1.3 to 2.9 purely
+    with decisions per game -- so what is asserted is the shape.
+    """
+    small, big = by_game(60, 25, 0.6), by_game(60, 100, 0.6)
+    n_s = fit_alpha(small)["se"]
+    n_b = fit_alpha(big)["se"]
+    c_s = bootstrap_alpha(small, reps=60)["se_clustered"]
+    c_b = bootstrap_alpha(big, reps=60)["se_clustered"]
+    assert n_b < 0.6 * n_s, f"naive SE hardly moved: {n_s:.4f} -> {n_b:.4f}"
+    assert c_b > 0.75 * c_s, (
+        f"clustered SE fell like an independent sample: {c_s:.4f} -> {c_b:.4f}")
+    assert (c_b / n_b) > 1.4 * (c_s / n_s)
+
+
+def test_a_bootstrap_needs_enough_games_to_resample():
+    assert bootstrap_alpha(by_game(4, 40, 0.5), reps=20) is None
