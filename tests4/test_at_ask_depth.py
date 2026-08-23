@@ -214,3 +214,91 @@ def test_the_two_sampler_paths_agree_on_the_new_likelihood():
                 checked += 1
     assert checked > 200, f"only {checked} draws compared"
     assert worst < 1e-9, f"paths disagree by {worst:.3e}"
+
+
+# ---------------------------------------------------------------------------
+# The table has to reproduce the weight the parameters describe
+#
+# gamma, count_mode and gamma_schedule are folded into the per-slot log terms.
+# If that folding is wrong the model still runs and still produces plausible
+# marginals -- it just weights the evidence differently from what the parameters
+# say, which is the kind of error that survives a duel and shows up as an
+# unexplained tuning shift months later.
+# ---------------------------------------------------------------------------
+
+def test_a_single_ask_slot_reduces_exactly_to_the_incumbent():
+    """A slot's FIRST ask always has delta zero, so the two must coincide.
+
+    Delta is the net of that half-suit's publicly transferred cards for that
+    player. To have received one before their own first ask in the half-suit,
+    they would have had to ask in it earlier -- so the first ask of every slot
+    sits at delta zero by construction, and a slot with exactly one ask must
+    reproduce the incumbent term for term at every depth.
+
+    This is the check that would catch a sign error or an off-by-one in the
+    delta bookkeeping, and it needs no special fixture: single-ask slots are the
+    common case.
+    """
+    from fish4.oppmodel import build
+    worst, n_single = 0.0, 0
+    for rules, hands, sw, turn, hist, seat in collect_positions(6, 3, 30):
+        obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
+                          hand_counts=tuple(h.bit_count() for h in hands),
+                          set_winner=tuple(sw), history=hist)
+        bel = BeliefState(rules, observer=seat)
+        bel.update(obs)
+        a, _ = build(bel, obs, gamma=0.35, depth_mode="at_ask")
+        b, _ = build(bel, obs, gamma=0.35, depth_mode="initial")
+        if a is None or a.depth_table is None:
+            continue
+        for si in range(a.n_slots):
+            if round(b.weight[si] / 0.35) != 1:      # linear counting
+                continue
+            n_single += 1
+            for d in range(len(a.depth_table[si])):
+                ref = b.weight[si] * np.log(max(d + b.base[si], 1e-9))
+                worst = max(worst, abs(a.depth_table[si][d] - ref))
+    assert n_single > 20, f"only {n_single} single-ask slots found"
+    assert worst < 1e-12, (
+        f"single-ask slots differ from the incumbent by {worst:.3e}")
+
+
+@pytest.mark.parametrize("count_mode", ["linear", "sqrt", "capped"])
+@pytest.mark.parametrize("schedule", [0.0, 1.0])
+def test_it_composes_with_the_other_weight_modifiers(count_mode, schedule):
+    """Every combination builds, stays finite, and rises with depth.
+
+    Monotonicity is the invariant worth asserting. Each term is
+    ``log(d + base + delta)`` scaled by a non-negative multiplier -- gamma times
+    a count factor times a schedule factor that is clamped at zero -- so a slot's
+    entry can only increase with the depth the sampler gives it. A sign error in
+    the folding, or a negative multiplier slipping through, breaks that.
+
+    Note what is NOT asserted: that entries stay away from the ``log(1e-9)``
+    floor. An early draft required exactly that and failed, and the code was
+    right. The floor appears at any depth where ``d + base + delta <= 0``, which
+    describes a player asking in a half-suit they hold nothing of -- forbidden by
+    the rules, so the floor is excluding an impossible world rather than
+    softening an awkward one. That is what the floor is for, and a test that
+    forbade it would have forced the model to entertain worlds the game cannot
+    produce.
+    """
+    from fish4.oppmodel import build
+    seen = 0
+    for rules, hands, sw, turn, hist, seat in collect_positions(4, 3, 12):
+        obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
+                          hand_counts=tuple(h.bit_count() for h in hands),
+                          set_winner=tuple(sw), history=hist)
+        bel = BeliefState(rules, observer=seat)
+        bel.update(obs)
+        om, _ = build(bel, obs, gamma=0.35, depth_mode="at_ask",
+                      count_mode=count_mode, gamma_schedule=schedule)
+        if om is None or om.depth_table is None:
+            continue
+        for row in om.depth_table:
+            assert all(np.isfinite(v) for v in row)
+            assert all(a <= b + 1e-12 for a, b in zip(row, row[1:])), (
+                f"a slot's likelihood falls as its depth rises: "
+                f"{[round(v, 3) for v in row]}")
+            seen += 1
+    assert seen > 0, "no tables built for this combination"
