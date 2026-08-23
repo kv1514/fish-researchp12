@@ -21,13 +21,27 @@ the objective, and deliberately stores nothing else:
     banked       set differential already resolved, from the acting team's view
     n_hidden     number of live cards whose location is not yet pinned
 
-**The worlds are stored, not the true hands.** Two reasons. First,
-``fish.beliefs.BeliefState`` is anchored on the initial deal and refuses to
-attach to a mid-game position, so a posterior cannot be reconstructed after the
-fact - it has to be captured while the game is running. Second, storing the
-posterior's worlds and nothing else makes the leak-freedom of the whole
-downstream pipeline structural rather than a matter of discipline: the true
-layout is never written to disk, so no later stage can accidentally read it.
+**The worlds are stored, not the true hands.** The reason that matters is
+leak-freedom: storing the posterior's worlds and nothing else makes it
+structural rather than a matter of discipline, because the true layout is never
+written to disk and no later stage can accidentally read it. Capturing the
+posterior while the game runs also makes every batch reproducible from the file
+alone.
+
+This paragraph used to give a second, stronger reason, and it was false.
+``fish.beliefs.BeliefState`` is anchored on the initial deal, so it was said
+that "a posterior cannot be reconstructed after the fact". It is anchored on the
+initial deal but does not have to be HANDED one: given the current hand and the
+public history, ``initial_hand()`` back-computes a deal consistent with both and
+the tracker attaches to that. ``scripts4/rollout_target.py`` does it over 110
+positions without a single ``BeliefContradiction``.
+
+The correction is recorded rather than quietly deleted because the false half of
+that sentence cost more than the true half ever earned: the paper closed the
+whole objective-learning line on it (see ``fish4/learn/rollout.py``). An
+impossibility claim generates no experiment -- a positive result invites
+replication, "this cannot be done" invites moving on -- so the sentence that
+closes a direction is exactly the sentence nobody tests.
 
 WHICH DECISIONS ARE RECORDED
 ----------------------------

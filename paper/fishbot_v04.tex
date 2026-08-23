@@ -1665,6 +1665,48 @@ the sweep of Table~\ref{tab:gamma}: it is the unique exponent at which this
 likelihood is correctly specified. That sweep never tested it; $0.90$ and $1.50$
 bracket it at 150 pairs each, an MDE of $0.87$, which separates nothing.
 
+\paragraph{And in play, it is real and not worth buying.} Everything above is an
+argument from likelihood and from a normaliser, not from a duel, so the
+configuration it points at --- at-ask-time depth at $\gamma = 1.0$, the better
+covariate at the exponent where the model is correctly specified --- was
+pre-registered and run. Six blocks of 1000 duplicate deal-pairs against the
+champion, sized against a minimum interesting effect of $+0.15$ fixed in
+advance, with the run committed to proceed whatever its five screening cells
+said. They said $-0.05$, $+0.08$, $+0.32$, $-0.13$ and $+0.01$, every one of
+them uninformative at $\pm 0.53$, which is why they were never load-bearing.
+
+\[
+  +0.1015, \quad 95\%\ [+0.0063,\, +0.1967].
+\]
+
+The interval excludes zero, so by the test fixed in advance the effect is
+demonstrated. Three things belong next to that, and all three were decided
+before the data:
+
+It is \emph{below the bar it set itself}. The pre-registration named $+0.15$ as
+the smallest effect worth adopting --- roughly what the belief-space search
+delivers --- and this is $+0.10$, with the interval's upper end barely reaching
+it. Real, and not worth buying. The threshold was chosen before the number, so
+that judgement is not a reaction to it.
+
+The blocks \emph{disagree}. Cochran's $Q = 12.9$ on 5 dof ($p = 0.024$),
+$I^2 = 61.4\%$, $\hat\tau = 0.150$ --- the same size as the pooled effect. The
+A/A study measured no between-run variance at all
+(Section~\ref{sec:res-lookahead}), so this is an effect that depends on the deal
+population rather than a reason to change estimator.
+
+The random-effects interval is $[-0.052, +0.255]$ and \emph{includes zero}. We
+report it and it decides nothing. The fixed-effect pool was fixed as primary
+before any of this was known, and adopting a wider estimator once the narrow one
+is inconvenient is the failure this whole protocol exists to prevent --- it is
+the winner's curse run backwards, choosing the analysis that gives the answer
+one now prefers. Both numbers are printed; the pre-registered one governs.
+
+So the normaliser argument survives contact with play, and the engine keeps
+$\gamma = 0.35$ and initial-deal depth anyway. The two parameters were argued
+for jointly and the screens cannot separate them, so the pre-registration binds
+them to move together or not at all; they do not move.
+
 \paragraph{The competing story is refuted by the same data.} If asks went where
 the opportunity was rather than where the depth was, propensity would fall as
 cards held rises. Observed over expected runs $0.46$, $1.05$, $2.26$, $2.64$,
@@ -3213,7 +3255,18 @@ $+0.681 \pm 0.142$.
 
 What made it survive is that a negative claim generates no experiment. A positive
 result invites replication; ``this cannot be done'' invites moving on, and the
-sentence that closes a direction is exactly the sentence nobody tests. The
+sentence that closes a direction is exactly the sentence nobody tests.
+
+Having been caught once, we swept the engine for the rest of them.
+\texttt{fish4/NEGATIVE\_CLAIMS.md} registers every load-bearing impossibility
+claim in the source with a verdict: one refuted (the above), one true in the
+limit and false where the engine operates (a proposal twist ``cannot change what
+the policy computes'' --- correct asymptotically, and at the shipped 160 draws it
+made the marginals $3.4\times$ worse), and six that are either rules theorems or
+were measured rather than assumed. The rider that sweep produced is worth more
+than the register: an asymptotic ``cannot'' and a finite-sample ``cannot'' are
+different claims, and only one of them is about the engine that ships, so a
+measured negative should always carry the range it was measured over. The
 asymmetry is worth naming because the cost is asymmetric too: an inflated
 positive wastes the run that eventually corrects it, while an unexamined negative
 costs everything downstream of the direction it closed, and leaves no anomaly to
@@ -3260,7 +3313,22 @@ shipped $\gamma = 0.35$. So the engine currently pays more for the omission than
 the fitted exponent would, and reaching the exponent the data want means
 computing the denominator per world: tracking depth in \emph{every} live
 half-suit per player during the draw rather than only the asked ones. That is a
-constant-factor cost in the sampler and the remaining piece of this item.
+constant-factor cost in the sampler.
+
+\emph{And the free version of it has now been played, which changes what this
+item is worth.} At $\alpha = 1$ the denominator is exactly constant, so the
+better covariate can be used there at no cost at all. Six pre-registered blocks
+put that configuration at $+0.1015$, 95\% $[+0.0063, +0.1967]$ --- real, below
+the $+0.15$ this study fixed in advance as the smallest effect worth adopting,
+and heterogeneous enough ($\hat\tau = 0.150$, the size of the effect itself) that
+a random-effects reading includes zero. The engine keeps $\gamma = 0.35$.
+
+That is the useful bound on the expensive version. The cheap form of this idea,
+at the one exponent where the model is correctly specified, buys about a tenth
+of a set. Paying a constant factor in the sampler to reach $\alpha = 2.195$ has
+to beat that by enough to be worth the sampler time it takes away from draws ---
+and draws are the largest measured effect in this study. We would now want a
+sizing argument for that trade before writing the code, not after.
 
 A fixpoint is still not required, and that is the substantive update: the
 opponent being modelled is a policy whose choice rule can be fitted directly
