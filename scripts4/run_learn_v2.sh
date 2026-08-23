@@ -9,14 +9,22 @@ while pgrep -f "learn_ask_objective.py harvest --run v2" > /dev/null 2>&1; do
   sleep 20
 done
 echo "$(date +%H:%M:%S) harvest done: $(wc -l < data/learn/v2/positions.jsonl) positions"
+# Width is decided at each restart rather than fixed once. While the duel queue
+# occupies three of this machine's four cores the rollout gets one; when the
+# queue drains it should get three, and a pass that is append-only and resumable
+# can simply be restarted wider. scripts4/widen_rollout.sh does the restarting.
+width() {
+  if pgrep -f "duel.py jobs/j2" > /dev/null 2>&1; then echo 1; else echo 3; fi
+}
 restarts=0
 while true; do
   if ! pgrep -f "learn_ask_objective.py rollout --run v2" > /dev/null 2>&1; then
     restarts=$((restarts + 1))
     [ "$restarts" -gt 40 ] && { echo "giving up after $restarts restarts"; break; }
-    echo "$(date +%H:%M:%S) starting v04 rollout pass - run #$restarts"
+    w=$(width)
+    echo "$(date +%H:%M:%S) starting v04 rollout pass - run #$restarts, $w worker(s)"
     setsid nohup python scripts4/learn_ask_objective.py rollout --run v2 \
-      --continuation v04 --max-actions 400 --workers 1 \
+      --continuation v04 --max-actions 400 --workers "$w" \
       >> "$SCR/rollout_v2.log" 2>&1 < /dev/null &
     sleep 30
   fi

@@ -56,6 +56,7 @@ present and skips them, so an interrupted run resumes at the game boundary.
 from __future__ import annotations
 
 import json
+import os
 import random
 import sys
 import time
@@ -126,7 +127,30 @@ def decode_history(rows) -> list:
             raise ValueError(f"unknown history tag {tag!r}")
     return out
 
-MAX_WORKERS = 2
+
+def _worker_cap() -> int:
+    """How many processes a harvest or rollout pass may use.
+
+    Was a hard-coded 2, chosen when this ran on a machine with eight cores
+    shared with other jobs. Two is right while duels occupy the rest and wrong
+    the moment they finish, and a constant cannot tell the difference. The cap
+    now leaves one core for whatever else is running and can be overridden
+    explicitly, so a long resumable pass can be restarted wider once the queue
+    beside it drains.
+
+    Never below 2: a pass that silently drops to serial on a small container is
+    worse than one that mildly oversubscribes.
+    """
+    override = os.environ.get("FISH_LEARN_WORKERS")
+    if override:
+        try:
+            return max(1, int(override))
+        except ValueError:
+            pass
+    return max(2, (os.cpu_count() or 4) - 1)
+
+
+MAX_WORKERS = _worker_cap()
 
 
 # ---------------------------------------------------------------------------

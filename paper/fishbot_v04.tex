@@ -1413,13 +1413,40 @@ automatically move the default, because $\texttt{n\_draws}$ trades strength
 against latency and the public table has a request budget. Measured on $90$
 positions, a decision costs
 \[
-  3.52\,\mathrm{ms} \;+\; 5.84\,\mu\mathrm{s} \text{ per draw},
+  3.57\,\mathrm{ms} \;+\; 6.34\,\mu\mathrm{s} \text{ per draw},
 \]
-a fit whose residuals stay within $\pm 0.21$\,ms across $40$ to $1920$ draws. At
-the shipped $160$ the sampler is only a fifth of a decision, so tripling it costs
-$+1.7$\,ms --- $1.35\times$, not $3\times$. That headroom is finite and the same
-fit says so: by $1920$ draws a decision is already $3.2\times$ the shipped one.
+a fit whose residuals stay within $0.03$\,ms across $40$ to $1920$ draws. At the
+shipped $160$ the sampler is only a fifth of a decision, so tripling it costs
+$+1.9$\,ms --- $1.38\times$, not $3\times$. That headroom is finite and the same
+fit says so: by $1920$ draws a decision is already $3.3\times$ the shipped one.
 With the effect and the price both measured, the default moved to $480$.
+
+That fit is not an explanation, and the difference matters: if the fixed term
+were setup, it could be hoisted and draws would become nearly free. Timing the
+sampler alone, on one already-built sampler across $1$ to $1440$ draws, gives
+$2.55\,\mathrm{ms} + 8.0\,\mu\mathrm{s}$ per draw --- about $60\,\mu$s of fixed
+cost for each of the $42$ free cards it must place. That is per-card numpy
+dispatch. Sequential importance sampling walks the free cards one at a time, so
+batching makes each \emph{step} wider without making the number of steps
+smaller, and the per-card constants are already cached. There is nothing there to
+hoist.
+
+The consequence is a design rule with a number attached: going from $160$ to
+$480$ draws costs $2.2$\,ms inside the sampler, while going from one decision to
+two costs $2.5$\,ms before a single draw is taken. Draws are cheap and decisions
+are expensive, so under a latency budget a better posterior at one decision beats
+more decisions with worse ones. The belief-space search of
+Section~\ref{sec:lookahead} already obeys this without having been designed to: it
+never samples, and operates on the single posterior marginal matrix it is handed.
+
+One caution on those two fits. The per-draw slope of the sampler alone
+($8.0\,\mu$s) exceeds that of the whole decision containing it ($6.34\,\mu$s),
+which is impossible until the position mix is accounted for: per-draw work scales
+with the number of free cards, and the two runs drew positions averaging $42$ and
+$28$ of them. Scaling by that ratio predicts $5.4\,\mu$s against the $6.34$
+measured, which restores the ordering and accounts for most of the gap but not
+all of it --- the remainder is the rest of a decision that also grows with the
+draw count. We report it as a partial reconciliation rather than a clean one.
 
 Two of this paper's four documented winner's curses were paid for by sizing an
 experiment against an inflated screen. This is the case where pre-registering
@@ -3034,7 +3061,7 @@ last of these puts it at $+1.9$ sets per deal-pair against the previous
 champion, which is larger than the entire objective improvement that separated
 that champion from its own baseline.
 
-Six lessons generalise beyond this game.
+Seven lessons generalise beyond this game.
 
 \textbf{Correct is not the same as good.} An inference procedure is correct
 relative to a model. When a cheaper, wronger procedure beats an exact one, the
@@ -3052,11 +3079,25 @@ simulator gives access to the hidden state, refusing to use it for
 it reach the acting policy.
 
 \textbf{Know what your experiment could not have found.} The measured per-pair
-standard deviation of the set differential here is $3.869$ sets, which means the
+standard deviation of the set differential is around $3.8$ sets, which means the
 previous version's 600-pair cells could not resolve effects below about $0.44$
 sets per pair. Several of its reported nulls were therefore uninformative rather
 than negative. We report the minimum detectable effect alongside every interval
 for that reason.
+
+The sharper form of this lesson took most of the study to find, and it is that
+the noise figure is not a constant of the problem. Under common random numbers a
+paired trial on which the two arms behave identically contributes exactly zero,
+so the standard deviation scales with $\sqrt{s}$, where $s$ is the share of
+trials on which the two arms diverge at all --- and across our $28$ cells the
+remaining factor is nearly constant at $3.88 \pm 0.23$. The consequence is that
+sizing every experiment against a single number taken from two maximally
+different policies systematically over-sizes the comparisons that matter most,
+the near-identical ones. A candidate perturbing a tenth of trials needs
+$9.5\times$ fewer of them than the constant implies. The error is conservative,
+so no interval we published is too narrow; what it cost is experiments never run
+and nulls recorded from cells that could not have found anything --- and unlike
+a bad interval, those leave no trace to audit later.
 
 \textbf{Replicate the winner, not the losers.} A screening study over
 twenty-five cells will hand you an apparent winner under a complete null, and it
@@ -3066,13 +3107,14 @@ version had genuinely found for a different pair of terms. The cheap defence is
 not a multiplicity correction, it is one more run on fresh seeds. Ours cost forty
 minutes and saved a wrong champion.
 
-And it is not a lesson one learns once. The same error appears four times in this
+And it is not a lesson one learns once. The same error appears five times in this
 study, each occurrence a level above where the last was caught: a selected
 screening cell, then a section built on three points, then the power calculation
 for the experiment correcting the first, then the estimator built to measure the
-ask objective. None was caught by being more careful. Each was caught by
-measuring the quantity that had been reasoned about --- which is the next lesson,
-and the reason it is stated separately.
+ask objective, and finally --- in a shape we did not anticipate --- an
+impossibility claim that closed a research direction. None was caught by being
+more careful. Each was caught by measuring the quantity that had been reasoned
+about --- which is the next lesson, and the reason it is stated separately.
 
 \textbf{A diagnostic you can optimise is not the thing you want.} The sampler
 reports an effective sample size, and it is a real quantity honestly computed.
@@ -3084,6 +3126,26 @@ Every intermediate metric in a pipeline is a proxy for something further
 downstream, and the moment it becomes an optimisation target it stops being a
 measurement of what it proxied. Section~\ref{sec:res-ess} keeps both halves of
 that result, and the parameter ships at zero.
+
+\textbf{An impossibility claim is a claim.} We wrote, in this paper and in the
+code, that the belief tracker \emph{cannot} attach to a determinized mid-game
+position, and closed the objective-learning line on it. The claim was specific,
+mechanistic, well-argued and supported by a number, and every one of those
+properties made it less likely to be checked. It was false: the tracker is
+anchored on the initial deal but does not have to be handed one, and given the
+current hand and the public history it back-computes a consistent deal in a few
+lines. The measurement that had been used to support the diagnosis, repeated
+with the strong policy actually running, moves from $+0.101$ to
+$+0.681 \pm 0.142$.
+
+What made it survive is that a negative claim generates no experiment. A positive
+result invites replication; ``this cannot be done'' invites moving on, and the
+sentence that closes a direction is exactly the sentence nobody tests. The
+asymmetry is worth naming because the cost is asymmetric too: an inflated
+positive wastes the run that eventually corrects it, while an unexamined negative
+costs everything downstream of the direction it closed, and leaves no anomaly to
+notice. Our stated defence --- measure the quantity you reasoned about --- applies
+verbatim, but we had been applying it only to numbers we wanted to be true.
 
 \textbf{A coefficient that decays may be a covariate that decays.} The choice
 model's fitted exponent falls from $2.00$ at the opening to $-0.02$ by the

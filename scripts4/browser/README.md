@@ -46,3 +46,24 @@ declare dialog opened on the posterior MAP: five of six cards pre-selected to
 the teammate the engine thought most likely at 20% each, the sixth to `you ·
 100%` because that is the card actually held, and every option carrying its
 probability.
+
+## Where the table actually lives
+
+Measured 2026-08-23, not assumed:
+
+| URL | status |
+|---|---|
+| `fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app` | **live and public.** `GET /` 200; `POST /api/new` 200 in ~0.22 s warm, ~1.3 s cold; the served `app.js` contains the score-breakdown panel. |
+| `fish-engine-side-space.vercel.app` | 404 `DEPLOYMENT_NOT_FOUND` |
+| `fish-engine-git-main-side-space.vercel.app` | 200, but it is Vercel's own placeholder page, not the table |
+
+The project has no deployment protection of any kind --- no password, no SSO, no
+trusted-IP list --- so the branch preview is genuinely public and not merely
+reachable by whoever is logged in.
+
+The two production URLs are dead for one reason: production tracks `main`, and
+`main` is the v0.3 tree. It has no `api/`, no `public/`, no `vercel.json` and no
+`fish4/`, so there is nothing there to serve. Nothing is misconfigured on
+Vercel's side and no setting change would fix it. Reaching a production URL
+needs the web app to reach `main`, which is a merge decision rather than a
+deployment one.

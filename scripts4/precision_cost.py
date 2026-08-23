@@ -57,6 +57,33 @@ DRAWS = (40, 160, 480, 1920)
 BASE, BOUGHT = 160, 480
 
 
+def _free_cards(positions) -> list[int]:
+    """How many cards the sampler must place, per position.
+
+    Recorded because per-draw cost scales with it, so two cost measurements on
+    different position mixes give different slopes and only look inconsistent
+    until this number is beside them.
+    """
+    import random
+
+    from fish.beliefs import BeliefState
+    from fish4.posterior import Posterior
+    out = []
+    for i, (rules, hands, sw, turn, hist, seat) in enumerate(positions):
+        obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
+                          hand_counts=tuple(h.bit_count() for h in hands),
+                          set_winner=tuple(sw), history=hist)
+        bel = BeliefState(rules, observer=seat)
+        bel.update(obs)
+        post = Posterior(bel, random.Random(1000 + i), n_draws=40, n_worlds=1,
+                         obs=obs, gamma=GAMMA)
+        post.marginals()
+        s = getattr(post, "_sampler", None) or getattr(post, "sampler", None)
+        if s is not None and getattr(s, "_n", 0):
+            out.append(int(s._n))
+    return out or [0]
+
+
 def time_config(positions, n_draws: int, reps: int) -> list[float]:
     """Milliseconds for one ``act`` at each position, best of ``reps``."""
     out = []
@@ -87,9 +114,11 @@ def main(argv):
     # for the positions to come from more than a handful of deals.
     positions = harvest(max(60, n_pos * 3), 0, n_pos)
     hl = [len(h) for (_, _, _, _, h, _) in positions]
+    n_free = _free_cards(positions)
     print(f"harvested {len(positions)} positions   "
           f"history length {min(hl)}-{max(hl)}, median "
-          f"{int(np.median(hl))}\n")
+          f"{int(np.median(hl))}   "
+          f"free cards mean {np.mean(n_free):.1f}\n")
 
     per = {}
     for d in DRAWS:
@@ -135,6 +164,7 @@ def main(argv):
         "per_decision_ms": {str(d): float(np.mean(per[d])) for d in DRAWS},
         "fixed_ms": float(fixed), "marginal_us_per_draw": float(marg * 1000),
         "base_draws": BASE, "bought_draws": BOUGHT,
+        "mean_free_cards": float(np.mean(n_free)),
         "median_ms": {str(d): float(np.median(per[d])) for d in DRAWS},
         "p90_ms": {str(d): float(np.percentile(per[d], 90)) for d in DRAWS},
         "ratio_mean": float(ratio.mean()),
