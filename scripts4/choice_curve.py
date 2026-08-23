@@ -117,8 +117,11 @@ def collect(n_games: int, seed0: int = 606000):
 
 
 def _phase_ok(r, phase):
+    """``phase`` is None, "early", "late", or an inclusive ``(lo, hi)`` band."""
     if phase is None:
         return True
+    if isinstance(phase, tuple):
+        return phase[0] <= r["resolved"] <= phase[1]
     frac = r["resolved"] / r["n_hs"] if r["n_hs"] else 0.0
     return (frac < 0.5) if phase == "early" else (frac >= 0.5)
 
@@ -191,25 +194,39 @@ def fit_alpha(records, phase=None, eps=1e-6, lo=-2.0, hi=4.0):
     both on the clean subset, where every alternative has depth at least one,
     and on everything with the same flooring the engine uses.
     """
-    sets = []
+    # Padded into one rectangular array so a likelihood evaluation is a handful
+    # of numpy calls rather than a Python loop over every decision. The fit does
+    # ~180 evaluations and there are tens of thousands of decisions, so the
+    # difference is minutes against milliseconds.
+    logd, chosen = [], []
+    width = 0
     for r in records:
         if not _phase_ok(r, phase):
             continue
-        d = np.array([max(a["depth0"], eps) for a in r["alts"]], dtype=float)
         j = next((i for i, a in enumerate(r["alts"])
                   if a["hs"] == r["picked"]), None)
         if j is None:
             continue
-        sets.append((np.log(d), j))
-    if not sets:
+        d = [max(a["depth0"], eps) for a in r["alts"]]
+        width = max(width, len(d))
+        logd.append(np.log(np.asarray(d, dtype=float)))
+        chosen.append(j)
+    if not logd:
         return None
+    LD = np.full((len(logd), width), -np.inf)
+    for i, row in enumerate(logd):
+        LD[i, :row.size] = row
+    pad = ~np.isfinite(LD)
+    LD_z = np.where(pad, 0.0, LD)          # value under the padding mask
+    idx = np.arange(len(chosen))
+    ch = np.asarray(chosen)
 
     def nll(alpha):
-        tot = 0.0
-        for ld, j in sets:
-            z = alpha * ld
-            tot -= z[j] - (np.max(z) + np.log(np.sum(np.exp(z - np.max(z)))))
-        return tot
+        z = np.where(pad, -np.inf, alpha * LD_z)
+        mx = np.max(z, axis=1, keepdims=True)
+        lse = (mx[:, 0] + np.log(np.sum(np.exp(np.where(pad, -np.inf, z - mx)),
+                                        axis=1)))
+        return float(np.sum(lse - alpha * LD_z[idx, ch]))
 
     grid = np.linspace(lo, hi, 121)
     vals = [nll(a) for a in grid]
@@ -228,7 +245,7 @@ def fit_alpha(records, phase=None, eps=1e-6, lo=-2.0, hi=4.0):
     h = 0.02
     d2 = (nll(ahat + h) - 2 * nll(ahat) + nll(ahat - h)) / (h * h)
     se = float(1.0 / np.sqrt(d2)) if d2 > 0 else float("nan")
-    return {"alpha": float(ahat), "se": se, "n": len(sets),
+    return {"alpha": float(ahat), "se": se, "n": len(chosen),
             "nll": float(nll(ahat)), "nll_at_1": float(nll(1.0)),
             "nll_at_0": float(nll(0.0))}
 
@@ -302,10 +319,33 @@ def main(argv):
         print(f"      {'':<44} log-lik gain over alpha=0: "
               f"{fit['nll_at_0'] - fit['nll']:.1f} nats; "
               f"over alpha=1: {fit['nll_at_1'] - fit['nll']:.1f}")
+    # A binary early/late split hides the shape and puts the boundary where
+    # nobody measured it. Fitting per band shows whether alpha drifts, jumps, or
+    # holds - and how much of the sample sits in each, since the late bands are
+    # thin by construction: once half the sets are gone there are few asks left.
+    print(f"\nALPHA BY HOW MANY HALF-SUITS WERE ALREADY RESOLVED")
+    bands = [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 8)]
+    out["alpha_bands"] = {}
+    for lo, hi in bands:
+        fit = fit_alpha(clean, phase=(lo, hi))
+        if fit is None or fit["n"] < 40:
+            n = fit["n"] if fit else 0
+            print(f"  resolved {lo}-{hi}: only {n} decisions, not fitted")
+            continue
+        out["alpha_bands"][f"{lo}-{hi}"] = fit
+        print(f"  resolved {lo}-{hi}:  alpha = {fit['alpha']:+.3f} "
+              f"+/- {fit['se']:.3f}   n={fit['n']}")
+
     print("\ngamma_schedule assumes the early alpha exceeds the late one.")
 
     dest.write_text(json.dumps(out, indent=1))
+    # The records themselves, so a different model can be fitted to the same
+    # decisions without replaying 200 games. They are the measurement; the fits
+    # above are one reading of it.
+    raw = dest.with_name(dest.stem + "_records.json")
+    raw.write_text(json.dumps(recs))
     print(f"\nwrote {dest}")
+    print(f"wrote {raw}  ({len(recs)} decisions, refit without replaying)")
 
 
 if __name__ == "__main__":
