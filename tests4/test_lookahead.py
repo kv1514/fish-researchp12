@@ -1,0 +1,258 @@
+"""Belief-space lookahead: the ablation discipline, determinism, and no leak.
+
+Three properties carry the whole design, and each is a way the change could be
+worthless or wrong rather than merely unhelpful:
+
+* **It reduces to its baseline.** A zero weight, or a depth of one, must
+  reproduce the incumbent policy decision for decision. v0.3's most instructive
+  methodological failure was an ablation that silently changed a second thing,
+  producing tight and completely wrong intervals, so every new term in this
+  project is required to pass this and its converse.
+* **It is deterministic given the belief.** This is the entire reason to search
+  the belief rather than sampled worlds. If the bonus moved between runs on one
+  position, the design would have reintroduced the variance it exists to avoid.
+* **It cannot see the hidden state.** The search builds hypothetical futures by
+  editing a posterior. Editing a *belief* is inference; editing a layout would
+  be a peek. The invariance test is what tells the two apart.
+"""
+
+from __future__ import annotations
+
+import random
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from fish.beliefs import BeliefState
+from fish.cards import NUM_PLAYERS, half_suit_mask
+from fish.observation import Observation
+from fish.rules import RuleConfig
+from fish4.askfeat import DecisionContext
+from fish4.lookahead import ChainState, lookahead_bonus, possession_value
+from fish4.posterior import Posterior
+from fish4.registry4 import make_agent
+
+from tests4.test_leakage4 import (alternative_world, collect_positions, replay)
+
+BASE = {"opponent_gamma": 0.35}
+LOOK = {"opponent_gamma": 0.35, "w_lookahead": 0.25,
+        "lookahead_depth": 3, "lookahead_beam": 4}
+
+
+# ---------------------------------------------------------------------------
+# The recursion itself, on a chain small enough to evaluate by hand
+# ---------------------------------------------------------------------------
+
+def _toy_state(couple: bool, n_hs: int = 9):
+    """We hold card 0 of half-suit 0; cards 1-3 are split between seats 1 and 3.
+
+    Every row is a genuine distribution and the column masses match the hand
+    counts, because both are what the search's arithmetic relies on: seat 1's
+    column sums to 2.0 against a hand of 2, seat 3's to 1.0 against a hand of 1.
+    Everything outside half-suit 0 is resolved, so the candidate set is exactly
+    {cards 1,2,3} x {seats 1,3} and the values below are closed-form.
+    """
+    M = np.zeros((n_hs * 6, NUM_PLAYERS))
+    M[0, 0] = 1.0                              # ours, already
+    M[1, 1], M[1, 3] = 0.8, 0.2
+    M[2, 1], M[2, 3] = 0.7, 0.3
+    M[3, 1], M[3, 3] = 0.5, 0.5
+    counts = [1, 2, 0, 1, 0, 0]
+    live = [False] * n_hs
+    live[0] = True
+    return ChainState(M, hand=1 << 0, counts=counts, me=0, live=live,
+                      n_hs=n_hs, couple=couple)
+
+
+def test_depth_one_is_the_greedy_maximum():
+    for couple in (False, True):
+        st = _toy_state(couple)
+        assert possession_value(st, depth=1, beam=6) == pytest.approx(0.8)
+
+
+def test_without_coupling_the_search_is_exactly_greedy():
+    """0.8*(1 + 0.7) - descending p, and nothing the continuation can change.
+
+    This is the scheduling argument made concrete: with the point-mass update
+    alone, every other candidate's probability survives the transition
+    untouched, so the chain is a product over a fixed set of numbers and taking
+    them in descending order is optimal. A lookahead that only did this would be
+    a no-op by construction.
+    """
+    st = _toy_state(couple=False)
+    assert possession_value(st, depth=2, beam=6) == pytest.approx(0.8 * 1.7)
+    assert possession_value(st, depth=3, beam=6) == pytest.approx(
+        0.8 * (1 + 0.7 * 1.5))
+
+
+def test_coupling_lowers_the_continuation_and_is_what_greedy_cannot_see():
+    """Learning seat 1 held one card makes their other holdings less likely.
+
+    Seat 1's column carries mass 2.0 over three cards. Taking card 1 leaves them
+    with one card against a remaining mass of 1.2, so the column is scaled by
+    1/1.2 and each row renormalises: card 2 falls from 0.70 to 0.66, not stays.
+    That drop is the entire mechanism by which a possession chain can rank two
+    asks differently from their immediate success probabilities.
+    """
+    st = _toy_state(couple=True)
+    st.apply_success(1, 1)
+    assert st.M[2, 1] == pytest.approx(0.6604, abs=1e-3)
+    assert st.M[3, 1] == pytest.approx(0.4545, abs=1e-3)
+    assert st.M[2].sum() == pytest.approx(1.0)
+    st.undo()
+    assert st.M[2, 1] == pytest.approx(0.7)
+
+    coupled = possession_value(_toy_state(True), depth=2, beam=6)
+    plain = possession_value(_toy_state(False), depth=2, beam=6)
+    assert coupled < plain
+
+
+def test_a_publicly_located_card_is_not_diluted_by_the_quota_sweep():
+    """A certainty cannot be argued away by counting; renormalising restores it."""
+    st = _toy_state(couple=True)
+    st.M[4] = 0.0
+    st.M[4, 1] = 1.0                 # seat 1 is known to hold card 4
+    st.counts[1] = 3
+    st.apply_success(1, 1)
+    assert st.M[4, 1] == pytest.approx(1.0)
+
+
+def test_zero_probability_branches_are_not_expanded():
+    for couple in (False, True):
+        st = _toy_state(couple)
+        st.M[1:4] = 0.0
+        assert possession_value(st, depth=3, beam=6) == 0.0
+
+
+def test_undo_restores_the_state_exactly():
+    st = _toy_state(couple=True)
+    before_M = st.M.copy()
+    before = (st.hand, list(st.counts))
+    st.apply_success(1, 1)
+    assert st.hand != before[0]
+    st.undo()
+    assert st.hand == before[0]
+    assert st.counts == before[1]
+    assert np.array_equal(st.M, before_M)
+
+
+def test_a_resolved_half_suit_is_never_asked_in():
+    st = _toy_state(couple=True)
+    st.live[0] = False
+    assert st.legal_asks() == []
+
+
+def test_we_never_ask_for_a_card_we_hold():
+    st = _toy_state(couple=True)
+    assert all(card != 0 for _, card in st.legal_asks())
+    st.apply_success(1, 1)
+    assert all(card not in (0, 1) for _, card in st.legal_asks())
+
+
+# ---------------------------------------------------------------------------
+# The ablation discipline, on real positions
+# ---------------------------------------------------------------------------
+
+def _ctx(rules, hands, set_winner, turn, history, seat):
+    obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
+                      hand_counts=tuple(h.bit_count() for h in hands),
+                      set_winner=tuple(set_winner), history=history)
+    bel = BeliefState(rules, observer=seat)
+    bel.update(obs)
+    post = Posterior(bel, random.Random(13), n_draws=64, obs=obs, gamma=0.35)
+    return obs, DecisionContext(obs, bel, post)
+
+
+def test_bonus_is_identically_zero_at_depth_one():
+    for rules, hands, sw, turn, hist, seat in collect_positions(2, 4, 8):
+        obs, ctx = _ctx(rules, hands, sw, turn, hist, seat)
+        asks = obs.legal_asks()
+        if not asks:
+            continue
+        b = lookahead_bonus(ctx, asks, depth=1, beam=4)
+        assert np.array_equal(b, np.zeros(len(asks)))
+
+
+def test_depth_one_reproduces_the_baseline_decision_for_decision():
+    """The ablation half of the discipline: a disabled term changes nothing."""
+    positions = collect_positions(3, 3, 20)
+    assert positions, "no positions harvested"
+    for rules, hands, sw, turn, hist, seat in positions:
+        obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
+                          hand_counts=tuple(h.bit_count() for h in hands),
+                          set_winner=tuple(sw), history=hist)
+        a = make_agent(("fishbot4", BASE))
+        b = make_agent(("fishbot4", dict(BASE, w_lookahead=0.25,
+                                         lookahead_depth=1)))
+        a.begin_game(seat, rules, 4242)
+        b.begin_game(seat, rules, 4242)
+        assert a.act(obs) == b.act(obs)
+
+
+def test_a_nonzero_weight_demonstrably_changes_a_decision():
+    """The converse half: a term that can never change anything is untested."""
+    positions = collect_positions(4, 2, 60)
+    differed = 0
+    for rules, hands, sw, turn, hist, seat in positions:
+        obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
+                          hand_counts=tuple(h.bit_count() for h in hands),
+                          set_winner=tuple(sw), history=hist)
+        a = make_agent(("fishbot4", BASE))
+        b = make_agent(("fishbot4", LOOK))
+        a.begin_game(seat, rules, 4242)
+        b.begin_game(seat, rules, 4242)
+        if a.act(obs) != b.act(obs):
+            differed += 1
+    assert differed > 0, "the lookahead weight never changed a single decision"
+
+
+# ---------------------------------------------------------------------------
+# Determinism and the information boundary
+# ---------------------------------------------------------------------------
+
+def test_bonus_is_deterministic_given_the_belief():
+    """Run it twice on one position. Sampled search cannot pass this."""
+    for rules, hands, sw, turn, hist, seat in collect_positions(2, 4, 8):
+        obs, ctx = _ctx(rules, hands, sw, turn, hist, seat)
+        asks = obs.legal_asks()
+        if not asks:
+            continue
+        first = lookahead_bonus(ctx, asks, depth=3, beam=4)
+        second = lookahead_bonus(ctx, asks, depth=3, beam=4)
+        assert np.array_equal(first, second)
+
+
+def test_bonus_is_invariant_under_a_consistent_relabelling():
+    """Permute the five hidden hands into another world the record allows.
+
+    The acting seat's own hand and the entire public log are held fixed, so a
+    bonus that moved would be reading something no policy is entitled to.
+    """
+    rng = random.Random(97)
+    checked = 0
+    for rules, hands, sw, turn, hist, seat in collect_positions(3, 3, 16):
+        alt_init = alternative_world(rules, hands, sw, hist, seat, rng)
+        if alt_init is None:
+            continue
+        # alternative_world proposes an *initial deal*; the current layout is
+        # what the public log makes of it, so it has to be replayed forward.
+        alt = list(replay(rules, alt_init, hist).hands)
+        assert alt[seat] == hands[seat], "the permutation moved our own hand"
+
+        obs_a, ctx_a = _ctx(rules, hands, sw, turn, hist, seat)
+        asks = obs_a.legal_asks()
+        if not asks:
+            continue
+        obs_b, ctx_b = _ctx(rules, alt, sw, turn, hist, seat)
+        assert obs_b.legal_asks() == asks, "the candidate set itself moved"
+        got = lookahead_bonus(ctx_a, asks, depth=3, beam=4)
+        alt_got = lookahead_bonus(ctx_b, asks, depth=3, beam=4)
+        assert np.array_equal(got, alt_got)
+        checked += 1
+    assert checked > 0, "no alternative world was found to test against"

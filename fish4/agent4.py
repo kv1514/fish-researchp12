@@ -92,6 +92,11 @@ class FishBot4(Tablebase4Mixin, Agent):
                  claim_threshold: float = 0.97,
                  claim_exact: bool = True,
                  claim_exact_candidates: int = 3,
+                 # -- belief-space lookahead
+                 w_lookahead: float = 0.0,
+                 lookahead_depth: int = 1,
+                 lookahead_beam: int = 4,
+                 lookahead_couple: bool = True,
                  # -- endgame
                  use_tablebase: bool = True,
                  tablebase_max_half_suits: int = 2,
@@ -120,6 +125,10 @@ class FishBot4(Tablebase4Mixin, Agent):
         self.claim_cfg = ClaimConfig(threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
                                      use_exact=claim_exact)
+        self.w_lookahead = w_lookahead
+        self.lookahead_depth = lookahead_depth
+        self.lookahead_beam = lookahead_beam
+        self.lookahead_couple = lookahead_couple
         self.use_tablebase = use_tablebase
         self.tablebase_max_half_suits = tablebase_max_half_suits
         self.stall_window = stall_window
@@ -189,6 +198,16 @@ class FishBot4(Tablebase4Mixin, Agent):
             if self.w_value and model is not None:
                 scores = scores + self.w_value * score_asks_by_value(
                     ctx, asks, model)
+        # Belief-space lookahead, as an additive bonus rather than a
+        # replacement. The bonus is identically zero at depth <= 1, so the
+        # baseline is reproduced decision for decision and the weight ablates
+        # exactly one idea. See fish4/lookahead.py for why this is the one
+        # search design the variance diagnosis does not rule out.
+        if self.w_lookahead and self.lookahead_depth > 1:
+            from .lookahead import lookahead_bonus
+            scores = scores + self.w_lookahead * lookahead_bonus(
+                ctx, asks, depth=self.lookahead_depth,
+                beam=self.lookahead_beam, couple=self.lookahead_couple)
         order = sorted(range(len(asks)), key=lambda i: -scores[i])
         top = scores[order[0]]
         # If no ask can possibly land, every ask hands over the turn for
