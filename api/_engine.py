@@ -78,15 +78,27 @@ MAX_LOG = 1200
 #: Used when FISH_SECRET is unset. Random per process, deliberately: the
 #: obvious fallbacks are all things an attacker can read. VERCEL_URL is in the
 #: address bar, and a secret derived from it is not a secret - it would let
-#: anyone derive every deal. Random means tokens do not survive a cold start, so
-#: a game in progress ends when the instance recycles. That is a bad experience
-#: and a safe one, and it is the right way round. Set FISH_SECRET to avoid it.
+#: anyone derive every deal.
+#:
+#: Note this is per PROCESS, not per cold start: two concurrently warm instances
+#: sign with different keys, so with FISH_SECRET unset a game dies on the first
+#: request that happens to land on a different instance, not merely at recycle
+#: time. Verification is fail-closed, so that is availability rather than
+#: confidentiality - but it makes the deployment barely usable. Set FISH_SECRET.
 _EPHEMERAL_SECRET = secrets.token_bytes(32)
+
+
+#: Below this, a deploy-time secret is worth less than the random fallback: the
+#: attacker gets an oracle from any one token they hold, and can grind it
+#: offline. Refusing a short value is better than honouring it.
+MIN_SECRET_BYTES = 16
 
 
 def _secret() -> bytes:
     s = os.environ.get("FISH_SECRET")
-    return s.encode() if s else _EPHEMERAL_SECRET
+    if s and len(s.encode()) >= MIN_SECRET_BYTES:
+        return s.encode()
+    return _EPHEMERAL_SECRET
 
 
 def seed_from_nonce(nonce: str) -> int:

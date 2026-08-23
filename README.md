@@ -108,9 +108,12 @@ closes the take-back too: a truncated log no longer verifies.
 py scripts4/devserve.py         # serve public/ + api/ exactly as deployed
 ```
 
-**Set `FISH_SECRET` in the deployment environment.** Without it the key is
-random per process, which is safe but means a game ends when the instance
-recycles — the fallback is deliberately not derived from anything an attacker
+**Set `FISH_SECRET` in the deployment environment** (at least 16 bytes; a
+shorter value is refused in favour of the random fallback, because a short
+secret can be ground offline from any single token). Without it the key is
+random per *process* — not merely per cold start, so two concurrently warm
+instances sign differently and a game dies on the first request that lands on
+another one — the fallback is deliberately not derived from anything an attacker
 can read, and every candidate (the deployment URL, the deployment id) is either
 public or unstable.
 

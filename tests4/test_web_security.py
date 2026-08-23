@@ -134,6 +134,28 @@ def test_hostile_tokens_raise_valueerror(tok):
         unseal(tok)
 
 
+def test_a_short_fish_secret_is_refused_in_favour_of_the_random_fallback():
+    """A short deploy-time secret is worse than no deploy-time secret.
+
+    Any single token an attacker holds is an offline oracle on the key, so a
+    short value can be ground out and then used to forge sessions and derive
+    deals. The random per-process fallback is at least unguessable, at the cost
+    of games not surviving a move between instances.
+    """
+    from api import _engine
+    old = os.environ.get("FISH_SECRET")
+    try:
+        os.environ["FISH_SECRET"] = "short"
+        assert _engine._secret() == _engine._EPHEMERAL_SECRET
+        os.environ["FISH_SECRET"] = "x" * _engine.MIN_SECRET_BYTES
+        assert _engine._secret() == b"x" * _engine.MIN_SECRET_BYTES
+    finally:
+        if old is None:
+            os.environ.pop("FISH_SECRET", None)
+        else:
+            os.environ["FISH_SECRET"] = old
+
+
 # ---------------------------------------------------------------------------
 # What the seat is entitled to see
 # ---------------------------------------------------------------------------

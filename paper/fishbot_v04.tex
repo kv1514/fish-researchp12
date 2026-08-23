@@ -1708,10 +1708,22 @@ edits only the asked card's row is exactly greedy at every depth, so the obvious
 version of this idea is a no-op by construction rather than by measurement. That
 is a structural statement about why search keeps failing in this game, it
 removes a whole branch of the design space rather than a point in it, and it is
-the part of Section~\ref{sec:lookahead} we would keep. Its empirical shadow is
-the no-coupling cell, which is a null at both 200 and 500 pairs
-($+0.070$ and $+0.112$, both intervals comfortably containing zero) exactly as
-the proposition requires.
+the part of Section~\ref{sec:lookahead} we would keep. Its empirical shadow is the
+no-coupling cell, and the shadow is worth stating carefully, because the
+proposition entails greedy equivalence \emph{at a node} and the step from there
+to a null set differential is a modelling inference rather than a theorem.
+Setting \texttt{couple=False} also does not restore the proposition's hypotheses
+outright --- the transition still zeroes the asked row and decrements the
+target's count. What is demonstrated is narrower and still to the point: with
+the coupling off, the arm's chosen branch was the highest-probability branch in
+$53{,}273$ of $53{,}273$ multi-branch nodes, against $49$ non-greedy choices with
+it on; and its set differential is a null at both 200 and 500 pairs ($+0.070$
+and $+0.112$, both intervals comfortably containing zero), which is consistent
+with that. We would also withdraw a remark from an earlier draft that the
+coupling ``changed no decision at all'': over $1{,}110$ champion-trajectory
+positions the coupled and uncoupled arms disagree on $0.54\%$ of decisions, so
+observing no disagreement in a sample of $59$ is the modal outcome rather than
+evidence of equality.
 
 The implementation ships disabled (\texttt{w\_lookahead} defaults to $0$), which
 is the right default for an effect we cannot demonstrate.
