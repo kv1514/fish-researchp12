@@ -2975,6 +2975,33 @@ everything else is a tie-break.
 Recorded deliberately, because in this project the negative results have
 repeatedly been the informative ones.
 
+\paragraph{An exact posterior, by enumerating the disjunctions.} Since the
+largest measured effect in this study comes from making the posterior more
+accurate, an \emph{exact} posterior is the obvious thing to want, and there is a
+standard route to one. The counting DP is exact over candidate masks and quotas;
+what forces sampling is the OR constraints the no-bluff rule leaves behind. The
+complement of an OR is a conjunction of exclusions, which the DP absorbs
+natively, so inclusion--exclusion over the $k$ OR constraints gives both the
+exact partition function and exact marginals in $2^k$ DP passes and no sampling
+at all.
+
+We measured the two quantities that decide it before writing any of it. On 100
+real decisions the median is $k = 6$ OR constraints (max $14$; \emph{none} has
+zero), and one DP pass returning marginals costs $0.86$\,ms. So the median
+decision would cost $55$\,ms against the sampler's $3.8$, and only $15\%$ of
+decisions would cost no more than sampling does.
+
+The reason it fails is structural rather than a constant factor, which is why no
+amount of optimisation rescues it: the cost of exactness grows as $2^k$ in the
+same $k$ that makes sampling hard. Where the sampler struggles --- many OR
+constraints, a tightly coupled support --- enumeration is exponentially out of
+reach, and where enumeration is cheap there is barely a constraint to handle and
+the sampler is already close to exact. The two methods are easy in the same
+places and hard in the same places, so neither can rescue the other. Recorded
+because this is an idea that will occur to the next person too, and it took ten
+minutes to kill with two measurements rather than a week to kill with an
+implementation.
+
 \paragraph{Exact inference, on its own.} The headline effort of this version ---
 replacing a documented-biased sampler with provably correct inference --- bought
 nothing in play (Section~\ref{sec:res-exact}) and was measurably worse at
