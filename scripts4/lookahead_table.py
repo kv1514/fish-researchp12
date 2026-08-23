@@ -46,6 +46,8 @@ ROWS = [
     ("REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)",      r"depth 3, $w=0.25$ --- retest", "retest"),
     ("REPLICATE lookahead d3 w0.25 vs champion (second fresh set)", r"\quad --- retest again",       "retest"),
     ("REPLICATE coupling ablation d3 (fresh seeds)",  r"\emph{no coupling} --- retest",     "retest"),
+    ("DECISIVE lookahead d3 w0.25 vs champion (A)",    r"depth 3, $w=0.25$ --- decisive A",   "decisive"),
+    ("DECISIVE lookahead d3 w0.25 vs champion (B)",    r"\quad --- decisive B",               "decisive"),
 ]
 
 
@@ -97,7 +99,7 @@ def main(plain: bool = False) -> int:
     for name, kind, r in found:
         if r is None:
             continue
-        if kind == "retest" and out[-1] != r"\midrule":
+        if kind in ("retest", "decisive") and out[-1] != r"\midrule":
             out.append(r"\midrule")
         lo, hi = r["diff_ci"]
         bold = lo > 0 or hi < 0

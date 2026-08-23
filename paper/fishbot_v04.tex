@@ -97,8 +97,11 @@ replicate twice. We also build the one search design the variance diagnosis
 leaves open --- a lookahead over the posterior rather than over sampled
 layouts --- and prove that its natural form is exactly greedy at every depth, so
 that only the quota coupling between candidates can make such a search
-non-trivial. Whether the coupled form helps is still open, and the
-attempt to settle it produced the more useful finding. Three runs of the
+non-trivial. The coupled form is worth about $+0.15$ sets per
+deal-pair over 2400 unselected pairs, 95\% CI $[+0.022, +0.285]$ --- but the two
+cells we pre-registered as decisive pool to $[-0.019, +0.324]$ and do not
+separate it from zero, so we report a small effect that is probably real and is
+not demonstrated. The attempt to settle it produced the more useful finding. Three runs of the
 identical configuration returned $+0.570$, $-0.044$ and $+0.386$ sets per
 deal-pair, disagreeing by more than their own intervals allow ($Q = 7.03$,
 $p = 0.030$), which suggested a between-run variance component that no interval
@@ -1611,6 +1614,10 @@ depth 3, $w=0.25$ --- retest & 500 & $-0.044$ & $[-0.321, +0.233]$ & 0.48 \\
 \quad --- retest again & 500 & $\mathbf{+0.386}$ & $[+0.086, +0.686]$ & 0.48 \\
 \midrule
 \emph{no coupling} --- retest & 500 & $+0.112$ & $[-0.164, +0.388]$ & 0.48 \\
+\midrule
+depth 3, $w=0.25$ --- decisive A & 700 & $\mathbf{+0.307}$ & $[+0.063, +0.551]$ & 0.41 \\
+\midrule
+\quad --- decisive B & 700 & $+0.001$ & $[-0.240, +0.243]$ & 0.41 \\
 \bottomrule
 \end{tabular}
 \caption{Belief-space lookahead against the v0.4 champion, which is the identical policy with the bonus disabled. MDE is the smallest effect that cell could have resolved at 80\% power given the measured per-pair standard deviation of 3.869 sets, so a null row says the run did not detect an effect of that size, not that there is none.}
@@ -1715,14 +1722,47 @@ under the null is strong evidence that they are --- then fixed-effect pooling is
 the valid analysis, and over all 1200 pairs the estimate is $+0.226$, 95\% CI
 $[+0.041, +0.411]$.
 
-We do not report that as a result. It excludes zero by $0.04$; this configuration
-has already produced one screening cell that failed to replicate; and reaching
-for the pooling that happens to resolve, immediately after the pooling that
-happened not to, is the same error in the opposite direction. The remedy for an
-effect this size is not a better analysis of 1200 pairs. It is more pairs, at a
-size chosen before looking: at $n = 2600$ the minimum detectable effect is $0.21$,
-which separates $+0.23$ from $0$. That run is in progress and this section will
-report whatever it says.
+We did not report that as a result. It excludes zero by $0.04$; this
+configuration had already produced one screening cell that failed to replicate;
+and reaching for the pooling that happens to resolve, immediately after the
+pooling that happened not to, is the same error in the opposite direction. So we
+fixed a size in advance and ran it: two further cells of 700 pairs each, on fresh
+seeds, pre-registered as decisive.
+
+They returned $+0.307$, 95\% CI $[+0.063, +0.551]$, and $+0.001$, 95\% CI
+$[-0.240, +0.243]$.
+
+\paragraph{The verdict, on the test we committed to.} Pooled, those two cells
+give $+0.153$, 95\% CI $[-0.019, +0.324]$ --- which \emph{includes zero}. The
+experiment designed in advance to settle this does not settle it, and we report
+that rather than the alternative below, because a post-hoc pool does not get to
+overrule a pre-registered one.
+
+\paragraph{What the fuller picture says, and why we still do not claim it.}
+Dropping the original screening cell --- it was \emph{selected} for resolving, so
+including it in any pooled estimate is winner's curse --- and pooling the four
+unselected cells over 2400 pairs gives $+0.153$, 95\% CI $[+0.022, +0.285]$. The
+point estimate is identical to three decimal places across both analyses, which
+is fairly strong evidence that a small real effect exists, of order a seventh of
+a set per deal-pair. It is not evidence that we have demonstrated one.
+
+Dropping that cell also disposes of the heterogeneity this section opened with:
+$Q$ falls to $p = 0.063$ over the four unselected cells and $p = 0.081$ over the
+two decisive ones, neither significant. Combined with the A/A measurement above,
+the story is simply that one cell was selected for being large and the rest is
+sampling noise --- no between-run variance, and nothing wrong with the harness.
+
+\paragraph{And the sizing was wrong, by the error this section is about.} We
+chose $n = 2600$ on the grounds that its minimum detectable effect of $0.21$
+would separate $+0.23$ from zero. But $+0.23$ was the pool \emph{including} the
+selected cell --- the inflated estimate. Against the unbiased $+0.153$, a
+correctly powered test needs roughly $5000$ pairs. We committed the winner's
+curse in the power calculation for the experiment whose purpose was to correct
+for the winner's curse, which is the third time in this study the same error has
+appeared one level up from where it was last caught.
+
+The implementation ships disabled, which remains the right default for an effect
+that is probably real and is not demonstrated.
 
 \paragraph{What survives regardless.} Proposition~\ref{prop:greedy} does not
 depend on any of this. A possession-chain search over a belief whose transition
@@ -2336,11 +2376,13 @@ pairs), $-0.044$ and $+0.386$ (500 pairs each); the first and third exclude zero
 and the second excludes the third's estimate. Under random-effects pooling,
 which is the only valid pooling given $Q = 7.03$ on 2 df, the answer is
 $+0.278$, 95\% CI $[-0.083, +0.638]$. We could have reported this as a success or
-as a failure by choosing a run. Pooling all 1200 pairs gives $+0.226$, 95\% CI
-$[+0.041, +0.411]$, which excludes zero by $0.04$ and is not enough to call after
-this configuration has already failed to replicate once; a larger run is in
-progress and Section~\ref{sec:res-lookahead} reports it. The implementation ships
-disabled.
+as a failure by choosing a run. Over the four unselected cells --- 2400 pairs, the
+selected screening cell excluded --- it is $+0.153$, 95\% CI $[+0.022, +0.285]$,
+while the two cells pre-registered as decisive pool to $[-0.019, +0.324]$ and
+include zero. A small effect, probably real, not demonstrated; and the decisive
+run was under-powered because its size was chosen against an estimate the
+selected cell had inflated. Section~\ref{sec:res-lookahead} has the arithmetic.
+The implementation ships disabled.
 
 \paragraph{Inherited from v0.3, and not revisited.} Determinized search (PIMC
 and Information-Set MCTS) lost to its own prior; a value network trained on
