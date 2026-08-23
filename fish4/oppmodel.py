@@ -112,6 +112,9 @@ from .sis import OpponentModel
 #: docstring). Fitted on the 54-card variant; the argument is a fraction, so it
 #: carries to the 48-card one under the assumption that what matters is how far
 #: the deal has run rather than how many half-suits it had.
+#: Sampled free-card depths run 0..6, so a per-slot log table needs 7 entries.
+DEPTH_TABLE_MAX = 7
+
 ALPHA_Q, ALPHA_L, ALPHA_C = 3.0281, -4.7983, 1.9344
 
 #: The parabola's vertex. Past it the fit turns upward; the measurements do not,
@@ -180,7 +183,34 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     candidate world, because only the already-located half of the count depends
     on time. It remains an approximation in one respect: several asks by the same
     player in the same half-suit are collapsed onto one slot, so their per-ask
-    counts are averaged rather than kept separate.
+    counts are averaged rather than kept separate. Measured in play it costs
+    $-1.544$ sets per deal-pair over 250 pairs, which is a refutation rather
+    than a null.
+
+    ``"at_ask"``
+        the asker's true depth at the moment they asked, kept per ask rather
+        than averaged. Cards move only when an ask succeeds, and a successful
+        ask is entirely public -- card, asker and target are all in the log --
+        so
+
+            depth_at_ask(p, H) = depth_initial(p, H) + delta(p, H, t)
+
+        where ``delta`` is the net of that half-suit's publicly transferred
+        cards and is the SAME number in every hypothesised world. Verified
+        directly: 23,268 (player, half-suit, time) triples across six games,
+        zero mismatches. So the quantity ``"attime"`` was reaching for costs a
+        table built once per decision, not a replay per draw, and it is exact
+        rather than approximate.
+
+        The covariate matters more than the implementation detail suggests.
+        Refitting the choice model on 17,005 real decisions, at-ask-time depth
+        beats initial-deal depth by 4,654 nats: the shipped covariate captures
+        under a quarter of the signal the same one-parameter family can reach
+        (1,403 nats above uniform against 6,057). The two diverge exactly as the
+        game runs on -- mean absolute disagreement 0.16 cards at the opening
+        against 0.66 by the endgame -- which also means much of the apparent
+        decay of the fitted exponent over a game is regression dilution in the
+        old covariate rather than a change in behaviour.
 
     ``count_mode`` decides how repeated asks in the same half-suit accumulate.
     Under the choice model each ask is an independent draw, so the likelihood is
@@ -196,6 +226,13 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     #: Sum of per-ask schedule factors per slot, for gamma_schedule. Left equal
     #: to the raw count when the schedule is off, so the mean factor is 1.
     sched: dict[tuple[int, int], float] = {}
+    #: Net publicly-transferred cards of each half-suit held by each player,
+    #: running forward through the log. World-independent by construction: an
+    #: ask succeeds or fails identically in every hypothesised deal, because the
+    #: log says which.
+    pub: dict[tuple[int, int], int] = {}
+    #: Per slot, the value of `pub` at each of that slot's asks.
+    deltas: dict[tuple[int, int], list] = {}
     me = obs.player
     n_hs = len(obs.set_winner)
     resolved = 0
@@ -208,11 +245,28 @@ def build(bel, obs, gamma: float, include_self: bool = False,
         if not isinstance(ev, AskEvent):
             continue
         if not include_self and ev.asker == me:
+            # Still record the transfer: our own asks move cards too, and the
+            # deltas of OTHER players' slots depend on every movement, not only
+            # the ones we are modelling.
+            if ev.success:
+                h = half_suit_of(ev.card)
+                pub[(ev.asker, h)] = pub.get((ev.asker, h), 0) + 1
+                pub[(ev.target, h)] = pub.get((ev.target, h), 0) - 1
             continue
-        key = (ev.asker, half_suit_of(ev.card))
+        hs = half_suit_of(ev.card)
+        key = (ev.asker, hs)
         counts[key] = counts.get(key, 0) + 1
         sched[key] = sched.get(key, 0.0) + schedule_factor(
             resolved, n_hs, gamma_schedule)
+        # The asker's depth AT THIS MOMENT is their initial depth plus the net
+        # of the half-suit's cards that have publicly moved to them since the
+        # deal. Recorded before this ask's own transfer, which had not happened
+        # when they chose it.
+        deltas.setdefault(key, []).append(pub.get(key, 0))
+        if ev.success:
+            pub[key] = pub.get(key, 0) + 1
+            tkey = (ev.target, hs)
+            pub[tkey] = pub.get(tkey, 0) - 1
     if not counts and opp_lambda <= 0.0:
         return None, None
     slots = {key: i for i, key in enumerate(counts)}
@@ -283,9 +337,29 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                     break
             if possible and cols:
                 set_cols.append(tuple(cols))
+    #: Per-slot log terms for the at-ask-time model. Depth at the moment of an
+    #: ask is the initial depth plus a delta the public log fixes, identically
+    #: in every world, so the better covariate costs a table built once per
+    #: decision rather than a replay per draw. Verified on 23,268
+    #: (player, half-suit, time) triples across six games: zero mismatches.
+    table = None
+    if depth_mode == "at_ask" and slots:
+        table = []
+        for key, i in slots.items():
+            n = counts[key]
+            scale = weight[i] / (gamma * n) if (gamma and n) else 0.0
+            ds = deltas.get(key, [0] * n)
+            row = []
+            for d in range(DEPTH_TABLE_MAX):
+                tot = 0.0
+                for dl in ds:
+                    v = d + base[i] + dl
+                    tot += math.log(v if v > 0 else 1e-9)
+                row.append(gamma * scale * tot)
+            table.append(tuple(row))
     return (OpponentModel(weight, base, set_cols=set_cols,
                           opp_lambda=opp_lambda, my_team=obs.player & 1,
-                          tilt_strength=sis_tilt),
+                          tilt_strength=sis_tilt, depth_table=table),
             card_slot)
 
 

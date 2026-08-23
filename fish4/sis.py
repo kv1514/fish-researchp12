@@ -69,7 +69,7 @@ class OpponentModel:
     """
 
     __slots__ = ("weight", "base", "n_slots", "set_cols", "opp_lambda",
-                 "my_team", "tilt")
+                 "my_team", "tilt", "depth_table")
 
     #: Cap on a single step's twist factor. The depth-0 term of the likelihood
     #: is ``log(1e-9)``, so the 0 -> 1 ratio is ``1e9 ** w`` and would otherwise
@@ -83,11 +83,21 @@ class OpponentModel:
     TILT_MAX_DEPTH = 7
 
     def __init__(self, weight, base, set_cols=None, opp_lambda: float = 0.0,
-                 my_team: int = 0, tilt_strength: float = 0.0):
+                 my_team: int = 0, tilt_strength: float = 0.0,
+                 depth_table=None):
         self.weight = list(weight)
         self.base = list(base)
         self.n_slots = len(self.weight)
-        self.tilt = self._build_tilt(tilt_strength)
+        #: Per-slot, per-sampled-depth log terms, already scaled. Present only
+        #: for the at-ask-time model, where each ask carries its own public
+        #: delta and the terms cannot be folded into one weight times one log.
+        self.depth_table = depth_table
+        # The proposal twist reads weight and base to compute an incremental
+        # likelihood ratio, which the table's per-ask structure does not expose.
+        # It ships at zero and is a documented negative result, so it is simply
+        # unavailable here rather than approximated.
+        self.tilt = None if depth_table is not None else \
+            self._build_tilt(tilt_strength)
         # Columns (in sampler order) of the still-unlocated cards of each
         # half-suit that COULD be entirely with the opposing team. See the
         # "no-declaration" signal in oppmodel.py.
@@ -137,6 +147,14 @@ class OpponentModel:
         return table
 
     def log_likelihood_from_depths(self, depth) -> float:
+        table = self.depth_table
+        if table is not None:
+            total = 0.0
+            last = len(table[0]) - 1 if table else 0
+            for i in range(self.n_slots):
+                d = depth[i]
+                total += table[i][d if d <= last else last]
+            return total
         total = 0.0
         for i in range(self.n_slots):
             w = self.weight[i]

@@ -212,10 +212,19 @@ def draw_batch(sampler, rng, n: int):
             all_opp = ((picks[:, idxc] & 1) != om.my_team).all(axis=1)
             logl -= om.opp_lambda * all_opp
     if om is not None and depth is not None:
-        w = np.asarray(om.weight, dtype=np.float64)
-        base = np.asarray(om.base, dtype=np.int64)
-        d = depth + base[None, :]
-        logl = (np.log(np.where(d > 0, d, 1e-9)) * w[None, :]).sum(axis=1)
+        if getattr(om, "depth_table", None) is not None:
+            # Each slot's contribution is a function of its sampled depth alone
+            # -- the per-ask deltas and the base are already inside the table --
+            # so the whole likelihood is one gather and a row sum.
+            T = np.asarray(om.depth_table, dtype=np.float64)
+            d = np.clip(depth, 0, T.shape[1] - 1)
+            logl = np.take_along_axis(
+                T[None, :, :], d[:, :, None], axis=2)[:, :, 0].sum(axis=1)
+        else:
+            w = np.asarray(om.weight, dtype=np.float64)
+            base = np.asarray(om.base, dtype=np.int64)
+            d = depth + base[None, :]
+            logl = (np.log(np.where(d > 0, d, 1e-9)) * w[None, :]).sum(axis=1)
     return picks, logq, logl, alive
 
 
