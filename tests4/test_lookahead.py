@@ -260,6 +260,37 @@ def test_a_nonzero_weight_demonstrably_changes_a_decision():
 # Determinism and the information boundary
 # ---------------------------------------------------------------------------
 
+def test_bonus_horizon_is_exactly_depth_plies():
+    """The ask is ply 1, so the continuation gets depth-1, not depth.
+
+    This pins an off-by-one that no other test in this file catches, because
+    every other test either calls possession_value directly or uses depth <= 1
+    where lookahead_bonus returns early. Getting it wrong silently redefines
+    what `lookahead_depth=3` means, which would leave the measured results in
+    the paper describing a horizon the code no longer searches.
+    """
+    for rules, hands, sw, turn, hist, seat in collect_positions(2, 4, 8):
+        obs, ctx = _ctx(rules, hands, sw, turn, hist, seat)
+        asks = obs.legal_asks()
+        if not asks:
+            continue
+        live = [w is None for w in obs.set_winner]
+        for depth in (2, 3):
+            got = lookahead_bonus(ctx, asks, depth=depth, beam=4)
+            want = np.zeros(len(asks))
+            for i, a in enumerate(asks):
+                p = float(ctx.M[a.card, a.target])
+                if p <= 0.0:
+                    continue
+                st = ChainState(ctx.M, obs.hand, obs.hand_counts, obs.player,
+                                live, ctx.n_hs, couple=True)
+                st.apply_success(a.target, a.card)
+                want[i] = p * possession_value(st, depth - 1, 4)
+            assert np.allclose(got, want, atol=0.0, rtol=0.0), depth
+        return
+    pytest.skip("no position with a legal ask was harvested")
+
+
 def test_bonus_is_deterministic_given_the_belief():
     """Run it twice on one position. Sampled search cannot pass this."""
     for rules, hands, sw, turn, hist, seat in collect_positions(2, 4, 8):

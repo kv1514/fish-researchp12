@@ -1645,6 +1645,24 @@ already-wide intervals suggest. That strengthens rather than weakens the
 paper's existing warning about them: they are ``not shown to matter at this
 budget'', and the budget is smaller than it looked.
 
+\paragraph{Why $\tau$ could not be estimated better than this.} Two properties
+of the harness, both verified in the code, are why this section reports a
+variance component inferred from three run \emph{means} on two degrees of
+freedom rather than measured properly. First, \texttt{Result.to\_dict} in
+\texttt{fish4/match.py} persists only aggregates --- pair score, mean, interval
+--- so \texttt{results/v04\_duels.jsonl} contains no per-pair differentials, and
+the within-run and between-run components cannot be separated from the archive
+after the fact. Second, and more awkwardly, \emph{the harness cannot measure
+itself}: in \texttt{\_one\_deal} both games of a pair share the deck, the start
+seat and the agent seed, and the two team assignments are mirror images, so when
+\texttt{spec\_x} equals \texttt{spec\_y} the two games are byte-identical and the
+pair differential is exactly zero by construction. A true A/A run therefore
+reports no variance at all, for every pair, however many are played. Both are
+fixable --- log the differentials, and add a seed salt so a policy can be played
+against a differently-seeded copy of itself --- and until they are, any estimate
+of $\tau$ in this project rests on the handful of configurations that happen to
+have been run more than once.
+
 \paragraph{What we would conclude.} The correct experiment is not another 500
 pairs on fresh seeds --- that adds a fourth estimate to a set that already
 disagrees. It is either a single run large enough that $\tau$ is negligible
