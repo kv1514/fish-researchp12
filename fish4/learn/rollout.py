@@ -200,6 +200,14 @@ class PublicInfoHeuristic(HeuristicAgent):
 # Configuration
 # ---------------------------------------------------------------------------
 
+#: The strong continuation. Fixed by name so that a rollout file records which
+#: policy produced it and a later run cannot silently mean something else.
+V04_SPEC = ("fishbot4", {"opponent_gamma": 0.35})
+
+POLICY_PUBLIC = "rollout-public"
+POLICY_V04 = "v04"
+
+
 @dataclass(frozen=True)
 class RolloutConfig:
     """Everything that makes a rollout batch reproducible."""
@@ -210,18 +218,45 @@ class RolloutConfig:
     stall_window: int = 80
     #: whether the continuation policy uses negative information.
     use_negative: bool = False
+    #: which continuation finishes the rollout: ``POLICY_PUBLIC`` (the
+    #: incumbent, public information only) or ``POLICY_V04`` (the full engine).
+    policy: str = POLICY_PUBLIC
+    #: whether the determinized state is seeded with the REAL public history of
+    #: the position, rather than starting from an empty log.
+    seed_history: bool = False
+
+    def __post_init__(self) -> None:
+        if self.policy not in (POLICY_PUBLIC, POLICY_V04):
+            raise ValueError(f"unknown continuation policy {self.policy!r}")
+        if self.policy == POLICY_V04 and not self.seed_history:
+            # Not a taste question. The belief tracker anchors on an initial
+            # deal it back-computes from (current hand, public history); with an
+            # empty history it would anchor on the determinized mid-game hand as
+            # if it were the deal, and every inference downstream would be drawn
+            # from a game that never happened. Refuse rather than produce it.
+            raise ValueError(
+                "policy='v04' requires seed_history=True: the belief tracker "
+                "has nothing to attach to without the real public history")
 
     def to_dict(self) -> dict:
         return {"max_actions": self.max_actions,
                 "stall_window": self.stall_window,
                 "use_negative": self.use_negative,
-                "policy": PublicInfoHeuristic.name}
+                "seed_history": self.seed_history,
+                "policy": (PublicInfoHeuristic.name
+                           if self.policy == POLICY_PUBLIC else self.policy)}
 
     @classmethod
     def from_dict(cls, d: dict) -> "RolloutConfig":
+        pol = d.get("policy", POLICY_PUBLIC)
+        if pol == PublicInfoHeuristic.name:
+            pol = POLICY_PUBLIC
         return cls(max_actions=int(d.get("max_actions", 900)),
                    stall_window=int(d.get("stall_window", 80)),
-                   use_negative=bool(d.get("use_negative", False)))
+                   use_negative=bool(d.get("use_negative", False)),
+                   policy=pol,
+                   seed_history=bool(d.get("seed_history",
+                                           pol == POLICY_V04)))
 
 
 @dataclass
@@ -259,11 +294,24 @@ def _seat_seeds(world_seed: int) -> list[int]:
     return [rng.getrandbits(64) for _ in range(NUM_PLAYERS)]
 
 
+def _make_agents(cfg: RolloutConfig) -> list:
+    """Six continuation agents, one per seat.
+
+    ``fish4.registry4`` is imported here rather than at module scope: it pulls
+    in the whole engine, and a rollout file written by the public continuation
+    must stay loadable without it.
+    """
+    if cfg.policy == POLICY_V04:
+        from fish4.registry4 import make_agent
+        return [make_agent(V04_SPEC) for _ in range(NUM_PLAYERS)]
+    return [PublicInfoHeuristic(stall_window=cfg.stall_window,
+                                use_negative=cfg.use_negative)
+            for _ in range(NUM_PLAYERS)]
+
+
 def _play_out(state: GameState, seat_seeds: Sequence[int],
               cfg: RolloutConfig, stats: RolloutStats) -> None:
-    agents = [PublicInfoHeuristic(stall_window=cfg.stall_window,
-                                  use_negative=cfg.use_negative)
-              for _ in range(NUM_PLAYERS)]
+    agents = _make_agents(cfg)
     for p, ag in enumerate(agents):
         ag.begin_game(p, state.rules, seat_seeds[p])
     n = 0
@@ -287,7 +335,8 @@ def rollout_matrix(rules: RuleConfig, turn: int, set_winner: Sequence,
                    seat: int, worlds: Sequence[Sequence[int]],
                    asks: Sequence[Ask], seed: int,
                    cfg: Optional[RolloutConfig] = None,
-                   stats: Optional[RolloutStats] = None) -> np.ndarray:
+                   stats: Optional[RolloutStats] = None,
+                   history: Sequence = ()) -> np.ndarray:
     """``V[a, k]``: set differential GAINED by the acting team, in world k.
 
     The value is incremental - the differential already banked at the position
@@ -312,6 +361,8 @@ def rollout_matrix(rules: RuleConfig, turn: int, set_winner: Sequence,
         for i, ask in enumerate(asks):
             state = GameState.from_components(rules, list(world), turn,
                                               list(set_winner))
+            if cfg.seed_history:
+                state.history = list(history)
             try:
                 state.apply(seat, ask)
             except IllegalAction:
