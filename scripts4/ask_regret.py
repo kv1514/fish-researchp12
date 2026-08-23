@@ -277,6 +277,7 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
             seed0: int = 4242):
     positions = harvest(60, min_resolved, n_positions)
     rows = []
+    missed = [0]
     t0 = time.time()
     for pi, (rules, hands, sw, turn, hist, seat) in enumerate(positions):
         obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
@@ -300,6 +301,11 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
         if not isinstance(chosen, Ask):
             continue            # a claim: decided from the posterior, not searched
         if chosen not in asks:
+            # _legal_asks reimplements the engine's rule from the observation
+            # alone; if the policy picks something outside it, the
+            # reimplementation is wrong and the "exhaustive" comparison is not.
+            # Quietly appending would hide that, so it is counted and reported.
+            missed[0] += 1
             asks.append(chosen)
 
         # common random numbers: one seat-seed vector per world, shared by every
@@ -390,6 +396,10 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
         print(f"  pos {pi:>3}  asks={len(per):>2}  "
               f"crossfit={xf_regret:+.3f}  naive={naive_regret:+.3f}  "
               f"rank={rows[-1]['rank']}/{len(per) - 1}  [{el:.0f}s]", flush=True)
+    if missed[0]:
+        print(f"\nWARNING: the policy chose an ask outside the enumerated legal "
+              f"set {missed[0]} time(s).\n_legal_asks does not match the engine, "
+              f"so the comparison is not exhaustive.", flush=True)
     return rows
 
 

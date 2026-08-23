@@ -110,6 +110,11 @@ def collect(n_games: int, seed0: int = 606000):
                         "picked": half_suit_of(act.card),
                         "resolved": resolved,
                         "n_hs": n_hs,
+                        # Decisions inside one deal share a layout and a set of
+                        # players, so they are not independent draws. Carrying
+                        # the game lets the standard errors be resampled over
+                        # games rather than over decisions.
+                        "game": g,
                     })
             st.apply(p, act)
             step += 1
@@ -194,11 +199,21 @@ def fit_alpha(records, phase=None, eps=1e-6, lo=-2.0, hi=4.0):
     both on the clean subset, where every alternative has depth at least one,
     and on everything with the same flooring the engine uses.
     """
-    # Padded into one rectangular array so a likelihood evaluation is a handful
-    # of numpy calls rather than a Python loop over every decision. The fit does
-    # ~180 evaluations and there are tens of thousands of decisions, so the
-    # difference is minutes against milliseconds.
-    logd, chosen = [], []
+    des = design(records, phase, eps)
+    if des is None:
+        return None
+    return fit_design(des, lo, hi)
+
+
+def design(records, phase=None, eps=1e-6):
+    """Pack the decisions into arrays once.
+
+    Choice sets hold two to five alternatives, so they are padded to the widest
+    with the unused slots masked. Building this is the expensive part -- it walks
+    every record in Python -- and a bootstrap that rebuilt it per replicate spent
+    all its time here, so it is separated out and resampled by row instead.
+    """
+    logd, chosen, games = [], [], []
     width = 0
     for r in records:
         if not _phase_ok(r, phase):
@@ -211,15 +226,30 @@ def fit_alpha(records, phase=None, eps=1e-6, lo=-2.0, hi=4.0):
         width = max(width, len(d))
         logd.append(np.log(np.asarray(d, dtype=float)))
         chosen.append(j)
+        games.append(r.get("game", 0))
     if not logd:
         return None
     LD = np.full((len(logd), width), -np.inf)
     for i, row in enumerate(logd):
         LD[i, :row.size] = row
-    pad = ~np.isfinite(LD)
-    LD_z = np.where(pad, 0.0, LD)          # value under the padding mask
-    idx = np.arange(len(chosen))
-    ch = np.asarray(chosen)
+    return {"pad": ~np.isfinite(LD), "LD": np.where(np.isfinite(LD), LD, 0.0),
+            "chosen": np.asarray(chosen), "games": np.asarray(games)}
+
+
+def fit_design(des, lo=-2.0, hi=4.0, rows=None, grid=121, iters=60):
+    """Maximum-likelihood alpha for a packed design, optionally a row subset.
+
+    ``grid`` and ``iters`` trade precision for speed. The default resolves alpha
+    to about 1e-5, far finer than any standard error here; a bootstrap replicate
+    only has to locate its own maximum well enough to measure the SPREAD across
+    replicates, so it runs coarser.
+    """
+    pad = des["pad"] if rows is None else des["pad"][rows]
+    LD_z = des["LD"] if rows is None else des["LD"][rows]
+    ch = des["chosen"] if rows is None else des["chosen"][rows]
+    if not len(ch):
+        return None
+    idx = np.arange(len(ch))
 
     def nll(alpha):
         z = np.where(pad, -np.inf, alpha * LD_z)
@@ -228,12 +258,12 @@ def fit_alpha(records, phase=None, eps=1e-6, lo=-2.0, hi=4.0):
                                         axis=1)))
         return float(np.sum(lse - alpha * LD_z[idx, ch]))
 
-    grid = np.linspace(lo, hi, 121)
-    vals = [nll(a) for a in grid]
+    gr = np.linspace(lo, hi, grid)
+    vals = [nll(a) for a in gr]
     k = int(np.argmin(vals))
-    a0 = grid[max(k - 1, 0)]
-    a1 = grid[min(k + 1, len(grid) - 1)]
-    for _ in range(60):
+    a0 = gr[max(k - 1, 0)]
+    a1 = gr[min(k + 1, len(gr) - 1)]
+    for _ in range(iters):
         m1 = a0 + (a1 - a0) / 3
         m2 = a1 - (a1 - a0) / 3
         if nll(m1) < nll(m2):
@@ -245,9 +275,52 @@ def fit_alpha(records, phase=None, eps=1e-6, lo=-2.0, hi=4.0):
     h = 0.02
     d2 = (nll(ahat + h) - 2 * nll(ahat) + nll(ahat - h)) / (h * h)
     se = float(1.0 / np.sqrt(d2)) if d2 > 0 else float("nan")
-    return {"alpha": float(ahat), "se": se, "n": len(chosen),
+    return {"alpha": float(ahat), "se": se, "n": int(len(ch)),
             "nll": float(nll(ahat)), "nll_at_1": float(nll(1.0)),
             "nll_at_0": float(nll(0.0))}
+
+
+def bootstrap_alpha(records, phase=None, reps: int = 200, seed: int = 909):
+    """Standard error for alpha, resampled over GAMES rather than decisions.
+
+    The likelihood's own curvature treats every decision as an independent
+    draw. They are not: 17,000 decisions come from 200 deals, and decisions
+    inside one deal share a layout, six hands and one set of policies. Treating
+    them as independent understates the spread by whatever the within-game
+    correlation is, and the symptom is visible without any theory -- a smooth
+    curve fitted through the per-band estimates returns a chi-square several
+    times its degrees of freedom, which is what error bars that are too small
+    look like.
+
+    A block bootstrap over games fixes it without needing the correlation
+    modelled: resample whole games with replacement, refit, and take the spread
+    of the refits. It costs one fit per replicate, which is milliseconds now
+    that the fit is vectorised.
+    """
+    des = design(records, phase)
+    if des is None:
+        return None
+    rng = np.random.default_rng(seed)
+    order = np.argsort(des["games"], kind="stable")
+    g_sorted = des["games"][order]
+    bounds = np.searchsorted(g_sorted, np.unique(g_sorted), side="left")
+    blocks = np.split(order, bounds[1:])
+    if len(blocks) < 8:
+        return None
+    out = []
+    for _ in range(reps):
+        pick = rng.integers(0, len(blocks), size=len(blocks))
+        f = fit_design(des, rows=np.concatenate([blocks[i] for i in pick]),
+                       grid=49, iters=18)
+        if f is not None:
+            out.append(f["alpha"])
+    if len(out) < 8:
+        return None
+    a = np.asarray(out)
+    return {"se_clustered": float(a.std(ddof=1)),
+            "lo": float(np.percentile(a, 2.5)),
+            "hi": float(np.percentile(a, 97.5)),
+            "games": len(blocks), "reps": len(out)}
 
 
 def main(argv):
@@ -311,11 +384,18 @@ def main(argv):
         fit = fit_alpha(data, phase=ph)
         if fit is None:
             continue
+        bs = bootstrap_alpha(data, phase=ph)
+        if bs:
+            fit["bootstrap"] = bs
         out[f"alpha_{lab}"] = fit
-        z1 = ((fit["alpha"] - 1.0) / fit["se"]) if fit["se"] == fit["se"] else float("nan")
+        se = bs["se_clustered"] if bs else fit["se"]
+        z1 = (fit["alpha"] - 1.0) / se if se else float("nan")
         print(f"  {lab:<44} alpha = {fit['alpha']:+.3f} "
-              f"+/- {fit['se']:.3f}   n={fit['n']:<6} "
+              f"+/- {se:.3f}   n={fit['n']:<6} "
               f"({z1:+.1f} SE from 1)")
+        if bs:
+            print(f"      {'':<44} clustered over {bs['games']} games; "
+                  f"naive SE would have been {fit['se']:.3f}")
         print(f"      {'':<44} log-lik gain over alpha=0: "
               f"{fit['nll_at_0'] - fit['nll']:.1f} nats; "
               f"over alpha=1: {fit['nll_at_1'] - fit['nll']:.1f}")
@@ -332,9 +412,14 @@ def main(argv):
             n = fit["n"] if fit else 0
             print(f"  resolved {lo}-{hi}: only {n} decisions, not fitted")
             continue
+        bs = bootstrap_alpha(clean, phase=(lo, hi), reps=120)
+        if bs:
+            fit["bootstrap"] = bs
         out["alpha_bands"][f"{lo}-{hi}"] = fit
+        se = bs["se_clustered"] if bs else fit["se"]
         print(f"  resolved {lo}-{hi}:  alpha = {fit['alpha']:+.3f} "
-              f"+/- {fit['se']:.3f}   n={fit['n']}")
+              f"+/- {se:.3f}   n={fit['n']:<6}"
+              f"{'  (naive ' + format(fit['se'], '.3f') + ')' if bs else ''}")
 
     print("\ngamma_schedule assumes the early alpha exceeds the late one.")
 
