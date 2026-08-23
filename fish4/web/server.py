@@ -193,6 +193,22 @@ class Handler(BaseHTTPRequestHandler):
                                   "application/javascript; charset=utf-8")
             if p == "/style.css":
                 return self._file(STATIC / "style.css", "text/css")
+            if p == "/cards.js":
+                return self._file(STATIC / "cards.js",
+                                  "application/javascript; charset=utf-8")
+            if p == "/api/deck":
+                from fish.cards import (HALF_SUIT_NAMES, card_name,
+                                        half_suit_cards, is_red)
+                return self._json({"half_suits": [
+                    {"hs": h, "name": HALF_SUIT_NAMES[h],
+                     "cards": [{"id": c, "name": card_name(c), "red": is_red(c)}
+                               for c in half_suit_cards(h)]}
+                    for h in range(len(HALF_SUIT_NAMES))]})
+            if p == "/api/lobby":
+                from .lobby import lobby
+                return self._json({"rooms": lobby().listing()})
+            if p.startswith("/api/room/"):
+                return self._room_get(p, urlparse(self.path).query)
             parts = p.strip("/").split("/")
             if len(parts) >= 3 and parts[0] == "api" and parts[1] == "game":
                 g = _games.get(parts[2])
@@ -213,6 +229,10 @@ class Handler(BaseHTTPRequestHandler):
             body = self._body()
             if p == "/api/new":
                 return self._new(body)
+            if p == "/api/room":
+                return self._room_create(body)
+            if p.startswith("/api/room/"):
+                return self._room_post(p, body)
             parts = p.strip("/").split("/")
             if len(parts) == 4 and parts[0] == "api" and parts[1] == "game":
                 g = _games.get(parts[2])
@@ -273,6 +293,115 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"error": f"engine found no move: {e}",
                                "state": g.snapshot()}, 400)
         return self._json(g.act(action))
+
+
+# ---------------------------------------------------------------------------
+# multiplayer rooms
+# ---------------------------------------------------------------------------
+
+def _room_routes(cls):
+    from urllib.parse import parse_qs
+
+    def _room_create(self, body):
+        from .lobby import lobby
+        rules = RuleConfig(variant=body.get("variant", "54"),
+                           claims_any_time=bool(body.get("any_time", False)))
+        seed = body.get("seed")
+        seed = None if seed in (None, "") else int(seed)
+        room = lobby().create(
+            humans=int(body.get("humans", 1)),
+            arrangement=body.get("arrangement", "one_team"),
+            name=body.get("name", "anon"), rules=rules, seed=seed,
+            gamma=float(body.get("gamma", 0.35)),
+            bot_delay=float(body.get("bot_delay", 0.8)),
+            hints=bool(body.get("hints", True)))
+        joined = room.join(body.get("name", "anon"))
+        if joined is None:
+            return self._json({"error": "could not seat the host"}, 500)
+        return self._json({**joined, "code": room.code,
+                           "state": room.view(joined["seat"])})
+
+    def _room_get(self, path, query):
+        from .lobby import lobby
+        parts = path.strip("/").split("/")
+        room = lobby().get(parts[2] if len(parts) > 2 else "")
+        if room is None:
+            return self._json({"error": "no such table"}, 404)
+        q = parse_qs(query or "")
+        token = (q.get("token") or [""])[0]
+        seat = room.seat_of(token) if token else None
+        if len(parts) > 3 and parts[3] == "analyse":
+            if seat is None:
+                return self._json({"error": "not seated at this table"}, 403)
+            return self._json(room.analysis(seat))
+        return self._json(room.view(seat))
+
+    def _room_post(self, path, body):
+        from .lobby import lobby
+        parts = path.strip("/").split("/")
+        room = lobby().get(parts[2] if len(parts) > 2 else "")
+        if room is None:
+            return self._json({"error": "no such table"}, 404)
+        verb = parts[3] if len(parts) > 3 else ""
+        if verb == "join":
+            joined = room.join(body.get("name", "anon"))
+            if joined is None:
+                return self._json({"error": "this table is full"}, 409)
+            return self._json({**joined, "code": room.code,
+                               "state": room.view(joined["seat"])})
+        token = body.get("token", "")
+        seat = room.seat_of(token) if token else None
+        if seat is None:
+            return self._json({"error": "not seated at this table"}, 403)
+        if verb == "act":
+            try:
+                act = _action_from(body)
+            except Exception as e:
+                return self._json({"error": f"bad action: {e}"}, 400)
+            try:
+                room.apply(seat, act)
+            except Exception as e:
+                return self._json({"error": str(e),
+                                   "state": room.view(seat)}, 400)
+            return self._json(room.view(seat))
+        if verb == "auto":
+            if room.state is None or room.state.turn != seat:
+                return self._json(room.view(seat))
+            from ..registry4 import make_agent
+            helper = room.bots.get(("helper", seat))
+            if helper is None:
+                helper = make_agent(("fishbot4",
+                                     {"opponent_gamma": room.gamma}))
+                helper.begin_game(seat, room.rules, seat * 104729 + 7)
+                room.bots[("helper", seat)] = helper
+            try:
+                act = helper.act(Observation.from_state(room.state, seat))
+                room.apply(seat, act)
+            except Exception as e:
+                return self._json({"error": str(e),
+                                   "state": room.view(seat)}, 400)
+            return self._json(room.view(seat))
+        return self._json({"error": "not found"}, 404)
+
+    cls._room_create = _room_create
+    cls._room_get = _room_get
+    cls._room_post = _room_post
+    return cls
+
+
+def _action_from(body: dict):
+    kind = body.get("type")
+    if kind == "ask":
+        return Ask(int(body["target"]), int(body["card"]))
+    if kind == "claim":
+        return Claim(int(body["half_suit"]),
+                     tuple(int(x) for x in body["assignment"]))
+    if kind == "pass":
+        return Pass(int(body["teammate"]))
+    raise ValueError(f"unknown action {kind!r}")
+
+
+_room_routes(Handler)
 
 
 def serve(host: str = "127.0.0.1", port: int = 8420) -> int:

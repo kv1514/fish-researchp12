@@ -1698,6 +1698,22 @@ the seat's own \texttt{Observation}; the posterior shown is an inference from th
 public record, not a look behind it. The only exception is the reveal after the
 last card is public anyway.
 
+\paragraph{Mixed tables.} The same server seats any mixture of people and
+engines at one table, which is what makes the engine usable as an instrument on
+human play rather than only on self-play. The design point worth recording is
+that this is not a cosmetic choice: teams in Fish are the alternating seats
+$\{0,2,4\}$ against $\{1,3,5\}$, so a request as ordinary as ``three of us
+against three bots'' is a constraint on \emph{which} seats the people take, not
+on how many. A table therefore takes a seat \emph{arrangement} rather than a bot
+count --- one that fills a whole side before crossing, and one that interleaves
+--- and the 3-versus-3 configuration that a group of friends actually wants is
+the former at $n=3$. Engine seats move on a clock rather than instantly, because
+a decision costs about $4$\,ms and an unpaced possession appears to a human as a
+single discontinuous jump. Each seat is served only its own
+\texttt{Observation}, so the information boundary of
+Appendix~\ref{app:leak} is enforced by the transport, not merely respected by
+the client.
+
 Analysis costs 130--270\,ms, which is interactive, and the same objects drive
 the terminal client, the browser client and the batch experiments, so what a
 user sees is what the experiments measured.

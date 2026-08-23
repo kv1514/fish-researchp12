@@ -1,230 +1,440 @@
-/* FishBot v0.4 browser client.
+/* Fish client: a lobby, a table, and six seats that may be people or engines.
  *
- * Deliberately plain: no framework, no build step, no dependencies. The server
- * is stdlib-only for the same reason - the point of this UI is that it runs
- * wherever Python does, immediately.
- *
- * Everything rendered here comes from the acting seat's own view. The engine
- * panel shows the posterior over hidden cards, which is an inference from the
- * public record, not a look at the hidden state.
+ * The server is the only thing that knows the hidden cards, so the client is
+ * deliberately dumb: it polls a per-seat view, renders it, and posts actions.
+ * Every render is a full redraw keyed on the room's version counter, which is
+ * cheap at this size and removes a whole class of "the board disagrees with the
+ * server" bugs.
  */
 "use strict";
 
-let G = null;      // last snapshot
-let A = null;      // last analysis
-let pick = { target: null, card: null };
+const $ = (s) => document.querySelector(s);
+const CARDS = window.FishCards;
 
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const S = {
+  code: null, token: null, seat: null, view: null, ver: -1,
+  deck: null, sel: { card: null }, claim: null, hint: null,
+  timer: null, lobbyTimer: null,
+};
 
-function toast(msg) {
-  const t = $("toast");
-  t.textContent = msg;
-  t.style.display = "block";
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => { t.style.display = "none"; }, 3200);
-}
+const SEATED = () => JSON.parse(localStorage.getItem("fish.seats") || "{}");
+const remember = (code, token, seat) => {
+  const m = SEATED(); m[code] = { token, seat };
+  localStorage.setItem("fish.seats", JSON.stringify(m));
+};
 
-async function api(path, method = "GET", body) {
-  const r = await fetch(path, {
-    method,
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const j = await r.json();
-  if (!r.ok || j.error) {
-    toast(j.error || ("http " + r.status));
-    return j.state || null;
-  }
+async function api(path, body) {
+  const opt = body === undefined ? {} : {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  };
+  const r = await fetch(path, opt);
+  const j = await r.json().catch(() => ({ error: `http ${r.status}` }));
+  if (!r.ok && !j.state) throw new Error(j.error || `http ${r.status}`);
   return j;
 }
 
-// ---------------------------------------------------------------- new game
+const esc = (s) => String(s).replace(/[&<>"]/g,
+  (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-async function newGame() {
-  const s = await api("/api/new", "POST", {
-    seat: +$("seat").value,
-    seed: $("seed").value.trim(),
-    opponent: $("opponent").value,
-    gamma: $("opponent").value === "champion" ? 0.35 : 0.0,
+// ===========================================================================
+// lobby
+// ===========================================================================
+
+function segment(id, onchange) {
+  const box = $(id);
+  box.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    box.querySelectorAll("button").forEach((x) => x.classList.remove("on"));
+    b.classList.add("on");
+    if (onchange) onchange(b.dataset.v);
   });
-  if (!s) return;
-  G = s;
-  pick = { target: null, card: null };
-  $("seed").value = s.seed;
-  render();
-  refreshEngine();
+  return () => box.querySelector("button.on").dataset.v;
 }
 
-// ---------------------------------------------------------------- rendering
+let getHumans, getArr;
 
-function seatChip(p) {
-  const me = p === G.seat;
-  const ally = G.teammates.includes(p);
-  const cls = "seat " + (me ? "me" : ally ? "ally" : "foe");
-  return `<span class="${cls}">${me ? "you" : "P" + p}:${G.hand_counts[p]}</span>`;
+function explain() {
+  const n = +getHumans(), arr = getArr();
+  const order = arr === "one_team" ? [0, 2, 4, 1, 3, 5] : [0, 1, 2, 3, 4, 5];
+  const mine = order.slice(0, n).sort((a, b) => a - b);
+  const onA = mine.filter((s) => s % 2 === 0).length, onB = n - onA;
+  const bots = 6 - n;
+  const plural = (k, w) => `${k} ${w}${k === 1 ? "" : "s"}`;
+  let msg;
+  if (n === 6) msg = "Six people, no engines at the table.";
+  else if (n === 1)
+    msg = "You against five engines, two of which play on your own side.";
+  else if (onA === 0 || onB === 0)
+    msg = `Seats ${mine.join(", ")} are one team: ${plural(n, "person")} ` +
+      `against ${plural(bots, "engine")}` +
+      (n < 3 ? `, with ${plural(3 - n, "engine")} on your own side.` : ".");
+  else
+    msg = `Seats ${mine.join(", ")}: ${onA} of you on one team, ${onB} on the ` +
+      `other, ${plural(bots, "engine")} filling the rest.`;
+  if (n === 3 && arr === "one_team")
+    msg = "Seats 0, 2 and 4 are one whole team, so the three of you play " +
+      "three engines. This is the 3-versus-3 setup.";
+  $("#c-explain").textContent = msg;
 }
 
-function renderBoard() {
-  const sc = G.score;
-  const settled = G.set_winner.map((w, i) => w === null ? null :
-    `<span class="${w === "ours" ? "good" : w === "theirs" ? "bad" : "dim"}">${esc(G.half_suits[i].name)}</span>`)
-    .filter(Boolean).join(", ");
-  $("board").innerHTML = `<h2>board &mdash; seed ${G.seed}</h2>
-    <div class="row"><b class="win">you ${sc.you} &ndash; ${sc.them}</b>
-      <span class="dim">nulled ${sc.nulled}</span>
-      ${G.terminal ? `<b class="${sc.you > sc.them ? "good" : sc.them > sc.you ? "bad" : "dim"}">
-         ${sc.you > sc.them ? "YOU WIN" : sc.them > sc.you ? "you lose" : "tie"}</b>` :
-      `<span class="dim">turn: ${G.your_turn ? "<b>you</b>" : "P" + G.turn}</span>`}</div>
-    <div class="row">${[0, 1, 2, 3, 4, 5].map(seatChip).join("")}</div>
-    ${settled ? `<div class="dim" style="font-size:.8rem">settled: ${settled}</div>` : ""}`;
+async function refreshLobby() {
+  try {
+    const { rooms } = await api("/api/lobby");
+    const el = $("#lobby-list");
+    if (!rooms.length) {
+      el.innerHTML = `<p class="note">No open tables. Start one.</p>`;
+      return;
+    }
+    el.innerHTML = rooms.map((r) => `
+      <div class="room">
+        <b>${esc(r.code)}</b>
+        <span class="who">${r.humans} human · ${r.bots} bot${r.bots === 1 ? "" : "s"}
+          ${r.players.length ? "· " + r.players.map(esc).join(", ") : ""}</span>
+        ${r.seats_open
+          ? `<button class="primary sm" onclick="joinCode('${r.code}')">
+               join (${r.seats_open} free)</button>`
+          : `<span class="note">in play</span>`}
+      </div>`).join("");
+  } catch (e) { /* the lobby is best-effort */ }
 }
 
-function renderHand() {
-  const byHs = {};
-  G.hand.forEach(c => (byHs[c.hs] = byHs[c.hs] || []).push(c));
-  const rows = Object.keys(byHs).sort((a, b) => a - b).map(hs =>
-    `<div class="hs"><span class="lbl">${esc(G.half_suits[hs].name)}</span>` +
-    byHs[hs].map(c => `<span class="card ${c.red ? "red" : ""}">${c.name}</span>`).join("") +
-    `</div>`).join("");
-  $("hand").innerHTML = `<h2>your hand (${G.hand.length})</h2>` +
-    (rows || `<div class="dim">no cards</div>`);
+async function create() {
+  $("#c-err").textContent = "";
+  const name = $("#c-name").value.trim() || "Player";
+  try {
+    const j = await api("/api/room", {
+      humans: +getHumans(), arrangement: getArr(), name,
+      bot_delay: +$("#c-delay").value, hints: $("#c-hints").value === "1",
+    });
+    enterTable(j.code, j.token, j.seat, j.state);
+  } catch (e) { $("#c-err").textContent = e.message; }
 }
 
-function renderAction() {
-  const el = $("action");
-  if (G.terminal) {
-    el.innerHTML = `<h2>game over</h2>` + (G.reveal ?
-      `<div class="dim" style="font-size:.8rem">final hands were: ` +
-      G.reveal.map((h, i) => `P${i}[${h.join(" ")}]`).join("  ") + `</div>` : "");
+async function joinCode(code) {
+  code = (code || $("#j-code").value).trim().toUpperCase();
+  if (!code) return;
+  const known = SEATED()[code];
+  const name = $("#c-name").value.trim() || $("#j-code").dataset.name || "Player";
+  try {
+    if (known) {                       // came back after a refresh: same seat
+      const v = await api(`/api/room/${code}?token=${known.token}`);
+      if (v.seat !== null) return enterTable(code, known.token, known.seat, v);
+    }
+    const j = await api(`/api/room/${code}/join`, { name });
+    enterTable(code, j.token, j.seat, j.state);
+  } catch (e) { $("#c-err").textContent = e.message; }
+}
+window.joinCode = joinCode;
+
+// ===========================================================================
+// table
+// ===========================================================================
+
+function enterTable(code, token, seat, view) {
+  S.code = code; S.token = token; S.seat = seat; S.ver = -1;
+  S.sel = { card: null }; S.claim = null; S.hint = null;
+  remember(code, token, seat);
+  location.hash = code;
+  $("#lobby").classList.add("hidden");
+  $("#table").classList.remove("hidden");
+  $("#t-code").textContent = code;
+  $("#w-code").textContent = code;
+  clearInterval(S.lobbyTimer);
+  if (view) render(view);
+  clearInterval(S.timer);
+  S.timer = setInterval(poll, 650);
+  poll();
+}
+
+function leave() {
+  clearInterval(S.timer);
+  S.code = null; S.view = null;
+  location.hash = "";
+  $("#table").classList.add("hidden");
+  $("#lobby").classList.remove("hidden");
+  refreshLobby();
+  S.lobbyTimer = setInterval(refreshLobby, 3000);
+}
+
+async function poll() {
+  if (!S.code) return;
+  try {
+    const v = await api(`/api/room/${S.code}?token=${S.token}`);
+    render(v);
+  } catch (e) { /* transient */ }
+}
+
+async function act(body) {
+  try {
+    const v = await api(`/api/room/${S.code}/act`, { token: S.token, ...body });
+    S.sel = { card: null }; S.claim = null; S.hint = null;
+    if (v.error) $("#turnline").innerHTML = `<span class="err">${esc(v.error)}</span>`;
+    render(v.state || v, true);
+  } catch (e) {
+    $("#turnline").innerHTML = `<span class="err">${esc(e.message)}</span>`;
+  }
+}
+
+// --------------------------------------------------------------------- draw
+
+function render(v, force) {
+  if (!v || v.seat === undefined) return;
+  const changed = force || v.version !== S.ver || v.status !== (S.view || {}).status;
+  S.view = v; if (!changed) return;
+  S.ver = v.version;
+
+  $("#t-status").textContent =
+    v.status === "waiting" ? `waiting for ${v.open_seats.length} more`
+    : v.status === "finished" ? "game over" : "in play";
+
+  if (v.status === "waiting") {
+    $("#waiting").classList.remove("hidden");
+    $("#board").classList.add("hidden");
+    $("#w-seats").innerHTML = v.seats.map((s) => `
+      <div class="p ${s.team === v.seats[S.seat].team ? "us" : "them"}
+        ${s.seat === S.seat ? "you" : ""}">
+        <div class="nm">${esc(s.name)}</div>
+        <div class="meta">seat ${s.seat} · team ${s.team ? "B" : "A"}</div>
+      </div>`).join("");
     return;
   }
-  if (!G.your_turn) {
-    el.innerHTML = `<h2>waiting</h2><div class="dim">P${G.turn} to move.</div>`;
-    return;
-  }
-  if (G.must_pass) {
-    el.innerHTML = `<h2>you have no cards &mdash; pass the turn</h2><div class="row">` +
-      G.teammates.filter(p => G.hand_counts[p] > 0)
-        .map(p => `<button onclick="doPass(${p})">pass to P${p}</button>`).join("") +
-      `</div>`;
-    return;
-  }
-  // askable cards: half-suits we hold a card in, cards we do not hold
-  const mineHs = new Set(G.hand.map(c => c.hs));
-  const opps = [0, 1, 2, 3, 4, 5].filter(p => !G.teammates.includes(p) && p !== G.seat
-    && G.hand_counts[p] > 0);
-  const suits = [...mineHs].filter(hs => G.set_winner[hs] === null).sort((a, b) => a - b);
-  const cards = suits.map(hs => {
-    const cs = G.half_suits[hs].cards.filter(c => !c.mine);
-    return `<div class="hs"><span class="lbl">${esc(G.half_suits[hs].name)}</span>` +
-      cs.map(c => `<span class="card pick ${c.red ? "red" : ""} ${pick.card === c.id ? "sel" : ""}"
-        onclick="setCard(${c.id})">${c.name}</span>`).join("") + `</div>`;
+  $("#waiting").classList.add("hidden");
+  $("#board").classList.remove("hidden");
+
+  $("#s-you").textContent = v.score.you;
+  $("#s-them").textContent = v.score.them;
+  $("#s-null").textContent = v.score.nulled ? `· ${v.score.nulled} void` : "";
+
+  drawSeats(v); drawSets(v); drawHand(v); drawAsk(v); drawClaim(v); drawLog(v);
+  drawTurnline(v);
+  if (!v.hints) $("#hint-go").classList.add("hidden");
+  drawHints();
+}
+
+function drawSeats(v) {
+  const mine = v.team;
+  const order = [0, 1, 2, 3, 4, 5].map((k) => (S.seat + k) % 6);
+  $("#seats").innerHTML = order.map((i) => {
+    const s = v.seats[i], n = v.hand_counts[i];
+    return `<div class="p ${s.team === mine ? "us" : "them"}
+        ${i === v.turn ? "turn" : ""} ${i === S.seat ? "you" : ""}">
+      <div class="nm">${esc(s.name)}</div>
+      <div class="meta">${n} card${n === 1 ? "" : "s"}${s.kind === "bot" ? " · engine" : ""}</div>
+      <div class="mini">${"<i></i>".repeat(Math.min(n, 12))}</div>
+    </div>`;
   }).join("");
-  el.innerHTML = `<h2>your move</h2>
-    <div class="row"><span class="dim">ask</span>` +
-    opps.map(p => `<button onclick="setTarget(${p})"
-        style="${pick.target === p ? "border-color:var(--accent)" : ""}">P${p}</button>`).join("") +
-    `<span class="dim">for</span>
-      <button onclick="doAsk()" ${pick.target === null || pick.card === null ? "disabled" : ""}>
-        ${pick.target === null || pick.card === null ? "pick a player and a card" :
-      "ask P" + pick.target + " for " + cardName(pick.card)}</button>
-      <button onclick="doAuto()">let the engine move</button></div>
-    ${cards}
-    <div class="row"><span class="dim">or declare:</span>
-      ${(A && A.claims ? A.claims.filter(c => c.declaration) : []).slice(0, 4).map(c =>
-        `<button onclick='doClaim(${c.half_suit}, ${JSON.stringify(c.declaration)})'>
-          ${esc(c.half_suit_name)} (${(c.p_declaration_exact * 100).toFixed(0)}%)</button>`).join("")}
+}
+
+function drawSets(v) {
+  $("#sets").innerHTML = v.half_suit_names.map((nm, i) => {
+    const w = v.set_winner[i];
+    return `<div class="set ${w || ""}">${esc(nm)}</div>`;
+  }).join("");
+}
+
+function drawHand(v) {
+  const cards = v.hand.slice().sort((a, b) => a.id - b.id);
+  const live = v.your_turn && v.status === "playing";
+  $("#hand").innerHTML = CARDS.fan(cards, {
+    selected: S.sel.card, enabled: live, onclick: live ? "pickHandCard" : null,
+  });
+}
+
+function drawTurnline(v) {
+  const el = $("#turnline");
+  if (v.status === "finished") {
+    const won = v.score.you > v.score.them;
+    el.innerHTML = `<b>${won ? "Your team took it" : v.score.you === v.score.them
+      ? "Dead heat" : "The other team took it"}</b> — ${v.score.you}–${v.score.them}` +
+      (v.score.nulled ? ` (${v.score.nulled} void)` : "");
+    return;
+  }
+  if (v.must_pass) {
+    el.innerHTML = `You are out of cards. Hand the turn to ` +
+      v.teammates.map((p) =>
+        `<button class="sm" onclick="doPass(${p})">${esc(v.seats[p].name)}</button>`
+      ).join(" ");
+    return;
+  }
+  el.innerHTML = v.your_turn
+    ? `<b>Your turn.</b> Pick a card you want, then who to ask.`
+    : `Waiting on <b>${esc(v.seats[v.turn].name)}</b>.`;
+}
+
+function drawAsk(v) {
+  const box = $("#ask-cards"), tgt = $("#ask-targets");
+  if (!v.your_turn || !v.askable.length) {
+    box.innerHTML = `<p class="note">${v.your_turn ? "No legal ask." :
+      "Not your turn."}</p>`;
+    tgt.innerHTML = "";
+    return;
+  }
+  box.innerHTML = v.askable.map((g) => `
+    <div class="hsrow">
+      <div class="lbl">${esc(g.name)}</div>
+      <div class="pick">${g.cards.map((c) => `
+        <button class="${c.red ? "r" : ""} ${S.sel.card === c.id ? "on" : ""}"
+          onclick="pickHandCard(${c.id})">${esc(c.name)}</button>`).join("")}
+      </div>
+    </div>`).join("");
+
+  if (S.sel.card === null) {
+    tgt.innerHTML = `<p class="note">Choose the card you want.</p>`;
+    return;
+  }
+  const opps = v.seats.filter((s) => s.team !== v.team);
+  tgt.innerHTML = `<div class="lbl">Ask whom?</div><div class="pick">` +
+    opps.map((s) => {
+      const n = v.hand_counts[s.seat];
+      return `<button ${n ? "" : "disabled"}
+        onclick="doAsk(${s.seat})">${esc(s.name)} <span class="dim">${n}</span></button>`;
+    }).join("") + `</div>`;
+}
+
+function pickHandCard(id) {
+  const v = S.view;
+  if (!v || !v.your_turn) return;
+  const legal = v.askable.some((g) => g.cards.some((c) => c.id === id));
+  if (!legal) {                       // a card in your own hand: not askable
+    $("#turnline").innerHTML =
+      `<span class="dim">You hold that one — pick a card you want instead.</span>`;
+    return;
+  }
+  S.sel.card = S.sel.card === id ? null : id;
+  drawHand(v); drawAsk(v);
+}
+window.pickHandCard = pickHandCard;
+
+const doAsk = (target) => act({ type: "ask", target, card: S.sel.card });
+const doPass = (teammate) => act({ type: "pass", teammate });
+window.doAsk = doAsk; window.doPass = doPass;
+
+// ------------------------------------------------------------------- claims
+
+function drawClaim(v) {
+  const el = $("#claim-list");
+  if (!v.your_turn) { el.innerHTML = `<p class="note">On your turn.</p>`; return; }
+  if (!S.deck) { el.innerHTML = `<p class="note">loading deck…</p>`; return; }
+
+  if (S.claim === null) {
+    const live = v.set_winner.map((w, i) => w === null ? i : -1).filter((i) => i >= 0);
+    el.innerHTML = `<div class="pick">` + live.map((i) =>
+      `<button onclick="openClaim(${i})">${esc(v.half_suit_names[i])}</button>`
+    ).join("") + `</div><p class="note">Name who holds every card of a set.</p>`;
+    return;
+  }
+  const hs = S.claim.hs, team = [S.seat, ...v.teammates].sort((a, b) => a - b);
+  const rows = S.deck[hs].cards.map((c) => `
+    <div class="hsrow"><div class="lbl">${esc(c.name)}</div>
+      <div class="pick">${team.map((p) => `
+        <button class="${S.claim.assign[c.id] === p ? "on" : ""}"
+          onclick="assign(${c.id},${p})">${esc(v.seats[p].name)}</button>`).join("")}
+      </div></div>`).join("");
+  const done = S.deck[hs].cards.every((c) => S.claim.assign[c.id] !== undefined);
+  el.innerHTML = `<div class="lbl">${esc(v.half_suit_names[hs])}</div>${rows}
+    <div class="row">
+      <button class="primary" ${done ? "" : "disabled"}
+        onclick="sendClaim()">Declare</button>
+      <button class="ghost" onclick="openClaim(null)">cancel</button>
     </div>`;
 }
 
-function cardName(id) {
-  for (const hs of G.half_suits) for (const c of hs.cards) if (c.id === id) return c.name;
-  return "?";
+function openClaim(hs) {
+  S.claim = hs === null ? null : { hs, assign: {} };
+  drawClaim(S.view);
+}
+function assign(card, seat) {
+  S.claim.assign[card] = seat;
+  drawClaim(S.view);
+}
+function sendClaim() {
+  const hs = S.claim.hs;
+  act({ type: "claim", half_suit: hs,
+        assignment: S.deck[hs].cards.map((c) => S.claim.assign[c.id]) });
+}
+window.openClaim = openClaim; window.assign = assign; window.sendClaim = sendClaim;
+
+// -------------------------------------------------------------------- hints
+
+async function think() {
+  $("#hints").innerHTML = `<p class="note">thinking…</p>`;
+  try {
+    S.hint = await api(`/api/room/${S.code}/analyse?token=${S.token}`);
+  } catch (e) { S.hint = { error: e.message }; }
+  drawHints();
+}
+window.think = think;
+
+function drawHints() {
+  const a = S.hint, el = $("#hints");
+  if (!a) { el.innerHTML = `<p class="note">ask the engine what it would do</p>`; return; }
+  if (a.disabled || a.error || a.terminal) {
+    el.innerHTML = `<p class="note">${esc(a.note || a.error || "nothing to say")}</p>`;
+    return;
+  }
+  const best = (a.claims || []).find((c) => c.verdict === "claim");
+  el.innerHTML =
+    `<p class="note">position ${a.evaluation > 0 ? "+" : ""}${
+      a.evaluation.toFixed(2)} sets · ${Math.round(a.ms)} ms</p>` +
+    (best ? `<p class="note" style="color:var(--good)">claim
+      ${esc(best.half_suit_name)} (${(best.p_declaration_exact * 100).toFixed(0)}%)</p>` : "") +
+    (a.moves || []).slice(0, 5).map((m, i) => `
+      <div class="mv ${i ? "" : "top"}">
+        <span class="n">${i + 1}</span>
+        <span class="m">${esc(m.card_name)} from ${esc(S.view.seats[m.target].name)}</span>
+        <span class="pc">${(m.p_success * 100).toFixed(0)}%</span>
+      </div>`).join("") +
+    (a.deadlock && a.deadlock.dead
+      ? `<p class="note" style="color:var(--warn)">dead position: no ask in any
+         live set can land</p>` : "");
 }
 
-function renderLog() {
-  $("log").innerHTML = `<h2>history</h2>` + G.log.slice().reverse().map(e =>
-    `<div class="${e.asker === G.seat || e.claimer === G.seat ? "me" : ""}">${esc(e.text)}` +
-    (e.revealed ? ` <span class="dim">[${esc(e.revealed.join(" "))}]</span>` : "") +
-    `</div>`).join("");
+// ---------------------------------------------------------------------- log
+
+function drawLog(v) {
+  const nm = (i) => esc(v.seats[i].name);
+  $("#log").innerHTML = v.log.slice().reverse().map((e) => {
+    if (e.t === "ask")
+      return `<div class="ev">${nm(e.asker)} → ${nm(e.target)}:
+        <span class="cn">${esc(e.card_name)}</span>
+        <span class="${e.ok ? "ok" : "no"}">${e.ok ? "yes" : "no"}</span></div>`;
+    if (e.t === "claim")
+      return `<div class="ev">${nm(e.claimer)} declared
+        <b>${esc(e.hs_name)}</b> — ${e.winner === null ? "void"
+          : e.winner === v.team ? `<span class="ok">your team</span>`
+          : `<span class="no">the other team</span>`}</div>`;
+    return `<div class="ev">${nm(e.player)} out of cards, passed to
+      ${nm(e.teammate)}</div>`;
+  }).join("");
 }
 
-function renderEngine() {
-  const el = $("engine");
-  if (!A || A.terminal) { el.innerHTML = `<h2>engine</h2><div class="dim">game over.</div>`; return; }
-  const ev = A.evaluation;
-  const pct = Math.min(48, Math.abs(ev) * 9);
-  const bar = ev >= 0
-    ? `<i style="left:50%;width:${pct}%"></i>`
-    : `<i class="neg" style="left:${50 - pct}%;width:${pct}%"></i>`;
-  const moves = (A.moves || []).slice(0, 8).map(m => `<tr>
-      <td>${m.certain ? "&#9733; " : ""}P${m.target} &rarr; <b>${m.card_name}</b></td>
-      <td class="num">${(m.p_success * 100).toFixed(1)}%</td>
-      <td class="num ${m.eval_expected >= 0 ? "good" : "bad"}">${m.eval_expected >= 0 ? "+" : ""}${m.eval_expected.toFixed(2)}</td>
-      <td class="dim">${Object.entries(m.terms).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
-        .slice(0, 2).map(([k, v]) => `${k}${v >= 0 ? "+" : ""}${v.toFixed(2)}`).join(" ")}</td>
-    </tr>`).join("");
-  const claims = (A.claims || []).filter(c => c.p_team_holds_all > 0.02).slice(0, 5).map(c => `<tr>
-      <td>${esc(c.half_suit_name)}</td>
-      <td class="num">${(c.p_team_holds_all * 100).toFixed(0)}%</td>
-      <td class="num ${c.p_declaration_exact > 0.9 ? "good" : ""}">${(c.p_declaration_exact * 100).toFixed(0)}%</td>
-      <td class="dim">${esc(c.verdict)}</td></tr>`).join("");
-  const table = (A.card_table || []).filter(r => !r.mine).map(r => `<tr>
-      <td>${r.name}</td>` + r.probs.map((p, i) =>
-        `<td class="num ${p > .95 ? "good" : p < .02 ? "dim" : ""}">${p > .005 ? (p * 100).toFixed(0) : "&middot;"}</td>`).join("") +
-    `</tr>`).join("");
-  el.innerHTML = `<h2>engine analysis <span class="dim">(${A.ms} ms)</span></h2>
-    <div class="eval ${ev >= 0 ? "pos" : "neg"}">${ev >= 0 ? "+" : ""}${ev.toFixed(2)}
-      <span class="dim" style="font-size:.8rem">sets expected, your side</span></div>
-    <div class="bar">${bar}</div>
-    ${(A.notes || []).map(n => `<div class="note">! ${esc(n)}</div>`).join("")}
-    ${A.exact ? `<div class="note">solved exactly: ${A.exact.value_for_me >= 0 ? "+" : ""}${A.exact.value_for_me}</div>` : ""}
-    ${A.deadlock && A.deadlock.summary ? `<div class="note">${esc(A.deadlock.summary)}</div>` : ""}
-    ${A.principal_variation && A.principal_variation.length ?
-      `<div class="pv">plan if each lands: ` +
-      A.principal_variation.map(x => `P${x.target}:${x.card_name}`).join(" &rarr; ") + `</div>` : ""}
-    ${moves ? `<h2 style="margin-top:.8rem">candidate asks</h2>
-      <table><tr><th>ask</th><th class="num">lands</th><th class="num">eval</th><th>why</th></tr>
-      ${moves}</table>` : ""}
-    ${claims ? `<h2 style="margin-top:.8rem">declarations</h2>
-      <table><tr><th>half-suit</th><th class="num">ours</th><th class="num">exact</th><th></th></tr>
-      ${claims}</table>` : ""}
-    ${table ? `<h2 style="margin-top:.8rem">where the hidden cards are (%)</h2>
-      <table><tr><th></th>${[0, 1, 2, 3, 4, 5].map(p =>
-        `<th class="num">${p === G.seat ? "you" : "P" + p}</th>`).join("")}</tr>${table}</table>` : ""}`;
-}
+// ===========================================================================
+// boot
+// ===========================================================================
 
-function render() { renderBoard(); renderHand(); renderAction(); renderLog(); renderEngine(); }
+window.addEventListener("DOMContentLoaded", async () => {
+  getHumans = segment("#c-humans", explain);
+  getArr = segment("#c-arr", explain);
+  explain();
+  $("#c-go").onclick = create;
+  $("#j-go").onclick = () => joinCode();
+  $("#leave").onclick = leave;
+  $("#hint-go").onclick = think;
+  $("#show-rules").onclick = (e) => {
+    e.preventDefault(); $("#rules").classList.remove("hidden");
+  };
+  $("#rules-x").onclick = () => $("#rules").classList.add("hidden");
+  $("#j-code").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") joinCode();
+  });
 
-async function refreshEngine() {
-  if (!G || G.terminal) { A = null; renderEngine(); return; }
-  $("engine").innerHTML = `<h2>engine analysis</h2><div class="dim">thinking&hellip;</div>`;
-  A = await api(`/api/game/${G.id}/analyse`);
-  renderEngine();
-  renderAction();
-}
+  try { S.deck = (await api("/api/deck")).half_suits; } catch (e) { }
 
-// ---------------------------------------------------------------- actions
+  refreshLobby();
+  S.lobbyTimer = setInterval(refreshLobby, 3000);
 
-window.setTarget = (p) => { pick.target = p; renderAction(); };
-window.setCard = (c) => { pick.card = c; renderAction(); };
-
-async function send(body) {
-  const s = await api(`/api/game/${G.id}/act`, "POST", body);
-  if (s) { G = s; pick = { target: null, card: null }; render(); refreshEngine(); }
-}
-window.doAsk = () => send({ type: "ask", target: pick.target, card: pick.card });
-window.doClaim = (hs, a) => send({ type: "claim", half_suit: hs, assignment: a });
-window.doPass = (p) => send({ type: "pass", teammate: p });
-window.doAuto = async () => {
-  const s = await api(`/api/game/${G.id}/auto`, "POST", {});
-  if (s) { G = s; pick = { target: null, card: null }; render(); refreshEngine(); }
-};
-
-// ---------------------------------------------------------------- boot
-
-$("seat").innerHTML = [0, 1, 2, 3, 4, 5].map(i =>
-  `<option value="${i}">${i}</option>`).join("");
-$("new").onclick = newGame;
-newGame();
+  const code = location.hash.replace("#", "").toUpperCase();
+  if (code) joinCode(code);
+});

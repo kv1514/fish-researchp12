@@ -444,8 +444,55 @@ def cmd_bench(args) -> int:
     return 0
 
 
+def _public_tunnel(port: int) -> None:
+    r"""Ask a public relay for a URL that forwards to this machine.
+
+    Both relays here speak plain SSH remote-forwarding and need no account and
+    nothing installed, which matters because the alternative is asking somebody
+    to sign up for a tunnelling service before they can deal a hand of cards.
+    The trade is that the URL is temporary and the relay sees the traffic.
+    """
+    import re
+    import subprocess
+    import threading
+
+    common = ["ssh", "-o", "StrictHostKeyChecking=no",
+              "-o", "ServerAliveInterval=30", "-R", f"80:localhost:{port}"]
+    relays = [common + ["serveo.net"], common + ["nokey@localhost.run"]]
+    pat = re.compile(r"https://[\w.-]+\.(?:serveo\.net|lhr\.life|localhost\.run)")
+
+    def run():
+        for cmd in relays:
+            try:
+                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                        stderr=subprocess.STDOUT, text=True,
+                                        bufsize=1)
+            except FileNotFoundError:
+                print("  [public] no ssh on PATH; skipping the tunnel")
+                return
+            shown = False
+            for line in proc.stdout:
+                m = pat.search(line)
+                if m and not shown:
+                    shown = True
+                    print(f"\n  public link  ->  {m.group(0)}\n"
+                          "  anyone with that link can join a table.\n")
+            proc.wait()
+            if shown:
+                return          # the relay worked then dropped; do not retry
+            print(f"  [public] {cmd[-1]} gave no URL, trying the next relay")
+        print("  [public] no relay answered; the LAN address above still works")
+
+    threading.Thread(target=run, daemon=True).start()
+
+
 def cmd_serve(args) -> int:
     from .web.server import serve
+    if args.public:
+        print("\n  --public puts this table on the open internet through a"
+              "\n  third-party relay. There is no password on it: anyone"
+              "\n  with the link can sit down. Ctrl-C when you are done.\n")
+        _public_tunnel(args.port)
     return serve(args.host, args.port)
 
 
@@ -540,6 +587,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("serve", help="browser UI")
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8420)
+    p.add_argument("--public", action="store_true",
+                   help="also expose a temporary public URL via an ssh relay")
     p.set_defaults(func=cmd_serve)
     return ap
 

@@ -18,7 +18,50 @@ Black Joker**, individually askable (you can ask specifically for the red
 one). Six players, two teams (seats 0/2/4 vs 1/3/5), nine cards each. The
 classic 48-card (no-8s) variant is also supported.
 
-## Quickstart
+## FishBot v0.4 — play it
+
+```bash
+py -m fish4 serve
+```
+
+Open <http://127.0.0.1:8420>. You get a lobby: start a table, pick how many
+**people** sit at it, and engines fill the rest of the six seats.
+
+Seating is a team decision, not a cosmetic one. Teams in Fish are the
+alternating seats {0,2,4} against {1,3,5}, so "three of us against three bots"
+is a constraint on *which* seats the people take:
+
+| Arrangement | 3 people | what you get |
+|---|---|---|
+| **People on one team** | seats 0, 2, 4 | 3 humans vs 3 engines |
+| **Mixed with the bots** | seats 0, 1, 2 | 2 humans one side, 1 the other |
+
+Share the four-letter table code and anyone can join from another machine.
+Each seat is served only its own view, so the server never sends you a card
+you are not entitled to see. Cards are drawn as real faces, fanned as a hand.
+`think` asks the engine for its ranked move list, success probabilities and
+claim confidence for your seat.
+
+To let people outside your network in:
+
+```bash
+py -m fish4 serve --public
+```
+
+That opens a temporary public URL through a third-party SSH relay. There is no
+password on the table: anyone with the link can sit down.
+
+Other v0.4 entry points:
+
+```bash
+py -m fish4 play          # terminal game against five engines
+py -m fish4 analyse       # analyse a position
+py -m fish4 duel a b -n 200   # luck-controlled matchup
+py -m fish4 perpetual     # the dead-position study
+py -m pytest tests4 tests -q
+```
+
+## v0.3 simulator and live coach
 
 ```bash
 py -m fish.cli serve
