@@ -27,7 +27,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SD = 3.869              # measured per-pair SD, see fish4/evalx/README.md
+#: Per-pair standard deviation, measured over the 4800 A/A pairs of the variance
+#: study rather than the 3.869 estimated earlier from far fewer. Every MDE in the
+#: table below scales with it, and the settling run was powered against this
+#: value, so the table has to use the same one or its "minimum resolvable effect"
+#: column would disagree with the design of the run it is reporting.
+SD = 3.796
 
 #: (run label, how the paper should name the cell, which block). Order is the
 #: order of the table: the screening cells first, then the retests, so the reader
@@ -48,6 +53,14 @@ ROWS = [
     ("REPLICATE coupling ablation d3 (fresh seeds)",  r"\emph{no coupling} --- retest",     "retest"),
     ("DECISIVE lookahead d3 w0.25 vs champion (A)",    r"depth 3, $w=0.25$ --- decisive A",   "decisive"),
     ("DECISIVE lookahead d3 w0.25 vs champion (B)",    r"\quad --- decisive B",               "decisive"),
+] + [
+    # The pre-registered settling run: six blocks of 1000, fixed in
+    # jobs/PREREGISTRATION_lookahead.md before any of them ran.
+    (f"SETTLE lookahead d3 w0.25 block {i}",
+     (r"depth 3, $w=0.25$ --- settle, block 1" if i == 0
+      else rf"\quad --- block {i + 1}"),
+     "settle")
+    for i in range(6)
 ]
 
 
