@@ -58,6 +58,8 @@ POOLS = {
         [f"RETAKE GATE w0.30 depth>=2 vs champion block {i}" for i in range(2)],
     "precision rung 2, six blocks":
         [f"PRECISION2 n_draws 1440 vs 480 block {i}" for i in range(6)],
+    "claim threshold, two blocks":
+        [f"CLAIM THRESHOLD 0.90 vs 0.97 block {i}" for i in range(2)],
 }
 
 

@@ -114,6 +114,16 @@ def main():
           f"drifts a little\n  with divergence and the rule below is a good "
           f"approximation rather than a law.")
 
+    print(f"\nWHERE THIS IS MEASURED, AND WHERE IT IS NOT")
+    print(f"  divergence share across these cells runs "
+          f"{sh.min():.2f} to {sh.max():.2f}.")
+    print("  Every cell here changes something the policy consults constantly, so")
+    print("  none of them is quiet. A change that binds rarely -- a claim")
+    print("  threshold, a stall window -- diverges on a few percent of pairs, and")
+    print("  the rule below is an EXTRAPOLATION there, not a measurement. It")
+    print("  should not be trusted to size such a run; use the cell's own")
+    print("  interval, which implies its standard deviation to within 1%.")
+
     print(f"\nHOW TO SIZE THE NEXT EXPERIMENT")
     print(f"  sd ~= {cs.mean():.2f} * sqrt(share of pairs on which the arms "
           f"diverge)")
@@ -140,6 +150,7 @@ def main():
            "cond_sd_mean": float(cs.mean()),
            "cond_sd_spread": float(cs.std(ddof=1) / cs.mean()),
            "raw_sd_spread": float(sd.std(ddof=1) / sd.mean()),
+           "share_range": [float(sh.min()), float(sh.max())],
            "cells": cells}
     dest = ROOT / "results" / "pair_sd_model.json"
     dest.write_text(json.dumps(out, indent=1))

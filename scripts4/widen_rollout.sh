@@ -10,7 +10,8 @@ queue_done() {
 import json, pathlib
 want = set()
 for f in ('j24_at_ask_confirm.json', 'j25_stack.json',
-          'j26_retake_gate.json', 'j27_precision2.json'):
+          'j26_retake_gate.json', 'j27_precision2.json',
+          'j28_claim_threshold.json'):
     p = pathlib.Path('jobs') / f
     if p.exists():
         want |= {j['label'] for j in json.loads(p.read_text())}
