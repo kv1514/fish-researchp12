@@ -80,7 +80,17 @@ def stage_harvest(args) -> dict:
 
 def stage_rollout(args) -> dict:
     root = data_root(args.run)
-    cfg = R.RolloutConfig()
+    if args.continuation == "v04":
+        # The paper wrote off this whole line because the continuation was too
+        # weak to let a won card matter by the end of the deal. It measured that
+        # claim at a slope of +0.101; with the engine finishing the rollout the
+        # same measurement gives +0.681 +/- 0.142 (results/rollout_target.json).
+        # A rollout is roughly 20x slower this way, which is the price of the
+        # target carrying signal.
+        cfg = R.RolloutConfig(policy=R.POLICY_V04, seed_history=True,
+                              max_actions=args.max_actions)
+    else:
+        cfg = R.RolloutConfig()
     summary = R.evaluate_positions(root, cfg=cfg, n_workers=args.workers,
                                    seed=args.seed, limit=args.limit)
     print(json.dumps(summary, indent=2))
@@ -643,6 +653,14 @@ def main() -> None:
                          "free-p fit divided by its own p coefficient, or the "
                          "incumbent (a null-change control)")
     ap.add_argument("--label", default=None)
+    ap.add_argument("--continuation", choices=["public", "v04"],
+                    default="public",
+                    help="policy that finishes each rollout. 'public' is the "
+                         "incumbent and reproduces every rollout file on disk; "
+                         "'v04' is the full engine and needs schema-2 "
+                         "positions, which carry the public history.")
+    ap.add_argument("--max-actions", type=int, default=900,
+                    help="cap on actions inside one rollout")
     args = ap.parse_args()
 
     if args.stage in ("harvest", "all"):

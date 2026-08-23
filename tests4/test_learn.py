@@ -559,3 +559,44 @@ def test_v04_continuation_is_reproducible():
     a = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds, asks, **kw)
     b = rollout_matrix(st.rules, seat, st.set_winner, seat, worlds, asks, **kw)
     assert np.array_equal(a, b)
+
+
+def test_history_codec_roundtrips_every_event_type():
+    from fish.engine import PassEvent
+    from fish4.learn.dataset import decode_history, encode_history
+    h = [AskEvent(0, 1, 5, True), AskEvent(1, 2, 7, False),
+         ClaimEvent(2, 3, (0, 1, 2, 3, 4, 5), (0, 1, 2, 3, 4, 5), 1),
+         PassEvent(4, 0)]
+    assert decode_history(encode_history(h)) == h
+    with pytest.raises(ValueError, match="unknown history tag"):
+        decode_history([["z", 1, 2]])
+
+
+def test_v04_rollout_refuses_a_position_without_a_stored_history():
+    """A schema-1 record must stop the run, not run on an invented game.
+
+    This is the one place where "be permissive" would be catastrophic and
+    invisible: an empty history makes every belief tracker anchor on the
+    determinized mid-game hand as though it were the deal, and the rollout
+    completes, and the number is wrong.
+    """
+    from fish4.learn.rollout import _eval_one
+    st = _midgame(seed=9, plies=18)
+    seat = st.turn
+    asks = Observation.from_state(st, seat).legal_asks()[:2]
+    if len(asks) < 2:
+        pytest.skip("no legal asks at this position")
+    rec = {
+        "pid": "legacy:18", "seat": seat,
+        "set_winner": list(st.set_winner),
+        "rules": st.rules.to_dict(),
+        "asks": [[a.target, a.card] for a in asks],
+        "eval_idx": [0, 1],
+        "worlds": [[format(h, "x") for h in w]
+                   for w in _posterior_worlds(st, seat, n=1, seed=6)],
+    }
+    with pytest.raises(ValueError, match="predates the stored public history"):
+        _eval_one((rec, _v04_cfg().to_dict(), 7))
+    # ... and the public continuation still evaluates it, as it always could.
+    out = _eval_one((rec, RolloutConfig(max_actions=200).to_dict(), 7))
+    assert len(out["v"]) == 2

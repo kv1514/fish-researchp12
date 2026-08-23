@@ -560,16 +560,29 @@ def rollout_summary(root) -> dict:
 def _eval_one(args) -> dict:
     """Worker: evaluate one harvested position. Pure function of its input."""
     import time
-    from .dataset import record_asks, record_rules, record_worlds
+    from .dataset import (decode_history, record_asks, record_rules,
+                          record_worlds)
     rec, cfg_dict, seed = args
     cfg = RolloutConfig.from_dict(cfg_dict)
+    hist = ()
+    if cfg.seed_history:
+        if "history" not in rec:
+            # A schema-1 position, harvested before the log was stored. Seeding
+            # an empty history here would anchor six belief trackers on a deal
+            # that never happened and the rollout would run, silently, on a
+            # different game. Refuse by name.
+            raise ValueError(
+                f"position {rec.get('pid')} predates the stored public history "
+                f"(schema askobj-positions/1) and cannot be finished by "
+                f"policy={cfg.policy!r}; re-harvest it")
+        hist = tuple(decode_history(rec["history"]))
     asks = record_asks(rec)
     cands = [asks[i] for i in rec["eval_idx"]]
     stats = RolloutStats()
     t0 = time.time()
     V = rollout_matrix(record_rules(rec), rec["seat"], rec["set_winner"],
                        rec["seat"], record_worlds(rec), cands, seed,
-                       cfg=cfg, stats=stats)
+                       cfg=cfg, stats=stats, history=hist)
     return {"pid": rec["pid"], "eval_idx": list(rec["eval_idx"]),
             "v": V.astype(int).tolist(), "stats": stats.to_dict(),
             "seconds": round(time.time() - t0, 3)}

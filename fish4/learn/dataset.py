@@ -68,7 +68,7 @@ import numpy as np
 
 from fish.beliefs import RESOLVED, BeliefContradiction
 from fish.cards import deck_size, team_of
-from fish.engine import Ask
+from fish.engine import Ask, AskEvent, ClaimEvent, PassEvent
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish.runner import GameTimeout, play_game
@@ -79,9 +79,53 @@ from ..posterior import Posterior
 from .rollout import banked_differential
 
 #: Bump when the record shape changes.
-POSITION_SCHEMA = "askobj-positions/1"
+POSITION_SCHEMA = "askobj-positions/2"
+#: Schemas this module can still read. Version 1 lacks ``history`` and so
+#: cannot feed the strong continuation; the rollout stage refuses it by name
+#: rather than by seeding an empty log, which would anchor six belief trackers
+#: on a game that never happened.
+READABLE_SCHEMAS = ("askobj-positions/1", "askobj-positions/2")
 
 #: Hard cap on worker processes: 8 cores, other jobs running alongside.
+
+def encode_history(history) -> list:
+    """The public log as JSON, one compact row per event.
+
+    Tags mirror ``fish.gamelog``: ``a`` ask, ``c`` claim, ``p`` pass. Stored
+    because the strong rollout continuation reconstructs each seat's initial
+    deal from its hand plus this log, and a position without it can only be
+    finished by a policy that has no model to attach.
+    """
+    out = []
+    for ev in history:
+        if isinstance(ev, AskEvent):
+            out.append(["a", ev.asker, ev.target, ev.card,
+                        1 if ev.success else 0])
+        elif isinstance(ev, ClaimEvent):
+            out.append(["c", ev.claimer, ev.half_suit, list(ev.declared),
+                        list(ev.revealed), ev.winner])
+        elif isinstance(ev, PassEvent):
+            out.append(["p", ev.player, ev.teammate])
+        else:
+            raise TypeError(f"cannot encode event {ev!r}")
+    return out
+
+
+def decode_history(rows) -> list:
+    """Inverse of :func:`encode_history`. Unknown tags raise."""
+    out = []
+    for r in rows:
+        tag = r[0]
+        if tag == "a":
+            out.append(AskEvent(r[1], r[2], r[3], bool(r[4])))
+        elif tag == "c":
+            out.append(ClaimEvent(r[1], r[2], tuple(r[3]), tuple(r[4]), r[5]))
+        elif tag == "p":
+            out.append(PassEvent(r[1], r[2]))
+        else:
+            raise ValueError(f"unknown history tag {tag!r}")
+    return out
+
 MAX_WORKERS = 2
 
 
@@ -226,6 +270,7 @@ class HarvestBot(FishBot4):
             "pid": f"{self.sink.game_seed}:{len(obs.history)}",
             "game": self.sink.game_seed,
             "ply": len(obs.history),
+            "history": encode_history(obs.history),
             "seat": obs.player,
             "rules": obs.rules.to_dict(),
             "set_winner": list(obs.set_winner),
