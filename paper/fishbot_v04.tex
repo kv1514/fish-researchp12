@@ -1550,6 +1550,90 @@ agrees with optimal play $78.7\%$ of the time. The missing fifth is not in the
 endgame in the sense v0.3 meant --- these positions \emph{are} the endgame --- it
 is in choosing correctly when the hidden information genuinely has not resolved.
 
+\subsection{How much the ask objective leaves on the table}
+\label{sec:res-regret}
+
+Table~\ref{tab:exact} is absolute but narrow: it needs a position the exact
+solver can reach, and it scores agreement with a \emph{perfect-information}
+optimum rather than value. This measures the objective where it actually
+operates --- positions with hidden information and no solvable endgame --- by
+running one step of policy iteration and reporting the gap.
+
+At a decision with belief $b$ and policy $\pi$, the value of ask $a$ is
+$Q(a) = \mathbb{E}_{w \sim b}[V^{\pi}(w, a)]$: draw worlds from the posterior,
+take $a$, and play the deal to the end with $\pi$ in all six seats. The one-step
+regret is $\max_a Q(a) - Q(\pi(\text{root}))$, and it is zero exactly when the
+objective already picks the best ask available \emph{with respect to its own
+continuation}. It bounds what any better tie-break could buy.
+
+This is not strategy fusion. Every seat inside a rollout sees only the public
+history plus the hand the sampled world gives it; nothing consults the world it
+is being played in. Determinization becomes strategy fusion when the searcher
+conditions its plan on the sampled world, and here the world only generates
+observations.
+
+We harvest 40 on-policy positions with at least five half-suits resolved, where
+the action set is small enough to evaluate \emph{exhaustively} --- 18.4 legal
+asks on average, all of them, rather than a shortlist the objective proposed.
+Thirty-seven yielded an ask decision rather than a claim.
+
+\paragraph{The estimator cannot be the obvious one.} $\max_a \widehat{Q}(a)$ over
+eighteen noisy estimates is biased upward by about two standard errors, so a
+policy that already played perfectly would measure a regret near $+1.8$. On
+synthetic rollouts with twenty-five \emph{truly equal} actions the naive
+estimator reports $+1.83$ sets of regret that does not exist. This is the same
+selection bias Section~\ref{sec:res-lookahead} is about, arriving at a fourth
+level: inside the tool built to measure the objective.
+
+Cross-fitting removes it. Choose the challenger on half the sampled worlds,
+score it on the other half, both ways round; the half that scores it played no
+part in choosing it, so the estimate is unbiased for the value of the action
+actually selected --- which is at most the best available, making the result a
+lower bound and never an inflated one. On the same synthetic null it returns
+$-0.004 \pm 0.012$ over five runs of 4000 trials, and given one action truly
+worth $+2.0$ it recovers $+0.88$.
+
+\paragraph{The result.}
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+cross-fitted one-step regret & $-0.097 \pm 0.105$, 95\% $[-0.302, +0.109]$ \\
+naive maximum over actions   & $+0.579$ \\
+\textbf{selection bias, measured} & $\mathbf{+0.676}$ sets \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The selection bias is the solid finding. Two thirds of a set per decision is the
+entire difference between reporting that the objective throws away most of a set
+and reporting that it throws away nothing detectable.
+
+\paragraph{What the interval can and cannot say.} Its resolution is set by the
+noise, and getting that right changed the reading. A first calibration modelled
+each action's rollout noise as independent, which is not the design: every
+action runs through the same worlds with the same seat seeds. Measured properly
+the paired spread across actions is $1.253$ sets against a raw per-world spread
+of $1.437$, so common random numbers barely help --- changing the root ask sends
+the deal down a genuinely different path, and there is little shared variation
+left to cancel. At that noise the estimator recovers $21\%$ of a true half-set
+edge and $57\%$ of a full one.
+
+So the honest reading is not that the objective is optimal. It is that its
+one-step regret is under roughly half a set per decision and this design cannot
+resolve anything smaller. The same procedure applied to a \emph{random} legal ask
+returns $+0.128 \pm 0.130$, indistinguishable from zero, which confirms the limit
+is the design and not the policy: at this budget one-step lookahead cannot
+reliably beat a coin flip either.
+
+\paragraph{Ranking.} Over the same rollouts, the objective's ordering of asks
+correlates $+0.164 \pm 0.072$ with what those asks turn out to be worth, against
+$+0.133 \pm 0.072$ for $\Prob(\text{success})$ alone. The full objective ranks
+slightly better than its dominant term, by an amount well inside noise --- which
+is what Section~\ref{sec:res-ladder}'s tie-break story predicts, and is not on
+this evidence more than that.
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 
