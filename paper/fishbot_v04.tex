@@ -1727,10 +1727,33 @@ it. Real, and not worth buying. The threshold was chosen before the number, so
 that judgement is not a reaction to it.
 
 The blocks \emph{disagree}. Cochran's $Q = 12.9$ on 5 dof ($p = 0.024$),
-$I^2 = 61.4\%$, $\hat\tau = 0.150$ --- the same size as the pooled effect. The
-A/A study measured no between-run variance at all
-(Section~\ref{sec:res-lookahead}), so this is an effect that depends on the deal
-population rather than a reason to change estimator.
+$I^2 = 61.4\%$, $\hat\tau = 0.150$ --- the same size as the pooled effect. Two
+explanations fit that on its own: the harness understates its uncertainty, or
+this particular effect varies with the deal population. They are distinguishable,
+because the identical six-block design has now been run three times and the A/A
+null twenty-four times:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+run & pooled & $Q$ & $p$ & $\hat\tau$ \\
+\midrule
+lookahead settling & $+0.104$ & $4.08$ & $0.538$ & $0.000$ \\
+precision, 480 vs 160 & $+0.340$ & $2.92$ & $0.713$ & $0.000$ \\
+at-ask depth, $\gamma = 1.0$ & $+0.102$ & $12.94$ & $\mathbf{0.024}$ & $\mathbf{0.150}$ \\
+A/A null, 24 blocks & $0.000$ & $18.41$ & $0.735$ & $0.000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every other run gives $\hat\tau$ \emph{exactly} zero, including two real effects
+of comparable and larger size, and so does the null. So the harness is not
+understating its uncertainty by default, and a deal-population-dependent effect
+is the better explanation here. We state the multiplicity rather than leave it
+implicit: four homogeneity tests at the $5\%$ level give roughly a one-in-five
+chance of at least one significant result under a complete null, so one
+significant $Q$ out of four points at where to look and does not settle it.
 
 The random-effects interval is $[-0.052, +0.255]$ and \emph{includes zero}. We
 report it and it decides nothing. The fixed-effect pool was fixed as primary
