@@ -2188,8 +2188,14 @@ positions the coupled and uncoupled arms disagree on $0.54\%$ of decisions, so
 observing no disagreement in a sample of $59$ is the modal outcome rather than
 evidence of equality.
 
-The implementation ships disabled (\texttt{w\_lookahead} defaults to $0$), which
-is the right default for an effect we cannot demonstrate.
+\texttt{w\_lookahead} still defaults to $0$, and that is now a choice about cost
+rather than about evidence. The effect is demonstrated; it is worth about a tenth
+of a set per deal-pair for roughly $6.7$~ms per decision
+(Section~\ref{sec:lookahead-cost}), so a caller under a latency budget should
+decide deliberately instead of inheriting. The engine exposes the enabled
+configuration under its own name rather than by moving the default, because every
+``vs champion'' cell in this paper names the default spec and moving it would
+redefine what those runs measured.
 
 % =====================================================================
 \subsection{Is the opponent model just fitting its own kind?}
