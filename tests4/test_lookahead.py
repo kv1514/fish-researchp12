@@ -418,3 +418,57 @@ def test_the_policy_action_is_invariant_under_a_consistent_relabelling():
         if checked >= 5:
             break
     assert checked >= 5, f"only {checked} alternative worlds found; need 5"
+
+
+# ---------------------------------------------------------------------------
+# The explanation has to match the play
+#
+# The public table plays the strongest measured configuration, which includes
+# the belief-space search, and renders a per-term breakdown of why one ask
+# outscores another. If the Analyser scored asks without the search while the
+# bots played with it, the breakdown would omit a term the engine used and the
+# rows would not sum to the score they sit under -- a decomposition missing a
+# term is worse than no decomposition, because it looks complete.
+# ---------------------------------------------------------------------------
+
+def test_the_analyser_defaults_to_no_lookahead():
+    """So an explanation of the paper's champion is unchanged."""
+    import inspect
+    from fish4.analyse import Analyser
+    ps = inspect.signature(Analyser).parameters
+    assert ps["w_lookahead"].default == 0.0
+    assert ps["lookahead_depth"].default == 1
+
+
+def test_the_breakdown_sums_to_the_score_with_the_search_on():
+    from fish.engine import GameState
+    from fish4.analyse import Analyser
+
+    rules = RuleConfig()
+    st = GameState.deal(rules, seed=606)
+    seat = st.turn
+    an = Analyser(rules, seat, gamma=0.35, n_draws=96, seed=11,
+                  w_lookahead=0.25, lookahead_depth=3, lookahead_beam=4)
+    moves = an.analyse(Observation.from_state(st, seat)).moves
+    assert moves
+    assert any("lookahead" in m.terms for m in moves), (
+        "no move carries a lookahead term although the search is on")
+    for m in moves[:12]:
+        total = m.p_success + sum(m.terms.values())
+        assert abs(total - m.score) < 1e-6, (
+            f"terms sum to {total:.6f} against a score of {m.score:.6f}")
+
+
+def test_with_the_search_off_no_lookahead_term_appears():
+    from fish.engine import GameState
+    from fish4.analyse import Analyser
+
+    rules = RuleConfig()
+    st = GameState.deal(rules, seed=606)
+    seat = st.turn
+    an = Analyser(rules, seat, gamma=0.35, n_draws=96, seed=11)
+    moves = an.analyse(Observation.from_state(st, seat)).moves
+    assert moves
+    assert not any("lookahead" in m.terms for m in moves)
+    for m in moves[:12]:
+        assert abs(m.p_success + sum(m.terms.values()) - m.score) < 1e-6

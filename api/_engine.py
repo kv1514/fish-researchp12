@@ -67,6 +67,17 @@ from fish4.registry4 import make_agent
 #: puts 160 draws within noise of 320 in play, so this costs nothing measurable
 #: in strength and roughly halves the latency.
 WEB_DRAWS = 160
+
+#: The table plays the strongest measured configuration, not the paper's fixed
+#: reference. The belief-space lookahead is worth +0.104 sets per deal-pair,
+#: 95% CI [+0.020, +0.189], over a pre-registered 6000-pair run; it costs about
+#: 6.7 ms per decision, which is nothing against this function's budget because
+#: the client asks for one move at a time.
+#:
+#: Deliberately NOT expressed as registry4.V04_STRONGEST: that constant carries
+#: opponent_gamma, and gamma is a choice the visitor makes in the lobby. Only
+#: the parts the visitor does not choose belong here.
+WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}
 #: Ceiling on engine moves computed in one request. A human's turn is normally
 #: at most a few engine possessions away; this only bounds a pathological game.
 MAX_ADVANCE = 400
@@ -253,7 +264,7 @@ class Session:
         self.draws = draws
         self.state = GameState.deal(rules, seed=seed)
         rng = random.Random(seed ^ 0x9E3779B9)
-        spec = {"opponent_gamma": gamma, "n_draws": draws}
+        spec = dict(WEB_SPEC, opponent_gamma=gamma, n_draws=draws)
         self.bots = {}
         for p in range(NUM_PLAYERS):
             if p == seat:
@@ -343,8 +354,9 @@ class Session:
     def suggest(self):
         """What the actual policy would do from our seat - not a re-ranking."""
         if self._helper is None:
-            self._helper = make_agent(("fishbot4", {"opponent_gamma": self.gamma,
-                                                    "n_draws": self.draws}))
+            self._helper = make_agent(
+                ("fishbot4", dict(WEB_SPEC, opponent_gamma=self.gamma,
+                                  n_draws=self.draws)))
             self._helper.begin_game(self.seat, self.rules, self._helper_seed)
         return self._helper.act(self.obs())
 
@@ -402,7 +414,7 @@ class Session:
         from fish4.analyse import Analyser
         an = Analyser(self.rules, self.seat, value_model=None,
                       gamma=self.gamma, n_draws=self.draws,
-                      seed=self.seed & 0x7FFFFFFF)
+                      seed=self.seed & 0x7FFFFFFF, **WEB_SPEC)
         return an.analyse(self.obs()).to_dict()
 
 

@@ -438,6 +438,7 @@ const TERM_BLURB = {
   expose: "how much it exposes your own half-suit",
   claim: "progress toward a claimable set",
   info: "information gained whether or not it lands",
+  lookahead: "where the chain of asks after this one could go",
 };
 
 function renderWhy(box, m) {

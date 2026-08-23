@@ -140,7 +140,9 @@ class Analyser:
 
     def __init__(self, rules, seat: int, weights: Optional[AskWeights] = None,
                  value_model: Optional[HalfSuitValue] = None,
-                 n_draws: int = 320, gamma: float = 0.35, seed: int = 0):
+                 n_draws: int = 320, gamma: float = 0.35, seed: int = 0,
+                 w_lookahead: float = 0.0, lookahead_depth: int = 1,
+                 lookahead_beam: int = 4, lookahead_couple: bool = True):
         self.rules = rules
         self.seat = seat
         self.weights = weights or AskWeights()
@@ -149,6 +151,16 @@ class Analyser:
         self.gamma = gamma
         self.rng = random.Random(seed)
         self.bel = BeliefState(rules, observer=seat)
+        # The lookahead has to be here, and not only in the agent, because this
+        # class explains the agent's ranking to a human. A caller playing a
+        # policy with the search on and rendering an explanation with it off
+        # shows a score that omits a term the engine used, and a decomposition
+        # that leaves a term out is worse than no decomposition. Defaults are
+        # the incumbent's, so an explanation of the champion is unchanged.
+        self.w_lookahead = w_lookahead
+        self.lookahead_depth = lookahead_depth
+        self.lookahead_beam = lookahead_beam
+        self.lookahead_couple = lookahead_couple
 
     # -- evaluation ------------------------------------------------------------
 
@@ -187,6 +199,13 @@ class Analyser:
         private axis."""
         p, F = ask_feature_matrix(ctx, asks)
         scores = p + F @ self.weights.as_vector()
+        bonus = None
+        if self.w_lookahead and self.lookahead_depth > 1:
+            from .lookahead import lookahead_bonus
+            bonus = self.w_lookahead * lookahead_bonus(
+                ctx, asks, depth=self.lookahead_depth,
+                beam=self.lookahead_beam, couple=self.lookahead_couple)
+            scores = scores + bonus
         out = []
         M = ctx.M
         for i, a in enumerate(asks):
@@ -208,9 +227,11 @@ class Analyser:
                 p_success=float(p[i]), score=float(scores[i]),
                 eval_if_success=ev_s, eval_if_fail=ev_f,
                 eval_expected=p[i] * ev_s + (1 - p[i]) * ev_f,
-                terms={n: float(F[i, j] * getattr(self.weights, n))
-                       for j, n in enumerate(TERM_NAMES)
-                       if getattr(self.weights, n)},
+                terms={**{n: float(F[i, j] * getattr(self.weights, n))
+                          for j, n in enumerate(TERM_NAMES)
+                          if getattr(self.weights, n)},
+                       **({"lookahead": float(bonus[i])}
+                          if bonus is not None else {})},
                 certain=bool(p[i] >= 0.999999)))
         out.sort(key=lambda m: -m.score)
         return out
