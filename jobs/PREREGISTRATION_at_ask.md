@@ -75,3 +75,20 @@ screens, including the four this run does not test.
   not at all. They were argued for jointly and the screens cannot separate them;
   claiming either alone from this run would be reading a two-factor change as if
   it were one.
+- **The run proceeds whatever the five screens say.** Added while those cells
+  still hold zero data, and it makes this protocol stricter rather than looser,
+  which is the only kind of amendment a pre-registration can honestly take after
+  it is written.
+
+  The reason is not stubbornness. Running only when a screen looks favourable
+  conditions the confirmatory result on that screen, which inflates it by
+  exactly the mechanism that has already cost this project four rounds — and it
+  does so invisibly, because the published run would look unselected. The
+  configuration here was argued from a likelihood fit and a normaliser
+  measurement, neither of them a duel, so the screens are informative about the
+  answer and were never load-bearing for the design. If they come back negative
+  that is worth reporting next to the run, not instead of it.
+
+  What a negative screen would legitimately change is priority: whether to spend
+  the two hours at all. That is a resource decision, and if it is ever taken it
+  has to be recorded here as "not run", never as a quietly narrower experiment.
