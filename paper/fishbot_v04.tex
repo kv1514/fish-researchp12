@@ -1503,6 +1503,40 @@ drawn over the initial deal; that mode measured $-1.544$ sets per deal-pair over
 250 pairs. Whether the exact version plays better is a duel, and is not claimed
 here.
 
+\paragraph{What the engine drops, and where it sits.} The likelihood is written
+as proportional to a product of depths, and the proportionality hides a
+denominator: a proper choice model divides by the sum of $\text{depth}^\alpha$
+over the half-suits the player could legally ask in. At $\alpha = 1$ that sum is
+the player's hand count --- public, identical in every world, and it cancels.
+That is the original argument for an exponent near $1$, and it holds for every
+covariate here: the depths over live half-suits sum to the hand count whether
+depth is read at the deal, now, or at the ask.
+
+The cost of being elsewhere had never been measured. Across worlds drawn from
+the posterior at 30 real positions, the coefficient of variation of the dropped
+denominator is
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+$\alpha$ & $0.35$ & $0.60$ & $0.80$ & $1.00$ & $1.207$ & $1.60$ & $2.195$ \\
+\midrule
+mean CV & $0.100$ & $0.063$ & $0.032$ & $\mathbf{0.000}$ & $0.035$ & $0.107$ & $0.226$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+a V centred exactly on $1$, with the $\alpha = 1$ column serving as the control
+that the measurement is reading the right quantity. Two readings follow. The
+shipped $\gamma = 0.35$ pays more for the omission ($0.100$) than the fitted
+exponent on its own covariate would ($0.035$ at $1.207$) --- the approximation
+that motivated an exponent near $1$ is being violated more at the setting in use
+than at the one the data prefer. And $\gamma = 1.0$ is not just another point on
+the sweep of Table~\ref{tab:gamma}: it is the unique exponent at which this
+likelihood is correctly specified. That sweep never tested it; $0.90$ and $1.50$
+bracket it at 150 pairs each, an MDE of $0.87$, which separates nothing.
+
 \paragraph{The competing story is refuted by the same data.} If asks went where
 the opportunity was rather than where the depth was, propensity would fall as
 cards held rises. Observed over expected runs $0.46$, $1.05$, $2.26$, $2.64$,
@@ -2880,12 +2914,36 @@ minutes and saved a wrong champion.
 \subsection{What we would do next}
 
 \begin{itemize}
-\item \textbf{A proper likelihood, not a proxy.} The choice model uses depth in
-the asked half-suit on the initial deal. The right object is the acting
-policy's own probability of the observed action given the hand, evaluated at the
-time of the ask. That is a fixpoint --- the model of the opponent is the policy
---- and it is expensive, but it is the principled version of the thing that
-already works.
+\item \textbf{A proper likelihood, not a proxy --- two of three steps taken.}
+This item previously read: the choice model uses depth on the initial deal, and
+the right object is the acting policy's own probability of the observed action
+given the hand, evaluated at the time of the ask. Two thirds of that turned out
+to be cheap.
+
+\emph{At the time of the ask} costs a lookup table, not a fixpoint. Cards move
+only on successful asks and successful asks are public, so at-ask-time depth is
+initial-deal depth plus a delta the log fixes identically in every world
+(Section~\ref{sec:res-choicecurve}). It is worth $4{,}654$ nats on
+$17{,}005$ real decisions.
+
+\emph{The policy's own probability} was measured rather than assumed, by fitting
+the champion's actual half-suit choice as a conditional logit --- which is what
+Table~\ref{tab:choicecurve} is. The exponent is $2.195 \pm 0.033$ at the ask,
+not the $1$ the shipped model assumes.
+
+What remains is the part that is genuinely not free: using that exponent
+requires the denominator the engine drops. Measured across worlds, the
+coefficient of variation of that denominator is a V centred on $\alpha = 1$ ---
+$0.0000$ there, $0.0352$ at $1.207$, $0.2255$ at $2.195$, and $0.0997$ at the
+shipped $\gamma = 0.35$. So the engine currently pays more for the omission than
+the fitted exponent would, and reaching the exponent the data want means
+computing the denominator per world: tracking depth in \emph{every} live
+half-suit per player during the draw rather than only the asked ones. That is a
+constant-factor cost in the sampler and the remaining piece of this item.
+
+A fixpoint is still not required, and that is the substantive update: the
+opponent being modelled is a policy whose choice rule can be fitted directly
+from its own play.
 \item \textbf{A coordinated best-responder.} The robustness tests here show the
 model is not harmed by an opponent built to violate its assumption, which is
 weaker than showing it cannot be exploited. Training a genuine best response,
