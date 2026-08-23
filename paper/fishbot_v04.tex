@@ -1503,6 +1503,20 @@ drawn over the initial deal; that mode measured $-1.544$ sets per deal-pair over
 250 pairs. Whether the exact version plays better is a duel, and is not claimed
 here.
 
+\paragraph{Is the power law the right shape?} Fitting one functional form well
+is not evidence that it is the right one. The saturated alternative gives every
+depth value a free coefficient; it nests the power law, so it can never fit
+worse, and it is the best that anything conditioning on depth alone can do. On
+the same decisions the power law gives up $110$ nats to it on initial-deal depth
+and $269$ on depth at the ask.
+
+Set against the $4{,}654$ nats that changing the covariate is worth, the shape is
+not what limits this model --- the covariate matters roughly seventeen times
+more. That is the useful bound: further gains in the choice model need a
+different conditioning variable or the normaliser below, not a better curve.
+(The initial-deal figure is a lower bound; that fit had not converged, and its
+depth-5 coefficient rests on five alternatives in the whole corpus.)
+
 \paragraph{What the engine drops, and where it sits.} The likelihood is written
 as proportional to a product of depths, and the proportionality hides a
 denominator: a proper choice model divides by the sum of $\text{depth}^\alpha$
