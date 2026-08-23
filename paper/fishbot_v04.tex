@@ -2277,6 +2277,58 @@ seeds ($+0.068$ and $-0.066$). We record it as a failed experiment rather than
 burying it in a methodology note, because it is the shape of the mistake this
 project is most likely to make next.
 
+\paragraph{Style that responds to the match.} Every objective term in v0.4 is a
+function of one candidate ask and the posterior. None knows the score, and none
+knows that the last four moves were the same two players passing one card back
+and forth. Two ideas were built to close that gap, each ablatable to zero, and
+both are refuted --- not as nulls, but with a dose-response, which is the more
+informative outcome because the gradient confirms the mechanism rather than
+merely the sign. All cells are 200 duplicate deal-pairs against the champion.
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+change & set diff & 95\% CI \\
+\midrule
+break the duel, $w_{\mathrm{retake}} = 0.30$ & $-0.340$ & $[-0.665, -0.015]$ \\
+break the duel, $w_{\mathrm{retake}} = 1.00$ & $\mathbf{-1.015}$ & $[-1.562, -0.468]$ \\
+\midrule
+tie-breakers up when behind, $w_{\mathrm{behind}} = 0.50$ & $-0.185$ & $[-0.628, +0.258]$ \\
+tie-breakers up when behind, $w_{\mathrm{behind}} = 1.00$ & $\mathbf{-0.890}$ & $[-1.384, -0.396]$ \\
+tie-breakers down when behind, $w_{\mathrm{behind}} = -0.50$ & $-0.075$ & $[-0.552, +0.402]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\emph{Breaking the duel} penalises taking back a card this seat just lost to that
+same opponent. Section~\ref{sec:game} notes that the state graph is cyclic
+precisely because two opponents can trade a card back and forth; the question
+here was whether a player should decline to. They should not, and three times the
+penalty costs three times the sets. This is the scheduling argument of
+Proposition~\ref{prop:greedy} arriving from a third direction: a card you watched
+an opponent take is a card you \emph{know} they hold, so taking it back is a
+certain ask and a certain ask keeps the turn. Deferring it risks the turn to
+preserve an option that was not going anywhere, and the information concealed by
+not asking is worth less than the possession thrown away. It is worth recording
+that this is a manoeuvre strong players describe using, which the engine could
+not previously express at all --- the measurement is the point, not the outcome.
+
+\emph{Score-adaptive tie-breakers} scale the weights by how far behind the team
+is, on the reasoning that a losing side should buy information and a winning side
+should buy certainty. Scaling them \emph{up} when behind loses monotonically.
+Scaling them \emph{down} is indistinguishable from the champion. The asymmetry is
+the finding: the loss surface is steep on the side of trusting the tie-breakers
+more and flat on the side of trusting them less, which is what one would expect
+if v0.3's hand-tuned constants already sit at the point where the tie-breakers
+have given everything they have --- and is a third piece of evidence, after the
+inverted-U sweeps and the substitution result of Section~\ref{sec:res-ladder},
+that they are tie-breakers rather than an objective.
+
+Neither idea is retried in another form. What both share is that they spend
+$P(\text{success})$ to buy something else, and this paper's most reproducible
+finding is that nothing else is worth buying with it.
+
 \paragraph{Belief-space possession-chain search.} Built to test the one design
 the variance diagnosis leaves open, and abandoned \emph{unresolved} rather than
 as a null. Three runs of the identical configuration returned $+0.570$ (200
