@@ -39,11 +39,16 @@
         <p class="note" id="c-explain"></p>
 
         <div class="row">
-          <label>Bot pace
+          <label>Engine pace
             <select id="c-delay">
-              <option value="0.25">fast</option>
-              <option value="0.8" selected>normal</option>
-              <option value="1.8">slow</option>
+              <option value="1">1s &mdash; quick</option>
+              <option value="3">3s &mdash; brisk</option>
+              <option value="6">6s &mdash; steady</option>
+              <option value="10">10s &mdash; read every move</option>
+              <option value="12" selected>12s &mdash; recommended</option>
+              <option value="15">15s &mdash; unhurried</option>
+              <option value="20">20s</option>
+              <option value="30">30s</option>
             </select>
           </label>
           <label>Engine hints
@@ -85,6 +90,20 @@
       <span class="code-chip">table <b id="t-code"></b></span>
       <span id="t-status" class="chip"></span>
       <span class="grow"></span>
+      <span id="pace" class="pace hidden">
+        <button id="pause-go" class="ghost sm" title="freeze the engines">pause</button>
+        <button id="skip-go" class="ghost sm" title="play the pending engine move now">next &rarr;</button>
+        <select id="pace-sel" title="how long the engines wait between moves">
+          <option value="1">1s</option>
+          <option value="3">3s</option>
+          <option value="6">6s</option>
+          <option value="10">10s</option>
+          <option value="12" selected>12s</option>
+          <option value="15">15s</option>
+          <option value="20">20s</option>
+          <option value="30">30s</option>
+        </select>
+      </span>
       <span class="score"><b id="s-you">0</b> us · <b id="s-them">0</b> them
         <span id="s-null" class="dim"></span></span>
     </div>
@@ -102,9 +121,12 @@
         <div id="sets" class="sets"></div>
       </div>
 
+      <div id="spot" class="spot hidden"></div>
+
       <div class="hand-area">
         <div id="hand"></div>
         <div id="turnline" class="turnline"></div>
+        <div id="act-err" class="err"></div>
       </div>
 
       <div class="controls">

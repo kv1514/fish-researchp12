@@ -36,6 +36,22 @@ is a constraint on *which* seats the people take:
 | **People on one team** | seats 0, 2, 4 | 3 humans vs 3 engines |
 | **Mixed with the bots** | seats 0, 1, 2 | 2 humans one side, 1 the other |
 
+Engines play on a clock, not instantly. The default is **12 seconds a move**.
+A decision costs about 4ms, so an unpaced possession arrives as a single jump
+with no way to see what happened.
+
+The wait is only useful if there is something to read in it, so the table says
+what the last move was in plain words and what it proved to everyone watching.
+Nobody may bluff, which makes an ask a statement about your own hand as well as
+a question about someone else's: a failed ask tells the table that the asker
+holds another card of that set, that neither player holds the card asked for,
+and that it therefore sits with one of the other four.
+
+`pause` freezes the clock. `next` plays the pending move at once. Together they
+are a step-through: a frozen table advances exactly one engine move per click
+and stays frozen, so you can walk an engine's whole possession ask by ask. Any
+seated player can change the pace mid-game, 1s to 30s.
+
 Share the four-letter table code and anyone can join from another machine.
 Each seat is served only its own view, so the server never sends you a card
 you are not entitled to see. Cards are drawn as real faces, fanned as a hand.

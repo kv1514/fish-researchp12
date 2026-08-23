@@ -112,11 +112,47 @@ label > input, label > select, label > .seg { margin-top: .3rem; }
 .set.null { background: rgba(255,255,255,.09); color: var(--faint);
   text-decoration: line-through; }
 
+/* --------------------------------------------------------------- spotlight */
+.pace { display: flex; gap: .3rem; align-items: center; }
+.pace select { width: auto; padding: .18rem .3rem; font-size: .78rem; }
+
+.spot { display: flex; gap: 1rem; align-items: center; margin-top: 1rem;
+  background: var(--bg2); border: 1px solid var(--line);
+  border-left: 3px solid var(--warn); border-radius: var(--r);
+  padding: .9rem 1rem; }
+.spot-card { flex: 0 0 74px; }
+.spot-card .face { width: 74px; height: auto; display: block;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.5)); }
+.spot-body { flex: 1; min-width: 0; }
+.spot-head { font-size: 1.02rem; line-height: 1.35; }
+.spot-head .ok { color: var(--good); font-weight: 700; }
+.spot-head .no { color: var(--bad); font-weight: 700; }
+.spot-why { margin: .45rem 0 .1rem; padding-left: 1.05rem; color: var(--dim);
+  font-size: .85rem; }
+.spot-why li { margin: .12rem 0; }
+.spot-why .cn { font-family: ui-monospace, Menlo, monospace; color: var(--ink); }
+.spot-why b { color: var(--ink); }
+.spot-set { display: flex; gap: .25rem; flex: 0 0 auto; flex-wrap: wrap;
+  max-width: 17rem; }
+.spot-set .rv { text-align: center; width: 46px; }
+.spot-set .rv .face { width: 46px; height: auto; display: block; }
+.spot-set .rv span { font-size: .6rem; color: var(--dim); display: block;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.cd { margin-top: .55rem; display: flex; align-items: center; gap: .55rem; }
+.cd-bar { flex: 1; height: 4px; background: rgba(255,255,255,.09);
+  border-radius: 2px; overflow: hidden; }
+.cd-bar i { display: block; height: 100%; background: var(--warn);
+  border-radius: 2px; transition: width .12s linear; }
+.cd-txt { font-size: .76rem; color: var(--faint); white-space: nowrap;
+  font-variant-numeric: tabular-nums; }
+
 /* -------------------------------------------------------------------- hand */
 .hand-area { margin: 1.4rem 0 .4rem; text-align: center; }
 .turnline { min-height: 1.6rem; color: var(--dim); font-size: .9rem;
   margin-top: .5rem; }
 .turnline b { color: var(--warn); }
+#act-err { min-height: 0; margin-top: .25rem; }
 .fan { display: flex; justify-content: center; align-items: flex-end;
   padding-top: 2.2rem; min-height: 9.5rem; }
 .fan.empty { color: var(--faint); font-size: .85rem; padding-top: 4rem; }
@@ -182,6 +218,8 @@ label > input, label > select, label > .seg { margin-top: .3rem; }
   .ring { grid-template-columns: repeat(2, 1fr); }
   .sets { grid-template-rows: none; grid-template-columns: repeat(3, 1fr); }
   .slot { width: 66px; }
+  .spot { flex-direction: column; align-items: flex-start; }
+  .spot-set { max-width: 100%; }
   h1 { font-size: 2rem; }
   #lobby { padding-top: 1.6rem; }
 }

@@ -1709,7 +1709,19 @@ count --- one that fills a whole side before crossing, and one that interleaves
 --- and the 3-versus-3 configuration that a group of friends actually wants is
 the former at $n=3$. Engine seats move on a clock rather than instantly, because
 a decision costs about $4$\,ms and an unpaced possession appears to a human as a
-single discontinuous jump. Each seat is served only its own
+single discontinuous jump. Pacing alone is not enough: a longer gap is
+only a longer gap unless there is something to read in it, so the table
+states each move in words together with what it \emph{proved}. That
+second part is free, and is the one place where the no-bluff rule pays
+the observer directly: an ask is a truthful statement about the asker's
+hand as well as a question about the target's, so a failed ask
+establishes that the target does not hold the card, that the asker does
+not either, and that the asker holds some other card of that half-suit.
+The default gap is $12$\,s and is adjustable in play. Freezing the table
+turns the same control into a step-through --- one engine move per
+request, still frozen afterwards --- which is what makes an engine's
+whole possession readable, since a possession is a run of successful
+asks and it is the run, not any single ask, that carries the plan. Each seat is served only its own
 \texttt{Observation}, so the information boundary of
 Appendix~\ref{app:leak} is enforced by the transport, not merely respected by
 the client.
@@ -2134,6 +2146,20 @@ each candidate is then validated by an \emph{independent} replay of the whole
 public history, so the test does not assume the sampler is correct. Checked
 quantities: posterior marginals under four combinations of the opponent-model
 parameters, all eleven ask-objective terms, and the end-to-end policy action.
+
+There is a second boundary, and it is worth recording that the first set of
+tests did not protect it. The permutation tests establish that the
+\emph{policy} never reads a card it should not; they say nothing about what the
+\emph{server} puts on the wire. An earlier revision of the multiplayer table
+included the deal seed in the per-seat view, as a debugging convenience. Every
+hand is a deterministic function of that integer, so one number defeated the
+entire property the permutation tests were built to guarantee --- and it was
+readable without joining the table, since a table code alone fetches a view.
+The lesson generalises past this bug: a leak test that only exercises the
+component you were thinking about will keep passing while the leak moves to the
+component you were not. The transport now has its own test, which walks the
+serialised view recursively and fails on any key or value that could reconstruct
+the deal, for a seated player and for an anonymous visitor alike.
 
 % =====================================================================
 \begin{thebibliography}{99}

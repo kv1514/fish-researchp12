@@ -149,4 +149,26 @@ function fan(cards, opts = {}) {
   }).join("") + `</div>`;
 }
 
-window.FishCards = { cardFace, cardBack, fan };
+const RANK_WORD = {
+  2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven",
+  8: "Eight", 9: "Nine", T: "Ten", J: "Jack", Q: "Queen", K: "King", A: "Ace",
+};
+const SUIT_WORD = { C: "Clubs", D: "Diamonds", H: "Hearts", S: "Spades" };
+
+/** "7H" -> "Seven of Hearts". Written out because a slow table exists to be
+ *  read, and a rank-suit code is something you decode rather than read. */
+function prettyCard(name) {
+  if (name === "RJ") return "Red Joker";
+  if (name === "BJ") return "Black Joker";
+  return `${RANK_WORD[name.slice(0, -1)]} of ${SUIT_WORD[name.slice(-1)]}`;
+}
+
+/** The suit pip on its own, for inline use in a sentence. */
+function glyphOf(name) {
+  return (name === "RJ" || name === "BJ") ? "★" : SUIT[name.slice(-1)].glyph;
+}
+
+const isRedName = (name) =>
+  name === "RJ" ? true : name === "BJ" ? false : SUIT[name.slice(-1)].red;
+
+window.FishCards = { cardFace, cardBack, fan, prettyCard, glyphOf, isRedName };

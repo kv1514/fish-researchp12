@@ -14,7 +14,7 @@ const CARDS = window.FishCards;
 const S = {
   code: null, token: null, seat: null, view: null, ver: -1,
   deck: null, sel: { card: null }, claim: null, hint: null,
-  timer: null, lobbyTimer: null,
+  timer: null, lobbyTimer: null, misses: 0,
 };
 
 const SEATED = () => JSON.parse(localStorage.getItem("fish.seats") || "{}");
@@ -30,7 +30,11 @@ async function api(path, body) {
   };
   const r = await fetch(path, opt);
   const j = await r.json().catch(() => ({ error: `http ${r.status}` }));
-  if (!r.ok && !j.state) throw new Error(j.error || `http ${r.status}`);
+  if (!r.ok && !j.state) {
+    const err = new Error(j.error || `http ${r.status}`);
+    err.status = r.status;
+    throw err;
+  }
   return j;
 }
 
@@ -91,6 +95,7 @@ async function refreshLobby() {
       <div class="room">
         <b>${esc(r.code)}</b>
         <span class="who">${r.humans} human · ${r.bots} bot${r.bots === 1 ? "" : "s"}
+          · ${r.pace}s pace
           ${r.players.length ? "· " + r.players.map(esc).join(", ") : ""}</span>
         ${r.seats_open
           ? `<button class="primary sm" onclick="joinCode('${r.code}')">
@@ -134,7 +139,7 @@ window.joinCode = joinCode;
 
 function enterTable(code, token, seat, view) {
   S.code = code; S.token = token; S.seat = seat; S.ver = -1;
-  S.sel = { card: null }; S.claim = null; S.hint = null;
+  S.sel = { card: null }; S.claim = null; S.hint = null; S.misses = 0;
   remember(code, token, seat);
   location.hash = code;
   $("#lobby").classList.add("hidden");
@@ -148,13 +153,15 @@ function enterTable(code, token, seat, view) {
   poll();
 }
 
-function leave() {
+function leave(why) {
   clearInterval(S.timer);
-  S.code = null; S.view = null;
+  S.code = null; S.view = null; S.misses = 0;
   location.hash = "";
   $("#table").classList.add("hidden");
   $("#lobby").classList.remove("hidden");
+  $("#c-err").textContent = why || "";
   refreshLobby();
+  clearInterval(S.lobbyTimer);
   S.lobbyTimer = setInterval(refreshLobby, 3000);
 }
 
@@ -162,34 +169,82 @@ async function poll() {
   if (!S.code) return;
   try {
     const v = await api(`/api/room/${S.code}?token=${S.token}`);
+    S.misses = 0;
     render(v);
-  } catch (e) { /* transient */ }
+  } catch (e) {
+    // A 404 means the table is gone -- the server restarted, or it was
+    // evicted. Polling a dead room forever just looks like a frozen board, so
+    // say what happened and go back to the lobby. Two strikes, because a
+    // single failed request in flight across a restart is not proof.
+    if (e.status === 404 && ++S.misses >= 2) leave("That table is gone.");
+  }
 }
 
 async function act(body) {
+  // The message goes in its own slot, and is written after the redraw. Putting
+  // it in the turn line meant the redraw on the very next line erased it, so a
+  // rejected move looked like a move that silently did nothing.
+  say("");
   try {
     const v = await api(`/api/room/${S.code}/act`, { token: S.token, ...body });
     S.sel = { card: null }; S.claim = null; S.hint = null;
-    if (v.error) $("#turnline").innerHTML = `<span class="err">${esc(v.error)}</span>`;
     render(v.state || v, true);
+    if (v.error) say(v.error);
   } catch (e) {
-    $("#turnline").innerHTML = `<span class="err">${esc(e.message)}</span>`;
+    say(e.message);
   }
+}
+
+function say(msg) {
+  const el = $("#act-err");
+  if (el) el.textContent = msg || "";
 }
 
 // --------------------------------------------------------------------- draw
 
 function render(v, force) {
   if (!v || v.seat === undefined) return;
+  // Responses can overtake each other: a poll issued before a pause lands
+  // after the pause response and would put the board, the button and the
+  // countdown back the way they were. The version counter only ever goes up,
+  // so anything older than what is already on screen is simply dropped.
+  if (!force && S.ver >= 0 && v.version < S.ver) return;
+  // The clock moves between versions, so pacing is read before the redraw
+  // short-circuit; everything else only changes when a move happens.
+  S.paused = !!v.paused;
+  S.delay = v.bot_delay;
+  S.botOnMove = v.status === "playing" && v.turn !== undefined &&
+    v.seats[v.turn] && v.seats[v.turn].kind === "bot";
+  S.waitUntil = Date.now() + (v.wait_left || 0) * 1000;
+  S.held = v.wait_left || 0;
+  drawPace(v);
+  tickWait();
   const changed = force || v.version !== S.ver || v.status !== (S.view || {}).status;
-  S.view = v; if (!changed) return;
-  S.ver = v.version;
+  S.view = v;
+  if (!changed) return;
+  // The version is committed only after the board has actually been redrawn.
+  // Recording it first would mean one thrown draw froze the table for good:
+  // every later poll would see the same version and skip the redraw, and the
+  // error is swallowed by the poll loop, so it would look like a dead server.
+  try {
+    redraw(v);
+    S.ver = v.version;
+  } catch (err) {
+    console.error("redraw failed", err);
+    S.ver = -1;                       // try again on the next poll
+  }
+}
 
+function redraw(v) {
+  // A rejection message is about a move that did not happen, so it stands
+  // until something does. This only runs when the version actually moved.
+  say("");
   $("#t-status").textContent =
     v.status === "waiting" ? `waiting for ${v.open_seats.length} more`
     : v.status === "finished" ? "game over" : "in play";
 
   if (v.status === "waiting") {
+    $("#spot").classList.add("hidden");
     $("#waiting").classList.remove("hidden");
     $("#board").classList.add("hidden");
     $("#w-seats").innerHTML = v.seats.map((s) => `
@@ -208,7 +263,7 @@ function render(v, force) {
   $("#s-null").textContent = v.score.nulled ? `· ${v.score.nulled} void` : "";
 
   drawSeats(v); drawSets(v); drawHand(v); drawAsk(v); drawClaim(v); drawLog(v);
-  drawTurnline(v);
+  drawTurnline(v); drawSpot(v);
   if (!v.hints) $("#hint-go").classList.add("hidden");
   drawHints();
 }
@@ -237,9 +292,35 @@ function drawSets(v) {
 function drawHand(v) {
   const cards = v.hand.slice().sort((a, b) => a.id - b.id);
   const live = v.your_turn && v.status === "playing";
-  $("#hand").innerHTML = CARDS.fan(cards, {
+  const el = $("#hand");
+  el.innerHTML = CARDS.fan(cards, {
     selected: S.sel.card, enabled: live, onclick: live ? "pickHandCard" : null,
   });
+  fitFan(el);
+}
+
+/** Shrink a fan that is wider than the screen.
+ *
+ * The cards are rotated, so a hand is meaningfully wider than the sum of its
+ * card widths and no amount of fiddling with the overlap predicts it. Measuring
+ * the drawn extent and scaling once does, at any window size, for any number of
+ * cards.
+ */
+function fitFan(el) {
+  const fan = el.querySelector(".fan");
+  if (!fan) return;
+  fan.style.transform = "";
+  const slots = [...fan.children];
+  if (slots.length < 2) return;
+  const span = slots[slots.length - 1].getBoundingClientRect().right -
+    slots[0].getBoundingClientRect().left;
+  const avail = el.getBoundingClientRect().width - 10;
+  // A hidden or not-yet-laid-out container measures zero, which would divide
+  // out to a negative scale and turn the hand inside out. Leave it alone and
+  // let the next redraw, or the resize handler, measure it for real.
+  if (avail <= 0 || span <= 0 || span <= avail) return;
+  fan.style.transformOrigin = "50% 100%";
+  fan.style.transform = `scale(${(avail / span).toFixed(3)})`;
 }
 
 function drawTurnline(v) {
@@ -252,10 +333,14 @@ function drawTurnline(v) {
     return;
   }
   if (v.must_pass) {
-    el.innerHTML = `You are out of cards. Hand the turn to ` +
-      v.teammates.map((p) =>
-        `<button class="sm" onclick="doPass(${p})">${esc(v.seats[p].name)}</button>`
-      ).join(" ");
+    // A cardless teammate cannot be passed to, so offering it would only
+    // produce a rejection from the server.
+    const able = v.teammates.filter((p) => v.hand_counts[p] > 0);
+    el.innerHTML = able.length
+      ? `You are out of cards. Hand the turn to ` + able.map((p) =>
+          `<button class="sm" onclick="doPass(${p})">${esc(v.seats[p].name)}` +
+          ` <span class="dim">${v.hand_counts[p]}</span></button>`).join(" ")
+      : `You are out of cards, and so is everyone on your side.`;
     return;
   }
   el.innerHTML = v.your_turn
@@ -391,6 +476,168 @@ function drawHints() {
          live set can land</p>` : "");
 }
 
+// ------------------------------------------------------------- what happened
+//
+// A slow table is only slower, not clearer, unless there is something to read
+// during the wait. This panel says in words what the last move was and -- the
+// part that actually teaches the game -- what it proved to everyone watching.
+// Under the no-bluff rule an ask is a statement: you may only ask in a
+// half-suit you already hold a card of, and never for a card you hold. So
+// every ask, landed or not, hands the table a deduction.
+
+function hsOf(cardId) {
+  return S.deck ? S.deck[Math.floor(cardId / 6)] : null;
+}
+
+function bigCard(name) {
+  return `<div class="spot-card">${CARDS.cardFace(name)}</div>`;
+}
+
+function deductions(e, v) {
+  const nm = (i) => esc(v.seats[i].name);
+  const hs = hsOf(e.card);
+  const set = hs ? esc(hs.name) : "that set";
+  const c = `<span class="cn">${esc(e.card_name)}</span>`;
+  // Under the no-bluff rule an ask is a truthful statement about the asker's
+  // own hand as well as a question about the target's, which is where the
+  // second and third bullets come from. A table that allows bluff asks gets
+  // the weaker reading, so the rule is read from the view rather than assumed.
+  const strict = !v.rules || v.rules.no_bluff !== false;
+  const out = [`${nm(e.asker)} holds at least one${strict ? " <em>other</em>" : ""} ` +
+    `<b>${set}</b> card &mdash; you may only ask in a set you are already in.`];
+  if (e.ok) {
+    out.push(`${nm(e.target)} held the ${c}; it moves to ${nm(e.asker)}, ` +
+      `who keeps the turn and may ask again or declare a set.`);
+    if (strict) out.push(`Before this, ${nm(e.asker)} did not hold it ` +
+      `&mdash; you may not ask for a card that is already in your hand.`);
+  } else if (strict) {
+    out.push(`${nm(e.target)} does not hold the ${c}, and neither does ` +
+      `${nm(e.asker)}, so it sits with one of the other four players.`);
+    out.push(`The turn goes to ${nm(e.target)}.`);
+  } else {
+    out.push(`${nm(e.target)} does not hold the ${c}.`);
+    out.push(`The turn goes to ${nm(e.target)}.`);
+  }
+  return out;
+}
+
+function drawSpot(v) {
+  const el = $("#spot");
+  const e = v.log && v.log.length ? v.log[v.log.length - 1] : null;
+  if (!e || v.status === "waiting") { el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  const nm = (i) => esc(v.seats[i].name);
+
+  let head, art, why;
+  if (e.t === "ask") {
+    const hs = hsOf(e.card);
+    art = bigCard(e.card_name);
+    head = `<b>${nm(e.asker)}</b> asked <b>${nm(e.target)}</b> for the
+      <b>${esc(CARDS.prettyCard(e.card_name))}</b>` +
+      (hs ? ` <span class="dim">(${esc(hs.name)})</span>` : "") +
+      ` &mdash; <span class="${e.ok ? "ok" : "no"}">${e.ok ? "yes" : "no"}</span>`;
+    why = deductions(e, v);
+  } else if (e.t === "claim") {
+    art = `<div class="spot-set">${e.revealed.map((r) =>
+      `<div class="rv">${CARDS.cardFace(r.card_name)}
+        <span>${nm(r.holder)}</span></div>`).join("")}</div>`;
+    const mine = v.seats[e.claimer].team;
+    const strays = e.revealed.filter((r) => v.seats[r.holder].team !== mine);
+    const verdict = e.void ? `<span class="no">nobody scores it</span>`
+      : e.winner === v.team ? `<span class="ok">your team scores it</span>`
+      : `<span class="no">the other team scores it</span>`;
+    head = `<b>${nm(e.claimer)}</b> declared <b>${esc(e.hs_name)}</b> &mdash; ${verdict}`;
+    // Why it went that way. A declaration has to name who holds every card,
+    // so there are three distinct ways to be wrong and they are not scored
+    // alike: a set that was never yours goes to the other side, while a set
+    // that was yours but split wrong is settled by the house rule.
+    if (e.winner === mine) {
+      why = [`Every holder was named correctly, so the set is scored.`];
+    } else if (strays.length) {
+      why = [`${strays.length === 1 ? "One card was" :
+        strays.length + " cards were"} in the other team's hand ` +
+        `(${strays.map((r) => `${esc(r.card_name)} with ${nm(r.holder)}`).join(", ")}), ` +
+        `so the declaration could not be right and the set goes to them.`];
+    } else {
+      why = [`All six were on ${nm(e.claimer)}'s side, but the split was named ` +
+        `wrong &mdash; so ${e.void ? "nobody scores it" :
+        "the other team takes it"} under this table's rules.`];
+    }
+    why.push(`Every card of ${esc(e.hs_name)} is now face up, and the set is ` +
+      `off the table for the rest of the game.`);
+  } else {
+    art = `<div class="spot-card">${CARDS.cardBack()}</div>`;
+    head = `<b>${nm(e.player)}</b> is out of cards and handed the turn to
+      <b>${nm(e.teammate)}</b>`;
+    why = [`An empty hand cannot ask, so a teammate must take over.`,
+           `${nm(e.player)} is out of the game for good: a player with no ` +
+           `cards cannot ask, cannot be asked, and cannot be passed to, so ` +
+           `there is no way to get a card back.`];
+  }
+  el.innerHTML = `${art}
+    <div class="spot-body">
+      <div class="spot-head">${head}</div>
+      <ul class="spot-why">${why.map((w) => `<li>${w}</li>`).join("")}</ul>
+      <div class="cd" id="cd">
+        <div class="cd-bar"><i></i></div><span class="cd-txt"></span>
+      </div>
+    </div>`;
+  tickWait();
+}
+
+// ------------------------------------------------------------------- pacing
+
+function drawPace(v) {
+  const box = $("#pace");
+  if (v.status !== "playing") { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  $("#pause-go").textContent = v.paused ? "resume" : "pause";
+  $("#pause-go").classList.toggle("primary", v.paused);
+  const sel = $("#pace-sel");
+  const want = String(v.bot_delay);
+  if (document.activeElement !== sel &&
+      [...sel.options].some((o) => o.value === want)) sel.value = want;
+  $("#skip-go").innerHTML = v.paused ? "step &rarr;" : "next &rarr;";
+  $("#skip-go").disabled = !S.botOnMove;
+}
+
+function tickWait() {
+  // Ten times a second, so it only touches the two things that change. An
+  // innerHTML rewrite here would rebuild the bar every tick and cancel the
+  // CSS transition that makes it glide rather than jump.
+  const cd = $("#cd");
+  if (!cd) return;
+  const v = S.view;
+  const fill = cd.querySelector("i"), txt = cd.querySelector(".cd-txt");
+  if (!v || v.status !== "playing" || (!S.botOnMove && !S.paused)) {
+    cd.style.visibility = "hidden";
+    return;
+  }
+  cd.style.visibility = "visible";
+  const pct = (left) =>
+    Math.max(0, Math.min(100, 100 * (1 - left / Math.max(0.001, S.delay || 1))));
+  if (S.paused) {
+    // Say so even when a person is on move: you can still play your own turn
+    // while the engines are frozen, and it should be obvious why nothing
+    // happens afterwards.
+    fill.style.width = `${S.botOnMove ? pct(S.held) : 0}%`;
+    txt.textContent = "paused — " + (S.botOnMove
+      ? `${v.seats[v.turn].name} is waiting on you`
+      : "the engines are frozen");
+    return;
+  }
+  const left = Math.max(0, (S.waitUntil - Date.now()) / 1000);
+  fill.style.width = `${pct(left)}%`;
+  txt.textContent = `${v.seats[v.turn].name} plays in ${left.toFixed(0)}s`;
+}
+
+async function pace(body) {
+  try {
+    const v = await api(`/api/room/${S.code}/pace`, { token: S.token, ...body });
+    render(v, true);
+  } catch (e) { /* the clock is not worth an error banner */ }
+}
+
 // ---------------------------------------------------------------------- log
 
 function drawLog(v) {
@@ -402,7 +649,7 @@ function drawLog(v) {
         <span class="${e.ok ? "ok" : "no"}">${e.ok ? "yes" : "no"}</span></div>`;
     if (e.t === "claim")
       return `<div class="ev">${nm(e.claimer)} declared
-        <b>${esc(e.hs_name)}</b> — ${e.winner === null ? "void"
+        <b>${esc(e.hs_name)}</b> — ${e.void ? "void"
           : e.winner === v.team ? `<span class="ok">your team</span>`
           : `<span class="no">the other team</span>`}</div>`;
     return `<div class="ev">${nm(e.player)} out of cards, passed to
@@ -420,8 +667,20 @@ window.addEventListener("DOMContentLoaded", async () => {
   explain();
   $("#c-go").onclick = create;
   $("#j-go").onclick = () => joinCode();
-  $("#leave").onclick = leave;
+  $("#leave").onclick = () => leave();
   $("#hint-go").onclick = think;
+  $("#pause-go").onclick = () => pace({ paused: !S.paused });
+  $("#skip-go").onclick = () => pace({ skip: true });
+  $("#pace-sel").onchange = (e) => pace({ delay: +e.target.value });
+  setInterval(tickWait, 100);          // the countdown runs between polls
+  // The fan is sized by measurement, so it has to be re-measured when the
+  // window changes; otherwise a hand shrunk to fit a phone stays shrunk after
+  // the window is widened again.
+  let refit;
+  window.addEventListener("resize", () => {
+    clearTimeout(refit);
+    refit = setTimeout(() => { const h = $("#hand"); if (h) fitFan(h); }, 120);
+  });
   $("#show-rules").onclick = (e) => {
     e.preventDefault(); $("#rules").classList.remove("hidden");
   };

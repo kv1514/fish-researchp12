@@ -364,6 +364,12 @@ def _room_routes(cls):
                 return self._json({"error": str(e),
                                    "state": room.view(seat)}, 400)
             return self._json(room.view(seat))
+        if verb == "pace":
+            # Pacing is a property of the table, so any seated player may
+            # change it; there is no host privilege to get wrong.
+            room.pace(paused=body.get("paused"), delay=body.get("delay"),
+                      skip=bool(body.get("skip")))
+            return self._json(room.view(seat))
         if verb == "auto":
             if room.state is None or room.state.turn != seat:
                 return self._json(room.view(seat))
