@@ -122,10 +122,15 @@ def main(plain: bool = False) -> int:
     out += [r"\bottomrule", r"\end{tabular}",
             r"\caption{Belief-space lookahead against the v0.4 champion, which is"
             r" the identical policy with the bonus disabled. MDE is the smallest"
-            r" effect that cell could have resolved at 80\% power given the"
-            r" measured per-pair standard deviation of 3.869 sets, so a null row"
+            r" effect that cell could have resolved at 80\% power, so a null row"
             r" says the run did not detect an effect of that size, not that there"
-            r" is none.}",
+            r" is none. This table uses the per-pair standard deviation of"
+            r" $3.796$ measured over the 4800 A/A pairs reported later in this"
+            r" section, rather than the $3.869$ used"
+            r" elsewhere in this paper: the settling run was powered against"
+            r" $3.796$, and a table reporting a run against a different"
+            r" resolution from the one it was designed for would misstate what"
+            r" it could see. The two differ by under $2\%$.}",
            r"\label{tab:lookahead}", r"\end{table}"]
     print("\n".join(out))
     if missing:
