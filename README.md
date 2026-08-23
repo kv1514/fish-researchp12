@@ -127,6 +127,31 @@ py -m fish4 perpetual     # the dead-position study
 py -m pytest tests4 tests -q
 ```
 
+### Measuring the engine rather than comparing it
+
+A duel says which of two policies is better. These say how good one of them is,
+or what it is actually doing, and each answers a question the duels cannot.
+
+```bash
+py scripts4/choice_curve.py 200        # fit the opponent model's own exponent
+py scripts4/ask_regret.py 48 12 5      # what the ask objective leaves on the table
+py scripts4/precision_scaling.py       # does posterior error still fall with draws?
+py scripts4/ess_probe.py 6 160         # how many of the draws actually count
+py scripts4/rollout_target.py          # does a won card survive to the end of the deal?
+py scripts4/pool_cells.py --lookahead  # pool repeated runs, and test that they agree
+py scripts4/settle_verdict.py          # the pre-registered lookahead verdict
+```
+
+Two of them exist because a natural way to measure something here is wrong:
+
+- `ask_regret.py` cross-fits, because `max` over a few dozen noisy action values
+  sits about two thirds of a set above the truth. It reports both numbers so the
+  gap — the selection bias — is visible rather than argued.
+- `ess_probe.py` reports effective sample size, and `results/tilt_accuracy.json`
+  records what happened when the sampler was tuned to improve it: effective
+  sample size rose 26% and the estimate got 3.4x worse. Flat importance weights
+  are not the goal.
+
 ## v0.3 simulator and live coach
 
 ```bash
