@@ -22,17 +22,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SD = 3.869              # measured per-pair SD, see fish4/evalx/README.md
 
-#: (substring of the label, how the paper should name the cell). Order is the
-#: order of the table; the screening cells first, then the replications, so the
-#: reader meets the apparent winner before they meet its retest.
+#: (run label, how the paper should name the cell, which block). Order is the
+#: order of the table: the screening cells first, then the retests, so the reader
+#: meets the apparent winner before they meet its replication.
+#:
+#: Labels are matched EXACTLY. Substring matching looked fine until the retests
+#: existed, at which point "lookahead d3 w0.25 vs champion" also matched
+#: "REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)" and the screening row
+#: silently rendered the retest's numbers - a table that quietly replaces the
+#: result it is supposed to be compared against is worse than no table.
 ROWS = [
-    ("lookahead d3 w0.25 vs champion",              r"depth 3, $w=0.25$",              "screen"),
-    ("lookahead d2 w0.25 vs champion",              r"depth 2, $w=0.25$",              "screen"),
-    ("lookahead d3 w0.60 vs champion",              r"depth 3, $w=0.60$",              "screen"),
-    ("lookahead d3 w0.25 NO coupling",              r"depth 3, \emph{no quota coupling}", "screen"),
-    ("REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)",       r"depth 3, $w=0.25$ --- retest", "retest"),
-    ("REPLICATE lookahead d3 w0.25 vs champion (second fresh set)",  r"\quad --- retest again",       "retest"),
-    ("REPLICATE coupling ablation d3",              r"\emph{no coupling} --- retest",  "retest"),
+    ("lookahead d3 w0.25 vs champion",               r"depth 3, $w=0.25$",                 "screen"),
+    ("lookahead d2 w0.25 vs champion",               r"depth 2, $w=0.25$",                 "screen"),
+    ("lookahead d3 w0.60 vs champion",               r"depth 3, $w=0.60$",                 "screen"),
+    ("lookahead d3 w0.25 NO coupling vs champion",   r"depth 3, \emph{no quota coupling}",  "screen"),
+    ("REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)",      r"depth 3, $w=0.25$ --- retest", "retest"),
+    ("REPLICATE lookahead d3 w0.25 vs champion (second fresh set)", r"\quad --- retest again",       "retest"),
+    ("REPLICATE coupling ablation d3 (fresh seeds)",  r"\emph{no coupling} --- retest",     "retest"),
 ]
 
 
@@ -46,9 +52,9 @@ def load() -> list[dict]:
     return [json.loads(l) for l in p.read_text().splitlines() if l.strip()]
 
 
-def pick(rows: list[dict], needle: str):
-    """The most recent run carrying this label, or None if it has not run."""
-    hits = [r for r in rows if needle in (r.get("label") or "")]
+def pick(rows: list[dict], label: str):
+    """The most recent run with exactly this label, or None if it has not run."""
+    hits = [r for r in rows if (r.get("label") or "") == label]
     return hits[-1] if hits else None
 
 
