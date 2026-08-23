@@ -2885,7 +2885,7 @@ last of these puts it at $+1.9$ sets per deal-pair against the previous
 champion, which is larger than the entire objective improvement that separated
 that champion from its own baseline.
 
-Three lessons generalise beyond this game.
+Six lessons generalise beyond this game.
 
 \textbf{Correct is not the same as good.} An inference procedure is correct
 relative to a model. When a cheaper, wronger procedure beats an exact one, the
@@ -2916,6 +2916,37 @@ two independently-motivated changes stacking, which is exactly what the previous
 version had genuinely found for a different pair of terms. The cheap defence is
 not a multiplicity correction, it is one more run on fresh seeds. Ours cost forty
 minutes and saved a wrong champion.
+
+And it is not a lesson one learns once. The same error appears four times in this
+study, each occurrence a level above where the last was caught: a selected
+screening cell, then a section built on three points, then the power calculation
+for the experiment correcting the first, then the estimator built to measure the
+ask objective. None was caught by being more careful. Each was caught by
+measuring the quantity that had been reasoned about --- which is the next lesson,
+and the reason it is stated separately.
+
+\textbf{A diagnostic you can optimise is not the thing you want.} The sampler
+reports an effective sample size, and it is a real quantity honestly computed.
+Tuning the proposal to raise it worked --- 83.7 effective draws became 105.8 ---
+and made the posterior $3.4\times$ worse, because effective sample size measures
+how \emph{flat} the importance weights are and a proposal covering one corner of
+the target very well has beautifully flat weights over the corner it covers.
+Every intermediate metric in a pipeline is a proxy for something further
+downstream, and the moment it becomes an optimisation target it stops being a
+measurement of what it proxied. Section~\ref{sec:res-ess} keeps both halves of
+that result, and the parameter ships at zero.
+
+\textbf{A coefficient that decays may be a covariate that decays.} The choice
+model's fitted exponent falls from $2.00$ at the opening to $-0.02$ by the
+endgame, which reads as players changing how they choose. Most of it is
+regression dilution: the model conditions on depth at the \emph{initial deal},
+cards move, and the covariate's disagreement with the hand it describes grows
+monotonically through a game. Noise in a covariate attenuates its own
+coefficient, so noise that grows with time manufactures a trend out of drift.
+Refitting on the quantity the model is actually about leaves a decay that is real
+and half the size. The general form: before explaining a trend in a fitted
+parameter, check whether the thing it is fitted \emph{to} is degrading at the
+same rate.
 
 \subsection{What we would do next}
 
