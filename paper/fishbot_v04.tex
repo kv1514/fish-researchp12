@@ -1323,6 +1323,108 @@ Provably correct inference, replacing a sampler its own authors documented as
 biased, moved the result by eight thousandths of a set per deal-pair. The second
 row differs from the first in one parameter.
 
+\subsection{The choice model, measured rather than assumed}
+\label{sec:res-choicecurve}
+
+Section~\ref{sec:res-oppmodel} establishes that the model is worth $+1.9$ sets
+per deal-pair, which is the largest single effect in this engine. It rests on
+one sentence: \emph{a player asks in a half-suit in proportion to how many cards
+of it they hold}. Proportional means an exponent of one, and that exponent was
+never measured. It was chosen because it is the one value whose denominator is
+public --- the depths of a hand sum to its size --- which is an excellent reason
+to try it and no reason whatever to believe it.
+
+There is a specific reason to doubt it. Under an objective dominated by
+$\Prob(\text{success})$, what makes a half-suit worth asking in is how many cards
+it still offers: holding five of six offers exactly one card to ask for, holding
+one of six offers five. Depth and opportunity pull in opposite directions, so
+linear-in-depth is not obviously right even in sign.
+
+\paragraph{The design.} The policy is available, so the propensity can be
+measured instead of argued. Over 200 self-play games we record, at every ask,
+which half-suits were legal, the asker's depth in each \emph{on the initial
+deal}, and which was chosen. That is a conditional-logit design in which the
+alternatives are known from the rules rather than inferred, and it yields 17{,}005
+asks where at least two half-suits were legal --- 72{,}091 alternatives in all.
+Fitting $\Prob(\text{ask in }H) \propto \operatorname{depth}_H^{\alpha}$ by exact
+conditional likelihood gives $\alpha$ directly, with $\alpha = 1$ the shipped
+model and $\alpha = 0$ legality carrying all the signal and depth none.
+
+Standard errors are block-bootstrapped over games. This is not a refinement: the
+likelihood's own curvature treats every decision as an independent draw, and
+17{,}005 decisions come from 200 deals whose members share a layout, six hands and
+one set of policies. The correction doubles every interval, and the symptom was
+visible beforehand --- a smooth curve through the per-band estimates returned a
+$\chi^2$ several times its degrees of freedom.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+half-suits resolved & 0 & 1 & 2 & 3 & 4 & 5 & 6--8 \\
+\midrule
+$\alpha$          & $2.00$ & $1.28$ & $1.20$ & $0.68$ & $0.30$ & $0.41$ & $-0.02$ \\
+clustered SE      & $0.08$ & $0.08$ & $0.12$ & $0.12$ & $0.13$ & $0.18$ & $0.16$ \\
+decisions         & 4410 & 2881 & 2527 & 2437 & 1958 & 1541 & 1251 \\
+\bottomrule
+\end{tabular}
+\caption{The fitted exponent of the choice model against how far the deal has
+run. The shipped model is a constant $1$. It is wrong at both ends, in opposite
+directions: at the opening the true exponent is about $2$ and the model
+understates its own strongest signal, and by the endgame it is $0$ and the model
+applies a tilt that is not there.}
+\label{tab:choicecurve}
+\end{table}
+
+\paragraph{What it says.} Pooled over the whole game the best constant is
+$\alpha = 1.207 \pm 0.046$ --- close enough to $1$ that a constant never looked
+broken, and far enough from either end of Table~\ref{tab:choicecurve} that it
+could not be right. Split at the halfway point, $\alpha = 1.331 \pm 0.049$ early
+against $0.232 \pm 0.118$ late. The likelihood prefers the fitted constant to
+$\alpha = 0$ by 1402 nats and to $\alpha = 1$ by 40.
+
+The mechanism is the one the term was built for, and it is now measured rather
+than asserted. A player asks where they are deep only if they had a choice.
+Early, holding nine cards across many live half-suits, they do; late, holding
+two cards with most of the deck resolved, legality binds and they ask where they
+\emph{can}.
+
+\paragraph{The competing story is refuted by the same data.} If asks went where
+the opportunity was rather than where the depth was, propensity would fall as
+cards held rises. Observed over expected runs $0.46$, $1.05$, $2.26$, $2.64$,
+$2.90$ for one through five cards held --- monotonically the other way. Whatever
+else is wrong with the model, its sign is right.
+
+\paragraph{A rule, not a regularity.} In 72{,}091 legal alternatives, not one had
+an initial-deal depth of zero. That is a theorem rather than a coincidence:
+asking in a half-suit requires holding a card of it, and cards move only to
+askers who already hold one, so a player's first card of any half-suit cannot
+have arrived by play. The consequence matters for the implementation, because
+the likelihood floors a zero depth at $\log 10^{-9}$ and that floor is therefore
+excluding worlds the \emph{rules} forbid rather than softening an awkward case.
+The engine's \texttt{allow\_bluff\_asks} variant does not undo it; that flag
+widens which cards of a half-suit may be asked for and leaves the half-suit
+guard alone.
+
+\paragraph{What was changed, and what was not.} \texttt{gamma\_schedule} now
+interpolates between the constant and a weighted quadratic through
+Table~\ref{tab:choicecurve} ($\chi^2 = 8.3$ on 4 dof), clamped flat past its
+vertex because past there the parabola turns up and the measurements do not. It
+is normalised by the profile's mean over the observed distribution of asks, so
+full strength redistributes the model's belief across the game without changing
+how much of it there is in total. That separation is deliberate: $\gamma$ was
+already tuned by duels to the broad plateau of Table~\ref{tab:gamma}, and a term
+that moved shape and strength together would leave any positive result
+unattributable. Zero remains the incumbent, decision for decision.
+
+Whether the reshaped model plays better is a duel, and is not claimed here.
+
+\paragraph{Limitation.} This measures the champion against copies of itself,
+which is exactly the situation the opponent model is used in throughout this
+paper, and exactly not the situation of a human table. The profile is a fact
+about this policy's behaviour, not about Fish.
+
 \subsection{The strength ladder}
 \label{sec:res-ladder}
 
