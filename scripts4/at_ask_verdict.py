@@ -89,6 +89,24 @@ def main() -> int:
     print(f"  Cochran Q  {p['q']:.3f} on {p['df']} df, p = {p['q_p']:.4f}")
     print(f"  I^2        {100 * p['i2']:.1f}%")
     print(f"  tau        {p['tau']:.4f} sets per pair")
+    if p["q_p"] < 0.05:
+        print("  The blocks disagree by more than sampling noise allows. The "
+              "A/A study\n  measured no between-run variance at all, so this "
+              "is an effect that depends\n  on the deal population rather than "
+              "a reason to re-pool -- and tau here is\n  the same size as the "
+              "pooled effect, which means the effect is not a\n  constant of "
+              "the game. A random-effects interval is printed below for that\n"
+              "  reason, and is diagnostic: the pre-registration fixed the "
+              "fixed-effect\n  pool as primary before any of this was known, "
+              "and switching estimator now\n  because the first one is "
+              "inconvenient is the error this whole protocol\n  exists to "
+              "prevent.")
+        re_se = p.get("re_se")
+        if re_se:
+            rlo, rhi = p["re"] - Z * re_se, p["re"] + Z * re_se
+            print(f"\n  random-effects (DerSimonian-Laird), DIAGNOSTIC ONLY")
+            print(f"    {p['re']:+.4f}  95% [{rlo:+.4f}, {rhi:+.4f}]   "
+                  f"{'excludes zero' if (rlo > 0 or rhi < 0) else 'INCLUDES ZERO'}")
 
     sc = cells(SCREENS)
     if sc:
@@ -103,11 +121,21 @@ def main() -> int:
 
     print("\n" + "=" * 70)
     if demonstrated and est > 0:
-        print("VERDICT: DEMONSTRATED.")
+        print("VERDICT: DEMONSTRATED, AND BELOW THE BAR."
+              if est < MIN_INTERESTING else "VERDICT: DEMONSTRATED.")
         print("The pre-registration binds depth_mode and opponent_gamma "
               "together, so what is\ndemonstrated is the PAIR: at-ask depth at "
               "gamma = 1.0. Neither component is\nclaimed on its own, and this "
               "script has no way to report one.")
+        if est < MIN_INTERESTING:
+            print(f"\nThe interval excludes zero, so the effect is real. It "
+                  f"is also {est:.3f}, under\nthe {MIN_INTERESTING:.2f} fixed "
+                  f"in advance as the smallest effect worth adopting, and\n"
+                  f"the interval's upper end {hi:.3f} barely reaches it. "
+                  f"Reported as what it is: a\nreal effect that the "
+                  f"pre-registration's own threshold says is too small to\n"
+                  f"buy, decided by a number chosen before the data rather "
+                  f"than after.")
     elif demonstrated:
         print("VERDICT: DEMONSTRATED, AND NEGATIVE.")
         print("The configuration is worse than the champion by a margin this "

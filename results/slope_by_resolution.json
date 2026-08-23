@@ -1,0 +1,70 @@
+{
+ "source": "/home/user/fish-researchp12/results/rollout_target.json",
+ "paired_by_level": [
+  {
+   "resolved": 4,
+   "delta": 0.4126095590119874,
+   "se": 0.1764616640853263,
+   "positions": 31
+  },
+  {
+   "resolved": 5,
+   "delta": -0.027728084065691577,
+   "se": 0.11167952175710874,
+   "positions": 39
+  },
+  {
+   "resolved": 6,
+   "delta": 1.8553810423218347,
+   "se": 0.20060091225667215,
+   "positions": 9
+  },
+  {
+   "resolved": 7,
+   "delta": 1.0380207393124723,
+   "se": 0.2418517709023775,
+   "positions": 26
+  },
+  {
+   "resolved": 8,
+   "delta": 0.10505247367641245,
+   "se": 0.3744515088961365,
+   "positions": 5
+  }
+ ],
+ "levels": [
+  {
+   "resolved": 4,
+   "slope": 0.36395263110993675,
+   "se": 0.1490786791192238,
+   "positions": 31
+  },
+  {
+   "resolved": 5,
+   "slope": 0.04454833546882366,
+   "se": 0.10537929477978193,
+   "positions": 39
+  },
+  {
+   "resolved": 6,
+   "slope": 1.9833141921618045,
+   "se": 0.18566584115222318,
+   "positions": 9
+  },
+  {
+   "resolved": 7,
+   "slope": 1.0960796587921435,
+   "se": 0.2493990119166584,
+   "positions": 26
+  },
+  {
+   "resolved": 8,
+   "slope": 0.07001294046675983,
+   "se": 0.1705642310777684,
+   "positions": 5
+  }
+ ],
+ "trend_per_resolved": 0.07644297540616814,
+ "trend_se": 0.05120884845764102,
+ "extrapolated_at_2": 0.18479326078843938
+}
