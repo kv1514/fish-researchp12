@@ -3,6 +3,12 @@ name = "fish-engine"
 version = "0.2.0"
 description = "Research engine for Literature (Fish / Canadian Fish)"
 requires-python = ">=3.11"
+# numpy has always been a hard runtime dependency - the posterior, the ask
+# objective and the exact solver are all array code - but it was only ever
+# installed by hand. Declaring it is what lets an environment that builds from
+# this file alone, such as the serverless deployment in api/, actually import
+# the engine.
+dependencies = ["numpy>=1.26"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
