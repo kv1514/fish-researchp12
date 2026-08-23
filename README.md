@@ -7,7 +7,9 @@ toward understanding what near-optimal Fish actually looks like.
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
 - Research log: [RESEARCH_LOG.md](RESEARCH_LOG.md)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
-- Research paper: [PAPER.md](PAPER.md)
+- Research paper, v0.4 (current): [paper/fishbot_v04.tex](paper/fishbot_v04.tex)
+- Research paper, v0.3 (superseded, kept because its results still reproduce):
+  [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
 
 ## Main variant
@@ -195,8 +197,10 @@ Notably, no search was involved. Two search designs (PIMC and ISMCTS) each
 lost decisively to the very policy they were built on, for a measured
 reason: the spread of a position's value across possible hidden layouts is
 about 2.4x the gap between the best and worst candidate move, so evaluating
-different moves against different guessed layouts ranks luck. See
-[PAPER.md](PAPER.md).
+different moves against different guessed layouts ranks luck. That measurement
+is v0.3's, in [PAPER.md](PAPER.md); what it rules out is *sampling* rather than
+search, and the design it leaves open is in
+[paper/fishbot_v04.tex](paper/fishbot_v04.tex) under "Search over the belief".
 
 ## Three things this engine gets right that are easy to get wrong
 
