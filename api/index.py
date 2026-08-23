@@ -26,6 +26,22 @@ from api._engine import (Session, new_session, parse_action,  # noqa: E402
 MAX_BODY = 512 * 1024
 
 
+def route_of(path: str, query: str) -> str:
+    """The requested operation.
+
+    Vercel's rewrite routes on the *destination* path, so by the time the
+    function runs, ``self.path`` says ``/api/index`` and the original route is
+    gone. vercel.json therefore carries it through as ``?op=``. Locally there is
+    no rewrite and the path is intact, so fall back to its last segment - which
+    keeps scripts4/devserve.py exercising the same code as production rather
+    than a dev-only branch.
+    """
+    op = parse_qs(query or "").get("op", [None])[0]
+    if op:
+        return op.strip("/").split("/")[-1]
+    return path.strip("/").split("/")[-1]
+
+
 class handler(BaseHTTPRequestHandler):
 
     # -- plumbing -------------------------------------------------------------
@@ -50,9 +66,10 @@ class handler(BaseHTTPRequestHandler):
     # -- routes ---------------------------------------------------------------
 
     def do_GET(self):
-        path = urlparse(self.path).path
+        u = urlparse(self.path)
+        op = route_of(u.path, u.query)
         try:
-            if path.endswith("/deck"):
+            if op == "deck":
                 from fish.cards import (HALF_SUIT_NAMES, card_name,
                                         half_suit_cards, is_red)
                 return self._send({"half_suits": [
@@ -60,7 +77,7 @@ class handler(BaseHTTPRequestHandler):
                      "cards": [{"id": c, "name": card_name(c), "red": is_red(c)}
                                for c in half_suit_cards(h)]}
                     for h in range(len(HALF_SUIT_NAMES))]})
-            if path.endswith("/health"):
+            if op == "health":
                 return self._send({"ok": True})
             return self._send({"error": "not found"}, 404)
         except Exception as e:                       # pragma: no cover
@@ -68,11 +85,12 @@ class handler(BaseHTTPRequestHandler):
             return self._send({"error": str(e)}, 500)
 
     def do_POST(self):
-        path = urlparse(self.path).path
+        u = urlparse(self.path)
+        op = route_of(u.path, u.query)
         try:
             body = self._body()
 
-            if path.endswith("/new"):
+            if op == "new":
                 s = new_session(body)
                 played = s.advance()
                 out = s.snapshot()
@@ -86,13 +104,13 @@ class handler(BaseHTTPRequestHandler):
                 return self._send({"error": "missing session token"}, 400)
             s = Session.restore(token, body.get("actions") or [])
 
-            if path.endswith("/state"):
+            if op == "state":
                 return self._send(s.snapshot())
 
-            if path.endswith("/analyse"):
+            if op == "analyse":
                 return self._send(s.analysis())
 
-            if path.endswith("/act"):
+            if op == "act":
                 if not s.snapshot()["your_turn"]:
                     return self._send({"error": "not your turn"}, 400)
                 played = s.play(parse_action(body.get("action") or {}))
@@ -100,7 +118,7 @@ class handler(BaseHTTPRequestHandler):
                 out["actions"] = played
                 return self._send(out)
 
-            if path.endswith("/auto"):
+            if op == "auto":
                 if not s.snapshot()["your_turn"]:
                     return self._send({"error": "not your turn"}, 400)
                 played = s.play(s.suggest())
