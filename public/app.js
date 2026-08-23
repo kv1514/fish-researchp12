@@ -31,6 +31,11 @@ const S = {
   gamma: 0.35,
   busy: false,
   hint: null,
+  // Re-ask for the analysis on every turn of ours, rather than on a click.
+  // Off by default: it costs one request per turn and not everyone wants the
+  // engine's read of their own position.
+  autothink: false,
+  hinting: false,
   pace: 12,          // seconds the table waits between engine moves
   paused: false,
   pacing: false,     // a pacing loop is running
@@ -727,6 +732,7 @@ function render() {
   renderLog();
   renderAction();
   renderPosterior();
+  maybeAutoThink();
 }
 
 $("t-pace").addEventListener("change", (e) => { S.pace = +e.target.value; });
@@ -745,17 +751,47 @@ $("t-next").addEventListener("click", () => {
 });
 
 $("t-quit").addEventListener("click", () => show("start"));
-$("t-think").addEventListener("click", async () => {
-  if (!S.snap || S.snap.terminal) return;
+
+async function think(quiet) {
+  if (!S.snap || S.snap.terminal || S.hinting) return;
+  S.hinting = true;
   $("t-think").disabled = true;
   try {
     S.hint = await api("analyse", { token: S.token, actions: S.actions });
     render();
   } catch (e) {
-    toast(e.message);
+    // A failed auto-fetch must not nag: the player did not ask for it, and the
+    // turn is still playable without it.
+    if (!quiet) toast(e.message);
   } finally {
+    S.hinting = false;
     $("t-think").disabled = false;
   }
+}
+
+$("t-think").addEventListener("click", () => think(false));
+
+$("t-auto").addEventListener("change", (ev) => {
+  S.autothink = ev.target.checked;
+  try { localStorage.setItem("fish.autothink", S.autothink ? "1" : ""); }
+  catch (_) { /* private window, or storage disabled */ }
+  if (S.autothink) maybeAutoThink();
 });
+
+try { S.autothink = !!localStorage.getItem("fish.autothink"); }
+catch (_) { S.autothink = false; }
+$("t-auto").checked = S.autothink;
+
+/* Fetch the analysis when it is ours to move and we do not already have one.
+ *
+ * Guarded three ways, because render() calls this and the fetch calls render():
+ * `S.hinting` stops a second request while one is in flight, `S.hint` stops a
+ * repeat for a position already analysed, and both are cleared together when a
+ * new snapshot arrives. */
+function maybeAutoThink() {
+  if (!S.autothink || S.hinting || S.hint) return;
+  if (!S.snap || S.snap.terminal || !S.snap.your_turn) return;
+  think(true);
+}
 
 initStart();

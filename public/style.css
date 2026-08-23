@@ -416,3 +416,20 @@ button.ghost.on {
   .whyname { flex-basis: 3.8rem; }
   .whyval { flex-basis: 3rem; }
 }
+
+/* The auto-think toggle, beside the Think button. Sized to the ghost buttons
+   around it so the pace bar stays one line at narrow widths. */
+.pacebar .autothink {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .85rem;
+  color: var(--dim, #8a8f98);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.pacebar .autothink input {
+  margin: 0;
+  cursor: pointer;
+}

@@ -23,6 +23,7 @@ py scripts4/browser/play_full_game.py      # a whole game, scores, voids, log
 py scripts4/browser/check_declare.py       # what the dialog pre-selects
 py scripts4/browser/check_score_panel.py   # the per-term score breakdown
 py scripts4/browser/check_signed_terms.py  # the negative-term layout branch
+py scripts4/browser/check_autothink.py     # the auto toggle actually saves the click
 ```
 
 They print assertions rather than raising, because the useful output is the
