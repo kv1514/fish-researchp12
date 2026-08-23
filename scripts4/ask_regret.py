@@ -82,6 +82,7 @@ from fish.beliefs import BeliefState
 from fish.cards import NUM_PLAYERS, team_of
 from fish.engine import Ask, GameState, IllegalAction, NULL_TEAM
 from fish.observation import Observation
+from fish4.askfeat import AskWeights, DecisionContext, score_asks
 from fish4.posterior import Posterior
 from fish4.registry4 import make_agent
 
@@ -235,6 +236,43 @@ def crossfit_regret(per: dict, incumbent):
     return q_all, naive, float(np.mean(gains))
 
 
+def attenuation(n_actions: int, n_worlds: int, noise: float,
+                deltas=(0.5, 1.0, 2.0), trials: int = 1500, seed: int = 5150):
+    """What fraction of a real edge this design can actually see.
+
+    Cross-fitting removes the upward bias by choosing the challenger on data
+    that does not score it, and the price is that the choosing is done on half
+    the worlds. With a dozen worlds the challenger is sometimes a noise winner,
+    so a genuine improvement comes back only in part. That makes the reported
+    regret a lower bound -- the right direction for a number about one's own
+    policy -- but a lower bound of unstated tightness is not much of a bound.
+
+    ``noise`` must be the PAIRED spread, not the raw one. The design runs every
+    action through the same sampled worlds with the same seat seeds, so what
+    separates two actions is the world-by-world *difference* between them, and
+    the deal-level variation they share cancels. Calibrating with the raw
+    per-world spread would model a design nobody ran and would understate the
+    resolution badly -- the raw spread here is 1.44 sets, most of which is
+    simply which deal was drawn.
+    """
+    rng = np.random.default_rng(seed)
+    out = {}
+    for d in deltas:
+        true = [0.0] * n_actions
+        true[n_actions // 3] = d
+        got = []
+        for _ in range(trials):
+            # the shared deal component cancels in every comparison, so it is
+            # simply left out and `noise` is the per-action deviation from it
+            per = {i: true[i] + rng.normal(0.0, noise, size=n_worlds)
+                   for i in range(n_actions)}
+            _, _, cf = crossfit_regret(per, 0)
+            if cf is not None:
+                got.append(cf)
+        out[d] = float(np.mean(got)) / d if got and d else float("nan")
+    return out
+
+
 def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
             seed0: int = 4242):
     positions = harvest(60, min_resolved, n_positions)
@@ -286,6 +324,28 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
         if xf_regret is None:
             continue
 
+        # What the objective thought of each ask, next to what each ask was
+        # actually worth. The rollouts are the expensive part and they are
+        # already paid for; the scores cost one feature matrix. Together they
+        # answer a question the duels cannot: not "does the objective beat its
+        # ablations" but "does it rank asks the way the game does".
+        cand = list(per)
+        ctx = DecisionContext(obs, bel, post)
+        try:
+            sc, psucc = score_asks(ctx, cand, AskWeights())
+            sc = np.asarray(sc, dtype=np.float64)
+            psucc = np.asarray(psucc, dtype=np.float64)
+        except Exception:
+            sc = psucc = None
+        qv = np.array([q_all[a] for a in cand], dtype=np.float64)
+        ok = ~np.isnan(qv)
+        corr_obj = corr_p = float("nan")
+        if sc is not None and ok.sum() > 2:
+            if np.std(sc[ok]) > 0 and np.std(qv[ok]) > 0:
+                corr_obj = float(np.corrcoef(sc[ok], qv[ok])[0, 1])
+            if np.std(psucc[ok]) > 0 and np.std(qv[ok]) > 0:
+                corr_p = float(np.corrcoef(psucc[ok], qv[ok])[0, 1])
+
         # Scale reference, free: the same cross-fitted comparison run against a
         # uniformly random legal ask instead of the policy's. Without it a regret
         # of "+0.2 sets" has no units -- it could be most of what is available at
@@ -297,7 +357,25 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
             rnd_regret = float("nan")
 
         vals = [x for x in q_all.values() if not np.isnan(x)]
+        naive_best = max(vals)
+        within = [float(np.nanstd(v, ddof=1)) for v in per.values()
+                  if np.sum(~np.isnan(v)) > 1]
+        # The scale that actually governs selection: how much an action's score
+        # moves relative to the incumbent's ACROSS THE SAME WORLDS. Under common
+        # random numbers this is smaller than the raw spread by however much of
+        # that spread is the deal rather than the action, and it is the number
+        # the calibration needs.
+        ref = per[chosen]
+        paired = [float(np.nanstd(v - ref, ddof=1)) for a, v in per.items()
+                  if a != chosen and np.sum(~np.isnan(v - ref)) > 1]
+        # /sqrt(2): the difference of two equally noisy estimates
+        paired_sd = (float(np.mean(paired)) / np.sqrt(2.0)
+                     if paired else float("nan"))
         rows.append({
+            "corr_objective_vs_rollout": corr_obj,
+            "corr_psuccess_vs_rollout": corr_p,
+            "world_sd": float(np.mean(within)) if within else float("nan"),
+            "paired_sd": paired_sd,
             "random_regret": rnd_regret,
             "position": pi, "seat": seat, "history": len(hist),
             "n_asks": len(per), "n_worlds": nw,
@@ -362,14 +440,60 @@ def main(argv):   # noqa: C901
         rse = float(rr.std(ddof=1) / np.sqrt(rr.size))
         summary["mean_random_regret"] = float(rr.mean())
         summary["se_random_regret"] = rse
-        summary["fraction_of_available"] = (
-            float(1.0 - reg.mean() / rr.mean()) if rr.mean() else None)
         print(f"same test vs a RANDOM ask {rr.mean():+.4f} +/- {rse:.4f} "
               f"<- the scale")
-        if rr.mean():
+        # A ratio against a denominator consistent with zero is not a
+        # percentage, it is a division by noise. Report it only when the
+        # reference is actually distinguishable from no improvement at all.
+        if rr.mean() > 2 * rse:
+            summary["fraction_of_available"] = float(1.0 - reg.mean() / rr.mean())
             print(f"the objective captures    "
                   f"{100 * summary['fraction_of_available']:.1f}% of what "
                   f"one-step lookahead can find")
+        else:
+            summary["fraction_of_available"] = None
+            print("  the random-ask reference is itself indistinguishable from "
+                  "zero, so there is no")
+            print("  scale to express the regret as a fraction of -- the test "
+                  "has no resolution here,")
+            print("  which is a fact about the design and not about the "
+                  "objective.")
+    for key, lab in (("corr_objective_vs_rollout", "full objective"),
+                     ("corr_psuccess_vs_rollout", "P(success) alone")):
+        c = np.array([r[key] for r in rows], dtype=float)
+        c = c[~np.isnan(c)]
+        if c.size:
+            cse = float(c.std(ddof=1) / np.sqrt(c.size))
+            summary[f"mean_{key}"] = float(c.mean())
+            summary[f"se_{key}"] = cse
+            print(f"corr(rollout value, {lab:<16}) = {c.mean():+.4f} "
+                  f"+/- {cse:.4f}   over {c.size} positions")
+
+    raw = np.array([r["world_sd"] for r in rows], dtype=float)
+    raw = raw[~np.isnan(raw)]
+    psd = np.array([r.get("paired_sd", np.nan) for r in rows], dtype=float)
+    psd = psd[~np.isnan(psd)]
+    if psd.size:
+        noise = float(psd.mean())
+        na = int(round(summary["mean_asks"]))
+        att = attenuation(na, n_worlds, noise)
+        summary["world_sd"] = float(raw.mean()) if raw.size else None
+        summary["paired_sd"] = noise
+        summary["attenuation"] = {str(k): v for k, v in att.items()}
+        if raw.size:
+            print(f"\nper-world rollout sd     {raw.mean():.3f} sets  "
+                  f"(mostly which deal was drawn)")
+        print(f"paired sd across actions {noise:.3f} sets  "
+              f"<- what selection actually contends with")
+        print(f"at this design ({na} asks, {n_worlds} worlds) the estimator "
+              f"recovers")
+        for d, f in att.items():
+            print(f"    {100 * f:5.1f}% of a true +{d} edge")
+        floor = min((d for d, f in att.items() if f >= 0.5), default=None)
+        if floor is not None:
+            print(f"so an edge of +{floor} or more would show; the figure above "
+                  f"is a lower bound below that.")
+
     dest.write_text(json.dumps({"summary": summary, "rows": rows}, indent=1))
     print(f"wrote {dest}")
 
