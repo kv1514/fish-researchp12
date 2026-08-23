@@ -2499,14 +2499,53 @@ of the engine.
 Repeating the paper's own measurement with the full v0.4 policy finishing every
 rollout, over $110$ positions and $3056$ scored candidate asks: position-centred
 rollout value rises by $+0.681 \pm 0.142$ across the range of
-$\Prob(\text{success})$, against the $+0.101$ above --- a difference of $4.1$
-standard errors. No single position carries it (the largest leave-one-out move
+$\Prob(\text{success})$, against the $+0.101$ above.
+
+Those two numbers must not be quoted against each other, and we nearly did. The
+$+0.101$ was measured over the LEARNING harvest, whose positions span the whole
+deal --- median two half-suits resolved, only $29\%$ with four or more --- while
+this measurement harvests late positions, four or more by construction.
+Attributing the gap to the continuation, when the position distribution also
+differs, is a two-factor change read as one: the error this section is about,
+committed inside the correction to it.
+
+The control is cheap and settles it. Running the public-information heuristic on
+the SAME $110$ positions, the same determinized worlds, the same seeds and the
+same $3056$ root asks gives a slope of $\mathbf{+0.040 \pm 0.045}$ --- consistent
+with the published $+0.101$ and indistinguishable from zero. Because the two arms
+score identical asks at identical positions, $\Prob(\text{success})$ is
+bit-identical between them, and the difference of the two within-slopes is
+exactly the within-slope of the differenced outcome. That paired contrast is
+\[
+  +0.641 \pm 0.145 \quad (4.4\text{ standard errors, clustered by position}).
+\]
+So the continuation is the cause, and the earlier comparison was right for a
+reason rather than by a coincidence of position mix.
+
+One caution on that pairing, because it briefly said the opposite. Averaging the
+per-position slope \emph{differences} without weights gives $+0.194 \pm 0.160$,
+apparently a null. That is a different estimand, not a more careful version of
+the same one: a single position's slope is very noisy (they run from $-6$ to
+$+4$), and an unweighted average is dominated by positions carrying almost no
+contrast in $\Prob(\text{success})$, whereas the reported slopes weight each
+position by its own sum of squared centred $\Prob(\text{success})$. A pairing
+that changes the weighting is not a pairing. No single position carries it (the largest leave-one-out move
 is $0.06$), and the run's first $40$ positions, which had been measured on their
 own first, agree with the remaining $80$ within $1.7$ standard errors, so it is
 one slope rather than an average of two regimes. Per-position slopes nonetheless
 run from $-6.4$ to $+3.7$: it is that between-position spread, and not the
 number of asks scored, that sets the interval, which is why tripling the run
 barely narrowed it.
+
+The mechanism is measurable too, and turns out to be almost embarrassingly
+concrete. Handed the same position, the same world and the same root ask, the
+heuristic needs $181$ plies on average to reach a terminal state where the
+engine needs $26$ --- a factor of seven. The extra plies are exchanges that undo
+each other: nothing stops the heuristic trading a card back and forth until its
+stall rule fires, and every one of those plies is a chance for the root ask to
+stop mattering to the final differential. Neither policy comes near the
+$400$-action cap ($324$ and $56$ at worst), so no part of this is capped games
+being scored on partial boards.
 
 So the diagnosis was correct about the mechanism --- a weak continuation does
 flatten the target --- and wrong about it being a wall. The target the
