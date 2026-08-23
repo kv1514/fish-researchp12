@@ -1075,13 +1075,35 @@ no-coupling cell in Table~\ref{tab:lookahead} is the experiment.
 
 \subsection{Cost}
 
-The branching factor of a real position averages $8$, so the tree is bounded by
-a beam of $4$ candidates per ply, ranked by immediate $p$. At depth $3$ that is
-at most $84$ node expansions, and measured over real positions the whole bonus
-vector costs a median of about $14$\,ms per decision on the contended host of
-Section~\ref{sec:counting} --- roughly a $15\%$ addition to a $100$-ms
-posterior, and the one part of v0.4 whose cost is a search rather than an
-inference.
+The branching factor of a real mid-game position is large: measured over 615
+decisions from six self-play games at the champion configuration, the number of
+legal asks has mean $45.0$, median $45$, p90 $81$ and maximum $102$, and exceeds
+$8$ in $94.6\%$ of decisions. (An earlier draft of this section said the
+branching factor ``averages 8''. That figure is the mean legal-action count of
+the \emph{exact-solver corpus} in
+\texttt{results/exact\_positions\_v2.json}, which consists of endgame positions
+with one or two live half-suits --- an endgame statistic read as a general one.)
+
+Continuations are therefore beamed to the best $4$ candidates by immediate $p$.
+The root ply is \emph{not} beamed, because the policy needs a bonus for every
+candidate it is ranking, so the cost is $n\,(1 + b + b^2) = 21n$ node expansions
+rather than the $b + b^2 + b^3 = 84$ a uniformly-beamed tree would give. At the
+median $n = 45$ that is about $945$ expansions, and the measured median of about
+$14$\,ms per decision on the contended host of Section~\ref{sec:counting} is
+consistent with that rather than with $84$ nodes, which at the same per-node cost
+would be nearer $1.4$\,ms.
+
+Against the configuration the lookahead runs actually used --- $160$ draws, the
+\texttt{fish4/agent4.py} default, since no lookahead cell in
+\texttt{results/v04\_duels.jsonl} overrides \texttt{n\_draws} --- the relevant
+posterior cost is the $31.9$\,ms row of Table~\ref{tab:posterior}, not the
+$\sim\!100$\,ms rows, which are all $512$-draw. So the bonus adds roughly $44\%$
+to a decision, not the $15\%$ an earlier draft claimed by comparing against a
+budget these runs never ran at. The wall clock agrees and is harsher: the
+champion-family cells average about $2.1$\,ms per action while the depth-3
+lookahead cell runs $319.70$\,s over $42{,}373$ actions, i.e. about $7.5$\,ms per
+action across both sides. This is the one part of v0.4 whose cost is a search
+rather than an inference, and it is not cheap.
 
 % =====================================================================
 \section{Evaluation methodology}

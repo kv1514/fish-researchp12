@@ -91,8 +91,18 @@ The seed is the deal — `GameState.deal` is deterministic and this repository i
 public — so the browser never receives it. Signing it would not have been
 enough: an HMAC authenticates a payload, it does not conceal one, and a base64
 token is readable by whoever holds it. Instead the token carries a random
-*nonce* and the seed is derived server-side as `HMAC(secret, nonce)`. The client
-holds something that identifies its game and reveals nothing about the hands.
+*nonce* and the seed is derived server-side as `HMAC(secret, nonce)`, over the
+full digest rather than a truncation — at a 30-bit seed there would be fewer
+deals than 9-card hands, so a player's own cards would pin their deal and an
+unkeyed `seed → hands` table would survive rotating the key.
+
+The token also commits to the **action log**, which is the part that is easy to
+miss. Authenticating the session without authenticating its history proves only
+*which* game a client is playing, and replay then honours whatever history
+arrives — so a client could assert nine claims that never happened and read the
+engine's honest answer, which is every card's true holder. Binding the log costs
+one hash and no storage, because the token round-trips on every response, and it
+closes the take-back too: a truncated log no longer verifies.
 
 ```bash
 py scripts4/devserve.py         # serve public/ + api/ exactly as deployed

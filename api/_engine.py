@@ -97,8 +97,14 @@ def seed_from_nonce(nonce: str) -> int:
     hands. Domain-separated from the signature so the same key cannot be made to
     serve both purposes.
     """
+    # The full digest, NOT truncated. seed -> deal is public deterministic code
+    # (random.Random(seed).shuffle(deck)), so a small seed space is enumerable
+    # offline regardless of the key: at 2**30 there are fewer seeds than there
+    # are 9-card hands, so the nine cards the protocol legitimately hands a
+    # player pin their own deal uniquely, and a precomputed seed->hands table
+    # would break every past and future game and survive rotating FISH_SECRET.
     d = hmac.new(_secret(), b"fish-deal:" + nonce.encode(), hashlib.sha256).digest()
-    return int.from_bytes(d[:8], "big") % (1 << 30)
+    return int.from_bytes(d, "big")
 
 
 def seal(payload: dict) -> str:
@@ -113,6 +119,10 @@ def unseal(token: str) -> dict:
         body, sig = token.split(".", 1)
     except ValueError:
         raise ValueError("malformed session token")
+    if not sig.isascii():
+        # compare_digest raises TypeError on non-ASCII str, which would escape
+        # the ValueError contract this function promises its callers.
+        raise ValueError("malformed session token")
     want = hmac.new(_secret(), body.encode(), hashlib.sha256).digest()
     want = base64.urlsafe_b64encode(want).decode().rstrip("=")[:27]
     # Constant time: a timing oracle on the signature is the one way an attacker
@@ -125,6 +135,28 @@ def unseal(token: str) -> dict:
         raise ValueError("this game has expired - start a new one")
     pad = "=" * (-len(body) % 4)
     return json.loads(base64.urlsafe_b64decode(body + pad))
+
+
+def log_hash(actions) -> str:
+    """A commitment to the exact action log, for sealing into the token.
+
+    THE HOLE THIS CLOSES
+    --------------------
+    Sealing the session without sealing the log authenticates *which game* a
+    client is playing and nothing about *what happened in it*. Replay applies
+    whatever list arrives, and a claim resolves against the true hands and
+    reports the holders - which is correct, because a resolved claim is public.
+    So a client could post its own valid token with a fabricated log of nine
+    claims and read all 54 card locations out of the response. Because the
+    function is stateless the fabrication is never persisted: the attacker
+    discards the reply and plays the same deal on with perfect information.
+
+    Binding the log costs one hash and no storage, because the token already
+    round-trips on every response. It also closes the take-back: a truncated
+    log no longer verifies, so a bad move cannot be replayed away.
+    """
+    raw = json.dumps(actions or [], separators=(",", ":"), sort_keys=True)
+    return hashlib.sha256(raw.encode()).hexdigest()[:24]
 
 
 def _action_of(ev) -> object:
@@ -219,6 +251,15 @@ class Session:
         self._helper_seed = rng.getrandbits(64)
         self._helper = None
         self.log: list = []
+        #: card -> the seat that held it, learned as claims resolve. The end of
+        #: game cannot be reconstructed from ``state.hands``: terminal means
+        #: every half-suit is resolved, and resolving one strips its cards from
+        #: every hand, so at terminal the hands are all empty by construction
+        #: and a reveal built from them is six empty lists.
+        self.revealed: dict[int, int] = {}
+        #: The wire form of every action so far, in order. What the token
+        #: commits to, and what the client is expected to send back verbatim.
+        self.wire_log: list = []
 
     # -- reconstruction -------------------------------------------------------
 
@@ -226,10 +267,16 @@ class Session:
     def restore(cls, token: str, actions) -> "Session":
         d = unseal(token)
         rules = RuleConfig(variant=d["v"], claims_any_time=bool(d["a"]))
+        if log_hash(actions) != d.get("h"):
+            # Either the log was altered or it belongs to another game. Both are
+            # unrecoverable by retrying, and the two are not worth telling apart
+            # for an attacker's benefit.
+            raise ValueError("this game has expired - start a new one")
         s = cls(int(d["s"]), str(d["n"]), rules, float(d["g"]))
         if actions:
             if len(actions) > MAX_LOG:
                 raise ValueError("action log too long")
+            s.wire_log = list(actions)
             for a in actions:
                 # Replay APPLIES the recorded action; it never re-derives it.
                 # That is what keeps the cost of a request independent of how
@@ -241,7 +288,8 @@ class Session:
     def token(self) -> str:
         return seal({"s": self.seat, "n": self.nonce, "g": self.gamma,
                      "v": self.rules.variant,
-                     "a": int(bool(self.rules.claims_any_time))})
+                     "a": int(bool(self.rules.claims_any_time)),
+                     "h": log_hash(self.wire_log)})
 
     # -- driving --------------------------------------------------------------
 
@@ -255,14 +303,20 @@ class Session:
             action = self.bots[p].act(Observation.from_state(self.state, p))
             ev = self.state.apply(p, action)
             self.log.append(narrate(ev))
-            played.append(wire_action(ev))
+            self.note_reveal(ev)
+            w = wire_action(ev)
+            played.append(w)
+            self.wire_log.append(w)
             n += 1
         return played
 
     def play(self, action):
         ev = self.state.apply(self.seat, action)
         self.log.append(narrate(ev))
-        return [wire_action(ev)] + self.advance()
+        self.note_reveal(ev)
+        w = wire_action(ev)
+        self.wire_log.append(w)
+        return [w] + self.advance()
 
     def suggest(self):
         """What the actual policy would do from our seat - not a re-ranking."""
@@ -273,6 +327,12 @@ class Session:
         return self._helper.act(self.obs())
 
     # -- views ----------------------------------------------------------------
+
+    def note_reveal(self, ev) -> None:
+        """Record where a resolved half-suit's cards actually were."""
+        if isinstance(ev, ClaimEvent):
+            for c, holder in zip(half_suit_cards(ev.half_suit), ev.revealed):
+                self.revealed[c] = holder
 
     def obs(self) -> Observation:
         return Observation.from_state(self.state, self.seat)
@@ -309,8 +369,9 @@ class Session:
             # Revealed only once every card is public anyway. Before that the
             # server has the layout and the client does not, which is the whole
             # point of sealing the seed.
-            "reveal": ([[card_name(c) for c in mask_to_cards(h)]
-                        for h in st.hands] if st.is_terminal else None),
+            "reveal": ([[card_name(c) for c in sorted(self.revealed)
+                         if self.revealed[c] == p] for p in range(NUM_PLAYERS)]
+                       if st.is_terminal else None),
         }
 
     def analysis(self) -> dict:

@@ -247,7 +247,10 @@ function renderAction() {
         r.appendChild(el("div", "rrow",
           `<b>P${p}</b> ${h.length ? h.join(" ") : "—"}`));
       });
-      box.appendChild(el("h4", null, "Every hand, now that it is over"));
+      // Not "every hand": a card's holder is only ever established when its set
+      // is declared, and a set is stripped from every hand as it resolves. What
+      // can honestly be shown is where each card sat at the moment it resolved.
+      box.appendChild(el("h4", null, "Where the cards were as each set resolved"));
       box.appendChild(r);
     }
     const again = el("button", "primary", "Deal again");
@@ -484,9 +487,13 @@ function openDeclare() {
       rows.innerHTML = "";
       for (const c of hs.cards) {
         const r = el("div", "declrow");
-        const face = el("span", "card sm");
-        face.innerHTML = face(c.name);
-        r.appendChild(face);
+        // Named `cell`, not `face`: `face` is the module-level card renderer,
+        // and a local of that name shadowed it here, so this line called a DOM
+        // node. The throw escaped openModal before the modal was shown, which
+        // made the Declare button do nothing at all - in every game.
+        const cell = el("span", "card sm");
+        cell.innerHTML = face(c.name);
+        r.appendChild(cell);
         const sel = el("select");
         sel.dataset.card = String(c.id);
         for (const p of team) {

@@ -80,9 +80,15 @@ from fish.cards import NUM_PLAYERS, half_suit_mask, mask_to_cards, team_of
 
 #: Default plies of possession to look ahead. Depth 1 is the incumbent.
 DEFAULT_DEPTH = 3
-#: Default number of candidate asks expanded per ply. The branching factor of a
-#: real position averages 8; expanding all of them at depth 3 is 512 nodes for a
-#: quantity that is dominated by its best few branches.
+#: Default number of candidate asks expanded per ply, in the CONTINUATION only.
+#: A real mid-game position offers a median of 45 legal asks (mean 45.0, p90 81,
+#: max 102, measured over 615 decisions), so an unbeamed depth-3 tree would be
+#: ~45^3 nodes for a quantity dominated by its best few branches.
+#:
+#: The root ply is deliberately not beamed: lookahead_bonus has to return a
+#: bonus for every candidate the policy is ranking, so the cost is n(1 + b + b^2)
+#: = 21n, about 945 expansions at the median n, not the 84 a uniformly-beamed
+#: tree would give.
 DEFAULT_BEAM = 4
 
 

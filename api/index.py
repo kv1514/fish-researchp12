@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from fish.engine import IllegalAction                          # noqa: E402
 from api._engine import (Session, new_session, parse_action,  # noqa: E402
                          wire_action)
 
@@ -80,9 +81,9 @@ class handler(BaseHTTPRequestHandler):
             if op == "health":
                 return self._send({"ok": True})
             return self._send({"error": "not found"}, 404)
-        except Exception as e:                       # pragma: no cover
+        except Exception:                            # pragma: no cover
             traceback.print_exc()
-            return self._send({"error": str(e)}, 500)
+            return self._send({"error": "internal error"}, 500)
 
     def do_POST(self):
         u = urlparse(self.path)
@@ -128,11 +129,19 @@ class handler(BaseHTTPRequestHandler):
 
             return self._send({"error": "not found"}, 404)
 
-        except ValueError as e:
+        except (ValueError, IllegalAction) as e:
+            # IllegalAction is NOT a ValueError, so without naming it here it
+            # reached the handler below and its message was echoed to the
+            # client. Those messages are statements about the on-turn player's
+            # hidden hand ("cannot ask for a card you hold", "must hold a card
+            # of the half-suit"), and replay lets a client choose who is on
+            # turn, which made the error body an exact hand-membership oracle.
             return self._send({"error": str(e)}, 400)
-        except Exception as e:                       # pragma: no cover
+        except Exception:                            # pragma: no cover
+            # Never echo the exception text: an unexpected error deep in the
+            # engine can carry hidden state in its message just as readily.
             traceback.print_exc()
-            return self._send({"error": str(e)}, 500)
+            return self._send({"error": "internal error"}, 500)
 
     def log_message(self, *args):                    # quieter function logs
         pass
