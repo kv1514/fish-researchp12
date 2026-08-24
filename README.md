@@ -24,14 +24,30 @@ toward understanding what near-optimal Fish actually looks like.
 > fix is fewer pushes**, not a cleverer ignore command. Batch commits locally
 > and push once per group of work.
 >
-> **The error message's "retry in 24 hours" is not the recovery time.** Two
-> pushes were refused, at 03:47:13 and 03:51:16 UTC; the next one deployed
-> normally at 03:56:02 — the limit released in **under five minutes**. A
-> refused push also creates *no deployment record at all*, so it costs nothing
-> but a red status. Both of those were checked against the deployment API
-> rather than taken from the message, which is the point: the paragraph above
-> replaced one inference-from-an-error-string with a measurement, and then
-> repeated a different claim from the same error string without measuring it.
+> **The error message's "retry in 24 hours" is not the recovery time, and the
+> limit is intermittent rather than a window.** Five consecutive pushes, UTC:
+>
+> ```
+> 03:41:06  deployment created, cancelled by ignoreCommand   -> success
+> 03:47:13  refused: "retry in 24 hours"
+> 03:51:16  refused
+> 03:56:02  deployment created, cancelled by ignoreCommand   -> success
+> 03:57:52  refused
+> ```
+>
+> Two of five got through, and one arrived less than two minutes after a
+> refusal. So it behaves like a bucket that refills continuously, not a door
+> that shuts for a day — and *not* like something that "releases" and stays
+> released, which is what a first reading of the 03:51→03:56 gap suggested.
+> A refused push also creates **no deployment record at all**, so it costs a
+> red status and nothing else.
+>
+> All of that came from the deployment API rather than the message, which is
+> the point of the paragraph: the note above replaced one
+> inference-from-an-error-string with a measurement, then repeated a *different*
+> claim from the same error string without measuring it, and the first
+> correction then over-read a single recovery as a rule. Three passes over four
+> sentences, each one shorter on evidence than it sounded.
 
 **Play it:**
 [fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
