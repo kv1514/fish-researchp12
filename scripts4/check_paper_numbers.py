@@ -24,6 +24,7 @@ Exit status is 1 if any watched figure no longer appears in the paper.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -112,6 +113,22 @@ WATCH = [
 ]
 
 
+def _present(s: str, near: str) -> bool:
+    """Is ``s`` in ``near`` as a whole number rather than as a substring?
+
+    A bare ``s in near`` is close to no test at all for a short format. In a
+    1400-character window, "5" matches every digit that occurs anywhere; "35"
+    matched 13 of the values 0--59, INCLUDING the 28 and 32 this module's
+    docstring names as the stale values it exists to catch; and the two
+    continuation-length rows share an anchor and each passed on the OTHER's
+    value, so swapping the two numbers in the paper reported clean. Requiring
+    that no digit or decimal point abut the match is what makes the check able
+    to fail.
+    """
+    return re.search(r"(?<![\d.])" + re.escape(s) + r"(?![\d.])",
+                     near) is not None
+
+
 def main() -> int:
     text = PAPER.read_text(encoding="utf-8")
     # A percentage is written "11.7\%" in LaTeX and formatted "11.7%" by
@@ -143,7 +160,7 @@ def main() -> int:
         # A signed value may appear with its sign stripped by surrounding
         # LaTeX, so accept the bare digits too -- but only near the anchor.
         near = text[max(0, at - WINDOW):at + WINDOW]
-        ok = s in near or s.lstrip("+") in near
+        ok = _present(s, near) or _present(s.lstrip("+"), near)
         print(f"{name:<34}{s:>12}   {'yes' if ok else '*** NOT NEAR ANCHOR'}")
         if not ok:
             missing.append(name)

@@ -38,6 +38,9 @@ from test_adaptive import collect_positions                  # noqa: E402
 #: What the ungated penalty cost at w=0.30, over 200 pairs.
 UNGATED_W030 = -0.340
 
+#: The gate this script sizes: ``retake_min_depth=2``, as pre-registered.
+MIN_DEPTH = 2
+
 #: ``results/pair_sd_model.json``: across 28 cells the per-pair sd is well
 #: described by ``sd = COND_SD * sqrt(share of pairs on which the arms
 #: diverge)``, with the conditional part varying by only 5.9%. Sizing therefore
@@ -96,15 +99,26 @@ def main(argv):
     for d in sorted(depths):
         print(f"  depth {d}: {depths[d]:>5}  ({100 * depths[d] / n:5.1f}%)")
     deep = sum(v for k, v in depths.items() if k >= 2)
-    print(f"  depth >= 2 in {100 * deep / n:.0f}% of positions -- duels are "
-          f"the normal case, not an edge one")
+    # Another line that used to state its conclusion whatever the count was.
+    gloss = ("duels are the normal case, not an edge one" if deep > n / 2 else
+             "common enough to gate on, but not the normal case")
+    print(f"  depth >= {MIN_DEPTH} in {100 * deep / n:.0f}% of positions -- "
+          f"{gloss}")
 
     total_retake = sum(retake_by_depth.values())
-    gated_out = retake_by_depth.get(1, 0)
+    # The gate spares every retake position BELOW min_depth, which is not the
+    # same set as "depth exactly 1". It was, while duel_depth counted either
+    # direction alone: a retake implies a loss, a loss implied depth >= 1, so
+    # depth 1 was the whole spared set. Once the statistic requires cards to
+    # have moved both ways, a first retake scores 0 and `get(1)` finds none of
+    # them -- the script reported that the gate spares nothing and that its
+    # largest possible effect is +0.000. Count the definition, not one value
+    # of it.
+    gated_out = sum(v for k, v in retake_by_depth.items() if k < MIN_DEPTH)
     print(f"\na retake is on the menu in {total_retake} positions "
           f"({100 * total_retake / n:.1f}%)")
-    print(f"of those, {gated_out} are at depth 1 -- the ones the gate spares "
-          f"({100 * gated_out / n:.2f}% of all positions)")
+    print(f"of those, {gated_out} are below depth {MIN_DEPTH} -- the ones the "
+          f"gate spares ({100 * gated_out / n:.2f}% of all positions)")
 
     share = gated_out / total_retake if total_retake else 0.0
     expected = abs(UNGATED_W030) * share
@@ -134,12 +148,21 @@ def main(argv):
         print(f"  {n_pairs:>5}   {h:>13.3f}   {m:>15.3f}{flag}")
     verdict = n_needed is not None and n_needed <= 1000
     print()
-    print("The largest effect the gate can have is inside what a 200-pair cell "
-          "can\nresolve, so such a cell would return a number "
-          "indistinguishable from zero\nwhatever the truth is. Running it "
-          "anyway would add a sixth null to a\nfive-null family and look like "
-          "evidence.")
-    if n_needed:
+    # This paragraph used to print unconditionally, which made it a claim the
+    # data could not contradict. It is true only when a 200-pair cell cannot
+    # resolve the largest effect the gate can have, so say it only then.
+    mde200 = (1.96 + 0.8416212) * est_sd / (200 ** 0.5)
+    if mde200 > expected:
+        print("The largest effect the gate can have is inside what a 200-pair "
+              "cell can\nresolve, so such a cell would return a number "
+              "indistinguishable from zero\nwhatever the truth is. Running it "
+              "anyway would add a sixth null to a\nfive-null family and look "
+              "like evidence.")
+    else:
+        print(f"A 200-pair cell resolves {mde200:.3f} at 80% power, inside the "
+              f"{expected:+.3f} the\ngate can be worth, so a screen at that "
+              f"size is informative after all.")
+    if n_needed and est_sd > 0:
         print(f"\nIt would take about {n_needed} pairs to have 80% power "
               f"against the most this\ngate can be worth -- a real experiment, "
               f"not a screen, and it should be\nqueued as one behind work with "
@@ -159,7 +182,8 @@ def main(argv):
            "retake_by_depth": {str(k): v
                                for k, v in sorted(retake_by_depth.items())},
            "retake_share": total_retake / n,
-           "depth1_retake_share": gated_out / n,
+           "min_depth": MIN_DEPTH,
+           "spared_retake_share": gated_out / n,
            "gate_share_of_flagged": share,
            "max_recoverable": expected,
            "est_divergence_share": UNGATED_SHARE * share,

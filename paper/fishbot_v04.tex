@@ -3167,20 +3167,36 @@ large one, the loss growing monotonically with how firmly the policy withholds.
 Two variants of playing to the score --- more variance when behind, more caution
 when ahead --- also failed to beat playing the same way regardless.
 
-The situation is not rare, which is what makes the result usable: at $57\%$ of
-decision points the acting seat is already two or more exchanges deep with some
-opponent, and a re-take is available at $11\%$ of positions. So this is advice
+The situation is not rare, which is what makes the result usable: a re-take is
+available at $11\%$ of positions, and at $18\%$ of decision points the acting
+seat is already two or more exchanges deep with some opponent. So this is advice
 about a common decision, not a corner case. Take the certain ask.
 
 We are careful about one thing here. What was measured is a penalty applied to
 \emph{every} re-take, including the first, and the argument for withholding is
 really about a \emph{repeated} exchange. The engine can now gate the penalty on
 the exchange recurring, and we can say in advance what that version could be
-worth at most --- $+0.098$ sets per deal-pair --- because the gate touches only
-the $3\%$ of positions where a re-take is available and the duel is exactly one
-deep, which is $29\%$ of what the ungated penalty flags.
+worth at most --- $+0.159$ sets per deal-pair --- because the gate touches only
+the $5\%$ of positions where a re-take is available and no card has yet come
+back the other way, which is $47\%$ of what the ungated penalty flags.
 That is small enough that the $200$-pair cells this study used for screening
 could not have resolved it either way, which is why no such cell was run.
+
+Both of those figures moved, and the reason is worth recording rather than
+quietly restating. The depth statistic originally counted successful asks
+between this seat and one opponent in \emph{either direction separately}, so an
+opponent taking two cards off this seat and giving nothing back scored the same
+depth as a card going out and coming home --- opposite situations, since in the
+first that opponent has plainly netted two cards. Over $1023$ harvested
+positions, $37.8\%$ of the positions where the gate opened had no two-way
+exchange at all with the opponent it opened on. Requiring cards to have moved
+both ways takes the ``two or more exchanges deep'' rate from $57\%$ to $18\%$ and
+\emph{raises} what the gate could recover from $+0.098$ to $+0.159$, because
+sparing a first re-take now correctly includes every position where nothing has
+come back yet. This is the same defect the gate was built to fix, one level down:
+an implementation that did not match its own stated hypothesis. The unit test
+that should have caught it was named for exactly this property and its example
+happened to run both ways, so it passed against code that did not have it.
 
 \paragraph{And a warning about the obvious idea.} Scoring asks by ``how much
 does this improve my team's chance of winning this half-suit'' --- which sounds

@@ -30,7 +30,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts4"))
 
-from check_paper_numbers import PAPER, WATCH                   # noqa: E402
+from check_paper_numbers import (PAPER, WATCH,                  # noqa: E402
+                                 _present)
 
 
 def test_every_watched_figure_matches_the_results_file():
@@ -62,3 +63,36 @@ def test_every_watched_figure_has_an_anchor_that_is_in_the_paper():
 
 def test_the_paper_is_where_the_manifest_says():
     assert PAPER.exists()
+
+
+def test_the_match_can_actually_fail():
+    """A check that cannot report a miss is not a check.
+
+    The rule was a bare ``value in window``. Over a 1400-character window that
+    passes on any digit string that happens to occur inside a longer number, so
+    the two continuation-length rows -- which share an anchor -- each passed on
+    the OTHER's value, and swapping the two figures in the paper reported
+    clean. This pins the boundary rule that fixed it.
+    """
+    near = r"the heuristic needs $181$ plies where the engine needs $26$"
+    assert _present("181", near)
+    assert _present("26", near)
+    for fragment in ("18", "8", "1", "2", "6"):
+        assert not _present(fragment, near), \
+            f"{fragment!r} matched as a substring of a longer number"
+    # A decimal must not match a truncation of itself, in either direction.
+    assert _present("0.340", "the pooled estimate is $0.340$")
+    assert not _present("0.34", "the pooled estimate is $0.340$")
+    assert not _present("0.3401", "the pooled estimate is $0.340$")
+
+
+def test_short_integer_formats_are_not_free_passes():
+    """The row the module docstring names as its motivating example.
+
+    ``n_cells`` was written 28, then 31, then 34 while runs kept landing. Under
+    the old rule "35" still passed against a window containing 28 or 32, so the
+    check would have reported clean on precisely the drift it was written for.
+    """
+    stale = r"across the $28$ cells of this study that store per-pair values"
+    assert not _present("35", stale)
+    assert _present("28", stale)

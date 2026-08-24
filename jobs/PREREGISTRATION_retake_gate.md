@@ -37,13 +37,45 @@ above tested the implementation. `retake_min_depth` gates the penalty on
 
 ## What was measured before sizing, rather than assumed
 
-- Duels are not rare: `duel_depth ≥ 2` at **57%** of decision points.
-- A retake is on the menu at **11.2%** of positions; **3.25%** are at depth 1,
-  which are exactly the ones the gate spares.
-- So the gate un-flags **29%** of the flagged positions. If the ungated penalty's
-  −0.340 is proportional to what it flags, the most the gate can recover is
-  **+0.098** — which is why a 200-pair screen was **not** run: it resolves
-  ±0.192 at best and would have returned a null whatever the truth was.
+> **Second amendment, still before any pair of this run was played.** An audit
+> of `duel_depth` found that it did not implement the hypothesis above. It
+> counted successful asks between this seat and one opponent *in either
+> direction separately*, so two cards taken off this seat by one opponent, with
+> nothing given back, scored the same depth 2 as a card going out and coming
+> home. Those are opposite situations: in the first the opponent has netted two
+> cards, which is exactly not "neither side nets a card across the cycle".
+> Measured over the 1023 harvested positions, **37.8%** of the positions where
+> the gate opened had no two-way exchange at all with the opponent it opened on
+> — 31.2% pure loss runs, 6.6% pure taking runs.
+>
+> This is the same defect the section below identifies in the five prior cells:
+> the implementation did not match its own stated hypothesis. Discovering it
+> *after* running would have made this run the sixth cell testing the wrong
+> thing. `duel_depth` now requires cards to have moved both ways with that
+> opponent before it counts anything, and the base rates below are re-measured
+> under the corrected statistic. The test that was supposed to cover this was
+> named `test_duel_depth_counts_the_trade_in_both_directions` and its example
+> happened to run both ways, so it passed against an implementation that did
+> not.
+>
+> **The design does not change.** The re-measured numbers make 2000 pairs
+> *more* than adequate rather than less, so leaving it alone costs nothing and
+> changing it after inspecting the numbers is what this protocol exists to
+> prevent.
+
+Re-measured on 400 decision points under the corrected statistic:
+
+- Duels are common but not the normal case: `duel_depth ≥ 2` at **18%** of
+  decision points (the pre-amendment statistic said 57%, and was counting table
+  activity rather than duels).
+- A retake is on the menu at **11.2%** of positions, unchanged — the gate does
+  not change what is flagged, only what is spared. **5.25%** of all positions
+  are retakes below depth 2, which are exactly the ones the gate spares.
+- So the gate un-flags **47%** of the flagged positions, against 29% before. If
+  the ungated penalty's −0.340 is proportional to what it flags, the most the
+  gate can recover is **+0.159**, against +0.098 before. A 200-pair screen is
+  still not run: it resolves ±0.351 at 80% power, which does not separate
+  +0.159 from zero.
 
 ## Effect size and sizing
 
@@ -55,8 +87,10 @@ whole problem).
 
 Per-pair sd is **not** taken as the A/A 3.796. `results/pair_sd_model.json`
 decomposes it as `sd = √s · sd(D | diverge)`. The ungated arms diverged on 0.440
-of pairs; the gate keeps 71% of the flagged positions, so the estimate is
-`s ≈ 0.31`, and with a flat conditional term of 3.9 that gives **sd ≈ 2.16**.
+of pairs; under the corrected statistic the gate keeps 53% of the flagged
+positions, so the estimate is `s ≈ 0.205`, and with a flat conditional term of
+3.9 that gives **sd ≈ 1.77**. (Before the second amendment these read 71%,
+`s ≈ 0.31` and sd ≈ 2.16.)
 
 > **Amended before any pair of this run was played.** Auditing that model
 > afterwards showed the conditional term is *not* flat: it drifts with share
@@ -71,8 +105,9 @@ of pairs; the gate keeps 71% of the flagged positions, so the estimate is
 > its bias is recorded here.
 
 - **2 blocks × 1000 pairs = 2000 duplicate deal-pairs**, fresh seeds throughout.
-- **MDE at 80% power ≈ 0.135**, which separates −0.340 from 0 comfortably and
-  separates −0.242 from 0 adequately.
+- **MDE at 80% power ≈ 0.111** under the corrected statistic (0.135 as
+  originally sized), which separates −0.340 from 0 comfortably and separates
+  −0.242 from 0 adequately.
 - Sized on the A/A figure instead, the same power would have demanded about
   6200 pairs and this would not have been run.
 

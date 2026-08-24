@@ -88,6 +88,33 @@ def test_duel_depth_counts_the_trade_in_both_directions():
     assert duel_depth(quiet) == 0
 
 
+def test_duel_depth_is_zero_for_a_one_directional_run():
+    """The case the test above is NAMED for, and never actually checked.
+
+    Its example happens to run both ways, so it passed against an
+    implementation that counted either direction alone. One opponent taking two
+    cards off this seat and giving nothing back is not a duel -- they have
+    netted two cards -- and neither is this seat taking two and losing none.
+    """
+    losses = _obs([AskEvent(asker=1, target=0, card=7, success=True),
+                   AskEvent(asker=1, target=0, card=9, success=True)])
+    assert duel_depth(losses) == 0
+    takes = _obs([AskEvent(asker=0, target=1, card=7, success=True),
+                  AskEvent(asker=0, target=1, card=9, success=True)])
+    assert duel_depth(takes) == 0
+    # ... and one of each with the SAME opponent is a duel, at depth 2.
+    both = _obs([AskEvent(asker=1, target=0, card=7, success=True),
+                 AskEvent(asker=0, target=1, card=7, success=True)])
+    assert duel_depth(both) == 2
+
+
+def test_duel_depth_does_not_pool_two_opponents_into_one_duel():
+    """Losing to one seat and taking from another is two exchanges, not a duel."""
+    o = _obs([AskEvent(asker=1, target=0, card=7, success=True),
+              AskEvent(asker=0, target=3, card=9, success=True)])
+    assert duel_depth(o) == 0
+
+
 # ---------------------------------------------------------------------------
 # The score
 # ---------------------------------------------------------------------------
@@ -191,7 +218,9 @@ def test_min_depth_spares_the_first_retake():
     from fish.engine import Ask
     o = _obs([AskEvent(asker=1, target=0, card=7, success=True)])
     asks = [Ask(1, 7), Ask(1, 8)]
-    assert duel_depth(o) == 1
+    # Zero, not one: nothing has come back yet, so no card has changed hands
+    # BETWEEN us. The retake under consideration would be the first return leg.
+    assert duel_depth(o) == 0
     assert list(retake_flags(o, asks, min_depth=0)) == [1.0, 0.0]
     assert list(retake_flags(o, asks, min_depth=2)) == [0.0, 0.0]
 
