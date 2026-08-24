@@ -644,3 +644,95 @@ def test_v04_rollout_refuses_a_position_without_a_stored_history():
     # ... and the public continuation still evaluates it, as it always could.
     out = _eval_one((rec, RolloutConfig(max_actions=200).to_dict(), 7))
     assert len(out["v"]) == 2
+
+
+def test_claim_feature_is_largest_for_a_certain_steal():
+    """The feature scored ZERO on exactly the asks it was written to reward.
+
+    ``claim`` is "how much closer does a success bring this half-suit to one we
+    can declare". It multiplied P(success) by the product of P(card with our
+    team) over all SIX cards -- including the card being asked for, which by
+    construction we do not hold. For a provably-certain steal that factor is
+    exactly 0, so the product is 0 and the feature is 0; it rose as the steal
+    became LESS certain, which is backwards.
+    """
+    import numpy as np
+    from fish4.askfeat import TERM_NAMES, DecisionContext, ask_feature_matrix
+    from fish4.posterior import Posterior
+
+    st = _midgame(seed=17, plies=22)
+    seat = st.turn
+    obs = Observation.from_state(st, seat)
+    asks = obs.legal_asks()
+    if len(asks) < 2:
+        pytest.skip("no choice of asks at this position")
+
+    from fish.beliefs import BeliefState
+    bel = BeliefState(st.rules, observer=seat)
+    bel.update(obs)
+    post = Posterior(bel, random.Random(5), n_draws=160, n_worlds=8, obs=obs,
+                     gamma=0.35)
+    ctx = DecisionContext(obs, bel, post)
+    p, F = ask_feature_matrix(ctx, asks)
+    j = TERM_NAMES.index("claim")
+
+    certain = [i for i in range(len(asks)) if p[i] > 0.999]
+    if not certain:
+        pytest.skip("no provably-certain steal at this position")
+    # A certain steal must not score zero on a feature about claim progress.
+    for i in certain:
+        assert F[i, j] > 0.0, (
+            f"claim feature is {F[i, j]} for an ask with P(success)="
+            f"{p[i]:.4f} -- the asked card is being counted in the product "
+            f"again")
+    # And it must beat the median uncertain ask, since certainty is the point.
+    others = [F[i, j] for i in range(len(asks)) if i not in certain]
+    if others:
+        assert max(F[i, j] for i in certain) >= float(np.median(others))
+
+
+def test_a_term_whose_formula_changed_is_refused_even_though_its_name_did_not():
+    """The name check could not see a column changing meaning underneath it.
+
+    ``fit.build_blocks`` refused a harvest whose TERM_NAMES differed from the
+    current ones, because adding or reordering a term misattributes one term's
+    effect to another. The symmetric hazard -- a stable name over a changed
+    formula -- was invisible, and it then happened: ``claim`` was corrected
+    from a product over all six cards of the half-suit to a product over the
+    other five. A weight fitted on the old column would describe a feature the
+    engine no longer computes.
+    """
+    import numpy as np
+    import pytest
+
+    from fish4.askfeat import TERM_NAMES, term_versions, stale_terms
+    from fish4.learn.fit import build_blocks
+
+    assert stale_terms(term_versions()) == []
+    # A harvest taken before versions were recorded is, by definition, all-1s.
+    assert "claim" in stale_terms(None)
+
+    n = len(TERM_NAMES)
+    rec = {"pid": 7, "game": 0, "ply": 3, "seat": 0,
+           "p": [0.4, 0.6], "f": [[0.1] * n, [0.2] * n],
+           "eval_idx": [0, 1], "terms": list(TERM_NAMES),
+           "tv": term_versions()}
+    rollouts = {7: [[1.0, 1.0], [2.0, 2.0]]}
+
+    # Current versions: fine.
+    assert len(build_blocks([rec], rollouts)) == 1
+
+    # One term's definition bumped under an unchanged name: refused, and the
+    # message has to name the term rather than say "basis mismatch".
+    stale = dict(rec)
+    tv = term_versions()
+    tv[TERM_NAMES.index("claim")] -= 1
+    stale["tv"] = tv
+    with pytest.raises(ValueError, match="claim"):
+        build_blocks([stale], rollouts)
+
+    # And a harvest with no versions at all is refused for the same reason,
+    # rather than being read as "nothing has changed".
+    no_tv = {k: v for k, v in rec.items() if k != "tv"}
+    with pytest.raises(ValueError, match="claim"):
+        build_blocks([no_tv], rollouts)

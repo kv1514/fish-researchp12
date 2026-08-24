@@ -60,7 +60,7 @@ from typing import Iterable, Optional, Sequence
 
 import numpy as np
 
-from ..askfeat import TERM_NAMES, AskWeights
+from ..askfeat import TERM_NAMES, AskWeights, stale_terms
 
 N_TERMS = len(TERM_NAMES)
 
@@ -144,6 +144,20 @@ def build_blocks(positions: Iterable[dict], rollouts: dict) -> list[PositionBloc
                 f"{rec['pid']}: harvested with basis {tuple(stored)} but "
                 f"fish4.askfeat.TERM_NAMES is now {tuple(TERM_NAMES)}; "
                 f"re-harvest before fitting")
+        # The names matching is only half the check. A term whose FORMULA
+        # changed while its name stayed put produces a column that no longer
+        # means what the fitted weight would claim, and the name check cannot
+        # see it. `claim` has already been corrected this way, after this
+        # dataset was harvested.
+        bad = stale_terms(rec.get("tv"))
+        if bad:
+            raise ValueError(
+                f"{rec['pid']}: harvested with definition version(s) "
+                f"{ {n: (rec.get('tv') or [1] * len(TERM_NAMES))[TERM_NAMES.index(n)] for n in bad} } "
+                f"for {bad}, which fish4/askfeat.py has since changed. A "
+                f"weight fitted on that column would describe a feature the "
+                f"engine no longer computes. Re-harvest, or drop the term "
+                f"from the basis deliberately -- not by ignoring this.")
         if F_all.shape[1] != N_TERMS:
             raise ValueError(f"{rec['pid']}: feature width {F_all.shape[1]} "
                              f"!= {N_TERMS}; TERM_NAMES changed under the data")

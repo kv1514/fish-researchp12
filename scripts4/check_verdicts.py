@@ -41,11 +41,11 @@ RUNS = [
     ("PRECISION2 n_draws 1440 vs 480 block", 6,
      "precision2_verdict.json", "scripts4/precision_verdict.py 2"),
     ("CLAIM THRESHOLD 0.90 vs 0.97 block", 2,
-     "claim_threshold_verdict.json", "(no verdict script yet)"),
+     "claim_threshold_verdict.json", "scripts4/claim_verdict.py"),
     ("LEARNED WEIGHTS v2 vs champion block", 2,
      "learned_weights_verdict.json", "(no verdict script yet)"),
     ("RETAKE BONUS w-0.30 vs champion block", 2,
-     "retake_bonus_verdict.json", "(no verdict script yet)"),
+     "retake_bonus_verdict.json", "scripts4/retake_bonus_verdict.py"),
     ("COMBINED 480+lookahead vs champion block", 2,
      "combined_verdict.json", "(no verdict script yet)"),
 ]

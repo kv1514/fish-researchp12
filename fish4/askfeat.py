@@ -58,6 +58,47 @@ TERM_NAMES = (
     "signal",      # NEW: the BENEFIT side of revealing a holding to teammates
 )
 
+#: Definition version of each term, bumped whenever a term's FORMULA changes
+#: while its name stays the same.
+#:
+#: fish4/learn/fit.py already refused a harvest whose TERM_NAMES differed from
+#: the current ones, because adding or reordering a term silently attributes
+#: one term's effect to another. It could not see the other half of the same
+#: hazard: a name that stays put while the column beneath it changes meaning.
+#: That is not hypothetical -- ``claim`` was corrected from a product over all
+#: six cards of the half-suit to a product over the OTHER five, which flips it
+#: from scoring zero on a certain steal to scoring highest there. Any fit over
+#: a harvest predating that correction would attribute a weight to a feature
+#: the engine no longer computes.
+#:
+#: A harvest with no versions recorded is treated as all-1s, which is exactly
+#: what it is.
+TERM_VERSIONS = {
+    "suit": 1, "turn": 1, "scarce": 1, "reveal": 1, "deplete": 1,
+    "expose": 1,
+    "claim": 2,        # v2: excludes the asked card from the product
+    "info": 1, "certain": 1, "concent": 1, "signal": 1,
+}
+assert tuple(TERM_VERSIONS) == TERM_NAMES, "TERM_VERSIONS must mirror TERM_NAMES"
+
+
+def term_versions() -> list:
+    """Current definition versions, aligned to :data:`TERM_NAMES`."""
+    return [TERM_VERSIONS[n] for n in TERM_NAMES]
+
+
+def stale_terms(recorded) -> list:
+    """Names whose stored definition version is not the current one.
+
+    ``recorded`` is a list aligned to TERM_NAMES, or None for a harvest taken
+    before versions were written -- which means every term was at version 1.
+    """
+    have = list(recorded) if recorded else [1] * len(TERM_NAMES)
+    if len(have) != len(TERM_NAMES):
+        raise ValueError(f"recorded {len(have)} term versions for "
+                         f"{len(TERM_NAMES)} terms")
+    return [n for n, v in zip(TERM_NAMES, have) if v != TERM_VERSIONS[n]]
+
 
 @dataclass(frozen=True)
 class AskWeights:
@@ -98,7 +139,7 @@ class DecisionContext:
     __slots__ = ("obs", "bel", "post", "M", "me", "my_team", "n_hs", "per",
                  "hs_live", "my_depth", "team_exp", "opp_exp", "player_exp",
                  "revealed", "turn_risk", "exposure", "hs_entropy",
-                 "team_concentration", "p_team_all", "avg_live")
+                 "team_concentration", "p_team_all", "p_team_card", "avg_live")
 
     def __init__(self, obs, bel, post):
         self.obs = obs
@@ -127,6 +168,12 @@ class DecisionContext:
         self.hs_entropy = np.zeros(n_hs)
         self.team_concentration = np.zeros(n_hs)
         self.p_team_all = np.zeros(n_hs)
+        #: Per-card P(this card sits with our team), by half-suit.
+        #: Kept because the claim feature needs the product over the
+        #: OTHER five cards, and dividing the six-card product by one
+        #: factor is exactly wrong when that factor is zero -- which
+        #: is precisely the case the feature exists to reward.
+        self.p_team_card = np.zeros((n_hs, 6))
 
         for hs in range(n_hs):
             if not self.hs_live[hs]:
@@ -154,6 +201,7 @@ class DecisionContext:
             # cheap screen and is only ever used as a *relative* term.
             pteam = block[:, mine].sum(axis=1)
             self.p_team_all[hs] = float(np.prod(pteam))
+            self.p_team_card[hs] = pteam
 
         counts = obs.hand_counts
         live_counts = [c for c in counts if c > 0]
@@ -240,8 +288,22 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
         # Claim progress: how much closer a success brings this half-suit to
         # being one WE can declare. Gaining a card puts it in our own hand,
         # which is the only perfectly localised place it can be, so the gain is
-        # largest when the rest of the suit is already ours.
-        F[i, 6] = pi * ctx.p_team_all[hs] ** (1.0 / 6.0)
+        # largest when THE REST of the suit is already ours.
+        #
+        # "The rest" is the whole point and was the bug. This used
+        # ctx.p_team_all[hs], the product over all SIX cards -- including the
+        # one being asked for, which by construction we do not hold. For a
+        # provably-certain steal that card's factor is exactly 0, so the
+        # product is 0 and the feature is 0: it scored zero on precisely the
+        # asks it was written to reward, and rose as the steal became less
+        # certain. Excluding the asked card is what the comment above always
+        # described.
+        others = ctx.p_team_card[hs]
+        rest = 1.0
+        for k in range(6):
+            if hs * 6 + k != a.card:
+                rest *= float(others[k])
+        F[i, 6] = pi * rest ** (1.0 / 5.0)
         # Information: a maximally uncertain ask (p ~ 0.5) in a maximally
         # uncertain half-suit resolves the most.
         F[i, 7] = 4.0 * pi * fail * ctx.hs_entropy[hs]

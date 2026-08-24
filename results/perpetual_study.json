@@ -11,7 +11,14 @@
     "share_of_plies_with_no_landing_ask": 0.04243498251831984,
     "mean_actions_after_first_dead_position": 4.43,
     "mean_dead_half_suits_at_peak": 3.135,
-    "nulls_per_game": 0.275
+    "nulls_per_game": 0.275,
+    "half_suits": 1800,
+    "stuck_half_suits": 171,
+    "share_of_half_suits_stuck": 0.095,
+    "null_rate_when_stuck": 0.23391812865497075,
+    "null_rate_when_not_stuck": 0.009208103130755065,
+    "stuck_share_of_all_nulls": 0.7272727272727273,
+    "null_rate_ratio": 25.403508771929822
   },
   "no_progress_rule": {
     "games": 200,
@@ -25,7 +32,14 @@
     "share_of_plies_with_no_landing_ask": 0.04243498251831984,
     "mean_actions_after_first_dead_position": 4.43,
     "mean_dead_half_suits_at_peak": 3.135,
-    "nulls_per_game": 0.275
+    "nulls_per_game": 0.275,
+    "half_suits": 1800,
+    "stuck_half_suits": 171,
+    "share_of_half_suits_stuck": 0.095,
+    "null_rate_when_stuck": 0.23391812865497075,
+    "null_rate_when_not_stuck": 0.009208103130755065,
+    "stuck_share_of_all_nulls": 0.7272727272727273,
+    "null_rate_ratio": 25.403508771929822
   },
   "signalling": {
     "games": 200,
@@ -39,6 +53,13 @@
     "share_of_plies_with_no_landing_ask": 0.04559328500572301,
     "mean_actions_after_first_dead_position": 4.78,
     "mean_dead_half_suits_at_peak": 3.155,
-    "nulls_per_game": 0.22
+    "nulls_per_game": 0.22,
+    "half_suits": 1800,
+    "stuck_half_suits": 186,
+    "share_of_half_suits_stuck": 0.10333333333333333,
+    "null_rate_when_stuck": 0.1989247311827957,
+    "null_rate_when_not_stuck": 0.004337050805452293,
+    "stuck_share_of_all_nulls": 0.8409090909090909,
+    "null_rate_ratio": 45.866359447004605
   }
 }

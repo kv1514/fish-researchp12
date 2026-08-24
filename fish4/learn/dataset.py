@@ -89,7 +89,8 @@ from fish.rules import RuleConfig
 from fish.runner import GameTimeout, play_game
 
 from ..agent4 import FishBot4
-from ..askfeat import TERM_NAMES, ask_feature_matrix, DecisionContext
+from ..askfeat import (TERM_NAMES, ask_feature_matrix, DecisionContext,
+                       term_versions)
 from ..posterior import Posterior
 from .rollout import banked_differential
 
@@ -322,6 +323,10 @@ class HarvestBot(FishBot4):
             "banked": banked_differential(obs.set_winner, team_of(obs.player)),
             "n_hidden": n_hidden,
             "terms": list(TERM_NAMES),
+            # Not just the names: the DEFINITION version of each, so a formula
+            # that changes under a stable name is caught too. See
+            # fish4.askfeat.TERM_VERSIONS.
+            "tv": term_versions(),
         }
 
 
@@ -437,7 +442,8 @@ def harvest(root: Path, cfg: HarvestConfig, n_workers: int = MAX_WORKERS,
             f"with the tag naming only the newer. Harvest into a new root.")
     meta_path(root).write_text(json.dumps(
         {"schema": POSITION_SCHEMA, "config": cfg.to_dict(),
-         "terms": list(TERM_NAMES), "agent": ["fishbot4", {}]},
+         "terms": list(TERM_NAMES), "term_versions": term_versions(),
+         "agent": ["fishbot4", {}]},
         indent=2), encoding="utf-8")
     done = completed_games(root)
     seed_rng = random.Random(cfg.agent_seed_base)

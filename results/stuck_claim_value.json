@@ -2,13 +2,45 @@
  "n_games": 40,
  "n_decisions": 2719,
  "threshold": 0.97,
- "null_rate": 0.175,
- "bar": 0.825,
+ "null_rate": 0.23391812865497075,
+ "bar": 0.7660818713450293,
  "map_accuracy": 0.7407134976094152,
  "mean_p_map": 0.3507188289520917,
  "share_at_threshold": 0.1305627068775285,
- "share_in_band": 0.01360794409709452,
+ "share_in_band": 0.01986024273630011,
  "band_accuracy": 1.0,
+ "calibration": [
+  {
+   "lo": 0.0,
+   "hi": 0.5,
+   "n": 2062,
+   "accuracy": 0.6653734238603298
+  },
+  {
+   "lo": 0.5,
+   "hi": 0.7,
+   "n": 203,
+   "accuracy": 0.9359605911330049
+  },
+  {
+   "lo": 0.7,
+   "hi": 0.85,
+   "n": 75,
+   "accuracy": 0.9733333333333334
+  },
+  {
+   "lo": 0.85,
+   "hi": 0.97,
+   "n": 24,
+   "accuracy": 1.0
+  },
+  {
+   "lo": 0.97,
+   "hi": 1.01,
+   "n": 355,
+   "accuracy": 1.0
+  }
+ ],
  "n_half_suits": 359,
  "per_half_suit": {
   "map_accuracy": 0.8161559888579387,
@@ -21,7 +53,7 @@
   "half_suits_within_one_team_per_game": 8.975,
   "share_we_would_declare": 0.04178272980501393,
   "accuracy_there": 1.0,
-  "gain_not_computed": "the 0.175 null rate setting the bar was measured on the narrow provable-stuck population; this one is every half-suit actually within one team",
+  "gain_not_computed": "the 0.234 null rate setting the bar was measured on the narrow provable-stuck population; this one is every half-suit actually within one team",
   "mde_2000_pairs": 0.23780174677630073
  },
  "calibration_under_half": 0.6653734238603298,

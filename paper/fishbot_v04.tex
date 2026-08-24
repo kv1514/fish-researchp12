@@ -2414,7 +2414,9 @@ report it rather than promoting it --- particularly having already watched a
 larger apparent effect fail to replicate twice
 (Section~\ref{sec:res-replication}). The neighbouring cell in the other
 direction ($0.99$) gives $+0.010$ $[-0.010, +0.030]$, which is the shape of a
-policy that barely changes its decisions at all.
+policy that barely changes its decisions at all. This one has since been run
+properly, and Section~\ref{sec:res-claimthreshold} reports what an unselected
+2000 pairs did to it.
 
 \textbf{The claim threshold and the tablebase are exact no-ops.} The intervals
 $[-0.010, +0.030]$ and $[-0.005, +0.015]$ are not small effects; they are almost
@@ -2478,13 +2480,23 @@ direction, which is exactly why it looked like something. On a fresh set of 500
 deals it returned $+0.068$, and on a second fresh set $-0.066$. It was noise.
 
 That framing no longer holds, and the reason it stopped holding is the point.
-Four cells in this paper now exclude zero upward --- the pre-registered
-lookahead at $+0.104$, posterior precision at $+0.340$, at-ask depth at
-$+0.102$, and the claim threshold at $+0.035$ --- and every one of them was
-\emph{designed} to be able to, at six to thirty times this cell's sample size
-with the analysis fixed in advance. The distinction that matters is not how many
-intervals clear zero, it is whether clearing zero was a possible outcome of a
-design or the best of twenty-five looks.
+Three cells in this paper now exclude zero upward --- the pre-registered
+lookahead at $+0.104$, posterior precision at $+0.340$ and at-ask depth at
+$+0.102$ --- and every one of them was \emph{designed} to be able to, at thirty
+times this cell's sample size with the analysis fixed in advance. The
+distinction that matters is not how many intervals clear zero, it is whether
+clearing zero was a possible outcome of a design or the best of twenty-five
+looks.
+
+An earlier draft of that sentence said \emph{four}, and counted the claim
+threshold's $+0.035$ among them. That was the error the sentence is about,
+committed inside the sentence about it: the claim-threshold figure is a
+screening cell selected out of $103$ for excluding zero, which is the
+\emph{other} category entirely. It is the eighth appearance of the pattern
+this paper keeps documenting, the fourth of them one level above where the
+error was last caught, and the only one caught by a \emph{run} rather than by
+rereading --- the confirmatory 2000 pairs of
+Section~\ref{sec:res-claimthreshold} put the effect at $+0.002$.
 
 We report this at length because it is the single most useful methodological
 observation the study produced. Twenty-five screening cells at a nominal 95\%
@@ -3215,12 +3227,23 @@ posterior says & decisions & actually the true split \\
 \midrule
 $[0.000, 0.500)$ & 2062 & $66.5\%$ \\
 $[0.500, 0.700)$ & 203 & $93.6\%$ \\
-$[0.700, 0.825)$ & 62 & $96.8\%$ \\
-$[0.825, 0.970)$ & 37 & $100.0\%$ \\
+$[0.700, 0.850)$ & 75 & $97.3\%$ \\
+$[0.850, 0.970)$ & 24 & $100.0\%$ \\
 $[0.970, 1.000]$ & 355 & $100.0\%$ \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+The interior cut points used to be $0.700$/$0.825$/$0.970$, where $0.825$ was
+$1$ minus the null rate on stuck half-suits --- a decision bar imported from
+Section~\ref{sec:res-perpetual}. Re-measuring that null rate therefore moved
+two rows of a table about the \emph{sampler}, for a reason having nothing to do
+with the sampler. How well a stated probability is calibrated is a property of
+the posterior alone, so the bins are now fixed, the bar is reported separately
+where it belongs, and the whole table is stored in
+\texttt{results/stuck\_claim\_value.json} rather than printed --- which is the
+failure \texttt{scripts4/check\_verdicts.py} exists to catch, found here in a
+table rather than a verdict.
 
 Two things follow. The distribution is \textbf{bimodal} --- $76\%$ of decisions
 sit below $0.5$ and $13\%$ above $0.97$, with almost nothing between --- which is
@@ -3238,14 +3261,13 @@ where we would look next.
 
 \paragraph{What we did not compute, and why.} The obvious next step is to price
 the change: declaring on splits the engine currently waits on, against waiting
-and accepting the measured $17.5\%$ null rate on stuck half-suits, would beat
-waiting wherever the MAP is right more than $82.5\%$ of the time --- which the
+and accepting the measured $23.4\%$ null rate on stuck half-suits, would beat
+waiting wherever the MAP is right more than $76.6\%$ of the time --- which the
 table says it is, everywhere above $0.5$. Carried through, that arithmetic
-returns about $+0.13$ sets per deal-pair, the size of effects this paper calls
-demonstrated.
+returns a number of the size this paper calls demonstrated.
 
 It is not reported, because the two numbers are measured over different
-populations. The $17.5\%$ is the null rate for half-suits a team is
+populations. The $23.4\%$ is the null rate for half-suits a team is
 \emph{stuck} on in Section~\ref{sec:res-perpetual}'s sense: it can \emph{prove}
 it holds all six and still cannot place the split. The population in the table
 above is every half-suit that \emph{is} entirely within one team, provable or
@@ -3257,6 +3279,85 @@ learning harvest's $+0.101$ against a late-position $+0.681$
 the size of the answer, and went looking for why it was too good. Pricing this
 properly needs the null rate re-measured over this population, and until then
 there is no estimate and no queued run.
+
+\subsection{The claim threshold: the one screen that resolved, re-run}
+\label{sec:res-claimthreshold}
+
+Section~\ref{sec:res-null} reports a cell that lowers the claim bar from $0.97$
+to $0.90$ and returns $+0.035$ $[+0.007, +0.063]$ over $400$ pairs. It is the
+only small, cheap, unexplained positive in a table the paper describes as mostly
+nulls, and it contradicts a documented conclusion: \texttt{fish4/claim4.py}
+argues that waiting to claim is close to free, and reports that over $150$
+duplicate deals the $0.97$ and $0.999$ policies never once diverged.
+
+That cell was selected out of $103$ for excluding zero, so it is inadmissible as
+evidence and \texttt{jobs/SCREENING\_DISCIPLINE.md} forbids it from sizing its
+own confirmation. \texttt{jobs/PREREGISTRATION\_claim\_threshold.md} fixes, in
+advance: two blocks of $1000$ fresh pairs; a minimum interesting effect of
+$+0.02$, deliberately an order of magnitude below the $+0.15$ used elsewhere,
+because this change is one constant and costs nothing to run; a fixed-effect
+pool of the two blocks as the only thing that decides; and no block droppable
+for its result.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+& estimate & \\
+\midrule
+screening cell, 400 pairs \emph{(selected)} & $+0.035$ $[+0.007, +0.063]$ & excludes zero \\
+\textbf{primary} --- two new blocks, 2000 pairs & $\mathbf{+0.002}$ $[-0.013, +0.017]$ & \textbf{includes zero} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The effect does not survive. The confirmatory estimate is a twentieth of the
+screen's, and the decay of $-0.033 \pm 0.016$ is itself $2.1$ standard errors
+--- selection inflation measured rather than inferred. The two blocks agree
+($Q = 1.35$ on 1 df, $p = 0.25$).
+
+\paragraph{This is a null with a mechanism.} A behavioural measurement taken
+before the run, over $998$ decisions carrying a claim candidate, found that
+raising the bar from $0.97$ to $0.90$ admits \emph{one extra claim in 998}. The
+run then diverged on $2.6\%$ of pairs. Two arms that make one different decision
+in a thousand and finish $97\%$ of deals identically are not a null from thin
+data; they are the same policy, and \texttt{claim4.py}'s argument survives its
+one piece of counter-evidence.
+
+\paragraph{The design missed its own power target, and says so.} The
+pre-registration derived a per-pair standard deviation of $0.286$ from the
+screening cell's recorded interval, giving a minimum detectable effect of
+$0.018$ --- just under the $+0.02$ it was built to detect. The run's realised
+standard deviation is $0.346$, $21\%$ higher, so the realised MDE is $0.022$ and
+sits \emph{above} the threshold. An effect of exactly $+0.02$ would have been
+missed more often than the design intended, and the null is reported against
+$0.022$ rather than against the number that was planned. The interval-derived
+standard deviation, which reproduces a cell's measured value to within $1\%$
+everywhere else in this study, is the one input that failed here, and it failed
+in the direction that flatters the design.
+
+\paragraph{A prediction recorded in advance, and scored.} The divergence model
+of Section~\ref{sec:res-null} was deliberately \emph{not} used to size this run,
+because every cell it was fitted on diverges on $23$--$88\%$ of pairs and a
+rarely-binding threshold does not. The pre-registration records what the model
+would have implied and predicts it will be wrong in a stated direction: at this
+per-pair standard deviation the model implies a divergence share of $0.8\%$,
+about sixteen pairs in $2000$, and the prediction is that the true share is
+substantially higher \emph{because} a threshold change alters one decision
+rather than the whole line of play, so its conditional differences must be
+smaller than the model's constant $3.88$. Both halves hold: the measured share
+is $2.6\%$, and the measured conditional standard deviation is $2.17$.
+
+That divergence share is a ninth of the low end of the range the model was
+fitted on, which makes this the most extreme out-of-sample point available for
+the drift correction of Section~\ref{sec:res-null} --- and the correction was
+fitted before this run existed. The flat conditional term of $3.859$ overstates
+the measured $2.166$ by $78\%$. The drift-corrected form
+$2.53 + 1.66\,s$ predicts $2.576$, an overstatement of $19\%$: still wrong, four
+times less wrong, and wrong in the same direction the correction was built to
+fix. A model extrapolated an order of magnitude past its data has no business
+being right, and it is not; what is worth recording is that the term added to it
+keeps earning its place where it cannot have been tuned.
 
 \subsection{Perpetual states, measured}
 \label{sec:res-perpetual}
@@ -3308,10 +3409,25 @@ almost never fires.
 
 \paragraph{The deadlock is real, and it is expensive.} In 110 of 200 games
 (55\%) a team reached a position where it could prove it held an entire
-half-suit and still could not place the split. Those half-suits are nulled
-\textbf{17.5\%} of the time against \textbf{2.8\%} for half-suits that never get
-stuck --- a factor of $6.3$ --- and they account for \textbf{27\% of all nulls}
-despite being only 11\% of half-suits.
+half-suit and still could not place the split. Over the $1800$ half-suits of
+those 200 games, $171$ ($9.5\%$) reach that state, and they are nulled
+\textbf{23.4\%} of the time ($\pm 3.2$) against \textbf{0.92\%} ($\pm 0.24$) for
+half-suits that never get stuck --- a factor of $25$ --- so they account for
+\textbf{73\% of all nulls} while being under a tenth of half-suits.
+
+Four figures in this paragraph were wrong in every draft before this one, and
+the way they were wrong is the reason the paragraph now names its denominators.
+They read $17.5\%$, $2.8\%$, a factor of $6.3$, and $27\%$ of all nulls. Those
+numbers appear in no results file: \texttt{perpetual\_study.py} tracked which
+\emph{teams} were stuck and recorded nothing per half-suit, so nothing in the
+pipeline could have checked them and nothing did. They were carried from draft
+to draft as though measured. The direction survives re-measurement --- it
+survives it more strongly, since the true ratio is four times the one claimed
+--- but $27\%$ against a measured $73\%$ is not a rounding difference, and one
+of these numbers had already been used downstream as a threshold
+(Section~\ref{sec:res-splitcal}). Every figure here now comes from
+\texttt{results/perpetual\_study.json} and is checked by
+\texttt{scripts4/check\_paper\_numbers.py} against it.
 
 \paragraph{The free-signalling escape works, and does not pay.} Turning on the
 protocol of Section~\ref{sec:perpetual} cuts nulls from $0.275$ to $0.220$ per
@@ -3589,8 +3705,8 @@ First, the last few turns are not a contest, so spend your attention earlier.
 Second --- and this is the one people get wrong --- if your team holds a half-suit
 outright, \emph{no opponent can legally ask in it}, so it cannot be taken from
 you. There is never a reason to rush that declaration. In our games, half-suits
-that reached "ours but we cannot place the split" were nulled 17.5\% of the
-time against 2.8\% otherwise, and accounted for 27\% of all nulls. Almost every
+that reached ``ours but we cannot place the split'' were nulled $23.4\%$ of the
+time against $0.92\%$ otherwise, and accounted for $73\%$ of all nulls. Almost every
 one of those is a self-inflicted wound.
 
 \paragraph{You can talk, and most players do not realise it.} You may not ask
@@ -3668,6 +3784,37 @@ artefact of the screen that measured it.
 
 The advice does not change, and it is now better supported. Withholding does
 not pay. Take the certain ask.
+
+\paragraph{And trading hard does not pay either.} Every cell above
+\emph{withholds}. The opposite policy --- take the card straight back, trade
+hard inside the duel, which is what strong players more often describe doing
+--- had never been measured. It has now been, at $2000$ pre-registered pairs
+(\texttt{jobs/PREREGISTRATION\_retake\_bonus.md}), and it returns
+$\mathbf{+0.013}$ $[-0.052, +0.079]$: the seventh null in this family. Against
+the gated penalty's $-0.004$ the difference is $+0.017 \pm 0.046$. The two
+policies act on \emph{disjoint} slices of the same decision in opposite
+directions, and both are null, which says something neither says alone --- the
+re-take decision does not repay any policy at all, in either direction.
+
+What that null is about was fixed before the run, because the reachable base
+rate was measured first. A re-take is a \emph{certain} ask, so the objective
+already scores it at $P(\text{success}) = 1$ --- the term this whole paper says
+dominates --- and it is \emph{already the chosen ask at $69\%$} of the positions
+where it is legal. A bonus can therefore act at only $3.5\%$ of positions, and
+where it can, the median score gap to the leader is $\mathbf{0.000}$: at the
+median reachable position the weight is breaking an exact tie between two asks
+the objective values equally. Breaking a tie has expected value zero unless the
+objective is systematically wrong in a way correlated with re-taking. So this is
+a null about tie-breaking, and it is emphatically \emph{not} a measurement of
+``trade hard in a duel'' as a human would mean it. The pre-registration says all
+of this before the first pair, which is the only reason the sentence can be
+written now.
+
+The practical advice is therefore unchanged in content and much better
+supported in kind: the re-take is a certain ask, so take it, and do not spend
+any thought on whether to make a policy of taking it or of holding back.
+Neither policy is worth anything. Spend the attention on the asks that are not
+certain.
 
 Both of those figures moved, and the reason is worth recording rather than
 quietly restating. The depth statistic originally counted successful asks
@@ -3784,6 +3931,7 @@ change & set diff & 95\% CI \\
 break the duel, $w_{\mathrm{retake}} = 0.30$ & $-0.340$ & $[-0.665, -0.015]$ \\
 break the duel, $w_{\mathrm{retake}} = 1.00$ & $\mathbf{-1.015}$ & $[-1.562, -0.468]$ \\
 \quad gated on a real duel, $2000$ pairs & $-0.004$ & $[-0.067, +0.059]$ \\
+\emph{reward} the re-take, $w_{\mathrm{retake}} = -0.30$, $2000$ pairs & $+0.013$ & $[-0.052, +0.079]$ \\
 \midrule
 tie-breakers up when behind, $w_{\mathrm{behind}} = 0.50$ & $-0.185$ & $[-0.628, +0.258]$ \\
 tie-breakers up when behind, $w_{\mathrm{behind}} = 1.00$ & $\mathbf{-0.890}$ & $[-1.384, -0.396]$ \\

@@ -8,8 +8,14 @@ continued play localises teammate holdings. "Waiting is close to free."
 
 ``results/perpetual_study.json`` measures something that bears on it directly
 and was never quoted beside it: half-suits a team gets STUCK on are nulled
-17.5% of the time against 2.8% for the rest, and they account for 27% of all
+23.4% of the time against 0.92% for the rest, and they account for 73% of all
 nulls. Waiting is not free on exactly the half-suits where waiting happens.
+
+Those four figures were 17.5%, 2.8% and 27% in every earlier version of this
+docstring, and in the paper, and they were in no results file at all --
+``perpetual_study.py`` recorded which TEAMS were stuck and nothing per
+half-suit. This script consumed one of them as a decision bar. It now reads the
+rate out of the file and refuses to run if the file does not carry it.
 
 THE DECISION, STATED AS ONE. At a stuck half-suit the team can prove it holds
 all six cards, so a wrong declaration cannot gift the set -- it can only VOID
@@ -19,11 +25,11 @@ it. So:
     wait                            ->  1 - q   (q = P(this ends up nulled))
 
 and declaring beats waiting exactly when ``p > 1 - q``. With q measured at
-0.175 that bar is **p > 0.825**, well under the 0.97 threshold in force. If a
+0.234 that bar is **p > 0.766**, well under the 0.97 threshold in force. If a
 material share of stuck positions sit between the two, the engine is waiting on
 half-suits it should be declaring.
 
-WHAT THIS DOES NOT SETTLE. q = 0.175 was measured under the CURRENT threshold;
+WHAT THIS DOES NOT SETTLE. q was measured under the CURRENT threshold;
 lowering the threshold changes which half-suits reach the stuck state and how
 long they sit there, so the two numbers are not independent. This is a
 first-order calculation that says whether a duel is worth running, not a
@@ -53,11 +59,26 @@ from fish.rules import RuleConfig                               # noqa: E402
 from fish4.agent4 import FishBot4                               # noqa: E402
 from fish4.claim4 import ClaimConfig, ClaimEvaluator            # noqa: E402
 
-#: P(a stuck half-suit ends up nulled), from results/perpetual_study.json's
-#: measured 17.5% -- read from the file rather than pinned, since it moves.
-DEFAULT_NULL_RATE = 0.175
+#: Key in results/perpetual_study.json holding P(a stuck half-suit is nulled).
+#: This used to be a pinned 0.175 under a comment claiming it was read from the
+#: file. It was not read from the file, and the file did not contain it; the
+#: number came from the paper, where it was never measured. Pinning is now an
+#: error rather than a fallback -- a bar this script divides by must come from
+#: a measurement, and a stale constant with a reassuring comment beside it is
+#: worse than no constant at all.
+NULL_RATE_KEY = "null_rate_when_stuck"
 #: The threshold actually in force.
 THRESHOLD = ClaimConfig().threshold
+
+#: Bins for the calibration table, FIXED and deliberately independent of the
+#: decision bar. They used to be cut at `bar`, so re-measuring the null rate in
+#: a different script silently moved the boundaries of a table about the
+#: sampler -- two of its rows changed counts when the perpetual study was
+#: re-run, for a reason having nothing to do with the posterior it describes.
+#: How well a probability is calibrated is a property of the sampler alone. The
+#: bar-defined band is reported separately, where it belongs.
+CALIBRATION_BINS = ((0.0, 0.5), (0.5, 0.7), (0.7, 0.85), (0.85, 0.97),
+                    (0.97, 1.01))
 
 
 def _stuck_half_suits(state, seat):
@@ -89,18 +110,22 @@ def main(argv) -> int:
     n_games = int(argv[0]) if argv else 40
     seed0 = int(argv[1]) if len(argv) > 1 else 71_000
 
-    try:
-        perp = json.loads((ROOT / "results" / "perpetual_study.json").read_text())
-        # nulls_per_game and the stuck-null rate live in the paper; the file
-        # carries the counts this was derived from.
-        null_rate = DEFAULT_NULL_RATE
-    except Exception:
-        null_rate = DEFAULT_NULL_RATE
+    perp_path = ROOT / "results" / "perpetual_study.json"
+    perp = json.loads(perp_path.read_text())["normal"]
+    if NULL_RATE_KEY not in perp:
+        print(f"{perp_path} has no {NULL_RATE_KEY!r}. Re-run "
+              f"scripts4/perpetual_study.py;\nthis script will not "
+              f"substitute a constant for the bar it divides by.",
+              file=sys.stderr)
+        return 2
+    null_rate = float(perp[NULL_RATE_KEY])
+    n_stuck = int(perp["stuck_half_suits"])
     bar = 1.0 - null_rate
 
     print("at a deadlock, is waiting really free?\n")
     print(f"claim threshold in force        {THRESHOLD:.2f}")
-    print(f"P(a stuck half-suit is nulled)  {null_rate:.3f}")
+    print(f"P(a stuck half-suit is nulled)  {null_rate:.3f}   "
+          f"({n_stuck} stuck half-suits over {perp['games']} games)")
     print(f"so declaring beats waiting at   p > {bar:.3f}\n")
 
     rules = RuleConfig()
@@ -190,10 +215,12 @@ def main(argv) -> int:
     # a stated 0.9 really means 0.9.
     print(f"\ncalibration of the posterior on the MAP split:")
     print(f"  {'stated p':<16}{'n':>6}{'actually right':>16}")
-    for lo, hi in ((0.0, 0.5), (0.5, 0.7), (0.7, 0.825), (0.825, 0.97),
-                   (0.97, 1.01)):
+    calib = []
+    for lo, hi in CALIBRATION_BINS:
         m = (p >= lo) & (p < hi)
         if m.sum():
+            calib.append({"lo": lo, "hi": hi, "n": int(m.sum()),
+                          "accuracy": float(ok[m].mean())})
             print(f"  [{lo:.3f},{hi:.3f}){m.sum():>6}"
                   f"{100 * ok[m].mean():>15.1f}%")
 
@@ -241,8 +268,8 @@ def main(argv) -> int:
     # STOP. The bar and the population do not match, and pretending otherwise
     # would be this paper's own two-factor error a third time.
     #
-    # `bar` is 1 - 0.175, and 0.175 came from results/perpetual_study.json's
-    # rate for half-suits a team gets STUCK on in the paper's narrow sense:
+    # `bar` is 1 - the null rate read above, which is the rate for half-suits
+    # a team gets STUCK on in the paper's narrow sense:
     # it can PROVE it holds all six and still cannot place the split. The
     # population scored above is wider -- every half-suit that is in fact
     # entirely within one team, whether or not that team can prove it. At
@@ -251,13 +278,15 @@ def main(argv) -> int:
     #
     # A gain computed as (accuracy in this population) - (1 - null rate in
     # that one) is a difference of two numbers measured over different things.
-    # It came out at +0.13 sets per deal-pair, which is the size of effects
-    # this paper calls demonstrated, and that is exactly why it must not be
-    # printed: a plausible number from a mismatched comparison is the failure
-    # mode this whole document is about.
+    # It comes out at the size of effects this paper calls demonstrated, and
+    # that is exactly why it must not be printed: a plausible number from a
+    # mismatched comparison is the failure mode this whole document is about.
+    # Re-measuring the null rate moved it and did not fix this -- the two
+    # populations still differ, so the arithmetic is still invalid.
     print()
-    print("  NOT COMPUTED. The 0.175 null rate that sets the bar was measured "
-          "on the\n  paper's narrow 'stuck' population -- a team that can "
+    print(f"  NOT COMPUTED. The {null_rate:.3f} null rate that sets the bar "
+          f"was measured on the\n  paper's narrow 'stuck' population -- a team "
+          f"that can "
           "PROVE it holds all six\n  and still cannot place the split. The "
           "population scored above is every\n  half-suit that IS entirely "
           "within one team, provable or not: 8.97 per game\n  out of nine "
@@ -327,6 +356,10 @@ def main(argv) -> int:
            "share_at_threshold": float((p >= THRESHOLD).mean()),
            "share_in_band": float(band.mean()),
            "band_accuracy": float(ok[band].mean()) if band.any() else None,
+           # Stored, not merely printed. The paper reproduces this table, and
+           # a printed-only table is a figure no drift check can see -- the
+           # failure scripts4/check_verdicts.py was written for.
+           "calibration": calib,
            "n_half_suits": n_clusters,
            "per_half_suit": {
                "map_accuracy": float(fok.mean()),
@@ -344,9 +377,10 @@ def main(argv) -> int:
                      "accuracy_there": (float(fok[act].mean())
                                         if act.any() else None),
                      "gain_not_computed": (
-                         "the 0.175 null rate setting the bar was measured on "
-                         "the narrow provable-stuck population; this one is "
-                         "every half-suit actually within one team"),
+                         f"the {null_rate:.3f} null rate setting the bar was "
+                         f"measured on the narrow provable-stuck population; "
+                         f"this one is every half-suit actually within one "
+                         f"team"),
                      "mde_2000_pairs": mde_2000},
            "calibration_under_half": float(ok[p < 0.5].mean()),
            "rows": rows}

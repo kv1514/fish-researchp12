@@ -274,6 +274,102 @@ WATCH = [
     ("stuck_claim_value.json", "value.half_suits_within_one_team_per_game",
      "{:.2f}", "half-suits within one team per game",
      "per game out of nine"),
+    # The deadlock quartet, and the reason this manifest exists at all. All
+    # four figures were quoted in three places across every draft and matched
+    # NO results file: perpetual_study.py tracked which TEAMS were stuck and
+    # recorded nothing per half-suit, so no check could have caught them and
+    # none did. One of them was then consumed downstream as a decision bar in
+    # scripts4/stuck_claim_value.py. Re-measured, the ratio is four times what
+    # was claimed and the share of nulls is 73% against a quoted 27%.
+    ("perpetual_study.json", "normal.half_suits", "{:d}",
+     "half-suits measured", "Over the $1800$ half-suits of"),
+    ("perpetual_study.json", "normal.stuck_half_suits", "{:d}",
+     "half-suits that get stuck", "Over the $1800$ half-suits of"),
+    ("perpetual_study.json", "normal.share_of_half_suits_stuck", "{:.1%}",
+     "share of half-suits stuck", "Over the $1800$ half-suits of"),
+    ("perpetual_study.json", "normal.null_rate_when_stuck", "{:.1%}",
+     "null rate when stuck", "and they are nulled"),
+    ("perpetual_study.json", "normal.null_rate_when_not_stuck", "{:.2%}",
+     "null rate when not stuck", "half-suits that never get stuck"),
+    ("perpetual_study.json", "normal.null_rate_ratio", "{:.0f}",
+     "ratio between the two", "half-suits that never get stuck"),
+    ("perpetual_study.json", "normal.stuck_share_of_all_nulls", "{:.0%}",
+     "stuck share of all nulls", "so they account for"),
+    # The signalling contrast is the one place a null rate is quoted as a
+    # BEFORE and an AFTER, so the two have to move together or the 20%
+    # reduction stops being one.
+    ("perpetual_study.json", "normal.nulls_per_game", "{:.3f}",
+     "nulls per game", "cuts nulls from"),
+    ("perpetual_study.json", "signalling.nulls_per_game", "{:.3f}",
+     "nulls per game, signalling on", "cuts nulls from"),
+    # The claim-threshold confirmation. Its point is that the SCREEN and the
+    # confirmatory run disagree, so both have to be quoted and both have to
+    # stay true -- writing one without the other is how the screen got counted
+    # among the designed cells in the first place.
+    ("claim_threshold_verdict.json", "estimate", "{:.3f}",
+     "claim threshold, confirmatory", "two new blocks, 2000 pairs"),
+    ("claim_threshold_verdict.json", "n_pairs", "{:d}",
+     "pairs in the claim run", "two new blocks, 2000 pairs"),
+    ("claim_threshold_verdict.json", "screen.decay", "{:.3f}",
+     "decay from screen to confirmation", "the decay of"),
+    ("claim_threshold_verdict.json", "screen.decay_se", "{:.3f}",
+     "error on that decay", "the decay of"),
+    # The realised sizing. The paragraph's whole claim is that the design
+    # missed its own power target, so the planned and realised MDEs have to
+    # travel together or it reads as a design that met it.
+    ("claim_threshold_verdict.json", "realised_sd", "{:.3f}",
+     "claim run realised sd", "realised\nstandard deviation is"),
+    ("claim_threshold_verdict.json", "mde_80", "{:.3f}",
+     "claim run realised MDE", "so the realised MDE is"),
+    # The out-of-sample test of the drift correction, at a share a ninth of
+    # anything it was fitted on. Both errors have to stay quoted: the force of
+    # the paragraph is the RATIO between them.
+    ("claim_threshold_verdict.json", "divergence.share", "{:.1%}",
+     "claim run divergence share", "the measured share\nis"),
+    ("claim_threshold_verdict.json", "divergence.conditional_sd", "{:.2f}",
+     "claim run conditional sd", "conditional standard deviation is"),
+    ("claim_threshold_verdict.json", "divergence.model_cond_sd_now", "{:.3f}",
+     "flat conditional term", "The flat conditional term of"),
+    ("claim_threshold_verdict.json", "divergence.drift_pred_cond_sd", "{:.3f}",
+     "drift-corrected prediction", "$2.53 + 1.66\\,s$ predicts"),
+    ("claim_threshold_verdict.json", "divergence.flat_rel_err", "{:.0%}",
+     "flat model error out of sample", "The flat conditional term of"),
+    ("claim_threshold_verdict.json", "divergence.drift_rel_err", "{:.0%}",
+     "drift model error out of sample", "an overstatement of"),
+    # The split-calibration table itself. It was printed and never stored, so
+    # nothing could check it -- and two of its rows silently changed counts
+    # when a null rate measured in a DIFFERENT script moved the bin edges.
+    # Every cell is watched now, and the bins no longer depend on that bar.
+    ("stuck_claim_value.json", "calibration.0.n", "{:d}",
+     "calibration row 1, n", "posterior says & decisions"),
+    ("stuck_claim_value.json", "calibration.1.n", "{:d}",
+     "calibration row 2, n", "posterior says & decisions"),
+    ("stuck_claim_value.json", "calibration.2.n", "{:d}",
+     "calibration row 3, n", "posterior says & decisions"),
+    ("stuck_claim_value.json", "calibration.3.n", "{:d}",
+     "calibration row 4, n", "posterior says & decisions"),
+    ("stuck_claim_value.json", "calibration.4.n", "{:d}",
+     "calibration row 5, n", "posterior says & decisions"),
+    ("stuck_claim_value.json", "calibration.2.accuracy", "{:.1%}",
+     "calibration row 3, accuracy", "posterior says & decisions"),
+    # The bar is 1 - the stuck null rate, quoted in the paper as a percentage
+    # and consumed here as a threshold. It is the figure that was carried for
+    # drafts as 82.5% off a null rate that no file held.
+    ("stuck_claim_value.json", "bar", "{:.1%}",
+     "declare-beats-wait bar", "would beat\nwaiting wherever the MAP is right"),
+    ("stuck_claim_value.json", "null_rate", "{:.1%}",
+     "null rate the bar comes from", "accepting the measured"),
+    # The seventh cell of the adaptive family, and the first in the TRADING
+    # direction. Quoted in the advice section and in the results table, so a
+    # stale figure here is advice to a human.
+    ("retake_bonus_verdict.json", "estimate", "{:.3f}",
+     "rewarding the re-take", "(\\texttt{jobs/PREREGISTRATION\\_retake\\_bonus.md}), and it returns"),
+    ("retake_bonus_verdict.json", "n_pairs", "{:d}",
+     "pairs in the bonus run", "It has now been, at"),
+    ("retake_bonus_verdict.json", "contrast_vs_gated_penalty.delta", "{:.3f}",
+     "bonus against gated penalty", "the gated penalty's $-0.004$ the difference is"),
+    ("retake_bonus_verdict.json", "contrast_vs_gated_penalty.se", "{:.3f}",
+     "error on that difference", "the gated penalty's $-0.004$ the difference is"),
 ]
 
 
