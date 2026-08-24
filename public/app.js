@@ -27,8 +27,20 @@ const S = {
   actions: [],
   snap: null,
   seat: 0,
-  variant: "54",
-  gamma: 0.35,
+  /* Display names for the six seats, indexed by seat number. The site ships
+   * one deck and one engine, so `variant` and `gamma` are gone: they were a
+   * rule variant with no tuning behind it and a strength selector whose weak
+   * arm is worth about -1.9 sets per deal-pair. Neither was a choice a player
+   * had any basis to make. */
+  names: null,
+  /* Room state. `code` and `secret` being set is what makes every action go
+   * through the room routes instead of the solo ones: in a room the SERVER
+   * holds the authoritative log, because five other people are appending to
+   * it. In solo the client holds it. Those cannot both be true, so one flag
+   * decides and every send() consults it. */
+  code: null,
+  secret: null,
+  roomPoll: null,
   busy: false,
   hint: null,
   // Which position the hint in hand was computed for. `gen` counts snapshots;
@@ -53,6 +65,7 @@ const S = {
   paused: false,
   pacing: false,     // a pacing loop is running
   wake: null,        // resolve() of the current wait, so Next can cut it short
+  wakeNow: false,    // Next was pressed: play the pending move even if paused
 };
 
 /* The only supported way to read the analysis. Never touch S.hint directly:
@@ -60,6 +73,118 @@ const S = {
  * renders as a confident and completely coherent answer to a question nobody
  * asked. */
 const hint = () => (S.hintGen === S.gen ? S.hint : null);
+
+const FN = window.FishNames;
+
+/* The name for a seat. Every seat label on the table goes through this: the
+ * engine calls the seats 0..5 and that is the right thing for a log and the
+ * wrong thing for a player, who is otherwise doing the interface's
+ * bookkeeping in their head across six labels differing by one digit. */
+const nm = (p) => FN.display(S.names, p, S.snap ? S.snap.seat : S.seat, p);
+
+const NAMES_KEY = "fish.names.v1";
+
+function loadNames() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(NAMES_KEY) || "null");
+    if (Array.isArray(raw) && raw.length === 6) return raw.map(FN.clean);
+  } catch (e) { /* private mode, cleared storage, a different browser */ }
+  return null;
+}
+
+function saveNames(names) {
+  try { localStorage.setItem(NAMES_KEY, JSON.stringify(names)); }
+  catch (e) { /* never worth failing a deal over */ }
+}
+
+const inRoom = () => !!(S.code && S.secret);
+
+const ROOM_KEY = "fish.room.v1";
+
+function saveRoom() {
+  try {
+    if (inRoom()) {
+      localStorage.setItem(ROOM_KEY,
+        JSON.stringify({ code: S.code, secret: S.secret }));
+    } else {
+      localStorage.removeItem(ROOM_KEY);
+    }
+  } catch (e) { /* private mode */ }
+}
+
+function loadRoom() {
+  try {
+    const r = JSON.parse(localStorage.getItem(ROOM_KEY) || "null");
+    if (r && r.code && r.secret) return r;
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+/* Call a room route. The code and secret ride on every request: a room has no
+ * session token, because the server -- not the client -- owns the log. */
+async function room(op, body) {
+  return api("room_" + op,
+    Object.assign({ code: S.code, secret: S.secret }, body || {}));
+}
+
+/* Rooms are polled. There is no socket here and no daemon thread on the other
+ * end, so a table advances on being looked at: `room_state` applies any engine
+ * move that has come due and hands back this seat's view. Every player polling
+ * is also what keeps the table moving when it is nobody's turn but a bot's. */
+function startRoomPoll(ms) {
+  stopRoomPoll();
+  S.roomPoll = setInterval(() => { pollRoom(); }, ms || 1500);
+}
+
+function stopRoomPoll() {
+  if (S.roomPoll) { clearInterval(S.roomPoll); S.roomPoll = null; }
+}
+
+async function pollRoom() {
+  if (!inRoom() || S.busy) return;
+  let j;
+  try {
+    j = await room("state", {});
+  } catch (e) {
+    // A room that has expired or been left should not keep the poller
+    // hammering a dead code.
+    if (/no such room|not seated/i.test(e.message || "")) {
+      leaveRoom(e.message);
+    }
+    return;
+  }
+  applyRoom(j);
+}
+
+function applyRoom(j) {
+  const r = j.room || {};
+  if (r.names) S.names = r.names.slice();
+  if (r.code) S.code = r.code;
+  if (typeof r.pace === "number") S.pace = r.pace;
+  const phase = j.phase || r.phase;
+  if (phase === "playing" && j.hand) {
+    const first = !S.snap || !S.snap.hand;
+    S.snap = j;
+    S.gen += 1;
+    if (first) show("table");
+    render();
+    renderClock(r.next_in || 0, S.pace);
+  } else {
+    S.room = r;
+    show("lobby");
+    renderLobby(r);
+  }
+}
+
+function leaveRoom(msg) {
+  stopRoomPoll();
+  S.code = null;
+  S.secret = null;
+  S.snap = null;
+  saveRoom();
+  show("start");
+  if (msg) toast(msg);
+}
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, html) => {
@@ -82,12 +207,30 @@ async function api(path, body) {
 
 /* Every mutating call goes through here so that the token and the action log
  * are advanced together, and so that two taps cannot race one game. */
+/* One entry point for "do a thing and take the new position".
+ *
+ * In a ROOM this goes to the room routes, because the server owns the log --
+ * five other people are appending to it, so a client-held log is not a log.
+ * In solo the client holds it and sends it back. Routing here rather than at
+ * each of the four call sites means a new action type cannot be added that
+ * works solo and silently does nothing in a room.
+ */
 async function send(path, body) {
   if (S.busy) return null;
   S.busy = true;
   document.body.classList.add("busy");
   try {
-    const j = await api(path, { token: S.token, actions: S.actions, ...body });
+    let j;
+    if (inRoom()) {
+      // `auto` is a solo convenience (play the engine's suggestion for me);
+      // in a room it would be acting on somebody else's behalf as far as the
+      // table can tell, so it is not offered.
+      const op = path === "act" ? "act" : "state";
+      j = await room(op, op === "act" ? { action: (body || {}).action } : {});
+      applyRoom(j);
+      return j;
+    }
+    j = await api(path, { token: S.token, actions: S.actions, ...body });
     if (j.token) S.token = j.token;
     if (j.actions) S.actions = S.actions.concat(j.actions);
     S.snap = j;
@@ -121,6 +264,27 @@ function hold(sec) {
   });
 }
 
+/* Wait `sec` while showing a countdown, and keep waiting while paused.
+ *
+ * Pause is handled INSIDE the wait rather than around it, so pausing during a
+ * countdown holds the remaining time instead of discarding it: the old loop
+ * did `hold(S.paused ? 0 : S.pace)`, which meant a table paused mid-wait
+ * resumed by immediately playing the move it had been waiting on. That is the
+ * opposite of what pause is for.
+ */
+async function holdVisible(sec) {
+  if (sec <= 0) { renderClock(0, 0); return; }
+  let left = sec;
+  const tick = 0.25;
+  while (left > 0) {
+    renderClock(left, sec);
+    await hold(tick);
+    if (S.wakeNow) { S.wakeNow = false; break; }   // "Next" cut it short
+    if (!S.paused) left -= tick;
+  }
+  renderClock(0, 0);
+}
+
 /* Play the engines out one move at a time, so a possession can be read.
  *
  * The local server did this with a daemon thread holding the table. There is no
@@ -129,18 +293,26 @@ function hold(sec) {
  * cost is one request per move, and the benefit is that every intermediate
  * position is real rather than reconstructed. */
 async function pace() {
+  // A ROOM paces itself on the server: `next_move_at` in the document is what
+  // stops one client rushing the table past everybody else's reading speed.
+  // Running this loop as well would have each browser also asking for engine
+  // moves, so the table would advance at the rate of whoever polled hardest --
+  // exactly what the server-side clock exists to prevent.
+  if (inRoom()) return;
   if (S.pacing) return;
   S.pacing = true;
   try {
     while (S.snap && !S.snap.terminal && !S.snap.your_turn) {
-      while (S.paused) await hold(0.25);
+      while (S.paused && !S.wakeNow) await hold(0.25);
+      S.wakeNow = false;
       const j = await send("step", { step: 1 });
       if (!j) break;
       if (j.terminal || j.your_turn) break;
-      await hold(S.paused ? 0 : S.pace);
+      await holdVisible(S.pace);
     }
   } finally {
     S.pacing = false;
+    renderClock(0, 0);
     render();
   }
 }
@@ -180,21 +352,219 @@ function teamNote() {
     `you play ${them.join(", ")}.`;
 }
 
-function gammaNote() {
-  $("s-gamma-note").textContent = Number(S.gamma) > 0
-    ? "The engine assumes a player asks in a set in proportion to how many "
-    + "cards of it they hold. Worth about 1.9 sets a deal-pair — the single "
-    + "biggest thing in v0.4."
-    : "The engine infers only what the rules force. Measurably weaker, and a "
-    + "fair comparison if you want to see what the opponent model is doing.";
+
+/* Names live in localStorage rather than on the server for a solo table.
+ * The server does not need them -- it deals cards and picks asks, and a name
+ * changes neither -- so shipping them to it would be storing something about a
+ * player for no gain. A room is different: there the names ARE shared state,
+ * and the server owns them. */
+function botSeats(mySeat) {
+  const out = [];
+  for (let p = 0; p < 6; p++) if (p !== mySeat) out.push(p);
+  return out;
+}
+
+function renderBotNameFields() {
+  const box = $("s-botnames");
+  box.innerHTML = "";
+  botSeats(S.seat).forEach((p, i) => {
+    const lab = el("label", null, `Seat ${p}`);
+    const inp = el("input");
+    inp.maxLength = FN.MAX;
+    inp.value = S.names[p] || FN.BOTS[i % FN.BOTS.length];
+    inp.placeholder = FN.BOTS[i % FN.BOTS.length];
+    inp.addEventListener("input", () => {
+      S.names[p] = FN.clean(inp.value);
+      saveNames(S.names);
+    });
+    lab.appendChild(inp);
+    box.appendChild(lab);
+  });
+}
+
+function syncNamesToSeat() {
+  // Moving your own seat has to move your own NAME with it, or the seat you
+  // vacated keeps your name and you inherit a bot's. The bot defaults are
+  // re-laid in seat order around wherever you now sit.
+  const me = FN.clean($("s-name").value) || "You";
+  const kept = botSeats(S.seat).map((p) => S.names[p]).filter(Boolean);
+  const fresh = FN.soloDefaults(S.seat, me);
+  botSeats(S.seat).forEach((p, i) => {
+    fresh[p] = kept[i] || fresh[p];
+  });
+  S.names = fresh;
+  saveNames(S.names);
+  renderBotNameFields();
+}
+
+/* ------------------------------------------------------------- room lobby */
+
+function renderLobby(r) {
+  $("l-code").textContent = r.code || "—";
+  const seats = r.seats || [];
+  const box = $("l-seats");
+  box.innerHTML = "";
+  seats.forEach((s) => {
+    const mine = s.team === (seats.find((x) => x.me) || {}).team;
+    const row = el("div", "lseat" + (mine ? " ours" : " theirs")
+      + (s.me ? " me" : ""));
+    row.appendChild(el("div", "sn", String(s.seat)));
+
+    // Editable where this player is allowed to edit: their own seat, or any
+    // bot. A bot is shared furniture; another person's label is how everybody
+    // else identifies who acted, so it is theirs alone to set.
+    const editable = s.me || s.kind === "bot";
+    if (editable) {
+      const inp = el("input");
+      inp.maxLength = FN.MAX;
+      inp.value = s.name || "";
+      inp.placeholder = s.kind === "bot" ? "bot" : "your name";
+      inp.addEventListener("change", async () => {
+        try {
+          const j = await room("rename", { seat: s.seat, name: inp.value });
+          applyRoom(j);
+        } catch (e) { $("l-err").textContent = e.message; }
+      });
+      const cell = el("div");
+      cell.appendChild(inp);
+      row.appendChild(cell);
+    } else {
+      row.appendChild(el("div", "who",
+        s.taken ? (s.name || "player") : "<span class='dim'>waiting…</span>"));
+    }
+
+    row.appendChild(el("div", "kind",
+      s.kind === "bot" ? "engine" : s.me ? "you" : "player"));
+    row.appendChild(el("div", "rd " + (s.ready ? "yes" : "no"),
+      s.kind === "bot" ? "" : s.ready ? "ready" : "…"));
+    box.appendChild(row);
+  });
+
+  const waiting = r.waiting_for || 0;
+  const me = seats.find((x) => x.me);
+  $("l-ready").checked = !!(me && me.ready);
+  $("l-status").textContent = waiting
+    ? `Waiting for ${waiting} more ${waiting === 1 ? "player" : "players"} to join.`
+    : `Everyone is here. ${r.ready_count}/${r.human_count} ready.`;
+}
+
+function initRoomScreens() {
+  seg("r-humans", (v) => {
+    const n = +v;
+    $("r-fill").textContent = n >= 6
+      ? "Six people, no engines."
+      : `${n} ${n === 1 ? "person" : "people"}, ${6 - n} engine${6 - n === 1 ? "" : "s"}.`;
+  });
+  $("r-fill").textContent = "2 people, 4 engines.";
+
+  const nameOf = () => FN.clean($("r-name").value) || "Player";
+
+  $("r-create").addEventListener("click", async () => {
+    $("r-err").textContent = "";
+    try {
+      const humans = +(document.querySelector("#r-humans button.on")
+        ?.dataset.v || 2);
+      const j = await api("room_new",
+        { humans, name: nameOf(), pace: S.pace });
+      S.code = j.code; S.secret = j.secret;
+      saveRoom();
+      applyRoom(j);
+      startRoomPoll();
+    } catch (e) { $("r-err").textContent = e.message; }
+  });
+
+  $("r-join").addEventListener("click", async () => {
+    $("r-err").textContent = "";
+    const code = ($("r-code").value || "").trim().toUpperCase();
+    if (!code) { $("r-err").textContent = "Enter a room code."; return; }
+    try {
+      const j = await api("room_join", { code, name: nameOf() });
+      S.code = j.code; S.secret = j.secret;
+      saveRoom();
+      applyRoom(j);
+      startRoomPoll();
+    } catch (e) { $("r-err").textContent = e.message; }
+  });
+
+  $("l-ready").addEventListener("change", async (e) => {
+    $("l-err").textContent = "";
+    try {
+      applyRoom(await room("ready", { ready: e.target.checked }));
+    } catch (err) { $("l-err").textContent = err.message; }
+  });
+
+  $("l-copy").addEventListener("click", async () => {
+    const url = `${location.origin}/?room=${encodeURIComponent(S.code || "")}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("Link copied");
+    } catch (e) {
+      // Clipboard needs a permission this page may not have. Showing the URL
+      // is strictly better than a silent failure.
+      toast(url);
+    }
+  });
+
+  $("l-leave").addEventListener("click", () => leaveRoom());
+
+  // A ?room=CODE link pre-fills the join box and opens the right tab, so the
+  // person who was sent the link does not have to work out what to do with it.
+  const q = new URLSearchParams(location.search).get("room");
+  if (q) {
+    $("r-code").value = q.toUpperCase().slice(0, 8);
+    document.querySelector('#s-tabs button[data-tab="room"]')?.click();
+  }
+
+  // Rejoin a room this browser was already in, so a refresh mid-game does not
+  // abandon the seat -- which in a room means the other players wait forever
+  // for somebody who cannot get back in.
+  const saved = loadRoom();
+  if (saved && !q) {
+    S.code = saved.code;
+    S.secret = saved.secret;
+    pollRoom().then(() => { if (inRoom()) startRoomPoll(); });
+  }
 }
 
 function initStart() {
-  seg("s-seat", (v) => { S.seat = +v; teamNote(); });
-  seg("s-variant", (v) => { S.variant = v; });
-  seg("s-gamma", (v) => { S.gamma = +v; gammaNote(); });
+  S.names = loadNames() || FN.soloDefaults(S.seat, "You");
+
+  // Tabs
+  document.querySelectorAll("#s-tabs button").forEach((b) => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#s-tabs button").forEach(
+        (o) => o.classList.toggle("on", o === b));
+      const want = b.dataset.tab;
+      document.querySelectorAll(".tabpane").forEach(
+        (o) => o.classList.toggle("on", o.dataset.pane === want));
+    });
+  });
+
+  const nameBox = $("s-name");
+  nameBox.value = S.names[S.seat] === "You" ? "" : (S.names[S.seat] || "");
+  nameBox.addEventListener("input", () => {
+    S.names[S.seat] = FN.clean(nameBox.value) || "You";
+    saveNames(S.names);
+  });
+  const rname = $("r-name");
+  if (rname) rname.value = nameBox.value;
+
+  seg("s-seat", (v) => { S.seat = +v; teamNote(); syncNamesToSeat(); });
+  seg("s-pace", (v) => {
+    S.pace = +v;
+    const sel = $("t-pace");
+    if (sel) sel.value = String(S.pace);
+  });
   teamNote();
-  gammaNote();
+  renderBotNameFields();
+
+  $("s-botreset").addEventListener("click", () => {
+    const me = FN.clean(nameBox.value) || "You";
+    S.names = FN.soloDefaults(S.seat, me);
+    saveNames(S.names);
+    renderBotNameFields();
+  });
+
   $("s-go").addEventListener("click", async () => {
     $("s-err").textContent = "";
     $("s-go").disabled = true;
@@ -202,9 +572,8 @@ function initStart() {
     try {
       S.actions = [];
       S.token = null;
-      const j = await api("new", {
-        seat: S.seat, variant: S.variant, gamma: S.gamma,
-      });
+      // No variant and no gamma: the site ships one deck and one engine.
+      const j = await api("new", { seat: S.seat });
       S.token = j.token;
       S.actions = j.actions || [];
       S.snap = j;
@@ -216,26 +585,84 @@ function initStart() {
       $("s-err").textContent = e.message;
     } finally {
       $("s-go").disabled = false;
-      $("s-go").textContent = "Deal";
+      $("s-go").textContent = "Ready — deal me in";
     }
   });
 }
 
 /* ------------------------------------------------------------------ table */
 
+/* Where each seat sits on the felt.
+ *
+ * EGOCENTRIC, and that is the whole point. The viewer is always at the bottom
+ * and the other five fan away from them in seat order, so "the player on my
+ * left" is a position on screen rather than a number to translate. A fixed
+ * absolute layout would have put seat 0 at the bottom for everybody, which
+ * makes the table unreadable for the five people not sitting in seat 0.
+ *
+ * Angles start at the bottom (90 degrees in screen space, y down) and go
+ * clockwise, which matches the direction the turn moves.
+ */
+const RING_ANGLES = [90, 30, 330, 270, 210, 150];
+
+function seatPos(offset) {
+  const a = (RING_ANGLES[offset % 6] * Math.PI) / 180;
+  // A pod is an anchor plus four stacked lines (puck, name, count, role), and
+  // it is centred on the anchor -- so the anchor has to sit well inside the
+  // felt or the last line falls off the edge. At a 41% vertical radius the
+  // "opponent"/"partner" line on the lower seats was clipped by the rail, and
+  // the viewer's own name sat below the table entirely. Pulled in to leave
+  // room for the stack rather than for the puck alone.
+  return { x: 50 + 41 * Math.cos(a), y: 50 + 33 * Math.sin(a) };
+}
+
 function renderSeats() {
   const s = S.snap;
   const box = $("t-seats");
   box.innerHTML = "";
-  for (let p = 0; p < 6; p++) {
+  for (let off = 0; off < 6; off++) {
+    // offset 0 is the viewer; going clockwise round the table from them.
+    const p = (s.seat + off) % 6;
     const mine = (p % 2) === (s.seat % 2);
-    const d = el("div", "seat" + (mine ? " ours" : " theirs")
-      + (p === s.seat ? " me" : "") + (p === s.turn ? " active" : ""));
-    d.appendChild(el("div", "who", p === s.seat ? "you" : "P" + p));
-    d.appendChild(el("div", "cnt", String(s.hand_counts[p])));
-    d.appendChild(el("div", "lbl", s.hand_counts[p] === 1 ? "card" : "cards"));
+    const out = s.hand_counts[p] === 0;
+    const d = el("div", "pod" + (mine ? " ours" : " theirs")
+      + (p === s.seat ? " me" : "") + (p === s.turn ? " active" : "")
+      + (out ? " out" : ""));
+    const { x, y } = seatPos(off);
+    d.style.setProperty("--x", x.toFixed(2) + "%");
+    d.style.setProperty("--y", y.toFixed(2) + "%");
+
+    const name = p === s.seat ? (nm(p) || "You") : nm(p);
+    d.appendChild(el("div", "puck", FN.initials(name)));
+    d.appendChild(el("div", "nm", name));
+    d.appendChild(el("div", "cards",
+      s.hand_counts[p] + (s.hand_counts[p] === 1 ? " card" : " cards")));
+    d.appendChild(el("div", "tag",
+      p === s.seat ? "you" : mine ? "partner" : "opponent"));
+    d.title = `${name} — seat ${p}, ${mine ? "your team" : "the other team"}`;
     box.appendChild(d);
   }
+}
+
+/* The between-moves countdown on the felt.
+ *
+ * Shown only while the table is genuinely waiting on an engine move. A
+ * countdown that also ran on the player's own turn would read as a shot clock,
+ * which is the opposite of what the pacing is for: the delay exists so there
+ * is time to read the position, not to hurry anybody. */
+function renderClock(left, total) {
+  const box = $("t-clock");
+  if (!(total > 0) || !(left > 0)) { box.hidden = true; return; }
+  box.hidden = false;
+  const pct = Math.max(0, Math.min(100, (100 * left) / total));
+  box.innerHTML = "";
+  box.appendChild(el("span", null,
+    `next move in ${Math.ceil(left)}s` + (S.paused ? " · paused" : "")));
+  const bar = el("span", "bar");
+  const fill = el("i");
+  fill.style.width = pct.toFixed(1) + "%";
+  bar.appendChild(fill);
+  box.appendChild(bar);
 }
 
 function renderSets() {
@@ -337,7 +764,7 @@ function renderAction() {
       const r = el("div", "reveal");
       s.reveal.forEach((h, p) => {
         r.appendChild(el("div", "rrow",
-          `<b>P${p}</b> ${h.length ? h.join(" ") : "—"}`));
+          `<b>${nm(p)}</b> ${h.length ? h.join(" ") : "—"}`));
       });
       // Not "every hand": a card's holder is only ever established when its set
       // is declared, and a set is stripped from every hand as it resolves. What
@@ -353,7 +780,7 @@ function renderAction() {
 
   if (!s.your_turn) {
     $("t-actionhead").textContent = "Waiting";
-    box.appendChild(el("p", "dim", `P${s.turn} is thinking.`));
+    box.appendChild(el("p", "dim", `${nm(s.turn)} is thinking.`));
     return;
   }
 
@@ -362,7 +789,7 @@ function renderAction() {
   if (s.must_pass) {
     const row = el("div", "btnrow");
     for (const t of s.teammates) {
-      const b = el("button", null, `Pass to P${t}`);
+      const b = el("button", null, `Pass to ${nm(t)}`);
       b.onclick = () => send("act", { action: { type: "pass", teammate: t },
                                       step: 1 }).then(() => pace());
       row.appendChild(b);
@@ -380,7 +807,10 @@ function renderAction() {
   dec.onclick = openDeclare;
   row.appendChild(dec);
   const auto = el("button", "ghost", "Let the engine move");
-  auto.onclick = () => send("auto", { step: 1 }).then(() => pace());
+  // Solo only: "play the engine's move for me" in a room would look to the
+  // other five players like a decision this seat made.
+  if (inRoom()) auto.remove();
+  else auto.onclick = () => send("auto", { step: 1 }).then(() => pace());
   row.appendChild(auto);
   box.appendChild(row);
 
@@ -408,7 +838,7 @@ function renderHint(box) {
     shown.forEach((m, i) => {
       const tr = el("tr", i === 0 ? "sel" : null);
       tr.innerHTML =
-        `<td>P${m.target} · ${pretty(m.card_name)}</td>`
+        `<td>${nm(m.target)} · ${pretty(m.card_name)}</td>`
         + `<td>${(100 * m.p_success).toFixed(0)}%</td>`
         + `<td>${m.score.toFixed(2)}</td>`;
       tr.onclick = () => {
@@ -484,7 +914,7 @@ function renderWhy(box, m) {
   const signed = parts.some(([, v]) => v < 0);
 
   box.appendChild(el("h5", null,
-    `Why P${m.target} · ${pretty(m.card_name)} scores ${m.score.toFixed(3)}`));
+    `Why ${nm(m.target)} · ${pretty(m.card_name)} scores ${m.score.toFixed(3)}`));
   for (const [k, v, blurb] of parts) {
     const row = el("div", "whyrow");
     row.appendChild(el("span", "whyname", k));
@@ -538,14 +968,14 @@ function renderPosterior() {
       if (p <= 0.004) return;
       const seg = el("i", "seg" + ((who % 2) === (seat % 2) ? " ours" : " theirs"));
       seg.style.flexGrow = String(p);
-      seg.title = `P${who}: ${(100 * p).toFixed(1)}%`;
-      if (p >= 0.18) seg.textContent = who === seat ? "you" : "P" + who;
+      seg.title = `${nm(who)}: ${(100 * p).toFixed(1)}%`;
+      if (p >= 0.18) seg.textContent = who === seat ? "you" : FN.initials(nm(who));
       bar.appendChild(seg);
     });
     row.appendChild(bar);
     const top = r.probs[r.most_likely];
     row.appendChild(el("span", "postbest",
-      `P${r.most_likely} ${(100 * top).toFixed(0)}%`));
+      `${nm(r.most_likely)} ${(100 * top).toFixed(0)}%`));
     box.appendChild(row);
   }
 }
@@ -581,7 +1011,7 @@ function openAsk() {
 
     const tRow = el("div", "seg wide");
     for (const p of opps) {
-      const b = el("button", null, `P${p} <span class="dim">${s.hand_counts[p]}</span>`);
+      const b = el("button", null, `${nm(p)} <span class="dim">${s.hand_counts[p]}</span>`);
       b.onclick = () => {
         for (const x of tRow.children) x.classList.remove("on");
         b.classList.add("on");
@@ -649,7 +1079,11 @@ async function openDeclare() {
   // not - but the starting point is now the best available answer.
   let an = hint();
   if (!an) {
-    try { an = await api("analyse", { token: S.token, actions: S.actions }); }
+    try {
+      an = inRoom() ? await room("analyse", {})
+                    : await api("analyse", { token: S.token,
+                                             actions: S.actions });
+    }
     catch (e) { an = null; }
   }
   const table = {};
@@ -713,7 +1147,7 @@ async function openDeclare() {
         }
         for (const q of team) {
           const pct = probs.length ? ` · ${(100 * (probs[q] || 0)).toFixed(0)}%` : "";
-          const o = el("option", null, (q === s.seat ? "you" : "P" + q) + pct);
+          const o = el("option", null, (q === s.seat ? "you" : nm(q)) + pct);
           o.value = String(q);
           if (q === (want != null ? want : team[0])) o.selected = true;
           sel.appendChild(o);
@@ -745,7 +1179,7 @@ function render() {
   $("t-them").textContent = s.score.them;
   $("t-void").textContent = s.score.nulled ? `${s.score.nulled} void` : "";
   $("t-turn").textContent = s.terminal ? "Game over"
-    : s.your_turn ? "Your turn." : `P${s.turn} to move.`;
+    : s.your_turn ? "Your turn." : `${nm(s.turn)} to move.`;
   $("t-turn").className = "turnline" + (s.your_turn && !s.terminal ? " you" : "");
   renderLastMove();
   renderSeats();
@@ -757,22 +1191,46 @@ function render() {
   maybeAutoThink();
 }
 
-$("t-pace").addEventListener("change", (e) => { S.pace = +e.target.value; });
+$("t-pace").addEventListener("change", (e) => {
+  S.pace = +e.target.value;
+  // In a room the pace is a property of the table, not of one browser, so a
+  // local change here would only desynchronise this player's countdown from
+  // the moves everybody else sees. Reset the control and say so.
+  if (inRoom()) {
+    e.target.value = String(S.pace = S.room && S.room.pace != null
+      ? S.room.pace : S.pace);
+    toast("The table's pace is set when the room is created.");
+  }
+});
 $("t-pause").addEventListener("click", () => {
   S.paused = !S.paused;
   $("t-pause").textContent = S.paused ? "Resume" : "Pause";
   $("t-pause").classList.toggle("on", S.paused);
   if (!S.paused && S.wake) S.wake();
   if (!S.paused) pace();
+  // Repaint the countdown so the "· paused" note appears immediately rather
+  // than at the next tick.
+  render();
 });
 $("t-next").addEventListener("click", () => {
   // Cut the current wait short. Together with Pause this is a step-through: a
   // frozen table advances exactly one engine move per click and stays frozen.
+  //
+  // That is what the comment claimed and it did not work. The loop began each
+  // iteration with `while (S.paused) await hold(0.25)`, so clicking Next on a
+  // paused table resolved one 0.25s tick, the `while` re-tested `S.paused`,
+  // found it still true, and waited again -- forever. Next was a no-op on
+  // exactly the table it was written for. A one-shot flag the wait also tests
+  // is what makes the step actually happen.
+  S.wakeNow = true;
   if (S.wake) S.wake();
-  else if (!S.pacing) pace();
+  if (!S.pacing) pace();
 });
 
-$("t-quit").addEventListener("click", () => show("start"));
+$("t-quit").addEventListener("click", () => {
+  if (inRoom()) leaveRoom();
+  else show("start");
+});
 
 async function think(quiet) {
   if (!S.snap || S.snap.terminal || S.hinting) return;
@@ -784,7 +1242,9 @@ async function think(quiet) {
   S.hinting = true;
   $("t-think").disabled = true;
   try {
-    const h = await api("analyse", { token: S.token, actions: S.actions });
+    const h = inRoom() ? await room("analyse", {})
+                       : await api("analyse", { token: S.token,
+                                                actions: S.actions });
     if (gen !== S.gen) return;
     S.hint = h;
     S.hintGen = gen;
@@ -825,3 +1285,4 @@ function maybeAutoThink() {
 }
 
 initStart();
+initRoomScreens();

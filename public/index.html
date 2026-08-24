@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fish — play FishBot v0.4</title>
-<meta name="description" content="Play six-player Literature against FishBot v0.4, a research engine with exact combinatorial belief tracking. See what it infers, and why.">
+<meta name="description" content="Play six-player Literature against FishBot v0.4, a research engine with exact combinatorial belief tracking. Play solo against five bots, or with friends in a room.">
 <link rel="stylesheet" href="/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127183;</text></svg>">
 
@@ -15,42 +15,87 @@
     <h1>Fish</h1>
     <p class="tagline">Six-player Literature against an engine that reads the
       table properly.</p>
-    <p class="blurb">FishBot v0.4 tracks where every hidden card can be by
-      counting the deals consistent with the public record — exactly, not by
-      sampling. It also assumes you ask in suits you are deep in, because you
-      do. You can watch both while you play.</p>
   </header>
 
   <div class="startgrid">
+
     <div class="panel">
-      <h2>Sit down</h2>
+      <div class="tabs" id="s-tabs">
+        <button data-tab="solo" class="on">Play the bots</button>
+        <button data-tab="room">Play with friends</button>
+      </div>
 
-      <label>Your seat
-        <div class="seg" id="s-seat">
-          <button data-v="0" class="on">0</button><button data-v="1">1</button>
-          <button data-v="2">2</button><button data-v="3">3</button>
-          <button data-v="4">4</button><button data-v="5">5</button>
+      <!-- ------------------------------------------------ solo -->
+      <div class="tabpane on" data-pane="solo">
+        <label class="fld">Your name
+          <input id="s-name" maxlength="18" placeholder="You" autocomplete="off">
+        </label>
+
+        <label class="fld">Your seat
+          <div class="seg" id="s-seat">
+            <button data-v="0" class="on">0</button><button data-v="1">1</button>
+            <button data-v="2">2</button><button data-v="3">3</button>
+            <button data-v="4">4</button><button data-v="5">5</button>
+          </div>
+        </label>
+        <p class="note" id="s-team"></p>
+
+        <label class="fld">Seconds between engine moves
+          <div class="seg" id="s-pace">
+            <button data-v="6">6</button>
+            <button data-v="10">10</button>
+            <button data-v="12" class="on">12</button>
+            <button data-v="15">15</button>
+            <button data-v="20">20</button>
+          </div>
+        </label>
+        <p class="note">You start on the move, and the table waits between
+          engine moves so you can follow what happened. Pause or step at any
+          time.</p>
+
+        <details class="fold">
+          <summary>Rename the bots</summary>
+          <div id="s-botnames" class="botnames"></div>
+          <button id="s-botreset" class="ghost sm">Reset names</button>
+        </details>
+
+        <button id="s-go" class="primary big">Ready — deal me in</button>
+        <p class="note err" id="s-err"></p>
+      </div>
+
+      <!-- ------------------------------------------------ room -->
+      <div class="tabpane" data-pane="room">
+        <label class="fld">Your name
+          <input id="r-name" maxlength="18" placeholder="You" autocomplete="off">
+        </label>
+
+        <div class="roomsplit">
+          <div>
+            <h3>Start a table</h3>
+            <label class="fld">How many seats for people
+              <div class="seg" id="r-humans">
+                <button data-v="2" class="on">2</button>
+                <button data-v="3">3</button>
+                <button data-v="4">4</button>
+                <button data-v="5">5</button>
+                <button data-v="6">6</button>
+              </div>
+            </label>
+            <p class="note" id="r-fill"></p>
+            <button id="r-create" class="primary">Create room</button>
+          </div>
+          <div class="orline"><span>or</span></div>
+          <div>
+            <h3>Join a table</h3>
+            <label class="fld">Room code
+              <input id="r-code" maxlength="8" placeholder="ABCD"
+                     autocomplete="off" spellcheck="false" class="code">
+            </label>
+            <button id="r-join" class="primary">Join room</button>
+          </div>
         </div>
-      </label>
-      <p class="note" id="s-team"></p>
-
-      <label>Deck
-        <div class="seg wide" id="s-variant">
-          <button data-v="54" class="on">54 cards — nine sets</button>
-          <button data-v="48">48 cards — classic</button>
-        </div>
-      </label>
-
-      <label>Engine strength
-        <div class="seg wide" id="s-gamma">
-          <button data-v="0">Reads only the rules</button>
-          <button data-v="0.35" class="on">Reads your asks</button>
-        </div>
-      </label>
-      <p class="note" id="s-gamma-note"></p>
-
-      <button id="s-go" class="primary">Deal</button>
-      <p class="note err" id="s-err"></p>
+        <p class="note err" id="r-err"></p>
+      </div>
     </div>
 
     <div class="panel">
@@ -68,7 +113,9 @@
           hold another card of that set — the only signal in the game, and your
           opponents read it too.</li>
       </ul>
-      <p class="note">Nothing is stored. A game lives in your browser tab.</p>
+      <p class="note">One engine, the strongest one measured: 480-draw exact
+        belief tracking plus depth-3 search over the posterior. Nothing is
+        stored; a solo game lives in your browser tab.</p>
     </div>
   </div>
 
@@ -77,12 +124,34 @@
   </footer>
 </section>
 
+<!-- -------------------------------------------------------- room lobby -->
+<section id="lobby" class="screen">
+  <div class="bar">
+    <button id="l-leave" class="ghost">&larr; Leave</button>
+    <div class="roomcode">Room <b id="l-code">—</b>
+      <button id="l-copy" class="ghost sm">Copy link</button></div>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="lobbywrap">
+    <h2>Waiting room</h2>
+    <p class="note" id="l-status"></p>
+    <div id="l-seats" class="lobbyseats"></div>
+    <div class="lobbyfoot">
+      <label class="chk"><input type="checkbox" id="l-ready"> I'm ready</label>
+      <p class="note" id="l-hint">Everyone has to be ready before the deal.
+        Nobody spawns into a game already in progress.</p>
+    </div>
+    <p class="note err" id="l-err"></p>
+  </div>
+</section>
+
 <!-- -------------------------------------------------------------- table -->
 <section id="table" class="screen">
   <div class="bar">
-    <button id="t-quit" class="ghost">&larr; New game</button>
+    <button id="t-quit" class="ghost">&larr; Leave table</button>
     <div class="score">
-      <span class="us"><b id="t-us">0</b> you</span>
+      <span class="us"><b id="t-us">0</b> your team</span>
       <span class="sep">—</span>
       <span class="them"><b id="t-them">0</b> them</span>
       <span class="void" id="t-void"></span>
@@ -92,26 +161,33 @@
       <button id="t-next" class="ghost" title="Play the pending move now">Next</button>
       <select id="t-pace" title="Seconds between engine moves">
         <option value="0">instant</option>
-        <option value="5">5s</option>
+        <option value="6">6s</option>
         <option value="10">10s</option>
         <option value="12" selected>12s</option>
         <option value="15">15s</option>
         <option value="20">20s</option>
       </select>
       <button id="t-think" class="ghost">Think</button>
-      <label class="autothink" title="Show the engine's read of the table on every one of your turns">
+      <label class="chk" title="Show the engine's read of the table on every one of your turns">
         <input type="checkbox" id="t-auto"> auto
       </label>
     </div>
   </div>
 
-  <div id="t-seats" class="seats"></div>
-
-  <div id="t-turn" class="turnline"></div>
-  <div id="t-last" class="lastmove"></div>
-
   <div class="tablegrid">
     <div class="col-main">
+      <!-- the round table -->
+      <div class="felt" id="t-felt">
+        <div class="feltinner">
+          <div class="feltmid">
+            <div id="t-turn" class="turnline"></div>
+            <div id="t-last" class="lastmove"></div>
+            <div id="t-clock" class="clock" hidden></div>
+          </div>
+        </div>
+        <div id="t-seats" class="ring"></div>
+      </div>
+
       <div class="panel hand">
         <h3>Your hand <span class="dim" id="t-handn"></span></h3>
         <div id="t-hand" class="fan"></div>
@@ -147,5 +223,6 @@
 </div>
 
 <script src="/cards.js"></script>
+<script src="/names.js"></script>
 <script src="/app.js"></script>
 </html>

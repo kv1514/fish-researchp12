@@ -98,6 +98,10 @@ WEB_DRAWS = 480
 #: opponent_gamma, and gamma is a choice the visitor makes in the lobby. Only
 #: the parts the visitor does not choose belong here.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}
+#: The opponent-model weight the champion carries. Not a knob the client can
+#: turn: the site ships one engine, and this is the value every measurement in
+#: the paper was taken at.
+CHAMPION_GAMMA = 0.35
 #: Ceiling on engine moves computed in one request. A human's turn is normally
 #: at most a few engine possessions away; this only bounds a pathological game.
 MAX_ADVANCE = 400
@@ -309,7 +313,16 @@ class Session:
     @classmethod
     def restore(cls, token: str, actions) -> "Session":
         d = unseal(token)
-        rules = RuleConfig(variant=d["v"], claims_any_time=bool(d["a"]))
+        # starting_player is NOT a separate token field: it is the seated
+        # player, which the token already carries as "s". Deriving it here
+        # rather than defaulting keeps restore() building the same game
+        # new_session() dealt -- a RuleConfig whose starting_player disagreed
+        # with the original would put the wrong seat on turn at ply 0, and the
+        # first replayed action would then be applied to the wrong player. That
+        # fails loudly (IllegalAction) for most logs and, worse, quietly for a
+        # log whose first action happens to be legal for both seats.
+        rules = RuleConfig(variant=d["v"], claims_any_time=bool(d["a"]),
+                           starting_player=int(d["s"]) % NUM_PLAYERS)
         if log_hash(actions) != d.get("h"):
             # Either the log was altered or it belongs to another game. Both are
             # unrecoverable by retrying, and the two are not worth telling apart
@@ -445,12 +458,32 @@ def new_session(body: dict) -> Session:
     debugging. Honouring that here would let anyone pick a deal they had already
     solved offline, which is the whole thing the nonce exists to prevent, so the
     field is ignored rather than trusted.
+
+    THE CLIENT ALSO DOES NOT CHOOSE THE ENGINE OR THE DECK any more, and the
+    reason is worth stating because it removes options rather than adding them.
+
+    The deck was offered as 54 or 48. Every number in the paper, every
+    pre-registered run and every calibration table is measured on the 54-card
+    variant; the 48-card arm exists in ``fish.rules`` for the rule-variant
+    robustness study and has no tuning, no verdict and no claim behind it.
+    Offering it as a peer choice implied a parity that was never measured.
+
+    The engine was offered as gamma 0 ("reads only the rules") against gamma
+    0.35 ("reads your asks"). That is a strength selector whose weak arm is
+    worth -1.9 sets per deal-pair, so it was a button that made the opponent
+    worse for no stated reason. One engine ships: the configuration in
+    ``WEB_SPEC`` at ``WEB_DRAWS`` draws with the champion's gamma, which is the
+    only configuration this project has measured directly against the reference
+    (+0.357 sets per deal-pair, 2000 pre-registered pairs).
+
+    ``starting_player`` is the human's seat. A player who deals in and
+    immediately watches four engine possessions has to reconstruct the tracking
+    from a log; starting them on the move means the game begins with a decision
+    they made.
     """
     seat = int(body.get("seat", 0)) % NUM_PLAYERS
-    rules = RuleConfig(variant=str(body.get("variant", "54")),
-                       claims_any_time=bool(body.get("any_time", False)))
-    gamma = max(0.0, min(2.0, float(body.get("gamma", 0.35))))
-    return Session(seat, secrets.token_urlsafe(12), rules, gamma)
+    rules = RuleConfig(variant="54", starting_player=seat)
+    return Session(seat, secrets.token_urlsafe(12), rules, CHAMPION_GAMMA)
 
 
 def parse_action(body: dict):

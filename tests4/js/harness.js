@@ -55,6 +55,17 @@ function load() {
     },
     setTimeout: (f) => f && 0,
     clearTimeout() {},
+    // The room code reads ?room= at load and polls on an interval. Stubbing
+    // these rather than leaving them undefined keeps the stub honest about
+    // what the page actually uses: the first version of this file had neither,
+    // and app.js threw at load the moment room support was added -- which
+    // failed every JS test for a reason that had nothing to do with any of
+    // them.
+    setInterval: () => 0,
+    clearInterval() {},
+    URLSearchParams,
+    location: { search: "", origin: "http://localhost", href: "http://localhost/" },
+    navigator: { clipboard: { writeText: async () => {} } },
     console,
     fetch: async (url, opt) => {
       calls.push({ url, body: JSON.parse((opt && opt.body) || "{}") });
@@ -69,6 +80,11 @@ function load() {
   // cards.js publishes window.FishCards, which app.js destructures at load.
   const pub = path.join(__dirname, "..", "..", "public");
   vm.runInContext(fs.readFileSync(path.join(pub, "cards.js"), "utf8"), ctx);
+  // names.js publishes window.FishNames, which app.js destructures at load in
+  // exactly the same way. Loading it here rather than stubbing it means the
+  // tests exercise the real sanitiser: a name that survives FishNames.clean in
+  // a test is one that survives it in the browser.
+  vm.runInContext(fs.readFileSync(path.join(pub, "names.js"), "utf8"), ctx);
   const src = fs.readFileSync(path.join(pub, "app.js"), "utf8");
   // app.js is a top-level script, so its consts are not reachable from
   // outside. Evaluate it inside a function that hands the bindings back.

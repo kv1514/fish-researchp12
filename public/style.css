@@ -433,3 +433,332 @@ button.ghost.on {
   margin: 0;
   cursor: pointer;
 }
+
+/* =====================================================================
+   The round table.
+
+   Six seats on an ellipse with the viewer always at the bottom. Egocentric
+   on purpose: a player reads their own hand and the seats fanning away from
+   it, the way you sit at a real table, so "the seat on my left" is a
+   position on screen and not a number to translate.
+
+   Seat positions are set by the layout code as --x/--y percentages rather
+   than by nth-child rules, because which screen position a seat occupies
+   depends on where the viewer is sitting and that is only known at runtime.
+   ===================================================================== */
+
+.felt {
+  position: relative;
+  margin: 0 0 18px;
+  /* Slightly taller than 16/9: the ring needs vertical room for the four-line
+     seat pods at the top and bottom, and at 16/9 they collided with the rail. */
+  aspect-ratio: 15 / 10;
+  min-height: 340px;
+  max-height: 460px;
+  border-radius: 50% / 46%;
+  background:
+    radial-gradient(120% 120% at 50% 18%,
+      color-mix(in srgb, var(--felt) 86%, white) 0%,
+      var(--felt) 58%,
+      color-mix(in srgb, var(--felt) 84%, black) 100%);
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--felt) 70%, black),
+    inset 0 0 46px rgba(0,0,0,.28),
+    var(--shadow);
+  color: var(--felt-ink);
+  container-type: inline-size;
+}
+
+/* The rail: a second ellipse just inside the edge, so the felt reads as a
+   table with a lip rather than as a green oval. */
+.feltinner {
+  position: absolute;
+  inset: 7% 5%;
+  border-radius: 50% / 46%;
+  border: 1px solid color-mix(in srgb, var(--felt-ink) 22%, transparent);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.feltmid {
+  text-align: center;
+  padding: 0 8%;
+  max-width: 62%;
+  pointer-events: auto;
+}
+
+.feltmid .turnline {
+  font-weight: 650;
+  font-size: clamp(15px, 2.6cqi, 21px);
+  margin: 0 0 4px;
+  color: var(--felt-ink);
+}
+.feltmid .lastmove {
+  font-size: clamp(12px, 2cqi, 15px);
+  color: color-mix(in srgb, var(--felt-ink) 76%, transparent);
+  min-height: 1.5em;
+}
+
+/* The between-moves countdown. Deliberately quiet: it is there so a player
+   knows the table is waiting for them to read it, not to hurry them. */
+.clock {
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(11px, 1.7cqi, 13px);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--felt-ink) 62%, transparent);
+}
+.clock .bar {
+  display: block;
+  height: 3px;
+  margin: 5px auto 0;
+  width: min(190px, 60%);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--felt-ink) 22%, transparent);
+  overflow: hidden;
+}
+.clock .bar i {
+  display: block;
+  height: 100%;
+  background: var(--felt-ink);
+  transition: width .25s linear;
+}
+
+.ring { position: absolute; inset: 0; }
+
+.pod {
+  position: absolute;
+  left: var(--x); top: var(--y);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: max-content;
+  text-align: center;
+}
+
+.pod .puck {
+  width: clamp(38px, 6.4cqi, 54px);
+  height: clamp(38px, 6.4cqi, 54px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: clamp(13px, 2.2cqi, 17px);
+  letter-spacing: .01em;
+  background: var(--panel);
+  color: var(--ink);
+  border: 2px solid var(--line);
+  box-shadow: 0 2px 6px rgba(0,0,0,.28);
+  transition: box-shadow .18s, border-color .18s, transform .18s;
+}
+.pod.ours .puck { border-color: var(--ours); }
+.pod.theirs .puck { border-color: var(--theirs); }
+.pod.me .puck { background: var(--ink); color: var(--panel); }
+
+/* On turn. The ring pulses rather than merely colouring, because on a table
+   with six pucks a colour change is easy to miss and this is the single most
+   important piece of state on the screen. */
+.pod.active .puck {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--felt-ink) 70%, transparent),
+              0 3px 10px rgba(0,0,0,.35);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pod.active .puck { animation: podpulse 2s ease-in-out infinite; }
+}
+@keyframes podpulse {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--felt-ink) 70%, transparent),
+                         0 3px 10px rgba(0,0,0,.35); }
+  50%      { box-shadow: 0 0 0 7px color-mix(in srgb, var(--felt-ink) 26%, transparent),
+                         0 3px 10px rgba(0,0,0,.35); }
+}
+
+.pod .nm {
+  font-size: clamp(11px, 1.8cqi, 14px);
+  font-weight: 600;
+  max-width: 13ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--felt-ink);
+}
+.pod .cards {
+  font-size: clamp(10px, 1.5cqi, 12px);
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--felt-ink) 70%, transparent);
+}
+.pod .tag {
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--felt-ink) 55%, transparent);
+}
+.pod.out .puck { opacity: .45; }
+.pod.out .cards { text-decoration: line-through; }
+
+/* =====================================================================
+   Start screen: tabs, fields, bot renaming
+   ===================================================================== */
+
+.tabs { display: flex; gap: 6px; margin: 0 0 16px; }
+.tabs button {
+  flex: 1;
+  padding: 9px 10px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--dim);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.tabs button.on {
+  color: var(--panel);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.tabpane { display: none; }
+.tabpane.on { display: block; }
+
+.fld { display: block; margin: 0 0 14px; font-weight: 600; font-size: 14px; }
+.fld input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 9px 11px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.fld input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fld input.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 20px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+.fold { margin: 4px 0 18px; }
+.fold summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent);
+}
+.botnames {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 12px 0 10px;
+}
+.botnames label { font-size: 12px; font-weight: 600; color: var(--dim); }
+.botnames input {
+  display: block; width: 100%; margin-top: 4px;
+  padding: 7px 9px; font: inherit; font-size: 14px;
+  color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px;
+}
+
+button.big { width: 100%; padding: 13px; font-size: 16px; }
+button.sm { padding: 5px 9px; font-size: 13px; }
+
+.roomsplit {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.roomsplit h3 { margin: 0 0 12px; font-size: 15px; }
+.orline {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.orline::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  border-left: 1px solid var(--line);
+}
+.orline span {
+  position: relative;
+  padding: 4px 6px;
+  background: var(--panel);
+  color: var(--dim);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+@media (max-width: 620px) {
+  .roomsplit { grid-template-columns: 1fr; }
+  .orline { padding: 4px 0; }
+  .orline::before { top: 50%; bottom: auto; left: 0; right: 0;
+                    border-left: 0; border-top: 1px solid var(--line); }
+}
+
+/* =====================================================================
+   Room lobby
+   ===================================================================== */
+
+.lobbywrap { max-width: 720px; margin: 0 auto; padding: 8px 16px 40px; }
+.lobbywrap h2 { margin: 8px 0 4px; }
+
+.roomcode { font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.roomcode b {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 19px;
+  letter-spacing: .2em;
+}
+.spacer { flex: 1; }
+
+.lobbyseats { display: grid; gap: 8px; margin: 18px 0; }
+.lseat {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: 10px;
+}
+.lseat.ours { border-left-color: var(--ours); }
+.lseat.theirs { border-left-color: var(--theirs); }
+.lseat.me { box-shadow: inset 0 0 0 1px var(--accent); }
+.lseat .sn {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--dim);
+  text-align: center;
+}
+.lseat .who { font-weight: 600; }
+.lseat input {
+  font: inherit; font-weight: 600;
+  padding: 5px 8px; width: 100%;
+  color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 7px;
+}
+.lseat .kind {
+  font-size: 11px; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--dim);
+}
+.lseat .rd { font-size: 13px; font-weight: 600; }
+.lseat .rd.yes { color: var(--ours); }
+.lseat .rd.no { color: var(--dim); }
+
+.lobbyfoot {
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.chk { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; }
+.lobbyfoot .chk { font-weight: 650; font-size: 16px; }

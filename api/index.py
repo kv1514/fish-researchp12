@@ -23,6 +23,8 @@ if str(ROOT) not in sys.path:
 from fish.engine import IllegalAction                          # noqa: E402
 from api._engine import (Session, new_session, parse_action,  # noqa: E402
                          wire_action)
+from api import _rooms                                         # noqa: E402
+from api import _room_game as RG                               # noqa: E402
 
 MAX_BODY = 512 * 1024
 
@@ -79,7 +81,12 @@ class handler(BaseHTTPRequestHandler):
                                for c in half_suit_cards(h)]}
                     for h in range(len(HALF_SUIT_NAMES))]})
             if op == "health":
-                return self._send({"ok": True})
+                # room_backend is reported because the difference matters and
+                # is otherwise invisible: on "memory" a room works for exactly
+                # one player, which looks like a bug in the game rather than a
+                # deployment that has no shared store configured.
+                return self._send({"ok": True,
+                                   "room_backend": _rooms.backend_name()})
             return self._send({"error": "not found"}, 404)
         except Exception:                            # pragma: no cover
             traceback.print_exc()
@@ -108,6 +115,15 @@ class handler(BaseHTTPRequestHandler):
                 out = s.snapshot()
                 out["actions"] = played
                 return self._send(out)
+
+            # Rooms first. A room request is authenticated by its seat
+            # SECRET and addressed by a room code; it never carries a session
+            # token, because the server -- not the client -- holds the
+            # authoritative log for a shared table. Dispatching after the token
+            # check below rejected every room route with "missing session
+            # token" before it reached the handler.
+            if op.startswith("room_"):
+                return self._room(op, body)
 
             # Every other route restores the session from the sealed token plus
             # the client's copy of the public action log.
@@ -166,6 +182,116 @@ class handler(BaseHTTPRequestHandler):
             # engine can carry hidden state in its message just as readily.
             traceback.print_exc()
             return self._send({"error": "internal error"}, 500)
+
+    # -- rooms ---------------------------------------------------------------
+
+    def _room(self, op: str, body: dict):
+        """Every /api/room_* route.
+
+        Split out so the solo routes above stay readable, and because rooms
+        share one shape: identify the caller by their seat secret, mutate under
+        compare-and-set, hand back that seat's view and nothing else.
+        """
+        if op == "room_new":
+            doc = RG.new_room(body.get("humans", 2), body.get("name", ""),
+                              body.get("pace", 12))
+            host = doc["seats"][0]
+            code = _rooms.store().create(doc)
+            return self._send({"code": code, "seat": host["seat"],
+                               "secret": host["secret"],
+                               "room": RG.lobby_view(doc, code,
+                                                     host["seat"])})
+
+        code = str(body.get("code") or "").strip().upper()[:8]
+        if not code:
+            return self._send({"error": "missing room code"}, 400)
+
+        if op == "room_join":
+            name = body.get("name", "")
+            try:
+                doc, out = RG.mutate(code, lambda d: RG.join_room(d, name))
+            except _rooms.NotFound:
+                return self._send({"error": "no such room"}, 404)
+            return self._send({"code": code, "seat": out["seat"],
+                               "secret": out["secret"],
+                               "room": RG.lobby_view(doc, code, out["seat"])})
+
+        secret = str(body.get("secret") or "")
+
+        # Every route below both reads and may WRITE, because a room advances
+        # on being looked at: an engine move that is due fires on the next
+        # request from anybody at the table. There is no daemon thread here to
+        # do it, so the readers drive the clock -- and `next_move_at` in the
+        # document is what stops them driving it faster than the pace.
+        def with_room(fn):
+            try:
+                return RG.mutate(code, fn)
+            except _rooms.NotFound:
+                raise ValueError("no such room")
+
+        if op == "room_state":
+            def _tick(d):
+                if RG.seat_of(d, secret) is None:
+                    raise ValueError("you are not seated at that table")
+                RG.maybe_start(d)
+                RG.step_bot(d)
+                return None
+            doc, _ = with_room(_tick)
+            me = RG.seat_of(doc, secret)
+            return self._send(RG.table_view(doc, code, me)
+                              if doc["phase"] == "playing"
+                              else {"room": RG.lobby_view(doc, code, me),
+                                    "phase": doc["phase"]})
+
+        if op == "room_ready":
+            want = bool(body.get("ready", True))
+            def _rdy(d):
+                RG.set_ready(d, secret, want)
+                RG.maybe_start(d)
+                return None
+            doc, _ = with_room(_rdy)
+            me = RG.seat_of(doc, secret)
+            return self._send(RG.table_view(doc, code, me)
+                              if doc["phase"] == "playing"
+                              else {"room": RG.lobby_view(doc, code, me),
+                                    "phase": doc["phase"]})
+
+        if op == "room_rename":
+            seat = int(body.get("seat", -1))
+            name = body.get("name", "")
+            doc, _ = with_room(lambda d: RG.rename(d, secret, seat, name))
+            me = RG.seat_of(doc, secret)
+            return self._send({"room": RG.lobby_view(doc, code, me),
+                               "phase": doc["phase"]})
+
+        if op == "room_act":
+            action = parse_action(body.get("action") or {})
+            def _act(d):
+                me = RG.seat_of(d, secret)
+                if me is None:
+                    raise ValueError("you are not seated at that table")
+                RG.apply_action(d, me, action)
+                return None
+            doc, _ = with_room(_act)
+            return self._send(RG.table_view(doc, code,
+                                            RG.seat_of(doc, secret)))
+
+        if op == "room_analyse":
+            # Read-only, and the one room route that does not tick the clock:
+            # asking the engine what it thinks must not advance the game.
+            try:
+                _, doc = _rooms.store().read(code)
+            except _rooms.NotFound:
+                return self._send({"error": "no such room"}, 404)
+            me = RG.seat_of(doc, secret)
+            if me is None:
+                return self._send({"error": "you are not seated at that "
+                                            "table"}, 403)
+            if doc["phase"] != "playing":
+                return self._send({"error": "that table has not started"}, 400)
+            return self._send(RG.session_for(doc, me).analysis())
+
+        return self._send({"error": "not found"}, 404)
 
     def log_message(self, *args):                    # quieter function logs
         pass

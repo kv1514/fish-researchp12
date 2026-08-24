@@ -362,3 +362,35 @@ exactly, giving a ground-truth answer to "was that the right move?" rather
 than only "did it beat the previous version". Fish turns out to be a *loopy*
 game (positions can repeat forever), so the solver uses layered value
 iteration rather than backward induction.
+
+## Playing with other people
+
+The table supports rooms: one player creates a table, the others join with a
+four-character code, and the empty seats are filled by engines. Everybody has
+to press **Ready** before the deal, so nobody arrives to find a game already in
+progress and has to reconstruct the tracking from a log.
+
+Solo play needs no setup at all. **Rooms need a shared store**, and the reason
+is worth stating because the cheap alternative does not work: a room's row
+holds the deal nonce, and the nonce derives the deal, so any client that can
+read the row can compute all six hands. Browsers therefore cannot talk to the
+database directly with a public key, the server has to mediate, and the server
+needs a secret the browser never sees.
+
+To turn rooms on for a deployment:
+
+1. Create a Postgres database (a free Supabase project is enough) and run
+   `scripts4/room_schema.sql` against it. That creates `fish_rooms` and leaves
+   row-level security **enabled with no policies**, which denies every request
+   made with the public anon key. Do not add a policy to make it reachable from
+   the browser; that is the thing the schema is preventing.
+2. Set two environment variables on the deployment:
+   `SUPABASE_URL` (the project URL) and `SUPABASE_SERVICE_KEY` (the service
+   role key, not the anon key).
+3. `GET /api/health` reports `room_backend`. `"postgres"` means rooms are
+   shared; `"memory"` means the variables are missing and a room will work for
+   exactly one player.
+
+Without the variables the site still runs and solo play is unaffected — the
+room routes fall back to an in-process store, which is visibly broken rather
+than silently wrong.
