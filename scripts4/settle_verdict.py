@@ -73,6 +73,35 @@ def _verdict(est, se, name):
     return lo > 0 or hi < 0
 
 
+#: The four rounds of the lookahead programme, by the label prefix each used.
+#: Cells about OTHER features that happen to mention a round name are excluded
+#: by name -- the two value-objective replications were being counted in.
+ROUNDS = {
+    "screens": ("lookahead d2 w0.25", "lookahead d3 w0.25 NO coupling",
+                "lookahead d3 w0.25 vs champion", "lookahead d3 w0.60"),
+    "replications": ("REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)",
+                     "REPLICATE lookahead d3 w0.25 vs champion (second fresh",
+                     "REPLICATE coupling ablation d3"),
+    "decisive": ("DECISIVE lookahead d3 w0.25 vs champion (A)",
+                 "DECISIVE lookahead d3 w0.25 vs champion (B)"),
+    "settling": ("SETTLE lookahead d3 w0.25 block",),
+}
+
+
+def _programme_pairs() -> dict:
+    """Deal-pairs spent on the lookahead question, by round, from the record."""
+    src = ROOT / "results" / "v04_duels.jsonl"
+    rows = [json.loads(l) for l in src.read_text(encoding="utf-8").splitlines()
+            if l.strip()]
+    out, total = {}, 0
+    for name, prefixes in ROUNDS.items():
+        n = sum(r["n_pairs"] for r in rows
+                if any((r.get("label") or "").startswith(px) for px in prefixes))
+        out[name] = n
+        total += n
+    return {"rounds": out, "total": total}
+
+
 def main() -> int:
     cs = cells(SETTLE)
     print(f"blocks recorded: {len(cs)}/6")
@@ -132,7 +161,15 @@ def main() -> int:
     # the document was the least protected against drift. Found by
     # check_verdicts.py, whose own reason for existing was a different finished
     # run that had never been analysed at all.
+    # The whole programme's cost, computed from the duel record rather than
+    # summed by hand. The paper claimed 15,600 deal-pairs across four rounds in
+    # two places, including the abstract; the four rounds cost 9,700, and 15,600
+    # matches nothing -- not the table, not the record with the stacking run
+    # added (15,700), not anything. A number nobody could recompute drifted.
+    prog = _programme_pairs()
     out = {"blocks": cs, "pooled": p, "n_pairs": sum(c["n"] for c in cs),
+           "programme_pairs": prog["total"],
+           "programme_rounds": prog["rounds"],
            "demonstrated": bool(demonstrated)}
     if len(extra) == len(UNSELECTED):
         out["secondary"] = {"cells": extra, "pooled": p2,

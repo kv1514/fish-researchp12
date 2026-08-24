@@ -68,6 +68,13 @@
   "q_p": 0.5362438325500576
  },
  "n_pairs": 6000,
+ "programme_pairs": 9700,
+ "programme_rounds": {
+  "screens": 800,
+  "replications": 1500,
+  "decisive": 1400,
+  "settling": 6000
+ },
  "demonstrated": true,
  "secondary": {
   "cells": [

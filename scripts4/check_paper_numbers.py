@@ -149,6 +149,14 @@ WATCH = [
      "lookahead, unselected pool", "secondary --- all ten unselected cells"),
     ("settle_verdict.json", "n_pairs", "{:d}", "pairs in the settling run",
      "final 6000, is"),
+    # The programme total. It was quoted as 15,600 in the abstract and again in
+    # the results, and matched nothing: not the table (9,700), not the record
+    # with the stacking run added (15,700). Nobody could recompute it, so it
+    # drifted unchallenged. It is now computed from the duel record.
+    ("settle_verdict.json", "programme_pairs", "{:,d}",
+     "the lookahead programme's cost", "duplicate\ndeal-pairs across four"),
+    ("settle_verdict.json", "programme_rounds.settling", "{:d}",
+     "pairs in the settling round", "6000 in the pre-registered settling"),
     # The basis comparison. Its point is that the winner's margin CONTAINS
     # ZERO, so the estimate and its standard error have to travel together --
     # quoting the gain alone would invert the paragraph into the conclusion it

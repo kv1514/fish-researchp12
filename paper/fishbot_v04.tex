@@ -97,7 +97,7 @@ replicate twice. We also build the one search design the variance diagnosis
 leaves open --- a lookahead over the posterior rather than over sampled
 layouts --- and prove that its natural form is exactly greedy at every depth, so
 that only the quota coupling between candidates can make such a search
-non-trivial. Settling whether the coupled form helps took 15{,}600 duplicate
+non-trivial. Settling whether the coupled form helps took 9{,}700 duplicate
 deal-pairs across four rounds; the answer, from a pre-registered test over the
 final 6000, is $+0.104$ sets per deal-pair, 95\% CI $[+0.020, +0.189]$. The route
 there is the more useful finding, and the estimate over rounds is the shape of
@@ -2312,8 +2312,9 @@ Section~\ref{sec:lookahead} describes the one search design the variance
 diagnosis does not rule out, and predicts, in Proposition~\ref{prop:greedy},
 that a version of it without the quota coupling would collapse to greedy. Both
 halves were measured. Table~\ref{tab:lookahead} is the whole record, and it took
-15{,}600 deal-pairs across four rounds to answer a question a 200-pair cell
-appeared to answer at the start.
+9{,}700 deal-pairs across four rounds --- 800 in screens, 1500 in replications,
+1400 decisive, 6000 in the pre-registered settling run --- to answer a question
+a 200-pair cell appeared to answer at the start.
 
 The answer is that the search helps, by about a tenth of a set per deal-pair.
 The section is long because the route to that number is the more useful part:
