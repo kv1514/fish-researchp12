@@ -3216,6 +3216,22 @@ $11.7\%$ of within-position variance, so there is signal to work with; what
 there is not is a way to attribute it to individual terms as they currently
 stand.
 
+\paragraph{The two most-quoted figures in this paper were the two nothing could
+check.} \texttt{check\_paper\_numbers.py} watches over a hundred figures
+against the results files that produce them. It could not watch the abstract's
+headline --- the $+1.85$ margin over the previous champion --- because that
+lives in the JSONL duel pool while every other watched figure lives in a JSON
+file, and the loader only read JSON. It could not watch
+Table~\ref{tab:exact} either, because that table's \emph{rates} were computed in
+the \LaTeX{} from counts the pipeline stored, so the number the paper prints was
+never a number the pipeline held. Both are correct; both sat outside every drift
+check for reasons as dull as a file format and a division done in the wrong
+place. This is the third time the same shape has appeared --- after
+\texttt{settle\_verdict.py} printing the lookahead headline and persisting
+nothing, and the deadlock quartet existing in no file at all --- and each time
+the unwatched figure was among the most load-bearing in the document, for the
+same reason: the numbers a paper repeats most are the ones nobody re-derives.
+
 \paragraph{A supervisor a bystander could switch off.} The rollout pass is
 restarted by a shell supervisor whose liveness check was
 \texttt{pgrep -f "learn\_ask\_objective.py rollout --run v2"}. That matches the

@@ -40,6 +40,32 @@ def _get(d, path):
     return d
 
 
+def _load(fname: str):
+    """Load a results source. ``duel:<label>`` addresses one cell of the pool.
+
+    The pool is JSONL, so until this existed the manifest could not watch
+    anything in it -- and the single most-quoted figure in the paper, the
+    abstract's headline margin over the previous champion, lives there. That is
+    the same shape as the settle_verdict.py failure this module was extended
+    for: the most load-bearing number was the one number no drift check could
+    see, and for a reason as dull as a file format.
+    """
+    if fname.startswith("duel:"):
+        label = fname[len("duel:"):]
+        hits = [json.loads(l) for l in
+                (ROOT / "results" / "v04_duels.jsonl").read_text().splitlines()
+                if l.strip()]
+        hits = [r for r in hits if (r.get("label") or "") == label]
+        if not hits:
+            raise FileNotFoundError(f"no duel cell labelled {label!r}")
+        if len(hits) > 1:
+            # Same rule as pool_cells.cells: silently preferring one is how a
+            # figure comes to be checked against a run nobody meant.
+            raise ValueError(f"{len(hits)} cells share the label {label!r}")
+        return hits[0]
+    return json.loads((ROOT / "results" / fname).read_text())
+
+
 #: (results file, key path, format spec, short name, anchor).
 #:
 #: The anchor is the point. Checking only that a formatted number appears
@@ -416,6 +442,33 @@ WATCH = [
      "error on that difference", "difference & $-0.054"),
     ("combined_verdict.json", "realised_sd", "{:.3f}",
      "combined run realised sd", "against a realised"),
+    # THE HEADLINE. The margin over the previous champion is quoted in the
+    # abstract, the introduction and the conclusions, and until the loader
+    # learned to read the duel pool it was unwatchable -- the most-quoted
+    # figure in the paper, outside every drift check, because it lives in a
+    # JSONL and everything else lives in JSON.
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_mean", "{:.2f}",
+     "margin over the v0.3 champion", "beats the previous champion by"),
+    ("duel:FINAL: v04 champion vs v03 champion", "n_pairs", "{:d}",
+     "pairs behind the headline", "over 500 duplicate deals"),
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.0", "{:.2f}",
+     "headline interval, low", "beats the previous champion by"),
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.1", "{:.2f}",
+     "headline interval, high", "beats the previous champion by"),
+    # The absolute-strength table. Its rates were computed in the LaTeX and
+    # stored nowhere, so the table carrying this paper's independent
+    # confirmation of the opponent model -- including the contrast the
+    # abstract quotes -- could not be checked against anything.
+    ("exact_agreement_rates.json", "agents.v04_champion.rates.uncertain",
+     "{:.1%}", "champion under uncertainty", "\\textbf{72.5%}"),
+    ("exact_agreement_rates.json", "agents.v04_champion.rates.m2",
+     "{:.1%}", "champion at m=2", "agrees with optimal play"),
+    ("exact_agreement_rates.json", "agents.v03_champion.rates.uncertain",
+     "{:.1%}", "v0.3 champion under uncertainty", "the v0.3 champion's"),
+    ("exact_agreement_rates.json", "no_opponent_model_uncertain", "{:.1%}",
+     "no opponent model, uncertain", "scores $67.5%$ under uncertainty"),
+    ("exact_agreement_rates.json", "n_positions", "{:d}",
+     "positions in the agreement corpus", "988 exactly solved positions"),
 ]
 
 
@@ -449,13 +502,16 @@ def main() -> int:
     missing = []
     ambiguous = []
     for fname, path, fmt, name, anchor in WATCH:
-        f = ROOT / "results" / fname
-        if not f.exists():
+        if not fname.startswith("duel:") and not (ROOT / "results" / fname).exists():
             print(f"{name:<34}{'-':>12}   results file absent")
             missing.append(f"{name} (results file absent)")
             continue
         try:
-            val = _get(json.loads(f.read_text()), path)
+            val = _get(_load(fname), path)
+        except FileNotFoundError as e:
+            print(f"{name:<34}{'-':>12}   *** {e}")
+            missing.append(f"{name} ({e})")
+            continue
         except (KeyError, IndexError, TypeError):
             print(f"{name:<34}{'-':>12}   *** key {path!r} gone from {fname}")
             missing.append(name)
@@ -468,6 +524,12 @@ def main() -> int:
         # window sat around 668. A check that inspects the wrong place and says
         # "no" is a nuisance; the same bug reporting "yes" off a coincidental
         # match elsewhere is the real hazard.
+        # The anchor is normalised the SAME way the text was. Without this the
+        # two disagree: an anchor written "72.5\\%" is absent from normalised
+        # text, and one written "72.5%" is absent from the paper as authored --
+        # so whichever way an anchor is written, one of the two checks that
+        # look for it reports it missing.
+        anchor = anchor.replace("\\%", "%").replace("{,}", ",")
         spots = []
         at = text.find(anchor)
         while at >= 0:
