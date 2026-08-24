@@ -123,6 +123,14 @@ WATCH = [
      "engine-continuation decisions counted", "the rule fired \\emph{zero}"),
     ("stall_asymmetry.json", "prefix_bite.mean", "{:.1f}",
      "actions the seeded prefix eats", "the seeded prefix eats a mean"),
+    # The sixth cell of the adaptive family, quoted in two places: the results
+    # table and the playing advice. A stale figure here is advice to a human.
+    ("retake_verdict.json", "pooled.fe", "{:.3f}", "gated retake, pooled",
+     "The gated penalty\nscores"),
+    ("retake_verdict.json", "contrast_vs_ungated.delta", "{:.3f}",
+     "gated vs ungated", "Against the ungated"),
+    ("retake_verdict.json", "n_pairs", "{:d}", "pairs in the retake run",
+     "It has now been run at"),
 ]
 
 

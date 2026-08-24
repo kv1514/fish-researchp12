@@ -3218,6 +3218,29 @@ back the other way, which is $47\%$ of what the ungated penalty flags.
 That is small enough that the $200$-pair cells this study used for screening
 could not have resolved it either way, which is why no such cell was run.
 
+It has now been run at $2000$ pairs, pre-registered in
+\texttt{jobs/PREREGISTRATION\_retake\_gate.md} with the design, the five prior
+failures and the analysis all fixed before a pair was played. The gated penalty
+scores $\mathbf{-0.004}$ sets per deal-pair $[-0.067, +0.059]$ against the
+champion --- indistinguishable from not having it. Against the ungated
+$-0.340$ the difference is $+0.336 \pm 0.169$.
+
+Two readings, and the paper takes the cautious one. The gate does remove the
+harm: the ungated form's loss does not survive restricting the penalty to a
+repeated exchange, which is what its own argument always said it should. But
+the recovery is $+0.336$ where the gate's model caps it at $+0.159$, and a gate
+cannot recover more harm than it removes flags for. One of those numbers is
+wrong, and the likelier one is the ungated $-0.340$: it comes from a $200$-pair
+screen whose interval $[-0.665, -0.015]$ barely clears zero, which is precisely
+the configuration that inflates an estimate --- the sixth appearance in this
+paper of the same selection effect. So the honest statement is that withholding
+the re-take, in the only form its argument ever justified, neither helps nor
+hurts; and that the harm the ungated version appeared to do was partly an
+artefact of the screen that measured it.
+
+The advice does not change, and it is now better supported. Withholding does
+not pay. Take the certain ask.
+
 Both of those figures moved, and the reason is worth recording rather than
 quietly restating. The depth statistic originally counted successful asks
 between this seat and one opponent in \emph{either direction separately}, so an
@@ -3332,6 +3355,7 @@ change & set diff & 95\% CI \\
 \midrule
 break the duel, $w_{\mathrm{retake}} = 0.30$ & $-0.340$ & $[-0.665, -0.015]$ \\
 break the duel, $w_{\mathrm{retake}} = 1.00$ & $\mathbf{-1.015}$ & $[-1.562, -0.468]$ \\
+\quad gated on a real duel, $2000$ pairs & $-0.004$ & $[-0.067, +0.059]$ \\
 \midrule
 tie-breakers up when behind, $w_{\mathrm{behind}} = 0.50$ & $-0.185$ & $[-0.628, +0.258]$ \\
 tie-breakers up when behind, $w_{\mathrm{behind}} = 1.00$ & $\mathbf{-0.890}$ & $[-1.384, -0.396]$ \\
