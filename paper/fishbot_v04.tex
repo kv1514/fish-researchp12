@@ -54,9 +54,9 @@ unquantified bias. This paper removes that bias, and reports what happened.
 We first show that hidden-state inference in Literature reduces to counting
 assignments in a degree-constrained bipartite system, which is $\#P$-complete
 in general but tiny in the dimension that matters here: real positions have
-$25.6$ unlocated cards on average but only $4.0$ \emph{distinct candidate
-sets}, so cards are exchangeable and the problem collapses onto an $8 \times 6$
-count matrix. A dynamic program over that structure returns the exact partition
+$25.1$ unlocated cards on average but only $4.1$ \emph{distinct candidate
+sets}, so cards are exchangeable and the problem collapses onto a count matrix
+with at most $9$ rows across the corpus we measured. A dynamic program over that structure returns the exact partition
 function, exact marginals, exact uniform sampling and exact joint probabilities,
 validated against exhaustive enumeration. The one part it cannot absorb --- the
 disjunctive constraints certifying that an asker held a card of the half-suit
@@ -194,7 +194,7 @@ inference in Literature reduces to counting assignments in a
 degree-constrained bipartite system, and that although the general problem is
 $\#P$-complete, the specific instances arising in this game are tiny in the
 dimension that matters: the number of \emph{distinct candidate sets} is on
-average $4.0$ even when $25.6$ cards are unlocated. We give an exact dynamic
+average $4.1$ even when $25.1$ cards are unlocated. We give an exact dynamic
 program over that structure that returns the partition function, exact
 marginals, and exact uniform sampling, and validate it against exhaustive
 enumeration (Section~\ref{sec:counting}).
@@ -494,25 +494,29 @@ Counting the elements of $\Omega_0$ is an instance of counting perfect
 matchings in a degree-constrained bipartite graph, equivalently a restricted
 permanent, which is $\#P$-complete in general \citep{valiant1979complexity}.
 The instances arising here, however, are small in the only dimension that
-matters. Measured over $901$ decision points from real games:
+matters. Measured over the $360$ decision points of the stored corpus
+(\texttt{results/infer\_position\_stats.json}):
 
 \begin{center}
 \begin{tabular}{lrrrr}
 \toprule
 quantity & mean & median & p90 & max\\
 \midrule
-free cards $|F|$                 & 25.6 & 26 & 43 & 45\\
-\textbf{distinct candidate sets} & \textbf{3.9} & \textbf{4} & \textbf{6} & \textbf{8}\\
-active OR-constraints            & 5.4 & 4 & 12 & 18\\
-cards per OR-constraint          & 3.35 & 3 & 5 & 5\\
+free cards $|F|$                 & 25.1 & 25 & 42 & 45\\
+\textbf{distinct candidate sets} & \textbf{4.1} & \textbf{4} & \textbf{6} & \textbf{9}\\
+active OR-constraints            & 4.7 & 5 & 9 & 14\\
+cards per OR-constraint          & 3.17 & 3 & 5 & 5\\
 \bottomrule
 \end{tabular}
 \end{center}
 
 Cards sharing a candidate set are \emph{exchangeable}. Grouping them collapses
 the problem from an assignment over $|F| \le 45$ labelled cards onto a
-\emph{group-count matrix} $k \in \mathbb{N}^{G\times 6}$ with $G \le 8$, where
-$k_{gp}$ is the number of cards of group $g$ dealt to player $p$.
+\emph{group-count matrix} $k \in \mathbb{N}^{G\times 6}$, where $k_{gp}$ is the
+number of cards of group $g$ dealt to player $p$. $G$ is small: at most $9$
+across those $360$ positions, with a $99$th percentile of $8$. That is an
+\emph{observation about this game}, not a bound --- nothing here proves $G$
+cannot be larger, and the dynamic program does not assume it is not.
 
 \subsection{The dynamic program}
 
@@ -821,10 +825,15 @@ are 462, so a layer with $m$ unresolved half-suits has at most $462^m \times 6$
 abstract states: $2{,}772$ for $m=1$ and $1{,}280{,}664$ for $m=2$, against
 $279{,}936$ and $1.3\times10^{10}$ card placements. Both are solved once, in
 full, as dense tables --- a genuine Fish tablebase, after which a query is an
-array lookup. Measured on 300 one-half-suit positions: $2{,}240$ CPU-seconds for
-the old solver against $0.052$ seconds for the new one. An independent
-cross-check on 131 further positions found agreement on both the value and the
-complete optimal-action set in $131/131$ cases, at a $4{,}205\times$ speedup.
+array lookup. Measured on the same $300$ one-half-suit positions, and this is
+one cross-check rather than two: the old solver agreed with the new one on both
+the value and the complete optimal-action set in $300/300$ cases, with no
+refusals, at $2{,}240$ CPU-seconds against $0.052$. That is
+$\mathbf{43{,}000\times}$ by total CPU time and
+$\mathbf{10{,}900\times}$ by median per position ($990$\,ms against
+$91\,\mu$s). An earlier draft reported ``131 further positions'' at
+$4{,}205\times$; there is no second corpus, and $4{,}205$ is not a ratio
+anything in \texttt{results/exact2\_cross\_check.json} produces.
 
 \subsection{A closed form for the perfect-information value}
 
@@ -1848,7 +1857,7 @@ The verdict rests on \emph{two of the six blocks}. Leaving out block 0 gives
 $[-0.041, +0.168]$ and leaving out block 4 gives $[-0.060, +0.148]$; dropping
 either one alone puts zero back inside. No block may be dropped for its result
 and none is --- the pre-registered pool is the pool --- but under $I^2 = 61\%$,
-with the interval clearing zero by $13\%$ of its own half-width, saying so costs
+with the interval clearing zero by $6.7\%$ of its own half-width, saying so costs
 nothing and omitting it would be a choice.
 
 The random-effects interval is $[-0.052, +0.255]$ and \emph{includes zero}. We
@@ -2074,8 +2083,8 @@ exact solver --- agree on which component does the work.
 claiming the speedup as strength. Disabling it changes not one of the 988
 decisions. In an information-resolved position the marginals are one-hot and the
 ordinary policy already plays it correctly; in an uncertain position the
-tablebase refuses by construction. Its value is a $4{,}205\times$ reduction in
-the cost of the endgame path and insurance against a class of error v0.3
+tablebase refuses by construction. Its value is a $10{,}900\times$ reduction in
+the median cost of the endgame path and insurance against a class of error v0.3
 demonstrably suffered, not extra strength.
 
 \textbf{Where the remaining gap is.} At $m{=}2$ under uncertainty the champion
@@ -2362,10 +2371,19 @@ $\sqrt{\cdot}$ counting, $\gamma = 0.70$ & $+0.480$ & $+0.212$ & $[-0.092, +0.51
 \end{tabular}
 \end{center}
 
-The combination is the only cell in this entire study, out of more than
-twenty-five, whose interval excluded zero in the improvement direction. On a
-fresh set of 500 deals it returned $+0.068$, and on a second fresh set
-$-0.066$. It was noise.
+When this was written the combination was the only cell in the study --- out of
+more than twenty-five --- whose interval excluded zero in the improvement
+direction, which is exactly why it looked like something. On a fresh set of 500
+deals it returned $+0.068$, and on a second fresh set $-0.066$. It was noise.
+
+That framing no longer holds, and the reason it stopped holding is the point.
+Four cells in this paper now exclude zero upward --- the pre-registered
+lookahead at $+0.104$, posterior precision at $+0.340$, at-ask depth at
+$+0.102$, and the claim threshold at $+0.035$ --- and every one of them was
+\emph{designed} to be able to, at six to thirty times this cell's sample size
+with the analysis fixed in advance. The distinction that matters is not how many
+intervals clear zero, it is whether clearing zero was a possible outcome of a
+design or the best of twenty-five looks.
 
 We report this at length because it is the single most useful methodological
 observation the study produced. Twenty-five screening cells at a nominal 95\%

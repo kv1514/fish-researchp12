@@ -4,6 +4,15 @@ A research engine for **Literature** (a.k.a. **Fish** / **Canadian Fish**),
 working toward the strongest practical engine for six-player Literature and
 toward understanding what near-optimal Fish actually looks like.
 
+> **Deploying:** `vercel.json`'s `ignoreCommand` cancels the *build* for pushes
+> that touch nothing the site serves, but Vercel still creates a *deployment*
+> for every push and the free tier caps those at 100/day
+> (`api-deployments-free-per-day`). Thirty pushes in one session exhausted it;
+> every push after that posts a failing Vercel status on the open PR while the
+> last successful deployment keeps serving the site normally. The fix is fewer
+> **pushes**, not a cleverer ignore command — batch commits locally and push
+> once per group of work.
+
 **Play it:**
 [fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
 --- six-player Literature against v0.4, with the engine's own posterior visible

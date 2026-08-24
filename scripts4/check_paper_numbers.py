@@ -67,6 +67,29 @@ WATCH = [
      "drift fit intercept", "it drifts\nwith share"),
     ("pair_sd_model.json", "cond_drift.slope", "{:.2f}", "drift fit slope",
      "it drifts\nwith share"),
+    # The position-statistics table, quoted in the abstract and the intro. Every
+    # row of it disagreed with the file it summarises, including the maximum
+    # that the complexity argument was stated as a bound on.
+    ("infer_position_stats.json", "free_cards.n", "{:d}",
+     "positions in the corpus", "decision points of the stored corpus"),
+    ("infer_position_stats.json", "free_cards.mean", "{:.1f}",
+     "mean free cards", "free cards $|F|$"),
+    ("infer_position_stats.json", "mask_groups.mean", "{:.1f}",
+     "mean distinct candidate sets",
+     "\\textbf{distinct candidate sets}"),
+    ("infer_position_stats.json", "mask_groups.max", "{:d}",
+     "max distinct candidate sets",
+     "$G$ is small: at most"),
+    ("infer_position_stats.json", "active_ors.mean", "{:.1f}",
+     "mean active OR-constraints", "active OR-constraints"),
+    ("infer_position_stats.json", "or_size.mean", "{:.2f}",
+     "mean cards per OR-constraint", "cards per OR-constraint"),
+    # The tablebase cross-check. It was quoted as "131 further positions at
+    # 4,205x"; the file holds one corpus of 300 and no ratio near 4,205.
+    ("exact2_cross_check.json", "cross_check_m1.n_positions", "{:d}",
+     "tablebase cross-check corpus", "one cross-check rather than two"),
+    ("exact2_cross_check.json", "cross_check_m1.v1_cpu_seconds", "{:,.0f}",
+     "old solver CPU seconds", "CPU-seconds against"),
     ("precision_verdict.json", "pooled.fe", "{:.3f}", "precision pooled",
      "posterior sampling budget, from 160 draws to 480"),
     ("at_ask_verdict.json", "pooled.fe", "{:.4f}", "at-ask pooled",
