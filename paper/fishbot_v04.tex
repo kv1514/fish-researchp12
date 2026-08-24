@@ -3232,6 +3232,20 @@ nothing, and the deadlock quartet existing in no file at all --- and each time
 the unwatched figure was among the most load-bearing in the document, for the
 same reason: the numbers a paper repeats most are the ones nobody re-derives.
 
+The manifest cannot find its own gaps, so the check is now inverted as well.
+\texttt{scripts4/unwatched\_claims.py} extracts every number the paper asserts
+in \textbf{bold} --- its strongest claims, the ones a reader takes as measured
+--- and requires each to be either pinned by the manifest or exempted with a
+\emph{stated reason}; an exemption with no reason is indistinguishable from an
+oversight, which is the failure being guarded against. Running it the first
+time returned nineteen unpinned figures. Six were version numbers, row labels
+or a saturated column; five belonged to the two figures above; and the
+remaining \emph{eight} were ordinary measurements nobody had thought to
+watch --- among them the A/A per-pair standard deviation that every power
+statement in this paper divides by, the stalling fraction that motivates the
+progress-optimal criterion the absolute-strength table is scored against, and
+the champion posterior's own NLL and Brier scores.
+
 \paragraph{A supervisor a bystander could switch off.} The rollout pass is
 restarted by a shell supervisor whose liveness check was
 \texttt{pgrep -f "learn\_ask\_objective.py rollout --run v2"}. That matches the

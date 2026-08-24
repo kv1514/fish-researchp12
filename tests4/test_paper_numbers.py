@@ -174,3 +174,30 @@ def test_no_watched_anchor_is_ambiguous():
         if n > 1:
             bad.append(f"{row[3]}: {anchor!r} appears {n} times")
     assert not bad, bad
+
+
+def test_no_bolded_number_in_the_paper_is_unaccounted_for():
+    """The manifest can only check figures somebody thought to watch.
+
+    Three of this project's worst figures were unwatched for exactly that
+    reason, and all three were among the most load-bearing in the document:
+    the deadlock quartet, which existed in no results file at all; the
+    abstract's margin over the previous champion, correct but living in a
+    JSONL the loader could not read; and Table tab:exact, whose rates were
+    computed in the LaTeX from counts the pipeline stored.
+
+    ``scripts4/unwatched_claims.py`` inverts the check -- every number the
+    paper asserts inside ``\\textbf`` must be either pinned by the manifest or
+    exempt with a stated reason. An exemption without a reason is
+    indistinguishable from an oversight, which is the failure being guarded
+    against, so the exemption table is required to carry one.
+    """
+    sys.path.insert(0, str(ROOT / "scripts4"))
+    from unwatched_claims import EXEMPT, sweep
+
+    assert all(isinstance(v, str) and v.strip() for v in EXEMPT.values()), (
+        "every exemption must state a reason")
+    unexplained, _ = sweep()
+    assert not unexplained, (
+        "bolded numbers with nothing behind them: "
+        + ", ".join(f"{v} in {c[:40]!r}" for v, c, _ in unexplained))

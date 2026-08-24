@@ -469,6 +469,44 @@ WATCH = [
      "no opponent model, uncertain", "scores $67.5%$ under uncertainty"),
     ("exact_agreement_rates.json", "n_positions", "{:d}",
      "positions in the agreement corpus", "988 exactly solved positions"),
+    # The stalling fraction. It motivates the progress-optimal criterion that
+    # the entire absolute-strength table is scored against, so if it is wrong
+    # the table is measuring the wrong thing. Both rows: the m=1 zero is what
+    # explains why v0.3 never noticed.
+    ("exact2_study.json", "stalling.m=2.fraction", "{:.1%}",
+     "value-preserving non-progress at m=2", "of\ndecided two-half-suit states"),
+    ("exact2_study.json", "stalling.m=1.fraction", "{:.0%}",
+     "value-preserving non-progress at m=1", "At\none half-suit the figure is"),
+    # The posterior-accuracy contrast the caption is built on: the EXACTLY
+    # CORRECT uniform posterior scoring worse than v0.3's biased sampler at the
+    # same budget. Quoting one without the other loses the whole point.
+    ("posterior_accuracy.json", "rows.3.nll", "{:.4f}",
+     "v0.3 sampler at 512 draws", "the same budget"),
+    ("posterior_accuracy.json", "rows.9.nll", "{:.4f}",
+     "exact uniform posterior at 512", "the same budget"),
+    # The headline duel's pair score, quoted beside its set differential.
+    ("duel:FINAL: v04 champion vs v03 champion", "pair_score", "{:.3f}",
+     "headline pair score", "\\textbf{v0.3 champion (\\texttt{tuned})}"),
+    # Quantiles of the candidate-set count, which bound the exact DP's state
+    # space; the mean and max were watched and the middle of the distribution
+    # was not.
+    ("infer_position_stats.json", "mask_groups.median", "{:d}",
+     "median distinct candidate sets", "\\textbf{distinct candidate sets}"),
+    ("infer_position_stats.json", "mask_groups.p90", "{:d}",
+     "p90 distinct candidate sets", "\\textbf{distinct candidate sets}"),
+    ("perpetual_study.json", "normal.games", "{:d}",
+     "games in the perpetual study", "games in which a position repeated"),
+    # The A/A per-pair standard deviation. Every MDE and every power statement
+    # in this paper divides by it, so it is the most reused number in the
+    # document after the headline -- and it was not watched.
+    ("v04_eval_calibration.json", "sd_per_pair", "{:.3f}",
+     "A/A per-pair standard deviation", "of the set differential between two"),
+    # The champion posterior configuration's own scores, bolded as the best
+    # row of Table~\ref{tab:posterior}.
+    ("posterior_accuracy.json", "rows.1.nll", "{:.4f}",
+     "champion posterior NLL", "512, $\\gamma{=}0.45$} & \\textbf{1.3251}"),
+    ("posterior_accuracy.json", "rows.1.brier", "{:.4f}",
+     "champion posterior Brier", "512, $\\gamma{=}0.45$} & \\textbf{1.3251}"),
 ]
 
 
