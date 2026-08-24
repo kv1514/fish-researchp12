@@ -152,8 +152,10 @@ def _worker_cap() -> int:
     explicitly, so a long resumable pass can be restarted wider once the queue
     beside it drains.
 
-    Never below 2: a pass that silently drops to serial on a small container is
-    worse than one that mildly oversubscribes.
+    An explicit FISH_LEARN_WORKERS is honoured down to 1: the docstring used to
+    promise "never below 2" while the override path returned max(1, ...), and a
+    promise the code does not keep is worse than either behaviour. Setting it
+    to 1 deliberately is a legitimate thing to want on a small box.
     """
     override = os.environ.get("FISH_LEARN_WORKERS")
     if override:
@@ -360,6 +362,17 @@ def meta_path(root: Path) -> Path:
     return Path(root) / "meta.json"
 
 
+def _meta(root: Path) -> dict:
+    """The harvest's recorded metadata, or an empty dict if there is none."""
+    p = meta_path(root)
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
 def load_positions(root: Path) -> list[dict]:
     p = positions_path(root)
     if not p.exists():
@@ -406,6 +419,22 @@ def harvest(root: Path, cfg: HarvestConfig, n_workers: int = MAX_WORKERS,
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
     n_workers = max(1, min(n_workers, MAX_WORKERS))
+    # The schema tag was written unconditionally and before this check, so
+    # resuming a directory whose positions.jsonl holds version-1 rows stamped
+    # it "askobj-positions/2" -- a dataset claiming to carry histories while
+    # only partly doing so. READABLE_SCHEMAS existed to police exactly that and
+    # was referenced nowhere, so nothing ever read the tag it was policing.
+    old = _meta(root)
+    prior = old.get("schema") if old else None
+    if prior is not None and prior != POSITION_SCHEMA:
+        if prior not in READABLE_SCHEMAS:
+            raise ValueError(
+                f"{root} holds schema {prior!r}, which this module cannot "
+                f"read (known: {list(READABLE_SCHEMAS)})")
+        raise ValueError(
+            f"{root} holds schema {prior!r} and this harvest writes "
+            f"{POSITION_SCHEMA!r}. Appending would leave one file mixing both, "
+            f"with the tag naming only the newer. Harvest into a new root.")
     meta_path(root).write_text(json.dumps(
         {"schema": POSITION_SCHEMA, "config": cfg.to_dict(),
          "terms": list(TERM_NAMES), "agent": ["fishbot4", {}]},

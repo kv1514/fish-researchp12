@@ -112,7 +112,11 @@ def stage_rollout(args) -> dict:
         cfg = R.RolloutConfig(policy=R.POLICY_V04, seed_history=True,
                               max_actions=args.max_actions)
     else:
-        cfg = R.RolloutConfig()
+        # max_actions was dropped here, so `--continuation public
+        # --max-actions 400` accepted the flag, printed nothing and ran at the
+        # default 900. A documented argument that silently does nothing is
+        # worse than one that is not offered.
+        cfg = R.RolloutConfig(max_actions=args.max_actions)
     summary = R.evaluate_positions(root, cfg=cfg, n_workers=args.workers,
                                    seed=args.seed, limit=args.limit)
     print(json.dumps(summary, indent=2))
@@ -121,9 +125,17 @@ def stage_rollout(args) -> dict:
     # Accumulate across resumed passes so the reported totals are the totals.
     for k in ("evaluated", "seconds"):
         summary[k] = prev.get(k, 0) + summary.get(k, 0)
-    if "rollout_stats" in prev and "rollout_stats" in summary:
-        for k, v in prev["rollout_stats"].items():
-            summary["rollout_stats"][k] = summary["rollout_stats"].get(k, 0) + v
+    # When every position is already done, evaluate_positions returns early and
+    # its summary carries no rollout_stats at all -- so the old `k in prev and
+    # k in summary` dropped everything accumulated so far. run_learn_v2.sh
+    # restarts this stage up to 40 times, so that fired as soon as the pass
+    # finished: the totals were erased by the run that confirmed they were
+    # complete.
+    if "rollout_stats" in prev:
+        merged = dict(prev["rollout_stats"])
+        for k, v in summary.get("rollout_stats", {}).items():
+            merged[k] = merged.get(k, 0) + v
+        summary["rollout_stats"] = merged
     res["rollout"] = summary
     save_results(res, args.run)
     return summary

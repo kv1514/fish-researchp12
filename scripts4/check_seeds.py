@@ -94,7 +94,7 @@ def load():
             if r.get("base_seed") is None:
                 continue
             done.add(r["label"])
-            n = 2 * int(r.get("n_pairs") or 0)
+            n = int(r.get("n_pairs") or 0)
             out.append((by_label.get(r["label"], "legacy"), r["label"],
                         int(r["base_seed"]), int(r["base_seed"]) + n, False))
     for name, cells in files.items():
@@ -103,7 +103,7 @@ def load():
                 continue
             if k["label"] in done:
                 continue              # already counted from the results file
-            n = 2 * int(k.get("n_pairs") or 0)
+            n = int(k.get("n_pairs") or 0)
             out.append((name, k["label"], int(k["base_seed"]),
                         int(k["base_seed"]) + n, True))
     return sorted(out, key=lambda t: (t[2], t[3]))
@@ -146,12 +146,25 @@ def main() -> int:
         members = [c for c in cells if c[1] in labels]
         clashes = [(a, b) for i, a in enumerate(members) for b in members[i + 1:]
                    if a[2] < b[3] and b[2] < a[3]]
-        mark = "OK" if not clashes else f"{len(clashes)} OVERLAPPING PAIRS"
+        # A pool whose labels match no cell used to print OK and count as
+        # clean, so one renamed or mistyped label -- or a result row without a
+        # base_seed -- turned the summary below into a statement about nothing
+        # while still claiming every published interval was sound. The ratio
+        # was printed and never asserted.
+        absent = [x for x in labels if not any(c[1] == x for c in cells)]
+        if absent:
+            mark = f"{len(absent)} LABEL(S) MATCH NO CELL"
+        elif clashes:
+            mark = f"{len(clashes)} OVERLAPPING PAIRS"
+        else:
+            mark = "OK"
         print(f"  {name:<34} {len(members):>2}/{len(labels)} cells   {mark}")
+        for x in absent:
+            print(f"      unmatched label: {x[:52]}")
         for a, b in clashes:
             print(f"      {a[1][:44]} [{a[2]},{a[3]})")
             print(f"      {b[1][:44]} [{b[2]},{b[3]})")
-        bad += len(clashes)
+        bad += len(clashes) + len(absent)
     if not bad:
         print("  No pooled estimate averages two cells that share a deal, so "
               "every\n  interval published from these pools is the interval "

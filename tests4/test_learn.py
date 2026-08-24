@@ -572,6 +572,50 @@ def test_history_codec_roundtrips_every_event_type():
         decode_history([["z", 1, 2]])
 
 
+def test_v04_rollout_matrix_refuses_a_forgotten_history():
+    """The guard that reads as though it were already there.
+
+    ``RolloutConfig.__post_init__`` rejects ``policy='v04'`` with
+    ``seed_history=False``, which looks like the check. It is not: it tests the
+    FLAG, while ``history`` defaults to ``()``. A caller who sets the flag and
+    forgets the argument gets an empty log, six belief trackers anchored on a
+    determinized mid-game hand as though it were the deal, and an ordinary
+    number back from a game that could not have happened.
+    """
+    from fish4.learn.rollout import POLICY_V04, RolloutConfig, rollout_matrix
+    st = _midgame(seed=11, plies=20)
+    seat = st.turn
+    asks = Observation.from_state(st, seat).legal_asks()[:2]
+    if not asks:
+        pytest.skip("no legal asks at this position")
+    cfg = RolloutConfig(policy=POLICY_V04, seed_history=True)
+    with pytest.raises(ValueError, match="real public history"):
+        rollout_matrix(st.rules, st.turn, list(st.set_winner), seat,
+                       [list(st.hands)], asks, 3, cfg=cfg)
+    # ... and it still runs when the history is actually supplied.
+    V = rollout_matrix(st.rules, st.turn, list(st.set_winner), seat,
+                       [list(st.hands)], asks, 3, cfg=cfg,
+                       history=list(st.history))
+    assert V.shape == (len(asks), 1)
+
+
+def test_v04_rollout_matrix_allows_an_explicit_empty_history():
+    """An empty history is truthful at ply zero, and must not be refused.
+
+    Passing it and omitting it are the same value and opposite claims, which is
+    why the refusal keys on a sentinel rather than on emptiness. Inferring the
+    omission from the position does not work: twenty plies of asking with no
+    claim leaves every hand full and no set decided.
+    """
+    from fish4.learn.rollout import POLICY_V04, RolloutConfig, rollout_matrix
+    st = GameState.deal(RuleConfig(), seed=5)
+    asks = Observation.from_state(st, st.turn).legal_asks()[:1]
+    cfg = RolloutConfig(policy=POLICY_V04, seed_history=True)
+    V = rollout_matrix(st.rules, st.turn, list(st.set_winner), st.turn,
+                       [list(st.hands)], asks, 3, cfg=cfg, history=())
+    assert V.shape == (1, 1)
+
+
 def test_v04_rollout_refuses_a_position_without_a_stored_history():
     """A schema-1 record must stop the run, not run on an invented game.
 

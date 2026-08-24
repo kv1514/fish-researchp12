@@ -369,12 +369,18 @@ def _differential(state: GameState, my_team: int) -> int:
     return (a - b) if my_team == 0 else (b - a)
 
 
+#: Distinguishes "the caller did not pass a history" from "the caller passed an
+#: empty one". They are the same value and opposite claims: the first is an
+#: omission, the second is an assertion that the game has not started.
+_NO_HISTORY = object()
+
+
 def rollout_matrix(rules: RuleConfig, turn: int, set_winner: Sequence,
                    seat: int, worlds: Sequence[Sequence[int]],
                    asks: Sequence[Ask], seed: int,
                    cfg: Optional[RolloutConfig] = None,
                    stats: Optional[RolloutStats] = None,
-                   history: Sequence = ()) -> np.ndarray:
+                   history: Sequence = _NO_HISTORY) -> np.ndarray:
     """``V[a, k]``: set differential GAINED by the acting team, in world k.
 
     The value is incremental - the differential already banked at the position
@@ -388,6 +394,30 @@ def rollout_matrix(rules: RuleConfig, turn: int, set_winner: Sequence,
     candidate - that is the common-random-numbers guarantee.
     """
     cfg = cfg or RolloutConfig()
+    if cfg.policy == POLICY_V04 and history is _NO_HISTORY:
+        # RolloutConfig.__post_init__ refuses policy='v04' with
+        # seed_history=False, which reads like the guard is in place. It is
+        # not: it checks the FLAG, while `history` used to default to (). So
+        # policy='v04' with the flag set and the argument forgotten seeded an
+        # empty log, anchored six belief trackers on a determinized mid-game
+        # hand as though it were the deal, and returned an ordinary-looking
+        # number computed from a game that could not have happened. The engine
+        # often notices -- the back-computed deal is usually infeasible and
+        # BeliefContradiction fires -- but "usually" is not a guarantee, and a
+        # world that happens to be consistent produces a wrong number quietly.
+        #
+        # Inferring the omission from the position does not work: 20 plies of
+        # asking with no claim leaves every hand full and no set decided, so it
+        # is indistinguishable from an opening. A sentinel makes "not passed"
+        # exactly detectable, which is the thing actually worth refusing. An
+        # empty history explicitly passed is a caller's assertion that this is
+        # ply zero, and is honoured.
+        raise ValueError(
+            "policy='v04' needs the real public history: pass history=... "
+            "(explicitly history=() at an opening position). Without it the "
+            "belief tracker anchors on a mid-game hand as if it were the deal")
+    if history is _NO_HISTORY:
+        history = ()
     stats = stats if stats is not None else RolloutStats()
     my_team = team_of(seat)
     base = banked_differential(set_winner, my_team)
@@ -510,6 +540,30 @@ def completed_rollouts(root) -> set:
     return out
 
 
+def recorded_policies(root) -> dict:
+    """How many stored rollout records were produced by each policy.
+
+    ``None`` counts records written before the policy was recorded at all.
+    Resuming keys on the position id alone, so without this a pass run with
+    ``--continuation v04`` on top of a public pass would skip every position
+    the weak policy had already done and leave one file holding both -- values
+    that differ by a factor of seven in the slope they support, with nothing on
+    disk saying which line is which.
+    """
+    import json
+    p = rollouts_path(root)
+    if not p.exists():
+        return {}
+    seen: dict = {}
+    with p.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if line:
+                k = json.loads(line).get("policy")
+                seen[k] = seen.get(k, 0) + 1
+    return seen
+
+
 def load_rollouts(root) -> dict:
     """``pid -> V`` matrix over the position's ``eval_idx`` candidates."""
     import json
@@ -583,7 +637,8 @@ def _eval_one(args) -> dict:
     V = rollout_matrix(record_rules(rec), rec["seat"], rec["set_winner"],
                        rec["seat"], record_worlds(rec), cands, seed,
                        cfg=cfg, stats=stats, history=hist)
-    return {"pid": rec["pid"], "eval_idx": list(rec["eval_idx"]),
+    return {"pid": rec["pid"], "policy": cfg.policy,
+            "eval_idx": list(rec["eval_idx"]),
             "v": V.astype(int).tolist(), "stats": stats.to_dict(),
             "seconds": round(time.time() - t0, 3)}
 
@@ -611,6 +666,18 @@ def evaluate_positions(root, cfg: Optional[RolloutConfig] = None,
     root = Path(root)
     cfg = cfg or RolloutConfig()
     n_workers = max(1, min(n_workers, MAX_WORKERS))
+    seen = recorded_policies(root)
+    wrong = {k: v for k, v in seen.items() if k is not None and k != cfg.policy}
+    if wrong:
+        raise ValueError(
+            f"{rollouts_path(root)} already holds "
+            f"{sum(wrong.values())} record(s) from "
+            f"{sorted(wrong)}; this pass is {cfg.policy!r}. Resuming keys on "
+            f"the position id alone, so continuing here would leave one file "
+            f"mixing two continuations. Use a different --run.")
+    if seen.get(None):
+        print(f"note: {seen[None]} rollout record(s) predate the policy tag "
+              f"and cannot be checked against {cfg.policy!r}", file=sys.stderr)
     done = completed_rollouts(root)
     jobs = []
     for rec in iter_positions(root):

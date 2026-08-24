@@ -31,16 +31,38 @@ JOBS = ROOT / "jobs" / "j29_learned_weights.json"
 PLACEHOLDER = "__weights__"
 
 
-def _rollout_running() -> bool:
-    """Is the v2 strong-continuation rollout pass still adding positions?"""
-    import subprocess
-    try:
-        out = subprocess.run(["pgrep", "-f",
-                              "learn_ask_objective.py rollout --run v2"],
-                             capture_output=True, text=True, timeout=10)
-    except Exception:
-        return False
-    return bool(out.stdout.strip())
+def _rollout_incomplete(run: str):
+    """Is the strong-continuation rollout pass for ``run`` still unfinished?
+
+    Returns a reason string, or None when every harvested position has been
+    evaluated.
+
+    This asks the DISK, not the process table, and that is the whole point.
+    The first version ran ``pgrep`` for a hard-coded ``--run v2`` and returned
+    False on any exception, so it failed OPEN three ways: a missing pgrep, a
+    permission error or a timeout all read as "not running" and armed; asking
+    about run v3 checked whether v2 was running; and ``run_learn_v2.sh`` polls
+    with ``sleep 120`` while ``widen_rollout.sh`` deliberately kills the pass
+    mid-flight, leaving a window of up to ~150 s in which no process matches
+    and arming succeeds on whatever prefix is on disk. A guard written because
+    a slip already happened once must fail closed.
+    """
+    from fish4.learn.dataset import iter_positions
+    from fish4.learn.rollout import completed_rollouts
+    from learn_ask_objective import data_root
+
+    root = data_root(run)
+    if not root.exists():
+        return f"no harvest at {root}"
+    done = completed_rollouts(root)
+    pids = [rec["pid"] for rec in iter_positions(root)]
+    if not pids:
+        return f"no harvested positions under {root}"
+    missing = [x for x in pids if x not in done]
+    if missing:
+        return (f"{len(missing)} of {len(pids)} harvested positions have no "
+                f"rollout yet")
+    return None
 
 
 def main(argv):
@@ -60,8 +82,9 @@ def main(argv):
     # the fit uses every position completed when the duel queue drains, and I
     # armed this once from a 91-block dry run by simply forgetting that -- which
     # is exactly the kind of slip a document cannot prevent and a check can.
-    if _rollout_running():
-        print("the v2 rollout pass is still running.\n"
+    reason = _rollout_incomplete(run)
+    if reason:
+        print(f"the {run} rollout pass is not finished: {reason}.\n"
               "jobs/PREREGISTRATION_learned_weights.md fixes the fit to use "
               "every position\ncompleted when the duel queue drains, so arming "
               "now would validate a vector\nfitted on an arbitrary prefix -- "
@@ -80,7 +103,28 @@ def main(argv):
         kw.update(weights)
         changed += 1
     if not changed:
-        print("nothing to fill; the job file is already armed")
+        # "Already armed" is not the same as "armed with the right vector", and
+        # conflating them made the recovery path a no-op that exits success.
+        # This script exists because the job file was once armed from a 91-block
+        # dry run; the fix for that is to re-run the fit and re-arm, and the
+        # old code answered that with "nothing to fill" and status 0, leaving
+        # the prefix weights in place.
+        armed = {k: v for k, v in jobs[0]["x"][1].items()
+                 if k in weights}
+        stale = {k: (armed.get(k), v) for k, v in weights.items()
+                 if armed.get(k) != v}
+        if stale:
+            print("the job file is armed with a DIFFERENT vector from the "
+                  "current fit.")
+            for k, (was, now) in sorted(stale.items()):
+                print(f"  {k:<12} armed {was!r}  fit now {now!r}")
+            print("\nRefusing to leave that standing. Re-arm deliberately: "
+                  "remove the armed\nvalues from jobs/j29_learned_weights.json "
+                  f"(restoring {PLACEHOLDER!r}) and run\nthis again, or keep "
+                  "the armed vector if it is the one you meant.")
+            return 1
+        print("nothing to fill; the job file is already armed, and with the "
+              "vector this fit\nproduces")
         print(json.dumps(jobs[0]["x"][1], indent=1))
         return 0
     JOBS.write_text(json.dumps(jobs, indent=1))
