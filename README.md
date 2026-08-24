@@ -7,11 +7,22 @@ toward understanding what near-optimal Fish actually looks like.
 > **Deploying:** `vercel.json`'s `ignoreCommand` cancels the *build* for pushes
 > that touch nothing the site serves, but Vercel still creates a *deployment*
 > for every push and the free tier caps those at 100/day
-> (`api-deployments-free-per-day`). Thirty pushes in one session exhausted it;
-> every push after that posts a failing Vercel status on the open PR while the
-> last successful deployment keeps serving the site normally. The fix is fewer
-> **pushes**, not a cleverer ignore command — batch commits locally and push
-> once per group of work.
+> (`api-deployments-free-per-day`). Every push after that posts a failing
+> Vercel status on the open PR while the last successful deployment keeps
+> serving the site normally.
+>
+> That used to be an inference from the error message. It is now measured: over
+> one 4.3-hour window the project recorded **40 deployments — 9.4 per hour —
+> of which 27 (68%) were `CANCELED` by the ignore command**, and the daily cap
+> was still reached. A cancelled deployment saves build minutes and costs a
+> deployment slot exactly like a real one.
+>
+> The Vercel docs were then checked for a way to skip deployment *creation*:
+> `git.deploymentEnabled` can disable a whole branch, and `ignoreCommand` is
+> the only path-aware mechanism — and it runs after the deployment record
+> exists. There is no per-path way to stop the record being created, so **the
+> fix is fewer pushes**, not a cleverer ignore command. Batch commits locally
+> and push once per group of work.
 
 **Play it:**
 [fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
