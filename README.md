@@ -4,6 +4,15 @@ A research engine for **Literature** (a.k.a. **Fish** / **Canadian Fish**),
 working toward the strongest practical engine for six-player Literature and
 toward understanding what near-optimal Fish actually looks like.
 
+**Play it:**
+[fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
+--- six-player Literature against v0.4, with the engine's own posterior visible
+while you play. Public, no sign-in, nothing stored; a game lives in the browser
+tab. The link is Vercel's stable per-branch URL, so it follows this branch
+rather than any one deployment. The project's *production* URL tracks `main`,
+which carries none of `api/`, `public/` or `fish4/`, so it 404s until this work
+merges.
+
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
 - Research log, v0.3: [RESEARCH_LOG.md](RESEARCH_LOG.md) (v0.4 keeps its record in
   the paper, in the per-module notes [fish4/infer/FRONTIER.md](fish4/infer/FRONTIER.md),
