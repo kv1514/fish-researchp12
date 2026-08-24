@@ -216,8 +216,82 @@ def main(argv) -> int:
               f"{100 * fok[lowband].mean():.1f}%   against a bar of "
               f"{100 * bar:.1f}%")
 
+    # What is it WORTH? A band with perfect accuracy is not an opportunity if
+    # nothing lands in it. Expected gain per stuck half-suit is the share of
+    # half-suits where declaring beats waiting, times how much it beats it by.
+    act = (fp >= 0.5) & (fp < THRESHOLD)          # the engine waits, we would not
+    if act.any():
+        gain_per_hs = float(act.mean() * (fok[act].mean() - bar))
+    else:
+        gain_per_hs = 0.0
+    hs_per_game = n_clusters / max(1, n_games)
+    gain_per_game = gain_per_hs * hs_per_game
+    # A duel measures sets per DEAL-PAIR, and a pair is two games.
+    gain_per_pair = 2 * gain_per_game
+    mde_2000 = (1.959964 + 0.8416212) * 3.796 / (2000 ** 0.5)
+    print(f"\nwhat changing this would be worth -- AND WHY THAT IS NOT "
+          f"QUOTED HERE:")
+    print(f"  half-suits fully within one team, per game   {hs_per_game:.2f}")
+    print(f"  share where we would declare and it waits    "
+          f"{100 * act.mean():.1f}%")
+    if act.any():
+        print(f"  and the MAP is right there                   "
+              f"{100 * fok[act].mean():.1f}%")
+
+    # STOP. The bar and the population do not match, and pretending otherwise
+    # would be this paper's own two-factor error a third time.
+    #
+    # `bar` is 1 - 0.175, and 0.175 came from results/perpetual_study.json's
+    # rate for half-suits a team gets STUCK on in the paper's narrow sense:
+    # it can PROVE it holds all six and still cannot place the split. The
+    # population scored above is wider -- every half-suit that is in fact
+    # entirely within one team, whether or not that team can prove it. At
+    # 8.97 per game out of nine half-suits total, it is very nearly all of
+    # them, so it is emphatically not the same set.
+    #
+    # A gain computed as (accuracy in this population) - (1 - null rate in
+    # that one) is a difference of two numbers measured over different things.
+    # It came out at +0.13 sets per deal-pair, which is the size of effects
+    # this paper calls demonstrated, and that is exactly why it must not be
+    # printed: a plausible number from a mismatched comparison is the failure
+    # mode this whole document is about.
     print()
-    if lowband.any() and fok[lowband].mean() > bar and not fband.any():
+    print("  NOT COMPUTED. The 0.175 null rate that sets the bar was measured "
+          "on the\n  paper's narrow 'stuck' population -- a team that can "
+          "PROVE it holds all six\n  and still cannot place the split. The "
+          "population scored above is every\n  half-suit that IS entirely "
+          "within one team, provable or not: 8.97 per game\n  out of nine "
+          "half-suits, so nearly all of them. Subtracting one from the\n  "
+          "other would be a difference between two different things, and it "
+          "would come\n  out at the size of effects this paper calls "
+          "demonstrated.")
+    print("\n  Fixing it means measuring the null rate over THIS population, "
+          "or narrowing\n  this population to the provable one. Until one of "
+          "those happens there is no\n  value estimate here, and no duel is "
+          "queued on one.")
+
+    print()
+    if True:
+        print(f"WHAT DOES SURVIVE is the calibration, which needs no bar at "
+              f"all: it compares\nthe posterior's stated probability against "
+              f"how often that same posterior was\nright, over one population. "
+              f"A posterior that says 'under 0.5' and is right\n"
+              f"{100 * ok[p < 0.5].mean():.1f}% of the time, and 'under 0.7' "
+              f"and is right {100 * ok[(p >= 0.5) & (p < 0.7)].mean():.1f}%, is "
+              f"badly\nUNDER-CONFIDENT about splits. claim4.py's threshold is "
+              f"the one place in this\nengine where a split probability is "
+              f"used as a NUMBER rather than as a ranking,\nand a threshold "
+              f"set on a miscalibrated number does not mean what it says.")
+        print()
+        print(f"That is a finding about the sampler, not about the claim "
+              f"policy, and it is\nwhere the next measurement should go. It "
+              f"also explains why the threshold is\nso insensitive between "
+              f"0.85 and 0.999, which v0.3 measured and could not\nexplain: "
+              f"the distribution is bimodal, {100 * (p < 0.5).mean():.0f}% "
+              f"below 0.5 and "
+              f"{100 * (p >= 0.97).mean():.0f}% above 0.97, so almost\n"
+              f"nothing sits where the threshold is.")
+    elif lowband.any() and fok[lowband].mean() > bar and not fband.any():
         print(f"The threshold is not the instrument. NOTHING sits in "
               f"[{bar:.3f}, {THRESHOLD:.2f}) --\nthe posterior on a stuck "
               f"split is bimodal -- so lowering the threshold to the\n"
@@ -261,6 +335,20 @@ def main(argv) -> int:
                "share_in_low_band": float(lowband.mean()),
                "low_band_accuracy": (float(fok[lowband].mean())
                                      if lowband.any() else None)},
+           # No value estimate is stored, deliberately. See the note in
+           # main(): the null rate that would set the bar was measured over a
+           # narrower population than the one scored here, so any gain
+           # computed from the two is a difference between different things.
+           "value": {"half_suits_within_one_team_per_game": hs_per_game,
+                     "share_we_would_declare": float(act.mean()),
+                     "accuracy_there": (float(fok[act].mean())
+                                        if act.any() else None),
+                     "gain_not_computed": (
+                         "the 0.175 null rate setting the bar was measured on "
+                         "the narrow provable-stuck population; this one is "
+                         "every half-suit actually within one team"),
+                     "mde_2000_pairs": mde_2000},
+           "calibration_under_half": float(ok[p < 0.5].mean()),
            "rows": rows}
     dest = ROOT / "results" / "stuck_claim_value.json"
     dest.write_text(json.dumps(out, indent=1))

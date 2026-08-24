@@ -2985,6 +2985,72 @@ well-argued, specific, mechanistic, and supported by a number. It was also never
 tested, because testing it required exactly the thing it asserted was
 impossible.
 
+\subsection{The split posterior is badly under-confident}
+\label{sec:res-splitcal}
+
+Section~\ref{sec:claiming} sets the claim threshold at $0.97$ and argues for it
+from a specific mechanism: while our team genuinely holds all six cards of a
+half-suit an opponent cannot take it --- a claim by a team that does not hold
+all six \emph{gives} the set away --- so the only cost of waiting is running out
+of opportunity. Waiting is close to free. v0.3 measured the consequence and
+could not explain it: thresholds from $0.85$ to $0.999$ play identically, and
+over $150$ duplicate deals $0.97$ and $0.999$ never once diverged.
+
+Scoring the posterior against ground truth explains it. Over $40$ games we
+recorded, at every position where a half-suit was in fact entirely within one
+team, the posterior probability the engine assigned to its own MAP split and
+whether that split was the true one --- $2719$ decisions on $359$ distinct
+half-suits, ground truth used for analysis only:
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+posterior says & decisions & actually the true split \\
+\midrule
+$[0.000, 0.500)$ & 2062 & $66.5\%$ \\
+$[0.500, 0.700)$ & 203 & $93.6\%$ \\
+$[0.700, 0.825)$ & 62 & $96.8\%$ \\
+$[0.825, 0.970)$ & 37 & $100.0\%$ \\
+$[0.970, 1.000]$ & 355 & $100.0\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Two things follow. The distribution is \textbf{bimodal} --- $76\%$ of decisions
+sit below $0.5$ and $13\%$ above $0.97$, with almost nothing between --- which is
+why the threshold is insensitive across the whole range v0.3 swept. There is
+nothing there to be sensitive to. That is the explanation the sweep lacked, and
+it is a fact about the posterior rather than about the claim rule.
+
+And the posterior is \textbf{badly under-confident}. It says ``below one half''
+and is right two thirds of the time; it says ``between a half and $0.7$'' and is
+right $93.6\%$ of the time. The claim threshold is the one place in this engine
+where a split probability is consumed as a \emph{number} rather than as a
+ranking, and a threshold set on a miscalibrated number does not mean what it
+says. This is a finding about the sampler, not about the claim policy, and it is
+where we would look next.
+
+\paragraph{What we did not compute, and why.} The obvious next step is to price
+the change: declaring on splits the engine currently waits on, against waiting
+and accepting the measured $17.5\%$ null rate on stuck half-suits, would beat
+waiting wherever the MAP is right more than $82.5\%$ of the time --- which the
+table says it is, everywhere above $0.5$. Carried through, that arithmetic
+returns about $+0.13$ sets per deal-pair, the size of effects this paper calls
+demonstrated.
+
+It is not reported, because the two numbers are measured over different
+populations. The $17.5\%$ is the null rate for half-suits a team is
+\emph{stuck} on in Section~\ref{sec:res-perpetual}'s sense: it can \emph{prove}
+it holds all six and still cannot place the split. The population in the table
+above is every half-suit that \emph{is} entirely within one team, provable or
+not --- $8.97$ per game out of nine, so very nearly all of them. Subtracting one
+from the other is a difference between two different things, and it produces a
+publishable-looking number by doing so. This is the same error as quoting the
+learning harvest's $+0.101$ against a late-position $+0.681$
+(Section~\ref{sec:res-learn}), and it is recorded here because we made it, saw
+the size of the answer, and went looking for why it was too good. Pricing this
+properly needs the null rate re-measured over this population, and until then
+there is no estimate and no queued run.
+
 \subsection{Perpetual states, measured}
 \label{sec:res-perpetual}
 

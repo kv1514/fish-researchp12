@@ -174,6 +174,18 @@ WATCH = [
      "the largest effect in this project"),
     ("at_ask_verdict.json", "pooled.fe", "{:.3f}", "at-ask, not shipped",
      "At-ask-time\ndepth at"),
+    # The split-calibration table. Its whole point is the gap between the
+    # stated probability and the realised accuracy, so the decision count and
+    # the population size both have to stay true or the table stops being one.
+    ("stuck_claim_value.json", "n_decisions", "{:d}", "split decisions scored",
+     "decisions on"),
+    ("stuck_claim_value.json", "n_half_suits", "{:d}", "distinct half-suits",
+     "decisions on"),
+    ("stuck_claim_value.json", "calibration_under_half", "{:.1%}",
+     "accuracy below 0.5", "$[0.000, 0.500)$"),
+    ("stuck_claim_value.json", "value.half_suits_within_one_team_per_game",
+     "{:.2f}", "half-suits within one team per game",
+     "per game out of nine"),
 ]
 
 

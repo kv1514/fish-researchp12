@@ -17,6 +17,14 @@
   "share_in_low_band": 0.03899721448467967,
   "low_band_accuracy": 1.0
  },
+ "value": {
+  "half_suits_within_one_team_per_game": 8.975,
+  "share_we_would_declare": 0.04178272980501393,
+  "accuracy_there": 1.0,
+  "gain_not_computed": "the 0.175 null rate setting the bar was measured on the narrow provable-stuck population; this one is every half-suit actually within one team",
+  "mde_2000_pairs": 0.23780174677630073
+ },
+ "calibration_under_half": 0.6653734238603298,
  "rows": [
   {
    "game": 0,
