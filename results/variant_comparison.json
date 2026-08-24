@@ -1,0 +1,140 @@
+{
+  "stats_54": {
+    "n_games": 300,
+    "seat_advantage": {
+      "n": 300,
+      "mean": 0.03333333333333333,
+      "ci95": [
+        -0.2633794084446491,
+        0.33004607511131573
+      ],
+      "metric": "set differential for the starting player's team"
+    },
+    "turn_retention": {
+      "n_turn_possessions": 11832,
+      "mean_cards_per_possession": 1.723968897903989,
+      "streak_distribution": {
+        "0": 0.3711967545638945,
+        "1": 0.209263015551048,
+        "2": 0.14334009465855307,
+        "3": 0.10141987829614604,
+        "4": 0.07133198106828939,
+        "5": 0.05273833671399594,
+        "6": 0.01986139283299527,
+        "7": 0.012677484787018255
+      }
+    },
+    "ask_success_by_phase": {
+      "phase_0": {
+        "success_rate": 0.6022418775724669,
+        "n": 11419
+      },
+      "phase_1": {
+        "success_rate": 0.6710285505124451,
+        "n": 10928
+      },
+      "phase_2": {
+        "success_rate": 0.6385305953977918,
+        "n": 9691
+      }
+    },
+    "completion_to_claim_delay": {
+      "n": 2598,
+      "mean": 15.392609699769054,
+      "median": 0,
+      "p90": 61
+    },
+    "specials_vs_normal": {
+      "mean_resolution_rank_specials": 3.9,
+      "mean_resolution_rank_normal": 4.0125,
+      "null_rate_specials": 0.03,
+      "null_rate_normal": 0.03875,
+      "n_specials": 300,
+      "n_normal": 2400
+    },
+    "failed_asks": {
+      "total_asks": 32038,
+      "failed_share": 0.36331855921093703,
+      "mean_asks_per_game": 106.79333333333334
+    },
+    "variant": "54"
+  },
+  "stats_48": {
+    "n_games": 300,
+    "seat_advantage": {
+      "n": 300,
+      "mean": 0.08333333333333333,
+      "ci95": [
+        -0.20925512753308795,
+        0.3759217941997546
+      ],
+      "metric": "set differential for the starting player's team"
+    },
+    "turn_retention": {
+      "n_turn_possessions": 10290,
+      "mean_cards_per_possession": 1.7448979591836735,
+      "streak_distribution": {
+        "0": 0.3531584062196307,
+        "1": 0.21661807580174927,
+        "2": 0.14820213799805637,
+        "3": 0.10359572400388727,
+        "4": 0.07949465500485908,
+        "5": 0.05267249757045676,
+        "6": 0.019825072886297375,
+        "7": 0.01020408163265306
+      }
+    },
+    "ask_success_by_phase": {
+      "phase_0": {
+        "success_rate": 0.5941235059760956,
+        "n": 10040
+      },
+      "phase_1": {
+        "success_rate": 0.6700135969040896,
+        "n": 9561
+      },
+      "phase_2": {
+        "success_rate": 0.6620820488498933,
+        "n": 8434
+      }
+    },
+    "completion_to_claim_delay": {
+      "n": 2294,
+      "mean": 12.641673931996513,
+      "median": 0,
+      "p90": 47
+    },
+    "specials_vs_normal": {
+      "mean_resolution_rank_specials": null,
+      "mean_resolution_rank_normal": 3.5,
+      "null_rate_specials": 0.0,
+      "null_rate_normal": 0.04375,
+      "n_specials": 0,
+      "n_normal": 2400
+    },
+    "failed_asks": {
+      "total_asks": 28035,
+      "failed_share": 0.3595505617977528,
+      "mean_asks_per_game": 93.45
+    },
+    "variant": "48"
+  },
+  "champion_gain_54": {
+    "gain": 1.51,
+    "ci": [
+      1.1658145890956333,
+      1.8541854109043667
+    ],
+    "n_pairs": 400,
+    "verdict": "champion stronger"
+  },
+  "champion_gain_48": {
+    "gain": 1.3675,
+    "ci": [
+      1.014046060909909,
+      1.720953939090091
+    ],
+    "n_pairs": 400,
+    "verdict": "champion stronger"
+  }
+}

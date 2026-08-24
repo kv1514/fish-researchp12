@@ -1,0 +1,14 @@
+# Nothing here is served or imported by the function, and some of it is large.
+# Keeping it out of the upload makes deploys smaller and faster.
+results/
+data/
+jobs/
+research/
+paper/
+scripts4/
+scripts/
+tests/
+tests4/
+checkpoints/
+configs/
+*.md

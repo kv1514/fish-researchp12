@@ -1,0 +1,18 @@
+[
+ {"label": "sqrt g0.70 draws320", "n_pairs": 200, "base_seed": 1900000, "agent_seed": 9900,
+  "x": ["fishbot4", {"opponent_gamma": 0.70, "count_mode": "sqrt", "n_draws": 320}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "sqrt g0.70 draws160", "n_pairs": 200, "base_seed": 1900000, "agent_seed": 9900,
+  "x": ["fishbot4", {"opponent_gamma": 0.70, "count_mode": "sqrt"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "opp_lambda 0.9", "n_pairs": 200, "base_seed": 1900000, "agent_seed": 9900,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "opp_lambda": 0.9}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "opp_lambda 1.8", "n_pairs": 200, "base_seed": 1900000, "agent_seed": 9900,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "opp_lambda": 1.8}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "sqrt g0.70 d320 + lam0.9", "n_pairs": 200, "base_seed": 1900000, "agent_seed": 9900,
+  "x": ["fishbot4", {"opponent_gamma": 0.70, "count_mode": "sqrt", "n_draws": 320,
+                     "opp_lambda": 0.9}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]}
+]

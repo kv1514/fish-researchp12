@@ -1,0 +1,54 @@
+{
+ "n_prefix": 743,
+ "run": "v2",
+ "blocks_prefix": 743,
+ "blocks_full": 1023,
+ "terms_not_fitted": [
+  "claim"
+ ],
+ "prefix": {
+  "w_suit": -0.0185,
+  "w_turn": 0.0689,
+  "w_scarce": 0.2075,
+  "w_reveal": -0.1358,
+  "w_deplete": -0.2099,
+  "w_expose": 0.6899,
+  "w_claim": 0.0,
+  "w_info": -0.1664,
+  "w_certain": -0.5302,
+  "w_concent": 0.1672,
+  "w_signal": -0.3208
+ },
+ "full": {
+  "w_suit": -0.0122,
+  "w_turn": 0.1079,
+  "w_scarce": 0.24,
+  "w_reveal": -0.1178,
+  "w_deplete": -0.219,
+  "w_expose": 0.8246,
+  "w_claim": 0.0,
+  "w_info": -0.1553,
+  "w_certain": -0.5017,
+  "w_concent": 0.1244,
+  "w_signal": -0.2488
+ },
+ "deltas": {
+  "suit": 0.006287542041397575,
+  "turn": 0.0390045698528224,
+  "scarce": 0.032571398598436246,
+  "reveal": 0.01797448651199844,
+  "deplete": -0.009046929597579106,
+  "expose": 0.13464627957681907,
+  "claim": 0.0,
+  "info": 0.01106871986532329,
+  "certain": 0.0285271997306068,
+  "concent": -0.04283663827827,
+  "signal": 0.07199228666523103
+ },
+ "l1_movement": 0.39395605071848394,
+ "largest_move": {
+  "term": "expose",
+  "delta": 0.13464627957681907
+ },
+ "sign_flips": []
+}

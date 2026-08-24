@@ -1,0 +1,6 @@
+[
+ {"label": "v04-default vs v03-champion", "n_pairs": 100,
+  "x": ["fishbot4", {}],
+  "y": ["tuned", {"w_turn": 0.6, "w_scarce": 0.2}],
+  "base_seed": 910000, "agent_seed": 5150}
+]

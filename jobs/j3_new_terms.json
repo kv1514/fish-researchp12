@@ -1,0 +1,192 @@
+[
+ {
+  "label": "draws 96",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 96
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "expose 0.40",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_expose": 0.4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "claim 0.30",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_claim": 0.3
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "signal +0.25",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_signal": 0.25
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "signal -0.25",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_signal": -0.25
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "turn 0.35",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_turn": 0.35
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "scarce 0.35",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_scarce": 0.35
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "smart_pass",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "smart_pass": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "info 0.10",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_info": 0.1
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "concent 0.15",
+  "n_pairs": 160,
+  "base_seed": 1500000,
+  "agent_seed": 7500,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_concent": 0.15
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]
