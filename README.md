@@ -408,6 +408,21 @@ button reachable by the key in the page. Supabase's security advisor flagged it
 `GET /api/health` reports `room_backend`: `"postgres"` once the variables are
 set, `"memory"` while they are missing.
 
+Then confirm it rather than assume it:
+
+    python scripts4/check_rooms_live.py
+
+That plays a real room from two independent HTTP clients — create, join,
+rename a bot, ready both, deal — and checks each seat gets nine cards, that the
+two hands share no card, and that neither the deal nonce nor any seat secret
+appears in a view. Exit status 0 only if a room actually dealt.
+
+Worth the extra step because `room_backend` answers a narrower question than it
+looks like it does: it reports which store the process chose at import, not
+that the credentials work, that the table exists, that RLS lets the service key
+through, or that two browsers reach the same room. All four can be wrong while
+health says `postgres`.
+
 Without the variables the site still runs and solo play is unaffected. The
 room routes **refuse up front**, naming the two missing variables.
 
