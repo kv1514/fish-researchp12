@@ -43,7 +43,7 @@ RUNS = [
     ("CLAIM THRESHOLD 0.90 vs 0.97 block", 2,
      "claim_threshold_verdict.json", "scripts4/claim_verdict.py"),
     ("LEARNED WEIGHTS v2 vs champion block", 2,
-     "learned_weights_verdict.json", "(no verdict script yet)"),
+     "learned_weights_verdict.json", "scripts4/learned_weights_verdict.py"),
     ("RETAKE BONUS w-0.30 vs champion block", 2,
      "retake_bonus_verdict.json", "scripts4/retake_bonus_verdict.py"),
     ("COMBINED 480+lookahead vs champion block", 2,

@@ -102,3 +102,60 @@ reader can see which terms moved.
   replication on fresh seeds first, for the reason the whole study keeps
   restating: this line has already produced one confidently-argued result that
   did not survive contact with a control.
+
+---
+
+## Amendment, written before the fit was run and before any weight was seen
+
+**The trigger this document fixed has become ambiguous, and resolving it after
+seeing a weight vector would be worthless. So it is resolved here.**
+
+The rule above says the fit uses *"every position the v2 rollout pass has
+completed at the moment the duel queue drains, and no other."* The queue drained
+at 03:25:31 UTC with the pass at **743** of 1023 positions. It did not stop
+there: `widen_rollout.sh` exists precisely to restart the pass wider once the
+queue frees the cores, so draining the queue is the event that makes the pass
+go *faster*, not the event that ends it. Written that way, the trigger names a
+number that is an accident of scheduling.
+
+Worse, it is an accident I influenced. The supervisor's liveness check was
+repaired in this same session — it had been fooled by a bystander process and
+had stopped restarting the pass — and that repair moved when the pass resumed
+relative to when the queue drained. A cut-off I moved is not a cut-off fixed in
+advance.
+
+**Resolution: the fit uses all 1023 positions, the full harvest.** That number
+was fixed when `dataset.py` was configured, before the rollout pass began and
+long before any weight vector existed, so it is the one quantity here that no
+decision of mine after seeing data can have touched. 743 is not.
+
+**Nothing has been looked at.** No fit has been run on the v2 data, no weight
+vector printed, no coefficient inspected. That is stated because the whole value
+of an amendment is the moment it is written, and this one is written while the
+pass is still at 910 of 1023.
+
+**Committed with it:**
+
+- The 743-position fit **will also be computed and reported**, as a robustness
+  check on whether the weights depend on where the pass happened to be. It is
+  reported beside the primary, never substituted for it, and the validation
+  duel plays the 1023-position vector regardless of which looks better. The
+  point of computing it is that a large disagreement between the two would be
+  evidence the fit is unstable, which is worth knowing and is not a licence to
+  choose.
+- Everything else in this document stands unchanged: the pinned-$p$ vector
+  only, 2 blocks x 1000 pairs, the fixed-effect pool as the only thing that
+  decides, and an interval containing zero reported as **unresolved at this
+  size**, never as a null.
+
+**And one term of the eleven will not be fitted at all.** The `claim` feature's
+formula was corrected after this harvest was taken — it multiplied by a product
+over all six cards of the half-suit including the one being asked for, so it
+scored exactly zero on provably certain steals, the asks it exists to reward.
+The stored column therefore describes a feature the engine no longer computes.
+`fish4/learn/fit.py` refuses such a column by default; the fit stage names it,
+zeroes it, and records that it was not fitted, because a ridge coefficient of
+exactly $0.0$ for `claim` reads identically to "fitted and came out at zero".
+The played vector will therefore carry `claim = 0`, which is also what the
+incumbent champion carries, so the duel is unaffected — but the fit is a
+ten-term fit and is reported as one.
