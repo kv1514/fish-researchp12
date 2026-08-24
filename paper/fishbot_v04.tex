@@ -2055,19 +2055,61 @@ from the opponent model itself, the largest figure in this paper. It is not the
 largest \emph{single} change: that is the sampler's $+0.340$, and this number is
 two changes at once.
 
-Two things must be said beside it. It is \textbf{indirect}: this configuration
-has never been played against the champion in a single duel, and a chained
-estimate inherits both links' assumptions, in particular that each change's
-effect does not depend on the deal population the other was measured over. And
-whether it beats the sampler \emph{alone} remains unresolved --- that is the
-stacking run's own estimate, whose interval contains zero at $68\%$ power. So
-the defensible ordering is
+\paragraph{And it has now been played directly, which is the only reason the
+number above can stand unqualified.} A chained estimate inherits both links'
+assumptions --- in particular that each change's effect does not depend on the
+deal population the other was measured over. That was plausible, since both
+pools were drawn the same way, and it was \emph{unmeasured}; this paper's
+recurring failure is exactly a plausible unmeasured step carrying a published
+number. There was also a cheaper reason to run it: \textbf{nobody had ever
+played the shipped configuration against the reference in a single duel}, so
+every ``vs.\ champion'' figure in this document was for a spec that is not the
+one on the website.
+
+\texttt{jobs/PREREGISTRATION\_combined.md} fixes, before any pair: two blocks
+of $1000$ fresh pairs; the A/A $3.796$ as the per-pair standard deviation
+rather than the divergence model, deliberately conservative because this arm
+differs from the champion by \emph{two} knobs and the model was fitted on arms
+differing by one; a fixed-effect pool as the only thing that decides; and three
+outcomes named in advance --- agrees, lower, higher --- so none could be chosen
+afterwards. It also states, in advance, that at $2000$ pairs against the
+chain's $12000$ this run \emph{cannot} make the estimate more precise. Its job
+is to make it honest, and a wider interval is the design working rather than a
+disappointment.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+& estimate & \\
+\midrule
+chained, 12000 pairs & $+0.411$ $[+0.285, +0.538]$ & indirect \\
+\textbf{direct}, 2000 pairs & $\mathbf{+0.357}$ $[+0.191, +0.524]$ & \textbf{excludes zero} \\
+\midrule
+difference & $-0.054 \pm 0.107$ & does not resolve \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{The chain agrees.} The intervals overlap and the difference is half a
+standard error, so the assumption the chain rests on is now measured and holds,
+and the indirect caveat can leave this section. Worth noting separately: the
+design's sizing assumption held almost exactly --- a planned per-pair standard
+deviation of $3.796$ against a realised $3.801$ --- which is unusual enough in
+this study to be worth one clause, given that the claim-threshold run's
+equivalent came in $21\%$ low.
+
+What is \emph{not} settled by this is whether the combination beats the sampler
+\emph{alone}: that is the stacking run's own estimate, whose interval contains
+zero at $68\%$ power. So the defensible ordering remains
 \[
   \text{search}+\text{sampler} \;\ge\; \text{sampler} \;>\; \text{champion},
 \]
-with the first inequality undemonstrated. The engine names this configuration
-\texttt{V04\_COMBINED} and the public table has been playing it all along; until
-this run reported, the registry declined to name what the website was running.
+with the first inequality undemonstrated --- and the leftmost quantity now
+measured directly rather than assembled. The engine names this configuration
+\texttt{V04\_COMBINED} and the public table has been playing it all along;
+until this run reported, no figure in this paper described what the website was
+actually running.
 
 \paragraph{And it stops paying: precision's returns diminish.} If tripling the
 sampling budget is worth $+0.340$, the obvious question is whether tripling it
@@ -3173,6 +3215,39 @@ however much signal the target carries. The whole eleven-term fit explains
 $11.7\%$ of within-position variance, so there is signal to work with; what
 there is not is a way to attribute it to individual terms as they currently
 stand.
+
+\paragraph{A supervisor a bystander could switch off.} The rollout pass is
+restarted by a shell supervisor whose liveness check was
+\texttt{pgrep -f "learn\_ask\_objective.py rollout --run v2"}. That matches the
+\emph{full command line of every process}, so a one-line loop written to
+\emph{watch} the pass --- one whose own command line contained that string ---
+was itself a match. The supervisor concluded the job was alive and stopped
+restarting it; the pass stayed dead for as long as the watcher ran, and was
+found only because a separate progress check reported zero workers. The
+widening script used the same pattern to choose a PID to \texttt{kill}.
+
+This is the mirror image of a failure this paper already records, in which the
+same function returning \texttt{False} on any exception made a guard fail
+\emph{open}. Both come from reading ``this string appears somewhere in the
+process table'' as ``this job is running''. The check now walks
+\texttt{/proc} and counts a process only when it is a Python interpreter whose
+own \texttt{argv} carries every token, excluding the caller and its ancestors;
+its test asserts both directions, including that \texttt{pgrep} really does
+match the bystander it is given.
+
+\paragraph{One term of the eleven will not be fitted, and the reason is worth
+one sentence.} The \texttt{claim} feature's formula was corrected after this
+harvest was taken --- it multiplied by the product over all \emph{six} cards of
+the half-suit including the one being asked for, so it scored exactly zero on
+provably certain steals, the asks it exists to reward. Its stored column
+therefore describes a feature the engine no longer computes. The loader refuses
+such a column by default, and the fit stage names it, zeroes it, and records
+that it was not fitted --- because a ridge coefficient of exactly $0.0$ for
+\texttt{claim} reads identically to ``fitted and came out at zero'', and those
+are different statements. The other ten terms are unaffected; re-harvesting to
+recover the eleventh is a day of rollouts for a term the champion already
+weights at zero, and the paragraph below is the reason that is not the
+bottleneck.
 
 \paragraph{``So use a different basis'' was reasoning, and the measurement says
 no.} The natural conclusion from the paragraph above --- and the one we wrote

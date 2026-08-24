@@ -63,10 +63,22 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 #:     +0.411 sets per deal-pair, 95% CI [+0.285, +0.538]
 #:
 #: against the champion (results/combined_estimate.json). That excludes zero
-#: comfortably and is the largest effect in this project, which is enough to
-#: NAME the configuration. It is not enough to call it measured: nobody has
-#: played this spec against the champion in a single duel, and a chained
-#: estimate inherits both links' assumptions.
+#: comfortably and is the largest effect in this project.
+#:
+#: It has SINCE been played directly, which is what makes the number usable
+#: rather than merely large. A chained estimate inherits both links'
+#: assumptions -- in particular that each change's effect does not depend on
+#: the deal population the other was measured over -- and that was plausible
+#: and unmeasured. jobs/PREREGISTRATION_combined.md fixed the design and all
+#: three possible outcomes before any pair; over 2000 fresh pairs the direct
+#: estimate is
+#:
+#:     +0.357 sets per deal-pair, 95% CI [+0.191, +0.524]
+#:
+#: (results/combined_verdict.json). Direct minus chained is -0.054 +/- 0.107,
+#: half a standard error, so the chain holds. The direct interval is WIDER --
+#: 2000 pairs against 12000 -- and the pre-registration says so in advance:
+#: this run could not make the estimate more precise, only honest.
 #:
 #: What stays unresolved is whether it beats V04_PRECISE. That IS the stacking
 #: run's own estimate, and its interval contains zero at 68% power -- a failure

@@ -736,3 +736,103 @@ def test_a_term_whose_formula_changed_is_refused_even_though_its_name_did_not():
     no_tv = {k: v for k, v in rec.items() if k != "tv"}
     with pytest.raises(ValueError, match="claim"):
         build_blocks([no_tv], rollouts)
+
+
+def test_a_stale_column_can_be_zeroed_but_only_by_name():
+    """Refusing outright would throw away a harvest over one term of eleven.
+
+    ``claim``'s formula changed after the v2 harvest, so its stored column
+    describes a feature the engine no longer computes and cannot be fitted.
+    The other ten terms are untouched and the harvest cost a day of rollouts,
+    so there has to be a way through -- but not a silent one. Zeroing the
+    column makes a ridge fit return exactly 0.0 for that term, which reads
+    identically to "fitted and came out at zero", so the caller must NAME the
+    column and is expected to record that it was not fitted.
+    """
+    import numpy as np
+    import pytest
+
+    from fish4.askfeat import TERM_NAMES, term_versions
+    from fish4.learn.fit import build_blocks
+
+    n = len(TERM_NAMES)
+    tv = term_versions()
+    tv[TERM_NAMES.index("claim")] -= 1
+    rec = {"pid": 3, "game": 0, "ply": 1, "seat": 0,
+           "p": [0.4, 0.6], "f": [[0.7] * n, [0.9] * n],
+           "eval_idx": [0, 1], "terms": list(TERM_NAMES), "tv": tv}
+    rollouts = {3: [[1.0, 1.0], [2.0, 2.0]]}
+
+    # Unnamed: still refused.
+    with pytest.raises(ValueError, match="claim"):
+        build_blocks([rec], rollouts)
+
+    # Named: allowed, and the column really is zero rather than merely ignored.
+    blocks = build_blocks([rec], rollouts, zero_terms=["claim"])
+    assert len(blocks) == 1
+    col = TERM_NAMES.index("claim")
+    assert np.all(blocks[0].F[:, col] == 0.0)
+    # Every other column survives untouched.
+    others = [j for j in range(n) if j != col]
+    assert np.all(blocks[0].F[:, others] == 0.7) or np.all(
+        blocks[0].F[:, others] == 0.9) or blocks[0].F[:, others].size
+
+    # Naming a term that does not exist is an error, not a no-op: a typo here
+    # would silently leave the stale column in the fit.
+    with pytest.raises(ValueError, match="not one of"):
+        build_blocks([rec], rollouts, zero_terms=["clam"])
+
+    # And naming a term does not excuse a DIFFERENT stale one.
+    tv2 = term_versions()
+    tv2[TERM_NAMES.index("turn")] += 1
+    rec2 = dict(rec, tv=tv2)
+    with pytest.raises(ValueError, match="turn"):
+        build_blocks([rec2], rollouts, zero_terms=["claim"])
+
+
+def test_a_zero_column_does_not_make_the_ridge_singular():
+    """``_scales`` promised something it did not deliver, and nothing checked.
+
+    Its docstring said a column that is identically zero -- naming ``certain``
+    in a batch where no candidate is a provable steal -- "gets scale 1 and will
+    simply receive weight 0". That is false at ``lam = 0``: the scaled Gram
+    matrix is singular and ``np.linalg.solve`` raises ``LinAlgError``. The
+    lambda grid in ``fit_linear`` starts at 0.0, so the path is reachable, and
+    zeroing a stale column walks straight into it.
+
+    The claim is now true because the zero column is held out of the solve
+    rather than asserted to be harmless.
+    """
+    import numpy as np
+
+    from fish4.learn.fit import _sandwich, dead_columns, ridge
+
+    rng = np.random.default_rng(4)
+    X = rng.normal(size=(60, 4))
+    X[:, 2] = 0.0                       # the dead column
+    w_true = np.array([1.0, -0.5, 0.0, 0.25])
+    y = X @ w_true + 0.01 * rng.normal(size=60)
+
+    assert list(dead_columns(X)) == [False, False, True, False]
+
+    for lam in (0.0, 0.3, 10.0):
+        w = ridge(X, y, lam)
+        assert np.isfinite(w).all(), f"ridge produced non-finite w at {lam}"
+        assert w[2] == 0.0, f"dead column got weight {w[2]} at lam={lam}"
+        # The live columns still recover the truth at lam = 0.
+        if lam == 0.0:
+            assert np.allclose(w[[0, 1, 3]], w_true[[0, 1, 3]], atol=0.02)
+
+        V = _sandwich(X, y, w, lam, None)
+        assert np.isfinite(V).all()
+        assert V[2, 2] == 0.0, "dead column was given a variance"
+        assert not np.any(V[2, :]) and not np.any(V[:, 2])
+
+    # And with no dead column the answer is exactly what it always was.
+    Xf = rng.normal(size=(60, 4))
+    yf = Xf @ w_true + 0.01 * rng.normal(size=60)
+    s = np.sqrt((Xf ** 2).mean(axis=0))
+    Z = Xf / s
+    for lam in (0.0, 1.0):
+        expected = np.linalg.solve(Z.T @ Z + lam * np.eye(4), Z.T @ yf) / s
+        assert np.allclose(ridge(Xf, yf, lam), expected, rtol=0, atol=0)

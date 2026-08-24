@@ -24,7 +24,9 @@ while [ "$(queue_done)" != "1" ]; do sleep 180; done
 echo "$(date +%H:%M:%S) duel queue drained"
 # Give any straggler worker a moment to exit before deciding the width.
 sleep 60
-pid=$(pgrep -f "learn_ask_objective.py rollout --run v2" | head -1)
+# Same reason as in run_learn_v2.sh: pgrep -f would happily hand back the PID
+# of a shell that merely mentions the job, and this line KILLS what it finds.
+pid=$(python scripts4/proc_alive.py learn_ask_objective.py rollout --run v2 | head -1)
 if [ -n "$pid" ]; then
   echo "$(date +%H:%M:%S) stopping rollout $pid so it restarts wider"
   kill "$pid"

@@ -145,7 +145,21 @@ def stage_fit(args) -> dict:
     root = data_root(args.run)
     positions = load_positions(root)
     rolls = R.load_rollouts(root)
-    blocks = F.build_blocks(positions, rolls)
+    # A term whose FORMULA changed after this harvest cannot be fitted from
+    # it: the stored column describes a feature the engine no longer computes.
+    # fish4/learn/fit.py refuses such a column by default. Here we name the
+    # ones we know about, zero them, and record that they were not fitted --
+    # because a ridge coefficient of exactly 0.0 for `claim` reads identically
+    # to "fitted and came out at zero", and those are different statements.
+    from fish4.askfeat import stale_terms
+    stale = sorted({t for rec in positions
+                    for t in stale_terms(rec.get("tv"))})
+    if stale:
+        print(f"NOT FITTED: {stale} -- this harvest predates a change to their "
+              f"formula.\n  Their columns are zeroed, so their reported "
+              f"weight is 0.0 by construction and\n  is not a measurement. "
+              f"Re-harvest to fit them.")
+    blocks = F.build_blocks(positions, rolls, zero_terms=stale)
     if len(blocks) < 20:
         raise SystemExit(f"only {len(blocks)} evaluated positions; run "
                          f"'rollout' first")
@@ -163,6 +177,7 @@ def stage_fit(args) -> dict:
     print(f"  slope on p: {pr.get('slope_on_p', float('nan')):+.3f}")
 
     lin = F.fit_linear(blocks, n_boot=args.boot, n_perm=args.perm)
+    lin["terms_not_fitted"] = stale
     lin_top = F.fit_linear(blocks, n_boot=max(100, args.boot // 4),
                            n_perm=max(100, args.perm // 3), max_rank=8)
     mlp = F.fit_mlp(blocks)

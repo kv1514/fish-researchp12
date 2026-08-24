@@ -401,6 +401,21 @@ WATCH = [
      "negative wrongly-split cases", "produced a negative"),
     ("claim_joint_gap.json", "decision.n_declaration_changed", "{:d}",
      "declarations changed", "which half-suit is declared at"),
+    # The shipped configuration, measured directly at last. The chained and
+    # direct estimates must BOTH stay quoted: the paragraph's whole claim is
+    # that they agree, and either one alone reads as the headline.
+    ("combined_verdict.json", "estimate", "{:.3f}",
+     "shipped config, direct", "\\textbf{direct}, 2000 pairs"),
+    ("combined_verdict.json", "ci.0", "{:+.3f}",
+     "direct interval, low", "\\textbf{direct}, 2000 pairs"),
+    ("combined_verdict.json", "ci.1", "{:+.3f}",
+     "direct interval, high", "\\textbf{direct}, 2000 pairs"),
+    ("combined_verdict.json", "contrast_vs_chain.delta", "{:.3f}",
+     "direct minus chained", "difference & $-0.054"),
+    ("combined_verdict.json", "contrast_vs_chain.se", "{:.3f}",
+     "error on that difference", "difference & $-0.054"),
+    ("combined_verdict.json", "realised_sd", "{:.3f}",
+     "combined run realised sd", "against a realised"),
 ]
 
 
