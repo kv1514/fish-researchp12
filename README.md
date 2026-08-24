@@ -139,7 +139,45 @@ py scripts4/precision_scaling.py       # does posterior error still fall with dr
 py scripts4/ess_probe.py 6 160         # how many of the draws actually count
 py scripts4/rollout_target.py          # does a won card survive to the end of the deal?
 py scripts4/pool_cells.py --lookahead  # pool repeated runs, and test that they agree
-py scripts4/settle_verdict.py          # the pre-registered lookahead verdict
+py scripts4/continuation_compare.py    # engine vs heuristic continuation, same positions
+py scripts4/continuation_length.py     # how many plies each takes to finish a deal
+py scripts4/slope_by_resolution.py     # is that contrast uniform across the deal?
+py scripts4/precision_cost.py 90 3     # what a decision costs, fixed and per draw
+py scripts4/decision_cost_profile.py   # and where inside the sampler the fixed part is
+py scripts4/claim_criterion.py 10      # does the claim threshold gate the right quantity?
+py scripts4/duel_depth_base_rate.py    # how often a duel is even happening
+py scripts4/exact_or_feasibility.py    # could the disjunctions be enumerated instead?
+```
+
+### The pre-registered verdicts
+
+Each reads the analysis its own pre-registration in `jobs/` fixed *before* the
+run existed, and each refuses to print anything on a partial pool. Taking an
+interim look at a fixed test and then deciding whether to continue is how a
+fixed analysis stops being one.
+
+```bash
+py scripts4/settle_verdict.py          # the belief-space lookahead
+py scripts4/precision_verdict.py       # sampling budget, 160 -> 480 draws
+py scripts4/precision_verdict.py 2     # and 480 -> 1440
+py scripts4/at_ask_verdict.py          # at-ask-time depth at gamma = 1.0
+py scripts4/stack_verdict.py           # does the lookahead still pay on precision?
+py scripts4/arm_learned_weights.py     # fill the validation job from the fit, once
+```
+
+### Checks that exist because something got past us
+
+Every one of these was written after the failure it now catches.
+
+```bash
+py scripts4/check_seeds.py             # two experiments sharing deals they should not
+py scripts4/check_paper_numbers.py     # a figure the paper quotes that its file no longer holds
+py scripts4/check_tex.py               # structure, and doubled backslashes from an editing script
+py scripts4/recheck_mdes.py            # does per-cell noise revise any published verdict?
+py scripts4/heterogeneity_across_runs.py  # is block disagreement the harness or one effect?
+py scripts4/rollout_target_robust.py   # is a headline slope carried by a few positions?
+py scripts4/pair_sd_model.py           # what actually sets a paired experiment's noise
+py scripts4/index_results.py           # regenerate results/README.md, and find orphans
 ```
 
 Two of them exist because a natural way to measure something here is wrong:

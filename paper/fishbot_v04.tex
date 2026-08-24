@@ -2744,6 +2744,36 @@ history does not error, it anchors six trackers on a determinized mid-game hand
 as though it were the deal and returns a number computed from a game that could
 not have happened. That configuration is refused rather than run.
 
+\paragraph{A second obstacle, which the continuation fix does not touch.} With
+the target no longer flat, the obvious next step is to ask which of the eleven
+objective terms it responds to, and the answer is that this design cannot say.
+Fitted one at a time over the same $3076$ scored asks, several features look
+more informative than $\Prob(\text{success})$ itself: \texttt{expose}
+$+1.807 \pm 0.359$, \texttt{deplete} $+1.387 \pm 0.224$, \texttt{certain}
+$+0.919 \pm 0.169$, against $\Prob(\text{success})$'s $+0.681 \pm 0.142$. Fitted
+together, $\Prob(\text{success})$ turns \emph{negative}, at
+$-0.329 \pm 0.264$. Neither column should be read, and the diagnostic that says
+so belongs beside them: $\Prob(\text{success})$ carries a variance inflation
+factor of $\mathbf{13.5}$ here, meaning $92.6\%$ of its within-position variation
+is reproduced by the other ten terms. It is not an independent regressor; it is
+computed from the same posterior the features are, and correlates with
+\texttt{deplete} at $0.854$ and \texttt{certain} at $0.738$. A coefficient that
+is not identified does not become identified by being reported, and the negative
+sign is an artefact of the basis rather than a finding about play.
+
+This matters for what happens next. The diagnosis above was right --- a weak
+continuation does flatten the target, and finishing rollouts properly un-flattens
+it sevenfold --- but it was not the only thing standing in the way. Near
+collinearity of the feature basis is a \emph{second} obstacle, independent of the
+first, and fixing the continuation does nothing about it: the design matrix is
+nearly singular whatever finishes the game, so the fitted weights are unstable
+however much signal the target carries. That is consistent with what v0.4's fit
+actually produced --- \texttt{turn} at $0.157$ where duplicate-deal play measures
+$0.60$ --- and it says the re-run needs a different basis, or a penalty, or terms
+dropped, and not merely more rollouts. The whole eleven-term fit explains
+$11.7\%$ of within-position variance, so there is signal to work with; what there
+is not is a way to attribute it to individual terms as they currently stand.
+
 We record this as the fifth appearance of the pattern this paper keeps
 documenting, and the first in which reasoning about a quantity did not merely
 inflate it but retired an entire research direction. The diagnosis was
@@ -3095,6 +3125,49 @@ where a card is not. Use it when you are stuck on a split. (Our engine gains
 about 20\% fewer nulls doing this; it does not gain games, because the turn it
 spends is worth about as much as the sets it saves. For a human, who is far more
 likely to misplace a split than an engine is, the trade is probably better.)
+
+\paragraph{Spend your effort on card-tracking, not on cleverness about which ask
+to make.} Three measurements in this study point the same way and none of them
+is visible alone. The full eleven-term objective ranks candidate asks barely
+better than $\Prob(\text{success})$ by itself. Nearly every term we added
+\emph{beside} $\Prob(\text{success})$ is a null. And the largest single effect in
+the whole study --- $+0.340$ sets per deal-pair --- comes from tripling the
+sampling budget, which does not touch the objective at all: it only makes the
+$\Prob(\text{success})$ the objective is already dominated by more accurate.
+
+For a human that is a claim about where to put attention. Knowing more precisely
+where the cards are beats reasoning more carefully about what to do with what
+you know. The engine's version of ``know more precisely'' is more Monte Carlo
+draws; yours is tracking the failed asks, which are the constraints that do the
+work. It is not that positional judgement is worthless --- the two tie-breakers
+above are real --- but that between an hour spent on card-reading and an hour
+spent on ask selection, the measurements say the first hour is worth several of
+the second.
+
+\paragraph{Do not hold back the re-take.} A card an opponent has just taken from
+you is a card you know they hold, so asking for it back is a certain ask, and a
+certain ask keeps your turn. The case against is that the exchange is public and
+repeating it tells the table this half-suit is contested while neither side nets
+a card. Strong players describe doing it. We measured it, and it loses: a penalty
+on re-taking cost $-0.340$ sets per deal-pair at a small weight and $-1.015$ at a
+large one, the loss growing monotonically with how firmly the policy withholds.
+Two variants of playing to the score --- more variance when behind, more caution
+when ahead --- also failed to beat playing the same way regardless.
+
+The situation is not rare, which is what makes the result usable: at $57\%$ of
+decision points the acting seat is already two or more exchanges deep with some
+opponent, and a re-take is available at $11\%$ of positions. So this is advice
+about a common decision, not a corner case. Take the certain ask.
+
+We are careful about one thing here. What was measured is a penalty applied to
+\emph{every} re-take, including the first, and the argument for withholding is
+really about a \emph{repeated} exchange. The engine can now gate the penalty on
+the exchange recurring, and we can say in advance what that version could be
+worth at most --- $+0.098$ sets per deal-pair --- because the gate touches only
+the $3\%$ of positions where a re-take is available and the duel is exactly one
+deep, which is $29\%$ of what the ungated penalty flags.
+That is small enough that the $200$-pair cells this study used for screening
+could not have resolved it either way, which is why no such cell was run.
 
 \paragraph{And a warning about the obvious idea.} Scoring asks by ``how much
 does this improve my team's chance of winning this half-suit'' --- which sounds

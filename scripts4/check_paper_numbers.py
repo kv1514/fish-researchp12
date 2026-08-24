@@ -80,11 +80,34 @@ WATCH = [
      "the\nheuristic needs"),
     ("continuation_length.json", "v04.mean", "{:.0f}", "engine plies",
      "the\nheuristic needs"),
+    # Quoted in the playing-advice section, where a stale number would be
+    # advice to a human rather than a figure in a table.
+    ("duel_depth_base_rate.json", "max_recoverable", "{:.3f}",
+     "most the retake gate can recover",
+     "The situation is not rare"),
+    # The collinearity diagnostic. Its whole force is that the VIF is large
+    # enough to void the coefficient beside it; a stale VIF would leave the
+    # paper voiding a fit on a number the file no longer holds.
+    ("target_feature_fit.json", "p_success_vif", "{:.1f}",
+     "P(success) variance inflation", "variance inflation\nfactor of"),
+    ("target_feature_fit.json", "multivariate.p_success.coef", "{:+.3f}",
+     "P(success) multivariate coefficient", "turns \\emph{negative}, at"),
+    ("target_feature_fit.json", "p_success_abscorr.deplete", "{:.3f}",
+     "corr with deplete", "correlates with"),
+    ("target_feature_fit.json", "p_success_abscorr.certain", "{:.3f}",
+     "corr with certain", "correlates with"),
+    ("target_feature_fit.json", "within_r2", "{:.1%}", "within R^2 of the fit",
+     "The whole eleven-term fit explains"),
 ]
 
 
 def main() -> int:
     text = PAPER.read_text(encoding="utf-8")
+    # A percentage is written "11.7\%" in LaTeX and formatted "11.7%" by
+    # Python, so a literal search for the formatted string misses every
+    # percentage in the paper -- a miss that looks exactly like drift.
+    # Normalising the escape here is a search convenience, not an edit.
+    text = text.replace("\\%", "%")
     print("do the paper's most drift-prone figures still match the files?\n")
     print(f"{'figure':<34}{'file value':>12}   in paper")
     missing = []
