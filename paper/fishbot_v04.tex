@@ -1487,7 +1487,13 @@ positions, a decision costs
 \[
   3.57\,\mathrm{ms} \;+\; 6.34\,\mu\mathrm{s} \text{ per draw},
 \]
-a fit whose residuals stay within $0.03$\,ms across $40$ to $1920$ draws. At the
+a fit whose residuals reach $0.21$\,ms across $40$ to $1920$ draws, and are
+worst at the low end --- $-0.21$ at $40$ draws and $+0.20$ at $160$, against
+$+0.03$ and $-0.02$ at $480$ and $1920$. So the straight line is a good
+description of the expensive end and a rough one exactly where the shipped
+budget sits, which is worth knowing before using it to price a change at $160$.
+The ratio quoted next does not depend on it: it is measured per decision, not
+read off the fit. At the
 shipped $160$ the sampler is only a fifth of a decision, so tripling it costs
 $+1.9$\,ms --- $1.38\times$, not $3\times$. That headroom is finite and the same
 fit says so: by $1920$ draws a decision is already $3.3\times$ the shipped one.
@@ -1496,7 +1502,7 @@ With the effect and the price both measured, the default moved to $480$.
 That fit is not an explanation, and the difference matters: if the fixed term
 were setup, it could be hoisted and draws would become nearly free. Timing the
 sampler alone, on one already-built sampler across $1$ to $1440$ draws, gives
-$2.55\,\mathrm{ms} + 8.0\,\mu\mathrm{s}$ per draw --- about $60\,\mu$s of fixed
+$2.50\,\mathrm{ms} + 8.0\,\mu\mathrm{s}$ per draw --- about $60\,\mu$s of fixed
 cost for each of the $42$ free cards it must place. That is per-card numpy
 dispatch. Sequential importance sampling walks the free cards one at a time, so
 batching makes each \emph{step} wider without making the number of steps

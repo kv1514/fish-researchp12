@@ -163,6 +163,14 @@ def main(argv):
         "n_decisions": len(positions), "reps": reps,
         "per_decision_ms": {str(d): float(np.mean(per[d])) for d in DRAWS},
         "fixed_ms": float(fixed), "marginal_us_per_draw": float(marg * 1000),
+        # The residuals themselves. The paper said they "stay within 0.03 ms
+        # across 40 to 1920 draws"; the largest is 0.21, seven times that, and
+        # nothing stored here could contradict the sentence because nothing
+        # here WAS the residuals. A fit quoted with a tolerance has to carry
+        # the tolerance it actually achieves.
+        "residual_ms": {str(d): float(y - q)
+                        for d, y, q in zip(DRAWS, ys, pred)},
+        "max_abs_residual_ms": float(np.max(np.abs(ys - pred))),
         "base_draws": BASE, "bought_draws": BOUGHT,
         "mean_free_cards": float(np.mean(n_free)),
         "median_ms": {str(d): float(np.median(per[d])) for d in DRAWS},

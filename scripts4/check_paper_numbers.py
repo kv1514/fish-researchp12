@@ -75,6 +75,13 @@ WATCH = [
      "Measured on $90$\npositions, a decision costs"),
     ("precision_cost.json", "marginal_us_per_draw", "{:.2f}", "cost per draw",
      "Measured on $90$\npositions, a decision costs"),
+    # The residuals. The paper quoted a tolerance the fit does not achieve and
+    # nothing stored could contradict it, because the residuals were printed
+    # and never saved.
+    ("precision_cost.json", "max_abs_residual_ms", "{:.2f}",
+     "worst residual of the cost fit", "a fit whose residuals reach"),
+    ("decision_cost_profile.json", "fixed_ms", "{:.2f}",
+     "sampler-alone fixed cost", "per draw --- about"),
     ("mde_recheck.json", "verdicts_changed_project_bar", "{:d}",
      "cells whose verdict changes", "Under the definition the rest of the paper"),
     ("continuation_length.json", "public.mean", "{:.0f}", "heuristic plies",
