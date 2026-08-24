@@ -98,7 +98,7 @@ WATCH = [
     ("target_feature_fit.json", "p_success_abscorr.certain", "{:.3f}",
      "corr with certain", "correlates with"),
     ("target_feature_fit.json", "within_r2", "{:.1%}", "within R^2 of the fit",
-     "The whole\neleven-term fit explains"),
+     "The whole eleven-term fit explains"),
     # `turn` is the control on the collinearity story: the paragraph's point is
     # that this term is NOT entangled and still disagrees with play, so all
     # three of its figures have to stay true or the paragraph inverts.
@@ -149,6 +149,18 @@ WATCH = [
      "lookahead, unselected pool", "secondary --- all ten unselected cells"),
     ("settle_verdict.json", "n_pairs", "{:d}", "pairs in the settling run",
      "final 6000, is"),
+    # The basis comparison. Its point is that the winner's margin CONTAINS
+    # ZERO, so the estimate and its standard error have to travel together --
+    # quoting the gain alone would invert the paragraph into the conclusion it
+    # was written to retract.
+    ("basis_search.json", "full_cv_r2", "{:.4f}", "full basis CV R^2",
+     "full, eleven terms and"),
+    ("basis_search.json", "best_cv_r2", "{:.4f}", "best basis CV R^2",
+     "selected \\emph{within} each fold"),
+    ("basis_search.json", "gain_over_full", "{:+.4f}", "gain over the full basis",
+     "beats the basis in use by"),
+    ("basis_search.json", "gain_se", "{:.4f}", "standard error of that gain",
+     "beats the basis in use by"),
 ]
 
 

@@ -2839,11 +2839,64 @@ it sevenfold --- but it was not the only thing standing in the way. Near
 collinearity of the feature basis is a \emph{second} obstacle, independent of the
 first, and fixing the continuation does nothing about it: the design matrix is
 nearly singular whatever finishes the game, so the fitted weights are unstable
-however much signal the target carries. It says the re-run needs a different
-basis, or a penalty, or terms dropped, and not merely more rollouts. The whole
-eleven-term fit explains $11.7\%$ of within-position variance, so there is signal
-to work with; what there is not is a way to attribute it to individual terms as
-they currently stand.
+however much signal the target carries. The whole eleven-term fit explains
+$11.7\%$ of within-position variance, so there is signal to work with; what
+there is not is a way to attribute it to individual terms as they currently
+stand.
+
+\paragraph{``So use a different basis'' was reasoning, and the measurement says
+no.} The natural conclusion from the paragraph above --- and the one we wrote
+first --- is that the re-run needs a different basis, or a penalty, or terms
+dropped, rather than more rollouts. It is cheap to check, because the completed
+run already holds every scored ask, so we checked it before spending anything.
+Nineteen candidate bases, each scored by \emph{leave-one-position-out}
+cross-validated within-position $R^2$ (position-level folds, because asks inside
+a position share worlds, seeds and a value level):
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+basis & CV $R^2$ & vs.\ the full basis \\
+\midrule
+full, eleven terms and $\Prob(\text{success})$ & $0.0959$ & --- \\
+strongest three, selected \emph{within} each fold & $\mathbf{0.1030}$ & $+0.0070 \pm 0.0038$ \\
+drop terms until every VIF $< 5$ & $0.0964$ & $+0.0005 \pm 0.0017$ \\
+ridge, $\lambda = 1$ & $0.0968$ & $+0.0009 \pm 0.0015$ \\
+$\Prob(\text{success})$ alone & $0.0430$ & $-0.0530 \pm 0.0234$ \\
+principal components, $k = 4$ & $0.0150$ & $-0.0809 \pm 0.0306$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The best of them beats the basis in use by $+0.0070 \pm 0.0038$, an interval
+that \emph{contains zero}. Ranked by point estimate a three-term basis wins;
+measured against the spread across positions, nothing here is distinguishable
+from what the objective already uses, and picking one off this table would be
+selecting on noise.
+
+That is the textbook consequence of collinearity and it is worth stating
+plainly, because it is easy to get backwards: near-collinearity makes individual
+\emph{coefficients} unidentified without making \emph{predictions} worse. A
+reduced basis is therefore not the fix, and neither is a penalty --- ridge does
+nothing at any $\lambda$ that does not also destroy the fit. Two smaller things
+fall out of the same table. Dropping terms by variance inflation removes
+$\Prob(\text{success})$ \emph{first} and costs nothing measurable, so the term
+this paper calls the objective adds no predictive value at these late positions
+once the other ten are present. And every principal-component basis is far
+worse, so the predictive directions in this design are not its high-variance
+directions --- rotating to the biggest components discards exactly the signal.
+
+We record this as the seventh appearance of the pattern, and the shortest-lived:
+the sentence it refutes was written earlier the same day, in the paragraph
+immediately above, by the same argument the paper keeps warning about. A
+plausible mechanism that generates no experiment is not a finding, even when the
+mechanism is real --- and here the mechanism \emph{is} real. The variance
+inflation factor of $13.5$ stands. What does not stand is the inference we drew
+from it about what to do next.
+
+The first version of this comparison also got its own selection wrong, which is
+worth one sentence because it is the same error at a third level. It ranked
+terms by $|\beta \cdot \mathrm{sd}|$ on a fit to \emph{all} the data and then
+cross-validated the winner, so the selection had already seen every held-out
+position. Selecting inside each fold instead is what the table above reports.
 
 Collinearity is not a licence to explain away every disagreement, and it does not
 cover the one that started this section. \texttt{turn} is the term play has
