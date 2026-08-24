@@ -2687,6 +2687,42 @@ exactly the within-slope of the differenced outcome. That paired contrast is
 So the continuation is the cause, and the earlier comparison was right for a
 reason rather than by a coincidence of position mix.
 
+One thing that contrast changes twice, and it had to be checked rather than
+argued. The engine arm finishes the game \emph{and} is handed the real public
+log; the heuristic arm finishes the game \emph{and} starts blind to every card
+the table has already watched change hands, because an empty log is the
+knowledge set \texttt{PublicInfoHeuristic} was defined and audited against and
+is what the original learning rollouts gave it. So the two arms differ in
+information as well as in policy, and reading the whole $+0.641$ as ``the
+continuation policy'' would be this section's own two-factor error committed one
+level further in --- inside the correction to the correction.
+
+A third arm settles it: the same weak heuristic, on the same $110$ positions and
+$3056$ root asks, with the public log seeded. It scores
+$\mathbf{+0.084 \pm 0.071}$, beside the unseeded heuristic's $+0.040$ and
+nowhere near the engine's $+0.681$. Because all three arms score identical asks
+at identical positions, the contrasts are exact within-slopes of differences on
+the same $x$ and therefore add:
+\[
+  \underbrace{+0.597 \pm 0.145}_{\text{policy alone}}
+  \;+\;
+  \underbrace{+0.044 \pm 0.069}_{\text{the log alone}}
+  \;=\; +0.641 .
+\]
+Handing the weak policy the whole public history moves the target by an amount
+this design cannot distinguish from zero. The asymmetry was real; it is not what
+the contrast measures.
+
+This arm exists because of an audit note about something else entirely --- that
+seeding the history also shortens the stall rule's effective window, since
+\texttt{stalled} scans the last $80$ actions and the seeded prefix eats a mean
+of $10.2$ of them. That particular asymmetry turns out to be inert: over $13{,}290$
+engine-continuation decisions the rule fired \emph{zero} times, because the
+prefix eats ten actions and the engine finishes in twenty-six more, so nothing
+approaches eighty without a claim. It fires at $1.02\%$ of the heuristic arm's
+decisions instead, which is the same fact as the $181$ plies --- but chasing it
+is what surfaced the information asymmetry, which was the one that mattered.
+
 One caution on that pairing, because it briefly said the opposite. Averaging the
 per-position slope \emph{differences} without weights gives
 $+0.020 \pm 0.246$, apparently a null. That is a different estimand, not a more

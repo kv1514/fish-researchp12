@@ -110,6 +110,19 @@ WATCH = [
      "positions where turn varies", "it varies between\ncandidate asks at"),
     ("target_feature_fit.json", "n_positions_kept", "{:d}",
      "positions in the within fit", "it varies between\ncandidate asks at"),
+    # The decomposition. Its force is that the two terms ADD to the combined
+    # contrast, so all three have to stay in step or the identity stops being
+    # one.
+    ("continuation_compare.json", "public_seeded.slope", "{:.3f}",
+     "public arm with the log seeded", "with the public log seeded. It scores"),
+    ("continuation_compare.json", "decomposition.policy_only.delta", "{:.3f}",
+     "policy alone", "policy alone"),
+    ("continuation_compare.json", "decomposition.log_only.delta", "{:.3f}",
+     "the log alone", "the log alone"),
+    ("stall_asymmetry.json", "arms.v04.acts", "{:,d}",
+     "engine-continuation decisions counted", "the rule fired \\emph{zero}"),
+    ("stall_asymmetry.json", "prefix_bite.mean", "{:.1f}",
+     "actions the seeded prefix eats", "the seeded prefix eats a mean"),
 ]
 
 
@@ -131,11 +144,13 @@ def _present(s: str, near: str) -> bool:
 
 def main() -> int:
     text = PAPER.read_text(encoding="utf-8")
-    # A percentage is written "11.7\%" in LaTeX and formatted "11.7%" by
-    # Python, so a literal search for the formatted string misses every
-    # percentage in the paper -- a miss that looks exactly like drift.
-    # Normalising the escape here is a search convenience, not an edit.
-    text = text.replace("\\%", "%")
+    # LaTeX spells some characters differently from Python's formatter, and a
+    # literal search for the formatted string then misses every figure written
+    # that way -- a miss that reads exactly like drift. "11.7\%" is the
+    # percent sign; "13{,}290" is the thousands separator, braced so TeX keeps
+    # the digits kerned as one number. Normalising both here is a search
+    # convenience, not an edit to the paper.
+    text = text.replace("\\%", "%").replace("{,}", ",")
     print("do the paper's most drift-prone figures still match the files?\n")
     print(f"{'figure':<34}{'file value':>12}   in paper")
     missing = []

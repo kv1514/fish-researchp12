@@ -34,6 +34,14 @@ from rollout_target import PAPER_SLOPE, centred_slope           # noqa: E402
 
 V04 = ROOT / "results" / "rollout_target.json"
 PUBLIC = ROOT / "results" / "rollout_target_public.json"
+#: The third arm. The two above differ in TWO things, not one: the engine
+#: finishes the game and is handed the real public log, while the heuristic
+#: finishes the game and starts blind to every card the table has watched
+#: change hands. Reading the whole contrast as "the continuation policy" is the
+#: two-factor error this experiment exists to avoid, one level further in. This
+#: arm is the heuristic WITH the log, so information is held fixed and only the
+#: policy moves.
+PUBLIC_SEEDED = ROOT / "results" / "rollout_target_public-seeded.json"
 
 
 def per_position_slopes(rows):
@@ -62,6 +70,21 @@ def per_position_slopes(rows):
     return out
 
 
+def paired_slope(a_rows, b_rows):
+    """Within-slope of (A - B), which IS the difference of the two within-slopes.
+
+    Both arms scored the same asks at the same positions, so x is bit-identical
+    between them and the pairing is exact rather than approximate.
+    """
+    rows_d = []
+    for ra, rb in zip(a_rows, b_rows):
+        assert ra["position"] == rb["position"]
+        rows_d.append({"position": ra["position"],
+                       "p_success": ra["p_success"],
+                       "q": ra["q"] - rb["q"]})
+    return centred_slope(rows_d)
+
+
 def main() -> int:
     if not PUBLIC.exists():
         print("the control arm has not run; "
@@ -71,7 +94,12 @@ def main() -> int:
     b = json.loads(PUBLIC.read_text())
 
     print("is the slope about the continuation, or about the positions?\n")
-    for name, d in (("full v0.4", a), ("public heuristic", b)):
+    c = (json.loads(PUBLIC_SEEDED.read_text())
+         if PUBLIC_SEEDED.exists() else None)
+    arms = [("full v0.4", a), ("public heuristic", b)]
+    if c is not None:
+        arms.append(("public + real log", c))
+    for name, d in arms:
         s = d["p_success_slope"]
         print(f"  {name:<18}{s['slope']:>+8.4f} +/- {s['se_clustered']:.4f}"
               f"   {s['n_points']} asks over {s['n_positions']} positions")
@@ -109,13 +137,7 @@ def main() -> int:
     #
     # so the pairing is free and the clustered standard error is the ordinary
     # one applied to the differenced outcome.
-    rows_d = []
-    for ra, rb in zip(a["rows"], b["rows"]):
-        assert ra["position"] == rb["position"]
-        rows_d.append({"position": ra["position"],
-                       "p_success": ra["p_success"],
-                       "q": ra["q"] - rb["q"]})
-    sd = centred_slope(rows_d)
+    sd = paired_slope(a["rows"], b["rows"])
     m, se = sd["slope"], sd["se_clustered"]
     print(f"paired difference     {m:+.4f} +/- {se:.4f}  ({m / se:+.1f} SE)"
           f"   over {sd['n_positions']} positions")
@@ -151,7 +173,42 @@ def main() -> int:
         print("comparison was position mix, and the diagnosis it appeared to")
         print("overturn stands.")
 
+    decomp = None
+    if c is not None:
+        pol = paired_slope(a["rows"], c["rows"])        # policy alone
+        info = paired_slope(c["rows"], b["rows"])       # information alone
+        print("\nDECOMPOSITION -- what the two arms above were changing at once")
+        print(f"  policy alone   (v04 vs public+log)   "
+              f"{pol['slope']:+.4f} +/- {pol['se_clustered']:.4f}  "
+              f"({pol['slope'] / pol['se_clustered']:+.1f} SE)")
+        print(f"  the log alone  (public+log vs public){info['slope']:+.4f} "
+              f"+/- {info['se_clustered']:.4f}  "
+              f"({info['slope'] / info['se_clustered']:+.1f} SE)")
+        print(f"  the two sum to {pol['slope'] + info['slope']:+.4f} against "
+              f"the combined {m:+.4f} (exact: both are\n  within-slopes of "
+              f"differences on the same x, so they add)")
+        share = abs(info["slope"]) / abs(m) if m else 0.0
+        print()
+        if abs(info["slope"]) > 1.96 * info["se_clustered"]:
+            print(f"  Handing the weak policy the same public log moves the "
+                  f"target on its own,\n  by {share:.0%} of the combined "
+                  f"contrast. That much of the +0.641 is information\n  "
+                  f"rather than continuation, and the paper must say so.")
+        else:
+            print(f"  Handing the weak policy the same public log does not move "
+                  f"the target\n  ({info['slope']:+.4f} +/- "
+                  f"{info['se_clustered']:.4f}). The information asymmetry was "
+                  f"real and is not\n  what the contrast measures: it is the "
+                  f"policy, as published.")
+        decomp = {"policy_only": {"delta": pol["slope"],
+                                  "se": pol["se_clustered"]},
+                  "log_only": {"delta": info["slope"],
+                               "se": info["se_clustered"]},
+                  "log_share_of_combined": share}
+
     out = {"v04": a["p_success_slope"], "public": b["p_success_slope"],
+           "public_seeded": (c["p_success_slope"] if c else None),
+           "decomposition": decomp,
            "paper_slope": PAPER_SLOPE, "same_positions": bool(same_pos),
            "unpaired": {"delta": d_un, "se": se_un, "z": d_un / se_un},
            "paired": {"delta": m, "se": se, "z": m / se,
