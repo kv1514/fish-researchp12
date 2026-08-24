@@ -108,24 +108,52 @@ def test_batch_and_scalar_agree_on_weighted_marginals():
 
 
 def test_batch_is_actually_faster():
-    """The whole point is speed, so measure it rather than assume it."""
-    rng = random.Random(11)
+    """The whole point is speed, so measure it rather than assume it.
+
+    Timed as a benchmark rather than as one sample, because the first version
+    was neither and went red on a loaded machine at 1.9x against a 2.0x bar.
+    Two things were wrong with it and only one was the machine.
+
+    It timed the FIRST EVER vectorised call, which carries numpy's one-time
+    setup: measured over seven repetitions the first takes 10.9 ms and the rest
+    take 3.1--3.5 ms, so repetition one scores 0.88x and every other scores
+    about 3.1x. A warm-up call is not a concession, it is the difference
+    between measuring setup and measuring the thing.
+
+    And it took a single sample of a wall clock on a box that also runs duel
+    workers. The minimum over repetitions is the standard estimator there: the
+    fastest run is the one least interrupted, so it is the closest to the
+    quantity being claimed.
+
+    With both fixed the real speedup is about 3.1x, so the bar goes UP to 2.5x
+    rather than down.
+    """
     free = list(range(26))
     masks = {c: (0b111110 if c % 3 else 0b011110) for c in free}
     quotas = [0, 6, 5, 5, 5, 5]
     ors = [((0, 1, 2), 1), ((3, 4, 5), 2), ((6, 7, 8, 9), 3)]
     s = SISSampler(free, masks, quotas, ors)
-    t0 = time.perf_counter()
-    a = sample_batch(s, rng, 256, vectorised=False)
-    t_scalar = time.perf_counter() - t0
-    t0 = time.perf_counter()
-    b = sample_batch(s, rng, 256, vectorised=True)
-    t_batch = time.perf_counter() - t0
+
+    # Warm-up, untimed: both paths, so neither is charged for its own setup.
+    sample_batch(s, random.Random(11), 64, vectorised=False)
+    sample_batch(s, random.Random(11), 64, vectorised=True)
+
+    scalar, batch = [], []
+    for _ in range(5):
+        rng = random.Random(11)
+        t0 = time.perf_counter()
+        a = sample_batch(s, rng, 256, vectorised=False)
+        scalar.append(time.perf_counter() - t0)
+        t0 = time.perf_counter()
+        b = sample_batch(s, rng, 256, vectorised=True)
+        batch.append(time.perf_counter() - t0)
     assert len(a) > 200 and len(b) > 200
+
+    t_scalar, t_batch = min(scalar), min(batch)
     speedup = t_scalar / max(t_batch, 1e-9)
-    print("256 draws: scalar {0:.1f} ms, batch {1:.1f} ms, speedup {2:.1f}x"
-          .format(t_scalar * 1e3, t_batch * 1e3, speedup))
-    assert speedup > 2.0, "vectorising bought only {0:.2f}x".format(speedup)
+    print("256 draws, best of 5: scalar {0:.1f} ms, batch {1:.1f} ms, "
+          "speedup {2:.1f}x".format(t_scalar * 1e3, t_batch * 1e3, speedup))
+    assert speedup > 2.5, "vectorising bought only {0:.2f}x".format(speedup)
 
 
 if __name__ == "__main__":
