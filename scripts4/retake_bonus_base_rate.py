@@ -82,17 +82,30 @@ def main(argv) -> int:
         cand = [i for i, f in enumerate(flags) if f]
         gaps.append(float(scores[best] - max(scores[i] for i in cand)))
 
+    # And the same statistic for the PENALTY direction, so the two are
+    # comparable. A penalty can only act where the re-take IS currently on top;
+    # a bonus only where it is not. The two reachable sets are disjoint and
+    # their sizes are what any sizing argument has to be built from -- the
+    # family's existing base-rate script counts positions where a re-take is
+    # FLAGGED, which is both sets at once and is not the same quantity.
+
     print(f"positions with a legal ask            {n}")
     print(f"  a re-take is on the menu            {have} "
           f"({100 * have / max(1, n):.1f}%)")
     print(f"  and is ALREADY the chosen ask       {top} "
           f"({100 * top / max(1, have):.1f}% of those)")
     print(f"  so a bonus could act at             {len(gaps)} "
-          f"({100 * len(gaps) / max(1, n):.1f}% of all positions)\n")
+          f"({100 * len(gaps) / max(1, n):.1f}% of all positions)")
+    print(f"  and a PENALTY could act at          {top} "
+          f"({100 * top / max(1, n):.1f}% of all positions)")
+    print(f"  the two reachable sets are disjoint, and the family's other "
+          f"base-rate\n  script counts their union, which is neither\n")
 
     out = {"n_positions": n, "retake_available": have,
            "already_chosen": top, "reachable": len(gaps),
-           "reachable_share": len(gaps) / max(1, n), "by_weight": {}}
+           "reachable_share": len(gaps) / max(1, n),
+           "penalty_reachable": top,
+           "penalty_reachable_share": top / max(1, n), "by_weight": {}}
     if gaps:
         g = np.array(gaps)
         print(f"score gap to the leader, where a bonus would have to close it:")
@@ -105,6 +118,39 @@ def main(argv) -> int:
             print(f"{w:>7.2f}{k:>21}{100 * k / max(1, n):>14.2f}%")
         out["gap_median"] = float(np.median(g))
         out["gap_mean"] = float(g.mean())
+
+        # What a run could see, on the family's own divergence model. The
+        # ungated penalty's arms diverged on 0.440 of pairs while acting at
+        # `top` positions; a bonus acts at `flips` of them, so scale.
+        UNGATED_SHARE, COND_SD = 0.440, 3.9
+        print(f"\nWHAT A RUN COULD SEE, scaled from the penalty's own "
+              f"divergence share")
+        print(f"  the ungated penalty acted at {100 * top / max(1, n):.2f}% of "
+              f"positions and its arms\n  diverged on {UNGATED_SHARE:.3f} of "
+              f"pairs")
+        print(f"\n{'bonus':>7}{'acts at':>10}{'est. share':>12}"
+              f"{'est. sd':>10}{'MDE @2000':>12}{'MDE @6000':>12}")
+        for w in WEIGHTS:
+            k = out["by_weight"][str(w)]["flips"]
+            share = UNGATED_SHARE * (k / top) if top else 0.0
+            sd = COND_SD * (share ** 0.5)
+            m2 = (1.959964 + 0.8416212) * sd / (2000 ** 0.5)
+            m6 = (1.959964 + 0.8416212) * sd / (6000 ** 0.5)
+            out["by_weight"][str(w)].update(
+                {"est_divergence_share": share, "est_pair_sd": sd,
+                 "mde_2000": m2, "mde_6000": m6})
+            print(f"{w:>7.2f}{100 * k / max(1, n):>9.2f}%{share:>12.3f}"
+                  f"{sd:>10.3f}{m2:>12.3f}{m6:>12.3f}")
+        print("\nThere is no measured effect to compare those MDEs against: "
+              "this direction\nhas never been run, so nothing sets the "
+              "alternative. What the table does say\nis the floor. A bonus "
+              "acts at under 3% of positions, and at the median one\nit is "
+              "breaking an exact tie -- two asks the objective scores equally, "
+              "where\nthe choice is arbitrary and its expected value is zero "
+              "unless the objective is\nwrong in a way correlated with "
+              "re-taking. That is the hypothesis worth stating\nbefore any "
+              "pairs are spent, and it is not the hypothesis 'trade hard in a "
+              "duel'\nusually means.")
 
     dest = ROOT / "results" / "retake_bonus_base_rate.json"
     dest.write_text(json.dumps(out, indent=1))

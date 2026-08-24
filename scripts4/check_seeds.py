@@ -62,6 +62,8 @@ POOLS = {
         [f"CLAIM THRESHOLD 0.90 vs 0.97 block {i}" for i in range(2)],
     "learned weights, two blocks":
         [f"LEARNED WEIGHTS v2 vs champion block {i}" for i in range(2)],
+    "retake bonus, two blocks":
+        [f"RETAKE BONUS w-0.30 vs champion block {i}" for i in range(2)],
 }
 
 
