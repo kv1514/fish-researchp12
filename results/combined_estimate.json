@@ -1,0 +1,25 @@
+{
+ "links": [
+  {
+   "label": "posterior precision, 160 -> 480 draws",
+   "est": 0.3396642142979297,
+   "se": 0.04903349754607166,
+   "n_pairs": 6000
+  },
+  {
+   "label": "belief-space lookahead, on top of 480",
+   "est": 0.07173651171610879,
+   "se": 0.04174775497370043,
+   "n_pairs": 6000
+  }
+ ],
+ "chained": {
+  "est": 0.4114007260140385,
+  "se": 0.06439843885487244,
+  "lo": 0.2851821042022873,
+  "hi": 0.5376193478257897,
+  "excludes_zero": true
+ },
+ "indirect": true,
+ "direct_run_played": false
+}

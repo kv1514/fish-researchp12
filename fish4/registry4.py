@@ -49,14 +49,45 @@ V04_STRONGEST = ("fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25,
 #: only a fifth of a decision (results/precision_cost.json).
 V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 
-#: NOT DEFINED, and the omission is the point. Both V04_STRONGEST and
-#: V04_PRECISE beat V04_CHAMPION by a pre-registered margin, but each was
-#: measured against the champion ALONE. Their combination has never been played,
-#: so a constant naming it would assert an additivity nobody here has tested --
-#: and the lookahead's whole mechanism is to search a belief that the sampler
-#: draws, which is exactly the sort of coupling that does not add. The run that
-#: would settle it is pre-registered in jobs/PREREGISTRATION_stack.md; until it
-#: reports, the strongest CLAIM this module can make is two separate ones.
+#: Both changes at once. This was deliberately NOT defined until the stacking
+#: run reported, because each had been measured against the champion ALONE and
+#: naming their combination would have asserted an additivity nobody had tested
+#: -- the lookahead's whole mechanism is to search a belief the sampler draws,
+#: which is exactly the sort of coupling that need not add.
+#:
+#: The stacking run (jobs/PREREGISTRATION_stack.md, 6000 pairs) has now reported
+#: the lookahead ON TOP OF 480 draws at +0.072, 95% CI [-0.010, +0.154]. Chained
+#: with the precision run's +0.340 -- disjoint deal seeds, so independent and the
+#: errors add in quadrature -- the combination is worth
+#:
+#:     +0.411 sets per deal-pair, 95% CI [+0.285, +0.538]
+#:
+#: against the champion (results/combined_estimate.json). That excludes zero
+#: comfortably and is the largest effect in this project, which is enough to
+#: NAME the configuration. It is not enough to call it measured: nobody has
+#: played this spec against the champion in a single duel, and a chained
+#: estimate inherits both links' assumptions.
+#:
+#: What stays unresolved is whether it beats V04_PRECISE. That IS the stacking
+#: run's own estimate, and its interval contains zero at 68% power -- a failure
+#: to resolve, not a null. So the honest ordering is
+#: V04_COMBINED >= V04_PRECISE > V04_CHAMPION, with the first inequality
+#: undemonstrated.
+#:
+#: This is also what the public table actually plays: api/_engine.py sets
+#: WEB_DRAWS = 480 and WEB_SPEC's lookahead. The site was running an
+#: unnamed configuration while this module declined to name it.
+V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
+                             "w_lookahead": 0.25, "lookahead_depth": 3,
+                             "lookahead_beam": 4})
+
+#: NOT DEFINED, and the omission is still the point: at-ask-time depth at
+#: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is
+#: deliberately not shipped, because jobs/PREREGISTRATION_at_ask.md fixed 0.15
+#: in advance as the smallest effect worth adopting and 0.102 is under it. A
+#: real effect below a threshold chosen before the data is not a reason to
+#: change a default; that is what fixing the threshold in advance was for.
+#: depth_mode therefore stays "initial" everywhere.
 
 REGISTRY = dict(_V03)
 REGISTRY["fishbot4"] = FishBot4

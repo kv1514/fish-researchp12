@@ -161,6 +161,19 @@ WATCH = [
      "beats the basis in use by"),
     ("basis_search.json", "gain_se", "{:.4f}", "standard error of that gain",
      "beats the basis in use by"),
+    # The chained combined estimate. It is the paper's largest number and it is
+    # INDIRECT, so the estimate, its error and the pair count all have to stay
+    # in step with the two runs behind it.
+    ("combined_estimate.json", "chained.est", "{:.3f}", "combined vs champion",
+     "chained: search $+$ $480$ draws"),
+    ("combined_estimate.json", "chained.se", "{:.3f}",
+     "error on the combined estimate", "chained: search $+$ $480$ draws"),
+    ("combined_estimate.json", "chained.lo", "{:+.3f}", "combined interval, low",
+     "the largest effect in this project"),
+    ("combined_estimate.json", "chained.hi", "{:+.3f}", "combined interval, high",
+     "the largest effect in this project"),
+    ("at_ask_verdict.json", "pooled.fe", "{:.3f}", "at-ask, not shipped",
+     "At-ask-time\ndepth at"),
 ]
 
 

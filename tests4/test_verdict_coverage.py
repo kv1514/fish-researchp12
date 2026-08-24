@@ -88,3 +88,56 @@ def test_the_headline_number_is_stored_not_just_printed():
     d = json.loads(f.read_text())
     assert "pooled" in d and "fe" in d["pooled"]
     assert d.get("n_pairs") == 6000
+
+
+# ---------------------------------------------------------------------------
+# What the registry may claim
+# ---------------------------------------------------------------------------
+
+def test_the_combined_spec_matches_what_the_website_plays():
+    """The registry named a configuration the site was already running unnamed.
+
+    If the two drift, the constant stops describing the thing whose estimate is
+    quoted beside it -- and that estimate is chained from two runs of exactly
+    this spec.
+    """
+    sys.path.insert(0, str(ROOT))
+    import os
+    os.environ.setdefault("FISH_SECRET", "test-secret-for-registry-comparison")
+    from fish4.registry4 import V04_COMBINED
+    from api._engine import WEB_DRAWS, WEB_SPEC
+
+    _name, kw = V04_COMBINED
+    assert kw["n_draws"] == WEB_DRAWS, (
+        f"registry says n_draws={kw['n_draws']}, the site plays {WEB_DRAWS}")
+    for k, v in WEB_SPEC.items():
+        assert kw.get(k) == v, (
+            f"registry says {k}={kw.get(k)!r}, the site plays {v!r}")
+
+
+def test_the_combined_estimate_is_flagged_indirect():
+    """It is chained from two runs, and must never be quoted as measured."""
+    f = ROOT / "results" / "combined_estimate.json"
+    assert f.exists(), "run scripts4/combined_estimate.py"
+    d = json.loads(f.read_text())
+    assert d["indirect"] is True
+    assert d["direct_run_played"] is False, (
+        "if a direct duel has been played, quote THAT and stop chaining")
+    assert d["chained"]["excludes_zero"] is True
+
+
+def test_at_ask_stays_unshipped_while_it_is_below_its_own_bar():
+    """A demonstrated effect under a pre-registered adoption threshold.
+
+    at-ask depth at gamma=1.0 measures +0.102 over 6000 pairs and the
+    pre-registration fixed 0.15 as the smallest effect worth adopting. Shipping
+    it anyway would be choosing the threshold after seeing the data, which is
+    the whole thing fixing it in advance prevents.
+    """
+    d = json.loads((ROOT / "results" / "at_ask_verdict.json").read_text())
+    est = d["pooled"]["fe"]
+    from fish4.registry4 import V04_COMBINED, V04_PRECISE, V04_STRONGEST
+    for spec in (V04_COMBINED, V04_PRECISE, V04_STRONGEST):
+        assert spec[1].get("depth_mode", "initial") == "initial", (
+            f"a shipped spec sets depth_mode while the at-ask effect is "
+            f"{est:+.3f}, under its pre-registered 0.15 bar")

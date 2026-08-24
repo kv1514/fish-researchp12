@@ -1883,6 +1883,58 @@ deals actually played, and that three such intervals will occasionally fail to
 overlap. We take the largest experiment as the headline and report the others
 rather than the most flattering one.
 
+\paragraph{What the strongest configuration is worth, and what nobody has
+played.} Two changes in this version clear a pre-registered bar against the
+champion: the tripled posterior sampling budget at $+0.340$ and the
+belief-space search at $+0.104$. Each was measured against the champion
+\emph{alone}, so neither says what their combination is worth --- and the
+combination is not obviously additive, since the search's whole mechanism is to
+search a belief the sampler draws.
+
+The stacking run lets the two be chained, because it measured the search
+\emph{on top of} $480$ draws. The two runs use disjoint deal seeds, so they are
+independent and their standard errors add in quadrature:
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+link & estimate & pairs \\
+\midrule
+$480$ draws vs.\ champion & $+0.340 \pm 0.049$ & 6000 \\
+search on top of $480$ draws & $+0.072 \pm 0.042$ & 6000 \\
+\midrule
+\textbf{chained: search $+$ $480$ draws vs.\ champion}
+  & $\mathbf{+0.411 \pm 0.064}$ & 12000 \\
+\bottomrule
+\end{tabular}
+\end{center}
+$95\%$ CI $[+0.285, +0.538]$ --- the largest effect in this project, comfortably
+clear of zero, and roughly four times v0.3's best single term.
+
+Two things must be said beside it. It is \textbf{indirect}: this configuration
+has never been played against the champion in a single duel, and a chained
+estimate inherits both links' assumptions, in particular that each change's
+effect does not depend on the deal population the other was measured over. And
+whether it beats the sampler \emph{alone} remains unresolved --- that is the
+stacking run's own estimate, whose interval contains zero at $68\%$ power. So
+the defensible ordering is
+\[
+  \text{search}+\text{sampler} \;\ge\; \text{sampler} \;>\; \text{champion},
+\]
+with the first inequality undemonstrated. The engine names this configuration
+\texttt{V04\_COMBINED} and the public table has been playing it all along; until
+this run reported, the registry declined to name what the website was running.
+
+\paragraph{A demonstrated effect that is deliberately not shipped.} At-ask-time
+depth at $\gamma = 1.0$ measures $+0.102$ over $6000$ pre-registered pairs and
+its interval excludes zero, so the effect is real. It is also below the $0.15$
+that \texttt{jobs/PREREGISTRATION\_at\_ask.md} fixed \emph{in advance} as the
+smallest effect worth adopting, and the upper end of its interval, $+0.197$,
+barely reaches that. It therefore does not ship, and \texttt{depth\_mode} stays
+\texttt{"initial"} in every named configuration. A real effect below a threshold
+chosen before the data is not a reason to move a default; deciding otherwise
+after seeing $+0.102$ is exactly what fixing the threshold in advance prevents.
+A test asserts the default, so the decision cannot quietly reverse itself.
+
 \paragraph{Do v0.3's objective terms survive better inference?} A reasonable
 worry about the whole result is that v0.3's hand-tuned tie-breakers were
 compensating for a poor posterior and would become redundant once it improved.
