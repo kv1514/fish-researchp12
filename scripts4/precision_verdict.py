@@ -202,9 +202,39 @@ def main(argv=None) -> int:
           "the effect\n  is real, and the pre-registration says so. This "
           "script does not make it.")
 
+    # The contrast the pre-registration named: both rungs multiply the draw
+    # budget by three, so under a log-linear response they buy the same amount.
+    # Storing it is the point -- a difference computed on the fly and printed
+    # is a difference nothing can check later.
+    loglin = None
+    if which == "2":
+        f1 = ROOT / "results" / "precision_verdict.json"
+        if f1.exists():
+            d1 = json.loads(f1.read_text())
+            e1, s1 = d1["pooled"]["fe"], d1["pooled"]["fe_se"]
+            d = p["fe"] - e1
+            se = math.hypot(s1, p["fe_se"])
+            loglin = {"rung1": e1, "rung1_se": s1, "rung2": p["fe"],
+                      "rung2_se": p["fe_se"], "delta": d, "se": se,
+                      "z": d / se if se else 0.0,
+                      "excludes_zero": bool(abs(d) > Z * se)}
+            print("\nLOG-LINEARITY -- both rungs multiply the budget by three")
+            print(f"  160 -> 480    {e1:+.4f} +/- {s1:.4f}")
+            print(f"  480 -> 1440   {p['fe']:+.4f} +/- {p['fe_se']:.4f}")
+            print(f"  difference    {d:+.4f} +/- {se:.4f}  ({d / se:+.1f} SE)")
+            if abs(d) > Z * se:
+                print("  The same multiplier buys significantly LESS at the "
+                      "higher rung, so the\n  response is not log-linear and "
+                      "precision's returns diminish. That is a\n  demonstrated "
+                      "result even though rung 2 on its own is not.")
+            else:
+                print("  The two rungs are not distinguishable, so this run "
+                      "does not resolve\n  whether the response is log-linear.")
+
     out = {"rung": which, "blocks": cs, "pooled": p, "n_pairs": n_tot,
            "mde_80": mde, "half_width": half,
            "min_interesting": MIN_INTERESTING,
+           "log_linearity": loglin,
            "demonstrated": bool(demonstrated),
            "screens": sc}
     dest = (ROOT / "results" / "precision_verdict.json" if which == "1"

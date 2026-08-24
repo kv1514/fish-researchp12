@@ -548,8 +548,13 @@ Two implementation notes make \eqref{eq:dp} fast. First, the constraint
 $\sum_g \kappa_g = q_p$ is enforced with an auxiliary axis counting cards taken
 so far, so the compositions $\kappa$ are never enumerated: player $p$'s step is
 $O(\sum_{g \in A_p} \min(n_g,q_p))$ array operations. Second, the state space
-$\prod_g (n_g+1)$ is small in practice --- median $272$, mean $577$ over real
-positions --- because $G$ is small, not because $|F|$ is.
+$\prod_g (n_g+1)$ is small in practice, because $G$ is small and not because
+$|F|$ is. An earlier draft put it at ``median $272$, mean $577$ over real
+positions''; those figures back nothing in
+\texttt{results/infer\_position\_stats.json}, which stored the \emph{quota}
+lattice $\prod_p (q_p+1)$ under a similar name and never the group product at
+all. The group product is now measured alongside it, and the two are different
+quantities rather than two estimates of one.
 
 \paragraph{What the dynamic program yields.}
 \begin{itemize}
@@ -603,8 +608,8 @@ clauses carry a great deal of information and cannot be dropped.
 filtered to be exactly uniform on $\Omega$. A typical clause covers $3.35$ live
 cards, each landing with the relevant player about one time in five, so a
 clause holds with probability roughly $0.53$ and five independent clauses hold
-about $4\%$ of the time. Measured acceptance on real positions: mean $0.30$,
-median $0.18$, and below $0.05$ on $16\%$ of positions. Rejection is therefore
+about $4\%$ of the time. Measured acceptance on real positions: mean $0.28$,
+median $0.17$, and below $0.05$ on $16\%$ of positions. Rejection is therefore
 exact but unaffordable.
 
 \paragraph{(c) Fold them into the dynamic program.} Refining the groups by
@@ -656,7 +661,8 @@ $0.52$; the $0.52$ is what \texttt{results/ess\_probe.json} measures over $641$
 real decisions, and the two sentences had disagreed with each other for as long
 as both existed. Drawing the batch one card at a
 time across all draws in lockstep, rather than one draw at a time, makes this
-$5$--$6\times$ faster for identical output; before that change the scalar loop
+$6.8\times$ faster at the median for identical output ($11.5\times$ on
+average, over $60$ positions); before that change the scalar loop
 was 67\% of the policy's total runtime.
 
 \subsection{A correction: option (c) is in fact tractable}
@@ -669,7 +675,7 @@ actually needs to stay together is a connected component of clauses that share
 cards, and OR-free cards can be processed one at a time. With that
 decomposition and a dynamic program over the residual-quota lattice, an exact
 backend refused none of 349 real positions at a work budget of $10^7$, costing
-a median of $7.5$\,ms and a p90 of $18.5$\,ms.
+a median of $7.5$\,ms and a p90 of $17.5$\,ms.
 
 That result is worth stating in its own right, because it inverts the usual
 shape of an accuracy-versus-compute study: \emph{the frontier here is not a
@@ -757,7 +763,7 @@ We flag one methodological point here because it nearly became a false finding.
 Our first at-ask-time implementation counted only cards that had \emph{visibly}
 changed hands, silently omitting every card the propagator had \emph{deduced} to
 be someone's --- the large majority. Depths came out far too small, and the
-variant measured as catastrophic on both instruments (posterior NLL $2.14$
+variant measured as catastrophic on both instruments (posterior NLL $2.22$
 against $1.35$; $-1.54$ sets per deal-pair in play). Two independent instruments
 agreeing on a large effect is normally reassuring; here they were agreeing about
 a bug. What caught it was that the magnitude was implausible for a refinement,
@@ -2002,6 +2008,48 @@ with the first inequality undemonstrated. The engine names this configuration
 \texttt{V04\_COMBINED} and the public table has been playing it all along; until
 this run reported, the registry declined to name what the website was running.
 
+\paragraph{And it stops paying: precision's returns diminish.} If tripling the
+sampling budget is worth $+0.340$, the obvious question is whether tripling it
+again is worth as much. Pre-registered in
+\texttt{jobs/PREREGISTRATION\_precision2.md} with a \emph{minimum interesting
+effect} of $0.150$ fixed before any pair was played --- so that a small positive
+would be reported as a small positive rather than promoted:
+\begin{center}
+\begin{tabular}{lrl}
+\toprule
+rung & set diff & 95\% CI \\
+\midrule
+$160 \to 480$ draws, 6000 pairs & $\mathbf{+0.340}$ & $[+0.244, +0.436]$ \\
+$480 \to 1440$ draws, 6000 pairs & $+0.094$ & $[-0.002, +0.191]$ \\
+\midrule
+\textbf{difference} & $\mathbf{-0.245 \pm 0.069}$ & $\mathbf{-3.5}$ SE \\
+\bottomrule
+\end{tabular}
+\end{center}
+Cochran's $Q = 4.01$ on $5$ df ($p = 0.55$), $I^2 = 0\%$, $\tau = 0$: the six
+blocks of rung 2 agree with each other completely, and with zero.
+
+Rung 2 on its own is \textbf{not demonstrated} --- its interval includes zero
+and its point estimate sits below the $0.150$ threshold fixed in advance. But
+the \emph{contrast} is demonstrated, and it is the more interesting quantity.
+Both rungs multiply the budget by exactly three, so under a log-linear response
+they would buy the same amount. They do not: the difference between the rungs
+is $-0.245 \pm 0.069$, which excludes zero at $3.5$ standard errors.
+Precision's returns diminish, and they do so somewhere between $480$ and $1440$
+draws.
+
+That is worth putting beside the earlier claim it repairs. The failed-experiment
+section reported ``precision has saturated'' on the strength of $200$-pair
+screens around $160$ draws, and Section~\ref{sec:res-precision} refutes that:
+saturation had not begun at $160$. It has begun by $480$. The screens reached
+the right word for the wrong rung, and getting from one to the other took
+$12{,}000$ pre-registered pairs across two runs.
+
+The default stays at $480$. Rung 1 is demonstrated and bought; rung 2 is not
+demonstrated, costs a further $1.4\times$ on the sampler, and its own
+pre-registration says a point estimate below $0.150$ does not move a default
+whatever its sign.
+
 \paragraph{A demonstrated effect that is deliberately not shipped.} At-ask-time
 depth at $\gamma = 1.0$ measures $+0.102$ over $6000$ pre-registered pairs and
 its interval excludes zero, so the effect is real. It is also below the $0.15$
@@ -2321,6 +2369,13 @@ underpowered cells do. The paragraph is kept in its original form above because
 the inference it drew was reasonable on the evidence available and wrong anyway,
 which is this paper's most frequently repeated lesson and is more useful stated
 against a concrete case than in the abstract.
+
+The word was right and the rung was wrong, which is the more interesting
+correction. A second pre-registered run at $480 \to 1440$ draws returns
+$+0.094$ $[-0.002, +0.191]$, and the contrast against rung 1's $+0.340$ is
+$-0.245 \pm 0.069$ --- so precision's returns \emph{do} diminish, just not
+where the screens said. Saturation has not begun at $160$ and has begun by
+$480$. See Section~\ref{sec:res-precision}.
 
 \textbf{One cell technically resolves, and should still be ignored.} Lowering
 the claim bar from $0.97$ to $0.90$ gives $+0.035$ $[+0.007, +0.063]$: an
@@ -3644,7 +3699,7 @@ validated against exhaustive enumeration in four separate ways. What failed was
 the assumption that the uniform posterior is the right target.
 
 \paragraph{Rejection sampling for the disjunctive clauses.} Exactly correct, and
-unaffordable: measured acceptance mean $0.30$, median $0.18$, below $0.05$ on
+unaffordable: measured acceptance mean $0.28$, median $0.17$, below $0.05$ on
 16\% of positions. Abandoned in favour of importance sampling with closed-form
 densities.
 

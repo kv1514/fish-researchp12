@@ -98,6 +98,19 @@ WATCH = [
      "coupled departures", "the coupled arm departs from the"),
     ("greedy_shadow.json", "uncoupled.non_greedy", "{:d}",
      "uncoupled departures", "the uncoupled arm\ndeparts at"),
+    # Precision rung 2 and the log-linearity contrast. Rung 2 alone is not
+    # demonstrated and the CONTRAST is, so the two must never drift apart --
+    # quoting one without the other inverts what the run showed.
+    ("precision2_verdict.json", "pooled.fe", "{:.3f}", "precision rung 2",
+     "$480 \\to 1440$ draws, 6000 pairs"),
+    ("precision2_verdict.json", "log_linearity.delta", "{:+.3f}",
+     "log-linearity contrast",
+     "the difference between the rungs"),
+    ("precision2_verdict.json", "log_linearity.se", "{:.3f}",
+     "contrast standard error",
+     "the difference between the rungs"),
+    ("precision2_verdict.json", "min_interesting", "{:.3f}",
+     "minimum interesting effect", "fixed before any pair was played"),
     ("precision_verdict.json", "pooled.fe", "{:.3f}", "precision pooled",
      "posterior sampling budget, from 160 draws to 480"),
     ("at_ask_verdict.json", "pooled.fe", "{:.4f}", "at-ask pooled",
