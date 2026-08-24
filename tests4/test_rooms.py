@@ -363,3 +363,56 @@ def test_room_codes_avoid_lookalike_characters():
         c = _rooms.new_code()
         assert len(c) == _rooms.CODE_LEN
         assert all(x in _rooms.CODE_ALPHABET for x in c)
+
+
+# ------------------------------------------- refusing a store that is not one
+
+def test_rooms_refuse_a_serverless_deployment_with_no_shared_store(monkeypatch):
+    """Measured, not predicted.
+
+    A create-then-join against the deployed build with no store configured
+    returned a perfectly good seat -- because both requests happened to land on
+    the same warm instance. The next request lands elsewhere and the table has
+    never existed. An intermittent room is worse than no room: it reads as a
+    bug in the game rather than as a missing environment variable.
+    """
+    _rooms.reset_store_for_tests(_rooms.MemoryStore())
+
+    # Local: one process, so the memory store is genuinely shared. Allowed.
+    monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.delenv("AWS_LAMBDA_FUNCTION_NAME", raising=False)
+    assert _rooms.serverless() is False
+    _rooms.require_shared_store()
+
+    # Serverless with no Postgres: refused, and the message names both
+    # variables rather than saying "unavailable".
+    monkeypatch.setenv("VERCEL", "1")
+    assert _rooms.serverless() is True
+    with pytest.raises(RuntimeError) as e:
+        _rooms.require_shared_store()
+    assert "SUPABASE_URL" in str(e.value)
+    assert "SUPABASE_SERVICE_KEY" in str(e.value)
+
+    # Serverless WITH Postgres configured: allowed.
+    _rooms.reset_store_for_tests(_rooms.PostgrestStore("https://x", "k"))
+    _rooms.require_shared_store()
+
+
+def test_the_store_is_chosen_from_the_environment(monkeypatch):
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_KEY", "service-key")
+    _rooms.reset_store_for_tests(None)
+    assert _rooms.backend_name() == "postgres"
+
+    monkeypatch.delenv("SUPABASE_URL")
+    monkeypatch.delenv("SUPABASE_SERVICE_KEY")
+    _rooms.reset_store_for_tests(None)
+    assert _rooms.backend_name() == "memory"
+
+
+def test_the_service_key_never_appears_in_a_store_error():
+    """A store error is returned to a client, so it must not carry the key."""
+    st = _rooms.PostgrestStore("https://127.0.0.1:1", "super-secret-key")
+    with pytest.raises(RuntimeError) as e:
+        st.read("ABCD")
+    assert "super-secret-key" not in str(e.value)

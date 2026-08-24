@@ -270,6 +270,35 @@ def backend_name() -> str:
     return "postgres" if isinstance(store(), PostgrestStore) else "memory"
 
 
+def serverless() -> bool:
+    """Are we running where each request may get a different process?"""
+    return bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+
+def require_shared_store() -> None:
+    """Refuse rooms when the store cannot actually be shared.
+
+    The memory store is correct for the local dev server, which is one
+    process, and correct for exactly one serverless instance -- which is the
+    problem. Deployed without SUPABASE_URL and SUPABASE_SERVICE_KEY, a room
+    created and joined in quick succession OFTEN WORKS, because both requests
+    happen to land on the same warm instance. Then a third request lands
+    somewhere else and the table has never existed.
+
+    That was measured, not predicted: a create-then-join against the deployed
+    build with no store configured returned a perfectly good seat. An
+    intermittent room is worse than no room, because it looks like a game bug
+    rather than a missing environment variable -- so this refuses up front,
+    and says which two variables are missing.
+    """
+    if serverless() and not isinstance(store(), PostgrestStore):
+        raise RuntimeError(
+            "Rooms need a shared store, and this deployment has none. Set "
+            "SUPABASE_URL and SUPABASE_SERVICE_KEY (see "
+            "scripts4/room_schema.sql), or play the bots -- solo games need "
+            "no setup and are unaffected.")
+
+
 def reset_store_for_tests(s=None) -> None:
     global _STORE
     with _STORE_LOCK:

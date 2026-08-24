@@ -391,6 +391,15 @@ To turn rooms on for a deployment:
    shared; `"memory"` means the variables are missing and a room will work for
    exactly one player.
 
-Without the variables the site still runs and solo play is unaffected — the
-room routes fall back to an in-process store, which is visibly broken rather
-than silently wrong.
+Without the variables the site still runs and solo play is unaffected. The
+room routes **refuse up front**, naming the two missing variables.
+
+That refusal is there because the obvious fallback was worse than useless.
+Deployed with no store, an in-process one *often works*: a create and a join a
+second apart usually land on the same warm serverless instance, so a room comes
+back with a perfectly good seat — and then a later request lands elsewhere and
+the table has never existed. That was measured against the live deployment, not
+predicted. An intermittent room reads as a bug in the game rather than as a
+missing environment variable, so rooms now fail closed wherever each request
+may get a different process. Locally, where there is one process, the in-memory
+store is genuinely shared and rooms work with no setup at all.

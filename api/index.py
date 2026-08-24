@@ -192,6 +192,9 @@ class handler(BaseHTTPRequestHandler):
         share one shape: identify the caller by their seat secret, mutate under
         compare-and-set, hand back that seat's view and nothing else.
         """
+        # Fail here rather than three requests later on a different instance.
+        _rooms.require_shared_store()
+
         if op == "room_new":
             doc = RG.new_room(body.get("humans", 2), body.get("name", ""),
                               body.get("pace", 12))
