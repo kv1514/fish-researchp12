@@ -1218,23 +1218,22 @@ exactly zero. Writing $s$ for the share of pairs on which they diverge at all,
   \mathrm{sd} \;\approx\; \sqrt{s}\;\cdot\;\mathrm{sd}(D \mid \text{diverge}).
 \]
 That much is arithmetic and follows from the design. The empirical content is
-what the second factor does. Across the $35$ cells of this study that store
-their per-pair differentials it moves little in absolute terms --- $3.91 \pm
-0.22$, a relative spread of $5.5\%$ against $9.0\%$ for the raw standard
+what the second factor does. Across the $46$ cells of this study that store
+their per-pair differentials it moves little in absolute terms --- $3.86 \pm
+0.29$, a relative spread of $7.6\%$ against $15.5\%$ for the raw standard
 deviation --- and our first draft stopped there and called that the finding. It
 does not survive being looked at properly.
 
 Three things weaken it, and the third matters for use. \emph{Most of the
 residual spread is not structure}: the sampling noise of an $\mathrm{sd}$
-estimate at these sample sizes is alone $3.0\%$, leaving about $4.6\%$ genuine
-between-cell variation. \emph{The comparison is carried by a handful of cells}:
-restricted to the $22$ cells with divergence share above $0.83$ --- where most of
-this study lives --- the raw spread is $3.49\%$ and the conditional spread is
-$3.48\%$, the same number, and the correlation between share and $\mathrm{sd}$
-collapses from $+0.87$ to $+0.09$. Where share barely varies the decomposition
-has nothing to explain, and it explains nothing. And \emph{the conditional term
-is not constant}: it drifts with share, $\mathrm{corr} = +0.59$, fitted as
-$2.48 + 1.72\,s$.
+estimate at these sample sizes is alone $2.8\%$. \emph{The comparison is carried
+by a handful of cells}: restricted to the $26$ cells with divergence share above
+$0.83$ --- where most of this study lives --- the raw spread is $3.38\%$ and the
+conditional spread is $3.45\%$, the same number to within noise, and the
+correlation between share and $\mathrm{sd}$ collapses from $+0.95$ to $-0.03$.
+Where share barely varies the decomposition has nothing to explain, and it
+explains nothing. And \emph{the conditional term is not constant}: it drifts
+with share, $\mathrm{corr} = +0.79$, fitted as $2.53 + 1.66\,s$.
 
 That drift matters precisely where the rule gets used, because the rule is only
 useful when extrapolated to a low-divergence contrast. At $s = 0.31$ the flat
@@ -1258,10 +1257,39 @@ per-pair standard deviation is a property of the comparison rather than of the
 game, the $\sqrt{s}$ scaling is exact by construction, and sizing every
 experiment against a figure measured between two maximally-different policies is
 systematically conservative for the near-identical comparisons that most need
-care. The calibration of the constant across a wide range of $s$ is \emph{not}
-established here, because this study has almost no cells at low $s$.
+care.
 
-The correlation between $s$ and the raw standard deviation is $+0.865$, and we
+\paragraph{The extrapolation was untestable, and then it was tested.} When the
+above was written this study had no cells below $s = 0.44$, so the calibration
+of the constant at low share --- the only place the rule is ever \emph{used} ---
+was not established, and the paragraph said so. The gated re-take run has since
+landed two blocks at $s = 0.233$ and $s = 0.236$, and the prediction that the
+flat model over-states low-share noise by roughly $30\%$ was recorded in
+\texttt{jobs/PREREGISTRATION\_retake\_gate.md} \emph{before any pair of that run
+was played}. Scoring it out of sample, over the three cells now below $s = 0.5$:
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+cell & $s$ & measured sd & flat & drift-corrected \\
+\midrule
+re-take gate, block 0 & $0.233$ & $1.443$ & $1.863$ & $1.409$ \\
+re-take gate, block 1 & $0.236$ & $1.440$ & $1.875$ & $1.420$ \\
+ungated re-take penalty & $0.440$ & $2.328$ & $2.560$ & $2.163$ \\
+\midrule
+\multicolumn{2}{l}{\textbf{mean relative error}} & &
+  $\mathbf{+23.1\%}$ & $\mathbf{-3.6\%}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The flat constant over-predicts by $23\%$ where it is used; the drift-corrected
+line lands within $4\%$. This is the only out-of-sample prediction in the paper
+that was written down before the data existed and then checked against it, and
+it is worth more than the several in-sample fits around it. Sizing at low $s$
+should use $\mathrm{sd} = (2.53 + 1.66\,s)\sqrt{s}$, and the flat form remains
+the conservative choice --- it asks for more pairs than are needed, never
+fewer.
+
+The correlation between $s$ and the raw standard deviation is $+0.952$, and we
 report it only to say that it is \emph{not} evidence. If $\mathrm{sd}$ really is
 $c\sqrt{s}$ for roughly constant $c$, that correlation is the correlation of $s$
 with $\sqrt{s}$, which is near $1$ over any range --- it is implied by the

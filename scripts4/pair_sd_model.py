@@ -52,6 +52,39 @@ AA_SD = 3.796
 MIN_PAIRS = 100
 
 
+
+def _low_share_check(cells, flat, drift):
+    """Test the two competing models where they were predicted to differ.
+
+    The flat conditional term and the drift-corrected line agree wherever this
+    study mostly lives -- share above 0.83 -- and diverge at low share, which
+    is exactly where the rule gets INVOKED, to justify a smaller experiment
+    than the A/A figure implies. When this decomposition was first written
+    there were no cells down there and the paper said so.
+
+    There are now. The retake-gate blocks landed at s ~ 0.234, and the
+    prediction that the flat model over-states low-share noise by about 30%
+    was recorded in jobs/PREREGISTRATION_retake_gate.md BEFORE any pair of
+    that run was played. This scores it out of sample.
+    """
+    lo = [c for c in cells if c.get("share", 1.0) < 0.5]
+    if not lo:
+        return {"n": 0}
+    a, b = drift["intercept"], drift["slope"]
+    rows = []
+    for c in sorted(lo, key=lambda c: c["share"]):
+        s_, sd = c["share"], c["sd"]
+        rows.append({"label": c.get("label"), "share": s_, "sd": sd,
+                     "flat_pred": flat * s_ ** 0.5,
+                     "drift_pred": (a + b * s_) * s_ ** 0.5})
+    n = len(rows)
+    return {"n": n,
+            "flat_rel_err": sum(r["flat_pred"] / r["sd"] - 1
+                                for r in rows) / n,
+            "drift_rel_err": sum(r["drift_pred"] / r["sd"] - 1
+                                 for r in rows) / n,
+            "cells": rows}
+
 def main():
     src = ROOT / "results" / "v04_duels.jsonl"
     cells = []
@@ -215,6 +248,9 @@ def main():
            if band.sum() > 5 else None,
            "band_cond_spread": float(cs[band].std(ddof=1) / cs[band].mean())
            if band.sum() > 5 else None,
+           "low_share_check": _low_share_check(
+               cells, float(cs.mean()),
+               {"intercept": float(b0), "slope": float(b1)}),
            "cond_drift": {"intercept": float(b0), "slope": float(b1)},
            "cells": cells}
     dest = ROOT / "results" / "pair_sd_model.json"

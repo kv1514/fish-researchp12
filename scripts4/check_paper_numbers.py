@@ -57,6 +57,16 @@ WATCH = [
      "it moves little in absolute terms"),
     ("pair_sd_model.json", "corr_share_sd", "{:+.3f}", "corr(share, sd)",
      "The correlation between $s$ and the raw standard deviation"),
+    # The out-of-sample test of the drift correction. Its whole force is that
+    # the two errors point opposite ways, so both have to stay true.
+    ("pair_sd_model.json", "low_share_check.flat_rel_err", "{:+.1%}",
+     "flat model error at low share", "mean relative error"),
+    ("pair_sd_model.json", "low_share_check.drift_rel_err", "{:+.1%}",
+     "drift-corrected error at low share", "mean relative error"),
+    ("pair_sd_model.json", "cond_drift.intercept", "{:.2f}",
+     "drift fit intercept", "it drifts\nwith share"),
+    ("pair_sd_model.json", "cond_drift.slope", "{:.2f}", "drift fit slope",
+     "it drifts\nwith share"),
     ("precision_verdict.json", "pooled.fe", "{:.3f}", "precision pooled",
      "posterior sampling budget, from 160 draws to 480"),
     ("at_ask_verdict.json", "pooled.fe", "{:.4f}", "at-ask pooled",
