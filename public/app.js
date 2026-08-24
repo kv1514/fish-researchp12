@@ -31,6 +31,19 @@ const S = {
   gamma: 0.35,
   busy: false,
   hint: null,
+  // Which position the hint in hand was computed for. `gen` counts snapshots;
+  // `hintGen` records the one `hint` belongs to. Two bugs made this necessary
+  // rather than defensive. Dealing a new game replaced token, actions and snap
+  // but not `hint`, so the previous game's analysis was rendered against the
+  // new deal -- including as the DECLARE dialog's pre-filled assignment, which
+  // is exactly how a player ends up voiding a set they hold. And `think()` had
+  // no way to notice that the player had moved while its request was in
+  // flight, so a late reply overwrote a fresh position's hint with an old
+  // one's. A counter makes a stale hint unusable rather than merely unlikely:
+  // every consumer goes through hint(), which returns null unless the
+  // generations agree.
+  gen: 0,
+  hintGen: -1,
   // Re-ask for the analysis on every turn of ours, rather than on a click.
   // Off by default: it costs one request per turn and not everyone wants the
   // engine's read of their own position.
@@ -41,6 +54,12 @@ const S = {
   pacing: false,     // a pacing loop is running
   wake: null,        // resolve() of the current wait, so Next can cut it short
 };
+
+/* The only supported way to read the analysis. Never touch S.hint directly:
+ * a hint computed for another position is worse than no hint, because it
+ * renders as a confident and completely coherent answer to a question nobody
+ * asked. */
+const hint = () => (S.hintGen === S.gen ? S.hint : null);
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, html) => {
@@ -73,6 +92,7 @@ async function send(path, body) {
     if (j.actions) S.actions = S.actions.concat(j.actions);
     S.snap = j;
     S.hint = null;
+    S.gen += 1;
     render();
     return j;
   } catch (e) {
@@ -188,6 +208,8 @@ function initStart() {
       S.token = j.token;
       S.actions = j.actions || [];
       S.snap = j;
+      S.hint = null;
+      S.gen += 1;
       show("table");
       render();
     } catch (e) {
@@ -362,11 +384,11 @@ function renderAction() {
   row.appendChild(auto);
   box.appendChild(row);
 
-  if (S.hint) renderHint(box);
+  if (hint()) renderHint(box);
 }
 
 function renderHint(box) {
-  const h = S.hint;
+  const h = hint();
   if (!h || h.terminal) return;
   const p = el("div", "hint");
   p.appendChild(el("h4", null, "What the engine sees"));
@@ -494,7 +516,7 @@ function renderWhy(box, m) {
  */
 function renderPosterior() {
   const panel = $("t-postpanel");
-  const rows = (S.hint && S.hint.card_table) || [];
+  const rows = (hint() && hint().card_table) || [];
   const live = rows.filter((r) => !r.certain && !r.mine);
   if (!live.length) { panel.hidden = true; return; }
   panel.hidden = false;
@@ -625,7 +647,7 @@ async function openDeclare() {
   // the dialog opens on the engine's best guess and shows the probability
   // behind every option. You can still overrule it - you know things it does
   // not - but the starting point is now the best available answer.
-  let an = S.hint;
+  let an = hint();
   if (!an) {
     try { an = await api("analyse", { token: S.token, actions: S.actions }); }
     catch (e) { an = null; }
@@ -754,10 +776,18 @@ $("t-quit").addEventListener("click", () => show("start"));
 
 async function think(quiet) {
   if (!S.snap || S.snap.terminal || S.hinting) return;
+  // Captured BEFORE the await. `think` is not covered by S.busy and only
+  // disables its own button, so the player can ask, declare or deal a new game
+  // while this request is in flight; without the check the reply would land on
+  // whatever position they moved to.
+  const gen = S.gen;
   S.hinting = true;
   $("t-think").disabled = true;
   try {
-    S.hint = await api("analyse", { token: S.token, actions: S.actions });
+    const h = await api("analyse", { token: S.token, actions: S.actions });
+    if (gen !== S.gen) return;
+    S.hint = h;
+    S.hintGen = gen;
     render();
   } catch (e) {
     // A failed auto-fetch must not nag: the player did not ask for it, and the
@@ -785,11 +815,11 @@ $("t-auto").checked = S.autothink;
 /* Fetch the analysis when it is ours to move and we do not already have one.
  *
  * Guarded three ways, because render() calls this and the fetch calls render():
- * `S.hinting` stops a second request while one is in flight, `S.hint` stops a
- * repeat for a position already analysed, and both are cleared together when a
- * new snapshot arrives. */
+ * `S.hinting` stops a second request while one is in flight, `hint()` stops a
+ * repeat for a position already analysed, and a new snapshot advances S.gen,
+ * which makes any hint held for the old one read as absent. */
 function maybeAutoThink() {
-  if (!S.autothink || S.hinting || S.hint) return;
+  if (!S.autothink || S.hinting || hint()) return;
   if (!S.snap || S.snap.terminal || !S.snap.your_turn) return;
   think(true);
 }
