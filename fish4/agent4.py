@@ -90,6 +90,7 @@ class FishBot4(Tablebase4Mixin, Agent):
                  w_value: float = 0.0,
                  value_turn: float = 0.0,
                  value_expose: float = 0.0,
+                 value_keep: float = 0.0,
                  # -- claiming
                  claim_threshold: float = 0.97,
                  claim_exact: bool = True,
@@ -131,6 +132,16 @@ class FishBot4(Tablebase4Mixin, Agent):
         self.w_value = w_value
         self.value_turn = value_turn
         self.value_expose = value_expose
+        self.value_keep = value_keep
+        # value_keep is read ONLY by the pure-value objective. In the blend
+        # path the heuristic already carries P(success) at weight 1.0, so the
+        # term is deliberately not applied there -- and a parameter that
+        # silently does nothing is how an ablation gets attributed to the wrong
+        # cause. Refuse the combination instead of ignoring half of it.
+        if value_keep and objective != "value":
+            raise ValueError(
+                f"value_keep={value_keep} has no effect with objective="
+                f"{objective!r}; it applies only to objective='value'")
         self.claim_cfg = ClaimConfig(threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
                                      use_exact=claim_exact)
@@ -206,7 +217,8 @@ class FishBot4(Tablebase4Mixin, Agent):
         if self.objective == "value" and model is not None:
             scores = score_asks_by_value(ctx, asks, model,
                                          turn_weight=self.value_turn,
-                                         expose_weight=self.value_expose)
+                                         expose_weight=self.value_expose,
+                                         keep_value=self.value_keep)
             _, p = score_asks(ctx, asks, AskWeights.zeros())
         else:
             # Style adapts to the match before the ask is scored: a team that
@@ -218,6 +230,10 @@ class FishBot4(Tablebase4Mixin, Agent):
                 wts = adjust_weights(wts, obs, self.w_behind)
             scores, p = score_asks(ctx, asks, wts)
             if self.w_value and model is not None:
+                # No keep_value here, deliberately: this branch ADDS the value
+                # objective to the heuristic one, and the heuristic already
+                # carries P(success) at weight 1.0. Crediting the turn again
+                # would price the same tempo twice.
                 scores = scores + self.w_value * score_asks_by_value(
                     ctx, asks, model)
         # Belief-space lookahead, as an additive bonus rather than a
