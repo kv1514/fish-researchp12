@@ -67,8 +67,28 @@ from ask_regret import GAMMA, SPEC, _legal_asks, _rollout, harvest
 PAPER_SLOPE = 0.101
 
 
+def _public_seeded_rollout(rules, world, turn, set_winner, history,
+                           root_action, root_seat, seat_seeds):
+    """The SECOND control: the weak policy, but handed the public log too.
+
+    The two arms above differ in two things, not one. The engine finishes the
+    game AND is handed the real public history; the heuristic finishes the game
+    AND starts from an empty log, blind to every card the table has already
+    watched change hands. Reading the whole contrast as "the continuation
+    policy" is therefore the two-factor error this section of the paper is
+    about, committed one level further in.
+
+    This arm holds the information fixed and moves only the policy. If it lands
+    near the unseeded heuristic, the contrast is the policy's and the published
+    reading stands. If it lands near the engine, most of what was attributed to
+    finishing the game properly was really the log.
+    """
+    return _public_rollout(rules, world, turn, set_winner, history,
+                           root_action, root_seat, seat_seeds, seed_log=True)
+
+
 def _public_rollout(rules, world, turn, set_winner, history, root_action,
-                    root_seat, seat_seeds):
+                    root_seat, seat_seeds, seed_log: bool = False):
     """The CONTROL arm: finish the deal with the public-information heuristic.
 
     Same positions, same worlds, same seeds, same root action as ``_rollout``.
@@ -93,6 +113,8 @@ def _public_rollout(rules, world, turn, set_winner, history, root_action,
 
     state = GameState.from_components(rules, list(world), turn,
                                       list(set_winner))
+    if seed_log:
+        state.history = list(history)
     agents = [PublicInfoHeuristic() for _ in range(NUM_PLAYERS)]
     for pl, a in enumerate(agents):
         a.begin_game(pl, rules, seat_seeds[pl])
@@ -110,7 +132,8 @@ def _public_rollout(rules, world, turn, set_winner, history, root_action,
 
 def gather(n_pos: int, n_worlds: int, min_resolved: int, seed0: int = 8821,
            continuation: str = "v04"):
-    roll = _rollout if continuation == "v04" else _public_rollout
+    roll = {"v04": _rollout, "public": _public_rollout,
+            "public-seeded": _public_seeded_rollout}[continuation]
     rows = []
     positions = harvest(80, min_resolved, n_pos)
     t0 = time.time()
@@ -200,8 +223,10 @@ def main(argv):
     dest = (Path(argv[4]) if len(argv) > 4
             else ROOT / "results" / default)
 
-    named = ("full v0.4" if continuation == "v04"
-             else "public-information heuristic")
+    named = {"v04": "full v0.4",
+             "public": "public-information heuristic",
+             "public-seeded": "public-information heuristic, public log seeded",
+             }[continuation]
     print("does a marginal card survive to the end of the deal?")
     print(f"{n_pos} positions | {n_worlds} worlds | "
           f">= {min_resolved} half-suits resolved | {named} continuation\n")
