@@ -2877,12 +2877,26 @@ plainly, because it is easy to get backwards: near-collinearity makes individual
 \emph{coefficients} unidentified without making \emph{predictions} worse. A
 reduced basis is therefore not the fix, and neither is a penalty --- ridge does
 nothing at any $\lambda$ that does not also destroy the fit. Two smaller things
-fall out of the same table. Dropping terms by variance inflation removes
-$\Prob(\text{success})$ \emph{first} and costs nothing measurable, so the term
-this paper calls the objective adds no predictive value at these late positions
-once the other ten are present. And every principal-component basis is far
-worse, so the predictive directions in this design are not its high-variance
-directions --- rotating to the biggest components discards exactly the signal.
+fall out of the same table, and the first has to be stated carefully because it
+reads, at a glance, like the opposite of this paper's central advice.
+
+Dropping terms by variance inflation removes $\Prob(\text{success})$
+\emph{first}, and costs nothing measurable ($+0.0005 \pm 0.0017$). That is
+\textbf{redundancy, not unimportance}, and the two are easy to confuse. The
+variance inflation factor of $13.5$ says precisely that $92.6\%$ of
+$\Prob(\text{success})$'s within-position variation is already reproduced by the
+other ten terms --- which is unsurprising, since all eleven are computed from the
+same posterior over the same worlds. A regression cannot miss a quantity its
+other regressors have already encoded, and it does not follow that the quantity
+does not matter. Section~\ref{sec:strategy}'s finding that the probability the ask
+lands \emph{is} the objective rests on \emph{play} --- scoring asks by anything
+else loses by $-7.4$ sets per deal-pair --- and nothing in this table bears on
+it. What the table says is narrower: given ten features already carrying that
+information, an eleventh copy of it adds nothing.
+
+And every principal-component basis is far worse, so the predictive directions in
+this design are not its high-variance directions --- rotating to the biggest
+components discards exactly the signal.
 
 We record this as the seventh appearance of the pattern, and the shortest-lived:
 the sentence it refutes was written earlier the same day, in the paragraph
