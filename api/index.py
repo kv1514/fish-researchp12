@@ -169,6 +169,12 @@ class handler(BaseHTTPRequestHandler):
 
             return self._send({"error": "not found"}, 404)
 
+        except _rooms.RoomsUnavailable as e:
+            # 503, not 500: the deployment is missing configuration, the
+            # request was fine, and retrying will not help until somebody sets
+            # the variables. The message is safe to show by construction --
+            # see the class docstring.
+            return self._send({"error": str(e)}, 503)
         except (ValueError, IllegalAction) as e:
             # IllegalAction is NOT a ValueError, so without naming it here it
             # reached the handler below and its message was echoed to the

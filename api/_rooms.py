@@ -100,6 +100,22 @@ class NotFound(Exception):
     """No such room, or it expired."""
 
 
+class RoomsUnavailable(Exception):
+    """Rooms are not configured here, and the message says how to fix it.
+
+    A distinct type because api/index.py deliberately refuses to echo the text
+    of an unexpected exception -- an error from deep in the engine can carry
+    hidden state in its message. That rule is right, and it swallowed this one:
+    raising RuntimeError got the caller ``{"error": "internal error"}`` with a
+    500, so the message naming the two missing environment variables reached
+    nobody. Which is exactly as unhelpful as the intermittent rooms this check
+    was written to replace.
+
+    Everything raised as this type is a statement about deployment
+    configuration, contains no game state, and is safe to show.
+    """
+
+
 # ---------------------------------------------------------------------------
 # Stores
 # ---------------------------------------------------------------------------
@@ -292,7 +308,7 @@ def require_shared_store() -> None:
     and says which two variables are missing.
     """
     if serverless() and not isinstance(store(), PostgrestStore):
-        raise RuntimeError(
+        raise RoomsUnavailable(
             "Rooms need a shared store, and this deployment has none. Set "
             "SUPABASE_URL and SUPABASE_SERVICE_KEY (see "
             "scripts4/room_schema.sql), or play the bots -- solo games need "

@@ -388,7 +388,10 @@ def test_rooms_refuse_a_serverless_deployment_with_no_shared_store(monkeypatch):
     # variables rather than saying "unavailable".
     monkeypatch.setenv("VERCEL", "1")
     assert _rooms.serverless() is True
-    with pytest.raises(RuntimeError) as e:
+    # A DISTINCT type, not RuntimeError: the API handler refuses to echo the
+    # text of an unexpected exception, so raising a bare RuntimeError turned
+    # this careful message into {"error": "internal error"} with a 500.
+    with pytest.raises(_rooms.RoomsUnavailable) as e:
         _rooms.require_shared_store()
     assert "SUPABASE_URL" in str(e.value)
     assert "SUPABASE_SERVICE_KEY" in str(e.value)
@@ -416,3 +419,66 @@ def test_the_service_key_never_appears_in_a_store_error():
     with pytest.raises(RuntimeError) as e:
         st.read("ABCD")
     assert "super-secret-key" not in str(e.value)
+
+
+def test_the_refusal_survives_the_api_handler(monkeypatch):
+    """Raising a good message is not the same as a caller receiving one.
+
+    require_shared_store() raised RuntimeError, which api/index.py routes to
+    its catch-all -- and that clause deliberately never echoes exception text,
+    because an error from deep in the engine can carry hidden state in its
+    message. So the caller got {"error": "internal error"} with a 500, and the
+    two variable names reached nobody. Verified against the live deployment
+    before it was noticed here, which is the wrong order.
+
+    Driven through do_POST rather than through _room, because the handling is
+    in do_POST: calling the inner method would let the exception escape and
+    prove nothing about what a client receives.
+    """
+    import json as _json
+
+    monkeypatch.setenv("VERCEL", "1")
+    _rooms.reset_store_for_tests(_rooms.MemoryStore())
+
+    from api.index import handler as ApiHandler
+
+    sent = {}
+    body = {"humans": 2, "name": "Ada", "pace": 0}
+
+    class FakeHandler:
+        path = "/api/index?op=room_new"
+
+        def _body(self):
+            return dict(body)
+
+        def _send(self, obj, code=200):
+            sent["obj"], sent["code"] = obj, code
+
+    h = FakeHandler()
+    for name in ("do_POST", "_room"):
+        setattr(h, name, getattr(ApiHandler, name).__get__(h, FakeHandler))
+
+    h.do_POST()
+
+    assert sent["code"] == 503, f"got {sent.get('code')}, not a 503"
+    msg = sent["obj"].get("error", "")
+    assert "SUPABASE_URL" in msg and "SUPABASE_SERVICE_KEY" in msg, (
+        f"the refusal reached the caller as {msg!r}")
+    assert "internal error" not in msg
+    _json.dumps(sent["obj"])
+
+
+def test_a_configured_deployment_does_not_refuse(monkeypatch):
+    """The control: with the variables set, room_new is not the 503 path.
+
+    Without this, the test above would pass just as happily against a handler
+    that refused every room request unconditionally.
+    """
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    _rooms.reset_store_for_tests(_rooms.MemoryStore())
+    with pytest.raises(_rooms.RoomsUnavailable):
+        _rooms.require_shared_store()
+
+    _rooms.reset_store_for_tests(_rooms.PostgrestStore("https://x", "k"))
+    _rooms.require_shared_store()          # must not raise
