@@ -82,6 +82,17 @@ WATCH = [
      "worst residual of the cost fit", "a fit whose residuals reach"),
     ("decision_cost_profile.json", "fixed_ms", "{:.2f}",
      "sampler-alone fixed cost", "per draw --- about"),
+    # The ESS figures. The paper quoted a p90 of the champion arm as if it were
+    # the mean of a model-disabled arm that was never run, and gave two
+    # different efficiencies 400 lines apart. All four are now watched.
+    ("ess_probe.json", "0.mean_ess", "{:.1f}", "champion mean ESS",
+     "160 draws are worth"),
+    ("ess_probe.json", "0.efficiency", "{:.0%}", "champion ESS efficiency",
+     "160 draws are worth"),
+    ("ess_probe.json", "0.p90_ess", "{:.1f}", "champion ESS p90",
+     "a median of $87.0$ and a p90 of"),
+    ("ess_probe.json", "0.exact_decisions", "{:d}", "exact-DP decisions",
+     "The exact DP is almost never"),
     ("mde_recheck.json", "verdicts_changed_project_bar", "{:d}",
      "cells whose verdict changes", "Under the definition the rest of the paper"),
     ("continuation_length.json", "public.mean", "{:.0f}", "heuristic plies",
@@ -232,6 +243,7 @@ def main() -> int:
     print("do the paper's most drift-prone figures still match the files?\n")
     print(f"{'figure':<34}{'file value':>12}   in paper")
     missing = []
+    ambiguous = []
     for fname, path, fmt, name, anchor in WATCH:
         f = ROOT / "results" / fname
         if not f.exists():
@@ -245,20 +257,49 @@ def main() -> int:
             missing.append(name)
             continue
         s = fmt.format(val)
+        # EVERY occurrence of the anchor, not just the first. This used to be
+        # text.find(), which silently checked the wrong sentence whenever a
+        # phrase recurred: "a p90 of" appears at line 668 and again at 1409, so
+        # a figure correctly written at 1409 was reported missing because the
+        # window sat around 668. A check that inspects the wrong place and says
+        # "no" is a nuisance; the same bug reporting "yes" off a coincidental
+        # match elsewhere is the real hazard.
+        spots = []
         at = text.find(anchor)
-        if at < 0:
+        while at >= 0:
+            spots.append(at)
+            at = text.find(anchor, at + 1)
+        if not spots:
             print(f"{name:<34}{s:>12}   *** ANCHOR GONE: {anchor[:34]!r}")
             missing.append(f"{name} (anchor text no longer in the paper)")
             continue
         # A signed value may appear with its sign stripped by surrounding
         # LaTeX, so accept the bare digits too -- but only near the anchor.
-        near = text[max(0, at - WINDOW):at + WINDOW]
-        ok = _present(s, near) or _present(s.lstrip("+"), near)
-        print(f"{name:<34}{s:>12}   {'yes' if ok else '*** NOT NEAR ANCHOR'}")
+        ok = False
+        for at in spots:
+            near = text[max(0, at - WINDOW):at + WINDOW]
+            if _present(s, near) or _present(s.lstrip("+"), near):
+                ok = True
+                break
+        note = "" if len(spots) == 1 else f"  (anchor x{len(spots)})"
+        print(f"{name:<34}{s:>12}   "
+              f"{'yes' if ok else '*** NOT NEAR ANCHOR'}{note}")
         if not ok:
             missing.append(name)
+        elif len(spots) > 1:
+            ambiguous.append((name, len(spots), anchor))
 
     print()
+    if ambiguous:
+        # Not a failure: the value was found beside one of them. But an
+        # ambiguous anchor is one edit away from pointing at the wrong sentence
+        # and passing there, so it gets named rather than tolerated silently.
+        print(f"{len(ambiguous)} anchor(s) occur more than once. The value was "
+              f"found beside one of\nthem, which is enough today and is one "
+              f"edit from being enough for the wrong\nreason. Tighten these:")
+        for name, n, anchor in ambiguous:
+            print(f"  - {name}: {anchor[:48]!r} appears {n} times")
+        print()
     if missing:
         print(f"{len(missing)} figure(s) in the paper no longer match the "
               f"results files:")

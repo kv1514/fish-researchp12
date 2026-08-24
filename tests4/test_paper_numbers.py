@@ -96,3 +96,22 @@ def test_short_integer_formats_are_not_free_passes():
     stale = r"across the $28$ cells of this study that store per-pair values"
     assert not _present("35", stale)
     assert _present("28", stale)
+
+
+def test_no_watched_anchor_is_ambiguous():
+    """An anchor that occurs twice can check the wrong sentence.
+
+    text.find() returned only the first occurrence, so a figure written
+    correctly beside the second was reported missing -- and, worse, a figure
+    that had drifted could have passed off a coincidental match beside the
+    first. Every anchor must identify exactly one place in the paper.
+    """
+    text = (PAPER.read_text(encoding="utf-8")
+            .replace("\\%", "%").replace("{,}", ","))
+    bad = []
+    for row in WATCH:
+        anchor = row[4]
+        n = text.count(anchor)
+        if n > 1:
+            bad.append(f"{row[3]}: {anchor!r} appears {n} times")
+    assert not bad, bad
