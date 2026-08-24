@@ -507,6 +507,29 @@ WATCH = [
      "champion posterior NLL", "512, $\\gamma{=}0.45$} & \\textbf{1.3251}"),
     ("posterior_accuracy.json", "rows.1.brier", "{:.4f}",
      "champion posterior Brier", "512, $\\gamma{=}0.45$} & \\textbf{1.3251}"),
+    # The learned-weights validation. The estimate and its interval must travel
+    # together with the homogeneity and the realised sd, because the paragraph
+    # argues the run resolved what it was built to resolve -- quoting the
+    # estimate alone would leave that unsupported.
+    ("learned_weights_verdict.json", "estimate", "{:.3f}",
+     "learned weights vs champion", "\\textbf{this run}, 2000 pairs"),
+    ("learned_weights_verdict.json", "ci.0", "{:.3f}",
+     "learned weights interval, low", "\\textbf{this run}, 2000 pairs"),
+    ("learned_weights_verdict.json", "ci.1", "{:.3f}",
+     "learned weights interval, high", "\\textbf{this run}, 2000 pairs"),
+    ("learned_weights_verdict.json", "realised_sd", "{:.3f}",
+     "learned weights realised sd", "realised per-pair\nstandard deviation of"),
+    ("learned_weights_verdict.json", "divergence_share", "{:.1%}",
+     "learned weights divergence", "the arms\ndiverge on"),
+    ("learned_weights_verdict.json", "v04_attempt.est", "{:.3f}",
+     "v0.4's own attempt", "120 pairs \\emph{(different design)}"),
+    # The prefix robustness check the amendment committed to.
+    ("fit_prefix_check_v2.json", "largest_move.delta", "{:+.3f}",
+     "largest weight move, 743 vs 1023", "a largest single move of"),
+    ("fit_prefix_check_v2.json", "l1_movement", "{:.3f}",
+     "total L1 movement", "total $L_1$ movement of"),
+    ("fit_prefix_check_v2.json", "blocks_full", "{:d}",
+     "positions in the fit", "resolving it to the full"),
 ]
 
 

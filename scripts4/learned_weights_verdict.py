@@ -74,21 +74,43 @@ def _weights_table() -> list[str]:
         return [f"  (no {FIT_FILE}; run the fit stage to report the vector)"]
     d = json.loads(path.read_text())
     fit = d.get("fit", d)
-    coefs = fit.get("coefficients") or {}
-    not_fitted = set(fit.get("terms_not_fitted") or [])
+    # The vector lives under fit.learned_weights; the per-term diagnostics
+    # (permutation p, cluster se) live under fit.linear.coefficients. An
+    # earlier version of this looked for fit.coefficients, found nothing, and
+    # printed an EMPTY TABLE under a heading -- which is worse than not
+    # printing it, because the pre-registration commits to showing this vector
+    # and a blank table reads as "there was nothing to show".
+    learned = fit.get("learned_weights") or {}
+    if not learned:
+        return [f"  *** {FIT_FILE} has no fit.learned_weights; the table the "
+                f"pre-registration\n      commits to cannot be printed, and "
+                f"this says so rather than printing nothing."]
+    lin = fit.get("linear") or {}
+    coefs = lin.get("coefficients") or {}
+    not_fitted = set(lin.get("terms_not_fitted")
+                     or fit.get("terms_not_fitted") or [])
     inc = AskWeights()
-    out = [f"  {'term':<10}{'incumbent':>11}{'learned':>11}   note"]
+    out = [f"  {'term':<10}{'incumbent':>11}{'learned':>11}{'perm p':>9}   note"]
     for name in TERM_NAMES:
-        c = coefs.get(name)
-        val = c.get("coef") if isinstance(c, dict) else c
+        val = learned.get(name)
         if val is None:
             continue
+        c = coefs.get(name)
+        pv = c.get("perm_p") if isinstance(c, dict) else None
+        pstr = f"{pv:>9.3f}" if isinstance(pv, (int, float)) else " " * 9
         note = "NOT FITTED (stale column, zeroed)" if name in not_fitted else ""
-        out.append(f"  {name:<10}{getattr(inc, name):>+11.3f}{val:>+11.3f}   "
-                   f"{note}")
+        out.append(f"  {name:<10}{getattr(inc, name):>+11.3f}{val:>+11.3f}"
+                   f"{pstr}   {note}")
     if not_fitted:
-        out.append(f"\n  {sorted(not_fitted)} carry 0.0 by construction, not by "
-                   f"measurement.")
+        out.append(f"\n  {sorted(not_fitted)}: 0.0 by construction, not by "
+                   f"measurement -- its stored\n  column predates a change to "
+                   f"its formula.")
+    out.append("\n  The individual signs are NOT findings. `certain` "
+               "correlates 0.738 with\n  P(success), which carries weight 1.0 "
+               "by convention, and a different fit on a\n  different "
+               "population gives it the OPPOSITE sign. That collinearity is "
+               "the\n  same one this paper documents for P(success)'s own "
+               "coefficient.")
     return out
 
 

@@ -3369,6 +3369,80 @@ well-argued, specific, mechanistic, and supported by a number. It was also never
 tested, because testing it required exactly the thing it asserted was
 impossible.
 
+\paragraph{And the weights were played, which settles the line.} Everything
+above is estimation. \texttt{jobs/PREREGISTRATION\_learned\_weights.md} fixes,
+before the fit was run and before any weight vector had been looked at, that
+the \emph{validation duel is the test}: two blocks of $1000$ fresh pairs, the
+pinned-$p$ vector only, the shipped champion as the baseline rather than the
+weaker \texttt{fishbot4()} defaults v0.4 validated against, and a fixed-effect
+pool as the only thing that decides.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+& estimate & \\
+\midrule
+v0.4's attempt, 120 pairs \emph{(different design)} & $-2.183$ & best of three variants \\
+\textbf{this run}, 2000 pairs & $\mathbf{-0.745}$ $[-0.914, -0.576]$ & \textbf{entirely below zero} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{The learned weights lose, and this is the stronger negative.} The two
+blocks agree exactly ($I^2 = 0\%$, $Q$ at $p = 0.33$), the realised per-pair
+standard deviation of $3.857$ matches the $3.8$ the design assumed, and the arms
+diverge on $87.6\%$ of pairs --- an ask-weight change alters decisions
+constantly, which is why the A/A figure is the right one here and why this run
+resolves what it was built to resolve.
+
+Read against the diagnosis it was built to test, the result is unambiguous.
+v0.4 blamed the weak rollout continuation; that diagnosis was measured, found
+right about the mechanism, and the continuation was replaced --- the target's
+slope on $\Prob(\text{success})$ went from $+0.101$ to $+0.681$ on late
+positions and $+0.355$ across the whole harvest. \emph{And the weights still
+lose.} So the continuation was a real obstacle and not the binding one. The
+binding one is the basis, which this section measured before the duel was
+played and which the table above says a smaller basis does not fix.
+
+\textbf{What the vector is not.} The fit moves several terms with permutation
+$p \le 0.023$ --- \texttt{expose} to $+0.825$ from an incumbent of zero,
+\texttt{certain} to $-0.502$, \texttt{signal} to $-0.249$ --- and the
+individual signs are not findings. \texttt{certain} correlates $0.738$ with
+$\Prob(\text{success})$, which carries weight $1.0$ by convention, and the
+within-position feature fit reported earlier in this section gives the same
+term the \emph{opposite} sign on a different population
+(\texttt{results/target\_feature\_fit.json}, $+0.649$ against this
+$-0.502$). That is the collinearity this
+section already documented for $\Prob(\text{success})$'s own coefficient,
+arriving a second time.
+
+The single most informative row is \texttt{turn}: incumbent $+0.600$, learned
+$+0.108$. The regression cuts by more than $80\%$ the weight on the term
+duplicate-deal play values most highly and the term collinearity cannot be
+blamed for, and then loses by three quarters of a set per pair. Whatever the
+regression is fitting, it is not what wins games.
+
+One term of the eleven carries $0.0$ by construction rather than by
+measurement: \texttt{claim}'s stored column predates the correction to its
+formula, so it was named, zeroed and excluded from the fit at every stage. The
+incumbent weights it at zero too, so the duel is unaffected --- but the fit is
+a ten-term fit and is reported as one.
+
+\paragraph{A cut-off resolved before it could be chosen.} The pre-registration
+fixed the fit at ``every position the pass has completed at the moment the duel
+queue drains''. The queue drained at $743$ of $1023$ and the pass did not stop
+there, because the supervisor that widens it exists precisely to make draining
+the queue speed the pass up. Worse, that timing had been moved earlier the same
+session by a repair to the supervisor's liveness check --- so the trigger named
+a number we had influenced. The amendment resolving it to the full $1023$ was
+written at $919$, before any fit had been run, and committed to computing the
+$743$ fit anyway as a robustness check. That check came back with \emph{no sign
+flips}, a largest single move of $+0.135$ and total $L_1$ movement of $0.394$
+across eleven terms: the vector is stable, and the ambiguity turned out not to
+matter. Learning that afterwards is the only order in which it is worth
+anything.
+
 \subsection{The split posterior is badly under-confident}
 \label{sec:res-splitcal}
 
