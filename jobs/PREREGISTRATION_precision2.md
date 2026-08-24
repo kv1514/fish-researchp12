@@ -67,8 +67,24 @@ last rung's +0.340 sizes nothing here.
 ## Analysis, fixed in advance
 
 **Primary.** Fixed-effect pool of the 6 blocks. Demonstrated if and only if the
-95% interval excludes zero. `scripts4/precision_verdict.py` already implements
-exactly this analysis for the last rung and is reused unchanged.
+95% interval excludes zero. `scripts4/precision_verdict.py` implements exactly
+this analysis for the last rung and is reused for this one.
+
+> **Corrected before any pair of this run was played.** That sentence originally
+> read "is reused unchanged", and it could not have been: the script had the
+> first rung's block labels hard-coded, so pointing it at this run was
+> impossible without editing it. It is now parameterised over both rungs, with
+> each rung's constants — its minimum interesting effect, its per-pair standard
+> deviation, its pre-registered MDE — fixed in the code beside the document that
+> fixed them. A commitment a document makes on behalf of code the code cannot
+> keep is not a commitment, and the fix belongs here rather than in a footnote
+> written after the run.
+
+The per-pair standard deviation above was also re-checked after a correction to
+how `pool_cells` recovers a standard error from a recorded interval (it used a
+normal critical where the harness uses *t*). That moved the measured mean of the
+six 480-vs-160 blocks by $-0.0004$ and left the MDE at $0.1374$ either way, so
+**3.799 stands and this design is unchanged**.
 
 **Homogeneity.** Cochran's $Q$ across the 6 blocks, diagnostic only.
 
