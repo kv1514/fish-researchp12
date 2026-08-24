@@ -285,10 +285,38 @@ def ask_delta_values(ctx, asks, model: HalfSuitValue) -> tuple:
 
 def score_asks_by_value(ctx, asks, model: HalfSuitValue,
                         turn_weight: float = 0.0,
-                        expose_weight: float = 0.0) -> np.ndarray:
-    """Expected change in sets from each candidate ask."""
+                        expose_weight: float = 0.0,
+                        keep_value: float = 0.0) -> np.ndarray:
+    """Expected change in sets from each candidate ask.
+
+    ``keep_value`` is the worth, in sets, of STILL BEING ON THE MOVE after a
+    successful ask. Without it this function prices the card and not the tempo,
+    which is the larger half of what an ask buys: a hit means you ask again,
+    and again, until you miss. ``ask_delta_values`` cannot see that -- it builds
+    both counterfactuals by editing the half-suit's marginal block, so
+    ``turn_is_ours``, feature 10 of the value model, is identical in the success
+    and failure branches. The turn entered only through ``turn_weight``, which
+    is a cost on failure with no matching credit for success.
+
+    That asymmetry is not cosmetic, and it was measured rather than argued
+    (``results/value_objective_diag.json``, scripts4/value_objective_diag.py):
+    over real positions the objective picks asks whose probability of success
+    is far below the ones the champion picks, and REMOVING the turn term makes
+    it pick better ones, because ``turn_weight * (1 - p) * turn_risk`` is
+    largest exactly where ``p`` is smallest. A cost on failure, with nothing on
+    the other side, is a subsidy for long shots.
+
+    Since the credit enters as ``keep_value * p``, it is a probability-of-
+    success term with a weight in sets -- which is what the heuristic objective
+    has carried at weight 1.0 all along, in its own units. The claim here is
+    only that the same quantity belongs in this objective too, expressed in
+    sets; what that number should BE is a measurement, not a guess, and until
+    one exists this defaults to 0.0 and changes nothing.
+    """
     ds, df, ps = ask_delta_values(ctx, asks, model)
     score = ps * ds + (1.0 - ps) * df
+    if keep_value:
+        score = score + keep_value * ps
     if turn_weight or expose_weight:
         for i, a in enumerate(asks):
             fail = 1.0 - ps[i]
