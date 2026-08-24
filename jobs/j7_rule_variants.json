@@ -1,0 +1,21 @@
+[
+ {"label": "any-time claims: v04-champ vs v03-champ", "n_pairs": 200,
+  "base_seed": 1700000, "agent_seed": 9501,
+  "rules": {"claims_any_time": true},
+  "x": ["fishbot4", {"opponent_gamma": 0.35}],
+  "y": ["tuned", {"w_turn": 0.6, "w_scarce": 0.2}]},
+ {"label": "any-time claims: gamma vs no-gamma", "n_pairs": 200,
+  "base_seed": 1710000, "agent_seed": 9502,
+  "rules": {"claims_any_time": true},
+  "x": ["fishbot4", {"opponent_gamma": 0.35}], "y": ["fishbot4", {}]},
+ {"label": "48-card variant: v04-champ vs v03-champ", "n_pairs": 200,
+  "base_seed": 1720000, "agent_seed": 9503,
+  "rules": {"variant": "48"},
+  "x": ["fishbot4", {"opponent_gamma": 0.35}],
+  "y": ["tuned", {"w_turn": 0.6, "w_scarce": 0.2}]},
+ {"label": "wrong-split-to-opponent: v04-champ vs v03-champ", "n_pairs": 200,
+  "base_seed": 1730000, "agent_seed": 9504,
+  "rules": {"wrong_distribution_outcome": "opponent"},
+  "x": ["fishbot4", {"opponent_gamma": 0.35}],
+  "y": ["tuned", {"w_turn": 0.6, "w_scarce": 0.2}]}
+]

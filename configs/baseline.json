@@ -1,0 +1,24 @@
+{
+  "name": "baseline",
+  "description": "Phase-2 ladder comparison across the baseline agent stack",
+  "rules": {
+    "variant": "54",
+    "claims_any_time": false,
+    "allow_bluff_asks": false,
+    "wrong_distribution_outcome": "null",
+    "mandatory_claim_known": false,
+    "starting_player": 0
+  },
+  "agents": [
+    {"agent": "random", "kwargs": {}},
+    {"agent": "heuristic", "kwargs": {}},
+    {"agent": "memory", "kwargs": {}},
+    {"agent": "probabilistic", "kwargs": {}}
+  ],
+  "n_deals": 400,
+  "n_deals_overrides": {"probabilistic": 120},
+  "base_seed": 0,
+  "agent_seed_base": 77,
+  "n_jobs": 8,
+  "notes": "Starting seat rotates per deal; teams swapped within each pair."
+}

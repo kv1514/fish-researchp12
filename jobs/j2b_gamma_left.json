@@ -1,0 +1,8 @@
+[
+ {"label": "gamma 0.10", "n_pairs": 150, "base_seed": 1200000, "agent_seed": 6001,
+  "x": ["fishbot4", {"opponent_gamma": 0.10}], "y": ["fishbot4", {}]},
+ {"label": "gamma 0.20", "n_pairs": 150, "base_seed": 1200000, "agent_seed": 6001,
+  "x": ["fishbot4", {"opponent_gamma": 0.20}], "y": ["fishbot4", {}]},
+ {"label": "gamma 1.50", "n_pairs": 150, "base_seed": 1200000, "agent_seed": 6001,
+  "x": ["fishbot4", {"opponent_gamma": 1.50}], "y": ["fishbot4", {}]}
+]

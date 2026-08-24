@@ -1,0 +1,82 @@
+[
+ {
+  "label": "value blend 0.3",
+  "n_pairs": 160,
+  "base_seed": 1800000,
+  "agent_seed": 8800,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_value": 0.3,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "value blend 1.0",
+  "n_pairs": 160,
+  "base_seed": 1800000,
+  "agent_seed": 8800,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_value": 1.0,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "value pure",
+  "n_pairs": 160,
+  "base_seed": 1800000,
+  "agent_seed": 8800,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "objective": "value",
+    "value_turn": 0.15,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "draws 320",
+  "n_pairs": 160,
+  "base_seed": 1800000,
+  "agent_seed": 8800,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 320
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]

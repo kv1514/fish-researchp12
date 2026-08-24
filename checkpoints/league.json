@@ -1,0 +1,162 @@
+{
+  "entries": {
+    "random-v1": {
+      "version": "random-v1",
+      "agent": "random",
+      "kwargs": {},
+      "rating": 200.0,
+      "rating_stderr": 845.0,
+      "separated": true,
+      "created": "2026-08-20 03:36:40",
+      "commit": "de9ab0c",
+      "notes": "rating anchor; uniform legal play",
+      "evidence": [],
+      "is_champion": false
+    },
+    "heuristic-v1": {
+      "version": "heuristic-v1",
+      "agent": "heuristic",
+      "kwargs": {},
+      "rating": 1586.0,
+      "rating_stderr": 454.0,
+      "separated": false,
+      "created": "2026-08-20 03:36:40",
+      "commit": "de9ab0c",
+      "notes": "public-info only, no belief tracking",
+      "evidence": [],
+      "is_champion": false
+    },
+    "memory-v1": {
+      "version": "memory-v1",
+      "agent": "memory",
+      "kwargs": {},
+      "rating": 2954.0,
+      "rating_stderr": 598.0,
+      "separated": false,
+      "created": "2026-08-20 03:36:40",
+      "commit": "de9ab0c",
+      "notes": "exact logical deduction, certainty-only decisions; 100% optimal on information-resolved endgames",
+      "evidence": [],
+      "is_champion": false
+    },
+    "probabilistic-v1": {
+      "version": "probabilistic-v1",
+      "agent": "probabilistic",
+      "kwargs": {},
+      "rating": 3156.0,
+      "rating_stderr": 599.0,
+      "separated": false,
+      "created": "2026-08-20 03:36:40",
+      "commit": "de9ab0c",
+      "notes": "belief sampling over deal-consistent worlds; previous champion",
+      "evidence": [
+        {
+          "vs": "memory-v1",
+          "pair_score": 0.763,
+          "wilson_ci": [
+            0.679,
+            0.83
+          ],
+          "n_pairs": 120,
+          "set_diff": 2.07,
+          "note": "probabilistic beat memory decisively over 120 paired deals"
+        }
+      ],
+      "is_champion": false
+    },
+    "paired-search-v1": {
+      "version": "paired-search-v1",
+      "agent": "paired_search",
+      "kwargs": {
+        "n_worlds": 12,
+        "n_candidates": 5
+      },
+      "rating": null,
+      "rating_stderr": null,
+      "separated": false,
+      "created": "2026-08-20 03:36:40",
+      "commit": "de9ab0c",
+      "notes": "common-random-numbers search; statistically NEUTRAL vs probabilistic, not yet better",
+      "evidence": [],
+      "is_champion": false
+    },
+    "value-search-v1": {
+      "version": "value-search-v1",
+      "agent": "value_search",
+      "kwargs": {
+        "model_path": "checkpoints/pi_value_v1.pt",
+        "n_worlds": 16,
+        "n_candidates": 6
+      },
+      "rating": null,
+      "rating_stderr": null,
+      "separated": false,
+      "created": "2026-08-20 03:36:40",
+      "commit": "de9ab0c",
+      "notes": "perfect-information value net leaves; currently LOSES to the prior (0.25)",
+      "evidence": [],
+      "is_champion": false
+    },
+    "tuned-v1": {
+      "version": "tuned-v1",
+      "agent": "tuned",
+      "kwargs": {
+        "w_turn": 0.6,
+        "w_scarce": 0.2
+      },
+      "rating": null,
+      "rating_stderr": null,
+      "separated": false,
+      "created": "2026-08-21 01:40:00",
+      "commit": "5ac315d",
+      "notes": "turn-risk 0.6 + scarcity 0.2; first policy to beat the belief prior",
+      "evidence": [
+        {
+          "wilson_ci": [
+            0.592,
+            0.658
+          ],
+          "pair_score": 0.626,
+          "set_diff_gain": 1.275,
+          "gain_ci": [
+            1.029,
+            1.521
+          ],
+          "n_pairs": 800,
+          "vs": "probabilistic-v1",
+          "note": "confirmed on fresh seeds after a 12-cell search"
+        }
+      ],
+      "is_champion": true
+    },
+    "tuned-v2-96s": {
+      "version": "tuned-v2-96s",
+      "agent": "tuned",
+      "kwargs": {
+        "w_turn": 0.6,
+        "w_scarce": 0.2,
+        "n_samples": 96
+      },
+      "rating": null,
+      "rating_stderr": null,
+      "separated": false,
+      "created": "2026-08-21 03:30:23",
+      "commit": "75c805a",
+      "notes": "REJECTED: 3x belief sampling, no measurable gain head-to-head vs tuned-v1 (+0.10 [-0.25,+0.44], 400 pairs)",
+      "evidence": [
+        {
+          "vs": "tuned-v1",
+          "v2_gain": 0.095,
+          "ci": [
+            -0.249,
+            0.439
+          ],
+          "pair_score": 0.49,
+          "n_pairs": 400,
+          "verdict": "no difference"
+        }
+      ],
+      "is_champion": false
+    }
+  }
+}

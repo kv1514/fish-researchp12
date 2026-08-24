@@ -1,0 +1,419 @@
+# Fish Engine - Research Log
+
+Living log of experiments, results, failures, and hypotheses.
+
+Conventions: 54-card variant, baseline rules (SPEC.md), paired-deal
+evaluation (every deal played twice with teams swapped, same cards and same
+agent randomness). "Pair score" = wins + 0.5*ties over deal-pairs. "Set
+diff" = per-pair set differential, range +/-18.
+
+Evidence tiers used throughout: **DEMONSTRATED** (large controlled
+experiment, CI reported), **PROMISING** (preliminary), **SPECULATIVE**
+(hypothesis, no data).
+
+---
+
+## Current bottleneck analysis
+
+| rank | bottleneck | evidence | status |
+|---|---|---|---|
+| 1 | Search cannot yet exploit beliefs | PIMC and ISMCTS both LOST to their own prior; paired search reached only parity | value net now trained, decisive test running |
+| 2 | Belief sampling cost | measured 736 us/world, 30x the cost of belief updates per decision | **improved 4.1x to 178 us/world** via cached OR-seeded sampler |
+| 3 | Sampling is not uniform over consistent worlds | OR seeding and quota weighting skew draws | open: needs importance weighting or MCMC refinement |
+| 4 | No ground truth for "is this move right?" | every metric was relative | **exact subgame solver built** |
+| 5 | Claim policy is a fixed confidence threshold | not decision-theoretic | open: next major item |
+
+---
+
+## Session 1 - engine, beliefs, baseline ladder
+
+### Key theoretical result driving the design
+In Literature, *every card movement is public*: a successful ask names the
+card, and a claim reveals all six locations. Therefore the current location
+of every card is a deterministic function of the INITIAL DEAL plus the
+public log, and all hidden-state inference reduces to constraints on the
+initial deal:
+- per-card candidate sets over initial owners,
+- exact per-player deal counts (9 each),
+- OR-constraints ("asker held at least one of that half-suit then").
+
+This makes belief tracking **exact and sound** rather than approximate.
+Verified by truth-in-support tests at every step for all six seats plus an
+external spectator, and by independent replay-validation of sampled worlds.
+
+**Honest limitation:** propagation is sound but NOT complete (no full
+arc-consistency), and the sampler is not uniform over the consistent set.
+Both are documented in `fish/beliefs.py` and remain open items.
+
+### DEMONSTRATED - the baseline ladder separates cleanly
+400 deal-pairs per cell (120 where probabilistic is involved):
+
+| matchup | pair score (X) | 95% CI | set diff/pair |
+|---|---|---|---|
+| random vs heuristic | 0.000 | [0, .010] | -12.94 +/- 0.19 |
+| random vs memory | 0.000 | [0, .010] | -16.38 +/- 0.11 |
+| random vs probabilistic | 0.000 | [0, .031] | -16.59 +/- 0.19 |
+| heuristic vs memory | 0.000 | [0, .010] | -11.86 +/- 0.20 |
+| heuristic vs probabilistic | 0.000 | [0, .031] | -12.08 +/- 0.43 |
+| memory vs probabilistic | 0.237 | [.170, .321] | -2.07 +/- 0.57 |
+
+Logical bookkeeping alone is worth ~12 sets/pair over public-info
+heuristics. Probabilistic inference adds a further 2.07 [1.50, 2.63].
+
+### Ratings v1 RETRACTED (methodological failure worth recording)
+An audit found `fit_ratings` never converged and had no handling for perfect
+separation, so the published numbers were iteration-budget artifacts.
+Rewritten as a regularized MAP Bradley-Terry fit (damped Newton,
+full-covariance stderrs). Refit:
+
+| agent | rating | note |
+|---|---|---|
+| probabilistic | 3156 +/- 599 | |
+| memory | 2954 +/- 598 | |
+| heuristic | 1586 +/- 454 | |
+| random | 200 +/- 845 | bound only (winless) |
+
+**LESSON:** when policies are separated by shutouts, pairwise ratings are
+only BOUNDS. The maximum-likelihood gap is literally infinite and any finite
+number is a prior artifact. The only precisely measured gap in this ladder is
+memory -> probabilistic (~202 points). Ordering is trustworthy; magnitudes
+below probabilistic are not. To get meaningful ratings across very unequal
+policies we need intermediate rungs or explicit handicaps.
+
+---
+
+## Session 2 - the search failure, diagnosed and fixed
+
+This is the most instructive result so far.
+
+| search design | vs probabilistic prior (paired deals) |
+|---|---|
+| PIMC v1 (independent rollout batches) | **0.146** for search (24 pairs) |
+| ISMCTS (UCT, per-iteration world resampling) | **0.062** for search (32 pairs, 1W/2T/29L) |
+| PairedSearch (common random numbers + paired significance) | **0.562** [.410, .704], statistically NEUTRAL |
+| ValueSearch with BELIEF-feature net | **0.150** for search (40 pairs, 6W/0T/34L) |
+
+Both naive search designs were dramatically WORSE than the simple policy
+they were built on. Rather than guess, `scripts/diagnose_search.py` measured:
+
+- **D1: is the leaf eval informative?** corr(eval@depth200, true final
+  differential) = **+0.73**. The evaluation function was fine.
+- **D2: the actual culprit.** Standard deviation of ONE action's rollout
+  value across sampled worlds = **0.698**. Mean gap between best and worst
+  candidate action = **0.293**. **Noise/signal ~ 2.4.** Any search that
+  evaluates different actions on *different* worlds (UCT's uneven
+  allocation, independent PIMC batches) produces a ranking dominated by
+  world luck.
+
+**FIX 1 (worked):** common random numbers - evaluate every candidate on the
+SAME worlds with the SAME rollout seeds - plus a paired significance test so
+search only overrides the prior on evidence. The deficit vanished
+(0.062 -> 0.562).
+
+**FIX 2 (failed, then diagnosed):** a value net trained on BELIEF features
+lost 34-6 when used inside determinized search. Cause: train/inference
+distribution mismatch. Inside a sampled world every card location is
+certain, so belief features (entropy, spread, expected share) take values
+the net never saw during training.
+
+**FIX 3:** train a PERFECT-INFORMATION evaluator, whose input distribution
+matches its use (scoring fully-determined worlds sampled from the agent's
+own beliefs). Results:
+
+| evaluator | variance explained | corr with outcome |
+|---|---|---|
+| belief-feature net (mismatched) | 43.7% | 0.669 |
+| perfect-information net | **58.7%** | **0.771** |
+
+(146k samples from 2,500 self-play games.)
+
+---
+
+## Session 2 - exact ground truth
+
+Built `fish/exact.py`, the project's only source of ABSOLUTE rather than
+relative truth.
+
+### DEMONSTRATED - the Fish state graph is CYCLIC
+Discovered by the solver's own tests: two opponents can trade a card back
+and forth and return to an identical position. Fish is a **loopy game**, so
+naive backward induction never terminates. This is a genuine structural
+property, not an implementation artifact.
+
+Solution: solve in layers. Claims strictly reduce the number of unresolved
+half-suits, so they always move to a simpler layer; asks and passes cycle
+within a layer and are solved by **value iteration** to a fixpoint. Every
+non-terminal in-layer state starts at 0, encoding the honest semantics of an
+unbroken cycle: if play never progresses, nobody scores again. A side that
+can only lose by claiming will correctly prefer to stall, which is exactly
+the stalemate behavior real Fish exhibits.
+
+### Tractability, measured
+A layer with k live cards has up to 6^k placements. One half-suit (6 cards)
+solves in ~1,800 states. Two half-suits (12 cards) is hopeless by
+enumeration, so `solve_position` refuses loudly above 9 live cards rather
+than hanging.
+
+Example verified ground truth: P0 holds 2C 3C 4C, P1 holds 5C, P3 holds
+6C 7C, P0 to move. Exact value +1, with THREE optimal actions (any
+successful steal). This is the kind of position where "the engine agrees
+with the optimum" is a real, checkable claim.
+
+---
+
+## Session 3 - absolute strength, and where the remaining gap actually is
+
+### DEMONSTRATED - agreement with EXACT optimal play
+
+The first metric in this project that is absolute rather than relative.
+188 solvable endgame positions (one live half-suit, <= 8 live cards) drawn
+from real games; each solved exactly; each agent asked for its action from
+its legal observation only.
+
+Two regimes are reported separately, because they mean different things:
+- **resolved**: every remaining card's location is already publicly
+  determined, so the perfect-information optimum IS the optimum and a strong
+  agent should reach 100%.
+- **uncertain**: genuine hidden information remains, so agreement is a
+  comparative signal, not a target.
+
+327 positions, 130 of them information-resolved:
+
+| agent | resolved | uncertain | mean value loss |
+|---|---|---|---|
+| random | 48.5% (63/130) | 28.9% (57/197) | 0.465 sets |
+| heuristic | 66.2% (86/130) | 47.7% (94/197) | 0.275 sets |
+| **memory** | **100.0% (130/130)** | 69.0% (136/197) | 0.138 sets |
+| **probabilistic** | **100.0% (130/130)** | **75.6% (149/197)** | **0.104 sets** |
+| ev_claim | 100.0% (130/130) | 75.6% (149/197) | 0.104 sets |
+| paired_search | 100.0% (130/130) | 73.6% (145/197) | 0.122 sets |
+| **value_search** | **97.7% (127/130)** | 68.0% (134/197) | 0.177 sets |
+
+**This is the strongest correctness result the project has.** When
+information is fully determined, both belief-tracking agents play *exactly
+optimally in every single position tested*. Not "beats the previous
+version": provably right.
+
+**And it localizes the search defect precisely.** `value_search` is the
+only agent that fails information-resolved positions (127/130). Those are
+positions with NO hidden information, where the right move is unambiguous
+and its own prior already had it. The learned evaluation is overriding a
+correct choice with a wrong estimate. That is direct, absolute evidence of a
+defect rather than a preference, and it is exactly what this benchmark was
+built to expose. Any fix must at minimum restore 130/130 before the agent
+can be taken seriously.
+
+`paired_search` shows the same effect in weaker form: identical on resolved
+positions but slightly *worse* than its prior under uncertainty (73.6% vs
+75.6%, value loss 0.122 vs 0.104), consistent with its neutral-to-slightly-
+negative match results. Search is still subtracting, not adding.
+
+`ev_claim` scores identically to `probabilistic` here, which independently
+corroborates the bimodality finding: in endgames the claim confidence is
+never in the band where the threshold rule differs.
+
+### The key strategic implication
+Because the strong agents are already optimal in solvable endgames, **the
+remaining strength gap is NOT in the endgame**. It lives in midgame
+positions that are too large to solve exactly. Any future search work should
+be aimed there, and endgame-focused search has little headroom to win back.
+
+This also explains the value-search failures below: in the regime where
+search was being measured, there was very little left to gain, so added
+estimation noise could only hurt.
+
+### DEMONSTRATED - claim threshold sweep, and a falsified prediction
+
+150 paired deals per cell, one variable changed:
+
+| vs baseline 0.97 | pair score for 0.97 | set diff per pair | verdict |
+|---|---|---|---|
+| 0.60 | 0.590 [0.510, 0.666] | +0.71 [+0.34, +1.08] | 0.97 better |
+| 0.70 | 0.570 [0.490, 0.647] | +0.45 [+0.18, +0.72] | 0.97 better (differential) |
+| 0.85 | 0.497 [0.418, 0.576] | -0.01 [-0.09, +0.06] | indistinguishable |
+| 0.999 | 0.500 [0.421, 0.579] | +0.00 [+0.00, +0.00] | identical play |
+
+**The EV claim model's prediction was FALSIFIED.** It derived an optimal
+threshold near 0.70; the experiment shows 0.70 is measurably *worse* than
+0.97 (+0.45 sets/pair). The model's error is identifiable: `wait_ev` used
+`p_improve = 0.55`, treating the resolution of an unknown teammate split as
+roughly a coin flip. In real play continued asking localizes teammate
+holdings far more reliably, so waiting is worth much more than modeled.
+Correcting `p_improve` from data is a concrete follow-up.
+
+**Structural finding:** 0.97 vs 0.999 produced a differential of *exactly*
+0.00 across 150 pairs, i.e. the two never once diverged. Claim confidence is
+**bimodal**: a strong agent either knows the split or does not, and almost
+never sits in the 0.97-0.999 band. This means threshold tuning in that range
+is not merely unhelpful, it is a no-op, and effort should go to *increasing
+how often the split becomes known* rather than to when to pull the trigger.
+
+Note on statistics: the pair-score Wilson CI and the differential t-CI
+disagreed for the 0.70 cell (score CI straddles 0.5, differential CI
+excludes 0). The differential is the more sensitive statistic because it
+uses magnitude rather than only sign; both are reported to avoid
+cherry-picking.
+
+### DEMONSTRATED - the search defect was localized, then fixed
+
+The three failures were dissected (`scripts/diagnose_value_search.py`).
+**All 3/3 were search overriding a CORRECT prior**, and each time it chose an
+action worth -1.00 when +1.00 was available. Example: P4 to move, P1 holding
+only 8D, P5 holding 8C 8H RJ BJ. Every steal wins the set; value search
+asked P1 for 8C, which provably fails, handing the turn to the opponents who
+then held everything.
+
+Root cause: in a fully-determined position every sampled world is identical,
+so the paired difference has zero variance and the significance test degrades
+to "trust the network". The network was extrapolating badly on lopsided
+endgames that rarely appear in self-play training data.
+
+FIX (`fish/agents/tablebase.py`): when an agent's own beliefs pin every live
+card, the position contains no hidden information, so solve it exactly
+instead of estimating. This is the Fish analogue of chess tablebases, and it
+is leak-free by construction: the reconstruction uses only public events plus
+the agent's own hand, and refuses unless every live card is pinned AND the
+reconstruction reproduces every public fact.
+
+Result: **every agent now scores 100.0% on information-resolved positions**,
+value search included.
+
+### DEMONSTRATED - search's overrides are net harmful, and the cause is the objective
+
+With the tablebase in place, a threshold sweep on the exact benchmark
+isolates what search actually contributes under genuine uncertainty:
+
+| configuration | agreement (uncertain) | mean value loss |
+|---|---|---|
+| **prior, no search** | **76.0%** | **0.104** |
+| paired search t=1.0 | 73.5% | 0.116 |
+| paired search t=1.5 | 74.0% | 0.122 |
+| paired search t=2.5 | 75.5% | 0.110 |
+| paired search t=4.0 | 75.5% | 0.110 |
+| paired search t=8.0 | 75.5% | 0.110 |
+| paired search 24 worlds, t=2.5 | 75.5% | 0.110 |
+| value search t=1.0 | 70.5% | 0.147 |
+| value search t=2.5 | 72.0% | 0.141 |
+
+Agreement rises monotonically as the override bar is raised, converging on
+the prior **from below**. That is the exact signature predicted if search's
+overrides were false positives from multiple comparisons. At t >= 2.5 search
+essentially stops overriding and simply becomes the prior.
+
+But the stronger reading is this: **no setting of the search makes it better
+than not searching.** Doubling the world count changes nothing. So the
+problem is not the search machinery, the sample size, or the statistics.
+**The problem is the evaluation target.** Neither depth-limited rollouts nor
+the learned value function ranks candidate asks better than the prior's
+simple P(success). Until the thing being maximized is improved, more search
+cannot help, and this is why the roadmap now points at the ask objective
+rather than at deeper search.
+
+### FAILED - quiescence extension for value search
+Hypothesis: evaluating immediately after our own action cannot see
+turn-retention value (the strongest measured skill statistic), so extend
+until the turn leaves our team, then evaluate.
+
+Result: **rejected**. Pair score for value search fell to 0.125 (34W/2T/4L
+against it over 40 paired deals), worse than the 0.25 without quiescence.
+Diagnosis: the perfect-information greedy continuation is too strong and too
+uniform. Inside a determinized world almost any successful ask drains the
+same cards, so all candidates converge to similar leaves and the comparison
+loses discrimination. Kept behind `quiesce=False` as a documented negative
+result.
+
+### Standing score for search variants vs the probabilistic prior
+| variant | pair score for search | reading |
+|---|---|---|
+| PIMC v1 | 0.146 | clearly worse |
+| ISMCTS | 0.062 | clearly worse |
+| value search (belief features) | 0.150 | clearly worse |
+| value search (PI features) | 0.250 | worse |
+| value search (PI + quiescence) | 0.125 | worse |
+| **paired search (CRN)** | **0.387-0.438**, CI straddles 0.5 | **neutral** |
+
+Common random numbers remain the only intervention that has removed the
+search deficit. Nothing has yet produced a search that is significantly
+BETTER than the belief prior. That is the honest current state.
+
+---
+
+## Performance
+
+| component | before | after | how |
+|---|---|---|---|
+| belief world sampling | 736 us/world | **178 us/world (4.1x)** | cache the constraint scaffolding across draws; satisfy disjoint OR-constraints during construction instead of repairing afterwards |
+| belief incremental update | 726 us | 352 us | fewer redundant propagation passes |
+
+Profiling drove both: sampling was 30x the per-decision cost of belief
+updates, and within sampling, OR repair was 66% of the time.
+
+Simulator throughput (8 cores): random ~30 games/s/core; heuristic ~8/s;
+memory ~11/s; probabilistic ~4/s. Python remains adequate through the
+current phase; a compiled core is NOT yet justified because inference, not
+rule application, dominates.
+
+---
+
+## Failed experiments (kept deliberately)
+
+1. **PIMC v1** - lost 0.146 to its own prior. Cause: world-noise dominated
+   action-gap. Superseded by paired search.
+2. **ISMCTS** - lost 0.062. Same root cause, worse because UCT allocates
+   different worlds to different actions by construction.
+3. **Belief-feature value net inside determinized search** - lost 0.150.
+   Cause: train/inference distribution mismatch. Superseded by the
+   perfect-information evaluator.
+4. **Naive backward induction for exact solving** - infinite recursion,
+   because the state graph is cyclic. Superseded by layered value iteration.
+
+---
+
+## Bugs found by the test suite and audits (all fixed)
+
+- Agent RNG seeds were a deterministic function of the deal seed, a genuine
+  channel for reconstructing hidden hands. Seeds now come from an
+  independent stream and are recorded rather than coupled.
+- `fit_ratings` never converged and mishandled perfect separation.
+- A gold-standard belief assertion ended in `or True` and could never fail.
+- Timed-out games were silently counted as completed paired observations.
+- Differential CI used population variance with a z critical value.
+- `Pass(-1)` was accepted (negative indexing wrapped to seat 5) and
+  corrupted `state.turn`; `Pass(7)` raised IndexError instead of
+  IllegalAction.
+- A factually exact claim submitted as a *list* rather than a tuple compared
+  unequal and was scored as a wrong distribution, nulling a correct claim.
+- The stall detector looked for runs of failed asks, missing the common
+  livelock where cards shuttle between two opponents with successful asks.
+  Now tracks resolution progress.
+- The OR-seeded sampler could break a seeded constraint while repairing an
+  overlapping one (caught by replay-validation).
+
+## Infrastructure incident
+
+The working tree was deleted by an external process mid-session (git
+directory included; nothing in the recycle bin, no Defender entry). The
+project was rebuilt from context and re-verified: 140+ tests pass. Datasets
+and the trained checkpoint were regenerated. Commits are now made more
+frequently as recovery points.
+
+---
+
+## Next experiments (highest expected information gain first)
+
+1. **Decision-theoretic claim policy.** Replace the fixed confidence
+   threshold with an expected-value comparison (claim now vs wait), using
+   the value net for the continuation. The threshold is currently the least
+   principled part of a strong agent.
+2. **Ask objective beyond P(success).** Learn the value of an ask including
+   turn retention, information gained, information leaked, and which
+   opponent receives the turn on failure.
+3. **Exact-solver agreement benchmark.** Measure how often each agent picks
+   an exactly-optimal action in solvable endgames. This is the first
+   absolute (not relative) strength metric.
+4. **Sampler uniformity.** Quantify the bias from OR seeding; test
+   importance weighting or MCMC refinement.
+5. **Teacher/student loop.** Use paired search as a teacher to label
+   difficult information states, train a policy head, put it back in search.
+6. **Exploiter search.** Train a best response against the champion; feed
+   its wins back into training.

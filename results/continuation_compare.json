@@ -1,0 +1,52 @@
+{
+ "v04": {
+  "slope": 0.6810178020205941,
+  "se_clustered": 0.14246922731803727,
+  "n_points": 3056,
+  "n_positions": 110,
+  "range": 1.0
+ },
+ "public": {
+  "slope": 0.03999950192462495,
+  "se_clustered": 0.04490859747037742,
+  "n_points": 3056,
+  "n_positions": 110,
+  "range": 1.0
+ },
+ "public_seeded": {
+  "slope": 0.08431581160435173,
+  "se_clustered": 0.07111486422512066,
+  "n_points": 3056,
+  "n_positions": 110,
+  "range": 1.0
+ },
+ "decomposition": {
+  "policy_only": {
+   "delta": 0.5967019904162424,
+   "se": 0.14505097445208764
+  },
+  "log_only": {
+   "delta": 0.04431630967972676,
+   "se": 0.06909996255077328
+  },
+  "log_share_of_combined": 0.06913423481528064
+ },
+ "paper_slope": 0.101,
+ "same_positions": true,
+ "unpaired": {
+  "delta": 0.6410183000959692,
+  "se": 0.14937959318245236,
+  "z": 4.291203948540875
+ },
+ "paired": {
+  "delta": 0.6410183000959692,
+  "se": 0.14458483487213605,
+  "z": 4.4335099228273505,
+  "n_positions": 110,
+  "share_v04_larger": 0.6272727272727273,
+  "n_positions_both_arms": 110,
+  "median_per_position": 0.29932613643586603,
+  "unweighted_mean": 0.020154335759132197,
+  "worst_per_position": -21.66666666666674
+ }
+}

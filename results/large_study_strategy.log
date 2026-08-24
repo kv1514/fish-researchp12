@@ -1,0 +1,15 @@
+﻿[   334s] turn-risk w=0.15             n=  600  score 0.453 [0.414,0.493]  diff -0.483 [-0.753,-0.214]  -> Y stronger
+[   264s] turn-risk w=0.30             n=  600  score 0.458 [0.419,0.498]  diff -0.477 [-0.768,-0.185]  -> Y stronger
+[   286s] turn-risk w=0.60             n=  600  score 0.403 [0.365,0.443]  diff -0.805 [-1.077,-0.533]  -> Y stronger
+[   302s] reveal-cost w=0.05           n=  600  score 0.504 [0.464,0.544]  diff -0.137 [-0.416,+0.142]  -> no difference
+[   331s] reveal-cost w=0.15           n=  600  score 0.478 [0.439,0.518]  diff -0.288 [-0.571,-0.006]  -> Y stronger
+[   337s] deplete w=0.15               n=  600  score 0.500 [0.460,0.540]  diff +0.010 [-0.236,+0.256]  -> no difference
+[   366s] scarcity w=0.20              n=  600  score 0.462 [0.422,0.502]  diff -0.547 [-0.830,-0.263]  -> Y stronger
+[   286s] claim 0.97 vs 0.70           n=  600  score 0.557 [0.517,0.596]  diff +0.288 [+0.169,+0.407]  -> X stronger
+[   377s] claim 0.97 vs 0.90           n=  600  score 0.504 [0.464,0.544]  diff +0.032 [-0.006,+0.069]  -> no difference
+[   247s] belief samples 32 vs 8       n=  600  score 0.605 [0.565,0.643]  diff +0.927 [+0.634,+1.219]  -> X stronger
+[   484s] belief samples 32 vs 96      n=  600  score 0.447 [0.407,0.487]  diff -0.537 [-0.822,-0.251]  -> Y stronger
+[   201s] tablebase on vs off          n=  600  score 0.500 [0.460,0.540]  diff +0.000 [+0.000,+0.000]  -> no difference
+
+14400 games in 3817s
+Saved C:\Users\vel_k\Documents\fish-engine\results\large_study_strategy.json

@@ -1,0 +1,160 @@
+{
+  "claim_threshold": [
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.97
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.6
+        }
+      ],
+      "n_pairs": 150,
+      "x_pair_wins": 56,
+      "y_pair_wins": 29,
+      "pair_ties": 65,
+      "sum_diff": 107.0,
+      "sum_diff_sq": 853.0,
+      "x_sets": 1337,
+      "y_sets": 1230,
+      "null_sets": 133,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 34251,
+      "pair_score": 0.59,
+      "wilson_ci": [
+        0.5099993378831533,
+        0.6655058570706172
+      ],
+      "diff_mean_ci": [
+        0.7133333333333334,
+        0.3449751952343214,
+        1.0816914714323453
+      ],
+      "label_x": "probabilistic{'claim_threshold': 0.97}",
+      "label_y": "probabilistic{'claim_threshold': 0.6}",
+      "verdict": "X better"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.97
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.7
+        }
+      ],
+      "n_pairs": 150,
+      "x_pair_wins": 35,
+      "y_pair_wins": 14,
+      "pair_ties": 101,
+      "sum_diff": 68.0,
+      "sum_diff_sq": 446.0,
+      "x_sets": 1315,
+      "y_sets": 1247,
+      "null_sets": 138,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 34114,
+      "pair_score": 0.57,
+      "wilson_ci": [
+        0.489999342108903,
+        0.6465046984106961
+      ],
+      "diff_mean_ci": [
+        0.4533333333333333,
+        0.18401507483748802,
+        0.7226515918291786
+      ],
+      "label_x": "probabilistic{'claim_threshold': 0.97}",
+      "label_y": "probabilistic{'claim_threshold': 0.7}",
+      "verdict": "no difference"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.97
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.85
+        }
+      ],
+      "n_pairs": 150,
+      "x_pair_wins": 2,
+      "y_pair_wins": 3,
+      "pair_ties": 145,
+      "sum_diff": -2.0,
+      "sum_diff_sq": 32.0,
+      "x_sets": 1294,
+      "y_sets": 1296,
+      "null_sets": 110,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 34575,
+      "pair_score": 0.49666666666666665,
+      "wilson_ci": [
+        0.4177403204686222,
+        0.5757594871256825
+      ],
+      "diff_mean_ci": [
+        -0.013333333333333334,
+        -0.08807194560879049,
+        0.06140527894212382
+      ],
+      "label_x": "probabilistic{'claim_threshold': 0.97}",
+      "label_y": "probabilistic{'claim_threshold': 0.85}",
+      "verdict": "no difference"
+    },
+    {
+      "spec_x": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.97
+        }
+      ],
+      "spec_y": [
+        "probabilistic",
+        {
+          "claim_threshold": 0.999
+        }
+      ],
+      "n_pairs": 150,
+      "x_pair_wins": 0,
+      "y_pair_wins": 0,
+      "pair_ties": 150,
+      "sum_diff": 0.0,
+      "sum_diff_sq": 0.0,
+      "x_sets": 1287,
+      "y_sets": 1287,
+      "null_sets": 126,
+      "timeouts": 0,
+      "incomplete_pairs": 0,
+      "total_actions": 34270,
+      "pair_score": 0.5,
+      "wilson_ci": [
+        0.4209887046908502,
+        0.5790112953091499
+      ],
+      "diff_mean_ci": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "label_x": "probabilistic{'claim_threshold': 0.97}",
+      "label_y": "probabilistic{'claim_threshold': 0.999}",
+      "verdict": "no difference"
+    }
+  ]
+}

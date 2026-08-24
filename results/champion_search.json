@@ -1,0 +1,177 @@
+[
+  {
+    "label": "turn 0.6 + scarce 0.2",
+    "kwargs": {
+      "w_turn": 0.6,
+      "w_scarce": 0.2
+    },
+    "n_pairs": 600,
+    "gain": 1.4066666666666667,
+    "gain_ci": [
+      1.1124728449170451,
+      1.7008604884162883
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.6375
+  },
+  {
+    "label": "turn 1.0 + scarce 0.4 + samples 96",
+    "kwargs": {
+      "w_turn": 1.0,
+      "w_scarce": 0.4,
+      "n_samples": 96
+    },
+    "n_pairs": 600,
+    "gain": 1.2583333333333333,
+    "gain_ci": [
+      0.9732886839503931,
+      1.5433779827162735
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.6416666666666666
+  },
+  {
+    "label": "turn 1.0 + scarce 0.4 + reveal 0.15",
+    "kwargs": {
+      "w_turn": 1.0,
+      "w_scarce": 0.4,
+      "w_reveal": 0.15
+    },
+    "n_pairs": 600,
+    "gain": 1.2133333333333334,
+    "gain_ci": [
+      0.9060446576386898,
+      1.520622009027977
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.6133333333333333
+  },
+  {
+    "label": "turn 1.0 + scarce 0.4",
+    "kwargs": {
+      "w_turn": 1.0,
+      "w_scarce": 0.4
+    },
+    "n_pairs": 600,
+    "gain": 1.0283333333333333,
+    "gain_ci": [
+      0.7474308858332765,
+      1.30923578083339
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.5908333333333333
+  },
+  {
+    "label": "scarce 0.2",
+    "kwargs": {
+      "w_scarce": 0.2
+    },
+    "n_pairs": 600,
+    "gain": 0.6483333333333333,
+    "gain_ci": [
+      0.3701512597715648,
+      0.9265154068951018
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.5666666666666667
+  },
+  {
+    "label": "scarce 0.4",
+    "kwargs": {
+      "w_scarce": 0.4
+    },
+    "n_pairs": 600,
+    "gain": 0.5716666666666667,
+    "gain_ci": [
+      0.28771671494058754,
+      0.8556166183927458
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.5675
+  },
+  {
+    "label": "turn 0.6",
+    "kwargs": {
+      "w_turn": 0.6
+    },
+    "n_pairs": 600,
+    "gain": 0.5633333333333334,
+    "gain_ci": [
+      0.2714316534276146,
+      0.855235013239052
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.575
+  },
+  {
+    "label": "samples 96",
+    "kwargs": {
+      "n_samples": 96
+    },
+    "n_pairs": 600,
+    "gain": 0.3433333333333333,
+    "gain_ci": [
+      0.06957522845237718,
+      0.6170914382142895
+    ],
+    "verdict": "candidate stronger",
+    "pair_score": 0.5291666666666667
+  },
+  {
+    "label": "turn 1.0",
+    "kwargs": {
+      "w_turn": 1.0
+    },
+    "n_pairs": 600,
+    "gain": 0.09833333333333333,
+    "gain_ci": [
+      -0.1914207970655451,
+      0.38808746373221176
+    ],
+    "verdict": "no difference",
+    "pair_score": 0.5158333333333334
+  },
+  {
+    "label": "turn 1.6 + scarce 0.4",
+    "kwargs": {
+      "w_turn": 1.6,
+      "w_scarce": 0.4
+    },
+    "n_pairs": 600,
+    "gain": -0.058333333333333334,
+    "gain_ci": [
+      -0.3555067085086522,
+      0.23884004184198548
+    ],
+    "verdict": "no difference",
+    "pair_score": 0.47916666666666663
+  },
+  {
+    "label": "scarce 0.8",
+    "kwargs": {
+      "w_scarce": 0.8
+    },
+    "n_pairs": 600,
+    "gain": -1.3216666666666668,
+    "gain_ci": [
+      -1.6141803072206193,
+      -1.0291530261127142
+    ],
+    "verdict": "baseline stronger",
+    "pair_score": 0.37
+  },
+  {
+    "label": "turn 1.6",
+    "kwargs": {
+      "w_turn": 1.6
+    },
+    "n_pairs": 600,
+    "gain": -1.5083333333333333,
+    "gain_ci": [
+      -1.8200820490316783,
+      -1.1965846176349884
+    ],
+    "verdict": "baseline stronger",
+    "pair_score": 0.3533333333333334
+  }
+]

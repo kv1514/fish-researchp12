@@ -1,0 +1,16 @@
+{
+  "cross_check_m1": {
+    "n_positions": 300,
+    "n_v1_solvable": 300,
+    "n_v1_refused": 0,
+    "value_agreement": 1.0,
+    "optimal_action_set_agreement": 1.0,
+    "disagreements": [],
+    "v1_cpu_seconds": 2240.245470800044,
+    "v1_wall_seconds": 769.4623219999921,
+    "v1_nodes": 2368371,
+    "v2_seconds": 0.05207720000180416,
+    "v2_median_us": 91.19999594986439,
+    "v1_median_ms": 989.9438499996904
+  }
+}

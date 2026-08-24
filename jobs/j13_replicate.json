@@ -1,0 +1,12 @@
+[
+ {"label": "REPLICATE value0.5+sqrt g0.70 (fresh seeds)", "n_pairs": 500,
+  "base_seed": 5000000, "agent_seed": 50000,
+  "x": ["fishbot4", {"opponent_gamma": 0.70, "count_mode": "sqrt", "w_value": 0.5,
+                     "hsvalue_path": "checkpoints/hsvalue_v1.json"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "REPLICATE 2 value0.5+sqrt g0.70", "n_pairs": 500,
+  "base_seed": 5100000, "agent_seed": 51000,
+  "x": ["fishbot4", {"opponent_gamma": 0.70, "count_mode": "sqrt", "w_value": 0.5,
+                     "hsvalue_path": "checkpoints/hsvalue_v1.json"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]}
+]

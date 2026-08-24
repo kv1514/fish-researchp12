@@ -1,0 +1,40 @@
+[
+ {
+  "label": "SCREEN gamma_schedule 0.4",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 0.4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 8300000,
+  "agent_seed": 9601
+ },
+ {
+  "label": "SCREEN gamma_schedule 0.8",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 0.8
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 8500000,
+  "agent_seed": 9602
+ }
+]

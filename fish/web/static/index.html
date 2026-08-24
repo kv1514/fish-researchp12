@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fish Engine Platform</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <h1>Fish <span class="sub">Literature engine platform</span></h1>
+  <div class="tabs">
+    <button class="tab active" data-tab="table">Live table</button>
+    <button class="tab" data-tab="match">Matchups</button>
+  </div>
+</header>
+
+<main>
+<section id="tab-table" class="tab-panel active">
+  <div class="controls">
+    <div class="seatpickers" id="seatpickers"></div>
+    <div class="row">
+      <label>Seed <input id="seed" type="number" placeholder="random"></label>
+      <label>Variant
+        <select id="variant">
+          <option value="54">54 (9 half-suits)</option>
+          <option value="48">48 (classic)</option>
+        </select>
+      </label>
+      <button id="new" class="primary">New game</button>
+      <button id="step">Step</button>
+      <button id="play">Play</button>
+      <button id="finish">Finish</button>
+      <label class="speed">Speed
+        <input id="speed" type="range" min="1" max="60" value="14">
+      </label>
+      <button id="analyze">Analyze position</button>
+    </div>
+    <div class="row presets">
+      <span>Quick fill:</span>
+      <button data-preset="probabilistic">All probabilistic</button>
+      <button data-preset="memory">All memory</button>
+      <button data-preset="mix">Team A strong vs Team B weak</button>
+      <button data-preset="paired_search">All paired-search</button>
+    </div>
+  </div>
+
+  <div class="scoreboard" id="scoreboard"></div>
+  <div class="board" id="board"></div>
+
+  <div class="lower">
+    <div class="panel">
+      <h2>Half-suits</h2>
+      <div id="suits" class="suits"></div>
+    </div>
+    <div class="panel">
+      <h2>Action log</h2>
+      <div id="log" class="log"></div>
+    </div>
+    <div class="panel">
+      <h2>Engine analysis</h2>
+      <div id="analysis" class="analysis muted">
+        Press <b>Analyze position</b> to evaluate the player to move.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-match" class="tab-panel">
+  <div class="controls">
+    <div class="row">
+      <label>Policy X <select id="mx"></select></label>
+      <label>Policy Y <select id="my"></select></label>
+      <label>Paired deals
+        <input id="mdeals" type="number" value="20" min="2" max="200">
+      </label>
+      <button id="runmatch" class="primary">Run matchup</button>
+    </div>
+    <p class="muted small">
+      Every deal is played twice with the teams swapped, on the same cards and
+      the same agent randomness, so the result is luck-controlled. A pair score
+      above 0.5 favours X.
+    </p>
+  </div>
+  <div id="matchout" class="matchout muted">No matchup run yet.</div>
+</section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+[
+ {
+  "label": "PRECISION n_draws 480 vs 160 block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 11000000,
+  "agent_seed": 9700
+ },
+ {
+  "label": "PRECISION n_draws 480 vs 160 block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 11200000,
+  "agent_seed": 9701
+ },
+ {
+  "label": "PRECISION n_draws 480 vs 160 block 2",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 11400000,
+  "agent_seed": 9702
+ },
+ {
+  "label": "PRECISION n_draws 480 vs 160 block 3",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 11600000,
+  "agent_seed": 9703
+ },
+ {
+  "label": "PRECISION n_draws 480 vs 160 block 4",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 11800000,
+  "agent_seed": 9704
+ },
+ {
+  "label": "PRECISION n_draws 480 vs 160 block 5",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 12000000,
+  "agent_seed": 9705
+ }
+]

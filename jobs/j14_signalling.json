@@ -1,0 +1,11 @@
+[
+ {"label": "signalling stuck (p<=0.15)", "n_pairs": 500, "base_seed": 6000000, "agent_seed": 60000,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "signal_mode": "stuck"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "signalling stuck (p<=0.35)", "n_pairs": 500, "base_seed": 6000000, "agent_seed": 60000,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "signal_mode": "stuck", "signal_max_p": 0.35}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+ {"label": "signalling dead-only", "n_pairs": 500, "base_seed": 6000000, "agent_seed": 60000,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "signal_mode": "dead"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]}
+]
