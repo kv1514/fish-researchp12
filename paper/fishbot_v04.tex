@@ -2767,12 +2767,25 @@ it sevenfold --- but it was not the only thing standing in the way. Near
 collinearity of the feature basis is a \emph{second} obstacle, independent of the
 first, and fixing the continuation does nothing about it: the design matrix is
 nearly singular whatever finishes the game, so the fitted weights are unstable
-however much signal the target carries. That is consistent with what v0.4's fit
-actually produced --- \texttt{turn} at $0.157$ where duplicate-deal play measures
-$0.60$ --- and it says the re-run needs a different basis, or a penalty, or terms
-dropped, and not merely more rollouts. The whole eleven-term fit explains
-$11.7\%$ of within-position variance, so there is signal to work with; what there
-is not is a way to attribute it to individual terms as they currently stand.
+however much signal the target carries. It says the re-run needs a different
+basis, or a penalty, or terms dropped, and not merely more rollouts. The whole
+eleven-term fit explains $11.7\%$ of within-position variance, so there is signal
+to work with; what there is not is a way to attribute it to individual terms as
+they currently stand.
+
+Collinearity is not a licence to explain away every disagreement, and it does not
+cover the one that started this section. \texttt{turn} is the term play has
+measured most directly, and it is precisely the term collinearity cannot be
+blamed for: its variance inflation factor is $1.4$, and it varies between
+candidate asks at $111$ of the $113$ positions. It comes back at
+$+0.010 \pm 0.154$ all the same, where duplicate-deal play puts it at $0.60$.
+That gap is real but not yet a finding in either direction: these positions are
+late by construction (four or more half-suits resolved), and holding the turn may
+simply be worth less when most of the board is already decided, so a coefficient
+near zero here is not in itself evidence against a weight of $0.60$ across a whole
+game. What can be said is that the explanation is not the one immediately to
+hand. Reaching for the nearest available mechanism is how this paper's recurring
+error starts, and it would have started again here.
 
 We record this as the fifth appearance of the pattern this paper keeps
 documenting, and the first in which reasoning about a quantity did not merely

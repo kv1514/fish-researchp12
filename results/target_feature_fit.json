@@ -128,5 +128,20 @@
   "concent": 0.06907169406058232,
   "reveal": 0.04214624422648472,
   "suit": 0.02135343844877838
+ },
+ "n_positions_kept": 113,
+ "positions_with_variation": {
+  "p_success": 110,
+  "suit": 70,
+  "turn": 111,
+  "scarce": 86,
+  "reveal": 66,
+  "deplete": 110,
+  "expose": 89,
+  "claim": 96,
+  "info": 104,
+  "certain": 36,
+  "concent": 85,
+  "signal": 74
  }
 }

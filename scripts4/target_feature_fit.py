@@ -125,6 +125,20 @@ def main(argv):
     r2w = 1 - ((Y - X @ beta) ** 2).sum() / (Y ** 2).sum()
     print(f"\nwithin R^2 {r2w:.4f}")
 
+    # A low VIF says a term is not ENTANGLED with the others. It does not say
+    # the data has anything to say about it: a feature identical across every
+    # candidate ask at a position contributes nothing to a within fit however
+    # uncorrelated it is. Count the positions where each term actually varies,
+    # so "identified" and "powered" cannot be read as the same word.
+    varies = {}
+    for i, n in enumerate(names):
+        k = 0
+        for pid in np.unique(G):
+            col = X[G == pid, i]
+            if col.std() > 1e-12:
+                k += 1
+        varies[n] = int(k)
+
     # 3. The diagnostic that decides how to read the two tables.
     p = names.index("p_success")
     corr = []
@@ -167,7 +181,9 @@ def main(argv):
                             for i, n in enumerate(names)},
            "within_r2": float(r2w),
            "p_success_vif": float(vifs["p_success"]),
-           "p_success_abscorr": {n: float(c) for c, n in corr}}
+           "p_success_abscorr": {n: float(c) for c, n in corr},
+           "n_positions_kept": len(np.unique(G)),
+           "positions_with_variation": varies}
     dest = ROOT / "results" / "target_feature_fit.json"
     dest.write_text(json.dumps(out, indent=1))
     print(f"\nwrote {dest}")

@@ -97,7 +97,18 @@ WATCH = [
     ("target_feature_fit.json", "p_success_abscorr.certain", "{:.3f}",
      "corr with certain", "correlates with"),
     ("target_feature_fit.json", "within_r2", "{:.1%}", "within R^2 of the fit",
-     "The whole eleven-term fit explains"),
+     "The whole\neleven-term fit explains"),
+    # `turn` is the control on the collinearity story: the paragraph's point is
+    # that this term is NOT entangled and still disagrees with play, so all
+    # three of its figures have to stay true or the paragraph inverts.
+    ("target_feature_fit.json", "multivariate.turn.vif", "{:.1f}", "turn VIF",
+     "variance inflation factor is"),
+    ("target_feature_fit.json", "multivariate.turn.coef", "{:+.3f}",
+     "turn coefficient", "It comes back at"),
+    ("target_feature_fit.json", "positions_with_variation.turn", "{:d}",
+     "positions where turn varies", "it varies between\ncandidate asks at"),
+    ("target_feature_fit.json", "n_positions_kept", "{:d}",
+     "positions in the within fit", "it varies between\ncandidate asks at"),
 ]
 
 
