@@ -131,6 +131,15 @@ WATCH = [
      "gated vs ungated", "Against the ungated"),
     ("retake_verdict.json", "n_pairs", "{:d}", "pairs in the retake run",
      "It has now been run at"),
+    # The stacking run. Its whole point is that an interval containing zero is
+    # NOT a null here, so the estimate and the power it was sized against have
+    # to travel together or the paragraph inverts.
+    ("stack_verdict.json", "pooled.fe", "{:.3f}", "lookahead on top of 480",
+     "lookahead on top of $480$ draws"),
+    ("stack_verdict.json", "n_pairs", "{:d}", "pairs in the stacking run",
+     "At $6000$ pairs this run has"),
+    ("stack_verdict.json", "power_vs_alternative", "{:.0%}",
+     "power against the stated alternative", "power against the"),
 ]
 
 

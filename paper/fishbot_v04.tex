@@ -2515,6 +2515,42 @@ positions the coupled and uncoupled arms disagree on $0.54\%$ of decisions, so
 observing no disagreement in a sample of $59$ is the modal outcome rather than
 evidence of equality.
 
+\paragraph{Does it still pay once precision is bought?} The two demonstrated
+features of this version --- the belief-space search and the larger posterior
+sampling budget --- were each measured against the champion \emph{alone}, so
+neither says anything about the other. They could add, or the sharper belief
+could already be earning what the search was earning. Pre-registered in
+\texttt{jobs/PREREGISTRATION\_stack.md} and written at one of six blocks, which
+is the only moment at which writing such a thing proves anything:
+\begin{center}
+\begin{tabular}{lrl}
+\toprule
+& set diff & 95\% CI \\
+\midrule
+lookahead on top of $480$ draws, $6000$ pairs & $+0.072$ & $[-0.010, +0.154]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Cochran's $Q = 1.94$ on $5$ df ($p = 0.86$), $I^2 = 0\%$, $\tau = 0$ --- the six
+blocks agree completely.
+
+The interval contains zero, and the pre-registration fixed in advance how that
+must be read. At $6000$ pairs this run has $68\%$ power against the $+0.104$ it
+was sized against, so failing to exclude zero is a \emph{failure to resolve an
+effect of the size assumed} and is not evidence that the search stops paying.
+The script that prints this verdict refuses to print the second sentence. It is
+a genuine limit of the design rather than a finding, and the honest summary is
+that we do not know.
+
+What the run does bear on is additivity, and only weakly. The search on its own
+measured $+0.104$; on top of the sampler it measures $+0.072$, a difference of
+$-0.032$ with the two intervals overlapping. As far as this study can tell the
+two features add rather than overlap --- with one point on each side of the
+comparison, which is exactly as weak a statement as it sounds. Neither
+\texttt{WEB\_DRAWS} nor \texttt{V04\_STRONGEST} moves on this result in either
+direction: both features are independently demonstrated, and this run is about
+what may be \emph{claimed}, not about what ships.
+
 \texttt{w\_lookahead} still defaults to $0$, and that is now a choice about cost
 rather than about evidence. The effect is demonstrated; it is worth about a tenth
 of a set per deal-pair for roughly $6.7$~ms per decision
