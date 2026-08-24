@@ -23,6 +23,15 @@ toward understanding what near-optimal Fish actually looks like.
 > exists. There is no per-path way to stop the record being created, so **the
 > fix is fewer pushes**, not a cleverer ignore command. Batch commits locally
 > and push once per group of work.
+>
+> **The error message's "retry in 24 hours" is not the recovery time.** Two
+> pushes were refused, at 03:47:13 and 03:51:16 UTC; the next one deployed
+> normally at 03:56:02 — the limit released in **under five minutes**. A
+> refused push also creates *no deployment record at all*, so it costs nothing
+> but a red status. Both of those were checked against the deployment API
+> rather than taken from the message, which is the point: the paragraph above
+> replaced one inference-from-an-error-string with a measurement, and then
+> repeated a different claim from the same error string without measuring it.
 
 **Play it:**
 [fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
