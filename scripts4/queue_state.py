@@ -40,6 +40,7 @@ WAIT_FOR = (
     "j27_precision2.json",
     "j28_claim_threshold.json",
     "j30_retake_bonus.json",
+    "j31_combined.json",
 )
 
 #: Job files deliberately NOT waited on, and why. An exclusion without a reason

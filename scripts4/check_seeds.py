@@ -64,6 +64,8 @@ POOLS = {
         [f"LEARNED WEIGHTS v2 vs champion block {i}" for i in range(2)],
     "retake bonus, two blocks":
         [f"RETAKE BONUS w-0.30 vs champion block {i}" for i in range(2)],
+    "combined config, two blocks":
+        [f"COMBINED 480+lookahead vs champion block {i}" for i in range(2)],
 }
 
 
