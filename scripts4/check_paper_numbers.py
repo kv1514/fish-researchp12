@@ -140,6 +140,15 @@ WATCH = [
      "At $6000$ pairs this run has"),
     ("stack_verdict.json", "power_vs_alternative", "{:.0%}",
      "power against the stated alternative", "power against the"),
+    # The HEADLINE. settle_verdict.py printed this and stored nothing for its
+    # whole life, so the single most load-bearing number in the paper was the
+    # one figure this manifest could not watch. It is quoted in five places.
+    ("settle_verdict.json", "pooled.fe", "{:.3f}", "lookahead, pre-registered",
+     "final 6000, is"),
+    ("settle_verdict.json", "secondary.pooled.fe", "{:.3f}",
+     "lookahead, unselected pool", "secondary --- all ten unselected cells"),
+    ("settle_verdict.json", "n_pairs", "{:d}", "pairs in the settling run",
+     "final 6000, is"),
 ]
 
 

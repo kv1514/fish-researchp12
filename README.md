@@ -155,6 +155,7 @@ py scripts4/precision_cost.py 90 3     # what a decision costs, fixed and per dr
 py scripts4/decision_cost_profile.py   # and where inside the sampler the fixed part is
 py scripts4/claim_criterion.py 10      # does the claim threshold gate the right quantity?
 py scripts4/duel_depth_base_rate.py    # how often a duel is even happening
+py scripts4/check_verdicts.py         # is a finished run sitting unanalysed?
 py scripts4/exact_or_feasibility.py    # could the disjunctions be enumerated instead?
 ```
 

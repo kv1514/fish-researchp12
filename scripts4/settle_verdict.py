@@ -115,6 +115,7 @@ def main() -> int:
               "reason to re-pool.")
 
     extra = cells(UNSELECTED)
+    p2, allc = None, []
     if len(extra) == len(UNSELECTED):
         allc = cs + extra
         p2 = pool(allc)
@@ -124,6 +125,20 @@ def main() -> int:
         for c in extra:
             print(f"  {c['label'][:52]:<52} n={c['n']:>4} {c['est']:>+7.3f}")
         _verdict(p2["fe"], p2["fe_se"], "  pooled")
+
+    # Persist it. This script printed its verdict and stored nothing for its
+    # whole life, which made the paper's HEADLINE number the one figure
+    # check_paper_numbers.py could not watch -- the most load-bearing claim in
+    # the document was the least protected against drift. Found by
+    # check_verdicts.py, whose own reason for existing was a different finished
+    # run that had never been analysed at all.
+    out = {"blocks": cs, "pooled": p, "n_pairs": sum(c["n"] for c in cs),
+           "demonstrated": bool(demonstrated)}
+    if len(extra) == len(UNSELECTED):
+        out["secondary"] = {"cells": extra, "pooled": p2,
+                            "n_pairs": sum(c["n"] for c in allc)}
+    dest = ROOT / "results" / "settle_verdict.json"
+    dest.write_text(json.dumps(out, indent=1))
 
     print("\n" + "=" * 68)
     if demonstrated:
