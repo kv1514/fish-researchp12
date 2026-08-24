@@ -762,3 +762,79 @@ button.sm { padding: 5px 9px; font-size: 13px; }
 }
 .chk { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; }
 .lobbyfoot .chk { font-weight: 650; font-size: 16px; }
+
+/* =====================================================================
+   Pace slider.
+
+   Replaced two segmented pickers offering 5 preset values each. A slider is
+   the right control here because the quantity is genuinely continuous and
+   personal: how long you need between moves depends on how fast you read a
+   position, and 0 (instant) through 20s is a range people want to sit
+   anywhere in rather than at one of five stops somebody else chose.
+
+   The current value is always rendered as text beside it. A slider whose
+   value you can only estimate from the thumb position is a slider you cannot
+   set deliberately, and this one sets how long you wait.
+   ===================================================================== */
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  margin: 10px 0 2px;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+.slider::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+}
+.slider::-moz-range-track {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line);
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 18px;
+  margin-top: -6.5px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+.slider::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+.slider:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.slider.sm { width: 96px; margin: 0; }
+
+.pacev {
+  float: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--accent);
+}
+.pacectl .pacev {
+  float: none;
+  min-width: 4.5ch;
+  font-size: 13px;
+  text-align: right;
+}
+.pacectl { display: inline-flex; align-items: center; gap: 8px; }
+
+.ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--dim);
+}

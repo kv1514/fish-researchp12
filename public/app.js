@@ -160,7 +160,7 @@ function applyRoom(j) {
   const r = j.room || {};
   if (r.names) S.names = r.names.slice();
   if (r.code) S.code = r.code;
-  if (typeof r.pace === "number") S.pace = r.pace;
+  if (typeof r.pace === "number") { S.pace = r.pace; syncPace(); }
   const phase = j.phase || r.phase;
   if (phase === "playing" && j.hand) {
     const first = !S.snap || !S.snap.hand;
@@ -526,8 +526,58 @@ function initRoomScreens() {
   }
 }
 
+/* Wire one pace slider and its readout, and keep every other copy in step.
+ *
+ * There are two (the start screen's and the table's) and they are the same
+ * setting, so a change to either has to move the other -- otherwise a player
+ * who nudges it mid-game returns to the start screen and finds it says
+ * something else. */
+function paceLabel(v) {
+  return v <= 0 ? "instant" : v + "s";
+}
+
+function syncPace() {
+  for (const [sl, out] of [["s-pace", "s-pacev"], ["t-pace", "t-pacev"]]) {
+    const el = $(sl), lab = $(out);
+    if (el) el.value = String(S.pace);
+    if (lab) lab.textContent = paceLabel(S.pace);
+  }
+}
+
+function bindPace(sliderId, outId) {
+  const el = $(sliderId);
+  if (!el) return;
+  el.value = String(S.pace);
+  const label = $(outId);
+  if (label) label.textContent = paceLabel(S.pace);
+  // `input` rather than `change`: the readout has to track the thumb while it
+  // is being dragged, or you are choosing a number you cannot see.
+  el.addEventListener("input", () => {
+    S.pace = Math.max(0, Math.min(20, +el.value || 0));
+    syncPace();
+    savePace();
+  });
+}
+
+const PACE_KEY = "fish.pace.v1";
+
+function savePace() {
+  try { localStorage.setItem(PACE_KEY, String(S.pace)); }
+  catch (e) { /* private mode */ }
+}
+
+function loadPace() {
+  try {
+    const v = parseFloat(localStorage.getItem(PACE_KEY));
+    if (Number.isFinite(v)) return Math.max(0, Math.min(20, v));
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
 function initStart() {
   S.names = loadNames() || FN.soloDefaults(S.seat, "You");
+  const savedPace = loadPace();
+  if (savedPace !== null) S.pace = savedPace;
 
   // Tabs
   document.querySelectorAll("#s-tabs button").forEach((b) => {
@@ -550,11 +600,12 @@ function initStart() {
   if (rname) rname.value = nameBox.value;
 
   seg("s-seat", (v) => { S.seat = +v; teamNote(); syncNamesToSeat(); });
-  seg("s-pace", (v) => {
-    S.pace = +v;
-    const sel = $("t-pace");
-    if (sel) sel.value = String(S.pace);
-  });
+  // The pace is a slider, 0..20s, not five presets. How long you need between
+  // moves depends on how fast you read a position, which is not a quantity
+  // somebody else gets to pick five values for. Both sliders and both readouts
+  // stay in step, so changing it on the start screen is reflected at the table
+  // and vice versa.
+  bindPace("s-pace", "s-pacev");
   teamNote();
   renderBotNameFields();
 
@@ -1191,14 +1242,16 @@ function render() {
   maybeAutoThink();
 }
 
-$("t-pace").addEventListener("change", (e) => {
-  S.pace = +e.target.value;
+bindPace("t-pace", "t-pacev");
+$("t-pace").addEventListener("change", () => {
   // In a room the pace is a property of the table, not of one browser, so a
-  // local change here would only desynchronise this player's countdown from
-  // the moves everybody else sees. Reset the control and say so.
+  // local change would only desynchronise this player's countdown from the
+  // moves everybody else sees. Snap back and say so -- on `change` rather than
+  // `input`, so the message fires once when the thumb is released instead of
+  // on every pixel of a drag.
   if (inRoom()) {
-    e.target.value = String(S.pace = S.room && S.room.pace != null
-      ? S.room.pace : S.pace);
+    S.pace = (S.room && S.room.pace != null) ? S.room.pace : S.pace;
+    syncPace();
     toast("The table's pace is set when the room is created.");
   }
 });

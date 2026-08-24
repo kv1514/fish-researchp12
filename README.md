@@ -377,19 +377,36 @@ read the row can compute all six hands. Browsers therefore cannot talk to the
 database directly with a public key, the server has to mediate, and the server
 needs a secret the browser never sees.
 
-To turn rooms on for a deployment:
+The database is already provisioned: Supabase project **`fish-rooms`**
+(ref `guqeesmrveijysuveuke`, us-west-1), with `fish_rooms`, its index and its
+reaper applied from `scripts4/room_schema.sql`.
 
-1. Create a Postgres database (a free Supabase project is enough) and run
-   `scripts4/room_schema.sql` against it. That creates `fish_rooms` and leaves
-   row-level security **enabled with no policies**, which denies every request
-   made with the public anon key. Do not add a policy to make it reachable from
-   the browser; that is the thing the schema is preventing.
-2. Set two environment variables on the deployment:
-   `SUPABASE_URL` (the project URL) and `SUPABASE_SERVICE_KEY` (the service
-   role key, not the anon key).
-3. `GET /api/health` reports `room_backend`. `"postgres"` means rooms are
-   shared; `"memory"` means the variables are missing and a room will work for
-   exactly one player.
+What remains is two environment variables on the Vercel deployment, and they
+have to be set by hand because no tool exposes either half — the service key is
+dashboard-only by design, and the Vercel API surface here has no environment
+variable endpoint:
+
+    SUPABASE_URL          https://guqeesmrveijysuveuke.supabase.co
+    SUPABASE_SERVICE_KEY  <Settings -> API Keys -> service_role, "reveal">
+
+Use the **service_role** key, not the anon key. The anon key ships in the page
+and is public by design; the whole security model is that it cannot reach this
+table. Verified against the live project with the real anon key:
+
+    GET  /rest/v1/fish_rooms            -> []                       (RLS)
+    POST /rest/v1/fish_rooms            -> violates row-level security policy
+    POST /rest/v1/rpc/fish_rooms_sweep  -> permission denied for function
+
+That third one is there because the first version of the schema was wrong.
+`fish_rooms_sweep` is `SECURITY DEFINER` so it can delete through RLS, and
+PostgREST publishes every function in `public` as an RPC endpoint with EXECUTE
+defaulting to PUBLIC — so as written it was a "delete every room in progress"
+button reachable by the key in the page. Supabase's security advisor flagged it
+(lints 0028/0029); the schema now revokes EXECUTE from `public`, `anon` and
+`authenticated`, and `service_role` is unaffected.
+
+`GET /api/health` reports `room_backend`: `"postgres"` once the variables are
+set, `"memory"` while they are missing.
 
 Without the variables the site still runs and solo play is unaffected. The
 room routes **refuse up front**, naming the two missing variables.

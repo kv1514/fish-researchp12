@@ -40,18 +40,16 @@
         </label>
         <p class="note" id="s-team"></p>
 
-        <label class="fld">Seconds between engine moves
-          <div class="seg" id="s-pace">
-            <button data-v="6">6</button>
-            <button data-v="10">10</button>
-            <button data-v="12" class="on">12</button>
-            <button data-v="15">15</button>
-            <button data-v="20">20</button>
-          </div>
+        <label class="fld" for="s-pace">Seconds between engine moves
+          <span class="pacev" id="s-pacev">12s</span>
+          <input type="range" id="s-pace" class="slider"
+                 min="0" max="20" step="1" value="12"
+                 aria-describedby="s-pacehint">
+          <span class="ticks"><i>0 — instant</i><i>20s</i></span>
         </label>
-        <p class="note">You start on the move, and the table waits between
-          engine moves so you can follow what happened. Pause or step at any
-          time.</p>
+        <p class="note" id="s-pacehint">You start on the move, and the table
+          waits between engine moves so you can follow what happened. Pause or
+          step at any time.</p>
 
         <details class="fold">
           <summary>Rename the bots</summary>
@@ -159,14 +157,11 @@
     <div class="pacebar">
       <button id="t-pause" class="ghost" title="Freeze the clock">Pause</button>
       <button id="t-next" class="ghost" title="Play the pending move now">Next</button>
-      <select id="t-pace" title="Seconds between engine moves">
-        <option value="0">instant</option>
-        <option value="6">6s</option>
-        <option value="10">10s</option>
-        <option value="12" selected>12s</option>
-        <option value="15">15s</option>
-        <option value="20">20s</option>
-      </select>
+      <label class="pacectl" title="Seconds between engine moves">
+        <input type="range" id="t-pace" class="slider sm"
+               min="0" max="20" step="1" value="12">
+        <span class="pacev" id="t-pacev">12s</span>
+      </label>
       <button id="t-think" class="ghost">Think</button>
       <label class="chk" title="Show the engine's read of the table on every one of your turns">
         <input type="checkbox" id="t-auto"> auto

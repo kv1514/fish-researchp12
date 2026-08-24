@@ -37,6 +37,19 @@ create index if not exists fish_rooms_touched_idx
 -- Optional: schedule with pg_cron if available, or leave it to the read-side
 -- TTL check. Kept as a function rather than a trigger because sweeping on
 -- every write would make one player's move pay for everybody's cleanup.
+--
+-- SECURITY DEFINER plus the REVOKEs below, and both halves matter. DEFINER is
+-- needed so the reaper can delete through the RLS that makes this table
+-- unreachable -- but PostgREST exposes every function in `public` as
+-- /rest/v1/rpc/<name>, and EXECUTE defaults to PUBLIC. As first written, this
+-- function was callable by anyone holding the project's anon key, which is
+-- public by design and ships in the page. With max_age = 0 that deletes every
+-- room in the table: a reaper reachable by the same key the browser carries is
+-- a delete button on every game in progress.
+--
+-- Supabase's own security advisor flagged it (lint 0028/0029). Verified after
+-- the revoke: an anon-key call returns "permission denied for function
+-- fish_rooms_sweep".
 create or replace function public.fish_rooms_sweep(max_age double precision)
 returns integer
 language sql
@@ -50,3 +63,9 @@ as $$
   )
   select coalesce(count(*), 0)::integer from gone;
 $$;
+
+-- The service key authenticates as service_role, which these revokes do not
+-- touch, so the server keeps its reaper and nobody else gets one.
+revoke execute on function public.fish_rooms_sweep(double precision) from public;
+revoke execute on function public.fish_rooms_sweep(double precision) from anon;
+revoke execute on function public.fish_rooms_sweep(double precision) from authenticated;
