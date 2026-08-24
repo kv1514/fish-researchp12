@@ -47,7 +47,7 @@ RUNS = [
     ("RETAKE BONUS w-0.30 vs champion block", 2,
      "retake_bonus_verdict.json", "scripts4/retake_bonus_verdict.py"),
     ("COMBINED 480+lookahead vs champion block", 2,
-     "combined_verdict.json", "(no verdict script yet)"),
+     "combined_verdict.json", "scripts4/combined_verdict.py"),
 ]
 
 #: Pools that are NOT runs in their own right, because another run's verdict

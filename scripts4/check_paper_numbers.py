@@ -370,6 +370,37 @@ WATCH = [
      "bonus against gated penalty", "the gated penalty's $-0.004$ the difference is"),
     ("retake_bonus_verdict.json", "contrast_vs_gated_penalty.se", "{:.3f}",
      "error on that difference", "the gated penalty's $-0.004$ the difference is"),
+    # The claim screen's correctness claim, which was a comment until it was
+    # measured. Its safety is a MARGIN, not an agreement, so the largest true
+    # joint and the largest gap both have to stay quoted or the paragraph
+    # reads as "the shortcut is exact".
+    ("claim_screen_check.json", "n_screened", "{:d}",
+     "half-suits screened out", "Over $11687$ screened half-suits"),
+    ("claim_screen_check.json", "n_claimable_but_screened", "{:d}",
+     "claimable half-suits discarded", "the number that turn out to be"),
+    ("claim_screen_check.json", "largest_true_joint_among_screened", "{:.3f}",
+     "largest true joint among screened", "the largest true joint among them is"),
+    ("claim_screen_check.json", "gap_max", "{:+.3f}",
+     "largest product-joint gap when screened", "the gap reaches"),
+    # The product-vs-joint gap and what it decided. Both halves are needed:
+    # the gap alone reads as a large correction, the decision counts alone
+    # read as a correction not worth making.
+    ("claim_joint_gap.json", "gap.n_queries", "{:d}",
+     "half-suit queries compared", "half-suit queries in"),
+    ("claim_joint_gap.json", "gap.n_differ", "{:d}",
+     "queries where they disagree", "the two\ndisagree on"),
+    ("claim_joint_gap.json", "gap.share_overstates_where_they_differ", "{:.0%}",
+     "share where the product overstates", "the two\ndisagree on"),
+    ("claim_joint_gap.json", "gap.median_abs_where_differ", "{:.3f}",
+     "median gap where they differ", "by a median of"),
+    ("claim_joint_gap.json", "gap.max_abs", "{:.3f}",
+     "largest gap", "and by as much as"),
+    ("claim_joint_gap.json", "decision.n_positions", "{:d}",
+     "forced-claim positions", "positions in the same games where a forced"),
+    ("claim_joint_gap.json", "decision.n_negative_wrongly_split", "{:d}",
+     "negative wrongly-split cases", "produced a negative"),
+    ("claim_joint_gap.json", "decision.n_declaration_changed", "{:d}",
+     "declarations changed", "which half-suit is declared at"),
 ]
 
 

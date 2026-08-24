@@ -686,6 +686,21 @@ hybrid --- exact where it fits, sampled where it does not --- which still beats
 every pure sampler at matched cost ($L_1$ error $0.133$ at $5.5$\,ms against
 $0.258$ for v0.3's sampler at $3.2$\,ms).
 
+\paragraph{A mode that promised exactness it could not deliver.} The shipped
+posterior takes the counting DP where no OR clause is active and the importance
+sampler everywhere else, and reports which it used. It also accepted
+\texttt{mode="exact"}, which forced the DP \emph{whatever the clause set looked
+like} and then set \texttt{Posterior.exact = True} for the result. The DP does
+not represent OR clauses --- that is the entire reason this module contains a
+sampler --- so its draws come from a strict superset of the feasible worlds. At
+the first position of one seeded game where a clause bites, $30\%$ of those
+draws are worlds the belief state has already \emph{proved} impossible. The
+mode a caller would reach for when they wanted a guaranteed-correct answer was
+the one mode that could quietly return a wrong one under a correct label. It
+now refuses. Nothing in the shipped agent used it, which is why it survived:
+a trap with no current caller is invisible to every test that exercises the
+paths that are taken.
+
 We nevertheless ship the importance sampler, and the reason is the subject of
 Section~\ref{sec:oppmodel}: the exact backend computes the \emph{uniform}
 posterior, and the uniform posterior is not the target we want. What the
@@ -1030,6 +1045,51 @@ implies a zero under the smaller OR-constrained one, and likewise for one.
 \item Forced claims maximise expected sets, $\Prob(\text{exact}) -
 \Prob(\text{an opponent holds one})$, rather than confidence.
 \end{itemize}
+
+That second probability was, until recently, an independence product, and the
+first bullet is the sentence that condemns it. The claim evaluator returned the
+\emph{joint} for ``this split is right'' and $\prod_c \sum_{p \in
+\text{team}} \Prob(p \text{ holds } c)$ for ``the half-suit is ours at all'', in
+the same tuple, from the same method, three lines below its own docstring
+saying the product of marginals is not the joint. Under the baseline null rule
+the forced-claim ranking is $\Prob(\text{exact}) + \Prob(\text{ours}) - 1$, so
+the two carry equal weight; and their difference is read as ``ours but wrongly
+split'', a quantity subtracted across two different distributions and therefore
+able to come out negative --- which it did, and a clamp hid it.
+
+Measured over $29406$ half-suit queries in $60$ games of real play, the two
+disagree on $27902$, and on $86\%$ of those the product \emph{overstates} the
+joint --- by a median of $0.008$ and by as much as $0.313$. Overstating ``our
+team holds it all'' is the direction that makes a declaration look safer than
+it is. Over the $5885$ positions in the same games where a forced claim could
+arise, the product produced a negative ``wrongly split'' $7$ times and the
+correction changes which half-suit is declared at $31$ of them. The decision
+counts are small, and neither is what makes the case: an expected value
+assembled from two different distributions is wrong at any magnitude, and the
+magnitude is reported so that the correction is not mistaken for a result.
+
+The screening tier is unaffected and deliberately so. It returns a product for
+\emph{both} elements, so the pair is internally consistent; what could not
+stand was one of each.
+
+\paragraph{But the screen itself carries a correctness claim, so we measured
+that too.} The middle tier skips the joint query when the product of the
+per-card MAP marginals falls below $0.35$, and returns the product as the
+half-suit's probability. Its justification is the comment ``most half-suits are
+nowhere near claimable'' --- an assertion about a distribution, inside a tier
+whose entire premise is that the product and the joint differ. If the product
+understates by enough, a half-suit whose true probability clears the $0.97$
+threshold is returned below $0.35$, no claim is made, and nothing records that
+a certain set was left on the table.
+
+Over $11687$ screened half-suits in $25$ games, the number that turn out to be
+claimable is \textbf{0}: the largest true joint among them is $0.581$, against
+a threshold of $0.97$. The shortcut is sound. What makes it sound is the margin and not
+agreement between the two quantities --- the gap reaches $+0.255$ on individual
+half-suits --- so the tier is safe at these settings and would not survive a
+much lower threshold. That is now a stored measurement
+(\texttt{results/claim\_screen\_check.json}) with a test that fails if a
+screened half-suit ever turns out to be claimable, rather than a comment.
 
 Finally, a hard architectural constraint taken from the literature: a claim must
 never be selected by determinized search. Inside any determinization the

@@ -56,7 +56,20 @@ class ClaimConfig:
     exact_candidates: int = 3
     #: cap on the enumeration of team assignments for unpinned cards
     max_enumerate: int = 4096
-    #: use exact joint probabilities at all (ablation handle)
+    #: use exact joint probabilities at all (ablation handle).
+    #:
+    #: Read the ablation carefully. With this False every half-suit takes the
+    #: tier-2 path, so `threshold` -- 0.97 -- is compared against an
+    #: INDEPENDENCE PRODUCT rather than against a joint probability, and the
+    #: two are not the same bar. Measured over 11687 screened half-suits
+    #: (results/claim_screen_check.json), the product sits ABOVE the joint on
+    #: average, by a mean of 0.007 and by as much as 0.255 on individual
+    #: half-suits, so switching it off makes the engine claim MORE eagerly and
+    #: not merely less precisely. The ablation therefore moves two things at
+    #: once, and "disabling exact joints changes nothing" is a statement about
+    #: their sum. The shipped default is True and the screen (0.35) sits far
+    #: below the threshold, so on the shipped path the threshold is only ever
+    #: compared against a joint or against a deduced 1.0.
     use_exact: bool = True
     #: skip the exact joint query when the independence screen is already far
     #: below anything claimable. Measured motivation: evaluating every claimable
@@ -152,7 +165,17 @@ class ClaimEvaluator:
             pr = self.post.prob_assignment(cards, cand_assign)
             if best is None or pr > best[0]:
                 best = (pr, cand_assign)
-        return (best[0], p_team_all, Claim(hs, best[1]))
+        # Both numbers from the same joint. This used to return the joint for
+        # the split and the INDEPENDENCE PRODUCT for "ours at all", which
+        # forced_claim then subtracted one from the other to get "ours but
+        # wrongly split" -- a difference between two different distributions,
+        # capable of coming out negative and clamped rather than caught. The
+        # product is what the tier-2 screen returns and is fine there, because
+        # there both numbers are products and the pair stays internally
+        # consistent.
+        p_team_joint = self.post.prob_all_with(cards, self.team,
+                                               self.cfg.max_enumerate)
+        return (best[0], p_team_joint, Claim(hs, best[1]))
 
     def candidates(self):
         if self._cands is None:

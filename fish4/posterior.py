@@ -40,6 +40,7 @@ enumeration in ``tests4/test_sis.py``).
 from __future__ import annotations
 
 import random
+from itertools import product as iproduct
 from typing import Optional
 
 import numpy as np
@@ -55,7 +56,7 @@ class PosteriorStats:
     """Counters, so approximations are reported rather than hidden."""
 
     __slots__ = ("decisions", "exact_decisions", "sis_decisions", "draws",
-                 "ess_sum", "failures", "infeasible")
+                 "ess_sum", "failures", "infeasible", "capped_set_queries")
 
     def __init__(self) -> None:
         self.decisions = 0
@@ -65,6 +66,10 @@ class PosteriorStats:
         self.ess_sum = 0.0
         self.failures = 0
         self.infeasible = 0
+        #: prob_all_with() queries that hit the enumeration cap on the exact
+        #: path and fell back to the independence product. Counted because an
+        #: approximation nobody counts is one nobody notices.
+        self.capped_set_queries = 0
 
     def to_dict(self) -> dict:
         d = {s: getattr(self, s) for s in self.__slots__}
@@ -167,6 +172,25 @@ class Posterior:
         # The exact DP answers the uniform-target question only. An opponent
         # model changes the target, so it forces the sampling path even when no
         # clause is active.
+        #
+        # mode="exact" used to force the DP even with clauses LIVE, and then
+        # report ``Posterior.exact is True`` and increment ``exact_decisions``.
+        # The DP does not see OR clauses at all -- that is the whole reason
+        # this module has a sampler -- so its draws come from a strict superset
+        # of the feasible worlds, and the module docstring measures exactly how
+        # wrong that is: a mean L1 error of 0.127 per card over 40 positions,
+        # WORSE than the biased sampler v0.4 replaced. A wrong answer labelled
+        # exact is the worst of the three available outcomes, so asking for
+        # exact where exact does not exist is now an error rather than a
+        # silently OR-free answer.
+        if self.mode == "exact" and active:
+            raise ValueError(
+                f"mode='exact' was asked for at a position with "
+                f"{len(active)} active OR clause(s). The counting DP does not "
+                f"represent them, so it would draw from a superset of the "
+                f"feasible worlds and report exact=True for it. Use "
+                f"mode='auto', which takes the DP wherever it is genuinely "
+                f"exact and the importance sampler everywhere else.")
         use_exact = ((self.mode == "exact"
                       or (self.mode == "auto" and not active))
                      and opp is None)
@@ -451,6 +475,104 @@ class Posterior:
         mask = np.ones(idx.shape[0], dtype=bool)
         for c, want in free_pins:
             mask &= idx[:, self._free_pos[c]] == want
+        return float(batch.w[mask].sum())
+
+    def prob_all_with(self, cards, players, max_enumerate: int = 512) -> float:
+        """``P(every one of `cards` is currently held by someone in `players`)``.
+
+        The JOINT, not the product of per-card marginals.
+
+        ``claim4.best_for_half_suit`` returns a pair -- the probability that a
+        specific split is right, and the probability the half-suit is ours at
+        all -- and ``forced_claim`` scores a declaration with both, as
+        ``p_exact - (1 - p_team)``. Under the baseline null rule the two carry
+        EQUAL weight in that ranking. The first came from this posterior; the
+        second was ``prod(sum of team marginals per card)``, an independence
+        product over cards that compete for the same quota slots. The same
+        method's own docstring says three lines earlier that the product of
+        marginals is not the joint, which is precisely why the MAP split is
+        shortlisted on marginals and then SCORED on the posterior.
+
+        Mixing the two is worse than using either twice: the difference
+        ``p_team - p_exact`` is read as "ours but wrongly split" and can come
+        out negative, which is only hidden by a clamp.
+
+        On the exact path this enumerates team-only assignments of the cards
+        that are not already pinned; the cap keeps a rare wide half-suit from
+        costing hundreds of dynamic programs, and falling back to the product
+        is counted in ``PosteriorStats.capped_set_queries`` rather than passed
+        off as the joint. On the sampling path it is one vectorised pass over
+        the weighted draws -- the same estimator ``prob_assignment`` uses, and
+        no more expensive.
+        """
+        bel = self.bel
+        pset = set(int(p) for p in players)
+        pmask = 0
+        for p in pset:
+            pmask |= 1 << p
+        free_cards: list[int] = []
+        for c in cards:
+            loc = bel.public_loc[c]
+            if loc == RESOLVED:
+                return 0.0
+            if loc is not None:
+                if loc not in pset:
+                    return 0.0
+                continue
+            cand = bel.candidates[c]
+            if cand == 0:
+                return 0.0
+            if not cand & pmask:
+                return 0.0
+            if not cand & ~pmask:
+                continue                  # every candidate is on the team
+            free_cards.append(c)
+        if not free_cards:
+            return 1.0
+        if self._sys is None:
+            return 0.0
+
+        if self._exact_ok:
+            opts = []
+            for c in free_cards:
+                cand = bel.candidates[c]
+                opts.append([(self._card_group[c], p) for p in sorted(pset)
+                             if cand >> p & 1])
+            total = 1
+            for o in opts:
+                total *= len(o)
+            if total > max_enumerate:
+                self.stats.capped_set_queries += 1
+                M = self.marginals()
+                out = 1.0
+                for c in free_cards:
+                    out *= float(sum(M[c, p] for p in pset))
+                return out
+            Z = self._sys.partition()
+            if not (Z > 0):
+                return 0.0
+            acc = 0.0
+            for combo in iproduct(*opts):
+                acc += self._sys.pinned_partition(list(combo))
+            return float(acc / Z)
+
+        batch = self._get_batch()
+        if batch is None or not len(batch):
+            return 0.0
+        idx = self._idx
+        if idx is None:
+            tot = 0.0
+            for w, deal in zip(batch.w, batch.deals):
+                if all(deal[c] in pset for c in free_cards):
+                    tot += w
+            return float(tot)
+        mask = np.ones(idx.shape[0], dtype=bool)
+        for c in free_cards:
+            col = idx[:, self._free_pos[c]]
+            ok = np.zeros(col.shape[0], dtype=bool)
+            for p in pset:
+                ok |= col == p
+            mask &= ok
         return float(batch.w[mask].sum())
 
     def prob_holds(self, player: int, card: int) -> float:
