@@ -64,3 +64,19 @@ def test_check_seeds_script_runs_clean():
     r = subprocess.run([sys.executable, "scripts4/check_seeds.py"],
                        cwd=ROOT, capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_the_engine_fingerprint_names_files_that_exist():
+    """A fingerprint over a renamed file records MISSING, not a hash.
+
+    That is deliberate -- silently shrinking what is fingerprinted would be
+    worse -- but it means a rename degrades the record until someone notices.
+    This is the noticing.
+    """
+    import sys
+    sys.path.insert(0, str(ROOT / "scripts4"))
+    from duel import FINGERPRINTED, engine_fingerprint
+    gone = [k for k, v in engine_fingerprint()["files"].items()
+            if v == "MISSING"]
+    assert not gone, f"fingerprinted files that do not exist: {gone}"
+    assert len(FINGERPRINTED) >= 8, "the fingerprint has been narrowed"
