@@ -169,6 +169,7 @@ py scripts4/queue_state.py            # what the duel queue still waits on
 py scripts4/basis_search.py           # is a different feature basis any better?
 py scripts4/combined_estimate.py      # what the strongest configuration is worth
 py scripts4/stuck_claim_value.py      # is the split posterior calibrated?
+py scripts4/greedy_shadow.py          # Proposition 1's empirical shadow
 py scripts4/exact_or_feasibility.py    # could the disjunctions be enumerated instead?
 ```
 

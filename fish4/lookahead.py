@@ -250,6 +250,15 @@ class ChainState:
         self.counts[self.me] -= 1
 
 
+#: Optional instrumentation hook, ``None`` in every shipped path. Set it to a
+#: callable ``(depth, n_branches, chosen_index, qs) -> None`` to record what
+#: search picked at each multi-branch node; ``chosen_index == 0`` is the greedy
+#: choice, since the branches are sorted by descending probability. It exists so
+#: Proposition 1's empirical shadow can be MEASURED rather than asserted. The
+#: cost when unset is one identity comparison per multi-branch node.
+_RECORDER = None
+
+
 def possession_value(state: ChainState, depth: int, beam: int,
                      allow_bluff: bool = False) -> float:
     """Expected cards banked in the remainder of this possession.
@@ -276,9 +285,16 @@ def possession_value(state: ChainState, depth: int, beam: int,
         return max([0.0] + [float(M[c, t]) for t, c in asks])
     scored = sorted(asks, key=lambda a: -float(M[a[1], a[0]]))
     best = 0.0
-    for target, card in scored[:beam]:
+    best_i = -1
+    qs = [] if _RECORDER is not None else None
+    for i, (target, card) in enumerate(scored[:beam]):
         p = float(M[card, target])
         if p <= 0.0:
+            if qs is not None:
+                # Keep qs aligned with `scored`, or a recorder indexing it by
+                # branch reads a different branch's value. A skipped branch is
+                # not a zero-valued one; it is not a candidate at all.
+                qs.append(None)
             continue
         state.apply_success(target, card)
         try:
@@ -288,8 +304,18 @@ def possession_value(state: ChainState, depth: int, beam: int,
         # A miss ends the possession, so it contributes no cards. What it costs
         # positionally is priced by the incumbent objective, not here.
         q = p * (1.0 + cont)
+        if qs is not None:
+            qs.append(q)
         if q > best:
-            best = q
+            best, best_i = q, i
+    if _RECORDER is not None and len(scored) > 1:
+        # `scored` is sorted by descending p, so index 0 IS the greedy choice
+        # and best_i != 0 is precisely a node where the search departed from it.
+        # Proposition 1 says that cannot happen with the coupling off, and the
+        # module has always said so; until now nothing stored the count, so the
+        # empirical shadow of the proposition was a number in the paper with no
+        # file behind it.
+        _RECORDER(depth, len(scored), best_i, qs)
     return best
 
 

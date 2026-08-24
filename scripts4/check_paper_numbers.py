@@ -90,6 +90,14 @@ WATCH = [
      "tablebase cross-check corpus", "one cross-check rather than two"),
     ("exact2_cross_check.json", "cross_check_m1.v1_cpu_seconds", "{:,.0f}",
      "old solver CPU seconds", "CPU-seconds against"),
+    # Proposition 1's empirical shadow. It was quoted as "53,273 of 53,273"
+    # with no file behind it; these come from instrumenting the real search.
+    ("greedy_shadow.json", "uncoupled.nodes", "{:,d}", "multi-branch nodes",
+     "Instrumenting the\nsearch itself over"),
+    ("greedy_shadow.json", "coupled.non_greedy", "{:d}",
+     "coupled departures", "the coupled arm departs from the"),
+    ("greedy_shadow.json", "uncoupled.non_greedy", "{:d}",
+     "uncoupled departures", "the uncoupled arm\ndeparts at"),
     ("precision_verdict.json", "pooled.fe", "{:.3f}", "precision pooled",
      "posterior sampling budget, from 160 draws to 480"),
     ("at_ask_verdict.json", "pooled.fe", "{:.4f}", "at-ask pooled",

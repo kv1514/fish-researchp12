@@ -738,8 +738,19 @@ candidate world, because a card the propagator has not pinned was never located
 at any time and so is exactly the card the sampler draws --- and it is not
 better. Posterior negative log-likelihood is $1.3536$ against $1.3522$ for the
 initial-deal version at matched settings, and $1.3391$ against $1.3373$ at the
-best settings of each. In duplicate-deal play the two are likewise
-indistinguishable. The theoretically-correct quantity buys nothing over the
+best settings of each. In duplicate-deal play at matched $\gamma = 0.35$ the two
+are likewise indistinguishable ($-0.050$, $[-0.377, +0.277]$ over 400 pairs).
+
+That is not the end of the story, and Section~\ref{sec:res-atask} is where it
+goes: at $\gamma = 1.0$ the at-ask covariate \emph{is} demonstrated, $+0.102$
+$[+0.006, +0.197]$ over 6000 pre-registered pairs. The two statements are
+compatible and the difference between them is the finding. What is demonstrated
+is the \emph{pair} --- at-ask depth together with a sharper $\gamma$ --- and
+neither component is claimed on its own, because the pre-registration bound them
+together on the argument that a covariate measuring the right thing deserves to
+be believed more sharply. Fixing $\gamma$ at the incumbent $0.35$ and swapping
+only the covariate is the comparison this remark makes, and it buys nothing.
+The theoretically-correct quantity buys nothing over the
 simpler one, so the simpler one ships.
 
 We flag one methodological point here because it nearly became a false finding.
@@ -1800,7 +1811,8 @@ the sweep of Table~\ref{tab:gamma}: it is the unique exponent at which this
 likelihood is correctly specified. That sweep never tested it; $0.90$ and $1.50$
 bracket it at 150 pairs each, an MDE of $0.87$, which separates nothing.
 
-\paragraph{And in play, it is real and not worth buying.} Everything above is an
+\paragraph{And in play, it is real and not worth buying.}
+\label{sec:res-atask} Everything above is an
 argument from likelihood and from a normaliser, not from a duel, so the
 configuration it points at --- at-ask-time depth at $\gamma = 1.0$, the better
 covariate at the exponent where the model is correctly specified --- was
@@ -2646,12 +2658,25 @@ proposition entails greedy equivalence \emph{at a node} and the step from there
 to a null set differential is a modelling inference rather than a theorem.
 Setting \texttt{couple=False} also does not restore the proposition's hypotheses
 outright --- the transition still zeroes the asked row and decrements the
-target's count. What is demonstrated is narrower and still to the point: with
-the coupling off, the arm's chosen branch was the highest-probability branch in
-$53{,}273$ of $53{,}273$ multi-branch nodes, against $49$ non-greedy choices with
-it on; and its set differential is a null at both 200 and 500 pairs ($+0.070$
-and $+0.112$, both intervals comfortably containing zero), which is consistent
-with that. We would also withdraw a remark from an earlier draft that the
+target's count. What is demonstrated is narrower and still to the point. Instrumenting the
+search itself over $60{,}277$ multi-branch nodes on champion trajectories
+(\texttt{scripts4/greedy\_shadow.py}), the coupled arm departs from the
+highest-probability branch at $452$ of them, $0.750\%$; the uncoupled arm
+departs at $\mathbf{1}$, $0.0017\%$ --- a factor of $452$. Its set differential
+is a null at both 200 and 500 pairs ($+0.070$ and $+0.112$, both intervals
+comfortably containing zero), which is consistent with that.
+
+The single uncoupled departure is worth a sentence, because it is real ---
+relative gap in $q$ of $1.9\times 10^{-3}$, three orders of magnitude above
+floating point --- and Proposition~\ref{prop:greedy} predicts exactly zero. It
+is not a contradiction. \texttt{couple=False} does not restore the
+proposition's hypotheses, as the module says: the transition still decrements
+the target's count, so a player reduced to zero cards drops out of
+\texttt{legal\_asks} and the available branch \emph{set} changes downstream.
+That is a channel the exchange argument does not cover. The empirical shadow is
+therefore a near-null with a mechanism rather than a null, and an earlier draft
+reporting it as ``$53{,}273$ of $53{,}273$'' overstated it --- those counts were
+in the paper and in no results file, which is how a number stays unchallenged. We would also withdraw a remark from an earlier draft that the
 coupling ``changed no decision at all'': over $1{,}110$ champion-trajectory
 positions the coupled and uncoupled arms disagree on $0.54\%$ of decisions, so
 observing no disagreement in a sample of $59$ is the modal outcome rather than
