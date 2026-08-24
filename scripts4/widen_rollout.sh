@@ -6,19 +6,18 @@
 cd /home/user/fish-researchp12 || exit 1
 
 queue_done() {
-  python - <<'PYEOF' 2>/dev/null || echo 0
-import json, pathlib
-want = set()
-for f in ('j24_at_ask_confirm.json', 'j25_stack.json',
-          'j26_retake_gate.json', 'j27_precision2.json',
-          'j28_claim_threshold.json'):
-    p = pathlib.Path('jobs') / f
-    if p.exists():
-        want |= {j['label'] for j in json.loads(p.read_text())}
-done = {json.loads(l).get('label') for l in
-        open('results/v04_duels.jsonl') if l.strip()}
-print(1 if want and want <= done else 0)
-PYEOF
+  # Delegates to scripts4/queue_state.py, which keeps the list of job files
+  # being waited on and REFUSES to pass when a job file with pending blocks is
+  # in neither its wait list nor its excluded list. The list used to live here
+  # as five hard-coded filenames and had already gone stale once: j30 was
+  # queued after it was written, so widening would have fired while 2000
+  # pre-registered pairs were still to play.
+  n=$(python scripts4/queue_state.py --wait-labels 2>/dev/null | wc -l)
+  if ! python scripts4/queue_state.py > /dev/null 2>&1; then
+    echo 0            # undeclared job file: refuse to widen rather than guess
+    return
+  fi
+  [ "$n" -eq 0 ] && echo 1 || echo 0
 }
 
 while [ "$(queue_done)" != "1" ]; do sleep 180; done
