@@ -201,16 +201,6 @@ def draw_batch(sampler, rng, n: int):
 
     logl = np.zeros(n, dtype=np.float64)
     om = sampler.opponent_model
-    if om is not None and om.opp_lambda and om.set_cols:
-        # "If the opponents held this whole half-suit, one of them would very
-        # likely have declared it by now." Not a constraint - they may hold it
-        # and be unable to place the split - so it enters as a soft weight.
-        for cols in om.set_cols:
-            if not cols:
-                continue
-            idxc = np.asarray(cols, dtype=np.int64)
-            all_opp = ((picks[:, idxc] & 1) != om.my_team).all(axis=1)
-            logl -= om.opp_lambda * all_opp
     if om is not None and depth is not None:
         if getattr(om, "depth_table", None) is not None:
             # Each slot's contribution is a function of its sampled depth alone
@@ -218,13 +208,30 @@ def draw_batch(sampler, rng, n: int):
             # so the whole likelihood is one gather and a row sum.
             T = np.asarray(om.depth_table, dtype=np.float64)
             d = np.clip(depth, 0, T.shape[1] - 1)
-            logl = np.take_along_axis(
+            logl += np.take_along_axis(
                 T[None, :, :], d[:, :, None], axis=2)[:, :, 0].sum(axis=1)
         else:
             w = np.asarray(om.weight, dtype=np.float64)
             base = np.asarray(om.base, dtype=np.int64)
             d = depth + base[None, :]
-            logl = (np.log(np.where(d > 0, d, 1e-9)) * w[None, :]).sum(axis=1)
+            logl += (np.log(np.where(d > 0, d, 1e-9)) * w[None, :]).sum(axis=1)
+    # AFTER the depth term, and with += rather than =. Both of those were wrong:
+    # this block came first and the depth branches ASSIGNED, so every decision
+    # in which any non-self player had already asked -- which is almost all of
+    # them, 632 of 641 in results/ess_probe.json -- silently threw the
+    # no-declaration term away before it could be used.
+    if om is not None and om.opp_lambda and getattr(om, "set_cards", None):
+        # "If the opponents held this whole half-suit, one of them would very
+        # likely have declared it by now." Not a constraint - they may hold it
+        # and be unable to place the split - so it enters as a soft weight.
+        col_of = {c: j for j, c in enumerate(sampler.order)}
+        for cards in om.set_cards:
+            idx = [col_of[c] for c in cards if c in col_of]
+            if not idx:
+                continue
+            idxc = np.asarray(idx, dtype=np.int64)
+            all_opp = ((picks[:, idxc] & 1) != om.my_team).all(axis=1)
+            logl -= om.opp_lambda * all_opp
     return picks, logq, logl, alive
 
 

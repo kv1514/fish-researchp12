@@ -187,7 +187,10 @@ def main() -> int:
         print(f"  the two sum to {pol['slope'] + info['slope']:+.4f} against "
               f"the combined {m:+.4f} (exact: both are\n  within-slopes of "
               f"differences on the same x, so they add)")
-        share = abs(info["slope"]) / abs(m) if m else 0.0
+        # NOT `share`: that name already holds the share of positions where the
+        # engine's slope is the larger, and reusing it here overwrote that
+        # value in the stored output -- 0.069 where the paper quotes 0.63.
+        log_share = abs(info["slope"]) / abs(m) if m else 0.0
         print()
         if abs(info["slope"]) > 1.96 * info["se_clustered"]:
             print(f"  Handing the weak policy the same public log moves the "
@@ -204,7 +207,7 @@ def main() -> int:
                                   "se": pol["se_clustered"]},
                   "log_only": {"delta": info["slope"],
                                "se": info["se_clustered"]},
-                  "log_share_of_combined": share}
+                  "log_share_of_combined": log_share}
 
     out = {"v04": a["p_success_slope"], "public": b["p_success_slope"],
            "public_seeded": (c["p_success_slope"] if c else None),

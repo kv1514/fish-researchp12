@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from fish.cards import NUM_PLAYERS, half_suit_cards, team_of
-from fish.engine import GameState
+from fish.engine import NULL_TEAM, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.registry4 import make_agent
@@ -141,6 +141,13 @@ def one_game(args) -> dict:
            "dead_plies": 0, "frozen_plies": 0, "ever_dead": False,
            "first_dead_ply": None, "dead_tail": 0,
            "stuck_team_plies": 0, "ever_stuck": False,
+           # WHICH half-suits a team got stuck on, not just how many plies were
+           # spent stuck. The paper quotes a null rate for stuck half-suits
+           # against unstuck ones (17.5% vs 2.8%, 27% of all nulls, 11% of
+           # half-suits) and none of those four numbers was ever computed: this
+           # script tracked stuck_team_plies and never summarised it. Record the
+           # identities so the comparison is possible.
+           "stuck_hs": set(),
            "repeat_states": 0, "max_repeat": 0,
            "dead_hs_seen": 0, "nulls": 0, "diff": 0}
     n = 0
@@ -174,6 +181,7 @@ def one_game(args) -> dict:
                     if unplaceable_from_seat(st, bels[q], q, hs):
                         rec["stuck_team_plies"] += 1
                         rec["ever_stuck"] = True
+                        rec["stuck_hs"].add(hs)
                         break
         p = st.turn
         try:
@@ -188,6 +196,15 @@ def one_game(args) -> dict:
     a, b, nulls = st.scores()
     rec["nulls"] = nulls
     rec["diff"] = a - b
+    # Which half-suits actually nulled, so the rate can be split by whether the
+    # holding team was ever stuck on that half-suit.
+    nulled = {h for h, w in enumerate(st.set_winner) if w == NULL_TEAM}
+    stuck = rec.pop("stuck_hs")
+    rec["n_half_suits"] = len(st.set_winner)
+    rec["n_stuck_hs"] = len(stuck)
+    rec["n_nulled"] = len(nulled)
+    rec["n_stuck_and_nulled"] = len(stuck & nulled)
+    rec["n_unstuck_and_nulled"] = len(nulled - stuck)
     return rec
 
 
@@ -241,6 +258,24 @@ def main(n_games: int = 200, n_jobs: int = 4) -> int:
                                                 for r in rows) / g,
             "nulls_per_game": sum(r["nulls"] for r in rows) / g,
         }
+        # The deadlock quartet, computed rather than asserted. The paper quotes
+        # a null rate for stuck half-suits against unstuck ones, their share of
+        # all nulls, and their share of half-suits; none of the four was ever
+        # produced by this script, which tracked stuck plies and summarised
+        # none of them.
+        hs_tot = sum(r["n_half_suits"] for r in rows)
+        stuck_tot = sum(r["n_stuck_hs"] for r in rows)
+        sn = sum(r["n_stuck_and_nulled"] for r in rows)
+        un = sum(r["n_unstuck_and_nulled"] for r in rows)
+        d["half_suits"] = hs_tot
+        d["stuck_half_suits"] = stuck_tot
+        d["share_of_half_suits_stuck"] = stuck_tot / max(1, hs_tot)
+        d["null_rate_when_stuck"] = sn / max(1, stuck_tot)
+        d["null_rate_when_not_stuck"] = un / max(1, hs_tot - stuck_tot)
+        d["stuck_share_of_all_nulls"] = sn / max(1, sn + un)
+        d["null_rate_ratio"] = (
+            d["null_rate_when_stuck"] / d["null_rate_when_not_stuck"]
+            if d["null_rate_when_not_stuck"] else None)
         out[label] = d
         return d
 

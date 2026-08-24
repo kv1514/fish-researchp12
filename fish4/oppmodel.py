@@ -334,9 +334,17 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     # Only the opponents' side is used: our own team may well hold a set without
     # us being able to prove it, which is precisely the situation this engine
     # spends its time in.
-    set_cols = []
+    # CARD IDS, not column indices. They used to be indices into whatever
+    # `order` the caller passed -- which is the unsorted free list -- while the
+    # thing they end up indexing is a `picks` matrix whose columns are in
+    # SISSampler.order, a different sort. Six of eight columns differ on a
+    # typical position, so the "did the opponents take this whole half-suit"
+    # test was reading a mixture of cards from other half-suits. Handing out
+    # card ids removes the coupling: the consumer maps them through the order
+    # that actually applies to its own array.
+    set_cards = []
     if opp_lambda > 0.0 and order is not None:
-        col_of = {c: j for j, c in enumerate(order)}
+        free_set = set(order)
         my_team = obs.player & 1
         for hs in range(len(obs.set_winner)):
             if obs.set_winner[hs] is not None:
@@ -345,9 +353,8 @@ def build(bel, obs, gamma: float, include_self: bool = False,
             cols = []
             possible = True
             for c in range(lo, lo + 6):
-                j = col_of.get(c)
-                if j is not None:
-                    cols.append(j)
+                if c in free_set:
+                    cols.append(c)
                     continue
                 m = bel.current_holder_mask(c)
                 if m == 0 or (m & (m - 1) == 0
@@ -355,7 +362,7 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                     possible = False       # a card of ours, or already resolved
                     break
             if possible and cols:
-                set_cols.append(tuple(cols))
+                set_cards.append(tuple(cols))
     #: Per-slot log terms for the at-ask-time model. Depth at the moment of an
     #: ask is the initial depth plus a delta the public log fixes, identically
     #: in every world, so the better covariate costs a table built once per
@@ -376,7 +383,7 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                     tot += math.log(v if v > 0 else 1e-9)
                 row.append(gamma * scale * tot)
             table.append(tuple(row))
-    return (OpponentModel(weight, base, set_cols=set_cols,
+    return (OpponentModel(weight, base, set_cards=set_cards,
                           opp_lambda=opp_lambda, my_team=obs.player & 1,
                           tilt_strength=sis_tilt, depth_table=table),
             card_slot)

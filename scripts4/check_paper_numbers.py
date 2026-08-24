@@ -111,6 +111,14 @@ WATCH = [
      "the difference between the rungs"),
     ("precision2_verdict.json", "min_interesting", "{:.3f}",
      "minimum interesting effect", "fixed before any pair was played"),
+    # The half-suit value model's calibration. The paper called it "reliable
+    # across every decile" while half its deciles miss at 95%; the mean bias is
+    # small only because the errors cancel, so both have to be quoted together.
+    ("hsvalue_fit.json", "results.model.mean_bias", "{:+.3f}",
+     "hsvalue mean calibration bias", "mean calibration\nbias of"),
+    ("hsvalue_fit.json", "results.model.log_loss", "{:.3f}",
+     "hsvalue held-out log-loss",
+     "half-suit value model is good --- held-out log-loss"),
     ("precision_verdict.json", "pooled.fe", "{:.3f}", "precision pooled",
      "posterior sampling budget, from 160 draws to 480"),
     ("at_ask_verdict.json", "pooled.fe", "{:.4f}", "at-ask pooled",

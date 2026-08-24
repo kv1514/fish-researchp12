@@ -68,7 +68,7 @@ class OpponentModel:
     player (so only the free cards need counting per draw).
     """
 
-    __slots__ = ("weight", "base", "n_slots", "set_cols", "opp_lambda",
+    __slots__ = ("weight", "base", "n_slots", "set_cards", "opp_lambda",
                  "my_team", "tilt", "depth_table")
 
     #: Cap on a single step's twist factor. The depth-0 term of the likelihood
@@ -82,7 +82,7 @@ class OpponentModel:
     #: this many entries per slot and is built once per decision.
     TILT_MAX_DEPTH = 7
 
-    def __init__(self, weight, base, set_cols=None, opp_lambda: float = 0.0,
+    def __init__(self, weight, base, set_cards=None, opp_lambda: float = 0.0,
                  my_team: int = 0, tilt_strength: float = 0.0,
                  depth_table=None):
         self.weight = list(weight)
@@ -101,7 +101,9 @@ class OpponentModel:
         # Columns (in sampler order) of the still-unlocated cards of each
         # half-suit that COULD be entirely with the opposing team. See the
         # "no-declaration" signal in oppmodel.py.
-        self.set_cols = set_cols or []
+        #: Tuples of CARD IDS -- see fish4/oppmodel.py. Consumers map them
+        #: through their own column order.
+        self.set_cards = set_cards or []
         self.opp_lambda = opp_lambda
         self.my_team = my_team
 

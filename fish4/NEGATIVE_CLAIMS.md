@@ -57,3 +57,31 @@ Before a negative claim is allowed to close a direction, it needs one of:
 The middle case carries a rider learned from the tilt: **say what range you
 measured over.** "Cannot, asymptotically" and "cannot, at 160 draws" are
 different claims, and only one of them is about the engine that ships.
+
+
+## The no-declaration signal is a null (2026-08-24: RETRACTED)
+
+Two screening cells put `opp_lambda` at 0.9 and 1.8 and returned +0.205 and
++0.190, both intervals containing zero, and the paper reported them as nulls
+alongside the rest of the failed-experiment table.
+
+They measured nothing. Three bugs made the term a no-op:
+
+- `fish4/sisbatch.py` assembled it into `logl` and then the opponent-model
+  branch that follows did `logl = ...` rather than `logl += ...`, discarding it
+  whenever any non-self player had asked -- 632 of 641 decisions in
+  `results/ess_probe.json`;
+- the half-suit column lists were indices into the caller's free-card order
+  applied to a `picks` matrix in the sampler's own sort, so on a typical
+  position six of eight columns pointed at cards from other half-suits;
+- the scalar reference sampler stored the term and never applied it, so the
+  batch/scalar agreement test could not detect either of the above.
+
+All three are fixed and `tests4/test_opp_lambda.py` fails against the previous
+code. The cells are now reported as INVALID rather than null. The feature has
+not been re-measured.
+
+The lesson is the same one this file keeps recording, in a new place: a null
+from a feature nobody checked was switched on is not evidence about the
+feature. Two cells agreeing on it was not corroboration either -- they agreed
+because they were both running the champion.

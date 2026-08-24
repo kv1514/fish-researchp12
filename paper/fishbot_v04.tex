@@ -1285,6 +1285,7 @@ experiment against a figure measured between two maximally-different policies is
 systematically conservative for the near-identical comparisons that most need
 care.
 
+\label{sec:eval-sd}
 \paragraph{The extrapolation was untestable, and then it was tested.} When the
 above was written this study had no cells below $s = 0.44$, so the calibration
 of the constant at low share --- the only place the rule is ever \emph{used} ---
@@ -2140,8 +2141,13 @@ paired play, posterior likelihood against the true hands, and agreement with an
 exact solver --- agree on which component does the work.
 
 \textbf{The tablebase contributes nothing here}, and we report that rather than
-claiming the speedup as strength. Disabling it changes not one of the 988
-decisions. In an information-resolved position the marginals are one-hot and the
+claiming the speedup as strength. Disabling it reproduces the champion's
+counts in all six columns of Table~\ref{tab:exact} exactly --- $278$
+resolved-optimal, $585$ uncertain-optimal, $515$ uncertain-progress, $182$ at
+$m{=}1$, $611$ at $m{=}2$. That is consistent with changing no decision and is
+not a proof of it: the comparison is of aggregates, and two different decision
+sets can produce the same totals. The per-decision check would be stronger and
+was not run. In an information-resolved position the marginals are one-hot and the
 ordinary policy already plays it correctly; in an uncertain position the
 tablebase refuses by construction. Its value is a $10{,}900\times$ reduction in
 the median cost of the endgame path and insurance against a class of error v0.3
@@ -2314,8 +2320,8 @@ draws per decision & 96 (from 160) & 160 & $-0.300$ & $[-0.852, +0.252]$ \\
 draws per decision & 320 (from 160) & 200 & $-0.035$ & $[-0.578, +0.508]$ \\
 count mode & $\sqrt{\cdot}$, $\gamma{=}0.70$, 160 & 200 & $+0.480$ & $[-0.042, +1.002]$ \\
 count mode & $\sqrt{\cdot}$, $\gamma{=}0.70$, 320 & 200 & $-0.165$ & $[-0.701, +0.371]$ \\
-no-declaration signal & $\lambda = 0.9$ & 200 & $+0.205$ & $[-0.301, +0.711]$ \\
-no-declaration signal & $\lambda = 1.8$ & 200 & $+0.190$ & $[-0.313, +0.693]$ \\
+no-declaration signal$^\dagger$ & $\lambda = 0.9$ & 200 & $+0.205$ & $[-0.301, +0.711]$ \\
+no-declaration signal$^\dagger$ & $\lambda = 1.8$ & 200 & $+0.190$ & $[-0.313, +0.693]$ \\
 \midrule
 \multicolumn{5}{l}{\emph{new ask-objective terms}}\\
 exposure & $0.40$ & 160 & $-0.113$ & $[-0.660, +0.435]$ \\
@@ -2347,6 +2353,28 @@ not ``shown not to matter''.}
 \end{table}
 
 Four of these deserve comment.
+
+$^\dagger$\,\textbf{These two rows measured nothing, and we found out
+afterwards.} The no-declaration term was assembled into the importance weights
+and then overwritten: the batch sampler built it first and the opponent-model
+branch that follows did \texttt{logl = } rather than \texttt{logl += }, so
+whenever any non-self player had already asked --- $632$ of $641$ decisions in
+\texttt{results/ess\_probe.json} --- the term was discarded before use. In the
+handful of decisions where it survived, it addressed the half-suit by column
+indices built against the caller's free-card order and applied to a matrix whose
+columns are in the sampler's own sort; six of eight columns differ on a typical
+position, so the ``did the opponents take this whole half-suit'' test read a
+mixture of cards from other half-suits. And the scalar reference sampler stored
+the term and never applied it at all, so the batch/scalar agreement test could
+not see any of this.
+
+Both cells are therefore reported as \emph{invalid rather than null}: they are
+what a disabled feature scores, which is the champion plus sampling noise, and
+the intervals above are consistent with exactly that. All three bugs are fixed
+and pinned by tests that fail against the previous code; the feature has not
+been re-measured, and until it is there is no result here in either direction.
+Nothing else in this paper is affected, because \texttt{opp\_lambda} defaults to
+zero and no other cell sets it.
 
 \textbf{Precision appeared to have saturated, and it had not.} v0.3 found that
 raising the sampled-world count from 32 to 96 was worth $+0.54$ sets per pair
@@ -2398,12 +2426,18 @@ nothing, which agrees exactly with the absolute benchmark
 
 \textbf{Replacing the objective with the learned value is catastrophic.} The
 half-suit value model is good --- held-out log-loss $0.727$ against $0.821$ for
-the class prior and $0.743$ for the best single feature, mean calibration bias
-$-0.006$, reliable across every decile. Scoring asks by the expected change in
+the class prior and $0.743$ for the best single feature, and a mean calibration
+bias of $-0.006$. That last figure flatters it, and the flattery is worth one
+sentence because ``well-calibrated'' is doing work in the argument below. Five
+of its ten deciles are miscalibrated at the $95\%$ level: it is over-confident
+at both ends (decile 0 says $7.6\%$ and delivers $0.5\%$; decile 9 says $92.7\%$
+and delivers $90.0\%$) and under-confident in the middle (deciles 4 and 5 both
+run about $3$ points high). The mean bias is near zero because those errors
+cancel, not because each decile is right. Scoring asks by the expected change in
 it, in units of sets, loses $7.4$ sets per deal-pair. Blending it in at low
 weight is harmless and does nothing. This is the sharpest confirmation of v0.3's
 central claim about this game that we have: the probability that an ask lands is
-not one term among several, it is the objective, and a well-calibrated model of
+not one term among several, it is the objective, and a decently-calibrated model of
 what a half-suit is worth is no substitute for it.
 
 \textbf{The eleven-term basis bought nothing.} Neither the two terms motivated
@@ -3041,7 +3075,9 @@ not have happened. That configuration is refused rather than run.
 \paragraph{A second obstacle, which the continuation fix does not touch.} With
 the target no longer flat, the obvious next step is to ask which of the eleven
 objective terms it responds to, and the answer is that this design cannot say.
-Fitted one at a time over the same $3076$ scored asks, several features look
+Fitted one at a time over the $3076$ rows of that run --- twenty more than the
+$3056$ the slope above uses, because a slope needs two scored asks at a position
+and twenty rows sit alone at theirs --- several features look
 more informative than $\Prob(\text{success})$ itself: \texttt{expose}
 $+1.807 \pm 0.359$, \texttt{deplete} $+1.387 \pm 0.224$, \texttt{certain}
 $+0.919 \pm 0.169$, against $\Prob(\text{success})$'s $+0.681 \pm 0.142$. Fitted
@@ -3071,7 +3107,7 @@ no.} The natural conclusion from the paragraph above --- and the one we wrote
 first --- is that the re-run needs a different basis, or a penalty, or terms
 dropped, rather than more rollouts. It is cheap to check, because the completed
 run already holds every scored ask, so we checked it before spending anything.
-Nineteen candidate bases, each scored by \emph{leave-one-position-out}
+Eighteen candidate bases, each scored by \emph{leave-one-position-out}
 cross-validated within-position $R^2$ (position-level folds, because asks inside
 a position share worlds, seeds and a value level):
 \begin{center}
@@ -3138,7 +3174,8 @@ Collinearity is not a licence to explain away every disagreement, and it does no
 cover the one that started this section. \texttt{turn} is the term play has
 measured most directly, and it is precisely the term collinearity cannot be
 blamed for: its variance inflation factor is $1.4$, and it varies between
-candidate asks at $111$ of the $113$ positions. It comes back at
+candidate asks at $111$ of the $113$ positions the feature fit retains (the
+slope's $110$, plus three the within-position fit keeps and the slope does not). It comes back at
 $+0.010 \pm 0.154$ all the same, where duplicate-deal play puts it at $0.60$.
 That gap is real but not yet a finding in either direction: these positions are
 late by construction (four or more half-suits resolved), and holding the turn may
@@ -3920,8 +3957,10 @@ The sharper form of this lesson took most of the study to find, and it is that
 the noise figure is not a constant of the problem. Under common random numbers a
 paired trial on which the two arms behave identically contributes exactly zero,
 so the standard deviation scales with $\sqrt{s}$, where $s$ is the share of
-trials on which the two arms diverge at all --- and across our $28$ cells the
-remaining factor is nearly constant at $3.88 \pm 0.23$. The consequence is that
+trials on which the two arms diverge at all --- and across our $46$ cells the
+remaining factor is nearly constant at $3.86 \pm 0.29$, though
+Section~\ref{sec:eval-sd} shows it drifts enough at low $s$ to matter where the
+rule is used. The consequence is that
 sizing every experiment against a single number taken from two maximally
 different policies systematically over-sizes the comparisons that matter most,
 the near-identical ones. A candidate perturbing a tenth of trials needs
