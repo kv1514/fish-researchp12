@@ -177,9 +177,9 @@ WATCH = [
     ("combined_estimate.json", "chained.se", "{:.3f}",
      "error on the combined estimate", "chained: search $+$ $480$ draws"),
     ("combined_estimate.json", "chained.lo", "{:+.3f}", "combined interval, low",
-     "the largest effect in this project"),
+     "larger than either change alone"),
     ("combined_estimate.json", "chained.hi", "{:+.3f}", "combined interval, high",
-     "the largest effect in this project"),
+     "larger than either change alone"),
     ("at_ask_verdict.json", "pooled.fe", "{:.3f}", "at-ask, not shipped",
      "At-ask-time\ndepth at"),
     # The split-calibration table. Its whole point is the gap between the

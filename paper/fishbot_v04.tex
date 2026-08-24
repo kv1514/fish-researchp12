@@ -1452,7 +1452,8 @@ flattening, and it does not. And precision at the operating point of 160 draws i
 nowhere near saturated: the prize is real and can be bought directly with draws
 rather than with a cleverer proposal.
 
-\paragraph{The policy can feel it, and it is the largest effect in this study.}
+\paragraph{The policy can feel it, and it is the largest single change here apart from the opponent model.}
+\label{sec:res-precision}
 The duel that paragraph declined to claim was pre-registered before its
 screening cell finished --- deliberately, because the belief-space search had
 already cost four rounds partly by being sized against a number a screen had
@@ -1907,8 +1908,10 @@ search on top of $480$ draws & $+0.072 \pm 0.042$ & 6000 \\
 \bottomrule
 \end{tabular}
 \end{center}
-$95\%$ CI $[+0.285, +0.538]$ --- the largest effect in this project, comfortably
-clear of zero, and roughly four times v0.3's best single term.
+$95\%$ CI $[+0.285, +0.538]$ --- larger than either change alone and, apart
+from the opponent model itself, the largest figure in this paper. It is not the
+largest \emph{single} change: that is the sampler's $+0.340$, and this number is
+two changes at once.
 
 Two things must be said beside it. It is \textbf{indirect}: this configuration
 has never been played against the champion in a single duel, and a chained
@@ -2222,13 +2225,27 @@ not ``shown not to matter''.}
 
 Four of these deserve comment.
 
-\textbf{Precision has saturated, and that is new.} v0.3 found that raising the
-sampled-world count from 32 to 96 was worth $+0.54$ sets per pair and concluded
-that belief precision had not saturated. Under v0.4's inference it plainly has:
-halving or doubling the draw budget around 160 changes nothing measurable. The
-natural reading is that v0.3 was buying accuracy, not precision --- more draws
-partially averaged out a \emph{bias} --- and once the bias is gone, the
-remaining sampling noise is no longer the binding constraint.
+\textbf{Precision appeared to have saturated, and it had not.} v0.3 found that
+raising the sampled-world count from 32 to 96 was worth $+0.54$ sets per pair
+and concluded that belief precision had not saturated. Under v0.4's inference
+these screens said it plainly had: halving or doubling the draw budget around
+$160$ changed nothing measurable, and the natural reading was that v0.3 had been
+buying accuracy rather than precision --- more draws partially averaging out a
+\emph{bias} --- so that once the bias was gone, sampling noise was no longer
+binding.
+
+\textbf{That reading is refuted}, by a pre-registered $6000$-pair run reported
+in Section~\ref{sec:res-precision}: going from $160$ draws to $480$ is worth
+$\mathbf{+0.340}$ sets per deal-pair, $95\%$ CI $[+0.243, +0.436]$, all six
+blocks positive, $I^2 = 0\%$. Precision had not saturated; the screens that said
+so were $200$-pair cells resolving about $\pm 0.53$, which cannot distinguish
+$+0.340$ from zero and returned exactly the null they were bound to return.
+Their agreement with each other was not corroboration --- underpowered cells
+agree on nothing in particular, and four of them agreeing on a null is what four
+underpowered cells do. The paragraph is kept in its original form above because
+the inference it drew was reasonable on the evidence available and wrong anyway,
+which is this paper's most frequently repeated lesson and is more useful stated
+against a concrete case than in the abstract.
 
 \textbf{One cell technically resolves, and should still be ignored.} Lowering
 the claim bar from $0.97$ to $0.90$ gives $+0.035$ $[+0.007, +0.063]$: an
@@ -3402,8 +3419,8 @@ to make.} Three measurements in this study point the same way and none of them
 is visible alone. The full eleven-term objective ranks candidate asks barely
 better than $\Prob(\text{success})$ by itself. Nearly every term we added
 \emph{beside} $\Prob(\text{success})$ is a null. And the largest single effect in
-the whole study --- $+0.340$ sets per deal-pair --- comes from tripling the
-sampling budget, which does not touch the objective at all: it only makes the
+the whole study apart from the opponent model itself --- $+0.340$ sets per
+deal-pair --- comes from tripling the sampling budget, which does not touch the objective at all: it only makes the
 $\Prob(\text{success})$ the objective is already dominated by more accurate.
 
 For a human that is a claim about where to put attention. Knowing more precisely
