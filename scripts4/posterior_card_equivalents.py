@@ -59,7 +59,16 @@ RATE = 0.45
 FULL_ORACLE = 17.483
 
 
-def main(n_games: int = 20) -> int:
+def main(n_games: int = 20, draws=None) -> int:
+    """``draws`` overrides the sampler budget, to separate reducible error.
+
+    The champion samples 160 draws. Running the SAME positions at a far larger
+    budget and re-measuring U splits the uncertainty in two: whatever shrinks is
+    sampling error, which more computation buys back, and whatever does not is
+    either genuinely hidden or a misspecified likelihood, neither of which more
+    draws can touch. Without that split, "18 card-equivalents of uncertainty"
+    could mean the sampler is sloppy or that the game simply does not tell you.
+    """
     rules = RuleConfig()
     rows = []
     for g in range(n_games):
@@ -76,7 +85,8 @@ def main(n_games: int = 20) -> int:
             if step % 3 == 0:
                 bel = agents[p].bel
                 bel.update(obs)
-                post = Posterior(bel, rng, n_draws=agents[p].n_draws,
+                post = Posterior(bel, rng,
+                                 n_draws=draws or agents[p].n_draws,
                                  n_worlds=agents[p].n_worlds, mode="auto",
                                  obs=obs, gamma=0.35)
                 M = post.marginals()
@@ -145,4 +155,5 @@ def main(n_games: int = 20) -> int:
 
 if __name__ == "__main__":
     a = sys.argv[1:]
-    raise SystemExit(main(int(a[0]) if a else 20))
+    raise SystemExit(main(int(a[0]) if a else 20,
+                          int(a[1]) if len(a) > 1 else None))
