@@ -96,20 +96,37 @@ def consistent_deals(obs: Observation, bel, hs: int) -> list:
     return out
 
 
+#: Memo for the champion oracle. It is a PURE FUNCTION of the information set
+#: -- that is the whole point of seeding it from the observation hash -- so
+#: caching it changes no value, only the time to get one. Without it the solver
+#: rebuilt an agent and replayed a hundred-event history at every node of every
+#: branch, and twenty games took over two hours to reach four.
+_CHAMP_CACHE: dict = {}
+
+
+def _info_key(seat, obs) -> bytes:
+    return hashlib.sha256(repr((seat, obs.hand, tuple(obs.hand_counts),
+                                tuple(obs.set_winner),
+                                tuple(repr(e) for e in obs.history)))
+                          .encode()).digest()
+
+
 def _champion_action(spec, rules, seat, st):
     """The champion's move, as a pure function of its information set."""
     from fish4.registry4 import make_agent
     obs = Observation.from_state(st, seat)
-    key = hashlib.sha256(repr((seat, obs.hand, tuple(obs.hand_counts),
-                               tuple(obs.set_winner),
-                               tuple(repr(e) for e in obs.history)))
-                         .encode()).digest()
+    key = _info_key(seat, obs)
+    hit = _CHAMP_CACHE.get(key)
+    if hit is not None:
+        return hit[0]
     a = make_agent(spec)
     a.begin_game(seat, rules, int.from_bytes(key[:8], "big"))
     try:
-        return a.act(obs)
+        act = a.act(obs)
     except Exception:
-        return None
+        act = None
+    _CHAMP_CACHE[key] = (act,)
+    return act
 
 
 class ExactII:
@@ -121,6 +138,7 @@ class ExactII:
         self.me = deviator
         self.spec = spec
         self.nodes = 0
+        self._memo: dict = {}
 
     # -- terminal value ------------------------------------------------------
 
@@ -131,6 +149,34 @@ class ExactII:
         if w == NULL_TEAM:
             return 0.0
         return 1.0 if w == team_of(self.me) else -1.0
+
+    # -- what the champion itself gets ---------------------------------------
+
+    def champion_value(self, states, weights, max_plies=MAX_PLIES) -> float:
+        """The same expectation with the CHAMPION in the deviator's seat.
+
+        The best response is only interesting beside this. Their difference is
+        the exact gain from deviating at m = 1 -- exploitability restricted to
+        the endgame, computed rather than sampled, which is what
+        scripts4/exploitability.py could not do.
+        """
+        tot = 0.0
+        for st, w in zip(states, weights):
+            t = copy.deepcopy(st)
+            for _ in range(max_plies):
+                v = self._value(t)
+                if v is not None:
+                    break
+                a = _champion_action(self.spec, self.rules, t.turn, t)
+                if a is None:
+                    break
+                try:
+                    t.apply(t.turn, a)
+                except Exception:
+                    break
+            v = self._value(t)
+            tot += w * (0.0 if v is None else v)
+        return tot
 
     # -- the search ----------------------------------------------------------
 
@@ -143,20 +189,32 @@ class ExactII:
         than a per-deal cheat.
         """
         self.nodes += 1
+        # Memo on the node itself: two branches reaching the same weighted
+        # belief set at the same depth have the same value by construction.
+        key = (depth, tuple(sorted(
+            (tuple(s.hands), s.turn, tuple(s.set_winner), round(w, 12))
+            for s, w in zip(states, weights))))
+        hit = self._memo.get(key)
+        if hit is not None:
+            return hit
         done = [self._value(s) for s in states]
         if all(v is not None for v in done):
-            return sum(w * v for w, v in zip(weights, done))
+            r = sum(w * v for w, v in zip(weights, done))
+            self._memo[key] = r
+            return r
         if depth >= MAX_PLIES:
-            return 0.0        # unresolved scores for nobody, as the harness does
+            self._memo[key] = 0.0   # unresolved scores for nobody, as the
+            return 0.0              # harness does
 
         turn = states[0].turn
         if any(s.turn != turn for s in states):
             # The deviator can see whose turn it is, so this cannot happen.
             raise AssertionError("information set spans different movers")
 
-        if turn == self.me:
-            return self._deviator(states, weights, depth)
-        return self._opponent(states, weights, depth, turn)
+        r = (self._deviator(states, weights, depth) if turn == self.me
+             else self._opponent(states, weights, depth, turn))
+        self._memo[key] = r
+        return r
 
     def _legal(self, st: GameState):
         p = st.turn

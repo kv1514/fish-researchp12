@@ -92,6 +92,7 @@ def main(n_games: int = 12) -> int:
                         skipped += 1
                         st.apply(p, agents[p].act(obs))
                         continue
+                    cv = sv.champion_value(states, w)
                     if len(deals) == 1:
                         want = closed_form(states[0], hs, p)
                         if abs(v - want) < 1e-9:
@@ -102,6 +103,7 @@ def main(n_games: int = 12) -> int:
                                         "closed_form": want})
                     else:
                         solved.append({"support": len(deals), "value": v,
+                                       "champion": cv, "gain": v - cv,
                                        "nodes": sv.nodes})
                 elif deals:
                     skipped += 1
@@ -133,6 +135,20 @@ def main(n_games: int = 12) -> int:
               f"{one}/{n}")
         print(f"  mean search nodes: "
               f"{sum(r['nodes'] for r in solved)/n:.0f}")
+        gains = sorted(r["gain"] for r in solved)
+        cvs = [r["champion"] for r in solved]
+        print(f"\n  THE CHAMPION IN THE SAME SEAT: mean "
+              f"{sum(cvs)/n:+.4f}")
+        print(f"  EXACT GAIN FROM DEVIATING: mean {sum(gains)/n:+.4f}, "
+              f"median {gains[n//2]:+.4f}, max {gains[-1]:+.4f}")
+        pos = sum(1 for x in gains if x > 1e-9)
+        neg = sum(1 for x in gains if x < -1e-9)
+        print(f"  positions where deviating gains: {pos}/{n};  "
+              f"where it loses: {neg}/{n}")
+        if neg:
+            print("  A NEGATIVE GAIN IS IMPOSSIBLE: the best response can "
+                  "always copy the\n  champion, so any negative entry is a "
+                  "bug in the solver, not a result.")
 
     out = ROOT / "results" / "ii_endgame.json"
     out.write_text(json.dumps({
