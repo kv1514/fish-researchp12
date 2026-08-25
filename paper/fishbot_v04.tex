@@ -4256,9 +4256,41 @@ choice assumption is worse than a biased sampler that accidentally encodes a
 choice model. That is a statement about which approximation is closer to the
 truth, not a general licence to prefer biased inference.
 
-\paragraph{Exact solving is still bounded.} Absolute ground truth reaches
-positions with one, and now two, unresolved half-suits. Midgame positions remain
-out of reach, which is exactly where v0.3 localised the remaining gap.
+\paragraph{Exact solving is still bounded, and bounded in a way this section
+previously misstated.} The tables solve the \emph{perfect-information} game.
+Calling them absolute ground truth without that qualifier is an overclaim, and
+two measurements say how large a one.
+
+First, the coverage. ``Reaches positions with one, and now two, unresolved
+half-suits'' describes the solver's reach over positions handed to it, not the
+game's. A tablebase value is legitimate only where the acting seat's belief pins
+every live card, which \texttt{tablebase4.pinned\_state} enforces. Over $2582$
+decisions from $25$ games that gate opens on $2.59\%$ of decisions: never at
+three or more live half-suits ($0$ of $188$), $12.1\%$ at two, $52.7\%$ at one.
+It first opens at step $100.2$ of $103.5$, with $8.1$ of $54$ cards left, and in
+$5$ of $25$ games it never opens at all.
+
+Second, the gap. Applied by determinizing over a belief, the tables overstate
+the mover's team by $5.294 \pm 0.159$ sets on the positions play actually
+reaches, and by $8.18$ at a fresh deal, where the closed form
+$V = \mathrm{sign} \times (2f - m)$ of \S\ref{sec:exact} predicts the team on
+move takes $8.36$ of the nine sets where play delivers $+0.27$. The closed form
+is not evidence that the Fish endgame is shallow; its own proof turns on ``every
+ask can be made to hit, and a hit retains the turn'', which is what perfect
+information buys and nothing else does. Measured independently, a team given
+the true deal beats the champion by $17.483$ sets per duplicate deal-pair
+against a maximum of $18$.
+
+So the honest statement is not that midgame positions remain out of reach
+pending a larger solver. It is that exact ground truth covers $2.6\%$ of the
+decisions a player faces, all in the last $3\%$ of the game, and that extending
+the perfect-information solver to three half-suits in full --- the natural next
+computational step --- would move that coverage by approximately zero, because
+the positions it would newly cover essentially never arise with every live card
+pinned. More ground truth requires solving the imperfect-information game, and
+the smallest Fish position carrying any hidden information already needs three
+players holding live cards, hence two on one side: a team-coordination problem
+with no two-player zero-sum reduction beneath it.
 
 \paragraph{No equilibrium claim.} We compute no equilibrium and no
 exploitability bound. The appropriate solution concept for a game with pre-play
