@@ -154,8 +154,13 @@ def main(n_games: int = 60) -> int:
             if (alt is not None and isinstance(act, Ask)
                     and not (st.hands[act.target] >> act.card) & 1):
                 fires += 1
-                mates = [q for q in range(NUM_PLAYERS)
-                         if team_of(q) == team_of(p) and q != p]
+                # EVERY other seat, not just teammates. An ask is public: the
+                # no-bluff rule proves the asker holds a card of that half-suit
+                # to the opponents as loudly as to the partner. Measuring only
+                # the partner counts one side of a two-sided disclosure, and
+                # would credit the arm for information it hands the opposition
+                # in equal measure.
+                mates = [q for q in range(NUM_PLAYERS) if q != p]
                 for t in mates:
                     agents[t].bel.update(Observation.from_state(st, t))
                 base = {}
@@ -175,7 +180,8 @@ def main(n_games: int = 60) -> int:
                         if t in fa_u and t in fb_u:
                             rows.append({"champ": base[t] - fa_u[t],
                                          "alt": base[t] - fb_u[t],
-                                         "alt_landed": fb_landed})
+                                         "alt_landed": fb_landed,
+                                         "ally": team_of(t) == team_of(p)})
             st.apply(p, act)
         print(f"  {g+1}/{n_games} games, {len(rows)} paired observations",
               flush=True)
@@ -183,6 +189,21 @@ def main(n_games: int = 60) -> int:
     if not rows:
         print("\nThe branch never fired with a landing alternative available.")
         return 1
+    def stats(sub):
+        cc = np.array([r["champ"] for r in sub])
+        aa = np.array([r["alt"] for r in sub])
+        dd = cc - aa
+        if len(dd) < 2:
+            return None
+        s_ = float(dd.std(ddof=1) / np.sqrt(len(dd)))
+        m_ = float(dd.mean())
+        return {"n": len(dd), "champ": float(cc.mean()),
+                "alt": float(aa.mean()), "diff": m_, "se": s_,
+                "ci95": [m_ - 1.96 * s_, m_ + 1.96 * s_]}
+
+    allies = [r for r in rows if r["ally"]]
+    foes = [r for r in rows if not r["ally"]]
+    rows = allies                       # headline stays the partner view
     c = np.array([r["champ"] for r in rows])
     a = np.array([r["alt"] for r in rows])
     d = c - a
@@ -221,6 +242,21 @@ def main(n_games: int = 60) -> int:
         print("    uncertainty. This strips that out and asks only which ASK")
         print("    told the partner more, at equal outcome.")
 
+    fs = stats(foes)
+    if fs:
+        print(f"\n  THE SAME MEASUREMENT FOR THE OPPONENTS ({fs['n']} obs):")
+        print(f"    champion's doomed ask   {fs['champ']:+.4f}")
+        print(f"    the landing substitute  {fs['alt']:+.4f}")
+        print(f"    PAIRED DIFFERENCE       {fs['diff']:+.4f}  95% CI "
+              f"[{fs['ci95'][0]:+.4f}, {fs['ci95'][1]:+.4f}]")
+        net = m - fs["diff"]
+        print(f"\n  NET, partners minus opponents:  {net:+.4f} "
+              f"card-equivalents per seat-pair")
+        print("    An ask is public. Information the substitute gives the")
+        print("    partner it also gives the opposition, and only the")
+        print("    DIFFERENCE is an advantage. If these cancel, the arm's")
+        print("    apparent information gain was never the team's to keep.")
+
     print()
     if lo > 0:
         print("The champion's doomed ask is the better signal, and that is "
@@ -248,6 +284,8 @@ def main(n_games: int = 60) -> int:
         "champion_mean_cards": float(c.mean()),
         "substitute_mean_cards": float(a.mean()),
         "paired_difference": m, "se": se, "ci95": [lo, hi],
+        "opponents": fs,
+        "net_partner_minus_opponent": (m - fs["diff"]) if fs else None,
         "like_for_like_n": len(miss),
         "like_for_like_difference": (float(np.mean(
             [r["champ"] - r["alt"] for r in miss])) if miss else None),
