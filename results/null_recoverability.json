@@ -1,0 +1,3212 @@
+{
+ "n_games": 300,
+ "n_nulls": 90,
+ "nulls_per_game": 0.3,
+ "n_claims": 2700,
+ "forced": 62,
+ "voluntary": 28,
+ "map_already_correct": 26,
+ "redraws": 8,
+ "mean_redraw_hit": 0.25833333333333336,
+ "mean_p_declared": 0.4063258002848238,
+ "mean_p_true": 0.4057995202883021,
+ "outcomes": {
+  "recovered": 28
+ },
+ "recovered_share_of_voluntary": 1.0,
+ "by_trigger": {
+  "doomed_ask": 27,
+  "no_asks": 62,
+  "voluntary": 1
+ },
+ "bar": 0.3,
+ "verdict": "clears_bar",
+ "records": [
+  {
+   "hs": 2,
+   "claimer": 5,
+   "forced": false,
+   "truth": [
+    5,
+    5,
+    5,
+    5,
+    5,
+    3
+   ],
+   "declared": [
+    5,
+    5,
+    5,
+    5,
+    5,
+    1
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.6451507674879617,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.35484923251203837,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": false,
+    "p_map": 0.7454393461689282,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 3,
+    "team_steps": 3
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 0,
+   "forced": false,
+   "truth": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    2
+   ],
+   "declared": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    4
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.5033622613250739,
+   "map_correct": true,
+   "redraw_hit": 0.75,
+   "rank_true_marginal": 1,
+   "p_true": 0.5033622613250739,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": true,
+    "p_map": 0.6102958679164698,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 4,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    2,
+    4,
+    2,
+    2,
+    2,
+    0
+   ],
+   "declared": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2960644510681835,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 4,
+   "p_true": 0.3118811881188118,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 4,
+   "forced": false,
+   "truth": [
+    4,
+    2,
+    4,
+    4,
+    4,
+    4
+   ],
+   "declared": [
+    4,
+    0,
+    4,
+    4,
+    4,
+    4
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.6348069707043769,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.36519302929562303,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": false,
+    "p_map": 0.7624414371417945,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    4
+   ],
+   "declared": [
+    0,
+    0,
+    4,
+    0,
+    0,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.26265624999999915,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 4,
+   "p_true": 0.4874999999999998,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": true,
+    "p_map": 0.28222656249999906,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    5,
+    5,
+    3,
+    3,
+    1,
+    5
+   ],
+   "declared": [
+    5,
+    1,
+    3,
+    3,
+    5,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.15315593908064473,
+   "map_correct": true,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 1,
+   "p_true": 0.2092032979295134,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    3,
+    1,
+    5,
+    1,
+    3,
+    3
+   ],
+   "declared": [
+    3,
+    1,
+    1,
+    1,
+    3,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2934326171874982,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.3687499999999999,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    2,
+    4,
+    0,
+    0,
+    0,
+    2
+   ],
+   "declared": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2937977241448756,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.39354838709677414,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 2,
+   "forced": false,
+   "truth": [
+    4,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "declared": [
+    0,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.5249783325884767,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.5249783325884767,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.5341998343594677,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 2,
+   "forced": false,
+   "truth": [
+    2,
+    2,
+    0,
+    2,
+    4,
+    4
+   ],
+   "declared": [
+    2,
+    2,
+    4,
+    2,
+    4,
+    0
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.32463493780421904,
+   "map_correct": true,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 1,
+   "p_true": 0.5697674418604649,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.2916000000000003,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    2,
+    0,
+    0,
+    0,
+    4,
+    0
+   ],
+   "declared": [
+    4,
+    0,
+    0,
+    0,
+    2,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.308156116312232,
+   "map_correct": true,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 1,
+   "p_true": 0.5551181102362202,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": true,
+    "p_map": 0.3410203368102092,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 3,
+   "forced": false,
+   "truth": [
+    3,
+    3,
+    3,
+    3,
+    3,
+    5
+   ],
+   "declared": [
+    3,
+    3,
+    3,
+    3,
+    3,
+    1
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.7465061078622195,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.25349389213778056,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": false,
+    "p_map": 0.36960926378596154,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 3,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 5,
+   "forced": false,
+   "truth": [
+    5,
+    3,
+    1,
+    5,
+    1,
+    5
+   ],
+   "declared": [
+    5,
+    3,
+    3,
+    5,
+    1,
+    5
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.7988629921389102,
+   "map_correct": false,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 2,
+   "p_true": 0.20113700786108996,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": false,
+    "p_map": 0.7179717587066736,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    5,
+    1,
+    5,
+    3,
+    1,
+    1
+   ],
+   "declared": [
+    1,
+    1,
+    5,
+    3,
+    1,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2691015624999991,
+   "map_correct": false,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 4,
+   "p_true": 0.48124999999999984,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    1,
+    3,
+    1,
+    1,
+    5,
+    1
+   ],
+   "declared": [
+    1,
+    5,
+    1,
+    1,
+    3,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2749851279000595,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.5243902439024388,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 0,
+   "forced": false,
+   "truth": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "declared": [
+    4,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.6177868203252319,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.382213179674768,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": false,
+    "p_map": 0.1712793314076908,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    2,
+    0,
+    0,
+    2,
+    4,
+    4
+   ],
+   "declared": [
+    2,
+    4,
+    0,
+    2,
+    4,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2916,
+   "map_correct": false,
+   "redraw_hit": 0.75,
+   "rank_true_marginal": 4,
+   "p_true": 0.46000000000000024,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.2856718192627813,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 1,
+   "forced": false,
+   "truth": [
+    1,
+    5,
+    1,
+    1,
+    1,
+    1
+   ],
+   "declared": [
+    1,
+    3,
+    1,
+    1,
+    1,
+    1
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.8672605287935645,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.1327394712064357,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": true,
+    "p_map": 0.6953909230337173,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 5,
+   "forced": false,
+   "truth": [
+    5,
+    1,
+    5,
+    5,
+    5,
+    5
+   ],
+   "declared": [
+    5,
+    3,
+    5,
+    5,
+    5,
+    5
+   ],
+   "trigger": "voluntary",
+   "p_map": 1.0,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 163,
+   "p_true": 0.0,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 7,
+    "team_steps": 7
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 2,
+   "forced": false,
+   "truth": [
+    2,
+    2,
+    2,
+    0,
+    2,
+    2
+   ],
+   "declared": [
+    2,
+    2,
+    2,
+    4,
+    2,
+    2
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.5530827083002905,
+   "map_correct": true,
+   "redraw_hit": 0.75,
+   "rank_true_marginal": 1,
+   "p_true": 0.5530827083002905,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.5416564340345539,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    3,
+    5,
+    1,
+    5,
+    3,
+    1
+   ],
+   "declared": [
+    3,
+    1,
+    1,
+    5,
+    3,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29454851991912945,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.3679245283018866,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 4,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    4,
+    0,
+    2,
+    0,
+    0,
+    0
+   ],
+   "declared": [
+    4,
+    0,
+    4,
+    0,
+    0,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.26265624999999915,
+   "map_correct": false,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 4,
+   "p_true": 0.4874999999999998,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    1,
+    3,
+    1,
+    5,
+    3,
+    3
+   ],
+   "declared": [
+    1,
+    5,
+    1,
+    3,
+    3,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2856718192627813,
+   "map_correct": false,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 4,
+   "p_true": 0.46551724137931044,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 4,
+   "forced": false,
+   "truth": [
+    2,
+    4,
+    4,
+    0,
+    2,
+    2
+   ],
+   "declared": [
+    0,
+    4,
+    4,
+    2,
+    2,
+    2
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.6795021582036224,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.6795021582036224,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": true,
+    "p_map": 0.7076333659911477,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 4,
+   "forced": false,
+   "truth": [
+    4,
+    4,
+    0,
+    4,
+    4,
+    4
+   ],
+   "declared": [
+    4,
+    4,
+    2,
+    4,
+    4,
+    4
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.7163046727787814,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.28369532722121865,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": true,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 5,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 1,
+   "forced": false,
+   "truth": [
+    5,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "declared": [
+    3,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.5969767021034329,
+   "map_correct": true,
+   "redraw_hit": 0.875,
+   "rank_true_marginal": 1,
+   "p_true": 0.5969767021034329,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": true,
+    "p_map": 0.5665043052563186,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 4,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    3,
+    1,
+    3,
+    5,
+    5,
+    3
+   ],
+   "declared": [
+    3,
+    1,
+    3,
+    5,
+    3,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2954730527423748,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.36057692307692296,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    3,
+    1,
+    5,
+    3,
+    5,
+    5
+   ],
+   "declared": [
+    1,
+    3,
+    5,
+    3,
+    5,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.27562499999999907,
+   "map_correct": false,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 4,
+   "p_true": 0.47499999999999987,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 5,
+    "is_original_claimer": true,
+    "p_map": 0.2691015624999991,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 4,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    2,
+    2,
+    2,
+    4,
+    2,
+    2
+   ],
+   "declared": [
+    2,
+    2,
+    2,
+    0,
+    2,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.719101505300234,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.2808984946997661,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    5,
+    5,
+    3,
+    5,
+    1,
+    5
+   ],
+   "declared": [
+    5,
+    5,
+    3,
+    3,
+    1,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.32779347954167926,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 3,
+   "p_true": 0.3998159180655621,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    4,
+    4,
+    2,
+    2,
+    0,
+    2
+   ],
+   "declared": [
+    2,
+    4,
+    2,
+    4,
+    0,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.25628906249999917,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.50625,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": true,
+    "p_map": 0.2691015624999991,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 6,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    2,
+    2,
+    2,
+    4,
+    0,
+    2
+   ],
+   "declared": [
+    2,
+    2,
+    2,
+    0,
+    4,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.33785156249999876,
+   "map_correct": false,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 4,
+   "p_true": 0.4187499999999999,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    5,
+    1,
+    3,
+    3,
+    1,
+    1
+   ],
+   "declared": [
+    5,
+    1,
+    1,
+    3,
+    1,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29565185546874817,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.3687499999999999,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    3,
+    3,
+    1,
+    5,
+    5,
+    3
+   ],
+   "declared": [
+    3,
+    3,
+    3,
+    5,
+    5,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2961301583371029,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.3505154639175258,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    3,
+    1,
+    3,
+    3,
+    5,
+    1
+   ],
+   "declared": [
+    3,
+    1,
+    3,
+    3,
+    1,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29437039075477156,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.3146067415730338,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    2,
+    4,
+    0,
+    4,
+    4,
+    2
+   ],
+   "declared": [
+    2,
+    4,
+    4,
+    4,
+    4,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.3672583441925299,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 3,
+   "p_true": 0.2754437581443973,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    2,
+    2,
+    0,
+    4,
+    4,
+    2
+   ],
+   "declared": [
+    2,
+    2,
+    4,
+    4,
+    4,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2930127723516134,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.4090909090909088,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    2,
+    2,
+    2,
+    4,
+    0,
+    0
+   ],
+   "declared": [
+    2,
+    2,
+    2,
+    0,
+    0,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.5135130993061356,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.28247626491901806,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    0,
+    0,
+    0,
+    2,
+    2,
+    4
+   ],
+   "declared": [
+    0,
+    0,
+    0,
+    2,
+    2,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29471021947873915,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.30555555555555564,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    4,
+    2,
+    0,
+    2,
+    2,
+    2
+   ],
+   "declared": [
+    0,
+    2,
+    4,
+    2,
+    2,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2856718192627813,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.5344827586206897,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.25847397782642423,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    0,
+    2,
+    2,
+    4,
+    0,
+    2
+   ],
+   "declared": [
+    4,
+    2,
+    2,
+    0,
+    0,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.6,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.6,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    1,
+    5,
+    3,
+    1,
+    1,
+    1
+   ],
+   "declared": [
+    1,
+    3,
+    5,
+    1,
+    1,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.26265624999999915,
+   "map_correct": false,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 4,
+   "p_true": 0.4874999999999998,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 4,
+   "forced": true,
+   "truth": [
+    0,
+    2,
+    2,
+    0,
+    4,
+    0
+   ],
+   "declared": [
+    0,
+    2,
+    0,
+    0,
+    4,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2962910681258903,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.3349514563106797,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    0,
+    4,
+    2,
+    2,
+    4
+   ],
+   "declared": [
+    0,
+    0,
+    2,
+    2,
+    4,
+    4
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.3164062499999989,
+   "map_correct": false,
+   "redraw_hit": 0.75,
+   "rank_true_marginal": 4,
+   "p_true": 0.43749999999999983,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    0,
+    0,
+    2,
+    4,
+    0
+   ],
+   "declared": [
+    0,
+    0,
+    0,
+    4,
+    2,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.30249999999999894,
+   "map_correct": false,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 4,
+   "p_true": 0.44999999999999996,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": true,
+    "p_map": 0.25628906249999917,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    1,
+    3,
+    5,
+    1,
+    1,
+    1
+   ],
+   "declared": [
+    1,
+    5,
+    3,
+    1,
+    1,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29988662131519267,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 4,
+   "p_true": 0.4523809523809524,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": true,
+    "p_map": 0.2856718192627813,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    1,
+    5,
+    3,
+    3,
+    3,
+    3
+   ],
+   "declared": [
+    5,
+    1,
+    3,
+    3,
+    3,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.28222656249999906,
+   "map_correct": true,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 1,
+   "p_true": 0.5312499999999999,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": true,
+    "p_map": 0.30249999999999894,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    1,
+    1,
+    5,
+    3,
+    5,
+    3
+   ],
+   "declared": [
+    1,
+    1,
+    1,
+    3,
+    5,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29340039628105574,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.35185185185185197,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    1,
+    5,
+    3,
+    1,
+    5,
+    1
+   ],
+   "declared": [
+    3,
+    5,
+    1,
+    1,
+    5,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2749851279000595,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.5243902439024388,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    5,
+    5,
+    3,
+    5,
+    1,
+    5
+   ],
+   "declared": [
+    5,
+    5,
+    1,
+    5,
+    3,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.33785156249999876,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.5812499999999998,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 5,
+    "is_original_claimer": true,
+    "p_map": 0.26265624999999915,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 6,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    3,
+    1,
+    1,
+    3,
+    5,
+    3
+   ],
+   "declared": [
+    3,
+    1,
+    1,
+    3,
+    3,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2905743803768667,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 4,
+   "p_true": 0.28023032629558553,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 0,
+   "forced": false,
+   "truth": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+   ],
+   "declared": [
+    0,
+    0,
+    4,
+    0,
+    0,
+    0
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.7388896764716681,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.26111032352833186,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": false,
+    "p_map": 0.27794115389599444,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    3,
+    5,
+    3,
+    5,
+    1,
+    5
+   ],
+   "declared": [
+    3,
+    5,
+    3,
+    5,
+    3,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29584209693104346,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 4,
+   "p_true": 0.3137254901960787,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 3,
+   "forced": false,
+   "truth": [
+    3,
+    5,
+    3,
+    3,
+    3,
+    3
+   ],
+   "declared": [
+    3,
+    1,
+    3,
+    3,
+    3,
+    3
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.8428515768397851,
+   "map_correct": true,
+   "redraw_hit": 0.875,
+   "rank_true_marginal": 1,
+   "p_true": 0.8428515768397851,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": true,
+    "p_map": 0.9656718951594699,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 4,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    3,
+    3,
+    3,
+    1,
+    5,
+    3
+   ],
+   "declared": [
+    3,
+    3,
+    3,
+    5,
+    1,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.30249999999999894,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.5499999999999999,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 3,
+   "forced": false,
+   "truth": [
+    1,
+    5,
+    3,
+    3,
+    3,
+    3
+   ],
+   "declared": [
+    5,
+    5,
+    3,
+    3,
+    3,
+    3
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.42245634654856573,
+   "map_correct": false,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 3,
+   "p_true": 0.21211039571915238,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 5,
+    "is_original_claimer": false,
+    "p_map": 0.18103013340382787,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 10,
+    "team_steps": 5
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 4,
+   "forced": true,
+   "truth": [
+    4,
+    4,
+    4,
+    0,
+    2,
+    4
+   ],
+   "declared": [
+    4,
+    4,
+    4,
+    2,
+    0,
+    4
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29536862003780545,
+   "map_correct": false,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 4,
+   "p_true": 0.45652173913043453,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": true,
+    "p_map": 0.2583327641554539,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 6,
+   "claimer": 5,
+   "forced": false,
+   "truth": [
+    5,
+    3,
+    5,
+    5,
+    5,
+    5
+   ],
+   "declared": [
+    5,
+    1,
+    5,
+    5,
+    5,
+    5
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.6676699328111393,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 2,
+   "p_true": 0.3323300671888605,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": false,
+    "p_map": 0.0768532317197778,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 2,
+   "forced": true,
+   "truth": [
+    4,
+    2,
+    4,
+    0,
+    4,
+    0
+   ],
+   "declared": [
+    0,
+    2,
+    4,
+    4,
+    4,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2672364263142765,
+   "map_correct": false,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 4,
+   "p_true": 0.4830508474576267,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.30815611631223216,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    1,
+    3,
+    1,
+    3,
+    5,
+    3
+   ],
+   "declared": [
+    1,
+    3,
+    1,
+    3,
+    1,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29451926674148887,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.3888888888888889,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 2,
+   "forced": false,
+   "truth": [
+    2,
+    2,
+    2,
+    0,
+    2,
+    2
+   ],
+   "declared": [
+    2,
+    2,
+    2,
+    4,
+    2,
+    2
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.47532642275168946,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.47532642275168946,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 1,
+   "forced": false,
+   "truth": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    3
+   ],
+   "declared": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    5
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.5570182550691521,
+   "map_correct": true,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 1,
+   "p_true": 0.5570182550691521,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 5,
+    "is_original_claimer": false,
+    "p_map": 0.015407924634295226,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 4,
+    "team_steps": 3
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    1,
+    3,
+    5,
+    5,
+    1,
+    5
+   ],
+   "declared": [
+    1,
+    1,
+    5,
+    5,
+    1,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2929394531249982,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.3687499999999999,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 5,
+   "forced": false,
+   "truth": [
+    1,
+    3,
+    5,
+    5,
+    5,
+    5
+   ],
+   "declared": [
+    1,
+    1,
+    5,
+    5,
+    5,
+    5
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.496331789006108,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 3,
+   "p_true": 0.17390689810097154,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 5,
+    "is_original_claimer": true,
+    "p_map": 0.267523952254498,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    0,
+    4,
+    0,
+    0,
+    0
+   ],
+   "declared": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.65,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.35,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    5,
+    1,
+    3,
+    3,
+    5,
+    5
+   ],
+   "declared": [
+    5,
+    1,
+    5,
+    3,
+    5,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29596326704526205,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 4,
+   "p_true": 0.3118811881188118,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    4,
+    2,
+    4,
+    2,
+    2
+   ],
+   "declared": [
+    0,
+    4,
+    2,
+    2,
+    2,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29541344727457053,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 4,
+   "p_true": 0.2961165048543692,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 5,
+   "forced": false,
+   "truth": [
+    3,
+    1,
+    3,
+    5,
+    3,
+    3
+   ],
+   "declared": [
+    1,
+    3,
+    3,
+    5,
+    3,
+    1
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.16129782954831937,
+   "map_correct": false,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 2,
+   "p_true": 0.060735331274133206,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 6,
+   "claimer": 4,
+   "forced": false,
+   "truth": [
+    0,
+    4,
+    4,
+    4,
+    4,
+    4
+   ],
+   "declared": [
+    2,
+    4,
+    4,
+    4,
+    4,
+    4
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.5044428568506272,
+   "map_correct": true,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 1,
+   "p_true": 0.5044428568506272,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 6,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    1,
+    3,
+    1,
+    1,
+    1,
+    5
+   ],
+   "declared": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29615507089702764,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.34177215189873433,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    2,
+    0,
+    4,
+    0,
+    2,
+    2
+   ],
+   "declared": [
+    2,
+    0,
+    2,
+    0,
+    2,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29612479953346066,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 4,
+   "p_true": 0.31578947368421073,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    5,
+    5,
+    5,
+    1,
+    5,
+    5
+   ],
+   "declared": [
+    5,
+    5,
+    5,
+    3,
+    5,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.6437499999999998,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.35624999999999996,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": false,
+    "p_map": 1.0,
+    "by": "deduction",
+    "clears_threshold": true,
+    "correct": true,
+    "steps": 1,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 5,
+   "claimer": 3,
+   "forced": true,
+   "truth": [
+    3,
+    5,
+    3,
+    3,
+    1,
+    3
+   ],
+   "declared": [
+    3,
+    1,
+    3,
+    3,
+    5,
+    3
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.27562499999999907,
+   "map_correct": false,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 4,
+   "p_true": 0.47499999999999987,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": true,
+    "p_map": 0.30249999999999894,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 4,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    5,
+    5,
+    1,
+    3,
+    5,
+    5
+   ],
+   "declared": [
+    5,
+    5,
+    3,
+    1,
+    5,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2666621875839828,
+   "map_correct": false,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 4,
+   "p_true": 0.4836065573770491,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    2,
+    4,
+    0,
+    0,
+    0
+   ],
+   "declared": [
+    0,
+    4,
+    2,
+    0,
+    0,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2856718192627815,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.5344827586206897,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": true,
+    "p_map": 0.25847397782642423,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 3,
+   "claimer": 0,
+   "forced": false,
+   "truth": [
+    0,
+    4,
+    0,
+    0,
+    0,
+    0
+   ],
+   "declared": [
+    0,
+    2,
+    0,
+    0,
+    0,
+    0
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.618167528158551,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.38183247184144886,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": false,
+    "p_map": 0.33217725299667417,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 6,
+    "team_steps": 4
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    1,
+    3,
+    5,
+    1,
+    5,
+    5
+   ],
+   "declared": [
+    1,
+    5,
+    5,
+    1,
+    5,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2892534747533667,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.4473684210526314,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 1,
+   "forced": false,
+   "truth": [
+    1,
+    1,
+    1,
+    1,
+    3,
+    1
+   ],
+   "declared": [
+    1,
+    1,
+    1,
+    1,
+    5,
+    1
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.6762405617899294,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 2,
+   "p_true": 0.3237594382100707,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": false,
+    "p_map": 0.13935931614919872,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    1,
+    5,
+    1,
+    1,
+    3,
+    5
+   ],
+   "declared": [
+    1,
+    5,
+    1,
+    1,
+    5,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2962097837889353,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 4,
+   "p_true": 0.32577319587628867,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    3,
+    3,
+    5,
+    1,
+    1,
+    1
+   ],
+   "declared": [
+    3,
+    3,
+    3,
+    1,
+    1,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29623646239014423,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.33540372670807456,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 4,
+   "forced": true,
+   "truth": [
+    0,
+    0,
+    2,
+    0,
+    4,
+    4
+   ],
+   "declared": [
+    2,
+    0,
+    0,
+    0,
+    4,
+    4
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.33765522279035776,
+   "map_correct": false,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 4,
+   "p_true": 0.41891891891891864,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 4,
+   "forced": true,
+   "truth": [
+    2,
+    4,
+    4,
+    4,
+    0,
+    2
+   ],
+   "declared": [
+    0,
+    4,
+    4,
+    4,
+    2,
+    2
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2749851279000595,
+   "map_correct": true,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 1,
+   "p_true": 0.5243902439024388,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 4,
+    "is_original_claimer": true,
+    "p_map": 0.2583327641554539,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 8,
+   "claimer": 2,
+   "forced": false,
+   "truth": [
+    0,
+    2,
+    2,
+    0,
+    2,
+    4
+   ],
+   "declared": [
+    4,
+    2,
+    2,
+    0,
+    2,
+    0
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.6255806394056327,
+   "map_correct": false,
+   "redraw_hit": 0.875,
+   "rank_true_marginal": 4,
+   "p_true": 0.3744193605943674,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": false,
+    "p_map": 0.3007421316178817,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 3,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    0,
+    4,
+    2,
+    4,
+    0
+   ],
+   "declared": [
+    0,
+    0,
+    2,
+    4,
+    4,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2762984878369487,
+   "map_correct": true,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 1,
+   "p_true": 0.5256410256410257,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    5,
+    1,
+    1,
+    1,
+    3,
+    1
+   ],
+   "declared": [
+    3,
+    1,
+    1,
+    1,
+    5,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.25847397782642423,
+   "map_correct": true,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 1,
+   "p_true": 0.5084033613445379,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 3,
+   "forced": false,
+   "truth": [
+    1,
+    5,
+    1,
+    3,
+    3,
+    3
+   ],
+   "declared": [
+    1,
+    1,
+    5,
+    3,
+    3,
+    3
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.5934502098094628,
+   "map_correct": false,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 4,
+   "p_true": 0.40654979019053716,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": true,
+    "p_map": 0.2680646083339187,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  },
+  {
+   "hs": 2,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    1,
+    1,
+    1,
+    3,
+    5,
+    1
+   ],
+   "declared": [
+    1,
+    1,
+    1,
+    5,
+    3,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2672364263142765,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.516949152542373,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 7,
+   "claimer": 1,
+   "forced": true,
+   "truth": [
+    5,
+    1,
+    3,
+    5,
+    3,
+    1
+   ],
+   "declared": [
+    3,
+    1,
+    3,
+    5,
+    3,
+    1
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.29569548932613043,
+   "map_correct": false,
+   "redraw_hit": 0.0,
+   "rank_true_marginal": 3,
+   "p_true": 0.34722222222222227,
+   "replay": {
+    "outcome": "blocked",
+    "reason": "no action but the ban",
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 4,
+   "claimer": 0,
+   "forced": true,
+   "truth": [
+    0,
+    4,
+    0,
+    0,
+    2,
+    0
+   ],
+   "declared": [
+    0,
+    2,
+    0,
+    0,
+    4,
+    0
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.2762984878369487,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.5256410256410257,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 0,
+    "is_original_claimer": true,
+    "p_map": 0.2762984878369487,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 0,
+   "claimer": 0,
+   "forced": false,
+   "truth": [
+    0,
+    2,
+    0,
+    0,
+    4,
+    4
+   ],
+   "declared": [
+    0,
+    4,
+    0,
+    0,
+    4,
+    4
+   ],
+   "trigger": "doomed_ask",
+   "p_map": 0.3632111265359037,
+   "map_correct": false,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 3,
+   "p_true": 0.2869253840514694,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": false,
+    "p_map": 0.2081991104970972,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 2,
+    "team_steps": 2
+   }
+  }
+ ]
+}

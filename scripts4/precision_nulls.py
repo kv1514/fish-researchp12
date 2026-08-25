@@ -65,7 +65,9 @@ def rows():
 def main() -> int:
     by = rows()
     print("does buying posterior draws reduce nulls, as the mechanism says?\n")
-    print(f"{'pool':<26}{'games':>8}{'x/game':>9}{'y/game':>9}"
+    # Per PAIR, not per game: x_nulls counts what that arm caused across both
+    # games of the duplicate deal, and n_pairs counts the pairs.
+    print(f"{'pool':<26}{'pairs':>8}{'x/pair':>9}{'y/pair':>9}"
           f"{'diff':>9}{'95% CI':>20}")
     out = {}
     for name, labels in POOLS.items():
@@ -91,6 +93,25 @@ def main() -> int:
 
     p1 = out.get("PRECISION 480 vs 160")
     print()
+
+    # Significance is the smaller question here. The mechanism implies a SIZE:
+    # 29% of nulls flip on a single redraw, so that share of the champion's
+    # null rate is what perfect claim-time sampling could remove at most.
+    # Comparing what tripling the draws actually removed against that ceiling
+    # says whether the mechanism matters, which "the interval includes zero"
+    # does not.
+    REDRAW_SHARE = 0.29
+    if p1:
+        avail = REDRAW_SHARE * p1["y_per_game"]
+        got = -p1["diff"]
+        print(f"MAGNITUDE. At 160 draws {REDRAW_SHARE*100:.0f}% of nulls flip "
+              f"on one redraw, so at most\n{avail:.3f} nulls per pair were "
+              f"available to claim-time sampling. Tripling the draws\n"
+              f"removed {got:+.3f}, which is {got/avail*100:.0f}% of that, "
+              f"and worth {got:.3f} of\ndifferential against the +0.340 the "
+              f"same pool scored -- about "
+              f"{abs(got)/0.340*100:.0f}% of it.\n"
+              f"So whatever bought the +0.340, it was not better claims.\n")
     if not p1:
         print("PRECISION pool incomplete; nothing to score.")
         return 1
@@ -102,7 +123,7 @@ def main() -> int:
         verdict = "confirmed"
     elif p1["diff"] < 0:
         print(f"DIRECTION RIGHT, NOT RESOLVED. The 480-draw arm nulls "
-              f"{-p1['diff']:.3f} fewer\ntimes per game but the interval "
+              f"{-p1['diff']:.3f} fewer\ntimes per pair but the interval "
               f"includes zero at six blocks. Reported as a\nfailure to "
               f"resolve, not as support.")
         verdict = "unresolved_right_direction"
