@@ -56,7 +56,7 @@ RUNS = [
      "value_keep_verdict.json", "scripts4/pool_verdict.py value_keep"),
     ("BASELINE value pure vs champion block", 2,
      "value_baseline_verdict.json", "scripts4/pool_verdict.py value_baseline"),
-    ("DOOMED avoid_doomed_asks vs champion block", 6,
+    ("DOOMED avoid_doomed_asks vs champion block", 8,
      "avoid_doomed_asks_verdict.json",
      "scripts4/pool_verdict.py avoid_doomed_asks"),
 ]

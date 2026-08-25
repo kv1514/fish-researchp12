@@ -51,7 +51,7 @@ RUNS = {
         "jobs/PREREGISTRATION_combined_reblock.md", "measure", None,
         "the shipped configuration, both blocks on one engine"),
     "avoid_doomed_asks": (
-        [f"DOOMED avoid_doomed_asks vs champion block {i}" for i in range(6)],
+        [f"DOOMED avoid_doomed_asks vs champion block {i}" for i in range(8)],
         "jobs/PREREGISTRATION_avoid_doomed_asks.md", "above", 0.05,
         "does refusing an ask that cannot land beat the champion?"),
     "gamma_schedule": (

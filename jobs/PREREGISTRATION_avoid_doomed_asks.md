@@ -92,3 +92,49 @@ is that a null result would not surprise me.
 Three of my last three pre-data predictions in this project have missed —
 value_keep by 0.167, gamma_schedule by the sign, and the COMBINED block-0
 replay outright. This one is recorded in the same spirit.
+
+---
+
+## AMENDMENT, 2026-08-25, written after the six blocks landed
+
+The six pre-registered blocks pooled to **+0.009, 95% CI [−0.039, +0.056]**
+over 6,000 pairs, with Q = 4.19 on 5 df and I² = 0%.
+
+**The prediction missed.** I recorded +0.05 to +0.15 and the entire interval
+lies below the bottom of that range. That is four pre-data predictions in a
+row: value_keep by 0.167, gamma_schedule by the sign, the COMBINED block-0
+replay outright, and this one.
+
+**The outcome is the third branch: unresolved, not adopted, not refuted.** The
+interval contains zero. Its upper limit of +0.056 does not quite fit inside the
+±0.05 band, so the bounded null is not yet established either.
+
+### What is being added, and why it is not a fishing expedition
+
+Two further blocks of 1,000 pairs at `base_seed` 68,000,000 upward, bringing
+the pool to 8,000. (65,000,000 was the first choice and `check_seeds.py`
+rejected it: block 5 of the original six already occupies
+[65,000,000, 65,001,000). The collision was caught before a pair was played,
+which is the only reason that check exists.) This is a deviation from the six blocks fixed above, and it
+is recorded as one. Three things constrain it:
+
+1. **The rule it serves was fixed in advance.** The original outcomes section
+   says an unresolved interval must have "the pairs it would take to settle
+   stated". `scripts4/pool_verdict.py` computes that from the observed
+   standard error: about 8,000 pairs. This runs exactly that number.
+2. **It cannot produce an adoption.** The point estimate sits inside the ±0.05
+   band, so no sample size reaches "entirely above +0.05" or "entirely below
+   −0.05" from here. The only outcome available is the bounded null, and
+   more data cannot turn this arm into a win.
+3. **The pooled estimate of record is the eight-block pool**, whatever it says,
+   and the six-block figure above stays in the record beside it.
+
+### The outcome of the amendment, fixed now
+
+- **Interval inside ±0.05** — the bounded null. Refusing an ask that cannot
+  land is worth less than the smallest effect this project treats as
+  interesting, and that is the finding: 1.5% of decisions give the turn away
+  for certain and it does not matter.
+- **Interval still straddling ±0.05** — say so and stop. Three runs at this
+  size would be spending a day to move a bound that is already tight enough to
+  act on.
