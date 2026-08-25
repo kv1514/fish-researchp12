@@ -249,13 +249,31 @@ def main(n_games: int = 60) -> int:
         print(f"    the landing substitute  {fs['alt']:+.4f}")
         print(f"    PAIRED DIFFERENCE       {fs['diff']:+.4f}  95% CI "
               f"[{fs['ci95'][0]:+.4f}, {fs['ci95'][1]:+.4f}]")
-        net = m - fs["diff"]
-        print(f"\n  NET, partners minus opponents:  {net:+.4f} "
-              f"card-equivalents per seat-pair")
-        print("    An ask is public. Information the substitute gives the")
-        print("    partner it also gives the opposition, and only the")
-        print("    DIFFERENCE is an advantage. If these cancel, the arm's")
-        print("    apparent information gain was never the team's to keep.")
+        # Weighted 2 to 3, not 1 to 1. The first version of this line
+        # printed m - fs["diff"], comparing ONE partner against ONE opponent,
+        # which is not a quantity anybody plays for: an ask discloses to two
+        # partners and three opponents at once.
+        net = 2.0 * m - 3.0 * fs["diff"]
+        print(f"\n  NET TO THE TEAM, 2 partners against 3 opponents: "
+              f"{net:+.4f}")
+        print("    card-equivalents per firing. An ask is public, so the")
+        print("    substitute's extra disclosure reaches the opposition too --")
+        print("    and there are MORE of them. In six-player Fish a public")
+        print("    disclosure is net-negative for the discloser's team by")
+        print("    arithmetic alone, whatever it says.")
+        # Sign discipline: diff is champion MINUS substitute, so net > 0
+        # means the CHAMPION is ahead on team-weighted information and the arm
+        # pays for the switch. It is a DEBIT against the arm's tempo credit,
+        # and adding the two instead of netting them would have widened the
+        # gap it actually narrows.
+        debit = 2 * 1.53 * net * RATE
+        print(f"    At {RATE} sets per card over 1.53 firings per game that is")
+        print(f"    {debit:+.4f} sets per deal-pair in the CHAMPION's favour, "
+              f"so it is a")
+        print(f"    debit against the arm. Tempo credits the arm +0.38 to "
+              f"+0.79, so the")
+        print(f"    two together expect +{0.38 - debit:.2f} to "
+              f"+{0.79 - debit:.2f}, against +0.017 measured.")
 
     print()
     if lo > 0:
@@ -285,7 +303,10 @@ def main(n_games: int = 60) -> int:
         "substitute_mean_cards": float(a.mean()),
         "paired_difference": m, "se": se, "ci95": [lo, hi],
         "opponents": fs,
-        "net_partner_minus_opponent": (m - fs["diff"]) if fs else None,
+        "net_team_2v3_cards_per_firing": (2.0 * m - 3.0 * fs["diff"])
+        if fs else None,
+        "net_team_sets_per_deal_pair": (2 * 1.53 * (2.0 * m - 3.0 * fs["diff"])
+                                        * RATE) if fs else None,
         "like_for_like_n": len(miss),
         "like_for_like_difference": (float(np.mean(
             [r["champ"] - r["alt"] for r in miss])) if miss else None),
