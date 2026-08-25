@@ -113,15 +113,43 @@ def load():
     return sorted(out, key=lambda t: (t[2], t[3]))
 
 
+#: A cell labelled ``REPLAY <original label>`` is a deliberate replication of
+#: that original: the SAME deals played again, which is the whole point, so its
+#: seed overlap with the original is the design and not a collision.
+#:
+#: This exists because the alternative is worse in a specific way. Without it,
+#: every replication trips the check, and a check that cries wolf on correct
+#: work is one people learn to run with their eyes closed -- which is exactly
+#: how the retake-gate collision this script was written for got through.
+#:
+#: The exemption is narrow on purpose. It applies only to the pair (replay,
+#: its own named original), and only when the seed ranges match EXACTLY. A
+#: REPLAY cell that overlaps anything else, or that overlaps its original only
+#: partially, is still reported.
+REPLAY_PREFIX = "REPLAY "
+
+
+def replays(a_label: str, b_label: str) -> bool:
+    """Is one of these a declared replay of the other?"""
+    for x, y in ((a_label, b_label), (b_label, a_label)):
+        if x.startswith(REPLAY_PREFIX) and x[len(REPLAY_PREFIX):] == y:
+            return True
+    return False
+
+
 def main() -> int:
     cells = load()
     within = 0
+    replayed = 0
     hist, live = [], []
     for i, a in enumerate(cells):
         for b in cells[i + 1:]:
             if b[2] >= a[3]:
                 break                 # sorted by start: nothing further overlaps
             if a[1] == b[1]:
+                continue
+            if replays(a[1], b[1]) and (a[2], a[3]) == (b[2], b[3]):
+                replayed += 1         # same deals on purpose
                 continue
             if a[0] == b[0] and a[0] != "legacy":
                 within += 1           # same job file: shared deals by design
@@ -131,6 +159,7 @@ def main() -> int:
     print(f"cells with a seed range: {len(cells)}  "
           f"({sum(1 for c in cells if c[4])} still queued)")
     print(f"shared deals within one job file (by design):  {within}")
+    print(f"declared replays of their own original (by design): {replayed}")
     print(f"shared deals across experiments, already run:  {len(hist)}")
     print(f"shared deals across experiments, still queued: {len(live)}")
 
