@@ -58,6 +58,27 @@ def marginally_impossible(bel, claim: Claim) -> bool:
     return False
 
 
+def generally_impossible(obs, bel, claim: Claim) -> bool:
+    """The max-flow feasibility check, which works at EVERY layer.
+
+    The enumeration below only decides m = 1. That left the pre-registration
+    for the claim_feasibility arm with a stated hole: 9.2% is the m=1 rate and
+    the rate above it was unmeasured, while the arm applied everywhere. The
+    arm then scored +0.028 against a +0.183 ceiling computed from the m=1 rate
+    alone, so whether impossible claims occur at higher layers is exactly the
+    number that says whether that ceiling was ever the right one.
+
+    fish4.feasible.declaration_feasible answers it, and agrees 40/40 with the
+    enumeration where both apply.
+    """
+    from fish4.feasible import declaration_feasible
+    try:
+        return not declaration_feasible(obs, bel, claim.half_suit,
+                                        claim.assignment)
+    except Exception:
+        return False
+
+
 def jointly_impossible(obs, bel, claim: Claim) -> bool:
     """No complete deal the public record allows contains this declaration.
 
@@ -114,9 +135,10 @@ def main(n_games: int = 80) -> int:
                 live = sum(1 for w in obs.set_winner if w is None)
                 marg = marginally_impossible(agents[p].bel, act)
                 joint = jointly_impossible(obs, agents[p].bel, act)
+                gen = generally_impossible(obs, agents[p].bel, act)
                 rec = {"live": live, "impossible": marg or joint,
                        "marginal": marg, "joint_only": joint and not marg,
-                       "checked_jointly": live == 1}
+                       "general": gen, "checked_jointly": live == 1}
             ev = st.apply(p, act)
             if rec is not None:
                 rec["winner"] = ev.winner
@@ -148,6 +170,16 @@ def main(n_games: int = 80) -> int:
         print(f"    {label:<22}{len(sub):>5}   won {won:>4}  "
               f"nulled {null:>4}  to the foe {lost:>4}   "
               f"sets/claim {(won-lost)/len(sub):+.3f}")
+
+    gen = [r for r in rows if r.get("general")]
+    from collections import Counter
+    print(f"\n  BY THE GENERAL CHECK, at every layer: {len(gen)}/{n} = "
+          f"{len(gen)/max(1,n)*100:.1f}%")
+    if gen:
+        print(f"    by half-suits still live: "
+              f"{dict(sorted(Counter(r['live'] for r in gen).items()))}")
+    bylive = Counter(r["live"] for r in rows)
+    print(f"    claims made per layer:     {dict(sorted(bylive.items()))}")
 
     print(f"\n  what they scored:")
     outcome(ok, "possible claims")

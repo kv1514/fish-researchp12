@@ -79,3 +79,34 @@ gamma_schedule by the sign, the COMBINED block-0 replay outright,
 avoid_doomed_asks by its whole range, and the m=1 disagreement shape (I said
 same-target/different-card from a four-decision smoke; at scale it was 49/12/35
 across three categories). This one is recorded in the same spirit.
+
+---
+
+## AMENDMENT, 2026-08-25: the coverage gap, closed after the run
+
+The pre-registration above said the 9.2% was measured at m=1 and that the rate
+at higher layers was **unmeasured**, while the arm applied everywhere. The
+max-flow check built for the arm answers that at every layer, so it was
+measured rather than left open:
+
+| | claims | jointly impossible |
+|---|---|---|
+| m = 1 | 60 | **7 (11.7%)** |
+| m = 2 … 9 | 480 | **0** |
+
+**Impossible claims happen only at m=1.** That is structural rather than
+lucky: at m=1 the hand counts are tight — six live cards and exact hand sizes,
+so a declaration that mis-splits them is detectably infeasible — while at m≥2
+there are enough live cards and enough slack in the counts that almost any
+team-only declaration fits some deal.
+
+So the +0.183 ceiling was computed from the right rate after all, and the arm's
++0.028 is not explained by missing opportunity at higher layers. It is
+explained by the other half of the sizing, which the pre-registration stated:
+the substituted split comes from the same confused posterior, so repairing an
+impossible claim converts it to a *feasible* one that is often still wrong.
+Measured in the smoke: five impossible claims repaired, two became wins.
+
+Nothing about the verdict changes. Recorded because a pre-registration that
+names a gap and never closes it is a pre-registration that got the benefit of
+the doubt for free.
