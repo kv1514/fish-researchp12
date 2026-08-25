@@ -56,6 +56,14 @@ class ClaimConfig:
     exact_candidates: int = 3
     #: cap on the enumeration of team assignments for unpinned cards
     max_enumerate: int = 4096
+    #: half-suits this evaluator refuses to claim, for counterfactual studies
+    #: only. ``scripts4/null_recoverability.py`` needs to replay a game with ONE
+    #: claim deleted; suppressing claims wholesale (by lifting ``threshold``)
+    #: does not do that -- it stops the team claiming anything, which starves it
+    #: of asks and forces it onto the deferred half-suit almost immediately, so
+    #: the counterfactual measures the wrong intervention. Empty on every
+    #: shipped path.
+    banned: frozenset = frozenset()
     #: use exact joint probabilities at all (ablation handle).
     #:
     #: Read the ablation carefully. With this False every half-suit takes the
@@ -181,6 +189,8 @@ class ClaimEvaluator:
         if self._cands is None:
             out = []
             for hs in self.obs.claimable_half_suits():
+                if hs in self.cfg.banned:
+                    continue
                 r = self.best_for_half_suit(hs)
                 if r is not None:
                     out.append(r)
@@ -222,7 +232,8 @@ class ClaimEvaluator:
             # probability, so whatever we declare loses the set. Pick the one we
             # know most about and declare every card we can actually place,
             # which at least avoids compounding the loss with a nonsense split.
-            live = self.obs.claimable_half_suits()
+            live = [hs for hs in self.obs.claimable_half_suits()
+                    if hs not in self.cfg.banned]
             if not live:
                 return None
             best = None

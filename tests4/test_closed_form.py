@@ -146,3 +146,48 @@ def test_footholds_counts_only_live_half_suits():
     assert footholds(st.hands, st.set_winner, 1) == {1}
     sw2 = [0] + [None] + [0] * 7
     assert footholds(hands, sw2, 0) == set()
+
+
+# -- the ban used by the null counterfactual ---------------------------------
+
+def _play_and_collect_claims(banned, seed=88_000, steps=400):
+    """Play one game, returning the half-suits claimed by anybody."""
+    from dataclasses import replace as _replace
+    from fish.engine import Claim as _Claim
+    from fish.observation import Observation
+    from fish4.registry4 import make_agent
+    rules = RuleConfig()
+    agents = [make_agent(("fishbot4", {"opponent_gamma": 0.35}))
+              for _ in range(NUM_PLAYERS)]
+    st = GameState.deal(rules, seed=seed)
+    rng = random.Random(seed + 1)
+    for p, a in enumerate(agents):
+        a.begin_game(p, rules, rng.getrandbits(64))
+        if banned:
+            a.claim_cfg = _replace(a.claim_cfg, banned=frozenset(banned))
+    claimed = []
+    for _ in range(steps):
+        if st.is_terminal:
+            break
+        p = st.turn
+        try:
+            act = agents[p].act(Observation.from_state(st, p))
+        except Exception:
+            break
+        if isinstance(act, _Claim):
+            claimed.append(act.half_suit)
+        st.apply(p, act)
+    return claimed
+
+
+def test_claim_ban_removes_exactly_the_banned_half_suit():
+    """``scripts4/null_recoverability.py`` deletes one claim and replays. If
+    the ban did not bite, every counterfactual would be meaningless; if it bit
+    wider than one half-suit, it would measure a different intervention. The
+    unbanned run is the control -- without it this passes for the wrong reason
+    when the game simply never reaches half-suit 0."""
+    control = _play_and_collect_claims(())
+    assert 0 in control, "control never claimed half-suit 0; test is vacuous"
+    banned = _play_and_collect_claims((0,))
+    assert 0 not in banned
+    assert banned, "banning one half-suit stopped the team claiming anything"
