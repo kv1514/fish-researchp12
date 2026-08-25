@@ -91,6 +91,9 @@ class FishBot4(Tablebase4Mixin, Agent):
                  value_turn: float = 0.0,
                  value_expose: float = 0.0,
                  value_keep: float = 0.0,
+                 #: never make an ask that provably cannot land while one
+                 #: that can is available. See the note at the use site.
+                 avoid_doomed_asks: bool = False,
                  # -- claiming
                  claim_threshold: float = 0.97,
                  claim_exact: bool = True,
@@ -142,6 +145,7 @@ class FishBot4(Tablebase4Mixin, Agent):
             raise ValueError(
                 f"value_keep={value_keep} has no effect with objective="
                 f"{objective!r}; it applies only to objective='value'")
+        self.avoid_doomed_asks = bool(avoid_doomed_asks)
         self.claim_cfg = ClaimConfig(threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
                                      use_exact=claim_exact)
@@ -300,6 +304,30 @@ class FishBot4(Tablebase4Mixin, Agent):
             best = claims.best_candidate()
             if best is not None and best[0] >= 0.5:
                 return best[2]
+            # No claim, and the ask we are about to make cannot land -- so it
+            # surrenders the turn for certain. Measured over 15,542 decisions
+            # (results/doomed_ask_diag.json) that happens 269 times in 150
+            # games, and in 229 of them ANOTHER ask could still have landed,
+            # with a median success probability of 0.385. So 1.5% of all
+            # decisions throw the turn away when a better-than-one-in-three
+            # chance of keeping it was on the table.
+            #
+            # This restricts the choice to asks that can land and then ranks
+            # them by the SAME objective, so it ablates exactly one idea: which
+            # ask to make when the best-scoring one is doomed. The claim gate
+            # above still sees the unfiltered order, so the claiming behaviour
+            # is bit-identical and this cannot be two changes wearing one flag.
+            #
+            # Off by default. It is a hypothesis, not a fix: the objective
+            # ranked the doomed ask top for reasons, and under the no-bluff
+            # rule a failed ask publicly proves the asker holds another card of
+            # that set, which is real information for a partner. Whether that
+            # is worth a certain turn is what the duel is for.
+            if self.avoid_doomed_asks:
+                live = [i for i in order if p[i] > 0.0]
+                if live:
+                    order = live
+                    top = scores[order[0]]
         pool = [i for i in order if scores[i] >= top - 1e-9]
         return asks[self.rng.choice(pool)]
 

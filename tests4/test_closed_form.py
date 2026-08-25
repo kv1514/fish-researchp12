@@ -191,3 +191,59 @@ def test_claim_ban_removes_exactly_the_banned_half_suit():
     banned = _play_and_collect_claims((0,))
     assert 0 not in banned
     assert banned, "banning one half-suit stopped the team claiming anything"
+
+
+# -- avoid_doomed_asks -------------------------------------------------------
+
+def test_avoid_doomed_asks_is_inert_by_default_and_bites_when_on():
+    """The flag must change which ask is played and NOTHING else.
+
+    Two halves, and the first is the one that matters: with the flag off the
+    champion must be action-for-action what it was, because every number in the
+    paper was played by that agent. With it on it must actually differ, or the
+    duel would be measuring nothing.
+    """
+    import hashlib
+    from fish.engine import Ask
+    from fish.observation import Observation
+    from fish4.registry4 import make_agent
+
+    def fingerprint(flag, games=4):
+        rules = RuleConfig()
+        h = hashlib.sha256()
+        failed = total = 0
+        for g in range(games):
+            spec = {"opponent_gamma": 0.35}
+            if flag:
+                spec["avoid_doomed_asks"] = True
+            agents = [make_agent(("fishbot4", spec))
+                      for _ in range(NUM_PLAYERS)]
+            st = GameState.deal(rules, seed=88_000 + g)
+            rng = random.Random(88_001 + g)
+            for p, a in enumerate(agents):
+                a.begin_game(p, rules, rng.getrandbits(64))
+            for _ in range(600):
+                if st.is_terminal:
+                    break
+                p = st.turn
+                act = agents[p].act(Observation.from_state(st, p))
+                if isinstance(act, Ask):
+                    total += 1
+                    if not (st.hands[act.target] >> act.card) & 1:
+                        failed += 1
+                h.update(repr((p, act)).encode())
+                st.apply(p, act)
+        return h.hexdigest()[:16], failed, total
+
+    off, off_failed, off_total = fingerprint(False)
+    on, on_failed, on_total = fingerprint(True)
+    # Verified by stashing the avoid_doomed_asks patch and recomputing: the
+    # four-game hash is identical with and without it, so this constant pins
+    # the champion as it was, not merely as it is.
+    assert off == "15fff1b606f50542", (
+        f"the champion moved: {off}. Every published number was played by the "
+        f"agent that fingerprints 15fff1b606f50542")
+    assert on != off, "avoid_doomed_asks changed nothing; the duel is vacuous"
+    assert on_failed / on_total < off_failed / off_total, (
+        f"the flag is meant to make FEWER asks fail: "
+        f"{on_failed}/{on_total} vs {off_failed}/{off_total}")

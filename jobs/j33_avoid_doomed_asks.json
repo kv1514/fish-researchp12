@@ -1,0 +1,116 @@
+[
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 0",
+  "n_pairs": 1000,
+  "base_seed": 64000000,
+  "agent_seed": 64001,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 1",
+  "n_pairs": 1000,
+  "base_seed": 64200000,
+  "agent_seed": 64002,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 2",
+  "n_pairs": 1000,
+  "base_seed": 64400000,
+  "agent_seed": 64003,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 3",
+  "n_pairs": 1000,
+  "base_seed": 64600000,
+  "agent_seed": 64004,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 4",
+  "n_pairs": 1000,
+  "base_seed": 64800000,
+  "agent_seed": 64005,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 5",
+  "n_pairs": 1000,
+  "base_seed": 65000000,
+  "agent_seed": 64006,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]
