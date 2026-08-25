@@ -3964,6 +3964,110 @@ plies.
 \end{remark}
 
 % =====================================================================
+\section{The price of a turn, and why it is conditional}
+\label{sec:tempo}
+
+Every result in this paper is denominated in one unit: the information exchange
+rate of about $0.45$ sets per hidden card revealed. Half the ask objective
+prices \emph{tempo} --- $\mathrm{turn\_risk}$, depth, the retained turn a hit
+buys --- and none of those weights was ever fitted against a measured scale,
+because none existed. This section supplies one, and the answer is not a
+constant.
+
+\subsection{Measuring it}
+
+The design is a duplicate deal with one intervention. Both arms play the
+identical deck with identical agent seeds; at one pre-chosen decision of one
+pre-chosen seat the treatment substitutes an ask that provably cannot land,
+taken from the true state so the donation is certain rather than a modelled
+mistake, and both arms then play on honestly. The difference in the donating
+team's differential is the price of exactly one turn. Substituting the agent's
+\emph{own} action instead gives exactly $0.000$ on every deal, which is the
+control that makes the number mean anything.
+
+Two runs of $1500$ pairs each put the price at $+0.271$, 95\% CI
+$[+0.092, +0.450]$ when the donation falls at decisions $0$--$4$, and $+0.497$,
+95\% CI $[+0.324, +0.671]$ at decisions $14$--$21$. Tempo value rises through a
+game.
+
+\subsection{It depends entirely on whether you have an ask worth making}
+
+Bucketing $1464$ donations by $p_{\text{best}}$, the success probability of the
+ask the seat would otherwise have made:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+$p_{\text{best}}$ & pairs & price & se \\
+\midrule
+$[0.00, 0.25)$ & $374$ & $-0.043$ & $0.169$ \\
+$[0.25, 0.50)$ & $511$ & $+0.004$ & $0.143$ \\
+$[0.50, 0.75)$ & $179$ & $\mathbf{+0.508}$ & $0.258$ \\
+$[0.75, 1.01)$ & $400$ & $\mathbf{+0.415}$ & $0.164$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Below $p_{\text{best}} = 0.5$ a turn is worth nothing; above it, about $+0.45$
+sets. \textbf{A turn is worth nothing unless you have something to do with it.}
+Tempo in Fish is not a resource in itself.
+
+This is not the timing effect in disguise, and the direction rules that out: a
+late turn prices \emph{higher} than an early one, so if low-$p_{\text{best}}$
+positions were merely late positions they would be worth more rather than
+nothing.
+
+\subsection{What it explains, and what it cost to find out}
+
+The measurement began as a critique of the engine. On $1.5\%$ of decisions
+($229$ of $15{,}542$) the champion plays an ask that cannot land while one with
+median success probability $0.385$ was available --- it surrenders the turn for
+certain. That looked like a defect, and \texttt{avoid\_doomed\_asks}, which
+restricts the choice to asks that can land and ranks them by the same
+objective, was pre-registered against it with a predicted $+0.05$ to $+0.15$.
+
+Over $8000$ duplicate deal-pairs it scored $+0.017$, 95\% CI
+$[-0.024, +0.059]$: at most $+0.06$ with 95\% confidence, under a fifth of the
+largest gain this project has demonstrated, and plausibly zero.
+
+Reconciling that with the turn price took four rounds, and three of the four
+found errors in the bridge rather than in the game. Treating the measured price
+as the value of a turn understated tempo by a factor of $1.7$, since the
+donation displaces the agent's normal action, which itself retains the turn
+only with probability $0.583$. Counting firings across all six seats
+double-counted, since the arm changes only the three seats it plays. Neither
+helped. The band table did: the branch fires when $p_{\text{best}} = 0$
+\emph{by definition}, at the floor of the worthless range, and the substitute's
+median $p = 0.385$ sits inside it too. The arm retains turns worth
+approximately nothing, $38.5\%$ of the time, and its predicted effect is
+approximately zero.
+
+So the champion's objective was right and the critique was wrong. Those $1.5\%$
+of decisions throw away a \emph{worthless} turn, which is exactly the
+circumstance in which the objective's other terms should dominate the
+probability term --- and they do. The discrepancy was a selection effect in the
+instrument: turns priced at positions sampled without regard to option quality
+and spent at positions where $p_{\text{best}} = 0$ by construction.
+
+\subsection{A note on public information}
+
+One candidate explanation, tested and set aside, produced a fact about the game
+worth keeping. Forking each firing and playing the champion's doomed ask in one
+branch and the substitute in the other, the substitute sheds $0.344$ more
+card-equivalents of a teammate's uncertainty --- and $0.269$ more of each
+\emph{opponent's}. An ask is public, and it reaches two partners and three
+opponents, so the team-weighted balance is
+\[
+2 \times (-0.344) - 3 \times (-0.269) = +0.120 \text{ card-equivalents per
+firing, favouring the quieter ask.}
+\]
+In six-player Fish a public disclosure is net-negative for the discloser's team
+whatever it says, because the opposition outnumbers the partnership three to
+two. This is the arithmetic behind the no-bluff structure noted in
+Section~\ref{sec:objective}: signal is welded to move, and what you tell your
+partner you tell your opponents more of.
+
+% =====================================================================
 \section{What this says about playing Fish}
 \label{sec:strategy}
 
