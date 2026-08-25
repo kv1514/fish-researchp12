@@ -1,11 +1,11 @@
 {
- "n_games": 5,
+ "n_games": 200,
  "max_support": 24,
- "pinned_checked": 6,
- "pinned_ok": 6,
+ "pinned_checked": 344,
+ "pinned_ok": 344,
  "pinned_mismatches": [],
- "n_solved": 4,
- "skipped_large_support": 2,
+ "n_solved": 308,
+ "skipped_large_support": 13,
  "solved": [
   {
    "game": 3,
@@ -42,6 +42,2742 @@
    "champion": 0.5,
    "gain": 0.0,
    "nodes": 5
+  },
+  {
+   "game": 7,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3462
+  },
+  {
+   "game": 7,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 2664
+  },
+  {
+   "game": 7,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 1438
+  },
+  {
+   "game": 9,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 10,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 2924
+  },
+  {
+   "game": 10,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1763
+  },
+  {
+   "game": 10,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 523
+  },
+  {
+   "game": 11,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333334,
+   "champion": -0.16666666666666669,
+   "gain": 1.0,
+   "nodes": 25889
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333334,
+   "champion": -0.16666666666666669,
+   "gain": 1.0,
+   "nodes": 9579
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 9,
+   "value": 1.0,
+   "champion": 0.1111111111111111,
+   "gain": 0.8888888888888888,
+   "nodes": 14232
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.33333333333333337,
+   "champion": 0.1111111111111111,
+   "gain": 0.22222222222222227,
+   "nodes": 9927
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": 0.0,
+   "gain": 0.6666666666666666,
+   "nodes": 2903
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 2276
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 1436
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 860
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 845
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 150
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 66
+  },
+  {
+   "game": 13,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.9166666666666667,
+   "champion": 0.0,
+   "gain": 0.9166666666666667,
+   "nodes": 36719
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333334,
+   "champion": 0.3333333333333333,
+   "gain": 0.5,
+   "nodes": 17484
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 4875
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1664
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 795
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 146
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 66
+  },
+  {
+   "game": 15,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.16666666666666666,
+   "champion": -2.7755575615628914e-17,
+   "gain": 0.16666666666666669,
+   "nodes": 123
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 7923
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 1849
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 651
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 579
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 149
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 63
+  },
+  {
+   "game": 17,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 18,
+   "kind": "solved",
+   "support": 20,
+   "value": 0.30000000000000004,
+   "champion": 0.3,
+   "gain": 5.551115123125783e-17,
+   "nodes": 876
+  },
+  {
+   "game": 18,
+   "kind": "solved",
+   "support": 4,
+   "value": -0.5,
+   "champion": -0.5,
+   "gain": 0.0,
+   "nodes": 49
+  },
+  {
+   "game": 19,
+   "kind": "solved",
+   "support": 9,
+   "value": 1.0000000000000002,
+   "champion": -0.5555555555555556,
+   "gain": 1.5555555555555558,
+   "nodes": 71426
+  },
+  {
+   "game": 19,
+   "kind": "solved",
+   "support": 6,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 40201
+  },
+  {
+   "game": 19,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 13367
+  },
+  {
+   "game": 19,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 395
+  },
+  {
+   "game": 19,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 169
+  },
+  {
+   "game": 19,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 31
+  },
+  {
+   "game": 20,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 21,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": -0.25,
+   "gain": 0.75,
+   "nodes": 16986
+  },
+  {
+   "game": 21,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": -0.25,
+   "gain": 0.75,
+   "nodes": 13591
+  },
+  {
+   "game": 21,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": -0.25,
+   "gain": 0.75,
+   "nodes": 6979
+  },
+  {
+   "game": 21,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 73
+  },
+  {
+   "game": 21,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 39
+  },
+  {
+   "game": 21,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 20
+  },
+  {
+   "game": 21,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 24,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 5
+  },
+  {
+   "game": 26,
+   "kind": "solved",
+   "support": 3,
+   "value": 1.0,
+   "champion": 0.3333333333333333,
+   "gain": 0.6666666666666667,
+   "nodes": 11932
+  },
+  {
+   "game": 26,
+   "kind": "solved",
+   "support": 3,
+   "value": 1.0,
+   "champion": -0.3333333333333333,
+   "gain": 1.3333333333333333,
+   "nodes": 8471
+  },
+  {
+   "game": 26,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": -0.3333333333333333,
+   "gain": 0.6666666666666666,
+   "nodes": 1768
+  },
+  {
+   "game": 26,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 30,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 122
+  },
+  {
+   "game": 30,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3798
+  },
+  {
+   "game": 30,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 2761
+  },
+  {
+   "game": 30,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 226
+  },
+  {
+   "game": 30,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 31,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 1.0,
+   "gain": 0.0,
+   "nodes": 11
+  },
+  {
+   "game": 32,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 33,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.25,
+   "champion": 0.0,
+   "gain": 0.25,
+   "nodes": 17
+  },
+  {
+   "game": 34,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 35,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 5
+  },
+  {
+   "game": 38,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 39,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 40,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.16666666666666666,
+   "champion": 0.16666666666666666,
+   "gain": 0.0,
+   "nodes": 37
+  },
+  {
+   "game": 41,
+   "kind": "solved",
+   "support": 3,
+   "value": 1.0,
+   "champion": 1.0,
+   "gain": 0.0,
+   "nodes": 236
+  },
+  {
+   "game": 41,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 8833
+  },
+  {
+   "game": 41,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3542
+  },
+  {
+   "game": 41,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1397
+  },
+  {
+   "game": 41,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 42,
+   "kind": "solved",
+   "support": 7,
+   "value": 0.7142857142857143,
+   "champion": -0.42857142857142855,
+   "gain": 1.1428571428571428,
+   "nodes": 12634
+  },
+  {
+   "game": 42,
+   "kind": "solved",
+   "support": 7,
+   "value": 0.7142857142857142,
+   "champion": -0.42857142857142855,
+   "gain": 1.1428571428571428,
+   "nodes": 7001
+  },
+  {
+   "game": 42,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": -0.5,
+   "gain": 1.0,
+   "nodes": 1436
+  },
+  {
+   "game": 42,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.16666666666666666,
+   "champion": -0.25,
+   "gain": 0.41666666666666663,
+   "nodes": 18913
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.0,
+   "champion": -0.25,
+   "gain": 0.25,
+   "nodes": 5746
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.75,
+   "champion": 0.25,
+   "gain": 0.5,
+   "nodes": 247
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.75,
+   "champion": 0.25,
+   "gain": 0.5,
+   "nodes": 144
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 661
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 315
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 131
+  },
+  {
+   "game": 44,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 47,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 48,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 51,
+   "kind": "solved",
+   "support": 16,
+   "value": -0.125,
+   "champion": -0.125,
+   "gain": 0.0,
+   "nodes": 74
+  },
+  {
+   "game": 51,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 15736
+  },
+  {
+   "game": 51,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 13809
+  },
+  {
+   "game": 51,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 5106
+  },
+  {
+   "game": 51,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 808
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 9,
+   "value": 1.0,
+   "champion": 0.2222222222222222,
+   "gain": 0.7777777777777778,
+   "nodes": 66418
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 9,
+   "value": 1.0,
+   "champion": 0.2222222222222222,
+   "gain": 0.7777777777777778,
+   "nodes": 49809
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": -0.16666666666666666,
+   "gain": 0.8333333333333333,
+   "nodes": 17069
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.25,
+   "gain": 0.25,
+   "nodes": 437
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.25,
+   "gain": 0.25,
+   "nodes": 225
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.25,
+   "gain": 0.25,
+   "nodes": 175
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3549
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1247
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 131
+  },
+  {
+   "game": 58,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 59,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.5,
+   "champion": -0.16666666666666666,
+   "gain": 0.6666666666666666,
+   "nodes": 384
+  },
+  {
+   "game": 59,
+   "kind": "solved",
+   "support": 3,
+   "value": 1.0,
+   "champion": -0.3333333333333333,
+   "gain": 1.3333333333333333,
+   "nodes": 20806
+  },
+  {
+   "game": 59,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": -0.3333333333333333,
+   "gain": 0.6666666666666666,
+   "nodes": 3994
+  },
+  {
+   "game": 59,
+   "kind": "solved",
+   "support": 3,
+   "value": -0.3333333333333333,
+   "champion": -0.3333333333333333,
+   "gain": 0.0,
+   "nodes": 132
+  },
+  {
+   "game": 59,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 60,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 1.0,
+   "gain": 0.0,
+   "nodes": 23
+  },
+  {
+   "game": 62,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 63,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 64,
+   "kind": "solved",
+   "support": 12,
+   "value": 1.0,
+   "champion": -0.3333333333333333,
+   "gain": 1.3333333333333333,
+   "nodes": 22047
+  },
+  {
+   "game": 64,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333333,
+   "champion": -0.3333333333333333,
+   "gain": 1.1666666666666665,
+   "nodes": 13476
+  },
+  {
+   "game": 64,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 3101
+  },
+  {
+   "game": 64,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 1494
+  },
+  {
+   "game": 64,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 65,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 2002
+  },
+  {
+   "game": 65,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1339
+  },
+  {
+   "game": 65,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 132
+  },
+  {
+   "game": 65,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 71,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 72,
+   "kind": "solved",
+   "support": 6,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 26863
+  },
+  {
+   "game": 72,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": 0.0,
+   "gain": 0.6666666666666666,
+   "nodes": 14727
+  },
+  {
+   "game": 72,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.5,
+   "champion": 0.16666666666666666,
+   "gain": 0.33333333333333337,
+   "nodes": 859
+  },
+  {
+   "game": 72,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.3333333333333333,
+   "champion": 0.16666666666666666,
+   "gain": 0.16666666666666666,
+   "nodes": 370
+  },
+  {
+   "game": 72,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 2271
+  },
+  {
+   "game": 72,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 780
+  },
+  {
+   "game": 72,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 73,
+   "kind": "solved",
+   "support": 21,
+   "value": 0.8571428571428571,
+   "champion": -0.047619047619047616,
+   "gain": 0.9047619047619047,
+   "nodes": 79757
+  },
+  {
+   "game": 73,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.49999999999999994,
+   "champion": 0.16666666666666669,
+   "gain": 0.33333333333333326,
+   "nodes": 8165
+  },
+  {
+   "game": 73,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 968
+  },
+  {
+   "game": 73,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 2957
+  },
+  {
+   "game": 73,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 745
+  },
+  {
+   "game": 73,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 498
+  },
+  {
+   "game": 73,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 75,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 76,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 78,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 21
+  },
+  {
+   "game": 79,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 80,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 81,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 84,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333334,
+   "champion": 0.3333333333333333,
+   "gain": 0.5,
+   "nodes": 10252
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 18,
+   "value": 0.7777777777777779,
+   "champion": -0.1111111111111111,
+   "gain": 0.8888888888888891,
+   "nodes": 25913
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.5,
+   "champion": -2.7755575615628914e-17,
+   "gain": 0.5,
+   "nodes": 15024
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": 0.0,
+   "gain": 0.6666666666666666,
+   "nodes": 3455
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 4957
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 2725
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1654
+  },
+  {
+   "game": 90,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 93,
+   "kind": "solved",
+   "support": 6,
+   "value": 5.551115123125782e-17,
+   "champion": -5.551115123125783e-17,
+   "gain": 1.1102230246251565e-16,
+   "nodes": 45
+  },
+  {
+   "game": 93,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 896
+  },
+  {
+   "game": 93,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 96,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 102,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 103,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 104,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 105,
+   "kind": "solved",
+   "support": 24,
+   "value": 0.8749999999999998,
+   "champion": -0.04166666666666665,
+   "gain": 0.9166666666666664,
+   "nodes": 115917
+  },
+  {
+   "game": 105,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": 0.0,
+   "gain": 0.6666666666666666,
+   "nodes": 4026
+  },
+  {
+   "game": 105,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 4618
+  },
+  {
+   "game": 105,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 3435
+  },
+  {
+   "game": 105,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 1659
+  },
+  {
+   "game": 105,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 108,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 24,
+   "value": 0.583333333333333,
+   "champion": -1.3877787807814457e-17,
+   "gain": 0.583333333333333,
+   "nodes": 15838
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333335,
+   "champion": 0.0,
+   "gain": 0.8333333333333335,
+   "nodes": 49277
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333334,
+   "champion": 0.0,
+   "gain": 0.8333333333333334,
+   "nodes": 36439
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.3333333333333333,
+   "champion": -5.551115123125783e-17,
+   "gain": 0.33333333333333337,
+   "nodes": 2211
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3683
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 3161
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 2142
+  },
+  {
+   "game": 111,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 112,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 114,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 116,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 117,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 122,
+   "kind": "solved",
+   "support": 4,
+   "value": 1.0,
+   "champion": 0.75,
+   "gain": 0.25,
+   "nodes": 250
+  },
+  {
+   "game": 122,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": 0.0,
+   "gain": 0.6666666666666666,
+   "nodes": 16475
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": 0.0,
+   "gain": 0.6666666666666666,
+   "nodes": 12540
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 2810
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 3467
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 1913
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 944
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 820
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 426
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 64
+  },
+  {
+   "game": 128,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 129,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 134,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 134
+  },
+  {
+   "game": 137,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.4999999999999999,
+   "champion": 0.16666666666666666,
+   "gain": 0.33333333333333326,
+   "nodes": 1963
+  },
+  {
+   "game": 137,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 611
+  },
+  {
+   "game": 137,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 138,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.25,
+   "champion": 0.0,
+   "gain": 0.25,
+   "nodes": 17
+  },
+  {
+   "game": 139,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 140,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.5,
+   "champion": 0.3333333333333333,
+   "gain": 0.16666666666666669,
+   "nodes": 273
+  },
+  {
+   "game": 140,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 141,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 143,
+   "kind": "solved",
+   "support": 18,
+   "value": 0.5555555555555558,
+   "champion": 0.1111111111111111,
+   "gain": 0.4444444444444447,
+   "nodes": 10053
+  },
+  {
+   "game": 143,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.6666666666666667,
+   "champion": -0.08333333333333333,
+   "gain": 0.7500000000000001,
+   "nodes": 32731
+  },
+  {
+   "game": 143,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.6666666666666667,
+   "champion": -0.08333333333333333,
+   "gain": 0.7500000000000001,
+   "nodes": 20676
+  },
+  {
+   "game": 143,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.8333333333333334,
+   "champion": 0.16666666666666666,
+   "gain": 0.6666666666666667,
+   "nodes": 1185
+  },
+  {
+   "game": 143,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.16666666666666666,
+   "champion": 0.16666666666666666,
+   "gain": 0.0,
+   "nodes": 224
+  },
+  {
+   "game": 143,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.16666666666666666,
+   "champion": 0.16666666666666666,
+   "gain": 0.0,
+   "nodes": 71
+  },
+  {
+   "game": 143,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 144,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 17
+  },
+  {
+   "game": 144,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3038
+  },
+  {
+   "game": 144,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1801
+  },
+  {
+   "game": 144,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 486
+  },
+  {
+   "game": 144,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 146,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 1.0,
+   "gain": 0.0,
+   "nodes": 11
+  },
+  {
+   "game": 147,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 149,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.7777777777777781,
+   "champion": -0.1111111111111111,
+   "gain": 0.8888888888888893,
+   "nodes": 12544
+  },
+  {
+   "game": 149,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.7777777777777779,
+   "champion": -0.1111111111111111,
+   "gain": 0.8888888888888891,
+   "nodes": 8697
+  },
+  {
+   "game": 149,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1303
+  },
+  {
+   "game": 149,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 413
+  },
+  {
+   "game": 149,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 15
+  },
+  {
+   "game": 150,
+   "kind": "solved",
+   "support": 18,
+   "value": -0.27777777777777785,
+   "champion": -0.2777777777777778,
+   "gain": -5.551115123125783e-17,
+   "nodes": 74
+  },
+  {
+   "game": 150,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": -0.5,
+   "gain": 1.1666666666666665,
+   "nodes": 22709
+  },
+  {
+   "game": 150,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.5,
+   "champion": -0.5,
+   "gain": 1.0,
+   "nodes": 9676
+  },
+  {
+   "game": 150,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.25,
+   "champion": -0.5,
+   "gain": 0.75,
+   "nodes": 3556
+  },
+  {
+   "game": 152,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.4444444444444444,
+   "champion": -0.3333333333333333,
+   "gain": 0.7777777777777777,
+   "nodes": 23241
+  },
+  {
+   "game": 152,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.3333333333333333,
+   "champion": -0.3333333333333333,
+   "gain": 0.6666666666666666,
+   "nodes": 9485
+  },
+  {
+   "game": 152,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 2005
+  },
+  {
+   "game": 152,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 198
+  },
+  {
+   "game": 152,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 238
+  },
+  {
+   "game": 152,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 91
+  },
+  {
+   "game": 152,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.5555555555555556,
+   "champion": 0.3333333333333333,
+   "gain": 0.22222222222222227,
+   "nodes": 12636
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.3333333333333334,
+   "champion": 0.3333333333333333,
+   "gain": 1.1102230246251565e-16,
+   "nodes": 7994
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": 0.33333333333333337,
+   "gain": 0.33333333333333326,
+   "nodes": 3881
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 5264
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.0,
+   "gain": 0.5,
+   "nodes": 4482
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 2070
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 783
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 147
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 65
+  },
+  {
+   "game": 153,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 154,
+   "kind": "solved",
+   "support": 5,
+   "value": 0.20000000000000007,
+   "champion": 0.20000000000000007,
+   "gain": 0.0,
+   "nodes": 26
+  },
+  {
+   "game": 154,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 157,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 160,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 162,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 163,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": -0.33333333333333337,
+   "gain": 1.0,
+   "nodes": 10450
+  },
+  {
+   "game": 163,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": -0.33333333333333337,
+   "gain": 1.0,
+   "nodes": 7522
+  },
+  {
+   "game": 163,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 429
+  },
+  {
+   "game": 163,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 573
+  },
+  {
+   "game": 163,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 425
+  },
+  {
+   "game": 163,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 62
+  },
+  {
+   "game": 163,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 164,
+   "kind": "solved",
+   "support": 18,
+   "value": 0.11111111111111116,
+   "champion": 0.1111111111111111,
+   "gain": 5.551115123125783e-17,
+   "nodes": 68
+  },
+  {
+   "game": 164,
+   "kind": "solved",
+   "support": 3,
+   "value": 1.0,
+   "champion": -0.3333333333333333,
+   "gain": 1.3333333333333333,
+   "nodes": 3369
+  },
+  {
+   "game": 164,
+   "kind": "solved",
+   "support": 3,
+   "value": 1.0,
+   "champion": -0.3333333333333333,
+   "gain": 1.3333333333333333,
+   "nodes": 1856
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 24,
+   "value": 0.45833333333333315,
+   "champion": 0.20833333333333331,
+   "gain": 0.24999999999999983,
+   "nodes": 6272
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 18,
+   "value": 0.5000000000000001,
+   "champion": -0.1111111111111111,
+   "gain": 0.6111111111111112,
+   "nodes": 31263
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 18,
+   "value": 0.38888888888888895,
+   "champion": -0.1111111111111111,
+   "gain": 0.5,
+   "nodes": 14893
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 8,
+   "value": 1.0,
+   "champion": -0.375,
+   "gain": 1.375,
+   "nodes": 8881
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 8,
+   "value": 0.7500000000000001,
+   "champion": -0.375,
+   "gain": 1.125,
+   "nodes": 4580
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": -0.25,
+   "gain": 0.75,
+   "nodes": 47
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 5968
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 1249
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 92
+  },
+  {
+   "game": 165,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 166,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 169,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 172,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 173,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 175,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 176,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 177,
+   "kind": "solved",
+   "support": 3,
+   "value": 0.3333333333333333,
+   "champion": 0.0,
+   "gain": 0.3333333333333333,
+   "nodes": 10
+  },
+  {
+   "game": 178,
+   "kind": "solved",
+   "support": 18,
+   "value": 0.8333333333333335,
+   "champion": 0.16666666666666666,
+   "gain": 0.6666666666666669,
+   "nodes": 17658
+  },
+  {
+   "game": 178,
+   "kind": "solved",
+   "support": 18,
+   "value": 0.666666666666667,
+   "champion": 0.16666666666666666,
+   "gain": 0.5000000000000003,
+   "nodes": 11413
+  },
+  {
+   "game": 178,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.6666666666666667,
+   "champion": -0.08333333333333333,
+   "gain": 0.7500000000000001,
+   "nodes": 30752
+  },
+  {
+   "game": 178,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.8333333333333334,
+   "champion": -0.08333333333333333,
+   "gain": 0.9166666666666667,
+   "nodes": 20485
+  },
+  {
+   "game": 178,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 480
+  },
+  {
+   "game": 178,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 18
+  },
+  {
+   "game": 186,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 12,
+   "value": 0.3333333333333333,
+   "champion": 0.08333333333333333,
+   "gain": 0.25,
+   "nodes": 417
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 9,
+   "value": 0.777777777777778,
+   "champion": -0.2222222222222222,
+   "gain": 1.0000000000000002,
+   "nodes": 42721
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 9,
+   "value": 1.0,
+   "champion": -0.2222222222222222,
+   "gain": 1.2222222222222223,
+   "nodes": 24628
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.6666666666666666,
+   "champion": -0.16666666666666666,
+   "gain": 0.8333333333333333,
+   "nodes": 9518
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.25,
+   "gain": 0.25,
+   "nodes": 401
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.5,
+   "champion": 0.25,
+   "gain": 0.25,
+   "nodes": 347
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.75,
+   "champion": 0.25,
+   "gain": 0.5,
+   "nodes": 209
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3170
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 1841
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 133
+  },
+  {
+   "game": 189,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
+  },
+  {
+   "game": 190,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 192,
+   "kind": "solved",
+   "support": 4,
+   "value": 0.25,
+   "champion": 0.0,
+   "gain": 0.25,
+   "nodes": 17
+  },
+  {
+   "game": 193,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 1.0,
+   "gain": 0.0,
+   "nodes": 13
+  },
+  {
+   "game": 195,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "game": 196,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 1.0,
+   "gain": 0.0,
+   "nodes": 13
+  },
+  {
+   "game": 197,
+   "kind": "solved",
+   "support": 6,
+   "value": 1.0,
+   "champion": -5.551115123125783e-17,
+   "gain": 1.0,
+   "nodes": 6178
+  },
+  {
+   "game": 197,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 485
+  },
+  {
+   "game": 197,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 168
+  },
+  {
+   "game": 197,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 17
+  },
+  {
+   "game": 198,
+   "kind": "solved",
+   "support": 6,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 35
+  },
+  {
+   "game": 198,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 8726
+  },
+  {
+   "game": 198,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 3708
+  },
+  {
+   "game": 198,
+   "kind": "solved",
+   "support": 2,
+   "value": 1.0,
+   "champion": 0.0,
+   "gain": 1.0,
+   "nodes": 2025
+  },
+  {
+   "game": 198,
+   "kind": "solved",
+   "support": 2,
+   "value": 0.0,
+   "champion": 0.0,
+   "gain": 0.0,
+   "nodes": 34
   }
  ]
 }
