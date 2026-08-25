@@ -81,8 +81,19 @@ def total_uncertainty(agent, obs, st, seed) -> tuple:
 
 
 def fork_and_measure(st, agents, asker, action, mates, seed):
-    """Apply ``action`` in a copy and return each teammate's uncertainty."""
+    """Apply ``action`` in a copy and return each teammate's uncertainty,
+    together with whether the ask LANDED in that fork.
+
+    That flag is the control this comparison needs. A landing ask publicly
+    moves a card, and a card whose new owner everyone just watched contributes
+    exactly zero to a teammate's uncertainty -- so roughly a full
+    card-equivalent of the substitute's advantage is not signal at all, it is
+    the ask having worked. Comparing the champion's doomed ask against ONLY the
+    forks where the substitute also failed is the like-for-like question: at
+    equal outcome, which ask told the partner more?
+    """
     f_st = copy.deepcopy(st)
+    landed = bool((f_st.hands[action.target] >> action.card) & 1)
     f_bel = {t: copy.deepcopy(agents[t].bel) for t in mates}
     try:
         f_st.apply(asker, action)
@@ -101,7 +112,7 @@ def fork_and_measure(st, agents, asker, action, mates, seed):
                 out[t] = u
         finally:
             holder.bel = saved
-    return out or None
+    return (out, landed) if out else None
 
 
 def main(n_games: int = 60) -> int:
@@ -158,10 +169,13 @@ def main(n_games: int = 60) -> int:
                 fb = fork_and_measure(st, agents, p, alt, list(base),
                                       POST_SEED)
                 if fa and fb:
+                    fa_u, _ = fa
+                    fb_u, fb_landed = fb
                     for t in base:
-                        if t in fa and t in fb:
-                            rows.append({"champ": base[t] - fa[t],
-                                         "alt": base[t] - fb[t]})
+                        if t in fa_u and t in fb_u:
+                            rows.append({"champ": base[t] - fa_u[t],
+                                         "alt": base[t] - fb_u[t],
+                                         "alt_landed": fb_landed})
             st.apply(p, act)
         print(f"  {g+1}/{n_games} games, {len(rows)} paired observations",
               flush=True)
@@ -188,6 +202,24 @@ def main(n_games: int = 60) -> int:
           f"game:")
     print(f"    {2 * 1.53 * m * RATE:+.4f} sets per deal-pair")
     print(f"  the residual to explain is +0.38 to +0.79 per deal-pair")
+
+    miss = [r for r in rows if not r["alt_landed"]]
+    if miss:
+        mc = np.array([r["champ"] for r in miss])
+        ma = np.array([r["alt"] for r in miss])
+        md = mc - ma
+        mse = float(md.std(ddof=1) / np.sqrt(len(md))) if len(md) > 1 else 0.0
+        mm = float(md.mean())
+        print(f"\n  LIKE FOR LIKE -- only the {len(miss)} forks where the "
+              f"substitute ALSO failed:")
+        print(f"    champion's doomed ask   {mc.mean():+.4f}")
+        print(f"    the failed substitute   {ma.mean():+.4f}")
+        print(f"    PAIRED DIFFERENCE       {mm:+.4f}  95% CI "
+              f"[{mm-1.96*mse:+.4f}, {mm+1.96*mse:+.4f}]")
+        print("    A landing ask publicly moves a card, and a card whose owner")
+        print("    everyone just watched contributes zero to a teammate's")
+        print("    uncertainty. This strips that out and asks only which ASK")
+        print("    told the partner more, at equal outcome.")
 
     print()
     if lo > 0:
@@ -216,6 +248,9 @@ def main(n_games: int = 60) -> int:
         "champion_mean_cards": float(c.mean()),
         "substitute_mean_cards": float(a.mean()),
         "paired_difference": m, "se": se, "ci95": [lo, hi],
+        "like_for_like_n": len(miss),
+        "like_for_like_difference": (float(np.mean(
+            [r["champ"] - r["alt"] for r in miss])) if miss else None),
         "sets_per_deal_pair": 2 * 1.53 * m * RATE,
         "rate_sets_per_card": RATE, "verdict": verdict}, indent=1))
     print(f"\nwrote {o.relative_to(ROOT)}")
