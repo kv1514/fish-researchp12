@@ -63,6 +63,8 @@ from fish.cards import (NUM_PLAYERS, deck_size, half_suit_mask, half_suit_of,
 from fish.engine import Ask, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
+from fish4.askfeat import DecisionContext, score_asks
+from fish4.posterior import Posterior
 from fish4.registry4 import make_agent
 
 CHAMPION = ("fishbot4", {"opponent_gamma": 0.35})
@@ -94,6 +96,34 @@ def doomed_ask(st, me):
     return None
 
 
+def _best_ask_p(agent, obs):
+    """The success probability of the ask this seat would otherwise have made.
+
+    The donation replaces the agent's NORMAL action, and that action keeps the
+    turn with probability p_best rather than with certainty. So the measured
+    price is p_best * (value of a turn), not the value of a turn -- treating it
+    as the latter understated tempo by a factor of about 1.7. Recording it here
+    lets the price be bucketed by how good the seat's options were, which is
+    the one thing that could still explain why avoid_doomed_asks scores nothing:
+    a turn may be worth far less when every ask is poor, and the doomed-ask
+    branch fires exactly there.
+    """
+    import numpy as np
+    asks = obs.legal_asks()
+    if not asks:
+        return None
+    try:
+        post = Posterior(agent.bel, random.Random(31337),
+                         n_draws=agent.n_draws, n_worlds=agent.n_worlds,
+                         mode=agent.infer_mode, obs=obs,
+                         gamma=agent.opponent_gamma)
+        ctx = DecisionContext(obs, agent.bel, post)
+        scores, pr = score_asks(ctx, asks, agent.weights)
+        return float(pr[int(np.argmax(scores))])
+    except Exception:
+        return None
+
+
 def one_game(deck, rules, agent_seed, target_seat, at_decision, donate):
     """Play one game; at the ``at_decision``-th decision of ``target_seat``,
     substitute a doomed ask if ``donate``. Returns team-0's differential and
@@ -105,6 +135,7 @@ def one_game(deck, rules, agent_seed, target_seat, at_decision, donate):
         a.begin_game(p, rules, ar.getrandbits(64))
     seen = 0
     fired = False
+    p_best = None
     for _ in range(4000):
         if st.is_terminal:
             break
@@ -118,6 +149,7 @@ def one_game(deck, rules, agent_seed, target_seat, at_decision, donate):
             if seen == at_decision and donate:
                 alt = doomed_ask(st, p)
                 if alt is not None:
+                    p_best = _best_ask_p(agents[p], obs)
                     act = alt
                     fired = True
             seen += 1
@@ -126,7 +158,7 @@ def one_game(deck, rules, agent_seed, target_seat, at_decision, donate):
         except Exception:
             break
     a_, b_, _ = st.scores()
-    return float(a_ - b_), fired
+    return float(a_ - b_), fired, p_best
 
 
 def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False,
@@ -144,7 +176,7 @@ def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False,
     """
     rules_dict = RuleConfig().to_dict()
     seed_rng = random.Random(agent_seed_base)
-    prices, fired_flags = [], []
+    prices, fired_flags, p_bests = [], [], []
     for i in range(n_pairs):
         aseed = seed_rng.getrandbits(64)
         rng = random.Random(base_seed + i)
@@ -155,16 +187,17 @@ def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False,
                               "starting_player": i % NUM_PLAYERS})
         seat = i % NUM_PLAYERS
         at = at_lo + i % max(1, at_hi - at_lo)
-        ref, _ = one_game(deck, rules, aseed, seat, at, donate=False)
-        alt, fired = one_game(deck, rules, aseed, seat, at,
-                              donate=not control)
+        ref, _, _ = one_game(deck, rules, aseed, seat, at, donate=False)
+        alt, fired, p_best = one_game(deck, rules, aseed, seat, at,
+                                      donate=not control)
         # Price in the DONATING team's frame.
         sign = 1.0 if team_of(seat) == 0 else -1.0
         prices.append(sign * (ref - alt))
         fired_flags.append(bool(fired))
+        p_bests.append(p_best)
         if progress and (i + 1) % 50 == 0:
             print(f"  ... {i+1}/{n_pairs}", flush=True)
-    return prices, fired_flags
+    return prices, fired_flags, p_bests
 
 
 def summarise(x):
@@ -192,7 +225,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     if not a.skip_control:
-        c, _ = run(a.control_pairs, 67_000_000, 67001, control=True)
+        c, _, _ = run(a.control_pairs, 67_000_000, 67001, control=True)
         bad = [i for i, v in enumerate(c) if v != 0.0]
         print(f"control: the agent's own action substituted, "
               f"{a.control_pairs} deals")
@@ -206,8 +239,8 @@ def main(argv=None) -> int:
 
     print(f"donating one turn at decision {a.at_lo}-{a.at_hi-1} of the "
           f"target seat, {a.pairs} paired deals\n")
-    prices, flags = run(a.pairs, a.base_seed, a.agent_seed, progress=True,
-                        at_lo=a.at_lo, at_hi=a.at_hi)
+    prices, flags, pbs = run(a.pairs, a.base_seed, a.agent_seed,
+                             progress=True, at_lo=a.at_lo, at_hi=a.at_hi)
     nfired = sum(flags)
     fired_prices = [x for x, f in zip(prices, flags) if f]
     s_all = summarise(prices)
@@ -226,6 +259,24 @@ def main(argv=None) -> int:
           "conditions on the treatment\n  being AVAILABLE, which is fixed "
           "before either arm plays and is identical in\n  both, so it does "
           "not condition on an outcome.")
+
+    band = [(x, q) for x, f, q in zip(prices, flags, pbs) if f and q is not None]
+    if band:
+        print(f"\n  BY HOW GOOD THE SEAT'S OPTIONS WERE (p of the ask it would")
+        print(f"  otherwise have made). If a turn is worth less when every ask")
+        print(f"  is poor, that is the last explanation standing for why")
+        print(f"  avoid_doomed_asks scores nothing -- its branch fires exactly")
+        print(f"  where the options are worst.")
+        print(f"    {'p_best':>14}{'pairs':>8}{'price':>9}{'se':>8}")
+        edges = [(0.0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.01)]
+        for lo_, hi_ in edges:
+            sub = [x for x, q in band if lo_ <= q < hi_]
+            if len(sub) < 5:
+                continue
+            mm = sum(sub) / len(sub)
+            sd = (sum((v - mm) ** 2 for v in sub) / (len(sub) - 1)) ** 0.5
+            print(f"    [{lo_:.2f},{hi_:.2f}){len(sub):>8}{mm:>9.3f}"
+                  f"{sd/len(sub)**0.5:>8.3f}")
 
     RATE = 0.45
     print(f"\nAt the exchange rate of {RATE} sets per hidden card, one turn is "
