@@ -4068,6 +4068,129 @@ Section~\ref{sec:objective}: signal is welded to move, and what you tell your
 partner you tell your opponents more of.
 
 % =====================================================================
+\section{The endgame solved under imperfect information}
+\label{sec:ii}
+
+Every ``exact'' result above is a statement about the perfect-information game,
+and Section~\ref{sec:tempo}'s companion result showed that game is degenerate.
+The v0.3 headline --- belief agents choosing a provably optimal move in 100\%
+of information-resolved positions --- was scored against that same
+perfect-information optimum, and every one of those positions had a single live
+half-suit. This section measures what the champion does at $m = 1$ when it
+genuinely cannot see, which is a different question with a different answer.
+
+\subsection{An exact best response over information sets}
+
+\texttt{fish4/exact\_ii} enumerates the deals consistent with the public record
+and optimises over the deviator's \emph{information sets} --- the same action
+at every deal it cannot tell apart --- by backward induction against champion
+opponents. There is no sampling anywhere in it.
+
+Two assumptions, stated rather than buried. The prior is uniform over
+consistent deals, which is what the constraint system alone licenses; tilting
+it by the champion's own opponent model would make the answer a statement about
+that model. And the opponents are a \emph{deterministic realisation} of the
+champion, seeded from a hash of the observation, because the champion samples
+and a distribution over policies is not a strategy one can best-respond to.
+That second choice rests on a property that was checked rather than assumed:
+over $629$ real decisions a freshly constructed agent given the same
+observation computes a bit-identical belief to one attached from the deal.
+
+The control runs first and gates the rest. Where the belief pins every card
+there is nothing hidden left, so the exact value must equal the closed form
+$2f - m$. Over $200$ games it does, \textbf{$344/344$}.
+
+\subsection{What the endgame is worth, and what the champion gets}
+
+Across $308$ genuinely hidden positions solved exactly ($13$ skipped for a
+belief support above $24$ deals, so $96\%$ coverage):
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+exact optimum in the seat on move & $+0.5129$ \\
+the champion in the same seat & $+0.0670$ \\
+\midrule
+exact gain from deviating & $\mathbf{+0.4459}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+with median gain $+0.3333$, maximum $+1.5556$, and --- as the invariant
+requires, since a best response can always copy the champion --- \emph{no}
+negative entry in $308$ positions.
+
+Two readings. First, hidden information is expensive: the closed form values
+the last half-suit at $+1$ to the team on move, and played optimally without
+sight of the cards it is worth $+0.51$. Some positions are worth $-0.5$ ---
+won under perfect information, lost under optimal play without it. Second, the
+v0.3 certificate is not wrong but certifies a much easier thing: where the
+champion cannot see, it captures $+0.067$ of the $+0.513$ available.
+
+\paragraph{The caveat, measured.} Best-responding to a realisation one can
+predict is easier than beating the mixture it came from, so this figure likely
+overstates exploitability against the champion as it plays. How much it
+overstates is not settled here, but its relevance is: over $41$ hidden $m = 1$
+information sets at $12$ seeds each, the champion repeats its move every time
+in only $32\%$ of them, averaging $2.41$ distinct actions. It mixes at most of
+these decisions.
+
+\subsection{Where the disagreements are, and one that is provable}
+
+Comparing the champion's move to the exact optimum's at each hidden decision,
+$84$ of $273$ agree. Of the $189$ disagreements, $79$ cost \emph{exactly}
+zero --- ties broken differently, not errors --- and the rest cost $+0.5267$ on
+average. Their shape does not implicate one component: of $96$ costly
+ask-versus-ask disagreements, $49$ share the target only, $12$ the card only,
+and $35$ neither. No repair is proposed from that.
+
+Thirteen could not be priced at all, because the declared split was in no
+candidate the solver enumerates --- and that set contains every assignment true
+in at least one consistent deal. Those claims were true in \emph{no} deal the
+record allows. Checked directly, and the weak version of the check refuted the
+reading it was built to confirm: testing each card's own holder mask gives
+$0/1080$. A declaration can satisfy every card's mask separately and match no
+complete deal, because the hand \emph{counts} do not add up --- the failure
+\texttt{claim4} names as ``per-card modes can be jointly impossible''.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+& claims & jointly impossible \\
+\midrule
+$m = 1$ & $60$ & $\mathbf{7\ (11.7\%)}$ \\
+$m = 2 \dots 9$ & $480$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Only at $m = 1$, and structurally: there the hand counts are tight enough that
+a mis-split is detectably infeasible, while above it there is slack enough that
+almost any team-only declaration fits some deal. Every such claim nulled:
+$+0.000$ sets each against $+0.968$ for the rest.
+
+\subsection{The repair, and why it is not adopted}
+
+A max-flow feasibility test over the live cards decides the question exactly at
+any layer, and agrees $40/40$ with brute-force enumeration where enumeration is
+available. Supplying the most likely \emph{feasible} declaration instead ---
+filtering alone changes nothing, because \texttt{forced\_claim} rebuilds a
+declaration from the masks when no candidate survives --- gives, over $6000$
+pre-registered pairs:
+\[
++0.028,\quad 95\%\ \text{CI}\ [+0.024,\, +0.033].
+\]
+Every block positive, every block excluding zero, and $27$ wins against $973$
+ties and $0$ losses in a representative block: the arm alters play about $0.09$
+times a game, so most deals are bit-identical and repairing a claim that could
+not have won cannot cost anything.
+
+The bar fixed before the arm existed was $+0.05$. \textbf{It is not adopted},
+and the champion is unchanged. A provable error, a free repair, and an effect
+smaller than the smallest one this project agreed in advance to care about ---
+all three are the finding.
+
+% =====================================================================
 \section{What this says about playing Fish}
 \label{sec:strategy}
 

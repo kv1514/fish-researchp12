@@ -217,6 +217,18 @@ def main(n_games: int = 12) -> int:
         "n_games": n_games, "max_support": MAX_SUPPORT,
         "pinned_checked": pinned_ok + pinned_bad, "pinned_ok": pinned_ok,
         "pinned_mismatches": bad, "n_solved": len(solved),
+        # Stored, not left for a reader to recompute from the records. The
+        # paper's manifest watches these three, and a figure the manifest
+        # cannot address is a figure nobody is checking. They were backfilled
+        # into the first run's output by hand after the manifest could not
+        # find them, which is exactly the drift check_paper_numbers exists to
+        # catch -- so the script writes them now.
+        "mean_gain": (sum(r["gain"] for r in solved) / len(solved))
+        if solved else None,
+        "mean_optimum": (sum(r["value"] for r in solved) / len(solved))
+        if solved else None,
+        "mean_champion": (sum(r["champion"] for r in solved) / len(solved))
+        if solved else None,
         "skipped_large_support": skipped, "solved": solved}, indent=1))
     print(f"\nwrote {out.relative_to(ROOT)}")
     return 0

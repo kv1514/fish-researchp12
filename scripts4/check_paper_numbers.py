@@ -530,6 +530,25 @@ WATCH = [
      "total L1 movement", "total $L_1$ movement of"),
     ("fit_prefix_check_v2.json", "blocks_full", "{:d}",
      "positions in the fit", "resolving it to the full"),
+    # The exact imperfect-information endgame. The control is watched first
+    # and deliberately: it is the number that licenses every other figure in
+    # that section, and a solver whose control quietly drifted from 344 while
+    # the paper still said 344 is exactly the failure this manifest exists for.
+    ("ii_endgame.json", "pinned_ok", "{:d}",
+     "exact-II control, pinned positions matching the closed form",
+     "Over $200$ games it does"),
+    ("ii_endgame.json", "n_solved", "{:d}",
+     "exact-II hidden positions solved", "genuinely hidden positions solved"),
+    ("ii_endgame.json", "mean_gain", "{:+.4f}",
+     "exact-II gain from deviating", "exact gain from deviating"),
+    # The arm that came out of it, with its interval, because the section's
+    # point is that a real effect can sit under the bar.
+    ("claim_feasibility_verdict.json", "estimate", "{:+.3f}",
+     "claim feasibility estimate", "over $6000$\npre-registered pairs"),
+    ("claim_feasibility_verdict.json", "ci.0", "{:+.3f}",
+     "claim feasibility interval, low", "over $6000$\npre-registered pairs"),
+    ("claim_feasibility_verdict.json", "ci.1", "{:+.3f}",
+     "claim feasibility interval, high", "over $6000$\npre-registered pairs"),
 ]
 
 
