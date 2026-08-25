@@ -875,9 +875,77 @@ V \;=\; \mathrm{sign}(\text{mover's team}) \times (2f - m),
 \label{eq:closedform}
 \end{equation}
 where $m$ is the number of live half-suits and $f$ the number of them in which
-the team on move holds at least one card. The mechanism is that footholds only
-ever shrink and a perfectly-informed asker never misses, so the team on move
-takes every half-suit it can reach and the opponents take the rest.
+the team on move holds at least one card.
+
+This is not only an empirical match at the layers we can enumerate. It holds at
+every $m$, and the reason is that it turns on three properties of the
+\emph{rules} rather than of any position, none of which needs a table:
+
+\begin{description}
+\item[A. Footholds never grow.] \texttt{check\_legal} refuses an ask unless the
+asker already holds a card of that half-suit, so a team holding none of $h$ can
+never receive one. Its foothold set only shrinks, and the mover's team can
+therefore claim at most the $f$ it has \emph{now}.
+\item[B. A team with no foothold in $h$ cannot deny $h$.] All six cards of $h$
+sit with the opponents, so every assignment it could submit reveals an opponent
+holder and \texttt{\_apply\_claim} awards the half-suit to the opponents. There
+is no spite-null available: a certain $-1$ cannot be converted into a $0$.
+Hence the opponents take all $m - f$ whatever the mover does.
+\item[C. The mover takes all $f$ without surrendering the turn.] A hit retains
+the turn, a claim never moves it, and a claim that empties the claimant passes
+within the team. With perfect information every ask can be made to hit, so the
+mover drains and claims each of its $f$ half-suits, and only when its team is
+cardless does the turn normalise to an opponent --- who by symmetry takes the
+rest.
+\end{description}
+
+A and B bound $V$ above by $2f - m$; C bounds it below. Each is checked against
+the engine rather than against a reading of it, and the optimal
+perfect-information policy that falls out is one line: \emph{take a hitting ask
+if one exists; otherwise claim a half-suit your team wholly owns; otherwise pass
+to a teammate with cards.} Played from $360$ random positions spanning $m = 1$
+to $m = 9$ it realises $2f - m$ every time, and at $m = 1$ and $m = 2$ it agrees
+with the exact solver on every position tested --- the one step in the argument
+anchored to a solver rather than to internal consistency.
+
+\subsection{The perfect-information game is trivial}
+
+The closed form is worth stating as a value because the value is degenerate. A
+team lacks a foothold in a half-suit only if all six of its cards landed in the
+opponents' twenty-seven, with probability $\binom{27}{6}/\binom{54}{6} =
+1.15\%$, so at a fresh deal
+\begin{equation}
+\mathbb{E}[V] \;=\; 2\left(9 - 9\tbinom{27}{6}\big/\tbinom{54}{6}\right) - 9
+\;=\; +8.794
+\label{eq:opening}
+\end{equation}
+of the nine available: \textbf{whoever moves first takes everything}.
+
+Premise C is the constructive step and the one an adversary could attack, so it
+is worth testing against opponents that are trying to win rather than against
+the greedy rule itself. The premise is stronger than the proof needs: the mover
+never surrenders the turn, so the opponents do not act at all until its team is
+cardless, and only the \emph{mover's} team needs to know the deal. The oracle
+duel reported in \S\ref{sec:limitations} is that experiment. Across $80$ games against
+the champion, in every one of the $40$ where an oracle seat moves first its
+team's realised set count equals its foothold count at the deal --- $40/40$
+exactly, not on average. Mean footholds were $8.94$ of nine against the $8.897$
+that \eqref{eq:opening} implies.
+
+The other forty games are the sharper result. There a \emph{champion} moves
+first, holding the advantage that \eqref{eq:opening} prices at $+8.79$ of nine,
+and converts essentially none of it: the oracle team still finishes with $8.95$
+of its $8.97$ footholds. A first move that is decisive under perfect
+information is worth nothing at all to a player who cannot see the deal.
+
+Two things follow for the project. First, extending the tablebase to larger $m$
+would buy no ground truth about Fish, because the closed form already answers
+every layer and the answer is a different game's answer. Second, the inference
+ceiling reported in \S\ref{sec:limitations} should be read accordingly: its
+$+17.483$ per deal-pair was framed as what perfect card-reading is worth, and it
+is closer
+to \eqref{eq:closedform} being played out --- seven of its ten per-deal
+differentials are exactly $18 = 2 \times 9$.
 
 This has an uncomfortable consequence for the previous version's headline
 absolute result. v0.3 reported that its belief agents choose a provably optimal
@@ -4272,9 +4340,12 @@ $5$ of $25$ games it never opens at all.
 
 Second, the gap. Applied by determinizing over a belief, the tables overstate
 the mover's team by $5.294 \pm 0.159$ sets on the positions play actually
-reaches, and by $8.18$ at a fresh deal, where the closed form
+reaches, and by $8.18$ with all nine half-suits still live, where the closed form
 $V = \mathrm{sign} \times (2f - m)$ of \S\ref{sec:exact} predicts the team on
-move takes $8.36$ of the nine sets where play delivers $+0.27$. The closed form
+move takes $8.36$ of the nine sets where play delivers $+0.27$. (That $8.36$ is
+an average over the $m = 9$ positions play reaches, which is not the same as a
+fresh deal: footholds only shrink, so $f$ has already fallen a little by then.
+At the deal itself \eqref{eq:opening} gives $+8.794$ exactly.) The closed form
 is not evidence that the Fish endgame is shallow; its own proof turns on ``every
 ask can be made to hit, and a hit retains the turn'', which is what perfect
 information buys and nothing else does. Measured independently, a team given
