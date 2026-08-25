@@ -66,6 +66,14 @@ POOLS = {
         [f"RETAKE BONUS w-0.30 vs champion block {i}" for i in range(2)],
     "combined config, two blocks":
         [f"COMBINED 480+lookahead vs champion block {i}" for i in range(2)],
+    "combined config, two blocks re-run on one engine":
+        [f"REPLAY COMBINED 480+lookahead vs champion block {i}" for i in range(2)],
+    "gamma schedule, six blocks":
+        [f"GAMMA_SCHEDULE s1.0 vs champion block {i}" for i in range(6)],
+    "value_keep settle, two blocks":
+        [f"SETTLE value_keep 0.30 vs champion block {i}" for i in range(2)],
+    "value pure baseline, two blocks":
+        [f"BASELINE value pure vs champion block {i}" for i in range(2)],
 }
 
 
