@@ -95,3 +95,63 @@ Nothing about the settling run, which is already in flight on its own seeds and
 is not re-sized or re-analysed because of this. Nothing about the adoption
 threshold, which is a statement about beating the champion and does not involve
 the baseline at all. And nothing about the public table.
+
+---
+
+## AMENDMENT, written 2026-08-25 after the control ran
+
+**The determinism control failed its stated criterion.** Replaying the original
+cell at its original seeds returned **−7.345**, not −7.355. Everything else
+about the two runs matches exactly — `pair_score` 0.03, `wilson_ci` identical to
+sixteen digits, `nulls` 103 (X 59 / Y 44), 0 timeouts, 0 dropped — and the
+differential moved by 0.010, which over 200 pairs is exactly two sets, with 11
+more actions played.
+
+The text above said: *"If it does not reproduce, the −7.355 is not a baseline
+for anything and this run stops."*
+
+### Why it failed, established rather than assumed
+
+Not the `keep_value` edit. The original record carries `engine: null` — it
+**predates the fingerprint mechanism entirely** — so the fingerprints could not
+be compared and the question had to be answered from git. Between the commit
+that recorded the cell and now, **nine of the eleven fingerprinted engine files
+changed**, including `posterior.py`, `oppmodel.py` and `askfeat.py`, all of
+which this arm executes.
+
+So the arm is not the same program, and for a much larger reason than the one
+the control was written to catch.
+
+### What that changes, and what it does not
+
+The control's stated inference is **confirmed**: −7.355 is not a baseline for
+anything. The "stop" clause existed to prevent computing a recovery against a
+number that does not describe the current policy — and that is exactly the
+situation, so the clause did its job by identifying it.
+
+Stopping the re-measurement, however, would leave the recovery quoted against
+the stale number, which is the failure the clause was written to prevent rather
+than a way of avoiding it. **The 2000-pair run therefore proceeds**, and its
+result is now doing two jobs instead of one: it is more precise *and* it is
+measured under the engine the challenger was measured under.
+
+The old −7.355 is **retired**, not merely superseded. It stays in
+`results/v04_duels.jsonl` as history and is not quoted again.
+
+This is a post-hoc change to a pre-registered stopping rule, which is exactly
+the kind of change that is usually self-serving. Three things are offered
+against that reading, and the reader is entitled to weigh them: the amendment
+is dated and appended with the original text untouched; the direction is
+*against* convenience, since it discards a number already used in a reported
+figure; and the substantive rule that governs the outcome — the replacement
+rule — is unchanged and was fixed before any of this.
+
+### A finding beyond this run
+
+Checking the fingerprints against the pooled estimates, which nobody had done,
+found that **three published pools average blocks played under different
+engines on files their arms execute** — including `COMBINED`, the paper's
+directly measured value for the configuration the website serves, whose two
+blocks sit either side of a claim-logic bug fix. See
+`scripts4/check_engine_provenance.py`. That is tracked separately from this
+pre-registration and changes nothing about this run.
