@@ -5,11 +5,11 @@
  "n_claims": 2700,
  "forced": 62,
  "voluntary": 28,
- "map_already_correct": 26,
+ "map_already_correct": 23,
  "redraws": 8,
- "mean_redraw_hit": 0.25833333333333336,
- "mean_p_declared": 0.4063258002848238,
- "mean_p_true": 0.4057995202883021,
+ "mean_redraw_hit": 0.2652777777777778,
+ "mean_p_declared": 0.39997944460083273,
+ "mean_p_true": 0.40094984636102027,
  "outcomes": {
   "recovered": 28
  },
@@ -230,15 +230,10 @@
    "rank_true_marginal": 1,
    "p_true": 0.2092032979295134,
    "replay": {
-    "outcome": "recovered",
-    "seat": 1,
-    "is_original_claimer": false,
-    "p_map": 1.0,
-    "by": "deduction",
-    "clears_threshold": true,
-    "correct": true,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 1,
-    "team_steps": 1
+    "team_steps": 2
    }
   },
   {
@@ -262,11 +257,11 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.2934326171874982,
+   "p_map": 0.29587353515624815,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 3,
-   "p_true": 0.3687499999999999,
+   "p_true": 0.33749999999999986,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -295,11 +290,11 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.2937977241448756,
+   "p_map": 0.2952699221678974,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 2,
-   "p_true": 0.39354838709677414,
+   "rank_true_marginal": 4,
+   "p_true": 0.30192719486081354,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -328,20 +323,20 @@
     2
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.5249783325884767,
-   "map_correct": true,
-   "redraw_hit": 0.375,
-   "rank_true_marginal": 1,
-   "p_true": 0.5249783325884767,
+   "p_map": 0.5429193896685688,
+   "map_correct": false,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 2,
+   "p_true": 0.4570806103314312,
    "replay": {
     "outcome": "recovered",
-    "seat": 2,
-    "is_original_claimer": true,
-    "p_map": 0.5341998343594677,
+    "seat": 4,
+    "is_original_claimer": false,
+    "p_map": 0.314413368676621,
     "by": "posterior",
     "clears_threshold": false,
-    "steps": 0,
-    "team_steps": 1
+    "steps": 2,
+    "team_steps": 2
    }
   },
   {
@@ -365,16 +360,16 @@
     0
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.32463493780421904,
-   "map_correct": true,
+   "p_map": 0.2672364263142765,
+   "map_correct": false,
    "redraw_hit": 0.625,
-   "rank_true_marginal": 1,
-   "p_true": 0.5697674418604649,
+   "rank_true_marginal": 4,
+   "p_true": 0.4830508474576267,
    "replay": {
     "outcome": "recovered",
     "seat": 2,
     "is_original_claimer": true,
-    "p_map": 0.2916000000000003,
+    "p_map": 0.2749851279000595,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -402,18 +397,14 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.308156116312232,
-   "map_correct": true,
+   "p_map": 0.25847397782642423,
+   "map_correct": false,
    "redraw_hit": 0.625,
-   "rank_true_marginal": 1,
-   "p_true": 0.5551181102362202,
+   "rank_true_marginal": 4,
+   "p_true": 0.49159663865546205,
    "replay": {
-    "outcome": "recovered",
-    "seat": 0,
-    "is_original_claimer": true,
-    "p_map": 0.3410203368102092,
-    "by": "posterior",
-    "clears_threshold": false,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 0,
     "team_steps": 1
    }
@@ -439,16 +430,16 @@
     1
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.7465061078622195,
+   "p_map": 0.7795591769752167,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.25349389213778056,
+   "p_true": 0.22044082302478324,
    "replay": {
     "outcome": "recovered",
     "seat": 1,
     "is_original_claimer": false,
-    "p_map": 0.36960926378596154,
+    "p_map": 0.41200556715878534,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 3,
@@ -476,16 +467,16 @@
     5
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.7988629921389102,
+   "p_map": 0.5155116414496205,
    "map_correct": false,
-   "redraw_hit": 0.375,
+   "redraw_hit": 0.75,
    "rank_true_marginal": 2,
-   "p_true": 0.20113700786108996,
+   "p_true": 0.48448835855037964,
    "replay": {
     "outcome": "recovered",
     "seat": 1,
     "is_original_claimer": false,
-    "p_map": 0.7179717587066736,
+    "p_map": 0.30602809038871875,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 2,
@@ -513,11 +504,11 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.2691015624999991,
+   "p_map": 0.25628906249999917,
    "map_correct": false,
    "redraw_hit": 0.5,
    "rank_true_marginal": 4,
-   "p_true": 0.48124999999999984,
+   "p_true": 0.4937499999999998,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -546,14 +537,18 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.2749851279000595,
-   "map_correct": true,
+   "p_map": 0.2762984878369487,
+   "map_correct": false,
    "redraw_hit": 0.5,
-   "rank_true_marginal": 1,
-   "p_true": 0.5243902439024388,
+   "rank_true_marginal": 4,
+   "p_true": 0.4743589743589743,
    "replay": {
-    "outcome": "blocked",
-    "reason": "no action but the ban",
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": true,
+    "p_map": 0.2832986472424554,
+    "by": "posterior",
+    "clears_threshold": false,
     "steps": 0,
     "team_steps": 1
    }
@@ -579,16 +574,16 @@
     0
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.6177868203252319,
+   "p_map": 0.707822489786624,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.382213179674768,
+   "p_true": 0.29217751021337623,
    "replay": {
     "outcome": "recovered",
     "seat": 4,
     "is_original_claimer": false,
-    "p_map": 0.1712793314076908,
+    "p_map": 0.14217583423879626,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 2,
@@ -622,12 +617,8 @@
    "rank_true_marginal": 4,
    "p_true": 0.46000000000000024,
    "replay": {
-    "outcome": "recovered",
-    "seat": 2,
-    "is_original_claimer": true,
-    "p_map": 0.2856718192627813,
-    "by": "posterior",
-    "clears_threshold": false,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 0,
     "team_steps": 1
    }
@@ -653,20 +644,20 @@
     1
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.8672605287935645,
+   "p_map": 0.7175751053830799,
    "map_correct": false,
-   "redraw_hit": 0.0,
+   "redraw_hit": 0.125,
    "rank_true_marginal": 2,
-   "p_true": 0.1327394712064357,
+   "p_true": 0.2824248946169201,
    "replay": {
     "outcome": "recovered",
     "seat": 1,
     "is_original_claimer": true,
-    "p_map": 0.6953909230337173,
+    "p_map": 0.653135494359043,
     "by": "posterior",
     "clears_threshold": false,
-    "steps": 0,
-    "team_steps": 1
+    "steps": 2,
+    "team_steps": 2
    }
   },
   {
@@ -690,21 +681,20 @@
     5
    ],
    "trigger": "voluntary",
-   "p_map": 1.0,
+   "p_map": 1.0000000000000002,
    "map_correct": false,
-   "redraw_hit": 0.125,
+   "redraw_hit": 0.0,
    "rank_true_marginal": 163,
    "p_true": 0.0,
    "replay": {
     "outcome": "recovered",
-    "seat": 1,
-    "is_original_claimer": false,
+    "seat": 5,
+    "is_original_claimer": true,
     "p_map": 1.0,
-    "by": "deduction",
+    "by": "posterior",
     "clears_threshold": true,
-    "correct": true,
     "steps": 7,
-    "team_steps": 7
+    "team_steps": 8
    }
   },
   {
@@ -728,16 +718,16 @@
     2
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.5530827083002905,
+   "p_map": 0.5360224099885542,
    "map_correct": true,
-   "redraw_hit": 0.75,
+   "redraw_hit": 0.875,
    "rank_true_marginal": 1,
-   "p_true": 0.5530827083002905,
+   "p_true": 0.5360224099885542,
    "replay": {
     "outcome": "recovered",
     "seat": 2,
     "is_original_claimer": true,
-    "p_map": 0.5416564340345539,
+    "p_map": 0.7513443213756819,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -765,11 +755,11 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.29454851991912945,
+   "p_map": 0.29625972452405747,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 2,
-   "p_true": 0.3679245283018866,
+   "rank_true_marginal": 3,
+   "p_true": 0.3349514563106795,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -798,11 +788,11 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.26265624999999915,
-   "map_correct": false,
-   "redraw_hit": 0.25,
-   "rank_true_marginal": 4,
-   "p_true": 0.4874999999999998,
+   "p_map": 0.2691015624999991,
+   "map_correct": true,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 1,
+   "p_true": 0.5187499999999999,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -831,11 +821,11 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.2856718192627813,
-   "map_correct": false,
-   "redraw_hit": 0.5,
-   "rank_true_marginal": 4,
-   "p_true": 0.46551724137931044,
+   "p_map": 0.2832986472424555,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.5322580645161291,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -864,20 +854,20 @@
     2
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.6795021582036224,
-   "map_correct": true,
-   "redraw_hit": 0.375,
-   "rank_true_marginal": 1,
-   "p_true": 0.6795021582036224,
+   "p_map": 0.8102218806817695,
+   "map_correct": false,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 4,
+   "p_true": 0.18977811931823044,
    "replay": {
     "outcome": "recovered",
     "seat": 4,
     "is_original_claimer": true,
-    "p_map": 0.7076333659911477,
+    "p_map": 0.6516880776978493,
     "by": "posterior",
     "clears_threshold": false,
-    "steps": 2,
-    "team_steps": 2
+    "steps": 0,
+    "team_steps": 1
    }
   },
   {
@@ -901,21 +891,20 @@
     4
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.7163046727787814,
+   "p_map": 0.6755894793316344,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.28369532722121865,
+   "p_true": 0.3244105206683656,
    "replay": {
     "outcome": "recovered",
     "seat": 4,
     "is_original_claimer": true,
     "p_map": 1.0,
-    "by": "deduction",
+    "by": "posterior",
     "clears_threshold": true,
-    "correct": true,
-    "steps": 5,
-    "team_steps": 1
+    "steps": 6,
+    "team_steps": 2
    }
   },
   {
@@ -939,11 +928,11 @@
     1
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.5969767021034329,
+   "p_map": 0.6150423989867009,
    "map_correct": true,
    "redraw_hit": 0.875,
    "rank_true_marginal": 1,
-   "p_true": 0.5969767021034329,
+   "p_true": 0.6150423989867009,
    "replay": {
     "outcome": "recovered",
     "seat": 1,
@@ -976,11 +965,11 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.2954730527423748,
+   "p_map": 0.2933098711148451,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.36057692307692296,
+   "p_true": 0.3969072164948453,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1009,16 +998,16 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.27562499999999907,
-   "map_correct": false,
-   "redraw_hit": 0.625,
-   "rank_true_marginal": 4,
-   "p_true": 0.47499999999999987,
+   "p_map": 0.2691015624999991,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.5187499999999999,
    "replay": {
     "outcome": "recovered",
     "seat": 5,
     "is_original_claimer": true,
-    "p_map": 0.2691015624999991,
+    "p_map": 0.3164062499999989,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -1046,21 +1035,20 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.719101505300234,
+   "p_map": 0.7427921811715966,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.2808984946997661,
+   "p_true": 0.25720781882840327,
    "replay": {
     "outcome": "recovered",
-    "seat": 0,
-    "is_original_claimer": false,
+    "seat": 2,
+    "is_original_claimer": true,
     "p_map": 1.0,
-    "by": "deduction",
+    "by": "posterior",
     "clears_threshold": true,
-    "correct": true,
     "steps": 1,
-    "team_steps": 1
+    "team_steps": 2
    }
   },
   {
@@ -1084,21 +1072,20 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.32779347954167926,
+   "p_map": 0.3211310717126044,
    "map_correct": false,
    "redraw_hit": 0.125,
-   "rank_true_marginal": 3,
-   "p_true": 0.3998159180655621,
+   "rank_true_marginal": 2,
+   "p_true": 0.43331572131158963,
    "replay": {
     "outcome": "recovered",
-    "seat": 3,
-    "is_original_claimer": false,
-    "p_map": 1.0,
-    "by": "deduction",
-    "clears_threshold": true,
-    "correct": true,
+    "seat": 1,
+    "is_original_claimer": true,
+    "p_map": 0.3054016620498629,
+    "by": "posterior",
+    "clears_threshold": false,
     "steps": 1,
-    "team_steps": 1
+    "team_steps": 2
    }
   },
   {
@@ -1122,11 +1109,11 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.25628906249999917,
+   "p_map": 0.28222656249999906,
    "map_correct": true,
-   "redraw_hit": 0.375,
+   "redraw_hit": 0.625,
    "rank_true_marginal": 1,
-   "p_true": 0.50625,
+   "p_true": 0.5312499999999999,
    "replay": {
     "outcome": "recovered",
     "seat": 0,
@@ -1159,11 +1146,11 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.33785156249999876,
-   "map_correct": false,
-   "redraw_hit": 0.375,
-   "rank_true_marginal": 4,
-   "p_true": 0.4187499999999999,
+   "p_map": 0.26265624999999915,
+   "map_correct": true,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 1,
+   "p_true": 0.5125,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1192,11 +1179,11 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.29565185546874817,
+   "p_map": 0.2947895507812482,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 2,
-   "p_true": 0.3687499999999999,
+   "rank_true_marginal": 3,
+   "p_true": 0.30624999999999997,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1225,11 +1212,11 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.2961301583371029,
+   "p_map": 0.2942316707839728,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 2,
-   "p_true": 0.3505154639175258,
+   "rank_true_marginal": 3,
+   "p_true": 0.3582089552238807,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1258,11 +1245,11 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.29437039075477156,
+   "p_map": 0.2961621648810418,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 3,
-   "p_true": 0.3146067415730338,
+   "p_true": 0.3333333333333335,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1291,21 +1278,20 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.3672583441925299,
+   "p_map": 0.4242674931737917,
    "map_correct": false,
    "redraw_hit": 0.125,
    "rank_true_marginal": 3,
-   "p_true": 0.2754437581443973,
+   "p_true": 0.2533999734934915,
    "replay": {
     "outcome": "recovered",
-    "seat": 0,
-    "is_original_claimer": false,
-    "p_map": 1.0,
-    "by": "deduction",
-    "clears_threshold": true,
-    "correct": true,
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.2583327641554539,
+    "by": "posterior",
+    "clears_threshold": false,
     "steps": 1,
-    "team_steps": 1
+    "team_steps": 2
    }
   },
   {
@@ -1329,11 +1315,11 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.2930127723516134,
+   "p_map": 0.29621358670914744,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.4090909090909088,
+   "p_true": 0.346153846153846,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1362,21 +1348,16 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.5135130993061356,
+   "p_map": 0.43263140727731214,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 2,
-   "p_true": 0.28247626491901806,
+   "rank_true_marginal": 3,
+   "p_true": 0.26261060577450124,
    "replay": {
-    "outcome": "recovered",
-    "seat": 4,
-    "is_original_claimer": false,
-    "p_map": 1.0,
-    "by": "deduction",
-    "clears_threshold": true,
-    "correct": true,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 1,
-    "team_steps": 1
+    "team_steps": 2
    }
   },
   {
@@ -1400,11 +1381,11 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.29471021947873915,
+   "p_map": 0.29524963613522276,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 3,
-   "p_true": 0.30555555555555564,
+   "p_true": 0.31308411214953275,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1433,16 +1414,16 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.2856718192627813,
+   "p_map": 0.25847397782642423,
    "map_correct": true,
    "redraw_hit": 0.375,
    "rank_true_marginal": 1,
-   "p_true": 0.5344827586206897,
+   "p_true": 0.5084033613445378,
    "replay": {
     "outcome": "recovered",
     "seat": 2,
     "is_original_claimer": true,
-    "p_map": 0.25847397782642423,
+    "p_map": 0.2762984878369487,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -1470,14 +1451,18 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.6,
-   "map_correct": true,
-   "redraw_hit": 0.5,
-   "rank_true_marginal": 1,
-   "p_true": 0.6,
+   "p_map": 0.27562499999999907,
+   "map_correct": false,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 4,
+   "p_true": 0.47499999999999987,
    "replay": {
-    "outcome": "blocked",
-    "reason": "no action but the ban",
+    "outcome": "recovered",
+    "seat": 2,
+    "is_original_claimer": true,
+    "p_map": 0.28222656249999906,
+    "by": "posterior",
+    "clears_threshold": false,
     "steps": 0,
     "team_steps": 1
    }
@@ -1503,14 +1488,18 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.26265624999999915,
+   "p_map": 0.30249999999999894,
    "map_correct": false,
    "redraw_hit": 0.5,
    "rank_true_marginal": 4,
-   "p_true": 0.4874999999999998,
+   "p_true": 0.44999999999999996,
    "replay": {
-    "outcome": "blocked",
-    "reason": "no action but the ban",
+    "outcome": "recovered",
+    "seat": 1,
+    "is_original_claimer": true,
+    "p_map": 0.27562499999999907,
+    "by": "posterior",
+    "clears_threshold": false,
     "steps": 0,
     "team_steps": 1
    }
@@ -1536,11 +1525,11 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.2962910681258903,
+   "p_map": 0.29438276367931804,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 3,
-   "p_true": 0.3349514563106797,
+   "rank_true_marginal": 4,
+   "p_true": 0.28240740740740755,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1569,11 +1558,11 @@
     4
    ],
    "trigger": "no_asks",
-   "p_map": 0.3164062499999989,
+   "p_map": 0.295664062499999,
    "map_correct": false,
-   "redraw_hit": 0.75,
+   "redraw_hit": 0.625,
    "rank_true_marginal": 4,
-   "p_true": 0.43749999999999983,
+   "p_true": 0.45624999999999993,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1602,18 +1591,14 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.30249999999999894,
-   "map_correct": false,
-   "redraw_hit": 0.5,
-   "rank_true_marginal": 4,
-   "p_true": 0.44999999999999996,
+   "p_map": 0.25628906249999917,
+   "map_correct": true,
+   "redraw_hit": 0.75,
+   "rank_true_marginal": 1,
+   "p_true": 0.50625,
    "replay": {
-    "outcome": "recovered",
-    "seat": 0,
-    "is_original_claimer": true,
-    "p_map": 0.25628906249999917,
-    "by": "posterior",
-    "clears_threshold": false,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 0,
     "team_steps": 1
    }
@@ -1639,18 +1624,14 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.29988662131519267,
-   "map_correct": false,
-   "redraw_hit": 0.125,
-   "rank_true_marginal": 4,
-   "p_true": 0.4523809523809524,
+   "p_map": 0.2856718192627813,
+   "map_correct": true,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 1,
+   "p_true": 0.5344827586206897,
    "replay": {
-    "outcome": "recovered",
-    "seat": 1,
-    "is_original_claimer": true,
-    "p_map": 0.2856718192627813,
-    "by": "posterior",
-    "clears_threshold": false,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 0,
     "team_steps": 1
    }
@@ -1676,16 +1657,16 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.28222656249999906,
+   "p_map": 0.30249999999999894,
    "map_correct": true,
-   "redraw_hit": 0.625,
+   "redraw_hit": 0.25,
    "rank_true_marginal": 1,
-   "p_true": 0.5312499999999999,
+   "p_true": 0.5499999999999999,
    "replay": {
     "outcome": "recovered",
     "seat": 3,
     "is_original_claimer": true,
-    "p_map": 0.30249999999999894,
+    "p_map": 0.28222656249999906,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -1713,11 +1694,11 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.29340039628105574,
+   "p_map": 0.2946540132087807,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 3,
-   "p_true": 0.35185185185185197,
+   "p_true": 0.35714285714285715,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1746,49 +1727,53 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.2749851279000595,
-   "map_correct": true,
-   "redraw_hit": 0.5,
-   "rank_true_marginal": 1,
-   "p_true": 0.5243902439024388,
-   "replay": {
-    "outcome": "blocked",
-    "reason": "no action but the ban",
-    "steps": 0,
-    "team_steps": 1
-   }
-  },
-  {
-   "hs": 1,
-   "claimer": 5,
-   "forced": true,
-   "truth": [
-    5,
-    5,
-    3,
-    5,
-    1,
-    5
-   ],
-   "declared": [
-    5,
-    5,
-    1,
-    5,
-    3,
-    5
-   ],
-   "trigger": "no_asks",
-   "p_map": 0.33785156249999876,
-   "map_correct": true,
-   "redraw_hit": 0.375,
-   "rank_true_marginal": 1,
-   "p_true": 0.5812499999999998,
+   "p_map": 0.29536862003780545,
+   "map_correct": false,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 4,
+   "p_true": 0.45652173913043465,
    "replay": {
     "outcome": "recovered",
     "seat": 5,
     "is_original_claimer": true,
-    "p_map": 0.26265624999999915,
+    "p_map": 0.32463493780421904,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 0,
+    "team_steps": 1
+   }
+  },
+  {
+   "hs": 1,
+   "claimer": 5,
+   "forced": true,
+   "truth": [
+    5,
+    5,
+    3,
+    5,
+    1,
+    5
+   ],
+   "declared": [
+    5,
+    5,
+    1,
+    5,
+    3,
+    5
+   ],
+   "trigger": "no_asks",
+   "p_map": 0.26265624999999915,
+   "map_correct": true,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 1,
+   "p_true": 0.5125,
+   "replay": {
+    "outcome": "recovered",
+    "seat": 5,
+    "is_original_claimer": true,
+    "p_map": 0.30249999999999894,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -1816,11 +1801,11 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.2905743803768667,
+   "p_map": 0.2949526318149247,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 4,
-   "p_true": 0.28023032629558553,
+   "p_true": 0.2828685258964145,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1849,16 +1834,16 @@
     0
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.7388896764716681,
+   "p_map": 0.6584917784361746,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.26111032352833186,
+   "p_true": 0.3415082215638254,
    "replay": {
     "outcome": "recovered",
     "seat": 4,
     "is_original_claimer": false,
-    "p_map": 0.27794115389599444,
+    "p_map": 0.41982368237592094,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 2,
@@ -1886,11 +1871,11 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.29584209693104346,
+   "p_map": 0.2932691585274235,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 4,
-   "p_true": 0.3137254901960787,
+   "p_true": 0.2863636363636368,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -1919,16 +1904,16 @@
     3
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.8428515768397851,
+   "p_map": 0.9656718951594699,
    "map_correct": true,
    "redraw_hit": 0.875,
    "rank_true_marginal": 1,
-   "p_true": 0.8428515768397851,
+   "p_true": 0.9656718951594699,
    "replay": {
     "outcome": "recovered",
     "seat": 3,
     "is_original_claimer": true,
-    "p_map": 0.9656718951594699,
+    "p_map": 0.9238290469111544,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -1956,14 +1941,18 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.30249999999999894,
-   "map_correct": true,
-   "redraw_hit": 0.5,
-   "rank_true_marginal": 1,
-   "p_true": 0.5499999999999999,
+   "p_map": 0.26265624999999915,
+   "map_correct": false,
+   "redraw_hit": 0.625,
+   "rank_true_marginal": 4,
+   "p_true": 0.4874999999999998,
    "replay": {
-    "outcome": "blocked",
-    "reason": "no action but the ban",
+    "outcome": "recovered",
+    "seat": 3,
+    "is_original_claimer": true,
+    "p_map": 0.28890624999999903,
+    "by": "posterior",
+    "clears_threshold": false,
     "steps": 0,
     "team_steps": 1
    }
@@ -1989,20 +1978,20 @@
     3
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.42245634654856573,
+   "p_map": 0.4724286666066961,
    "map_correct": false,
-   "redraw_hit": 0.375,
+   "redraw_hit": 0.125,
    "rank_true_marginal": 3,
-   "p_true": 0.21211039571915238,
+   "p_true": 0.22781439717902754,
    "replay": {
     "outcome": "recovered",
     "seat": 5,
     "is_original_claimer": false,
-    "p_map": 0.18103013340382787,
+    "p_map": 0.23909203730524076,
     "by": "posterior",
     "clears_threshold": false,
-    "steps": 10,
-    "team_steps": 5
+    "steps": 5,
+    "team_steps": 3
    }
   },
   {
@@ -2026,18 +2015,14 @@
     4
    ],
    "trigger": "no_asks",
-   "p_map": 0.29536862003780545,
+   "p_map": 0.31578432140339974,
    "map_correct": false,
-   "redraw_hit": 0.625,
+   "redraw_hit": 0.5,
    "rank_true_marginal": 4,
-   "p_true": 0.45652173913043453,
+   "p_true": 0.43805309734513254,
    "replay": {
-    "outcome": "recovered",
-    "seat": 4,
-    "is_original_claimer": true,
-    "p_map": 0.2583327641554539,
-    "by": "posterior",
-    "clears_threshold": false,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 0,
     "team_steps": 1
    }
@@ -2063,16 +2048,16 @@
     5
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.6676699328111393,
+   "p_map": 0.6823379462846941,
    "map_correct": false,
-   "redraw_hit": 0.125,
+   "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.3323300671888605,
+   "p_true": 0.3176620537153059,
    "replay": {
     "outcome": "recovered",
     "seat": 3,
     "is_original_claimer": false,
-    "p_map": 0.0768532317197778,
+    "p_map": 0.056550602575301305,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 2,
@@ -2100,16 +2085,16 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.2672364263142765,
-   "map_correct": false,
+   "p_map": 0.25,
+   "map_correct": true,
    "redraw_hit": 0.5,
-   "rank_true_marginal": 4,
-   "p_true": 0.4830508474576267,
+   "rank_true_marginal": 1,
+   "p_true": 0.49999999999999983,
    "replay": {
     "outcome": "recovered",
     "seat": 2,
     "is_original_claimer": true,
-    "p_map": 0.30815611631223216,
+    "p_map": 0.2916,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -2137,11 +2122,11 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.29451926674148887,
+   "p_map": 0.2959766763848384,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 2,
-   "p_true": 0.3888888888888889,
+   "rank_true_marginal": 4,
+   "p_true": 0.31428571428571433,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2170,21 +2155,20 @@
     2
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.47532642275168946,
+   "p_map": 0.5454630254696318,
    "map_correct": true,
-   "redraw_hit": 0.375,
+   "redraw_hit": 0.625,
    "rank_true_marginal": 1,
-   "p_true": 0.47532642275168946,
+   "p_true": 0.5454630254696318,
    "replay": {
     "outcome": "recovered",
     "seat": 0,
     "is_original_claimer": false,
     "p_map": 1.0,
-    "by": "deduction",
+    "by": "posterior",
     "clears_threshold": true,
-    "correct": true,
-    "steps": 1,
-    "team_steps": 1
+    "steps": 2,
+    "team_steps": 2
    }
   },
   {
@@ -2208,16 +2192,16 @@
     5
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.5570182550691521,
+   "p_map": 0.5126074599301894,
    "map_correct": true,
-   "redraw_hit": 0.625,
+   "redraw_hit": 0.375,
    "rank_true_marginal": 1,
-   "p_true": 0.5570182550691521,
+   "p_true": 0.5126074599301894,
    "replay": {
     "outcome": "recovered",
     "seat": 5,
     "is_original_claimer": false,
-    "p_map": 0.015407924634295226,
+    "p_map": 0.017785206270077562,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 4,
@@ -2245,11 +2229,11 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.2929394531249982,
+   "p_map": 0.2937890624999982,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 3,
-   "p_true": 0.3687499999999999,
+   "rank_true_marginal": 2,
+   "p_true": 0.39999999999999997,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2278,20 +2262,20 @@
     5
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.496331789006108,
+   "p_map": 0.4295308154209274,
    "map_correct": false,
    "redraw_hit": 0.125,
-   "rank_true_marginal": 3,
-   "p_true": 0.17390689810097154,
+   "rank_true_marginal": 2,
+   "p_true": 0.3608890706710829,
    "replay": {
     "outcome": "recovered",
-    "seat": 5,
-    "is_original_claimer": true,
-    "p_map": 0.267523952254498,
+    "seat": 1,
+    "is_original_claimer": false,
+    "p_map": 0.3113575505401457,
     "by": "posterior",
     "clears_threshold": false,
-    "steps": 0,
-    "team_steps": 1
+    "steps": 2,
+    "team_steps": 2
    }
   },
   {
@@ -2315,21 +2299,20 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.65,
+   "p_map": 0.7374999999999999,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.35,
+   "p_true": 0.26249999999999996,
    "replay": {
     "outcome": "recovered",
-    "seat": 4,
-    "is_original_claimer": false,
+    "seat": 0,
+    "is_original_claimer": true,
     "p_map": 1.0,
-    "by": "deduction",
+    "by": "posterior",
     "clears_threshold": true,
-    "correct": true,
     "steps": 1,
-    "team_steps": 1
+    "team_steps": 2
    }
   },
   {
@@ -2353,11 +2336,11 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.29596326704526205,
+   "p_map": 0.2909871537900862,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 4,
-   "p_true": 0.3118811881188118,
+   "rank_true_marginal": 2,
+   "p_true": 0.4285714285714284,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2386,11 +2369,11 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.29541344727457053,
+   "p_map": 0.2956800000000001,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 4,
-   "p_true": 0.2961165048543692,
+   "rank_true_marginal": 3,
+   "p_true": 0.34000000000000025,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2419,21 +2402,20 @@
     1
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.16129782954831937,
+   "p_map": 0.10271729035215164,
    "map_correct": false,
    "redraw_hit": 0.125,
-   "rank_true_marginal": 2,
-   "p_true": 0.060735331274133206,
+   "rank_true_marginal": 3,
+   "p_true": 0.2550031685198335,
    "replay": {
     "outcome": "recovered",
-    "seat": 3,
+    "seat": 1,
     "is_original_claimer": false,
-    "p_map": 1.0,
-    "by": "deduction",
-    "clears_threshold": true,
-    "correct": true,
-    "steps": 1,
-    "team_steps": 1
+    "p_map": 0.8198032748021333,
+    "by": "posterior",
+    "clears_threshold": false,
+    "steps": 16,
+    "team_steps": 9
    }
   },
   {
@@ -2457,21 +2439,20 @@
     4
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.5044428568506272,
-   "map_correct": true,
-   "redraw_hit": 0.0,
-   "rank_true_marginal": 1,
-   "p_true": 0.5044428568506272,
+   "p_map": 0.5760694828821412,
+   "map_correct": false,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 2,
+   "p_true": 0.42393051711785884,
    "replay": {
     "outcome": "recovered",
-    "seat": 0,
+    "seat": 2,
     "is_original_claimer": false,
     "p_map": 1.0,
-    "by": "deduction",
+    "by": "posterior",
     "clears_threshold": true,
-    "correct": true,
-    "steps": 1,
-    "team_steps": 1
+    "steps": 3,
+    "team_steps": 3
    }
   },
   {
@@ -2495,11 +2476,11 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.29615507089702764,
+   "p_map": 0.29549532869599116,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 2,
-   "p_true": 0.34177215189873433,
+   "rank_true_marginal": 4,
+   "p_true": 0.3057851239669422,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2528,11 +2509,11 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.29612479953346066,
+   "p_map": 0.29506903115437455,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 4,
-   "p_true": 0.31578947368421073,
+   "rank_true_marginal": 3,
+   "p_true": 0.34415584415584427,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2561,21 +2542,20 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.6437499999999998,
+   "p_map": 0.7437499999999999,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.35624999999999996,
+   "p_true": 0.25625,
    "replay": {
     "outcome": "recovered",
-    "seat": 1,
-    "is_original_claimer": false,
+    "seat": 5,
+    "is_original_claimer": true,
     "p_map": 1.0,
-    "by": "deduction",
+    "by": "posterior",
     "clears_threshold": true,
-    "correct": true,
     "steps": 1,
-    "team_steps": 1
+    "team_steps": 2
    }
   },
   {
@@ -2599,16 +2579,16 @@
     3
    ],
    "trigger": "no_asks",
-   "p_map": 0.27562499999999907,
+   "p_map": 0.295664062499999,
    "map_correct": false,
-   "redraw_hit": 0.625,
+   "redraw_hit": 0.75,
    "rank_true_marginal": 4,
-   "p_true": 0.47499999999999987,
+   "p_true": 0.45624999999999993,
    "replay": {
     "outcome": "recovered",
     "seat": 3,
     "is_original_claimer": true,
-    "p_map": 0.30249999999999894,
+    "p_map": 0.3306249999999988,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -2636,14 +2616,18 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.2666621875839828,
-   "map_correct": false,
-   "redraw_hit": 0.25,
-   "rank_true_marginal": 4,
-   "p_true": 0.4836065573770491,
+   "p_map": 0.25847397782642423,
+   "map_correct": true,
+   "redraw_hit": 0.5,
+   "rank_true_marginal": 1,
+   "p_true": 0.5084033613445378,
    "replay": {
-    "outcome": "blocked",
-    "reason": "no action but the ban",
+    "outcome": "recovered",
+    "seat": 5,
+    "is_original_claimer": true,
+    "p_map": 0.25847397782642423,
+    "by": "posterior",
+    "clears_threshold": false,
     "steps": 0,
     "team_steps": 1
    }
@@ -2669,11 +2653,11 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.2856718192627815,
+   "p_map": 0.29536862003780545,
    "map_correct": true,
-   "redraw_hit": 0.5,
+   "redraw_hit": 0.625,
    "rank_true_marginal": 1,
-   "p_true": 0.5344827586206897,
+   "p_true": 0.5434782608695653,
    "replay": {
     "outcome": "recovered",
     "seat": 0,
@@ -2706,16 +2690,16 @@
     0
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.618167528158551,
+   "p_map": 0.5672072021588871,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.38183247184144886,
+   "p_true": 0.432792797841113,
    "replay": {
     "outcome": "recovered",
     "seat": 4,
     "is_original_claimer": false,
-    "p_map": 0.33217725299667417,
+    "p_map": 0.3191124571579629,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 6,
@@ -2743,11 +2727,11 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.2892534747533667,
+   "p_map": 0.29583090379008636,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 2,
-   "p_true": 0.4473684210526314,
+   "p_true": 0.35714285714285704,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2776,16 +2760,16 @@
     1
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.6762405617899294,
+   "p_map": 0.8158152033886588,
    "map_correct": false,
-   "redraw_hit": 0.0,
+   "redraw_hit": 0.125,
    "rank_true_marginal": 2,
-   "p_true": 0.3237594382100707,
+   "p_true": 0.1841847966113412,
    "replay": {
     "outcome": "recovered",
     "seat": 3,
     "is_original_claimer": false,
-    "p_map": 0.13935931614919872,
+    "p_map": 0.06260972849585444,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 2,
@@ -2813,11 +2797,11 @@
     5
    ],
    "trigger": "no_asks",
-   "p_map": 0.2962097837889353,
+   "p_map": 0.29619468576944447,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 4,
-   "p_true": 0.32577319587628867,
+   "p_true": 0.3209876543209877,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2846,11 +2830,11 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.29623646239014423,
+   "p_map": 0.29493780401111974,
    "map_correct": false,
    "redraw_hit": 0.0,
-   "rank_true_marginal": 3,
-   "p_true": 0.33540372670807456,
+   "rank_true_marginal": 4,
+   "p_true": 0.2923728813559322,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2879,11 +2863,11 @@
     4
    ],
    "trigger": "no_asks",
-   "p_map": 0.33765522279035776,
-   "map_correct": false,
+   "p_map": 0.2666621875839828,
+   "map_correct": true,
    "redraw_hit": 0.625,
-   "rank_true_marginal": 4,
-   "p_true": 0.41891891891891864,
+   "rank_true_marginal": 1,
+   "p_true": 0.5163934426229505,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -2912,18 +2896,14 @@
     2
    ],
    "trigger": "no_asks",
-   "p_map": 0.2749851279000595,
-   "map_correct": true,
+   "p_map": 0.32653061224489704,
+   "map_correct": false,
    "redraw_hit": 0.625,
-   "rank_true_marginal": 1,
-   "p_true": 0.5243902439024388,
+   "rank_true_marginal": 4,
+   "p_true": 0.42857142857142844,
    "replay": {
-    "outcome": "recovered",
-    "seat": 4,
-    "is_original_claimer": true,
-    "p_map": 0.2583327641554539,
-    "by": "posterior",
-    "clears_threshold": false,
+    "outcome": "blocked",
+    "reason": "no action but the ban",
     "steps": 0,
     "team_steps": 1
    }
@@ -2949,16 +2929,16 @@
     0
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.6255806394056327,
+   "p_map": 0.7282139023377409,
    "map_correct": false,
-   "redraw_hit": 0.875,
+   "redraw_hit": 0.75,
    "rank_true_marginal": 4,
-   "p_true": 0.3744193605943674,
+   "p_true": 0.2717860976622591,
    "replay": {
     "outcome": "recovered",
     "seat": 0,
     "is_original_claimer": false,
-    "p_map": 0.3007421316178817,
+    "p_map": 0.7003701546682858,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 3,
@@ -2986,11 +2966,11 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.2762984878369487,
-   "map_correct": true,
-   "redraw_hit": 0.125,
-   "rank_true_marginal": 1,
-   "p_true": 0.5256410256410257,
+   "p_map": 0.308156116312232,
+   "map_correct": false,
+   "redraw_hit": 0.25,
+   "rank_true_marginal": 4,
+   "p_true": 0.44488188976377957,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -3019,11 +2999,11 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.25847397782642423,
+   "p_map": 0.2762984878369487,
    "map_correct": true,
    "redraw_hit": 0.25,
    "rank_true_marginal": 1,
-   "p_true": 0.5084033613445379,
+   "p_true": 0.5256410256410255,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -3052,16 +3032,16 @@
     3
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.5934502098094628,
+   "p_map": 0.2707413336944384,
    "map_correct": false,
    "redraw_hit": 0.5,
    "rank_true_marginal": 4,
-   "p_true": 0.40654979019053716,
+   "p_true": 0.4796718980350588,
    "replay": {
     "outcome": "recovered",
     "seat": 3,
     "is_original_claimer": true,
-    "p_map": 0.2680646083339187,
+    "p_map": 0.3473954068396589,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 2,
@@ -3089,11 +3069,11 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.2672364263142765,
-   "map_correct": true,
-   "redraw_hit": 0.5,
-   "rank_true_marginal": 1,
-   "p_true": 0.516949152542373,
+   "p_map": 0.2666621875839828,
+   "map_correct": false,
+   "redraw_hit": 0.375,
+   "rank_true_marginal": 4,
+   "p_true": 0.4836065573770495,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -3122,11 +3102,11 @@
     1
    ],
    "trigger": "no_asks",
-   "p_map": 0.29569548932613043,
+   "p_map": 0.29548471497535367,
    "map_correct": false,
    "redraw_hit": 0.0,
    "rank_true_marginal": 3,
-   "p_true": 0.34722222222222227,
+   "p_true": 0.3519163763066203,
    "replay": {
     "outcome": "blocked",
     "reason": "no action but the ban",
@@ -3155,16 +3135,16 @@
     0
    ],
    "trigger": "no_asks",
-   "p_map": 0.2762984878369487,
-   "map_correct": true,
+   "p_map": 0.2749851279000595,
+   "map_correct": false,
    "redraw_hit": 0.5,
-   "rank_true_marginal": 1,
-   "p_true": 0.5256410256410257,
+   "rank_true_marginal": 4,
+   "p_true": 0.47560975609756123,
    "replay": {
     "outcome": "recovered",
     "seat": 0,
     "is_original_claimer": true,
-    "p_map": 0.2762984878369487,
+    "p_map": 0.2672364263142765,
     "by": "posterior",
     "clears_threshold": false,
     "steps": 0,
@@ -3192,20 +3172,20 @@
     4
    ],
    "trigger": "doomed_ask",
-   "p_map": 0.3632111265359037,
-   "map_correct": false,
-   "redraw_hit": 0.25,
-   "rank_true_marginal": 3,
-   "p_true": 0.2869253840514694,
+   "p_map": 0.44098437356758036,
+   "map_correct": true,
+   "redraw_hit": 0.125,
+   "rank_true_marginal": 2,
+   "p_true": 0.44098437356758036,
    "replay": {
     "outcome": "recovered",
     "seat": 2,
     "is_original_claimer": false,
-    "p_map": 0.2081991104970972,
+    "p_map": 0.5002846170688177,
     "by": "posterior",
     "clears_threshold": false,
-    "steps": 2,
-    "team_steps": 2
+    "steps": 3,
+    "team_steps": 3
    }
   }
  ]

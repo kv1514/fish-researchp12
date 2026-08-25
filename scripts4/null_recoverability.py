@@ -132,24 +132,30 @@ def poll_offturn(st, agents, team=None, hs=None):
     """Off-turn deduced claims, as ``fish4.match._poll_offturn_claims`` runs
     them in every duel in this project.
 
-    It is here for fidelity to the harness, and NOT because it changes the
-    number. I added it believing it explained why this study's null rate ran
-    above the duel records', and then measured instead of assuming: on 40 deals
-    with six champions, poll on and poll off give 17 nulls and 0 unresolved
-    half-suits each -- identical. The champion's own-turn claim path already
-    catches every half-suit it has fully deduced, so the off-turn opportunity
-    adds nothing for this policy. It would matter for a policy that leaves
-    deductions on the table.
+    It is gated on ``rules.claims_any_time``, which the shipped RuleConfig
+    leaves OFF, so on the default rules this does nothing at all.
 
-    The rate gap had a duller explanation still: 10 games. At 300 games this
-    study measures 0.300 nulls per game against the 0.274 pooled over 66 duel
-    arms, which is the same number. I had reached for a population difference
-    that was not there.
+    That gate is a correction. The poll ran unconditionally at first, and
+    measuring it on and off gave 17 nulls and 0 unresolved half-suits either
+    way -- from which I concluded the champion already catches every half-suit
+    it has deduced on its own turn. That conclusion was not what the
+    measurement showed. ``check_legal`` refuses an off-turn claim outright when
+    ``claims_any_time`` is false, so every claim the poll tried raised and was
+    swallowed by its own except-continue: the identical numbers came from the
+    poll being a no-op, and said nothing whatever about the champion. An
+    experiment that cannot act is not a control.
+
+    The null rate needed no such explanation either: at 10 games it read 0.833,
+    at 300 games it reads 0.300 against the 0.274 pooled over 66 duel arms.
+    That is the same number, and I had reached twice for a mechanism where
+    there was only sample size.
 
     Returns ``(seat, claim)`` if a member of ``team`` could deduce ``hs``, which
     is recovery by deduction rather than by posterior.
     """
     from fish4.match import _deduced_claim
+    if not st.rules.claims_any_time:
+        return None
     changed = True
     guard = 0
     while changed and guard < 40:
