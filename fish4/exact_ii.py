@@ -139,6 +139,12 @@ class ExactII:
         self.spec = spec
         self.nodes = 0
         self._memo: dict = {}
+        #: the optimal action AT THE ROOT, once solve() has run. The value
+        #: alone says the champion leaves something on the table; this says
+        #: what it should have done instead, which is what a policy change has
+        #: to be built from.
+        self.best_action = None
+        self.action_values: dict = {}
 
     # -- terminal value ------------------------------------------------------
 
@@ -241,6 +247,7 @@ class ExactII:
         if not acts:
             return 0.0
         best = None
+        root = depth == 0
         for a in acts:
             buckets = {}
             for s, w in zip(states, weights):
@@ -257,8 +264,12 @@ class ExactII:
             for ss, ws in buckets.values():
                 tot = sum(ws)
                 v += tot * self.solve(ss, [x / tot for x in ws], depth + 1)
+            if root:
+                self.action_values[repr(a)] = v
             if best is None or v > best:
                 best = v
+                if root:
+                    self.best_action = a
         return best if best is not None else 0.0
 
     def _claim_candidates(self, states):

@@ -1,0 +1,25 @@
+{
+ "n_games": 6,
+ "n_decisions": 4,
+ "n_agree": 3,
+ "n_differ": 1,
+ "n_free_ties": 0,
+ "n_costly": 1,
+ "mean_cost_when_error": 0.6666666666666666,
+ "cost_per_decision": 0.16666666666666666,
+ "by_kind": {
+  "champion ask -> optimum ask": 1
+ },
+ "rows": [
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": -0.3333333333333333,
+   "cost": 0.6666666666666666,
+   "same_target": true,
+   "same_card": false
+  }
+ ]
+}
