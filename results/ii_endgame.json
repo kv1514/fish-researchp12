@@ -1,10 +1,39 @@
 {
- "n_games": 3,
+ "n_games": 6,
  "max_support": 24,
- "pinned_checked": 6,
- "pinned_ok": 6,
+ "pinned_checked": 9,
+ "pinned_ok": 9,
  "pinned_mismatches": [],
- "n_solved": 0,
- "skipped_large_support": 0,
- "solved": []
+ "n_solved": 4,
+ "skipped_large_support": 2,
+ "solved": [
+  {
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  },
+  {
+   "support": 10,
+   "value": 1.0,
+   "champion": 0.1,
+   "gain": 0.9,
+   "nodes": 7226
+  },
+  {
+   "support": 4,
+   "value": 0.75,
+   "champion": 0.25,
+   "gain": 0.5,
+   "nodes": 166
+  },
+  {
+   "support": 2,
+   "value": 0.5,
+   "champion": 0.5,
+   "gain": 0.0,
+   "nodes": 5
+  }
+ ]
 }
