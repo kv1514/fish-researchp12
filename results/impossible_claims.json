@@ -1,0 +1,2033 @@
+{
+ "n_games": 25,
+ "n_claims": 225,
+ "n_impossible": 4,
+ "share": 0.017777777777777778,
+ "rows": [
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 1,
+   "impossible": true,
+   "marginal": false,
+   "joint_only": true,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": true,
+   "marginal": false,
+   "joint_only": true,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": false
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": true,
+   "marginal": false,
+   "joint_only": true,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": true,
+   "marginal": false,
+   "joint_only": true,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 9,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 8,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 7,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 6,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 1,
+   "mine": true
+  },
+  {
+   "live": 5,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 4,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 3,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": 0,
+   "mine": true
+  },
+  {
+   "live": 2,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": false,
+   "winner": -1,
+   "mine": false
+  },
+  {
+   "live": 1,
+   "impossible": false,
+   "marginal": false,
+   "joint_only": false,
+   "checked_jointly": true,
+   "winner": -1,
+   "mine": false
+  }
+ ]
+}
