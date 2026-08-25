@@ -83,9 +83,31 @@ class OracleBot(FishBot4):
     that means neither thing.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, reveal: float = 1.0, **kwargs):
+        """``reveal`` is the fraction of the cards it cannot see that it is told.
+
+        1.0 is omniscience, which turns out to be nearly the maximum possible
+        margin and therefore a poor bound: with perfect information you never
+        miss an ask, never lose the turn, and take every set. What discriminates
+        between inference ideas is the SHAPE of the curve below that, so this
+        interpolates.
+
+        The revealed set is chosen once per game and held fixed, which is the
+        interpretable model: "this seat has perfect knowledge of these cards and
+        ordinary inference about the rest". Re-drawing it every decision would
+        instead model a stream of fresh information, and because pins persist in
+        the belief it would accumulate to omniscience after enough turns rather
+        than holding any fraction at all.
+
+        Drawn per seat from that seat's own randomness, so two oracles on the
+        same team do not share a lucky subset.
+        """
         super().__init__(**kwargs)
+        if not 0.0 <= reveal <= 1.0:
+            raise ValueError(f"reveal must be in [0, 1], got {reveal}")
+        self.reveal = reveal
         self._owners: Optional[list[int]] = None
+        self._revealed: Optional[set] = None
         #: Cards pinned by this agent rather than deduced. Reported so the
         #: cheat's size is visible instead of implied.
         self.pinned_by_cheat = 0
@@ -99,15 +121,33 @@ class OracleBot(FishBot4):
         super().begin_game(player, rules, seed)
         self.pinned_by_cheat = 0
         self.decisions = 0
+        self._revealed = None          # redrawn on the first act of this game
+
+    def _draw_revealed(self) -> None:
+        """Choose, once per game, which unknown cards this seat is told.
+
+        Drawn from the cards NOT already pinned at the first decision -- which
+        excludes this seat's own hand, so ``reveal`` is a fraction of what is
+        genuinely hidden from it rather than of the whole deck.
+        """
+        hidden = [c for c in range(len(self._owners))
+                  if not self.bel.is_pinned(c)]
+        if self.reveal >= 1.0:
+            self._revealed = set(hidden)
+            return
+        k = int(round(self.reveal * len(hidden)))
+        self._revealed = set(self.rng.sample(hidden, k)) if k else set()
 
     def _collapse(self) -> None:
-        """Pin every card to whoever was actually dealt it."""
-        bel = self._owners and self.bel
-        if bel is None:
+        """Pin the revealed cards to whoever was actually dealt them."""
+        if self._owners is None or self.bel is None:
             return
-        for card, owner in enumerate(self._owners):
-            if not bel.is_pinned(card):
-                bel._pin(card, owner)      # raises if the belief excluded truth
+        if self._revealed is None:
+            self._draw_revealed()
+        for card in self._revealed:
+            if not self.bel.is_pinned(card):
+                # raises if the honest belief had excluded the truth
+                self.bel._pin(card, self._owners[card])
                 self.pinned_by_cheat += 1
 
     def act(self, obs: Observation):

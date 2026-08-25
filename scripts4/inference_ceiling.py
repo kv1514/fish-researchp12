@@ -163,6 +163,9 @@ def main(argv=None) -> int:
     ap.add_argument("--control-seed", type=int, default=41_000_000)
     ap.add_argument("--control-only", action="store_true")
     ap.add_argument("--skip-control", action="store_true")
+    ap.add_argument("--curve", action="store_true",
+                    help="sweep the revealed fraction instead of measuring 1.0")
+    ap.add_argument("--reveal", type=float, default=1.0)
     a = ap.parse_args(argv)
 
     rules_dict = RuleConfig().to_dict()
@@ -173,6 +176,44 @@ def main(argv=None) -> int:
             return 1
         print()
     if a.control_only:
+        return 0
+
+    if a.curve:
+        # 0.0 is the sharpest control available: an oracle told nothing IS the
+        # champion, and under seat seeding an A/A differential is exactly zero
+        # on every deal. A non-zero first row means the cheat is leaking
+        # somewhere other than where it says it does.
+        grid = (0.0, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1.0)
+        rows = []
+        print(f"revealed fraction sweep, {a.pairs} pairs per point\n")
+        print(f"{'reveal':>7}{'margin':>10}   95% CI{'':>14}{'per card':>10}")
+        print("-" * 56)
+        for f in grid:
+            diffs = run(a.pairs,
+                        lambda f=f: OracleBot(reveal=f, opponent_gamma=0.35),
+                        lambda: make_agent(CHAMPION),
+                        a.base_seed + int(f * 1000) * 10_000, a.agent_seed,
+                        rules_dict)
+            st = summarise(diffs)
+            rows.append({"reveal": f, **st})
+            # ~45 cards are hidden from a seat at the start, so this is the
+            # margin bought per card told, which is what a curve shape means.
+            per = st["mean"] / (f * 45) if f else float("nan")
+            print(f"{f:>7.2f}{st['mean']:>10.3f}   "
+                  f"[{st['ci95'][0]:+.3f}, {st['ci95'][1]:+.3f}]"
+                  f"{per:>10.3f}" if f else
+                  f"{f:>7.2f}{st['mean']:>10.3f}   "
+                  f"[{st['ci95'][0]:+.3f}, {st['ci95'][1]:+.3f}]{'--':>10}")
+        out = ROOT / "results" / "inference_curve.json"
+        out.write_text(json.dumps({"grid": rows, "pairs_per_point": a.pairs,
+                                   "y": list(CHAMPION)}, indent=1))
+        print(f"\nwrote {out.relative_to(ROOT)}")
+        if abs(rows[0]["mean"]) > 1e-12:
+            print(f"\nCONTROL FAILED: reveal=0.0 gave {rows[0]['mean']:+.6f}, "
+                  f"not exactly 0. An oracle told nothing must BE the champion.")
+            return 1
+        print("\ncontrol ok: reveal=0.0 is exactly 0.000, so the cheat acts "
+              "only where it claims to")
         return 0
 
     print(f"oracle team vs champion team, {a.pairs} pairs")
