@@ -1,0 +1,96 @@
+{
+ "premise_A_growth_events": 0,
+ "premise_A_control_events": 1,
+ "premise_B": {
+  "claims_checked": 120,
+  "denials_found": 0,
+  "nulls_demonstrated": 10
+ },
+ "premise_C": [
+  {
+   "m": 1,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 1.0
+  },
+  {
+   "m": 2,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 1.9
+  },
+  {
+   "m": 3,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 2.95
+  },
+  {
+   "m": 4,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 3.95
+  },
+  {
+   "m": 5,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 4.95
+  },
+  {
+   "m": 6,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 5.85
+  },
+  {
+   "m": 7,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 6.75
+  },
+  {
+   "m": 8,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 7.95
+  },
+  {
+   "m": 9,
+   "n": 40,
+   "agree": 40,
+   "jams": 0,
+   "mean_value": 8.8
+  }
+ ],
+ "premise_D": [
+  {
+   "m": 1,
+   "n": 20,
+   "formula_matches_exact": 20,
+   "playout_matches_exact": 20,
+   "examples": []
+  },
+  {
+   "m": 2,
+   "n": 20,
+   "formula_matches_exact": 20,
+   "playout_matches_exact": 20,
+   "examples": []
+  }
+ ],
+ "positions": 360,
+ "agree": 360,
+ "p_half_suit_all_opponents": 0.011461188248884459,
+ "opening_expected_value_closed_form": 8.793698611520078,
+ "opening_expected_value_measured": 8.8,
+ "proved": true
+}
