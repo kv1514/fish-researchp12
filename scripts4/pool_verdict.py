@@ -50,11 +50,42 @@ RUNS = {
          for i in range(2)],
         "jobs/PREREGISTRATION_combined_reblock.md", "measure", None,
         "the shipped configuration, both blocks on one engine"),
+    "avoid_doomed_asks": (
+        [f"DOOMED avoid_doomed_asks vs champion block {i}" for i in range(6)],
+        "jobs/PREREGISTRATION_avoid_doomed_asks.md", "above", 0.05,
+        "does refusing an ask that cannot land beat the champion?"),
     "gamma_schedule": (
         [f"GAMMA_SCHEDULE s1.0 vs champion block {i}" for i in range(6)],
         "jobs/PREREGISTRATION_gamma_schedule.md", "above", 0.05,
         "does correcting the opponent model's dilution pay in play?"),
 }
+
+
+def _pairs_to_settle(est, se, n, bar) -> str:
+    """What it would take to turn this interval into a decision.
+
+    Two different questions depending on where the estimate sits, and they are
+    not interchangeable. Outside the band, more pairs could eventually put the
+    whole interval past the bar. INSIDE it, no amount of data ever will -- the
+    only conclusion available is the bounded null "the effect is smaller than
+    the bar", which is a real result and needs saying as one rather than being
+    filed as a failure.
+    """
+    import math
+    if abs(est) >= bar:
+        gap = abs(est) - bar
+        need = n * (Z * se / gap) ** 2
+        side = "above" if est > 0 else "below"
+        return (f"to put the whole interval {side} {bar:+.2f} at this point "
+                f"estimate: about {math.ceil(need/1000)*1000:,} pairs "
+                f"({need/n:.1f}x this run).")
+    gap = bar - abs(est)
+    need = n * (Z * se / gap) ** 2
+    return (f"the estimate sits inside +/-{bar:.2f}, so no sample size gives "
+            f"an adopt-or-reject verdict. About {math.ceil(need/1000)*1000:,} "
+            f"pairs ({need/n:.1f}x this run) would BOUND the effect inside "
+            f"the bar, which is the only conclusion this design can still "
+            f"reach and is worth stating as one.")
 
 
 def verdict(name: str) -> dict:
@@ -85,6 +116,14 @@ def verdict(name: str) -> dict:
               f"{'clears' if ok else 'does not clear'} the bar"
               f"{'' if ok else f' (lower limit {lo:+.3f})'}")
         decision = "adopt" if ok else "do_not_adopt"
+        # The pre-registrations that use this rule all say the same thing about
+        # an unresolved interval: state the pairs it would take to settle
+        # rather than quietly keeping the run. So state them.
+        if lo <= 0.0 <= hi:
+            decision = "unresolved"
+            need = _pairs_to_settle(p["fe"], p["fe_se"], n, bar)
+            print(f"  -> UNRESOLVED: the interval contains zero.")
+            print(f"     {need}")
     else:
         print(f"\nrule: this run is the value of record; it adopts nothing")
         decision = "measured"
@@ -106,9 +145,16 @@ def main(argv=None) -> int:
     rc = 0
     for name in which:
         v = verdict(name)
-        if not v["complete"]:
-            rc = 1
         out = ROOT / "results" / f"{name}_verdict.json"
+        if not v["complete"]:
+            # Deliberately do NOT write. A file called <name>_verdict.json is
+            # read as a verdict by anything that finds it, and one holding
+            # "complete": false is a partial result wearing a finished
+            # result's name -- the same failure as the n=4 exploitability
+            # file that sat in results/ looking like a measurement.
+            rc = 1
+            print(f"not writing {out.name}: a partial pool gets no file")
+            continue
         out.write_text(json.dumps(v, indent=1))
         print(f"wrote {out.relative_to(ROOT)}")
     return rc
