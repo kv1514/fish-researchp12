@@ -129,7 +129,19 @@ def one_game(deck, rules, agent_seed, target_seat, at_decision, donate):
     return float(a_ - b_), fired
 
 
-def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False):
+def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False,
+        at_lo=0, at_hi=5):
+    """Donate at the seat's ``at_lo``..``at_hi``-th decision.
+
+    WHY THIS IS A PARAMETER. The first version fixed the donation at decisions
+    0-4 and used the resulting price to predict what avoid_doomed_asks should
+    score. The two came out disjoint -- [+0.109, +0.531] predicted against
+    [-0.024, +0.059] measured -- and one of the three explanations is that the
+    bridge assumed a turn is worth the same everywhere. The doomed-ask branch
+    fires deep in stuck half-suits, not at move five. If tempo value decays
+    through a game, the bridge was wrong before either arm was at fault, and
+    that has to be ruled out before the residual can be called signalling.
+    """
     rules_dict = RuleConfig().to_dict()
     seed_rng = random.Random(agent_seed_base)
     prices, fired_flags = [], []
@@ -142,7 +154,7 @@ def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False):
         rules = RuleConfig(**{**rules_dict,
                               "starting_player": i % NUM_PLAYERS})
         seat = i % NUM_PLAYERS
-        at = i % 5                       # an early decision, varied by deal
+        at = at_lo + i % max(1, at_hi - at_lo)
         ref, _ = one_game(deck, rules, aseed, seat, at, donate=False)
         alt, fired = one_game(deck, rules, aseed, seat, at,
                               donate=not control)
@@ -169,6 +181,11 @@ def main(argv=None) -> int:
     ap.add_argument("--pairs", type=int, default=300)
     ap.add_argument("--base-seed", type=int, default=66_000_000)
     ap.add_argument("--agent-seed", type=int, default=66001)
+    ap.add_argument("--at-lo", type=int, default=0,
+                    help="earliest decision index of the target seat")
+    ap.add_argument("--at-hi", type=int, default=5)
+    ap.add_argument("--tag", default="",
+                    help="suffix for the results filename")
     ap.add_argument("--control-pairs", type=int, default=20)
     ap.add_argument("--control-only", action="store_true")
     ap.add_argument("--skip-control", action="store_true")
@@ -187,8 +204,10 @@ def main(argv=None) -> int:
         if a.control_only:
             return 0
 
-    print(f"donating one turn, {a.pairs} paired deals\n")
-    prices, flags = run(a.pairs, a.base_seed, a.agent_seed, progress=True)
+    print(f"donating one turn at decision {a.at_lo}-{a.at_hi-1} of the "
+          f"target seat, {a.pairs} paired deals\n")
+    prices, flags = run(a.pairs, a.base_seed, a.agent_seed, progress=True,
+                        at_lo=a.at_lo, at_hi=a.at_hi)
     nfired = sum(flags)
     fired_prices = [x for x, f in zip(prices, flags) if f]
     s_all = summarise(prices)
@@ -217,10 +236,11 @@ def main(argv=None) -> int:
           f"({2*0.59*s['mean']:+.3f} per deal-pair) if tempo is all it "
           f"changes.")
 
-    out = ROOT / "results" / "turn_price.json"
+    out = ROOT / "results" / f"turn_price{a.tag}.json"
     out.write_text(json.dumps({"summary": s, "summary_all_pairs": s_all,
                                "prices": prices, "fired": flags,
                                "n_fired": nfired, "base_seed": a.base_seed,
+                               "at_lo": a.at_lo, "at_hi": a.at_hi,
                                "rate_sets_per_card": RATE}, indent=1))
     print(f"\nwrote {out.relative_to(ROOT)}")
     return 0
