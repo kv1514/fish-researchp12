@@ -1,0 +1,57 @@
+{
+ "name": "avoid_doomed_asks",
+ "complete": true,
+ "question": "does refusing an ask that cannot land beat the champion?",
+ "prereg": "jobs/PREREGISTRATION_avoid_doomed_asks.md",
+ "blocks": [
+  {
+   "label": "DOOMED avoid_doomed_asks vs champion block 0",
+   "est": -0.009,
+   "se": 0.06425766917690096,
+   "n": 1000
+  },
+  {
+   "label": "DOOMED avoid_doomed_asks vs champion block 1",
+   "est": 0.027,
+   "se": 0.0583410205145117,
+   "n": 1000
+  },
+  {
+   "label": "DOOMED avoid_doomed_asks vs champion block 2",
+   "est": -0.055,
+   "se": 0.060775559797246366,
+   "n": 1000
+  },
+  {
+   "label": "DOOMED avoid_doomed_asks vs champion block 3",
+   "est": 0.089,
+   "se": 0.06015561235410789,
+   "n": 1000
+  },
+  {
+   "label": "DOOMED avoid_doomed_asks vs champion block 4",
+   "est": -0.047,
+   "se": 0.06001994163103954,
+   "n": 1000
+  },
+  {
+   "label": "DOOMED avoid_doomed_asks vs champion block 5",
+   "est": 0.037,
+   "se": 0.05431925608457448,
+   "n": 1000
+  }
+ ],
+ "n_pairs": 6000,
+ "estimate": 0.008796379164741753,
+ "se": 0.024256614778967466,
+ "ci": [
+  -0.03874571256390244,
+  0.05633847089338595
+ ],
+ "q": 4.187348543148873,
+ "df": 5,
+ "i2": 0.0,
+ "rule": "above",
+ "bar": 0.05,
+ "decision": "unresolved"
+}
