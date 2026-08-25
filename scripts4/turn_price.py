@@ -132,7 +132,7 @@ def one_game(deck, rules, agent_seed, target_seat, at_decision, donate):
 def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False):
     rules_dict = RuleConfig().to_dict()
     seed_rng = random.Random(agent_seed_base)
-    prices, fired_n = [], 0
+    prices, fired_flags = [], []
     for i in range(n_pairs):
         aseed = seed_rng.getrandbits(64)
         rng = random.Random(base_seed + i)
@@ -149,10 +149,10 @@ def run(n_pairs, base_seed, agent_seed_base, control=False, progress=False):
         # Price in the DONATING team's frame.
         sign = 1.0 if team_of(seat) == 0 else -1.0
         prices.append(sign * (ref - alt))
-        fired_n += int(fired)
+        fired_flags.append(bool(fired))
         if progress and (i + 1) % 50 == 0:
             print(f"  ... {i+1}/{n_pairs}", flush=True)
-    return prices, fired_n
+    return prices, fired_flags
 
 
 def summarise(x):
@@ -188,13 +188,25 @@ def main(argv=None) -> int:
             return 0
 
     print(f"donating one turn, {a.pairs} paired deals\n")
-    prices, fired = run(a.pairs, a.base_seed, a.agent_seed, progress=True)
-    s = summarise(prices)
-    print(f"\nsubstitution fired on {fired}/{a.pairs} deals "
-          f"(a doomed ask is not always available)")
+    prices, flags = run(a.pairs, a.base_seed, a.agent_seed, progress=True)
+    nfired = sum(flags)
+    fired_prices = [x for x, f in zip(prices, flags) if f]
+    s_all = summarise(prices)
+    s = summarise(fired_prices) if fired_prices else s_all
+    print(f"\nsubstitution fired on {nfired}/{a.pairs} deals; on the rest no "
+          f"doomed ask\nwas available, both arms played identically, and the "
+          f"pair contributes exactly 0.")
     print(f"\nPRICE OF ONE TURN {s['mean']:+.3f} sets, "
           f"95% CI [{s['ci95'][0]:+.3f}, {s['ci95'][1]:+.3f}]  "
           f"(sd {s['sd']:.2f}, n {s['n']})")
+    print(f"  over ALL pairs including the untreated "
+          f"{s_all['mean']:+.3f} [{s_all['ci95'][0]:+.3f}, "
+          f"{s_all['ci95'][1]:+.3f}]")
+    print("  The first is the price of a donation; the second dilutes it with "
+          "deals where\n  nothing was donated. Restricting to fired pairs "
+          "conditions on the treatment\n  being AVAILABLE, which is fixed "
+          "before either arm plays and is identical in\n  both, so it does "
+          "not condition on an outcome.")
 
     RATE = 0.45
     print(f"\nAt the exchange rate of {RATE} sets per hidden card, one turn is "
@@ -206,8 +218,9 @@ def main(argv=None) -> int:
           f"changes.")
 
     out = ROOT / "results" / "turn_price.json"
-    out.write_text(json.dumps({"summary": s, "prices": prices,
-                               "fired": fired, "base_seed": a.base_seed,
+    out.write_text(json.dumps({"summary": s, "summary_all_pairs": s_all,
+                               "prices": prices, "fired": flags,
+                               "n_fired": nfired, "base_seed": a.base_seed,
                                "rate_sets_per_card": RATE}, indent=1))
     print(f"\nwrote {out.relative_to(ROOT)}")
     return 0
