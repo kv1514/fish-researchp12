@@ -132,3 +132,52 @@ def declaration_feasible(obs, bel, half_suit: int, assignment) -> bool:
     if not rest:
         return all(x == 0 for x in counts)
     return _max_flow(rest, allowed, counts) == len(rest)
+
+
+def best_feasible(obs, bel, half_suit, team, marginals, cap: int = 400):
+    """The most likely declaration over ``team`` that some deal actually allows.
+
+    A filter that merely DROPS an infeasible candidate does not repair
+    anything: ``claim4.forced_claim`` falls back to building a declaration
+    straight from the holder masks when no candidate survives, so the dropped
+    claim comes back through the back door. Measured, the filter-only version
+    changed nothing at all -- 5 impossible claims of 40 with it on and with it
+    off, the same 16 nulls, the same 343 claims won.
+
+    So the repair has to SUPPLY a feasible declaration, not just refuse one.
+    Candidates are ordered by the product of the per-card marginals -- the same
+    ordering the evaluator's own shortlist uses -- and the first one that
+    passes the joint check wins. That keeps the choice as close to what the
+    engine wanted as feasibility permits.
+
+    Returns None when no assignment over ``team`` is feasible, which is a real
+    answer: the half-suit is not wholly the team's and no declaration can be
+    right.
+    """
+    from itertools import product as _product
+    cards = list(half_suit_cards(half_suit))
+    opts = []
+    for c in cards:
+        row = marginals[c]
+        allowed = [(float(row[q]), q) for q in team
+                   if (bel.current_holder_mask(c) >> q) & 1]
+        if not allowed:
+            return None
+        allowed.sort(reverse=True)
+        opts.append(allowed)
+    scored = []
+    total = 1
+    for o in opts:
+        total *= len(o)
+    if total > cap:
+        opts = [o[:2] if len(o) > 1 else o for o in opts]
+    for combo in _product(*opts):
+        pr = 1.0
+        for x, _ in combo:
+            pr *= x
+        scored.append((pr, tuple(q for _, q in combo)))
+    scored.sort(reverse=True)
+    for _, asg in scored[:cap]:
+        if declaration_feasible(obs, bel, half_suit, asg):
+            return asg
+    return None

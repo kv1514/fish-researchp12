@@ -74,6 +74,8 @@ POOLS = {
         [f"SETTLE value_keep 0.30 vs champion block {i}" for i in range(2)],
     "value pure baseline, two blocks":
         [f"BASELINE value pure vs champion block {i}" for i in range(2)],
+    "claim feasibility, six blocks":
+        [f"CLAIMFEAS feasibility filter vs champion block {i}" for i in range(6)],
     "avoid_doomed_asks, eight blocks":
         [f"DOOMED avoid_doomed_asks vs champion block {i}" for i in range(8)],
 }

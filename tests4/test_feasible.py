@@ -102,3 +102,71 @@ def test_a_declaration_outside_a_card_mask_is_rejected():
     wrong = next(q for q in range(NUM_PLAYERS) if not (mask >> q) & 1)
     asg = (wrong,) + (0,) * 5
     assert not declaration_feasible(obs, agents[0].bel, 0, asg)
+
+
+def test_claim_feasibility_is_inert_off_and_repairs_when_on():
+    """The arm must change nothing by default and must actually bite when on.
+
+    The first version of this arm only DROPPED infeasible candidates, and it
+    changed nothing at all: forced_claim rebuilds a declaration straight from
+    the holder masks when no candidate survives, so the dropped claim returned
+    through the back door -- 5 impossible claims of 40 either way, the same 16
+    nulls, the same 343 wins. The bite assertion below is what caught that, and
+    it is why the test asserts a repair rather than a configuration flag.
+    """
+    from fish.engine import NULL_TEAM
+    from fish4.exact_ii import consistent_deals
+
+    def enum_ok(obs, bel, claim):
+        deals = consistent_deals(obs, bel, claim.half_suit)
+        if not deals:
+            return None
+        cards = list(half_suit_cards(claim.half_suit))
+        return any(all((h[q] >> c) & 1 for c, q in zip(cards,
+                                                       claim.assignment))
+                   for h in deals)
+
+    def run(flag, n=12):
+        spec = ("fishbot4", {"opponent_gamma": 0.35} if not flag else
+                {"opponent_gamma": 0.35, "claim_feasibility": True})
+        rules = RuleConfig()
+        impossible = checked = foe = 0
+        for g in range(n):
+            agents = [make_agent(spec) for _ in range(NUM_PLAYERS)]
+            st = GameState.deal(rules, seed=79_000_000 + g)
+            ar = random.Random(79_500_000 + g)
+            for p, a in enumerate(agents):
+                a.begin_game(p, rules, ar.getrandbits(64))
+            for _ in range(600):
+                if st.is_terminal:
+                    break
+                p = st.turn
+                obs = Observation.from_state(st, p)
+                try:
+                    act = agents[p].act(obs)
+                except Exception:
+                    break
+                chk = None
+                if isinstance(act, Claim):
+                    live = [h for h, w in enumerate(obs.set_winner)
+                            if w is None]
+                    if len(live) == 1 and live[0] == act.half_suit:
+                        chk = enum_ok(obs, agents[p].bel, act)
+                        checked += 1
+                ev = st.apply(p, act)
+                if chk is False:
+                    impossible += 1
+                if isinstance(act, Claim) and ev.winner not in (NULL_TEAM,
+                                                                p % 2):
+                    foe += 1
+        return impossible, checked, foe
+
+    off_imp, off_n, _ = run(False)
+    on_imp, on_n, on_foe = run(True)
+    assert off_n >= 8 and on_n >= 8, "too few m=1 claims to compare"
+    assert off_imp > 0, (
+        "the champion made no impossible claim in this sample, so the arm has "
+        "nothing to repair and the test proves nothing")
+    assert on_imp == 0, (
+        f"the arm left {on_imp} impossible claims standing; a filter that does "
+        f"not bite is the failure this test exists for")

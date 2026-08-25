@@ -96,6 +96,8 @@ class FishBot4(Tablebase4Mixin, Agent):
                  avoid_doomed_asks: bool = False,
                  # -- claiming
                  claim_threshold: float = 0.97,
+                 #: refuse declarations no complete consistent deal allows
+                 claim_feasibility: bool = False,
                  claim_exact: bool = True,
                  claim_exact_candidates: int = 3,
                  # -- adaptive style
@@ -146,7 +148,8 @@ class FishBot4(Tablebase4Mixin, Agent):
                 f"value_keep={value_keep} has no effect with objective="
                 f"{objective!r}; it applies only to objective='value'")
         self.avoid_doomed_asks = bool(avoid_doomed_asks)
-        self.claim_cfg = ClaimConfig(threshold=claim_threshold,
+        self.claim_cfg = ClaimConfig(feasibility=bool(claim_feasibility),
+                                     threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
                                      use_exact=claim_exact)
         self.w_retake = w_retake

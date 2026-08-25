@@ -56,6 +56,10 @@ class ClaimConfig:
     exact_candidates: int = 3
     #: cap on the enumeration of team assignments for unpinned cards
     max_enumerate: int = 4096
+    #: refuse a declaration that no complete consistent deal contains. See
+    #: jobs/PREREGISTRATION_claim_feasibility.md. Off by default; the shipped
+    #: champion is unchanged.
+    feasibility: bool = False
     #: half-suits this evaluator refuses to claim, for counterfactual studies
     #: only. ``scripts4/null_recoverability.py`` needs to replay a game with ONE
     #: claim deleted; suppressing claims wholesale (by lifting ``threshold``)
@@ -192,10 +196,40 @@ class ClaimEvaluator:
                 if hs in self.cfg.banned:
                     continue
                 r = self.best_for_half_suit(hs)
-                if r is not None:
-                    out.append(r)
+                if r is None:
+                    continue
+                if self.cfg.feasibility and not self._feasible(r[2]):
+                    # The declaration matches no complete deal the public
+                    # record allows, so it cannot be right. REPAIR it rather
+                    # than drop it: dropping alone changed nothing, because
+                    # forced_claim rebuilds a declaration from the masks when
+                    # no candidate survives.
+                    r = self._repair(hs, r)
+                    if r is None:
+                        continue
+                out.append(r)
             self._cands = out
         return self._cands
+
+    def _repair(self, hs, r):
+        """Swap in the most likely FEASIBLE declaration for this half-suit."""
+        from .feasible import best_feasible
+        try:
+            asg = best_feasible(self.obs, self.bel, hs, self.team, self.ctx.M)
+        except Exception:
+            return r        # a repair must never make things worse on error
+        if asg is None:
+            return None
+        p_exact, p_team, _ = r
+        return (p_exact, p_team, Claim(hs, asg))
+
+    def _feasible(self, claim) -> bool:
+        from .feasible import declaration_feasible
+        try:
+            return declaration_feasible(self.obs, self.bel, claim.half_suit,
+                                        claim.assignment)
+        except Exception:
+            return True     # a filter must never reject on its own failure
 
     # -- decisions -------------------------------------------------------------
 
