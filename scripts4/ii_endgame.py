@@ -55,13 +55,64 @@ def closed_form(st, hs, seat) -> int:
     return v if team_of(st.turn) == team_of(seat) else -v
 
 
+JOURNAL = ROOT / "results" / "ii_endgame_journal.jsonl"
+
+
+def _load_journal():
+    """Positions already solved, keyed by game index.
+
+    This session has lost four long background runs to a timeout or a container
+    restart, each time writing nothing because the results file is only written
+    at the end. At roughly thirty seconds a game that is an expensive way to
+    learn the same lesson twice, so every position is appended as it lands and
+    a restart skips the games already done.
+    """
+    if not JOURNAL.exists():
+        return [], set()
+    rows = []
+    complete = set()
+    for line in JOURNAL.read_text().splitlines():
+        if line.strip():
+            r = json.loads(line)
+            rows.append(r)
+            if r.get("kind") == "game_done":
+                complete.add(r["game"])
+    # Only games with a game_done marker are complete. A run killed mid-game
+    # leaves that game's positions in the journal, and replaying it would
+    # DOUBLE-COUNT them -- so its partial records are dropped and it is redone.
+    return [r for r in rows if r["game"] in complete], complete
+
+
 def main(n_games: int = 12) -> int:
     rules = RuleConfig()
+    journalled, done_games = _load_journal()
+    if done_games:
+        print(f"  resuming: {len(done_games)} games already journalled "
+              f"({len(journalled)} positions)")
     pinned_ok = pinned_bad = 0
     bad = []
     solved = []
     skipped = 0
+    for r in journalled:
+        # Dispatch on the tag explicitly. An earlier version used a bare else
+        # for "solved", which swept up the game_done bookkeeping rows: the
+        # resumed run reported six solved positions where the fresh run found
+        # four, and then died on a KeyError reading a value those rows do not
+        # have. The faithfulness check caught it; the resume itself looked fine.
+        k = r.get("kind")
+        if k == "pinned_ok":
+            pinned_ok += 1
+        elif k == "pinned_bad":
+            pinned_bad += 1
+            bad.append(r)
+        elif k == "skipped":
+            skipped += 1
+        elif k == "solved":
+            solved.append(r)
+
     for g in range(n_games):
+        if g in done_games:
+            continue
         agents = [make_agent(SPEC) for _ in range(NUM_PLAYERS)]
         st = GameState.deal(rules, seed=99_000 + g)
         ar = random.Random(99_500 + g)
@@ -95,19 +146,30 @@ def main(n_games: int = 12) -> int:
                     cv = sv.champion_value(states, w)
                     if len(deals) == 1:
                         want = closed_form(states[0], hs, p)
-                        if abs(v - want) < 1e-9:
+                        rec = {"game": g, "exact": v, "closed_form": want,
+                               "kind": ("pinned_ok" if abs(v - want) < 1e-9
+                                        else "pinned_bad")}
+                        if rec["kind"] == "pinned_ok":
                             pinned_ok += 1
                         else:
                             pinned_bad += 1
-                            bad.append({"game": g, "exact": v,
-                                        "closed_form": want})
+                            bad.append(rec)
                     else:
-                        solved.append({"support": len(deals), "value": v,
-                                       "champion": cv, "gain": v - cv,
-                                       "nodes": sv.nodes})
+                        rec = {"game": g, "kind": "solved",
+                               "support": len(deals), "value": v,
+                               "champion": cv, "gain": v - cv,
+                               "nodes": sv.nodes}
+                        solved.append(rec)
+                    with JOURNAL.open("a") as fh:
+                        fh.write(json.dumps(rec) + "\n")
                 elif deals:
                     skipped += 1
+                    with JOURNAL.open("a") as fh:
+                        fh.write(json.dumps({"game": g, "kind": "skipped",
+                                             "support": len(deals)}) + "\n")
             st.apply(p, agents[p].act(obs))
+        with JOURNAL.open("a") as fh:
+            fh.write(json.dumps({"game": g, "kind": "game_done"}) + "\n")
         print(f"  {g+1}/{n_games} games, {pinned_ok+pinned_bad} pinned, "
               f"{len(solved)} solved, {skipped} skipped", flush=True)
 

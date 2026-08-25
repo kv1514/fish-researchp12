@@ -1,13 +1,15 @@
 {
- "n_games": 6,
+ "n_games": 5,
  "max_support": 24,
- "pinned_checked": 9,
- "pinned_ok": 9,
+ "pinned_checked": 6,
+ "pinned_ok": 6,
  "pinned_mismatches": [],
  "n_solved": 4,
  "skipped_large_support": 2,
  "solved": [
   {
+   "game": 3,
+   "kind": "solved",
    "support": 2,
    "value": 0.5,
    "champion": 0.5,
@@ -15,6 +17,8 @@
    "nodes": 5
   },
   {
+   "game": 4,
+   "kind": "solved",
    "support": 10,
    "value": 1.0,
    "champion": 0.1,
@@ -22,6 +26,8 @@
    "nodes": 7226
   },
   {
+   "game": 4,
+   "kind": "solved",
    "support": 4,
    "value": 0.75,
    "champion": 0.25,
@@ -29,6 +35,8 @@
    "nodes": 166
   },
   {
+   "game": 4,
+   "kind": "solved",
    "support": 2,
    "value": 0.5,
    "champion": 0.5,
