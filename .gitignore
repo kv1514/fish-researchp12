@@ -25,3 +25,8 @@ paper/*.toc
 # and a stale one would silently resume a DIFFERENT run's deals.
 results/exploitability_journal.jsonl
 results/ii_endgame_journal.jsonl
+# One journal per layer now: the shared file was keyed by game index alone, so
+# an m = 2 run started with an m = 1 journal present would have skipped all its
+# games as done and reported the wrong layer's positions.
+results/ii_endgame_journal_m*.jsonl
+results/ii_first_endgame_journal.jsonl
