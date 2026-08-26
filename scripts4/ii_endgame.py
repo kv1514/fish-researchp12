@@ -30,6 +30,7 @@ from __future__ import annotations
 import json
 import random
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,8 +40,8 @@ from fish.cards import NUM_PLAYERS, half_suit_mask, team_of
 from fish.engine import GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
-from fish4.exact_ii import (ExactII, consistent_deals,
-                             consistent_deals_multi)
+from fish4.exact_ii import (DEFAULT_DEADLINE, ExactII, SolveTimeout,
+                             consistent_deals, consistent_deals_multi)
 from fish4.registry4 import make_agent
 
 SPEC = ("fishbot4", {"opponent_gamma": 0.35})
@@ -106,7 +107,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
     if done_games:
         print(f"  resuming: {len(done_games)} games already journalled "
               f"({len(journalled)} positions)")
-    pinned_ok = pinned_bad = 0
+    pinned_ok = pinned_bad = timed_out = 0
     bad = []
     solved = []
     skipped = 0
@@ -124,6 +125,8 @@ def main(n_games: int = 12, layer: int = 1) -> int:
             bad.append(r)
         elif k == "skipped":
             skipped += 1
+        elif k == "timeout":
+            timed_out += 1
         elif k == "solved":
             solved.append(r)
 
@@ -149,6 +152,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                          consistent_deals_multi(obs, agents[p].bel, live))
                 if deals and len(deals) <= MAX_SUPPORT:
                     sv = ExactII(rules, hs, p, SPEC)
+                    sv.deadline = time.monotonic() + DEFAULT_DEADLINE
                     states = []
                     for hands in deals:
                         t = GameState.from_components(
@@ -158,6 +162,15 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                     w = [1.0 / len(states)] * len(states)
                     try:
                         v = sv.solve(states, w)
+                    except SolveTimeout:
+                        timed_out += 1
+                        with JOURNAL.open("a") as fh:
+                            fh.write(json.dumps(
+                                {"game": g, "kind": "timeout",
+                                 "support": len(deals),
+                                 "nodes": sv.nodes}) + "\n")
+                        st.apply(p, agents[p].act(obs))
+                        continue
                     except Exception as e:
                         skipped += 1
                         st.apply(p, agents[p].act(obs))
@@ -204,7 +217,8 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         return 1
 
     print(f"\nGENUINELY HIDDEN positions solved exactly: {len(solved)}"
-          f"  ({skipped} skipped for support > {MAX_SUPPORT})")
+          f"  ({skipped} skipped for support > {MAX_SUPPORT},"
+          f" {timed_out} timed out at {DEFAULT_DEADLINE:.0f}s)")
     if solved:
         vs = sorted(r["value"] for r in solved)
         n = len(vs)
@@ -257,7 +271,9 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         if solved else None,
         "mean_champion": (sum(r["champion"] for r in solved) / len(solved))
         if solved else None,
-        "skipped_large_support": skipped, "solved": solved}, indent=1))
+        "skipped_large_support": skipped, "timed_out": timed_out,
+        "deadline_seconds": DEFAULT_DEADLINE,
+        "solved": solved}, indent=1))
     if smoke:
         print(f"\n{n_games} games is below the {MIN_RESULT_GAMES} this script "
               f"treats as a result;\nwrote {out.relative_to(ROOT)} instead. "

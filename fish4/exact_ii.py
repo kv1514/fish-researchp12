@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import time
 from itertools import product
 from typing import Optional
 
@@ -59,6 +60,21 @@ from fish.rules import RuleConfig
 #: Depth cap. A cycle of mutual misses can run forever; the harness scores an
 #: unresolved half-suit for nobody (fish4/match.play_capped), so this does too.
 MAX_PLIES = 24
+
+#: Seconds a single position may take before the solver gives up on it.
+#:
+#: This exists because "solvable" and "solvable in the time available" were
+#: conflated once already. A probe capped at support 8 solved every m = 2
+#: position in under a second, which read as "m = 2 is reachable"; the study
+#: allowed support up to 24 and ground on ONE position for six and a half
+#: hours, writing nothing. An exact solver with no deadline does not fail
+#: loudly, it fails silently and forever, and a layer that is out of reach
+#: should say so rather than hang.
+DEFAULT_DEADLINE = 60.0
+
+
+class SolveTimeout(Exception):
+    """The position exceeded its budget. It is unsolved, not zero."""
 
 
 def consistent_deals_multi(obs: Observation, bel, live) -> list:
@@ -190,6 +206,7 @@ class ExactII:
         #: to be built from.
         self.best_action = None
         self.action_values: dict = {}
+        self.deadline = None          # set by the caller; None = no limit
 
     # -- terminal value ------------------------------------------------------
 
@@ -243,6 +260,8 @@ class ExactII:
         than a per-deal cheat.
         """
         self.nodes += 1
+        if self.deadline is not None and time.monotonic() > self.deadline:
+            raise SolveTimeout(f"exceeded budget after {self.nodes} nodes")
         # Memo on the node itself: two branches reaching the same weighted
         # belief set at the same depth have the same value by construction.
         key = (depth, tuple(sorted(
