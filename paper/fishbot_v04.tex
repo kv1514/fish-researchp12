@@ -2638,7 +2638,7 @@ candidate & screen (200 pairs) & retest (500 pairs) & retest 95\% CI \\
 blended value objective, $0.5$ & $+0.410$ & $-0.208$ & $[-0.534, +0.118]$ \\
 $\sqrt{\cdot}$ counting, $\gamma = 0.70$ & $+0.480$ & $+0.212$ & $[-0.092, +0.516]$ \\
 \textbf{both together} & --- & $\mathbf{+0.490}$ & $\mathbf{[+0.184, +0.796]}$ \\
-\quad replication, fresh seeds & --- & $+0.068$ & $[-0.254, +0.390]$ \
+\quad replication, fresh seeds & --- & $+0.068$ & $[-0.254, +0.390]$ \\
 \quad replication again & --- & $-0.066$ & $[-0.395, +0.263]$ \\
 \bottomrule
 \end{tabular}
@@ -4071,6 +4071,25 @@ partner you tell your opponents more of.
 \section{The endgame solved under imperfect information}
 \label{sec:ii}
 
+\begin{quote}
+\textbf{Every figure in this section is withdrawn pending recomputation.} The
+solver's transposition table keyed nodes on hands, turn, half-suit winners and
+belief weights, and \emph{not} on the history. The opponents in it are the
+champion, whose action is a function of its whole observation, so two nodes
+identical in every key field but reached by different move orders have
+different continuations and different values. Merging them returned one
+branch's value for the other, and the maximisation read those values --- on the
+position that exposed it, the search reported $+0.2500$ for a move a rollout of
+the same strategy scores at $+0.7500$, and visited $154$ nodes where the
+corrected search visits $12{,}086$. The fault was found by an invariant that
+holds with no ground truth at all: a best response may copy the champion at
+every information set, so it cannot score below it. Five $m = 2$ positions did.
+The champion's own figure below is unaffected --- it is a rollout that never
+consulted the table --- but the optimum and the gain are not, and the
+disagreement counts in Section~\ref{sec:iidiff} come from the same search. The
+numbers are being recomputed; until they are, read nothing here as measured.
+\end{quote}
+
 Every ``exact'' result above is a statement about the perfect-information game,
 and Section~\ref{sec:tempo}'s companion result showed that game is degenerate.
 The v0.3 headline --- belief agents choosing a provably optimal move in 100\%
@@ -4136,6 +4155,7 @@ in only $32\%$ of them, averaging $2.41$ distinct actions. It mixes at most of
 these decisions.
 
 \subsection{Where the disagreements are, and one that is provable}
+\label{sec:iidiff}
 
 Comparing the champion's move to the exact optimum's at each hidden decision,
 $84$ of $273$ agree. Of the $189$ disagreements, $79$ cost \emph{exactly}
