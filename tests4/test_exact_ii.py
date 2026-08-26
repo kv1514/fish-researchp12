@@ -329,3 +329,57 @@ def test_the_position_the_memo_got_wrong():
     assert abs(tree - cv) < 1e-9, (
         f"the same champion strategy scores {tree:+.6f} in the tree and "
         f"{cv:+.6f} in the rollout")
+
+
+# ---------------------------------------------------------------------------
+# The position where the champion gets STUCK in one of the deals.
+#
+# _opponent used to drop such a state and renormalise the survivors, which
+# asserts the world does not exist and inflates every other deal's weight,
+# while champion_value stopped that deal's rollout and scored it in place. The
+# two therefore disagreed about the same strategy. The m = 2 tree/rollout
+# control caught it at 105/106 -- one position in a hundred -- so a test that
+# waits for it to happen by chance is a test that usually does not run.
+# ---------------------------------------------------------------------------
+
+STUCK_FIXTURE = os.path.join(ROOT, "tests4", "fixtures",
+                             "ii_stuck_position.json")
+
+
+def _load_stuck():
+    with open(STUCK_FIXTURE) as fh:
+        d = json.load(fh)
+    rules = RuleConfig()
+    hist = [_decode_event(r) for r in d["history"]]
+    states = []
+    for hands in d["deals"]:
+        t = GameState.from_components(rules, list(hands), d["turn"],
+                                      list(d["set_winner"]))
+        t.history = list(hist)
+        states.append(t)
+    return rules, d["live"], d["seat"], states
+
+
+def test_a_stuck_deal_keeps_its_weight():
+    """Tree and rollout must agree where the champion cannot move.
+
+    The assertion that the drop actually happened is not decoration: if a
+    future change stops the champion getting stuck here, this test would pass
+    without exercising anything, and would go on passing while the bug it was
+    written for came back somewhere else.
+    """
+    rules, live, seat, states = _load_stuck()
+    w = [1.0 / len(states)] * len(states)
+
+    sv = ExactII(rules, list(live), seat, SPEC)
+    sv.max_nodes = 300_000
+    tree = sv.champion_tree_value([_clone(s) for s in states], list(w))
+    assert sv.opp_dropped > 0, (
+        "the champion no longer gets stuck in this position, so the test is "
+        "not exercising the fault it was written for")
+
+    roll = ExactII(rules, list(live), seat, SPEC).champion_value(
+        [_clone(s) for s in states], list(w))
+    assert abs(tree - roll) < 1e-9, (
+        f"a stuck deal is being reweighted away: tree {tree:+.6f} against a "
+        f"rollout of {roll:+.6f} with {sv.opp_dropped} state(s) stuck")
