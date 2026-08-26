@@ -49,6 +49,10 @@ from fish4.registry4 import make_agent
 
 SPEC = ("fishbot4", {"opponent_gamma": 0.35})
 MAX_SUPPORT = 24          # positions above this are reported, not solved
+#: Above this the belief is too wide to enumerate exhaustively, and the
+#: enumeration stops rather than running to a support nobody would solve.
+#: Positions there are COUNTED -- the old product enumerator refused silently.
+WIDE_LIMIT = 100_000
 #: Positions at or below this support also get the tree-vs-playout control.
 #: It doubles their cost, so it buys its coverage where searches are cheap.
 CONSISTENCY_MAX_SUPPORT = 8
@@ -149,6 +153,8 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         print(f"  resuming: {len(done_games)} games already journalled "
               f"({len(journalled)} positions)")
     pinned_ok = pinned_bad = timed_out = 0
+    too_wide = no_deals = truth_ok = 0
+    truth_bad: list = []
     consistent_ok = 0
     consistent_bad: list = []
     bad = []
@@ -188,12 +194,43 @@ def main(n_games: int = 12, layer: int = 1) -> int:
             obs = Observation.from_state(st, p)
             live = [h for h, w in enumerate(obs.set_winner) if w is None]
             if len(live) == layer:
+                live_mask = 0
+                for h in live:
+                    live_mask |= half_suit_mask(h)
                 hs = live[0] if layer == 1 else list(live)
                 agents[p].bel.update(obs)
                 deals = (consistent_deals(obs, agents[p].bel, hs)
                          if layer == 1 else
-                         consistent_deals_multi(obs, agents[p].bel, live))
-                if deals and len(deals) <= MAX_SUPPORT:
+                         consistent_deals_multi(obs, agents[p].bel, live,
+                                                limit=WIDE_LIMIT))
+                # CONTROL. The true deal must be one of the deals the belief
+                # admits. If it is not, the belief has excluded the truth and
+                # every value computed over that support is a value of the
+                # wrong game. This is free here -- the support is already
+                # enumerated -- and it is the only check in this study that
+                # tests the BELIEF rather than the solver.
+                if deals and len(deals) <= WIDE_LIMIT:
+                    truth = tuple(st.hands[q] & live_mask
+                                  for q in range(NUM_PLAYERS))
+                    if truth in deals:
+                        truth_ok += 1
+                    else:
+                        truth_bad.append({"game": g, "support": len(deals)})
+                if deals and len(deals) > WIDE_LIMIT:
+                    # Used to be invisible: the product enumerator refused and
+                    # returned [], and the position was dropped without a
+                    # record of any kind.
+                    too_wide += 1
+                    with journal.open("a") as fh:
+                        fh.write(json.dumps({"game": g, "kind": "too_wide",
+                                             "solver": fp,
+                                             "support": len(deals)}) + "\n")
+                elif not deals:
+                    no_deals += 1
+                    with journal.open("a") as fh:
+                        fh.write(json.dumps({"game": g, "kind": "no_deals",
+                                             "solver": fp}) + "\n")
+                elif deals and len(deals) <= MAX_SUPPORT:
                     sv = ExactII(rules, hs, p, SPEC)
                     sv.max_nodes = MAX_NODES
                     sv.deadline = time.monotonic() + DEFAULT_DEADLINE
@@ -284,6 +321,14 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         print("nothing hidden. Nothing else it says is worth reading.")
         return 1
 
+    print(f"\nCONTROL -- the true deal is in the belief's support")
+    print(f"  it is: {truth_ok}/{truth_ok + len(truth_bad)}")
+    if truth_bad:
+        print(f"  MISSING in {len(truth_bad)}: the belief excludes the actual")
+        print(f"  deal, so every value over that support is a value of a")
+        print(f"  different game.")
+        return 1
+
     print(f"\nCONTROL -- the tree and the playout, same champion strategy")
     print(f"  they agree: {consistent_ok}/{consistent_ok + len(consistent_bad)}"
           f"  (support <= {CONSISTENCY_MAX_SUPPORT})")
@@ -298,6 +343,9 @@ def main(n_games: int = 12, layer: int = 1) -> int:
     print(f"\nGENUINELY HIDDEN positions solved exactly: {len(solved)}"
           f"  ({skipped} skipped for support > {MAX_SUPPORT},"
           f" {timed_out} over the {MAX_NODES:,}-node budget)")
+    if too_wide or no_deals:
+        print(f"  positions not enumerated: {too_wide} with a support above "
+              f"{WIDE_LIMIT:,}, {no_deals} with none at all")
     if solved:
         vs = sorted(r["value"] for r in solved)
         n = len(vs)
@@ -346,6 +394,9 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         "consistency_checked": consistent_ok + len(consistent_bad),
         "consistency_ok": consistent_ok,
         "consistency_max_support": CONSISTENCY_MAX_SUPPORT,
+        "truth_in_support_checked": truth_ok + len(truth_bad),
+        "truth_in_support_ok": truth_ok,
+        "too_wide": too_wide, "no_deals": no_deals, "wide_limit": WIDE_LIMIT,
         "pinned_mismatches": bad, "n_solved": len(solved),
         # Stored, not left for a reader to recompute from the records. The
         # paper's manifest watches these three, and a figure the manifest

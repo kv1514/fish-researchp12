@@ -89,12 +89,29 @@ class SolveTimeout(Exception):
     """The position exceeded its budget. It is unsolved, not zero."""
 
 
-def consistent_deals_multi(obs: Observation, bel, live) -> list:
+def consistent_deals_multi(obs: Observation, bel, live,
+                           limit: Optional[int] = None) -> list:
     """The same enumeration over SEVERAL live half-suits at once.
 
     m = 1 is the only layer where one half-suit's cards are all the live cards,
     so the single-half-suit version below silently assumes it. Above m = 1 the
     hand counts cover every live card and the enumeration has to as well.
+
+    WHY THIS IS A BACKTRACKING WALK AND NOT A PRODUCT. The first version built
+    the full cartesian product of allowed holders and filtered it on the hand
+    counts afterwards, and REFUSED outright when the product exceeded two
+    million -- returning an empty list, which the caller could not tell apart
+    from "the belief admits no deal at all", so the position vanished from the
+    study without being counted anywhere. On twelve synthetic m = 2 positions
+    with a wide belief it refused nine. Descending with the counts as a
+    constraint visits only prefixes that can still be completed: same deals, in
+    the same ORDER (checked, because the order decides which of several tied
+    actions gets reported as optimal), about sixty times faster where the
+    product version ran at all.
+
+    ``limit`` stops the walk once more than that many deals are found. A caller
+    that only needs to know whether the support exceeds its cap pays for the
+    cap, not for the belief's full width.
     """
     me = obs.player
     cards = [c for h in live for c in half_suit_cards(h)]
@@ -108,25 +125,38 @@ def consistent_deals_multi(obs: Observation, bel, live) -> list:
         if not allowed:
             return []
         opts.append(allowed)
-    prod = 1
-    for o in opts:
-        prod *= len(o)
-    if prod > 2_000_000:
-        return []                    # refuse rather than grind
-    counts = list(obs.hand_counts)
-    out = []
-    for combo in (product(*opts) if opts else [()]):
-        need = [0] * NUM_PLAYERS
-        for q in combo:
-            need[q] += 1
-        if any(need[q] != counts[q] for q in range(NUM_PLAYERS) if q != me):
-            continue
-        hands = [0] * NUM_PLAYERS
-        for c in mine:
-            hands[me] |= 1 << c
-        for c, q in zip(unseen, combo):
-            hands[q] |= 1 << c
-        out.append(tuple(hands))
+    need = [obs.hand_counts[q] if q != me else 0 for q in range(NUM_PLAYERS)]
+    base = 0
+    for c in mine:
+        base |= 1 << c
+    n = len(unseen)
+    out: list = []
+    assign: list = []
+
+    def rec(i: int, left: int) -> None:
+        # The count test comes FIRST, so that i == n is reached only with every
+        # player's count exactly met -- including the n == 0 case, where the
+        # product version still had to check that nobody else was owed a card.
+        if sum(need) != left:
+            return
+        if i == n:
+            hands = [0] * NUM_PLAYERS
+            hands[me] = base
+            for c, q in zip(unseen, assign):
+                hands[q] |= 1 << c
+            out.append(tuple(hands))
+            return
+        for q in opts[i]:
+            if need[q] > 0:
+                need[q] -= 1
+                assign.append(q)
+                rec(i + 1, left - 1)
+                assign.pop()
+                need[q] += 1
+                if limit is not None and len(out) > limit:
+                    return
+
+    rec(0, n)
     return out
 
 
@@ -249,6 +279,14 @@ class ExactII:
         #: to keep a cutoff honest is to be able to run without it and compare;
         #: tests4/test_exact_ii.py does exactly that.
         self.prune = True
+        #: States the opponent walk dropped, and actions the deviator skipped.
+        #: Both SHOULD be zero and both are argued to be: the champion's action
+        #: is computed from its own view of a state and applied to that same
+        #: state, and a wrong claim is legal rather than an error. Arguments of
+        #: that shape are what this file spent a day disproving, so they are
+        #: counted and reported instead.
+        self.opp_dropped = 0
+        self.dev_skipped = 0
 
     # -- terminal value ------------------------------------------------------
 
@@ -485,6 +523,7 @@ class ExactII:
                 try:
                     ev = t.apply(self.me, a)
                 except Exception:
+                    self.dev_skipped += 1
                     # Skip the action, do not abandon the loop. Returning the
                     # best found SO FAR here made the answer depend on the
                     # order actions happen to be generated in, and could have
@@ -545,10 +584,12 @@ class ExactII:
             a = _champion_action(self.spec, self.rules, seat, s)
             t = _clone(s)
             if a is None:
+                self.opp_dropped += 1
                 continue
             try:
                 ev = t.apply(seat, a)
             except Exception:
+                self.opp_dropped += 1
                 continue
             sig = repr(ev)
             buckets.setdefault(sig, ([], []))
