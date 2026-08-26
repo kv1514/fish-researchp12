@@ -41,10 +41,16 @@ from fish.engine import GameState, NULL_TEAM
 from fish.observation import Observation
 from fish.rules import RuleConfig
 import fish4.endgame_ii as endgame_ii
-from fish4.registry4 import make_agent
+from fish4.registry4 import V03_CHAMPION, make_agent
 
 ON = ("fishbot4", {"exact_endgame": True})
 OFF = ("fishbot4", {})
+#: Cross-play opponent. The solver models every other seat as the v0.4
+#: champion; against this one that model is simply WRONG, which is the point.
+#: If the gain survives an opponent the solver was not modelling, the policy is
+#: playing the endgame better. If it evaporates, the gain was exploitation of
+#: one specific opponent wearing the clothes of an improvement.
+OPPONENTS = {"champion": OFF, "v03": V03_CHAMPION}
 MIN_RESULT_PAIRS = 100
 
 FIRED = [0]
@@ -70,8 +76,9 @@ def flagged(mode: int, p: int) -> bool:
             or (mode == "one" and p == 0))
 
 
-def play(rules, seed: int, aseed: int, mode):
-    agents = [make_agent(ON if flagged(mode, p) else OFF)
+def play(rules, seed: int, aseed: int, mode, opp=OFF):
+    agents = [make_agent(ON if flagged(mode, p) else
+                         (OFF if team_of(p) == 0 else opp))
               for p in range(NUM_PLAYERS)]
     st = GameState.deal(rules, seed=seed)
     ar = random.Random(aseed)
@@ -89,7 +96,8 @@ def play(rules, seed: int, aseed: int, mode):
     return us - them, nulls, unres
 
 
-def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0) -> int:
+def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0,
+         opponent: str = "champion") -> int:
     """``seed_block`` shifts every deal and agent seed by a disjoint offset.
 
     A screen whose interval clears zero gets re-tested on fresh seeds before it
@@ -99,13 +107,18 @@ def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0) -> int:
     if mode not in ("one", "team", "all"):
         print(f"unknown arm {mode!r}")
         return 1
+    if opponent not in OPPONENTS:
+        print(f"unknown opponent {opponent!r}; choose from "
+              f"{sorted(OPPONENTS)}")
+        return 1
+    opp = OPPONENTS[opponent]
     rules = RuleConfig()
     t0 = time.time()
     diffs, na, nb, ua, ub = [], 0, 0, 0, 0
     for g in range(n_pairs):
         base = 92_000 + 10_000 * seed_block
-        a = play(rules, base + g, base + 500 + g, mode)
-        b = play(rules, base + g, base + 500 + g, "none")
+        a = play(rules, base + g, base + 500 + g, mode, opp)
+        b = play(rules, base + g, base + 500 + g, "none", opp)
         diffs.append(a[0] - b[0])
         na += a[1]; nb += b[1]; ua += a[2]; ub += b[2]
         if (g + 1) % 50 == 0:
@@ -119,7 +132,8 @@ def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0) -> int:
     lo, hi = mean - 1.96 * se, mean + 1.96 * se
     moved = sum(1 for x in diffs if x != 0)
 
-    print(f"\narm {mode}: {n} paired deals in {time.time()-t0:.0f}s")
+    print(f"\narm {mode} vs {opponent}: {n} paired deals in "
+          f"{time.time()-t0:.0f}s")
     print(f"  m = 1 decisions the flagged seats faced: {CANDIDATE[0]}")
     print(f"  of those the solver answered:            {FIRED[0]}")
     if FIRED[0] == 0:
@@ -127,19 +141,24 @@ def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0) -> int:
         print("this run measured the champion against itself.")
         return 1
     print(f"  paired deals whose outcome changed:      {moved}/{n}")
-    print(f"\n  set differential, policy minus champion: {mean:+.4f}  "
-          f"95% CI [{lo:+.4f}, {hi:+.4f}]")
+    # The control is the same seats WITHOUT the flag, whoever the opponent is.
+    # Calling it "minus champion" was right only while the opponent was the
+    # champion, and reads as a comparison against the wrong thing otherwise.
+    print(f"\n  set differential, policy minus flag-off control: "
+          f"{mean:+.4f}  95% CI [{lo:+.4f}, {hi:+.4f}]")
     print(f"  nulls {na} vs {nb};  unresolved half-suits {ua} vs {ub}")
     if ua > ub:
         print("  MORE UNRESOLVED than the control: the policy is declining to")
         print("  finish half-suits, which the harness scores for nobody.")
 
     smoke = n_pairs < MIN_RESULT_PAIRS
-    tag = f"_b{seed_block}" if seed_block else ""
+    tag = (f"_b{seed_block}" if seed_block else "")
+    tag += "" if opponent == "champion" else f"_vs{opponent}"
     out = ROOT / "results" / (f"exact_endgame_{mode}{tag}"
                               + ("_smoke" if smoke else "") + ".json")
     out.write_text(json.dumps({
         "arm": mode, "n_pairs": n, "seed_block": seed_block,
+        "opponent": opponent,
         "mean": mean, "ci95": [lo, hi],
         "candidates": CANDIDATE[0], "fired": FIRED[0], "pairs_moved": moved,
         "nulls_policy": na, "nulls_control": nb,
@@ -154,4 +173,5 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     raise SystemExit(main(a[0] if a else "team",
                           int(a[1]) if len(a) > 1 else 400,
-                          int(a[2]) if len(a) > 2 else 0))
+                          int(a[2]) if len(a) > 2 else 0,
+                          a[3] if len(a) > 3 else "champion"))
