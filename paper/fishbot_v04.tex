@@ -4174,6 +4174,46 @@ information sets at $12$ seeds each, the champion repeats its move every time
 in only $32\%$ of them, averaging $2.41$ distinct actions. It mixes at most of
 these decisions.
 
+\subsection{Two live half-suits, and what it costs to say so}
+\label{sec:iim2}
+
+The same solver at $m = 2$. The layer is where the impossible negative gains
+appeared, and where the second fault lived: a deal the champion has no move in
+was dropped from the belief and the survivors reweighted, instead of being
+scored where it stands. At $m = 2$ that case is routine --- 2,821 deals over
+the run --- and at $m = 1$ it never happens once, which is why the fault was
+invisible in the layer above.
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+pinned positions matching the closed form & $34/34$ \\
+the true deal in the belief's support & $375/375$ \\
+tree and rollout, same champion strategy & $116/116$ \\
+\midrule
+exact optimum in the seat on move & $+0.7734$ \\
+the champion in the same seat & $+0.4484$ \\
+\midrule
+exact gain from deviating & $\mathbf{+0.3250}$ \\
+negative entries & $\mathbf{0/109}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{This number is not comparable with $m = 1$'s, and the reason is
+coverage.} Only 109 of 341 positions were solved --- $32\%$. Of the rest,
+141 had a belief support above $24$ deals and 91 exceeded the
+$300{,}000$-node budget, and those are the \emph{wide} positions: the ones
+where the champion knows least. Supports of $2$ and $3$ alone account for
+50 of the 109 solved. So $+0.3250$ is the gain on the easier half of a harder
+layer, which is exactly where one should expect the champion to look better
+than it is, and it should not be read beside $m = 1$'s $+0.4405$ as though the
+two were measured on comparable samples.
+
+That is the honest limit of exact play in this project as it stands: $m = 1$ is
+solved at $95\%$ coverage, and $m = 2$ is solved on a third of its positions,
+selected for being easy.
+
 \subsection{Where the disagreements are, and one that is provable}
 \label{sec:iidiff}
 

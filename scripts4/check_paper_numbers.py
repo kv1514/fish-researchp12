@@ -540,13 +540,22 @@ WATCH = [
     ("ii_endgame.json", "n_solved", "{:d}",
      "exact-II hidden positions solved", "genuinely hidden positions solved"),
     ("ii_endgame.json", "mean_gain", "{:+.4f}",
-     "exact-II gain from deviating", "exact gain from deviating"),
+     "exact-II gain from deviating",
+     "genuinely hidden positions solved exactly"),
     # The control on the BELIEF rather than the search. It is the only one, and
     # a belief that excluded the truth would invalidate every value in the
     # section without any of the other controls noticing.
     ("ii_endgame.json", "truth_in_support_ok", "{:d}",
      "exact-II control, true deal in the belief's support",
      "The true deal must be one of the deals the belief admits"),
+    # m = 2. Watched with its NEGATIVE-GAIN count as well as its gain, because
+    # the negatives are what said the solver was broken and a silent return of
+    # them is the regression that matters most.
+    ("ii_endgame_m2.json", "mean_gain", "{:+.4f}",
+     "exact-II m=2 gain from deviating",
+     "tree and rollout, same champion strategy"),
+    ("ii_endgame_m2.json", "n_solved", "{:d}",
+     "exact-II m=2 positions solved", "positions were solved"),
     # The exploitability lower bound. Watched because it is the only figure in
     # the paper that contradicts a sentence the paper used to make -- "we
     # compute no exploitability bound" -- and a number that overturns a claim
