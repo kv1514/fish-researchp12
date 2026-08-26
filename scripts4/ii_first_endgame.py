@@ -65,7 +65,7 @@ def main(n_games: int = 60) -> int:
     fp = _solver_fingerprint()
     print(f"  solver fingerprint {fp}")
     done = {}
-    stale = 0
+    stale = undetailed = 0
     if JOURNAL.exists():
         for line in JOURNAL.read_text().splitlines():
             if line.strip():
@@ -73,9 +73,20 @@ def main(n_games: int = 60) -> int:
                 if r.get("solver") != fp:
                     stale += 1
                     continue
+                if r.get("kind") == "none" and "reason" not in r:
+                    # Not a solver mismatch. Counting it as one printed
+                    # "ignoring 36 journalled games from an older solver" for
+                    # rows the current solver wrote, which is the same lumping
+                    # of distinct causes under one label that the breakdown
+                    # below exists to undo.
+                    undetailed += 1
+                    continue
                 done[r["game"]] = r
     if stale:
         print(f"  ignoring {stale} journalled games from an older solver")
+    if undetailed:
+        print(f"  redoing {undetailed} journalled games recorded before the "
+              f"'why nothing here' breakdown existed")
     rows = list(done.values())
     for g in range(n_games):
         if g in done:
@@ -85,7 +96,17 @@ def main(n_games: int = 60) -> int:
         ar = random.Random(61_500 + g)
         for p, a in enumerate(agents):
             a.begin_game(p, rules, ar.getrandbits(64))
-        rec = {"game": g, "kind": "none", "solver": fp}
+        # "none" covers three different things and used to hide all of them
+        # behind one word. 36 of 60 games landed here, which is most of the
+        # denominator of the headline, so what it MEANS is not a detail:
+        #   pinned  -- an m = 1 decision arose but the belief pinned every
+        #              card, so there was nothing hidden to solve. The closed
+        #              form already answers those and the deviator gains 0.
+        #   wide    -- the support exceeded MAX_SUPPORT. Not solved, and NOT
+        #              the same as gaining nothing.
+        #   absent  -- no m = 1 decision arose at all before the game ended.
+        rec = {"game": g, "kind": "none", "reason": "absent", "solver": fp}
+        seen_pinned = seen_wide = False
         for _ in range(600):
             if st.is_terminal:
                 break
@@ -95,6 +116,10 @@ def main(n_games: int = 60) -> int:
             if len(live) == 1:
                 agents[p].bel.update(obs)
                 deals = consistent_deals(obs, agents[p].bel, live[0])
+                if len(deals) == 1:
+                    seen_pinned = True
+                elif len(deals) > MAX_SUPPORT:
+                    seen_wide = True
                 if 1 < len(deals) <= MAX_SUPPORT:
                     states = []
                     for hands in deals:
@@ -119,6 +144,9 @@ def main(n_games: int = 60) -> int:
                            "gain": v - cv, "nodes": sv.nodes}
                     break              # ONE position per game, deliberately
             st.apply(p, agents[p].act(obs))
+        if rec["kind"] == "none":
+            rec["reason"] = ("pinned" if seen_pinned else
+                             "wide" if seen_wide else "absent")
         rows.append(rec)
         with JOURNAL.open("a") as fh:
             fh.write(json.dumps(rec) + "\n")
@@ -129,9 +157,15 @@ def main(n_games: int = 60) -> int:
     solved = [r for r in rows if r["kind"] == "solved"]
     none_ = sum(1 for r in rows if r["kind"] == "none")
     to = sum(1 for r in rows if r["kind"] == "timeout")
+    why = {"pinned": 0, "wide": 0, "absent": 0}
+    for r in rows:
+        if r["kind"] == "none":
+            why[r.get("reason", "absent")] += 1
     print(f"\n{len(rows)} games: {len(solved)} with a solvable first hidden "
-          f"m = 1 decision,\n  {none_} with none at all, {to} over the "
-          f"{MAX_NODES:,}-node budget")
+          f"m = 1 decision,\n  {none_} with none -- {why['pinned']} where the "
+          f"belief pinned every card,\n  {why['wide']} where the support "
+          f"exceeded {MAX_SUPPORT}, {why['absent']} where no m = 1 decision "
+          f"arose --\n  and {to} over the {MAX_NODES:,}-node budget")
     if not solved:
         print("Nothing to report.")
         return 1
@@ -214,6 +248,8 @@ def main(n_games: int = 60) -> int:
                               else "ii_first_endgame.json")
     out.write_text(json.dumps({
         "n_games": len(rows), "n_solved": n, "n_none": none_,
+        "none_pinned": why["pinned"], "none_wide": why["wide"],
+        "none_absent": why["absent"],
         "n_timeout": to, "node_budget": MAX_NODES,
         "mean_gain": mean, "ci95": [lo, hi],
         "mean_gain_per_game": uncond, "ci95_per_game": [ulo, uhi],
