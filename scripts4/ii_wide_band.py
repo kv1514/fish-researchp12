@@ -46,7 +46,12 @@ SPEC = ("fishbot4", {"opponent_gamma": 0.35})
 #: they get a budget that reflects that rather than the one tuned for sweeping
 #: a whole layer.
 WIDE_NODES = 3_000_000
-BACKSTOP = 1800.0
+#: Wall-clock backstop. Deliberately short relative to the node budget: the
+#: first band position tried spent thirty minutes and 2.5M nodes without
+#: finishing, and at that rate the run is a day long. A position that cannot
+#: reach 3,000,000 nodes inside this is out of reach for the purpose either
+#: way, and failing fast is what makes the band measurable at all.
+BACKSTOP = 420.0
 JOURNAL = ROOT / "results" / "ii_wide_band_journal.jsonl"
 
 
@@ -116,18 +121,41 @@ def main(n_games: int = 60, lo: int = 25, hi: int = 120) -> int:
                                   f"gain {v-cv:+.4f}  {sv.nodes:>9} nodes  "
                                   f"{time.time()-t0:6.0f}s", flush=True)
                         except SolveTimeout:
+                            # WHICH limit bit. Reporting both as "over budget"
+                            # hides the difference between a position needing
+                            # more search and one that is merely slow -- the
+                            # first is a statement about Fish, the second about
+                            # this machine.
+                            why = ("nodes" if sv.nodes >= WIDE_NODES
+                                   else "wall clock")
                             rec = {"game": g, "index": idx, "solver": fp,
-                                   "kind": "over_budget",
-                                   "support": len(deals), "nodes": sv.nodes}
+                                   "kind": "over_budget", "limit": why,
+                                   "support": len(deals), "nodes": sv.nodes,
+                                   "seconds": time.time() - t0}
                             print(f"    game {g} support {len(deals):>4}  "
-                                  f"over budget after {sv.nodes} nodes",
-                                  flush=True)
+                                  f"hit the {why} limit after {sv.nodes} "
+                                  f"nodes, {time.time()-t0:.0f}s", flush=True)
                         with JOURNAL.open("a") as fh:
                             fh.write(json.dumps(rec) + "\n")
             st.apply(p, agents[p].act(obs))
 
+    fails = []
+    if JOURNAL.exists():
+        for line in JOURNAL.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                if r.get("solver") == fp and r["kind"] == "over_budget":
+                    fails.append(r)
+    if fails:
+        byn = sum(1 for r in fails if r.get("limit") == "nodes")
+        print(f"\n{len(fails)} positions unsolved: {byn} exhausted "
+              f"{WIDE_NODES:,} nodes, {len(fails)-byn} ran out of wall clock")
     if not rows:
-        print("\nNothing solved in the band. No comparison to make.")
+        print("\nNothing solved in the band. That is itself the finding: the")
+        print("support range immediately above the study's cap is not")
+        print("reachable at this budget, so the coverage limit is a hard one")
+        print("and the support-bias caveat cannot be settled by more compute")
+        print("of this kind.")
         return 1
     gains = sorted(r["gain"] for r in rows)
     n = len(gains)
