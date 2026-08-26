@@ -154,6 +154,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
               f"({len(journalled)} positions)")
     pinned_ok = pinned_bad = timed_out = 0
     too_wide = no_deals = truth_ok = 0
+    opp_dropped = dev_skipped = 0
     truth_bad: list = []
     consistent_ok = 0
     consistent_bad: list = []
@@ -257,6 +258,8 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                         st.apply(p, agents[p].act(obs))
                         continue
                     cv = sv.champion_value(states, w)
+                    opp_dropped += sv.opp_dropped
+                    dev_skipped += sv.dev_skipped
                     # SECOND CONTROL. champion_value rolls each deal forward
                     # independently; champion_tree_value walks the same tree
                     # the best response walks and plays the champion at the
@@ -329,6 +332,13 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         print(f"  different game.")
         return 1
 
+    if opp_dropped or dev_skipped:
+        print(f"\n  the search DROPPED {opp_dropped} opponent states and "
+              f"skipped {dev_skipped}\n  deviator actions. Both should be "
+              f"zero; a dropped opponent state is scored by the\n  rollout "
+              f"and renormalised away by the tree, which is one way the two "
+              f"can\n  disagree about the same strategy.")
+
     print(f"\nCONTROL -- the tree and the playout, same champion strategy")
     print(f"  they agree: {consistent_ok}/{consistent_ok + len(consistent_bad)}"
           f"  (support <= {CONSISTENCY_MAX_SUPPORT})")
@@ -397,6 +407,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         "truth_in_support_checked": truth_ok + len(truth_bad),
         "truth_in_support_ok": truth_ok,
         "too_wide": too_wide, "no_deals": no_deals, "wide_limit": WIDE_LIMIT,
+        "opp_dropped": opp_dropped, "dev_skipped": dev_skipped,
         "pinned_mismatches": bad, "n_solved": len(solved),
         # Stored, not left for a reader to recompute from the records. The
         # paper's manifest watches these three, and a figure the manifest
