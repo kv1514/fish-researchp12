@@ -4296,6 +4296,63 @@ every time in only $32\%$ of them. So this bounds the realisation, not the
 champion as it plays, and the claim is correspondingly narrow: \emph{that}
 profile is not an equilibrium.
 
+% =====================================================================
+\section{Playing the endgame from the solution}
+\label{sec:exactplay}
+
+Section~\ref{sec:iidiff} measures that the champion picks the exact optimum at
+under a third of hidden $m = 1$ decisions. \texttt{fish4/endgame\_ii.py} puts
+the solver in the agent at exactly those decisions. Duplicate-deal paired
+against the identical configuration with the flag off, so everything but the
+policy cancels:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+seed block & set differential & 95\% CI \\
+\midrule
+$0$ (screen) & $+0.0875$ & $[+0.0307, +0.1443]$ \\
+$1$ & $+0.0650$ & $[+0.0033, +0.1267]$ \\
+$2$ & $+0.0750$ & $[+0.0150, +0.1350]$ \\
+\midrule
+pooled, $1200$ pairs & $\mathbf{+0.0765}$ & $\mathbf{[+0.0422, +0.1108]}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cochran's $Q = 0.280$ on $2$ degrees of freedom: the three blocks are as
+consistent as independent estimates of one quantity get. That matters here more
+than the interval does. This project has already had a cell clear the same bar
+at $+0.490$, return $+0.068$ on one fresh block and $-0.066$ on a second, and
+turn out to be noise; the replications are what separate this from that.
+
+\paragraph{The firing rate is part of the result.} The first version of this
+measurement returned $+0.000 \pm 0.000$ over $40$ paired deals in a
+single-seat arm, which reads exactly like a clean null and was nothing of the
+kind --- the policy had fired \emph{twice}. Raising the caps from $12$ deals
+and $50{,}000$ nodes to the study's $24$ and $300{,}000$ changed that count from
+$2$ to $2$. A seat faces about $0.075$ solvable hidden $m = 1$ decisions per
+game, not because the search is too small but because the champion's belief has
+usually pinned the endgame before it arrives --- the same fact
+Section~\ref{sec:noneq} reports from the other side, where $36$ of $60$ games
+have no hidden first endgame decision at all. Every arm now reports how many
+decisions the flagged seats faced and how many the solver answered, and a run
+where it never fires refuses to print a differential.
+
+\paragraph{One mechanism, visible in the raw counts.} Over the $1200$ games the
+policy produced $446$ nulls against the control's $473$. A null is a claim
+with the right team and the wrong split, and the solver enumerates only
+declarations true in some consistent deal.
+
+\paragraph{Not promoted, and why.} The flag is off. A best response is not an
+equilibrium strategy: this measures that the policy beats \emph{the champion},
+not that it plays Fish better, and Section~\ref{sec:noneq} is a standing
+reminder that the two come apart. Turning it on would also change the champion,
+and the champion is what \texttt{fish4/exact\_ii} models --- every exact figure
+in Sections~\ref{sec:ii} and~\ref{sec:noneq} is a statement about the current
+one. Promotion is a separate decision with a cascade behind it, not a
+consequence of this table.
+
 \section{What this says about playing Fish}
 \label{sec:strategy}
 

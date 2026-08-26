@@ -556,6 +556,13 @@ WATCH = [
     ("ii_first_endgame.json", "none_pinned", "{:d}",
      "games where the belief pinned every card",
      "the belief has \\emph{pinned every card}"),
+    # The replicated endgame-policy gain. Watched with its heterogeneity
+    # statistic, because the interval alone is what the +0.490 cell also had.
+    ("exact_endgame_team_pooled.json", "pooled_mean", "{:+.4f}",
+     "exact endgame policy, pooled gain", "pooled, $1200$ pairs"),
+    ("exact_endgame_team_pooled.json", "cochran_q", "{:.3f}",
+     "exact endgame policy, Cochran Q",
+     "degrees of freedom: the three blocks are as"),
     # The arm that came out of it, with its interval, because the section's
     # point is that a real effect can sit under the bar.
     ("claim_feasibility_verdict.json", "estimate", "{:+.3f}",
