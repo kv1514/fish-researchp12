@@ -92,8 +92,31 @@ that dominate a small sample show 5x while the expensive ones that were blowing
 the node budget show several hundred. That is why coverage came back to 98%
 rather than merely improving.
 
-Worth **nothing** at `m = 2`, where the bound is +2 and no action attains it:
-the fixture position went 12,086 -> 12,086.
+At `m = 2` I first recorded it as worth **nothing**, on the strength of one
+fixture position that went 12,086 -> 12,086, and gave a reason: the bound is +2
+and no action attains it. The reason is wrong. Once one half-suit is banked a
+node's bound is +1 for the decided one plus +1 for the rest, and an action
+attains it by taking the second -- the same condition as an `m = 1` node, where
+actions attain the bound in 79 of 305 positions. Measured over 11 real `m = 2`
+positions:
+
+| | plain | pruned | |
+|---|---|---|---|
+| median position | -- | -- | **38%** |
+| best position | -- | -- | **1%** |
+| all 11 together | 428,227 | 29,824 | **7%** |
+
+Zero value disagreements, and it saved nodes in 9 of the 11. So roughly
+fourteen-fold in aggregate rather than nothing.
+
+That figure **understates** it, for a reason worth naming: the harness runs the
+unpruned solver first and drops any position it cannot finish inside the node
+budget. Those are precisely the positions where the cutoff helps most, so they
+are missing from the sample by construction.
+
+None of this changes `m = 2`'s 32% coverage, because the cutoff was already on
+by default when that was measured. The error was documentary -- but a file that
+tells the next reader a component is worthless is how a component gets removed.
 
 ## Tried, sound, and worthless: the foothold tightening
 
