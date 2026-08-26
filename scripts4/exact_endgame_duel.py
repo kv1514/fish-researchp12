@@ -89,7 +89,13 @@ def play(rules, seed: int, aseed: int, mode):
     return us - them, nulls, unres
 
 
-def main(mode: str = "team", n_pairs: int = 400) -> int:
+def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0) -> int:
+    """``seed_block`` shifts every deal and agent seed by a disjoint offset.
+
+    A screen whose interval clears zero gets re-tested on fresh seeds before it
+    is believed. This project has already had a cell that excluded zero at
+    +0.490, returned +0.068 on one fresh block and -0.066 on a second, and was
+    noise. Blocks are 10,000 apart so no two overlap."""
     if mode not in ("one", "team", "all"):
         print(f"unknown arm {mode!r}")
         return 1
@@ -97,8 +103,9 @@ def main(mode: str = "team", n_pairs: int = 400) -> int:
     t0 = time.time()
     diffs, na, nb, ua, ub = [], 0, 0, 0, 0
     for g in range(n_pairs):
-        a = play(rules, 92_000 + g, 92_500 + g, mode)
-        b = play(rules, 92_000 + g, 92_500 + g, "none")
+        base = 92_000 + 10_000 * seed_block
+        a = play(rules, base + g, base + 500 + g, mode)
+        b = play(rules, base + g, base + 500 + g, "none")
         diffs.append(a[0] - b[0])
         na += a[1]; nb += b[1]; ua += a[2]; ub += b[2]
         if (g + 1) % 50 == 0:
@@ -128,10 +135,12 @@ def main(mode: str = "team", n_pairs: int = 400) -> int:
         print("  finish half-suits, which the harness scores for nobody.")
 
     smoke = n_pairs < MIN_RESULT_PAIRS
-    out = ROOT / "results" / (f"exact_endgame_{mode}"
+    tag = f"_b{seed_block}" if seed_block else ""
+    out = ROOT / "results" / (f"exact_endgame_{mode}{tag}"
                               + ("_smoke" if smoke else "") + ".json")
     out.write_text(json.dumps({
-        "arm": mode, "n_pairs": n, "mean": mean, "ci95": [lo, hi],
+        "arm": mode, "n_pairs": n, "seed_block": seed_block,
+        "mean": mean, "ci95": [lo, hi],
         "candidates": CANDIDATE[0], "fired": FIRED[0], "pairs_moved": moved,
         "nulls_policy": na, "nulls_control": nb,
         "unresolved_policy": ua, "unresolved_control": ub,
@@ -144,4 +153,5 @@ def main(mode: str = "team", n_pairs: int = 400) -> int:
 if __name__ == "__main__":
     a = sys.argv[1:]
     raise SystemExit(main(a[0] if a else "team",
-                          int(a[1]) if len(a) > 1 else 400))
+                          int(a[1]) if len(a) > 1 else 400,
+                          int(a[2]) if len(a) > 2 else 0))
