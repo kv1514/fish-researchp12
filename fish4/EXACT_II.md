@@ -75,9 +75,25 @@ Two exemptions, both deliberate:
   being recomputed -- the figure that used to sit here came from the run the
   memo fault invalidated.)
 
-Worth about 5x at `m = 1` (20% of the nodes over seven positions, values and
-root action values identical). Worth **nothing** at `m = 2`, where the bound is
-+2 and no action attains it.
+Worth is the wrong single number, and the first one recorded here was the
+wrong number. Over 21 real `m = 1` positions, values, root action values and
+the reported optimum are identical throughout, and the node counts are:
+
+| | plain | pruned | |
+|---|---|---|---|
+| median position | -- | -- | **21%** |
+| hardest position | 2,511,080 | 2,855 | **0.1%** |
+| all 21 together | 2,998,454 | 20,779 | **1%** |
+
+The first measurement here said "about 5x", taken over seven positions that
+happened to be easy. That is the median, and it understates the effect exactly
+where it matters: the saving grows with the position, so the cheap positions
+that dominate a small sample show 5x while the expensive ones that were blowing
+the node budget show several hundred. That is why coverage came back to 98%
+rather than merely improving.
+
+Worth **nothing** at `m = 2`, where the bound is +2 and no action attains it:
+the fixture position went 12,086 -> 12,086.
 
 ## Tried, sound, and worthless: the foothold tightening
 
