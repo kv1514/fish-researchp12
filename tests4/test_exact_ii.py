@@ -132,6 +132,49 @@ def test_tree_and_rollout_agree_about_the_champion(positions):
     assert checked, "every position timed out; the agreement was never tested"
 
 
+def test_the_control_does_not_read_the_search_back(positions):
+    """``champion_tree_value`` after ``solve``, on the SAME instance.
+
+    That is how scripts4/ii_endgame.py uses it, and it is the order that
+    matters: a node's value depends on the deviator's policy below it, so the
+    maximising search and the copying search assign DIFFERENT values to the
+    same key. Sharing one memo between them had the control return the search's
+    own optimum -- +0.8333 where the rollout was +0.1667 -- so it agreed with
+    the search by construction and could not have failed.
+
+    The other tests here do not catch it, because they build a fresh solver and
+    call the control first. Only a position where the champion is suboptimal
+    can show it at all: where the champion already plays the optimum, the max
+    and the copy coincide at every node and the contaminated answer is right.
+    """
+    rules, out = positions
+    checked = 0
+    for hs, seat, states in out:
+        w = [1.0 / len(states)] * len(states)
+        sv = ExactII(rules, hs, seat, SPEC)
+        sv.deadline = time.monotonic() + BUDGET
+        try:
+            v = sv.solve([_clone(s) for s in states], list(w))
+        except SolveTimeout:
+            continue
+        roll = sv.champion_value([_clone(s) for s in states], list(w))
+        if abs(v - roll) < 1e-9:
+            continue          # champion is already optimal here; nothing to see
+        try:
+            tree = sv.champion_tree_value([_clone(s) for s in states], list(w))
+        except SolveTimeout:
+            continue
+        checked += 1
+        assert abs(tree - roll) < 1e-9, (
+            f"the control reports {tree:+.6f} where the rollout of the same "
+            f"strategy gives {roll:+.6f}")
+        assert abs(tree - v) > 1e-9, (
+            f"the control returned the search's own optimum {v:+.6f}; it is "
+            f"reading the memo back rather than evaluating the champion")
+    assert checked, ("no position where the champion was suboptimal, so the "
+                     "contamination could not have shown either way")
+
+
 def test_champion_root_move_never_beats_the_maximum(positions):
     rules, out = positions
     priced = 0

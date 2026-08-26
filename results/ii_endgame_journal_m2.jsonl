@@ -1,8 +1,0 @@
-{"game": 0, "kind": "solved", "solver": "909e70b56964", "support": 2, "value": 2.0, "champion": 1.0, "gain": 1.0, "nodes": 290875}
-{"game": 0, "kind": "solved", "solver": "909e70b56964", "support": 2, "value": 2.0, "champion": 1.0, "gain": 1.0, "nodes": 82772}
-{"game": 0, "kind": "solved", "solver": "909e70b56964", "support": 2, "value": 2.0, "champion": 1.0, "gain": 1.0, "nodes": 40580}
-{"game": 0, "kind": "solved", "solver": "909e70b56964", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 133}
-{"game": 0, "kind": "solved", "solver": "909e70b56964", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 34}
-{"game": 0, "solver": "909e70b56964", "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
-{"game": 0, "kind": "game_done", "solver": "909e70b56964"}
-{"game": 1, "kind": "skipped", "solver": "909e70b56964", "support": 36}

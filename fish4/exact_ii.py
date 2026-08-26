@@ -304,12 +304,25 @@ class ExactII:
         the closed form can see it, because both agree wherever the support
         collapses to one deal and the fault needs several.
         """
-        save = self._deviator
+        # A SEPARATE MEMO, and this is not a detail. A node's value depends on
+        # the deviator's policy below it: solve() maximises there, this copies.
+        # Same key, different value. Sharing the instance's memo would have had
+        # this control read back the numbers of the search it exists to check
+        # -- a memo bug inside the control written to catch a memo bug. The
+        # node counter is saved and restored for the same reason: a search that
+        # has already spent 250,000 nodes would push this one straight over the
+        # budget and the control would report a timeout that is not one.
+        save_dev, save_memo, save_nodes = (self._deviator, self._memo,
+                                           self.nodes)
         try:
             self._deviator = self._deviator_copies_champion
+            self._memo = {}
+            self.nodes = 0
             return self.solve(states, weights)
         finally:
-            self._deviator = save
+            self._deviator = save_dev
+            self._memo = save_memo
+            self.nodes = save_nodes
 
     def _deviator_copies_champion(self, states, weights, depth, path=()):
         a = _champion_action(self.spec, self.rules, self.me, states[0])
