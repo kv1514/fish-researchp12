@@ -32,6 +32,7 @@ import random
 from typing import Optional
 
 from fish.agents.base import Agent
+from .endgame_ii import ExactEndgameMixin
 from .tablebase4 import Tablebase4Mixin
 from fish.beliefs import BeliefContradiction, BeliefState
 from fish.engine import Action
@@ -56,7 +57,7 @@ def _load_value(path):
     return m
 
 
-class FishBot4(Tablebase4Mixin, Agent):
+class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
     """The v0.4 policy. Every strategic choice is a constructor argument."""
 
     name = "fishbot4"
@@ -113,6 +114,14 @@ class FishBot4(Tablebase4Mixin, Agent):
                  # -- endgame
                  use_tablebase: bool = True,
                  tablebase_max_half_suits: int = 2,
+                 #: Play the m = 1 endgame from fish4.exact_ii's exact best
+                 #: response instead of the heuristic. OFF by default: it
+                 #: models every other seat as the champion, which is wrong
+                 #: about a teammate that also runs it, and a best response is
+                 #: not an equilibrium strategy. See fish4/endgame_ii.py.
+                 exact_endgame: bool = False,
+                 exact_endgame_max_support: int = 12,
+                 exact_endgame_max_nodes: int = 50_000,
                  # -- misc
                  stall_window: int = 80,
                  smart_pass: bool = False,
@@ -162,6 +171,14 @@ class FishBot4(Tablebase4Mixin, Agent):
         self.lookahead_couple = lookahead_couple
         self.use_tablebase = use_tablebase
         self.tablebase_max_half_suits = tablebase_max_half_suits
+        self.exact_endgame = bool(exact_endgame)
+        self.exact_endgame_max_support = int(exact_endgame_max_support)
+        self.exact_endgame_max_nodes = int(exact_endgame_max_nodes)
+        #: What the solver models the other five seats as. The champion, and
+        #: named here rather than inlined so it is obvious that changing the
+        #: agent's own configuration does NOT change the opponent model the
+        #: endgame search assumes.
+        self.exact_endgame_spec = ("fishbot4", {"opponent_gamma": 0.35})
         self.stall_window = stall_window
         self.smart_pass = smart_pass
         self.signal_mode = signal_mode
@@ -184,6 +201,12 @@ class FishBot4(Tablebase4Mixin, Agent):
         # (Leak-free: the reconstruction uses only public events plus our own
         # hand, and refuses unless every live card is already pinned.)
         exact = self.tablebase_action(obs)
+        if exact is not None:
+            return exact
+
+        # Nothing pinned, but one half-suit left and few enough deals to solve
+        # it exactly under imperfect information. Off by default.
+        exact = self.exact_ii_action(obs)
         if exact is not None:
             return exact
 
