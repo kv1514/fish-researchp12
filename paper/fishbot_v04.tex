@@ -4201,10 +4201,14 @@ negative entries & $\mathbf{0/109}$ \\
 \end{center}
 
 \paragraph{This number is not comparable with $m = 1$'s, and the reason is
-coverage.} Only 109 of 341 positions were solved --- $32\%$. Of the rest,
-141 had a belief support above $24$ deals and 91 exceeded the
-$300{,}000$-node budget, and those are the \emph{wide} positions: the ones
-where the champion knows least. Supports of $2$ and $3$ alone account for
+coverage.} Only 109 of 313 genuinely hidden positions were solved ---
+$35\%$. Of the rest, 141 had a belief support above $24$ deals and 63 exceeded
+the $300{,}000$-node budget, and those are the \emph{wide} positions: the ones
+where the champion knows least. (A further 28 positions over the budget had a
+support of \emph{one}: those are pinned, so they belong to the control above
+rather than to the hidden set, and counting them here --- as an earlier draft
+of this paragraph did --- understates the coverage. The control therefore ran
+on $34$ of the $62$ pinned positions available, not all of them.) Supports of $2$ and $3$ alone account for
 50 of the 109 solved. So $+0.3250$ is the gain on the easier half of a harder
 layer, which is exactly where one should expect the champion to look better
 than it is, and it should not be read beside $m = 1$'s $+0.4405$ as though the

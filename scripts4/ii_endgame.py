@@ -152,7 +152,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
     if done_games:
         print(f"  resuming: {len(done_games)} games already journalled "
               f"({len(journalled)} positions)")
-    pinned_ok = pinned_bad = timed_out = 0
+    pinned_ok = pinned_bad = timed_out = pinned_timed_out = 0
     too_wide = no_deals = truth_ok = 0
     opp_dropped = dev_skipped = 0
     truth_bad: list = []
@@ -176,7 +176,10 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         elif k == "skipped":
             skipped += 1
         elif k == "timeout":
-            timed_out += 1
+            if r.get("support") == 1:
+                pinned_timed_out += 1
+            else:
+                timed_out += 1
         elif k == "solved":
             solved.append(r)
 
@@ -245,7 +248,15 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                     try:
                         v = sv.solve(states, w)
                     except SolveTimeout:
-                        timed_out += 1
+                        # Split by whether the position was HIDDEN. A support
+                        # of one is a pinned position -- it belongs to the
+                        # control above, not to the hidden set -- and counting
+                        # its timeout against hidden coverage understates the
+                        # coverage. At m = 2, 28 of 91 timeouts were pinned.
+                        if len(deals) == 1:
+                            pinned_timed_out += 1
+                        else:
+                            timed_out += 1
                         with journal.open("a") as fh:
                             fh.write(json.dumps(
                                 {"game": g, "kind": "timeout", "solver": fp,
@@ -316,6 +327,11 @@ def main(n_games: int = 12, layer: int = 1) -> int:
     print(f"\nCONTROL -- positions where the belief pins every card")
     print(f"  exact value equals the closed form: {pinned_ok}/"
           f"{pinned_ok+pinned_bad}")
+    if pinned_timed_out:
+        print(f"  {pinned_timed_out} further pinned positions exceeded the "
+              f"budget and are NOT in that\n  ratio: the control covers "
+              f"{pinned_ok+pinned_bad} of "
+              f"{pinned_ok+pinned_bad+pinned_timed_out} available.")
     for b in bad[:5]:
         print(f"    MISMATCH exact {b['exact']:+.4f} vs closed form "
               f"{b['closed_form']:+d}")
@@ -428,6 +444,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         "mean_champion": (sum(r["champion"] for r in solved) / len(solved))
         if solved else None,
         "skipped_large_support": skipped, "timed_out": timed_out,
+        "pinned_timed_out": pinned_timed_out,
         "node_budget": MAX_NODES, "backstop_seconds": DEFAULT_DEADLINE,
         "solved": solved}, indent=1))
     if smoke:
