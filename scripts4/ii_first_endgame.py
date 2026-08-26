@@ -155,13 +155,28 @@ def main(n_games: int = 60) -> int:
     print(f"    positions where deviating gains nothing: "
           f"{sum(1 for x in gains if abs(x) < 1e-9)}/{n}")
 
+    # READ the sampled bound, do not retype it. A hardcoded comparison figure
+    # is a number nobody is checking: exploitability.py can be rerun with more
+    # pairs and this line would go on quoting the old interval while looking
+    # like it had been recomputed. That is the drift
+    # scripts4/check_paper_numbers.py exists to catch, and it does not watch
+    # print statements.
+    expl = ROOT / "results" / "exploitability.json"
+    sampled = None
+    if expl.exists():
+        sm = json.loads(expl.read_text()).get("summary", {})
+        if "mean" in sm and "ci95" in sm:
+            sampled = (sm["mean"], sm["ci95"][0], sm["ci95"][1])
     print(f"\n  beside scripts4/exploitability.py, same units (team "
           f"differential):")
-    print(f"    sampled rollout best response, whole game:  "
-          f"-0.4875  [-1.2442, +0.2692]")
+    if sampled is None:
+        print(f"    results/exploitability.json not found; no comparison")
+    else:
+        print(f"    sampled rollout best response, whole game:  "
+              f"{sampled[0]:+.4f}  [{sampled[1]:+.4f}, {sampled[2]:+.4f}]")
     print(f"    exact, one endgame decision only:           "
           f"{mean:+.4f}  [{lo:+.4f}, {hi:+.4f}]")
-    if lo > 0.2692:
+    if sampled is not None and lo > sampled[2]:
         print(f"\n  The exact bound from ONE endgame decision exceeds the")
         print(f"  sampled interval's upper end. The rollout responder was not")
         print(f"  finding what is there -- as fish4/bestresponse.py warned it")
@@ -175,6 +190,10 @@ def main(n_games: int = 60) -> int:
         "n_timeout": to, "node_budget": MAX_NODES,
         "mean_gain": mean, "ci95": [lo, hi],
         "median_gain": gains[n // 2], "max_gain": gains[-1],
+        # stored so the comparison is a figure a manifest can address, not a
+        # sentence in a log
+        "sampled_exploitability": sampled,
+        "beats_sampled_upper": bool(sampled is not None and lo > sampled[2]),
         "rows": solved}, indent=1))
     if smoke:
         print(f"\n{n_games} games is below {MIN_RESULT_GAMES}; wrote "
