@@ -27,6 +27,7 @@ earned the hard half.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 import sys
@@ -41,11 +42,15 @@ from fish.engine import GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.exact_ii import (DEFAULT_DEADLINE, ExactII, SolveTimeout,
-                             consistent_deals, consistent_deals_multi)
+                             _clone, consistent_deals,
+                             consistent_deals_multi)
 from fish4.registry4 import make_agent
 
 SPEC = ("fishbot4", {"opponent_gamma": 0.35})
 MAX_SUPPORT = 24          # positions above this are reported, not solved
+#: Positions at or below this support also get the tree-vs-playout control.
+#: It doubles their cost, so it buys its coverage where searches are cheap.
+CONSISTENCY_MAX_SUPPORT = 8
 #: Below this many games the run is a regression check and its output goes
 #: somewhere a reader -- or a manifest -- cannot mistake for a measurement.
 MIN_RESULT_GAMES = 30
@@ -63,10 +68,35 @@ def closed_form(st, live, seat) -> int:
     return v if t == team_of(seat) else -v
 
 
-JOURNAL = ROOT / "results" / "ii_endgame_journal.jsonl"
+def _solver_fingerprint() -> str:
+    """A short hash of the solver's source.
+
+    The journal exists so a killed run does not redo work, and that is only
+    safe while the work would come out the same. It was not: the memo key in
+    fish4/exact_ii.py omitted the history, five m = 2 positions came back with
+    an impossible negative gain, and the fixed run would have RESUMED FROM THE
+    BROKEN ONE -- reporting the old numbers under the new solver, with nothing
+    to say which was which. Rows carry the fingerprint now and a run ignores
+    any that do not match its own.
+    """
+    src = (ROOT / "fish4" / "exact_ii.py").read_bytes()
+    return hashlib.sha256(src).hexdigest()[:12]
 
 
-def _load_journal():
+def _journal_path(layer: int) -> Path:
+    """One journal per layer.
+
+    The single shared file was keyed by game index alone, so an m = 2 run
+    started while an m = 1 journal was present would have skipped all sixty
+    games as "already done" and reported m = 1's positions as m = 2's. It did
+    not happen -- the file was cleared between the runs -- but only by luck,
+    and the same luck is not available next time.
+    """
+    return ROOT / "results" / (f"ii_endgame_journal_m{layer}.jsonl"
+                               if layer != 1 else "ii_endgame_journal.jsonl")
+
+
+def _load_journal(path: Path, fp: str):
     """Positions already solved, keyed by game index.
 
     This session has lost four long background runs to a timeout or a container
@@ -75,16 +105,23 @@ def _load_journal():
     learn the same lesson twice, so every position is appended as it lands and
     a restart skips the games already done.
     """
-    if not JOURNAL.exists():
+    if not path.exists():
         return [], set()
     rows = []
     complete = set()
-    for line in JOURNAL.read_text().splitlines():
+    stale = 0
+    for line in path.read_text().splitlines():
         if line.strip():
             r = json.loads(line)
+            if r.get("solver") != fp:
+                stale += 1
+                continue
             rows.append(r)
             if r.get("kind") == "game_done":
                 complete.add(r["game"])
+    if stale:
+        print(f"  ignoring {stale} journalled rows from an older solver "
+              f"(fingerprint != {fp})")
     # Only games with a game_done marker are complete. A run killed mid-game
     # leaves that game's positions in the journal, and replaying it would
     # DOUBLE-COUNT them -- so its partial records are dropped and it is redone.
@@ -103,11 +140,16 @@ def main(n_games: int = 12, layer: int = 1) -> int:
     else at every layer for exactly that reason.
     """
     rules = RuleConfig()
-    journalled, done_games = _load_journal()
+    fp = _solver_fingerprint()
+    journal = _journal_path(layer)
+    print(f"  solver fingerprint {fp}; journal {journal.name}")
+    journalled, done_games = _load_journal(journal, fp)
     if done_games:
         print(f"  resuming: {len(done_games)} games already journalled "
               f"({len(journalled)} positions)")
     pinned_ok = pinned_bad = timed_out = 0
+    consistent_ok = 0
+    consistent_bad: list = []
     bad = []
     solved = []
     skipped = 0
@@ -164,9 +206,9 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                         v = sv.solve(states, w)
                     except SolveTimeout:
                         timed_out += 1
-                        with JOURNAL.open("a") as fh:
+                        with journal.open("a") as fh:
                             fh.write(json.dumps(
-                                {"game": g, "kind": "timeout",
+                                {"game": g, "kind": "timeout", "solver": fp,
                                  "support": len(deals),
                                  "nodes": sv.nodes}) + "\n")
                         st.apply(p, agents[p].act(obs))
@@ -176,9 +218,33 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                         st.apply(p, agents[p].act(obs))
                         continue
                     cv = sv.champion_value(states, w)
+                    # SECOND CONTROL. champion_value rolls each deal forward
+                    # independently; champion_tree_value walks the same tree
+                    # the best response walks and plays the champion at the
+                    # deviator's nodes. Same strategy, two code paths, so the
+                    # numbers must be equal. This is what localises a broken
+                    # tree: the pinned control below only exercises positions
+                    # where the support is one deal, and the memo bug that
+                    # produced five impossible negative gains needed several.
+                    # Restricted to small supports because it costs a second
+                    # full search, and the bug it was written for showed at
+                    # support 4.
+                    if len(deals) <= CONSISTENCY_MAX_SUPPORT:
+                        try:
+                            tv = sv.champion_tree_value(
+                                [_clone(x) for x in states], list(w))
+                            if abs(tv - cv) < 1e-9:
+                                consistent_ok += 1
+                            else:
+                                consistent_bad.append(
+                                    {"game": g, "support": len(deals),
+                                     "tree": tv, "playout": cv})
+                        except SolveTimeout:
+                            pass
                     if len(deals) == 1:
                         want = closed_form(states[0], live, p)
-                        rec = {"game": g, "exact": v, "closed_form": want,
+                        rec = {"game": g, "solver": fp,
+                               "exact": v, "closed_form": want,
                                "kind": ("pinned_ok" if abs(v - want) < 1e-9
                                         else "pinned_bad")}
                         if rec["kind"] == "pinned_ok":
@@ -187,21 +253,21 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                             pinned_bad += 1
                             bad.append(rec)
                     else:
-                        rec = {"game": g, "kind": "solved",
+                        rec = {"game": g, "kind": "solved", "solver": fp,
                                "support": len(deals), "value": v,
                                "champion": cv, "gain": v - cv,
                                "nodes": sv.nodes}
                         solved.append(rec)
-                    with JOURNAL.open("a") as fh:
+                    with journal.open("a") as fh:
                         fh.write(json.dumps(rec) + "\n")
                 elif deals:
                     skipped += 1
-                    with JOURNAL.open("a") as fh:
-                        fh.write(json.dumps({"game": g, "kind": "skipped",
+                    with journal.open("a") as fh:
+                        fh.write(json.dumps({"game": g, "kind": "skipped", "solver": fp,
                                              "support": len(deals)}) + "\n")
             st.apply(p, agents[p].act(obs))
-        with JOURNAL.open("a") as fh:
-            fh.write(json.dumps({"game": g, "kind": "game_done"}) + "\n")
+        with journal.open("a") as fh:
+            fh.write(json.dumps({"game": g, "kind": "game_done", "solver": fp}) + "\n")
         print(f"  {g+1}/{n_games} games, {pinned_ok+pinned_bad} pinned, "
               f"{len(solved)} solved, {skipped} skipped", flush=True)
 
@@ -214,6 +280,17 @@ def main(n_games: int = 12, layer: int = 1) -> int:
     if pinned_bad or pinned_ok == 0:
         print("\nThe solver does not reproduce the proved answer where there is")
         print("nothing hidden. Nothing else it says is worth reading.")
+        return 1
+
+    print(f"\nCONTROL -- the tree and the playout, same champion strategy")
+    print(f"  they agree: {consistent_ok}/{consistent_ok + len(consistent_bad)}"
+          f"  (support <= {CONSISTENCY_MAX_SUPPORT})")
+    for b in consistent_bad[:5]:
+        print(f"    MISMATCH game {b['game']} support {b['support']}: "
+              f"tree {b['tree']:+.4f} vs playout {b['playout']:+.4f}")
+    if consistent_bad:
+        print("\nThe search and the rollout do not agree about the SAME")
+        print("strategy, so the tree is wrong and its optimum means nothing.")
         return 1
 
     print(f"\nGENUINELY HIDDEN positions solved exactly: {len(solved)}"
@@ -241,9 +318,15 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         print(f"  positions where deviating gains: {pos}/{n};  "
               f"where it loses: {neg}/{n}")
         if neg:
+            # This printed a warning and carried on, once. The run wrote a
+            # results file with five impossible entries in it and every other
+            # number in that file computed by the same broken search. A
+            # violated invariant is a failed run.
             print("  A NEGATIVE GAIN IS IMPOSSIBLE: the best response can "
                   "always copy the\n  champion, so any negative entry is a "
                   "bug in the solver, not a result.")
+            print("\nRefusing to write a results file. Fix the solver.")
+            return 1
 
     # A short run is a regression check, not a result, and must not be able
     # to occupy the filename a result lives at. Two six-game verification runs
@@ -258,6 +341,9 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         "n_games": n_games, "layer": layer,
         "max_support": MAX_SUPPORT,
         "pinned_checked": pinned_ok + pinned_bad, "pinned_ok": pinned_ok,
+        "consistency_checked": consistent_ok + len(consistent_bad),
+        "consistency_ok": consistent_ok,
+        "consistency_max_support": CONSISTENCY_MAX_SUPPORT,
         "pinned_mismatches": bad, "n_solved": len(solved),
         # Stored, not left for a reader to recompute from the records. The
         # paper's manifest watches these three, and a figure the manifest

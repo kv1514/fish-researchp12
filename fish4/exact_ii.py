@@ -45,7 +45,6 @@ elsewhere.
 
 from __future__ import annotations
 
-import copy
 import hashlib
 import time
 from itertools import product
@@ -186,6 +185,29 @@ def _champion_action(spec, rules, seat, st):
     return act
 
 
+def _clone(st: GameState) -> GameState:
+    """A shallow copy of a state, which is all the search ever needs.
+
+    ``copy.deepcopy`` was 60%+ of the solver's time: it walked the rule config
+    and every event in the history at every node. Events are frozen dataclasses
+    and the rules are never mutated, so only the three mutable containers have
+    to be new. Checked against deepcopy for identical values on every position
+    of a full game before it was adopted -- a faster search that returns a
+    different number is not a faster search.
+    """
+    t = GameState.__new__(GameState)
+    t.rules = st.rules
+    t.hands = list(st.hands)
+    t.turn = st.turn
+    t._num_hs = st._num_hs
+    t._deck_size = st._deck_size
+    t.set_winner = list(st.set_winner)
+    t.history = list(st.history)
+    t.debug = st.debug
+    t.agent_seed = st.agent_seed
+    return t
+
+
 class ExactII:
     """Best response for one seat at m = 1, against champion opponents."""
 
@@ -233,7 +255,7 @@ class ExactII:
         """
         tot = 0.0
         for st, w in zip(states, weights):
-            t = copy.deepcopy(st)
+            t = _clone(st)
             for _ in range(max_plies):
                 v = self._value(t)
                 if v is not None:
@@ -249,9 +271,56 @@ class ExactII:
             tot += w * (0.0 if v is None else v)
         return tot
 
+    def champion_tree_value(self, states, weights) -> float:
+        """The champion's value computed BY THE RECURSION instead of a playout.
+
+        ``champion_value`` rolls each deal forward independently; this walks the
+        same tree the best response walks, but plays the champion's move at the
+        deviator's nodes rather than maximising. They evaluate the same strategy
+        by two different code paths, so they must return the same number, and
+        that number must not exceed the best response -- the optimiser may copy
+        the champion.
+
+        This is the check that catches a broken tree. A memo key that omitted
+        the history made the maximisation return less than one of its own
+        options for five m = 2 positions; the negative gain was the symptom,
+        and this is the test that localises it. Neither the pinned control nor
+        the closed form can see it, because both agree wherever the support
+        collapses to one deal and the fault needs several.
+        """
+        save = self._deviator
+        try:
+            self._deviator = self._deviator_copies_champion
+            return self.solve(states, weights)
+        finally:
+            self._deviator = save
+
+    def _deviator_copies_champion(self, states, weights, depth, path=()):
+        a = _champion_action(self.spec, self.rules, self.me, states[0])
+        if a is None:
+            return 0.0
+        buckets = {}
+        for s, w in zip(states, weights):
+            t = _clone(s)
+            try:
+                ev = t.apply(self.me, a)
+            except Exception:
+                return 0.0
+            sig = repr(ev)
+            buckets.setdefault(sig, ([], []))
+            buckets[sig][0].append(t)
+            buckets[sig][1].append(w)
+        v = 0.0
+        for sig, (ss, ws) in buckets.items():
+            tot = sum(ws)
+            v += tot * self.solve(ss, [x / tot for x in ws],
+                                  depth + 1, path + (sig,))
+        return v
+
     # -- the search ----------------------------------------------------------
 
-    def solve(self, states: list, weights: list, depth: int = 0) -> float:
+    def solve(self, states: list, weights: list, depth: int = 0,
+              path: tuple = ()) -> float:
         """Expected value to the deviator's team over a weighted belief set.
 
         ``states`` all share the deviator's information: same public history,
@@ -264,7 +333,23 @@ class ExactII:
             raise SolveTimeout(f"exceeded budget after {self.nodes} nodes")
         # Memo on the node itself: two branches reaching the same weighted
         # belief set at the same depth have the same value by construction.
-        key = (depth, tuple(sorted(
+        #
+        # THE HISTORY IS PART OF THE NODE. Leaving it out cost five impossible
+        # negative gains at m = 2 -- positions where the "best response" scored
+        # BELOW the champion it may freely copy. The opponents here are the
+        # champion, whose action is a function of its whole observation, so two
+        # nodes with identical hands, turn, winners and weights but different
+        # histories have different continuations and different values. Merging
+        # them returned one branch's value for the other, and because the
+        # maximisation reads those values, the max came out below one of its
+        # own options. Every solved position at m = 1 and m = 2 was recomputed
+        # after this line changed; see results/ii_endgame*.json.
+        # ``path`` is the events since the root, and every state in this node
+        # shares them. The root's own history is common to the whole search, so
+        # the path identifies the history without rebuilding it -- keying on
+        # ``states[0].history`` directly was equally correct and unusably slow,
+        # since it re-reprs a hundred events at every node.
+        key = (depth, path, tuple(sorted(
             (tuple(s.hands), s.turn, tuple(s.set_winner), round(w, 12))
             for s, w in zip(states, weights))))
         hit = self._memo.get(key)
@@ -284,8 +369,8 @@ class ExactII:
             # The deviator can see whose turn it is, so this cannot happen.
             raise AssertionError("information set spans different movers")
 
-        r = (self._deviator(states, weights, depth) if turn == self.me
-             else self._opponent(states, weights, depth, turn))
+        r = (self._deviator(states, weights, depth, path) if turn == self.me
+             else self._opponent(states, weights, depth, turn, path))
         self._memo[key] = r
         return r
 
@@ -305,7 +390,7 @@ class ExactII:
                 acts.append(Claim(h, tuple(holders)))
         return acts
 
-    def _deviator(self, states, weights, depth):
+    def _deviator(self, states, weights, depth, path=()):
         # Legality is information-set measurable: an ask needs a card of the
         # half-suit in hand (own), a target holding cards (public counts), and
         # a card not held (own). So the action set is the same in every state.
@@ -322,7 +407,7 @@ class ExactII:
         for a in acts:
             buckets = {}
             for s, w in zip(states, weights):
-                t = copy.deepcopy(s)
+                t = _clone(s)
                 try:
                     ev = t.apply(self.me, a)
                 except Exception:
@@ -332,9 +417,10 @@ class ExactII:
                 buckets[sig][0].append(t)
                 buckets[sig][1].append(w)
             v = 0.0
-            for ss, ws in buckets.values():
+            for sig, (ss, ws) in buckets.items():
                 tot = sum(ws)
-                v += tot * self.solve(ss, [x / tot for x in ws], depth + 1)
+                v += tot * self.solve(ss, [x / tot for x in ws],
+                                      depth + 1, path + (sig,))
             if root:
                 self.action_values[repr(a)] = v
             if best is None or v > best:
@@ -368,11 +454,11 @@ class ExactII:
                     out.append(Claim(h, holders))
         return out
 
-    def _opponent(self, states, weights, depth, seat):
+    def _opponent(self, states, weights, depth, seat, path=()):
         buckets = {}
         for s, w in zip(states, weights):
             a = _champion_action(self.spec, self.rules, seat, s)
-            t = copy.deepcopy(s)
+            t = _clone(s)
             if a is None:
                 continue
             try:
@@ -387,7 +473,8 @@ class ExactII:
             return 0.0
         v = 0.0
         norm = sum(sum(ws) for _, ws in buckets.values())
-        for ss, ws in buckets.values():
+        for sig, (ss, ws) in buckets.items():
             tot = sum(ws)
-            v += (tot / norm) * self.solve(ss, [x / tot for x in ws], depth + 1)
+            v += (tot / norm) * self.solve(ss, [x / tot for x in ws],
+                                           depth + 1, path + (sig,))
         return v
