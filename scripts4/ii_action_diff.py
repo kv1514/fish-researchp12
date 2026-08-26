@@ -43,6 +43,7 @@ from __future__ import annotations
 import json
 import random
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,7 +53,8 @@ from fish.cards import NUM_PLAYERS, half_suit_of
 from fish.engine import Ask, Claim, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
-from fish4.exact_ii import ExactII, _champion_action, consistent_deals
+from fish4.exact_ii import (DEFAULT_DEADLINE, ExactII, SolveTimeout,
+                            _champion_action, consistent_deals)
 from fish4.registry4 import make_agent
 
 SPEC = ("fishbot4", {"opponent_gamma": 0.35})
@@ -71,6 +73,7 @@ def main(n_games: int = 60) -> int:
     rules = RuleConfig()
     rows = []
     agree = 0
+    timed_out = 0
     for g in range(n_games):
         agents = [make_agent(SPEC) for _ in range(NUM_PLAYERS)]
         st = GameState.deal(rules, seed=76_000_000 + g)
@@ -89,6 +92,11 @@ def main(n_games: int = 60) -> int:
                 deals = consistent_deals(obs, agents[p].bel, hs)
                 if len(deals) > 1 and len(deals) <= MAX_SUPPORT:
                     sv = ExactII(rules, hs, p, SPEC)
+                    # A budget, because the fixed solver searches roughly two
+                    # orders of magnitude more nodes than the one that wrote
+                    # the first version of this result and an unbounded exact
+                    # search does not fail loudly, it fails forever.
+                    sv.deadline = time.monotonic() + DEFAULT_DEADLINE
                     states = []
                     for hands in deals:
                         t = GameState.from_components(
@@ -98,6 +106,10 @@ def main(n_games: int = 60) -> int:
                     w = [1.0 / len(states)] * len(states)
                     try:
                         best_v = sv.solve(states, w)
+                    except SolveTimeout:
+                        timed_out += 1
+                        st.apply(p, agents[p].act(obs))
+                        continue
                     except Exception:
                         st.apply(p, agents[p].act(obs))
                         continue
@@ -124,9 +136,29 @@ def main(n_games: int = 60) -> int:
         print(f"  {g+1}/{n_games} games, {agree} agree, {len(rows)} differ",
               flush=True)
 
+    impossible = [r for r in rows
+                  if r["cost"] is not None and r["cost"] < -1e-9]
+    if impossible:
+        # best_v is the MAXIMUM over the deviator's actions and the champion's
+        # action is one of them, so a negative cost is arithmetically
+        # impossible. It was not, for five m = 2 positions in ii_endgame.py,
+        # because the memo merged nodes with different histories -- the max
+        # read a stale value and came out below one of its own options. That
+        # run printed a warning and wrote its results anyway; this one does
+        # not.
+        print(f"\n{len(impossible)} decisions where the champion's own move "
+              f"scores ABOVE the maximum")
+        for r in impossible[:5]:
+            print(f"    support {r['support']}: optimum {r['opt_value']:+.4f} "
+                  f"vs champion {r['champ_value']:+.4f}")
+        print("That cannot happen. The search is wrong; nothing here is a "
+              "result.")
+        return 1
+
     n = len(rows)
     tot = agree + n
-    print(f"\n{tot} hidden m=1 decisions solved exactly")
+    print(f"\n{tot} hidden m=1 decisions solved exactly"
+          f"  ({timed_out} timed out at {DEFAULT_DEADLINE:.0f}s)")
     if not tot:
         print("None reached. Nothing to report.")
         return 1
@@ -164,6 +196,7 @@ def main(n_games: int = 60) -> int:
     out = ROOT / "results" / "ii_action_diff.json"
     out.write_text(json.dumps({
         "n_games": n_games, "n_decisions": tot, "n_agree": agree,
+        "timed_out": timed_out, "deadline_seconds": DEFAULT_DEADLINE,
         "n_differ": n, "n_free_ties": len(free), "n_costly": len(costly),
         "mean_cost_when_error": (sum(r["cost"] for r in costly) / len(costly))
         if costly else None,
