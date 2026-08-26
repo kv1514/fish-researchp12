@@ -60,3 +60,17 @@ If `mean_gain` moves by less than 0.01 in either direction, then the memo bug
 effect on the aggregate at m = 1, and the interesting question becomes why m = 2
 was so much more sensitive to it than m = 1. The obvious answer would be that
 twelve live cards transpose far more than six.
+
+## Amendment, same day, before any run reached game 20
+
+The budget changed from 60 seconds to 300,000 nodes, and all three runs were
+restarted from zero. The reason is in the commit: the 21% timeout rate that
+prediction 3 rests on was measured with three studies competing for four cores,
+so it was a fact about the machine. Predictions 1, 2, 4 and 5 are unaffected.
+
+Prediction 3 is restated: **`n_solved` still falls below 308**, and the
+positions that fail to solve are those needing more than 300,000 nodes. What I
+can no longer predict is the exact rate, because 300,000 nodes is a different
+budget from 60 seconds and I have not measured how they compare on an unloaded
+machine. Recording that I amended this rather than quietly leaving the old
+sentence to be graded against a protocol it was not written for.
