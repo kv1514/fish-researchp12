@@ -541,6 +541,15 @@ WATCH = [
      "exact-II hidden positions solved", "genuinely hidden positions solved"),
     ("ii_endgame.json", "mean_gain", "{:+.4f}",
      "exact-II gain from deviating", "exact gain from deviating"),
+    # The exploitability lower bound. Watched because it is the only figure in
+    # the paper that contradicts a sentence the paper used to make -- "we
+    # compute no exploitability bound" -- and a number that overturns a claim
+    # is the one worst served by drifting quietly.
+    ("ii_first_endgame.json", "mean_gain_per_game", "{:+.4f}",
+     "exact deviation gain per game", "exact, \\textbf{one} endgame decision"),
+    ("ii_first_endgame.json", "none_pinned", "{:d}",
+     "games where the belief pinned every card",
+     "the belief has \\emph{pinned every card}"),
     # The arm that came out of it, with its interval, because the section's
     # point is that a real effect can sit under the bar.
     ("claim_feasibility_verdict.json", "estimate", "{:+.3f}",

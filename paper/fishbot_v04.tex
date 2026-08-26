@@ -4211,6 +4211,70 @@ smaller than the smallest one this project agreed in advance to care about ---
 all three are the finding.
 
 % =====================================================================
+% =====================================================================
+\section{The all-champion profile is not an equilibrium}
+\label{sec:noneq}
+
+Computed with the corrected solver, and therefore not covered by the
+withdrawal in Section~\ref{sec:ii}.
+
+Section~\ref{sec:ii}'s figures average over \emph{positions}, and a game can
+contain several $m = 1$ decisions. That is the right unit for asking how well
+the champion plays the endgame and the wrong one for asking how exploitable it
+is: summing gains across positions in one game double-counts a continuation the
+deviator only gets to play once. So this takes exactly one position per game ---
+the first $m = 1$ decision with genuinely hidden cards --- and lets the deviator
+play champion-identically before it and optimally from it.
+
+The value is already a team differential: $+1$ for a half-suit the deviator's
+team takes and $-1$ for one the opponents take, so a half-suit changing hands
+moves it by $2$, exactly as it moves the set differential
+\texttt{scripts4/exploitability.py} reports. Over 60 games:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & per game & 95\% CI \\
+\midrule
+sampled rollout best response, whole game & $-0.4875$ & $[-1.2442, +0.2692]$ \\
+exact, \textbf{one} endgame decision only & $\mathbf{+0.1111}$ & $[+0.0460, +0.1761]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The interval excludes zero, so a single seat deviating at a single endgame
+decision takes a positive amount --- and if the all-champion profile were an
+equilibrium, no single seat could gain by deviating at all. The rollout
+responder, deviating for a \emph{whole} game, measured $-0.4875$: it does not
+merely fail to find an exploit, it loses ground, which is what
+\texttt{fish4/bestresponse.py} warns strategy fusion can do to a PIMC
+responder.
+
+\paragraph{Why the per-game figure is the smaller one, and why it is the right
+one.} Of the 60 games, only 22 contain a first $m = 1$ decision with
+anything hidden. In the other 36 the belief has \emph{pinned every card} by
+the time the endgame arrives --- not a wide support, not a missing position:
+all 36 are pinned --- so the closed form already answers them and the
+restricted deviator gains exactly zero. Conditional on a hidden decision
+existing the gain is $+0.2928$; per game it is $+0.1111$. Quoting the conditional
+figure beside a whole-game bound would compare a mean over a favourable subset
+against a mean over everything. The 2 games whose first hidden decision
+exceeded the node budget are excluded from the denominator rather than scored
+zero: unsolved is not worth nothing.
+
+That split is the better description of the champion. Its inference finishes
+the endgame outright in 60\% of games; where it does not, it leaves about a
+third of a set on the table.
+
+\paragraph{What this does not bound.} The opponents are a \emph{deterministic
+realisation} of the champion, seeded from a hash of the observation, and
+best-responding to a realisation one can predict is easier than beating the
+mixture it came from. The champion mixes at most of these decisions --- over
+$41$ hidden $m = 1$ information sets at $12$ seeds each it repeats its move
+every time in only $32\%$ of them. So this bounds the realisation, not the
+champion as it plays, and the claim is correspondingly narrow: \emph{that}
+profile is not an equilibrium.
+
 \section{What this says about playing Fish}
 \label{sec:strategy}
 
@@ -4610,8 +4674,14 @@ the smallest Fish position carrying any hidden information already needs three
 players holding live cards, hence two on one side: a team-coordination problem
 with no two-player zero-sum reduction beneath it.
 
-\paragraph{No equilibrium claim.} We compute no equilibrium and no
-exploitability bound. The appropriate solution concept for a game with pre-play
+\paragraph{No equilibrium claim, and the one exception.} We compute no
+equilibrium. We do now compute an exploitability \emph{lower} bound, in
+Section~\ref{sec:noneq}: a single seat deviating optimally at one endgame
+decision gains $+0.1111$ per game with an
+interval clear of zero, so the all-champion profile is not an equilibrium. That
+is a bound against a deterministic realisation of the champion rather than
+against the champion as it plays, and it is a lower bound only --- it says the
+profile is exploitable, not by how much. The appropriate solution concept for a game with pre-play
 agreement and no in-play communication is TMECor
 \citep{celli2018computational}, and nothing here approximates it. Every strength
 statement is relative to a named opponent or absolute against an exactly solved
