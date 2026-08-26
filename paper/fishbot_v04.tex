@@ -4344,14 +4344,41 @@ policy produced $446$ nulls against the control's $473$. A null is a claim
 with the right team and the wrong split, and the solver enumerates only
 declarations true in some consistent deal.
 
-\paragraph{Not promoted, and why.} The flag is off. A best response is not an
-equilibrium strategy: this measures that the policy beats \emph{the champion},
-not that it plays Fish better, and Section~\ref{sec:noneq} is a standing
-reminder that the two come apart. Turning it on would also change the champion,
-and the champion is what \texttt{fish4/exact\_ii} models --- every exact figure
-in Sections~\ref{sec:ii} and~\ref{sec:noneq} is a statement about the current
-one. Promotion is a separate decision with a cascade behind it, not a
-consequence of this table.
+\paragraph{Cross-play: the gain is not exploitation of one opponent.} The
+obvious objection is that \texttt{fish4/exact\_ii} best-responds to the v0.4
+champion, so a gain against that champion might be exploitation of it rather
+than better endgame play. Against \texttt{V03\_CHAMPION} --- a different agent,
+which the solver's opponent model is simply \emph{wrong} about --- over 400
+paired deals:
+\[
+  +0.0750 \quad 95\%\text{ CI } [+0.0100, +0.1400]
+\]
+against $+0.0765$ for the champion it was built to answer. The same gain
+against an opponent it was not modelling is what one would expect of a policy
+that plays the endgame better, and not what one would expect of an exploit. The
+null count moves the same way here too: 130 against 150.
+
+The \emph{all} arm cannot settle this and is reported for completeness only:
+with every seat flagged both teams are identical, so its differential is about
+zero by construction, and $-0.050 \pm 0.198$ over $40$ pairs is what that looks
+like.
+
+\paragraph{Not promoted, and why.} The flag is off, and after the cross-play
+result only one of the two original reasons still stands.
+
+The first was that a best response is not an equilibrium strategy, so this
+might measure only that the policy beats \emph{this} champion.
+Section~\ref{sec:noneq} remains a standing reminder that strength against a
+named opponent and unexploitability come apart --- but the cross-play row is
+direct evidence against that reading here, and the objection is much weaker
+than when it was written.
+
+The second stands unchanged: turning the flag on would change the champion, and
+the champion is what \texttt{fish4/exact\_ii} models. Every exact figure in
+Sections~\ref{sec:ii} and~\ref{sec:noneq} is a statement about the current
+champion, and promoting this would invalidate all of them at once. That is a
+decision with a cascade behind it, to be taken deliberately and re-measured
+afterwards, not a consequence of a good table.
 
 \section{What this says about playing Fish}
 \label{sec:strategy}

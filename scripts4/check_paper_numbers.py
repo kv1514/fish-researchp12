@@ -560,6 +560,11 @@ WATCH = [
     # statistic, because the interval alone is what the +0.490 cell also had.
     ("exact_endgame_team_pooled.json", "pooled_mean", "{:+.4f}",
      "exact endgame policy, pooled gain", "pooled, $1200$ pairs"),
+    # Cross-play. Watched because it is the figure that decides whether the
+    # gain is better play or an exploit, and those get read differently.
+    ("exact_endgame_team_vsv03.json", "mean", "{:+.4f}",
+     "exact endgame policy, vs the v0.3 champion",
+     "which the solver's opponent model is simply"),
     ("exact_endgame_team_pooled.json", "cochran_q", "{:.3f}",
      "exact endgame policy, Cochran Q",
      "degrees of freedom: the three blocks are as"),
