@@ -61,6 +61,47 @@ from fish.rules import RuleConfig
 MAX_PLIES = 24
 
 
+def consistent_deals_multi(obs: Observation, bel, live) -> list:
+    """The same enumeration over SEVERAL live half-suits at once.
+
+    m = 1 is the only layer where one half-suit's cards are all the live cards,
+    so the single-half-suit version below silently assumes it. Above m = 1 the
+    hand counts cover every live card and the enumeration has to as well.
+    """
+    me = obs.player
+    cards = [c for h in live for c in half_suit_cards(h)]
+    mine = [c for c in cards if (obs.hand >> c) & 1]
+    unseen = [c for c in cards if not (obs.hand >> c) & 1]
+    opts = []
+    for c in unseen:
+        mask = bel.current_holder_mask(c)
+        allowed = [q for q in range(NUM_PLAYERS)
+                   if q != me and (mask >> q) & 1]
+        if not allowed:
+            return []
+        opts.append(allowed)
+    prod = 1
+    for o in opts:
+        prod *= len(o)
+    if prod > 2_000_000:
+        return []                    # refuse rather than grind
+    counts = list(obs.hand_counts)
+    out = []
+    for combo in (product(*opts) if opts else [()]):
+        need = [0] * NUM_PLAYERS
+        for q in combo:
+            need[q] += 1
+        if any(need[q] != counts[q] for q in range(NUM_PLAYERS) if q != me):
+            continue
+        hands = [0] * NUM_PLAYERS
+        for c in mine:
+            hands[me] |= 1 << c
+        for c, q in zip(unseen, combo):
+            hands[q] |= 1 << c
+        out.append(tuple(hands))
+    return out
+
+
 def consistent_deals(obs: Observation, bel, hs: int) -> list:
     """Every assignment of the unseen cards of ``hs`` the public record allows.
 
@@ -132,9 +173,13 @@ def _champion_action(spec, rules, seat, st):
 class ExactII:
     """Best response for one seat at m = 1, against champion opponents."""
 
-    def __init__(self, rules: RuleConfig, hs: int, deviator: int, spec):
+    def __init__(self, rules: RuleConfig, hs, deviator: int, spec):
         self.rules = rules
-        self.hs = hs
+        #: one half-suit or several. Kept as a tuple internally so the m = 1
+        #: path and the general path are the same code; ``self.hs`` stays an
+        #: int there so nothing that reads it has to change.
+        self.live = (hs,) if isinstance(hs, int) else tuple(hs)
+        self.hs = self.live[0]
         self.me = deviator
         self.spec = spec
         self.nodes = 0
@@ -149,12 +194,15 @@ class ExactII:
     # -- terminal value ------------------------------------------------------
 
     def _value(self, st: GameState) -> Optional[float]:
-        w = st.set_winner[self.hs]
-        if w is None:
-            return None
-        if w == NULL_TEAM:
-            return 0.0
-        return 1.0 if w == team_of(self.me) else -1.0
+        total = 0.0
+        for h in self.live:
+            w = st.set_winner[h]
+            if w is None:
+                return None
+            if w == NULL_TEAM:
+                continue
+            total += 1.0 if w == team_of(self.me) else -1.0
+        return total
 
     # -- what the champion itself gets ---------------------------------------
 
@@ -227,11 +275,15 @@ class ExactII:
         if st.hands[p] == 0:
             return list(st.legal_passes(p))
         acts = list(st.legal_asks(p))
-        base = self.hs * CARDS_PER_HALF_SUIT
-        holders = [st.holder_of(base + i) for i in range(CARDS_PER_HALF_SUIT)]
         team = team_of(p)
-        if all(h is not None and team_of(h) == team for h in holders):
-            acts.append(Claim(self.hs, tuple(holders)))
+        for h in self.live:
+            if st.set_winner[h] is not None:
+                continue
+            base = h * CARDS_PER_HALF_SUIT
+            holders = [st.holder_of(base + i)
+                       for i in range(CARDS_PER_HALF_SUIT)]
+            if all(x is not None and team_of(x) == team for x in holders):
+                acts.append(Claim(h, tuple(holders)))
         return acts
 
     def _deviator(self, states, weights, depth):
@@ -281,17 +333,20 @@ class ExactII:
         the rest are weakly dominated and enumerating them only costs tree.
         """
         team = team_of(self.me)
-        base = self.hs * CARDS_PER_HALF_SUIT
         seen = set()
         out = []
-        for st in states:
-            holders = tuple(st.holder_of(base + i)
-                            for i in range(CARDS_PER_HALF_SUIT))
-            if any(h is None or team_of(h) != team for h in holders):
-                continue            # not ours in this deal; cannot be true
-            if holders not in seen:
-                seen.add(holders)
-                out.append(Claim(self.hs, holders))
+        for h in self.live:
+            base = h * CARDS_PER_HALF_SUIT
+            for st in states:
+                if st.set_winner[h] is not None:
+                    continue
+                holders = tuple(st.holder_of(base + i)
+                                for i in range(CARDS_PER_HALF_SUIT))
+                if any(x is None or team_of(x) != team for x in holders):
+                    continue        # not ours in this deal; cannot be true
+                if (h, holders) not in seen:
+                    seen.add((h, holders))
+                    out.append(Claim(h, holders))
         return out
 
     def _opponent(self, states, weights, depth, seat):
