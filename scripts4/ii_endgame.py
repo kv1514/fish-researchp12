@@ -45,6 +45,9 @@ from fish4.registry4 import make_agent
 
 SPEC = ("fishbot4", {"opponent_gamma": 0.35})
 MAX_SUPPORT = 24          # positions above this are reported, not solved
+#: Below this many games the run is a regression check and its output goes
+#: somewhere a reader -- or a manifest -- cannot mistake for a measurement.
+MIN_RESULT_GAMES = 30
 
 
 def closed_form(st, live, seat) -> int:
@@ -228,8 +231,15 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                   "always copy the\n  champion, so any negative entry is a "
                   "bug in the solver, not a result.")
 
-    out = ROOT / "results" / (f"ii_endgame_m{layer}.json"
-                              if layer != 1 else "ii_endgame.json")
+    # A short run is a regression check, not a result, and must not be able
+    # to occupy the filename a result lives at. Two six-game verification runs
+    # silently overwrote the 200-game m=1 result this session -- the one the
+    # paper's manifest watches for 344 pinned and 308 solved -- and it was git
+    # that noticed, not me. Same guard as scripts4/exploitability.py.
+    smoke = n_games < MIN_RESULT_GAMES
+    stem = f"ii_endgame_m{layer}" if layer != 1 else "ii_endgame"
+    out = ROOT / "results" / (f"{stem}_smoke.json" if smoke
+                              else f"{stem}.json")
     out.write_text(json.dumps({
         "n_games": n_games, "layer": layer,
         "max_support": MAX_SUPPORT,
@@ -248,7 +258,12 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         "mean_champion": (sum(r["champion"] for r in solved) / len(solved))
         if solved else None,
         "skipped_large_support": skipped, "solved": solved}, indent=1))
-    print(f"\nwrote {out.relative_to(ROOT)}")
+    if smoke:
+        print(f"\n{n_games} games is below the {MIN_RESULT_GAMES} this script "
+              f"treats as a result;\nwrote {out.relative_to(ROOT)} instead. "
+              f"Do not cite it.")
+    else:
+        print(f"\nwrote {out.relative_to(ROOT)}")
     return 0
 
 
