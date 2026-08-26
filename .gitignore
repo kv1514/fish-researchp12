@@ -30,3 +30,9 @@ results/ii_endgame_journal.jsonl
 # games as done and reported the wrong layer's positions.
 results/ii_endgame_journal_m*.jsonl
 results/ii_first_endgame_journal.jsonl
+
+# Short runs of the study scripts, which write here instead of to the results
+# filename precisely so a regression check cannot be mistaken for a
+# measurement. The scripts stamp them "Do not cite it"; committing one puts a
+# citable-looking file in results/ saying the opposite.
+results/*_smoke.json
