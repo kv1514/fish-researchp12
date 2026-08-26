@@ -245,6 +245,10 @@ class ExactII:
         #: the reproducible budget. None = no limit, which is what an
         #: unbounded exact search should never be given.
         self.max_nodes = None
+        #: Exact cutoff, on by default. Switchable because the only honest way
+        #: to keep a cutoff honest is to be able to run without it and compare;
+        #: tests4/test_exact_ii.py does exactly that.
+        self.prune = True
 
     # -- terminal value ------------------------------------------------------
 
@@ -346,6 +350,31 @@ class ExactII:
                                   depth + 1, path + (sig,))
         return v
 
+    def _upper(self, states, weights) -> float:
+        """The most this node can still pay the deviator.
+
+        Every live half-suit is worth at most +1, and one already decided
+        against us is worth exactly what it is worth. If an action ATTAINS this
+        bound there is nothing better and the remaining actions can be skipped.
+
+        This is not alpha-beta. No window is threaded and no bound is ever
+        stored, so a memoised value is still an exact value -- which matters,
+        because a pruned underestimate written into the memo is
+        indistinguishable from a real one afterwards.
+        """
+        mine = team_of(self.me)
+        tot = 0.0
+        for s, w in zip(states, weights):
+            best = 0.0
+            for h in self.live:
+                win = s.set_winner[h]
+                if win is None or win == mine:
+                    best += 1.0
+                elif win != NULL_TEAM:
+                    best -= 1.0
+            tot += w * best
+        return tot
+
     # -- the search ----------------------------------------------------------
 
     def solve(self, states: list, weights: list, depth: int = 0,
@@ -431,11 +460,23 @@ class ExactII:
         # so the deviator may only offer assignments over its own team, and is
         # scored on whether each happens to be right.
         acts = [a for a in acts if not isinstance(a, Claim)]
-        acts += self._claim_candidates(states)
+        claims = self._claim_candidates(states)
+        root = depth == 0
+        # Claims first BELOW the root, because a claim is the action most
+        # likely to attain the bound and end the loop early. NOT at the root:
+        # every action is evaluated there anyway, and best_action is the first
+        # maximiser in list order, so reordering would change which of several
+        # tied-optimal moves gets reported -- and ii_action_diff.py counts a
+        # disagreement whenever the champion's move is not the one reported.
+        # That would be a change to the headline dressed up as a speedup.
+        acts = (acts + claims) if root else (claims + acts)
         if not acts:
             return 0.0
         best = None
-        root = depth == 0
+        # The root is never pruned: ii_action_diff.py reads action_values for
+        # every action, the champion's included, and an unpriced champion move
+        # is silently reclassified rather than reported.
+        ub = None if (root or not self.prune) else self._upper(states, weights)
         for a in acts:
             buckets = {}
             illegal = False
@@ -469,6 +510,8 @@ class ExactII:
                 best = v
                 if root:
                     self.best_action = a
+            if ub is not None and best >= ub - 1e-9:
+                break               # attains the bound; nothing can beat it
         return best if best is not None else 0.0
 
     def _claim_candidates(self, states):

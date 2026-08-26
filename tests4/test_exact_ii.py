@@ -196,6 +196,59 @@ def test_champion_root_move_never_beats_the_maximum(positions):
     assert priced, "the champion's move was never priced; nothing was tested"
 
 
+def test_the_cutoff_changes_no_value(positions):
+    """The exact cutoff must be exactly that: same value, fewer nodes.
+
+    ``_upper`` bounds what a node can still pay, and an action attaining it
+    ends the action loop. That is only sound because nothing partial is ever
+    written to the memo -- a pruned underestimate stored as a value would be
+    indistinguishable from a real one on the next lookup, which is the shape of
+    the bug this whole file exists for.
+
+    The root is exempt and that is checked too: ``action_values`` must price
+    every action with the cutoff on, because ii_action_diff.py looks the
+    champion's move up there and reports it as unpriced if it is missing.
+    """
+    rules, out = positions
+    checked = 0
+    saved = kept = 0
+    for hs, seat, states in out:
+        w = [1.0 / len(states)] * len(states)
+        vals = {}
+        for flag in (False, True):
+            sv = ExactII(rules, hs, seat, SPEC)
+            sv.prune = flag
+            sv.deadline = time.monotonic() + BUDGET
+            try:
+                v = sv.solve([_clone(s) for s in states], list(w))
+            except SolveTimeout:
+                vals = {}
+                break
+            vals[flag] = (v, sv.nodes, dict(sv.action_values),
+                          repr(sv.best_action))
+        if len(vals) != 2:
+            continue
+        checked += 1
+        (v0, n0, av0, ba0), (v1, n1, av1, ba1) = vals[False], vals[True]
+        saved += n0
+        kept += n1
+        assert abs(v0 - v1) < 1e-9, (
+            f"support {len(states)}: cutoff changed the value, "
+            f"{v0:+.6f} without and {v1:+.6f} with")
+        assert set(av0) == set(av1), (
+            f"support {len(states)}: the cutoff left "
+            f"{sorted(set(av0) ^ set(av1))} unpriced at the root")
+        for k in av0:
+            assert abs(av0[k] - av1[k]) < 1e-9, (
+                f"support {len(states)}: root value of {k} moved from "
+                f"{av0[k]:+.6f} to {av1[k]:+.6f}")
+        assert ba0 == ba1, (
+            f"support {len(states)}: the reported optimum changed from {ba0} "
+            f"to {ba1}, which reclassifies a disagreement")
+    assert checked, "every position timed out; the cutoff was never compared"
+    assert kept <= saved, "the cutoff searched MORE nodes than it saved"
+
+
 def test_the_memo_distinguishes_histories():
     """The specific fault, stated as a property rather than a position.
 
