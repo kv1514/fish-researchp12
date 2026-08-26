@@ -44,6 +44,13 @@ import fish4.endgame_ii as endgame_ii
 from fish4.registry4 import V03_CHAMPION, make_agent
 
 ON = ("fishbot4", {"exact_endgame": True})
+#: The study's budget rather than the shipped one. In the team arm the policy
+#: declined 65 of 279 candidates at (12 deals, 50,000 nodes); those are the
+#: widest supports, so this asks whether the hardest positions are where the
+#: value is or where it runs out.
+ON_WIDE = ("fishbot4", {"exact_endgame": True,
+                        "exact_endgame_max_support": 24,
+                        "exact_endgame_max_nodes": 300_000})
 OFF = ("fishbot4", {})
 #: Cross-play opponent. The solver models every other seat as the v0.4
 #: champion; against this one that model is simply WRONG, which is the point.
@@ -76,8 +83,8 @@ def flagged(mode: int, p: int) -> bool:
             or (mode == "one" and p == 0))
 
 
-def play(rules, seed: int, aseed: int, mode, opp=OFF):
-    agents = [make_agent(ON if flagged(mode, p) else
+def play(rules, seed: int, aseed: int, mode, opp=OFF, on=ON):
+    agents = [make_agent(on if flagged(mode, p) else
                          (OFF if team_of(p) == 0 else opp))
               for p in range(NUM_PLAYERS)]
     st = GameState.deal(rules, seed=seed)
@@ -97,7 +104,7 @@ def play(rules, seed: int, aseed: int, mode, opp=OFF):
 
 
 def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0,
-         opponent: str = "champion") -> int:
+         opponent: str = "champion", caps: str = "shipped") -> int:
     """``seed_block`` shifts every deal and agent seed by a disjoint offset.
 
     A screen whose interval clears zero gets re-tested on fresh seeds before it
@@ -112,13 +119,14 @@ def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0,
               f"{sorted(OPPONENTS)}")
         return 1
     opp = OPPONENTS[opponent]
+    on = ON_WIDE if caps == "wide" else ON
     rules = RuleConfig()
     t0 = time.time()
     diffs, na, nb, ua, ub = [], 0, 0, 0, 0
     for g in range(n_pairs):
         base = 92_000 + 10_000 * seed_block
-        a = play(rules, base + g, base + 500 + g, mode, opp)
-        b = play(rules, base + g, base + 500 + g, "none", opp)
+        a = play(rules, base + g, base + 500 + g, mode, opp, on)
+        b = play(rules, base + g, base + 500 + g, "none", opp, on)
         diffs.append(a[0] - b[0])
         na += a[1]; nb += b[1]; ua += a[2]; ub += b[2]
         if (g + 1) % 50 == 0:
@@ -154,11 +162,12 @@ def main(mode: str = "team", n_pairs: int = 400, seed_block: int = 0,
     smoke = n_pairs < MIN_RESULT_PAIRS
     tag = (f"_b{seed_block}" if seed_block else "")
     tag += "" if opponent == "champion" else f"_vs{opponent}"
+    tag += "" if caps == "shipped" else f"_{caps}"
     out = ROOT / "results" / (f"exact_endgame_{mode}{tag}"
                               + ("_smoke" if smoke else "") + ".json")
     out.write_text(json.dumps({
         "arm": mode, "n_pairs": n, "seed_block": seed_block,
-        "opponent": opponent,
+        "opponent": opponent, "caps": caps,
         "mean": mean, "ci95": [lo, hi],
         "candidates": CANDIDATE[0], "fired": FIRED[0], "pairs_moved": moved,
         "nulls_policy": na, "nulls_control": nb,
@@ -174,4 +183,5 @@ if __name__ == "__main__":
     raise SystemExit(main(a[0] if a else "team",
                           int(a[1]) if len(a) > 1 else 400,
                           int(a[2]) if len(a) > 2 else 0,
-                          a[3] if len(a) > 3 else "champion"))
+                          a[3] if len(a) > 3 else "champion",
+                          a[4] if len(a) > 4 else "shipped"))
