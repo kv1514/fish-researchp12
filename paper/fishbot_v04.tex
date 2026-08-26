@@ -4218,6 +4218,39 @@ That is the honest limit of exact play in this project as it stands: $m = 1$ is
 solved at $95\%$ coverage, and $m = 2$ is solved on a third of its positions,
 selected for being easy.
 
+
+\paragraph{Both gains are lower bounds, and the reason is the same coverage
+that limits $m = 2$.} The exact gain \emph{rises} with how much is hidden. Over
+the solved positions, splitting each layer at its median belief support:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& narrow support & wide support & Welch $t$ \\
+\midrule
+$m = 1$ & $+0.3295$ ($n=172$) & $+0.5840$ ($n=133$) & $+5.37$ \\
+$m = 2$ & $+0.2553$ ($n=63$) & $+0.4205$ ($n=46$) & $+2.06$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+At $m = 1$ the trend is solid on its own ($r = +0.190$ against support,
+$t = +3.37$ over $305$ positions); at $m = 2$ it is suggestive rather than
+significant ($r = +0.145$, $t = +1.52$), and the two agree in sign and rough
+magnitude. The mechanism is the obvious one: the more the belief leaves open,
+the more an exact answer is worth over a heuristic.
+
+The positions the solver cannot reach are precisely the wide ones --- $16$
+unsolved at $m = 1$ with median support $48$, against a solved median of
+$3$; $204$ unsolved at $m = 2$ with median support $60$ against a
+solved median of $4$. So both reported means are \emph{lower} bounds on
+the gain over the whole layer, and $m = 2$'s is the looser of the two.
+
+No corrected figure is offered. The slope is fitted over the supports the
+solver reaches and the missing positions run to $60{,}480$ deals; extrapolating
+across that would be inventing a number for the part of the layer nobody has
+solved.
+
 \subsection{Where the disagreements are, and one that is provable}
 \label{sec:iidiff}
 
