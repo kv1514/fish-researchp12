@@ -69,11 +69,9 @@ Two exemptions, both deliberate:
 * **the root's action order.** Claims go first below the root because they are
   likeliest to attain the bound, but `best_action` is the first maximiser in
   list order, so reordering at the root would change which of several
-  tied-optimal moves is reported. A substantial share of the disagreements in
-  that study cost exactly zero, i.e. are ties rather than errors; reordering
-  them moves the headline while looking like a speedup. (The exact share is
-  being recomputed -- the figure that used to sit here came from the run the
-  memo fault invalidated.)
+  tied-optimal moves is reported. 78 of the 185 disagreements in that study cost
+  exactly zero, i.e. are ties rather than errors; reordering them moves the
+  headline while looking like a speedup.
 
 Worth is the wrong single number, and the first one recorded here was the
 wrong number. Over 21 real `m = 1` positions, values, root action values and
