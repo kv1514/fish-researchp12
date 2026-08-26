@@ -60,7 +60,20 @@ from fish.rules import RuleConfig
 #: unresolved half-suit for nobody (fish4/match.play_capped), so this does too.
 MAX_PLIES = 24
 
-#: Seconds a single position may take before the solver gives up on it.
+#: Search nodes a single position may take before the solver gives up on it.
+#:
+#: THE BUDGET IS NODES, NOT SECONDS, because a wall-clock budget measures the
+#: machine. Three of these studies were running at once on four cores when the
+#: corrected solver first met a real workload, and 21% of m = 1 positions
+#: exceeded 60s at about 190,000 nodes each -- a coverage figure that would not
+#: reproduce on an idle machine, or on anyone else's. A node cap gives every
+#: position the same budget in every run, and the seconds below are kept only
+#: as a backstop against a pathological case wedging a study for hours.
+MAX_NODES = 300_000
+
+#: Wall-clock backstop, in seconds. Secondary to MAX_NODES above: a run should
+#: end on the node cap, and reach this only if a single node somehow becomes
+#: pathologically slow.
 #:
 #: This exists because "solvable" and "solvable in the time available" were
 #: conflated once already. A probe capped at support 8 solved every m = 2
@@ -69,7 +82,7 @@ MAX_PLIES = 24
 #: hours, writing nothing. An exact solver with no deadline does not fail
 #: loudly, it fails silently and forever, and a layer that is out of reach
 #: should say so rather than hang.
-DEFAULT_DEADLINE = 60.0
+DEFAULT_DEADLINE = 900.0
 
 
 class SolveTimeout(Exception):
@@ -228,7 +241,10 @@ class ExactII:
         #: to be built from.
         self.best_action = None
         self.action_values: dict = {}
-        self.deadline = None          # set by the caller; None = no limit
+        self.deadline = None          # wall-clock backstop; None = no limit
+        #: the reproducible budget. None = no limit, which is what an
+        #: unbounded exact search should never be given.
+        self.max_nodes = None
 
     # -- terminal value ------------------------------------------------------
 
@@ -329,8 +345,11 @@ class ExactII:
         than a per-deal cheat.
         """
         self.nodes += 1
+        if self.max_nodes is not None and self.nodes > self.max_nodes:
+            raise SolveTimeout(f"exceeded {self.max_nodes} nodes")
         if self.deadline is not None and time.monotonic() > self.deadline:
-            raise SolveTimeout(f"exceeded budget after {self.nodes} nodes")
+            raise SolveTimeout(f"exceeded the wall-clock backstop after "
+                               f"{self.nodes} nodes")
         # Memo on the node itself: two branches reaching the same weighted
         # belief set at the same depth have the same value by construction.
         #
@@ -406,16 +425,26 @@ class ExactII:
         root = depth == 0
         for a in acts:
             buckets = {}
+            illegal = False
             for s, w in zip(states, weights):
                 t = _clone(s)
                 try:
                     ev = t.apply(self.me, a)
                 except Exception:
-                    return -1.0 if best is None else best
+                    # Skip the action, do not abandon the loop. Returning the
+                    # best found SO FAR here made the answer depend on the
+                    # order actions happen to be generated in, and could have
+                    # returned -1.0 for a position with a fine move later in
+                    # the list. It never fired on the positions I instrumented,
+                    # which is the only reason it did no damage.
+                    illegal = True
+                    break
                 sig = repr(ev)
                 buckets.setdefault(sig, ([], []))
                 buckets[sig][0].append(t)
                 buckets[sig][1].append(w)
+            if illegal:
+                continue
             v = 0.0
             for sig, (ss, ws) in buckets.items():
                 tot = sum(ws)

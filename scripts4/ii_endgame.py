@@ -41,7 +41,8 @@ from fish.cards import NUM_PLAYERS, half_suit_mask, team_of
 from fish.engine import GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
-from fish4.exact_ii import (DEFAULT_DEADLINE, ExactII, SolveTimeout,
+from fish4.exact_ii import (DEFAULT_DEADLINE, MAX_NODES, ExactII,
+                             SolveTimeout,
                              _clone, consistent_deals,
                              consistent_deals_multi)
 from fish4.registry4 import make_agent
@@ -194,6 +195,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
                          consistent_deals_multi(obs, agents[p].bel, live))
                 if deals and len(deals) <= MAX_SUPPORT:
                     sv = ExactII(rules, hs, p, SPEC)
+                    sv.max_nodes = MAX_NODES
                     sv.deadline = time.monotonic() + DEFAULT_DEADLINE
                     states = []
                     for hands in deals:
@@ -295,7 +297,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
 
     print(f"\nGENUINELY HIDDEN positions solved exactly: {len(solved)}"
           f"  ({skipped} skipped for support > {MAX_SUPPORT},"
-          f" {timed_out} timed out at {DEFAULT_DEADLINE:.0f}s)")
+          f" {timed_out} over the {MAX_NODES:,}-node budget)")
     if solved:
         vs = sorted(r["value"] for r in solved)
         n = len(vs)
@@ -358,7 +360,7 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         "mean_champion": (sum(r["champion"] for r in solved) / len(solved))
         if solved else None,
         "skipped_large_support": skipped, "timed_out": timed_out,
-        "deadline_seconds": DEFAULT_DEADLINE,
+        "node_budget": MAX_NODES, "backstop_seconds": DEFAULT_DEADLINE,
         "solved": solved}, indent=1))
     if smoke:
         print(f"\n{n_games} games is below the {MIN_RESULT_GAMES} this script "

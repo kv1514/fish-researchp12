@@ -53,7 +53,8 @@ from fish.cards import NUM_PLAYERS, half_suit_of
 from fish.engine import Ask, Claim, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
-from fish4.exact_ii import (DEFAULT_DEADLINE, ExactII, SolveTimeout,
+from fish4.exact_ii import (DEFAULT_DEADLINE, MAX_NODES, ExactII,
+                            SolveTimeout,
                             _champion_action, consistent_deals)
 from fish4.registry4 import make_agent
 
@@ -96,6 +97,7 @@ def main(n_games: int = 60) -> int:
                     # orders of magnitude more nodes than the one that wrote
                     # the first version of this result and an unbounded exact
                     # search does not fail loudly, it fails forever.
+                    sv.max_nodes = MAX_NODES
                     sv.deadline = time.monotonic() + DEFAULT_DEADLINE
                     states = []
                     for hands in deals:
@@ -158,7 +160,7 @@ def main(n_games: int = 60) -> int:
     n = len(rows)
     tot = agree + n
     print(f"\n{tot} hidden m=1 decisions solved exactly"
-          f"  ({timed_out} timed out at {DEFAULT_DEADLINE:.0f}s)")
+          f"  ({timed_out} over the {MAX_NODES:,}-node budget)")
     if not tot:
         print("None reached. Nothing to report.")
         return 1
@@ -196,7 +198,7 @@ def main(n_games: int = 60) -> int:
     out = ROOT / "results" / "ii_action_diff.json"
     out.write_text(json.dumps({
         "n_games": n_games, "n_decisions": tot, "n_agree": agree,
-        "timed_out": timed_out, "deadline_seconds": DEFAULT_DEADLINE,
+        "timed_out": timed_out, "node_budget": MAX_NODES,
         "n_differ": n, "n_free_ties": len(free), "n_costly": len(costly),
         "mean_cost_when_error": (sum(r["cost"] for r in costly) / len(costly))
         if costly else None,
