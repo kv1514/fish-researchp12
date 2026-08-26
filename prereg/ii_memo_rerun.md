@@ -74,3 +74,68 @@ can no longer predict is the exact rate, because 300,000 nodes is a different
 budget from 60 seconds and I have not measured how they compare on an unloaded
 machine. Recording that I amended this rather than quietly leaving the old
 sentence to be graded against a protocol it was not written for.
+
+---
+
+# Graded, after the run
+
+    pinned control        344/344   (was 344/344)
+    tree/rollout control  601/601   (new)
+    solved                305       (was 308; 13 skipped, 3 over budget)
+    mean optimum          +0.5084   (was +0.5129)
+    mean champion         +0.0679   (was +0.0670)
+    mean gain             +0.4405   (was +0.4459)
+    negative gains        0/305
+
+**1. Pinned control stays 344/344.** Hit.
+
+**2. `mean_champion` within 0.02 of +0.0670.** Hit: +0.0679, and on the matched
+positions it is identical to twelve decimal places, position for position,
+which is the stronger statement.
+
+**3. `n_solved` falls below 308.** Hit, but only just, and for a reason I did
+not predict: 305, with three positions over the node budget rather than the
+much larger loss the raw eighty-fold node increase implied. The exact cutoff
+added after this was written paid the increase back. Coverage is 95%, against
+the 96% of the broken run.
+
+**4. `mean_optimum` and `mean_gain` come out HIGHER.** **Missed.** Both came
+out lower. This is the one I flagged as argued rather than provable, from two
+observed cases that both deflated the maximum, and I wrote that if the gain
+came back lower I should say the deflation was a coincidence of two samples
+rather than explain it away. It was a coincidence of two samples.
+`scripts4/ii_memo_effect.py` says so directly: on the 304 positions both runs
+solve, the fix RAISED the optimum in 24 and LOWERED it in 19. A stale value is
+as likely to be too high as too low, which in hindsight is the only thing the
+mechanism ever implied.
+
+**5. Zero negative gains, controls agree everywhere.** Hit: 0/305 and 601/601.
+
+## The clause that fired
+
+> If `mean_gain` moves by less than 0.01 in either direction, then the memo bug
+> had almost no effect on the aggregate at m = 1, and the interesting question
+> becomes why m = 2 was so much more sensitive to it.
+
+On the matched positions the gain moved **0.0011**. So the bug -- real,
+reproducible, worth eighty-fold in nodes, and fatal at m = 2 -- changed the
+m = 1 headline by about a thousandth of a set.
+
+It was not harmless. It corrupted **43 of 304** individual positions, 14% of
+them. The aggregate survived because the errors went both ways and cancelled,
+which is luck, not soundness: nothing about the mechanism guaranteed it, and at
+m = 2 the same fault produced values so wrong they violated a bound that cannot
+be violated. Twelve live cards transpose far more than six, so there are more
+merges and larger errors, and past some size the cancellation stops rescuing
+the mean.
+
+The general lesson is the uncomfortable one. If I had checked this bug by
+looking at whether the headline moved, I would have concluded there was no bug.
+The invariant found it because it is evaluated per position and does not care
+about the mean.
+
+## Score
+
+Four of five, and the one that missed is the one whose mechanism was argued
+rather than provable. That is now seven pre-data predictions in this project
+with two hits, and both hits had a provable mechanism behind them.

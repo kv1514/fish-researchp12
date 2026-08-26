@@ -4072,22 +4072,27 @@ partner you tell your opponents more of.
 \label{sec:ii}
 
 \begin{quote}
-\textbf{Every figure in this section is withdrawn pending recomputation.} The
-solver's transposition table keyed nodes on hands, turn, half-suit winners and
-belief weights, and \emph{not} on the history. The opponents in it are the
-champion, whose action is a function of its whole observation, so two nodes
-identical in every key field but reached by different move orders have
-different continuations and different values. Merging them returned one
-branch's value for the other, and the maximisation read those values --- on the
-position that exposed it, the search reported $+0.2500$ for a move a rollout of
-the same strategy scores at $+0.7500$, and visited $154$ nodes where the
-corrected search visits $12{,}086$. The fault was found by an invariant that
-holds with no ground truth at all: a best response may copy the champion at
-every information set, so it cannot score below it. Five $m = 2$ positions did.
-The champion's own figure below is unaffected --- it is a rollout that never
-consulted the table --- but the optimum and the gain are not, and the
-disagreement counts in Section~\ref{sec:iidiff} come from the same search. The
-numbers are being recomputed; until they are, read nothing here as measured.
+\textbf{These figures were recomputed.} The solver's transposition table keyed
+nodes on hands, turn, half-suit winners and belief weights, and \emph{not} on
+the history. The opponents in it are the champion, whose action is a function
+of its whole observation, so two nodes identical in every key field but reached
+by different move orders have different continuations and different values.
+Merging them returned one branch's value for the other, and the maximisation
+read those values --- on the position that exposed it, the search reported
+$+0.2500$ for a move a rollout of the same strategy scores at $+0.7500$, and
+visited $154$ nodes where the corrected search visits $12{,}086$. The fault was
+found by an invariant that holds with no ground truth at all: a best response
+may copy the champion at every information set, so it cannot score below it.
+Five $m = 2$ positions did.
+
+On the 304 $m = 1$ positions that both the broken and the corrected run solve,
+the aggregate barely moved --- the gain went $+0.4403$ to $+0.4392$. That is not
+because the bug was harmless. It corrupted 43 of those 304 positions
+individually, and the errors went \emph{both ways}: the fix raised the optimum
+in 24 and lowered it in 19, so they very nearly cancelled in the mean. The
+champion figure is identical position for position, as it must be --- it is a
+rollout that never consulted the table --- and that identity is what licenses
+the comparison at all. Everything below is the corrected run.
 \end{quote}
 
 Every ``exact'' result above is a statement about the perfect-information game,
@@ -4115,36 +4120,45 @@ That second choice rests on a property that was checked rather than assumed:
 over $629$ real decisions a freshly constructed agent given the same
 observation computes a bit-identical belief to one attached from the deal.
 
-The control runs first and gates the rest. Where the belief pins every card
+Two controls run first and gate the rest. Where the belief pins every card
 there is nothing hidden left, so the exact value must equal the closed form
-$2f - m$. Over $200$ games it does, \textbf{$344/344$}.
+$2f - m$. Over $200$ games it does, \textbf{$344/344$}. And where the support
+is small enough to afford it, the champion's value is computed twice --- once
+by rolling each deal forward, once by walking the same tree the best response
+walks and playing the champion at the deviator's nodes. Same strategy, two code
+paths, so they must agree, and they do: $\mathbf{601/601}$. The first control
+cannot see a fault that needs several deals to show, which is exactly the fault
+that was there.
 
 \subsection{What the endgame is worth, and what the champion gets}
 
-Across $308$ genuinely hidden positions solved exactly ($13$ skipped for a
-belief support above $24$ deals, so $96\%$ coverage):
+Across $305$ genuinely hidden positions solved exactly ($13$ skipped for a
+belief support above $24$ deals and $3$ over the $300{,}000$-node budget, so
+$95\%$ coverage):
 
 \begin{center}
 \begin{tabular}{lr}
 \toprule
-exact optimum in the seat on move & $+0.5129$ \\
-the champion in the same seat & $+0.0670$ \\
+exact optimum in the seat on move & $+0.5084$ \\
+the champion in the same seat & $+0.0679$ \\
 \midrule
-exact gain from deviating & $\mathbf{+0.4459}$ \\
+exact gain from deviating & $\mathbf{+0.4405}$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 with median gain $+0.3333$, maximum $+1.5556$, and --- as the invariant
 requires, since a best response can always copy the champion --- \emph{no}
-negative entry in $308$ positions.
+negative entry in $305$ positions. That invariant is now a hard
+failure rather than a printed warning: the run that violated it wrote its
+results file anyway.
 
 Two readings. First, hidden information is expensive: the closed form values
 the last half-suit at $+1$ to the team on move, and played optimally without
 sight of the cards it is worth $+0.51$. Some positions are worth $-0.5$ ---
 won under perfect information, lost under optimal play without it. Second, the
 v0.3 certificate is not wrong but certifies a much easier thing: where the
-champion cannot see, it captures $+0.067$ of the $+0.513$ available.
+champion cannot see, it captures $+0.068$ of the $+0.508$ available.
 
 \paragraph{The caveat, measured.} Best-responding to a realisation one can
 predict is easier than beating the mixture it came from, so this figure likely
