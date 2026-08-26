@@ -333,11 +333,17 @@ def main(n_games: int = 12, layer: int = 1) -> int:
         return 1
 
     if opp_dropped or dev_skipped:
-        print(f"\n  the search DROPPED {opp_dropped} opponent states and "
-              f"skipped {dev_skipped}\n  deviator actions. Both should be "
-              f"zero; a dropped opponent state is scored by the\n  rollout "
-              f"and renormalised away by the tree, which is one way the two "
-              f"can\n  disagree about the same strategy.")
+        # NOT a warning. These are deals the champion has no move in; the tree
+        # scores them where they stand and keeps their weight, exactly as the
+        # rollout does. The count is reported because it USED to be a fault --
+        # the tree dropped such a deal and renormalised the survivors, and the
+        # tree/rollout control caught it at m = 2 at 105/106. m = 1 has none of
+        # them at all, which is why the fault was invisible there.
+        print(f"\n  deals the champion has no move in, scored in place: "
+              f"{opp_dropped}")
+        if dev_skipped:
+            print(f"  deviator actions illegal in some deal of the set, "
+                  f"skipped: {dev_skipped}")
 
     print(f"\nCONTROL -- the tree and the playout, same champion strategy")
     print(f"  they agree: {consistent_ok}/{consistent_ok + len(consistent_bad)}"
