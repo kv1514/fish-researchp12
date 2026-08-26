@@ -579,28 +579,52 @@ class ExactII:
         return out
 
     def _opponent(self, states, weights, depth, seat, path=()):
+        """A deal the champion cannot move in is STUCK, not impossible.
+
+        This used to drop such a state and renormalise the rest, which quietly
+        asserts that the world does not exist and inflates every other deal's
+        weight. ``champion_value`` does the opposite: it stops that deal's
+        rollout and scores it where it stands, which is what the harness does
+        with an unresolved half-suit -- it counts for nobody. The two therefore
+        disagreed about the same strategy, and the tree/rollout control caught
+        it at m = 2 with a single dropped state: tree -0.4167 against a rollout
+        of -0.3333 on six deals whose true values are 0, 0, 0, -1, 0, -1.
+
+        The rollout is the one that is right, so the tree now scores a stuck
+        deal in place and keeps its weight. With nothing stuck this is
+        arithmetically identical to the old code -- the weights already sum to
+        one, so the old ``tot / norm`` was ``tot`` -- which is why m = 1, where
+        nothing was ever stuck, is unaffected.
+        """
         buckets = {}
+        stuck = 0.0
         for s, w in zip(states, weights):
             a = _champion_action(self.spec, self.rules, seat, s)
             t = _clone(s)
             if a is None:
                 self.opp_dropped += 1
+                v = self._value(s)
+                stuck += w * (0.0 if v is None else v)
                 continue
             try:
                 ev = t.apply(seat, a)
             except Exception:
                 self.opp_dropped += 1
+                v = self._value(s)
+                stuck += w * (0.0 if v is None else v)
                 continue
             sig = repr(ev)
             buckets.setdefault(sig, ([], []))
             buckets[sig][0].append(t)
             buckets[sig][1].append(w)
         if not buckets:
-            return 0.0
-        v = 0.0
-        norm = sum(sum(ws) for _, ws in buckets.values())
+            return stuck
+        # NO renormalisation. The incoming weights sum to one over ALL states
+        # including the stuck ones, so dividing by the surviving weight would
+        # be the very error this method was fixed for.
+        v = stuck
         for sig, (ss, ws) in buckets.items():
             tot = sum(ws)
-            v += (tot / norm) * self.solve(ss, [x / tot for x in ws],
-                                           depth + 1, path + (sig,))
+            v += tot * self.solve(ss, [x / tot for x in ws],
+                                  depth + 1, path + (sig,))
         return v
