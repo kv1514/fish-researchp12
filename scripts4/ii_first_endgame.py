@@ -144,7 +144,14 @@ def main(n_games: int = 60) -> int:
     lo, hi = mean - 1.96 * se, mean + 1.96 * se
     print(f"\n  exact gain from deviating at the FIRST hidden m = 1 decision")
     print(f"    mean {mean:+.4f}  95% CI [{lo:+.4f}, {hi:+.4f}]")
-    print(f"    median {gains[n//2]:+.4f}, min {gains[0]:+.4f}, "
+    # A gain of zero is computed as a difference of two equal numbers reached
+    # by different code paths, so it lands at -5.6e-17 as often as at 0.0 and
+    # prints as "-0.0000" -- which reads exactly like a violation of the
+    # invariant checked immediately below. Clamped for display only; the
+    # invariant still tests the raw value against -1e-9.
+    def z(x):
+        return 0.0 if abs(x) < 1e-12 else x
+    print(f"    median {z(gains[n//2]):+.4f}, min {z(gains[0]):+.4f}, "
           f"max {gains[-1]:+.4f}")
     neg = sum(1 for x in gains if x < -1e-9)
     if neg:
@@ -167,16 +174,36 @@ def main(n_games: int = 60) -> int:
         sm = json.loads(expl.read_text()).get("summary", {})
         if "mean" in sm and "ci95" in sm:
             sampled = (sm["mean"], sm["ci95"][0], sm["ci95"][1])
+    # THE COMPARISON HAS TO BE PER GAME, NOT PER SOLVED POSITION.
+    # exploitability.py averages over EVERY game it plays. Most games here have
+    # no hidden m = 1 decision at all -- the belief pins every card, or the
+    # position never arises -- and in those the restricted deviator never
+    # deviates and gains exactly nothing. Quoting the conditional mean beside a
+    # whole-game figure compares a mean over a favourable subset against a mean
+    # over everything, and inflates the bound by the reciprocal of how often the
+    # subset occurs. Games over the node budget are EXCLUDED from the
+    # denominator rather than scored 0: they are unsolved, not worth nothing.
+    known = n + none_
+    uncond = sum(gains) / known if known else float("nan")
+    uvar = (sum((x - uncond) ** 2 for x in gains)
+            + none_ * uncond ** 2) / (known - 1) if known > 1 else 0.0
+    use = (uvar / known) ** 0.5
+    ulo, uhi = uncond - 1.96 * use, uncond + 1.96 * use
+    print(f"\n  PER GAME, counting the {none_} games with no hidden m = 1 "
+          f"decision as a gain of zero\n  ({to} over budget excluded -- "
+          f"unsolved is not zero):")
+    print(f"    mean {uncond:+.4f}  95% CI [{ulo:+.4f}, {uhi:+.4f}]")
+
     print(f"\n  beside scripts4/exploitability.py, same units (team "
-          f"differential):")
+          f"differential), per game:")
     if sampled is None:
         print(f"    results/exploitability.json not found; no comparison")
     else:
         print(f"    sampled rollout best response, whole game:  "
               f"{sampled[0]:+.4f}  [{sampled[1]:+.4f}, {sampled[2]:+.4f}]")
     print(f"    exact, one endgame decision only:           "
-          f"{mean:+.4f}  [{lo:+.4f}, {hi:+.4f}]")
-    if sampled is not None and lo > sampled[2]:
+          f"{uncond:+.4f}  [{ulo:+.4f}, {uhi:+.4f}]")
+    if sampled is not None and ulo > sampled[2]:
         print(f"\n  The exact bound from ONE endgame decision exceeds the")
         print(f"  sampled interval's upper end. The rollout responder was not")
         print(f"  finding what is there -- as fish4/bestresponse.py warned it")
@@ -189,6 +216,7 @@ def main(n_games: int = 60) -> int:
         "n_games": len(rows), "n_solved": n, "n_none": none_,
         "n_timeout": to, "node_budget": MAX_NODES,
         "mean_gain": mean, "ci95": [lo, hi],
+        "mean_gain_per_game": uncond, "ci95_per_game": [ulo, uhi],
         "median_gain": gains[n // 2], "max_gain": gains[-1],
         # stored so the comparison is a figure a manifest can address, not a
         # sentence in a log
