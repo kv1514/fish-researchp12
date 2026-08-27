@@ -61,3 +61,15 @@ result would not be licensed by this one.
 ## Amendments
 
 None yet.
+
+## Post-hoc grading, appended after the cross-play sweep
+
+Outcome 1 fired by this document's rule and `endgame_m = 3` shipped. It is now
+**withdrawn**: the +0.3025 was measured against the sibling configuration,
+whose opponent model conditions on ask choices, and the foreign-opponent sweep
+(`results/xplay_sweep.json`) shows m = 3 is *worse* than no correction against
+v0.3 by −0.438 [−0.829, −0.047], paired on identical deals. The flaw was in
+this document, not in the run: it never asked against whom the gain would be
+measured, and the sibling was the wrong answer. The m ≤ 2 correction survives
+because it has non-sibling evidence and its foreign-relative effect is a tie;
+everything above it does not.
