@@ -24,7 +24,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DUELS = ROOT / "results" / "v04_duels.jsonl"
 PREFIX = "endgame-info-b"
+REPLICA = "endgame-info-r"
 EXPECTED = 8
+
+
+def _pool(diffs):
+    n = len(diffs)
+    m = sum(diffs) / n
+    var = sum((x - m) ** 2 for x in diffs) / (n - 1)
+    se = (var / n) ** 0.5
+    return m, se, n
+
+
+def _report(name, b):
+    diffs = [d for r in b for d in r["diffs"]]
+    m, se, n = _pool(diffs)
+    print(f"\n{name}: {len(b)} blocks, {n} pairs")
+    print("   " + "  ".join(f"{r['diff_mean']:+.3f}" for r in b))
+    print(f"   pooled {m:+.4f}, 95% CI "
+          f"[{m-1.96*se:+.4f}, {m+1.96*se:+.4f}]")
+    return diffs, m, se
 
 
 def main() -> int:
@@ -57,6 +76,53 @@ def main() -> int:
           f"Y {sum(r['y_nulls'] for r in b)}), "
           f"timeouts {sum(r['timeouts'] for r in b)}, "
           f"dropped {sum(r['dropped_pairs'] for r in b)}")
+
+    # -- the replication, registered before it ran --------------------------
+    rep = [r for r in rows if r.get("label", "").startswith(REPLICA)]
+    if len(rep) == EXPECTED:
+        if sorted(set(r["engine"]["digest"] for r in rep)) != digs:
+            print("\nreplication ran against a different engine. Refusing "
+                  "to pool.")
+            return 1
+        pd, pm, pse = _report("primary  ", b)
+        rd, rm, rse = _report("replication", rep)
+        allm, allse, alln = _pool(pd + rd)
+        alo, ahi = allm - 1.96 * allse, allm + 1.96 * allse
+        print(f"\nboth runs, {alln} pairs: {allm:+.4f}, "
+              f"95% CI [{alo:+.4f}, {ahi:+.4f}]")
+        rlo, rhi = rm - 1.96 * rse, rm + 1.96 * rse
+        if rlo > 0:
+            print("\nThe replication clears zero on its own. Ship it, and "
+                  "quote the pooled\nfigure over all "
+                  f"{alln} pairs rather than the primary's alone.")
+            ship = "ship"
+        elif rm > 0 and alo > 0:
+            print("\nThe SIGN replicates and the SIZE does not: the "
+                  "replication's interval\nstraddles zero. The pooled "
+                  "interval over both runs clears it, which is\nwhat the "
+                  "pre-registration made the condition for shipping.")
+            ship = "ship-pooled"
+        elif rm > 0:
+            print("\nThe sign replicates, the size does not, and the pooled "
+                  "interval does not\nclear zero either. Not shipped.")
+            ship = "hold"
+        else:
+            print("\nThe replication's point estimate is NEGATIVE. The "
+                  "primary does not\nreplicate, and the first result was "
+                  "probably the grid selection showing\nthrough. Not "
+                  "shipped.")
+            ship = "refuted"
+        out2 = ROOT / "results" / "endgame_ask_replication.json"
+        out2.write_text(json.dumps({
+            "primary": {"n": len(pd), "diff": pm,
+                        "ci95": [pm - 1.96 * pse, pm + 1.96 * pse]},
+            "replication": {"n": len(rd), "diff": rm, "ci95": [rlo, rhi]},
+            "pooled": {"n": alln, "diff": allm, "ci95": [alo, ahi]},
+            "decision": ship}, indent=1))
+        print(f"wrote {out2.relative_to(ROOT)}")
+    elif rep:
+        print(f"\n{len(rep)}/{EXPECTED} replication blocks so far; "
+              f"not read until all eight are in.")
 
     if lo > 0:
         verdict = ("pays", "Outcome 1: the correction pays in play.")
