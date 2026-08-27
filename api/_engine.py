@@ -325,8 +325,17 @@ class Session:
     """A game rebuilt from a sealed seed plus the public action log."""
 
     def __init__(self, seat: int, nonce: str, rules: RuleConfig, gamma: float,
-                 draws: int = WEB_DRAWS):
-        self.seat = seat
+                 draws: int = WEB_DRAWS, mode: str = "play"):
+        #: "play" seats a human; "spectate" seats nobody -- all six seats are
+        #: engines and the client only steps and watches. Spectate is the 3v3
+        #: exhibition: Dylan's FishBot v0.7 (github.com/dylann4500/fishbot,
+        #: bridged in fish4/dylan_v07.py) on the even seats, this project's
+        #: engine on the odd ones. seat is -1 there, which advance() already
+        #: treats correctly (no turn ever equals -1, so the engines just play);
+        #: everything that would read hands[seat] has to guard it instead,
+        #: because Python would silently serve seat 5's hand for -1.
+        self.mode = mode
+        self.seat = seat if mode == "play" else -1
         self.nonce = nonce
         #: Never sent anywhere. Derived here and used here.
         seed = self.seed = seed_from_nonce(nonce)
@@ -338,9 +347,12 @@ class Session:
         spec = dict(WEB_SPEC, opponent_gamma=gamma, n_draws=draws)
         self.bots = {}
         for p in range(NUM_PLAYERS):
-            if p == seat:
+            if p == self.seat:
                 continue
-            self.bots[p] = make_agent(("fishbot4", dict(spec)))
+            if mode == "spectate" and p % 2 == 0:
+                self.bots[p] = make_agent(("dylan_v07", {}))
+            else:
+                self.bots[p] = make_agent(("fishbot4", dict(spec)))
             self.bots[p].begin_game(p, rules, rng.getrandbits(64))
         self._helper_seed = rng.getrandbits(64)
         self._helper = None
@@ -368,14 +380,19 @@ class Session:
         # first replayed action would then be applied to the wrong player. That
         # fails loudly (IllegalAction) for most logs and, worse, quietly for a
         # log whose first action happens to be legal for both seats.
+        mode = d.get("m", "play")
+        # A spectate token has no human seat, so the game starts at seat 0;
+        # deriving starting_player from -1 would deal seat 5 in on the move.
+        start = 0 if mode == "spectate" else int(d["s"]) % NUM_PLAYERS
         rules = RuleConfig(variant=d["v"], claims_any_time=bool(d["a"]),
-                           starting_player=int(d["s"]) % NUM_PLAYERS)
+                           starting_player=start)
         if log_hash(actions) != d.get("h"):
             # Either the log was altered or it belongs to another game. Both are
             # unrecoverable by retrying, and the two are not worth telling apart
             # for an attacker's benefit.
             raise ValueError("this game has expired - start a new one")
-        s = cls(int(d["s"]), str(d["n"]), rules, float(d["g"]))
+        s = cls(int(d["s"]), str(d["n"]), rules, float(d["g"]),
+                mode=d.get("m", "play"))
         if actions:
             if len(actions) > MAX_LOG:
                 raise ValueError("action log too long")
@@ -392,6 +409,7 @@ class Session:
         return seal({"s": self.seat, "n": self.nonce, "g": self.gamma,
                      "v": self.rules.variant,
                      "a": int(bool(self.rules.claims_any_time)),
+                     "m": self.mode,
                      "h": log_hash(self.wire_log)})
 
     # -- driving --------------------------------------------------------------
@@ -432,6 +450,8 @@ class Session:
         return [w] + self.advance(max_moves)
 
     def suggest(self):
+        if self.mode == "spectate":
+            raise ValueError("no suggestions in spectate mode")
         """What the actual policy would do from our seat - not a re-ranking."""
         if self._helper is None:
             self._helper = make_agent(
@@ -454,6 +474,36 @@ class Session:
     def snapshot(self) -> dict:
         st = self.state
         a, b, nulls = st.scores()
+        if self.mode == "spectate":
+            # No seat, no hand, no perspective: the spectator sees the public
+            # table. score.you is Dylan's team (the even seats) so the client
+            # can caption the two columns by bot name rather than by "you".
+            snap = {
+                "token": self.token(),
+                "seat": -1, "team": None, "spectate": True,
+                "turn": st.turn, "terminal": st.is_terminal,
+                "your_turn": False,
+                "score": {"you": a, "them": b, "nulled": nulls},
+                "hand_counts": list(st.hand_counts()),
+                "teammates": [],
+                "set_winner": [
+                    None if w is None else
+                    ("ours" if w == 0 else "theirs" if w == 1 else "null")
+                    for w in st.set_winner],
+                "half_suits": [
+                    {"index": i, "name": n,
+                     "cards": [{"id": c, "name": card_name(c),
+                                "red": is_red(c), "mine": False}
+                               for c in half_suit_cards(i)]}
+                    for i, n in enumerate(
+                        HALF_SUIT_NAMES[:len(st.set_winner)])],
+                "hand": [],
+                "log": self.log[-60:],
+                "must_pass": False,
+            }
+            if st.is_terminal:
+                snap["reveal"] = {}
+            return snap
         mine = team_of(self.seat)
         hand = st.hands[self.seat]
         return {
@@ -489,6 +539,10 @@ class Session:
         }
 
     def analysis(self) -> dict:
+        if self.mode == "spectate":
+            # There is no "you" to analyse for, and obs() at seat -1 would
+            # quietly build seat 5's view.
+            raise ValueError("no analysis in spectate mode")
         if self.state.is_terminal:
             return {"terminal": True}
         from fish4.analyse import Analyser
@@ -528,6 +582,13 @@ def new_session(body: dict) -> Session:
     from a log; starting them on the move means the game begins with a decision
     they made.
     """
+    if body.get("mode") == "spectate":
+        # The 3v3 exhibition: Dylan's FishBot v0.7 on seats 0/2/4, this
+        # project's engine on 1/3/5, nobody dealt in. The deal is still the
+        # server's nonce -- a spectator does not pick the deck either.
+        rules = RuleConfig(variant="54", starting_player=0)
+        return Session(-1, secrets.token_urlsafe(12), rules, CHAMPION_GAMMA,
+                       mode="spectate")
     seat = int(body.get("seat", 0)) % NUM_PLAYERS
     rules = RuleConfig(variant="54", starting_player=seat)
     return Session(seat, secrets.token_urlsafe(12), rules, CHAMPION_GAMMA)

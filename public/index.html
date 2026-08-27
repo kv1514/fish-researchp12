@@ -58,6 +58,12 @@
         </details>
 
         <button id="s-go" class="primary big">Ready — deal me in</button>
+        <button id="s-watch" class="big">Watch: Dylan&rsquo;s FishBot vs KV&rsquo;s FishBot</button>
+        <p class="note" id="s-watchnote">A 3v3 exhibition — Dylan&rsquo;s FishBot v0.7
+        (<a href="https://github.com/dylann4500/fishbot" target="_blank" rel="noopener">dylann4500/fishbot</a>,
+        running its own C++ engine) on three seats against this site&rsquo;s engine on the
+        other three. Games play out live at the table pace; the next one deals
+        automatically.</p>
         <p class="note err" id="s-err"></p>
       </div>
 
@@ -149,9 +155,9 @@
   <div class="bar">
     <button id="t-quit" class="ghost">&larr; Leave table</button>
     <div class="score">
-      <span class="us"><b id="t-us">0</b> your team</span>
+      <span class="us"><b id="t-us">0</b> <span id="t-us-label">your team</span></span>
       <span class="sep">—</span>
-      <span class="them"><b id="t-them">0</b> them</span>
+      <span class="them"><b id="t-them">0</b> <span id="t-them-label">them</span></span>
       <span class="void" id="t-void"></span>
     </div>
     <div class="pacebar">
@@ -184,7 +190,7 @@
       </div>
 
       <div class="panel hand">
-        <h3>Your hand <span class="dim" id="t-handn"></span></h3>
+        <h3><span id="t-handtitle">Your hand</span> <span class="dim" id="t-handn"></span></h3>
         <div id="t-hand" class="fan"></div>
       </div>
 

@@ -3,7 +3,7 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
-      "includeFiles": "{fish,fish4,api}/**"
+      "includeFiles": "{fish,fish4,api,external_v07}/**"
     }
   },
   "rewrites": [
@@ -23,5 +23,5 @@
       ]
     }
   ],
-  "ignoreCommand": "if [ -z \"$VERCEL_GIT_PREVIOUS_SHA\" ]; then exit 1; fi; git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- api public vercel.json requirements.txt fish fish4 2>/dev/null && exit 0; exit 1"
+  "ignoreCommand": "if [ -z \"$VERCEL_GIT_PREVIOUS_SHA\" ]; then exit 1; fi; git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- api public vercel.json requirements.txt fish fish4 external_v07 2>/dev/null && exit 0; exit 1"
 }

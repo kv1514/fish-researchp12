@@ -314,6 +314,7 @@ async function pace() {
     S.pacing = false;
     renderClock(0, 0);
     render();
+    if (S.watch && S.snap && S.snap.terminal) watchGameOver();
   }
 }
 
@@ -672,25 +673,31 @@ function renderSeats() {
   const box = $("t-seats");
   box.innerHTML = "";
   for (let off = 0; off < 6; off++) {
-    // offset 0 is the viewer; going clockwise round the table from them.
-    const p = (s.seat + off) % 6;
-    const mine = (p % 2) === (s.seat % 2);
+    // offset 0 is the viewer; going clockwise round the table from them. A
+    // spectator has no seat, so the table is laid out from seat 0 and the
+    // team tags name the bots instead of a "you".
+    const anchor = s.spectate ? 0 : s.seat;
+    const p = (anchor + off) % 6;
+    const mine = s.spectate ? (p % 2) === 0 : (p % 2) === (s.seat % 2);
     const out = s.hand_counts[p] === 0;
     const d = el("div", "pod" + (mine ? " ours" : " theirs")
-      + (p === s.seat ? " me" : "") + (p === s.turn ? " active" : "")
-      + (out ? " out" : ""));
+      + (!s.spectate && p === s.seat ? " me" : "")
+      + (p === s.turn ? " active" : "") + (out ? " out" : ""));
     const { x, y } = seatPos(off);
     d.style.setProperty("--x", x.toFixed(2) + "%");
     d.style.setProperty("--y", y.toFixed(2) + "%");
 
-    const name = p === s.seat ? (nm(p) || "You") : nm(p);
+    const name = (!s.spectate && p === s.seat) ? (nm(p) || "You") : nm(p);
     d.appendChild(el("div", "puck", FN.initials(name)));
     d.appendChild(el("div", "nm", name));
     d.appendChild(el("div", "cards",
       s.hand_counts[p] + (s.hand_counts[p] === 1 ? " card" : " cards")));
     d.appendChild(el("div", "tag",
-      p === s.seat ? "you" : mine ? "partner" : "opponent"));
-    d.title = `${name} — seat ${p}, ${mine ? "your team" : "the other team"}`;
+      s.spectate ? (mine ? "team Dylan" : "team KV")
+        : p === s.seat ? "you" : mine ? "partner" : "opponent"));
+    d.title = s.spectate
+      ? `${name} — seat ${p}, ${mine ? "Dylan's" : "KV's"} team`
+      : `${name} — seat ${p}, ${mine ? "your team" : "the other team"}`;
     box.appendChild(d);
   }
 }
@@ -740,6 +747,19 @@ function renderSets() {
 
 function renderHand() {
   const s = S.snap;
+  if (s.spectate) {
+    // Nobody's cards are shown to a spectator -- the server never sends them.
+    $("t-handn").textContent = "";
+    const hb = $("t-hand");
+    hb.innerHTML = "";
+    hb.appendChild(el("p", "dim",
+      "You're spectating: Dylan's FishBot v0.7 (seats 0/2/4) vs " +
+      "KV's FishBot (seats 1/3/5). Hands stay hidden, as they are " +
+      "from the players themselves."));
+    $("t-handtitle").textContent = "Spectating";
+    return;
+  }
+  $("t-handtitle").textContent = "Your hand";
   $("t-handn").textContent = s.hand.length ? `(${s.hand.length})` : "(empty)";
   const box = $("t-hand");
   box.innerHTML = "";
@@ -770,9 +790,11 @@ function renderLastMove() {
     f.innerHTML = face(e.card);
     box.appendChild(f);
   }
+  const named = (t) => S.names
+    ? t.replace(/\bP([0-5])\b/g, (m, d) => S.names[+d] || m) : t;
   const txt = el("div", "lmtext");
-  txt.appendChild(el("div", "lmwhat", e.text));
-  if (e.proved) txt.appendChild(el("div", "lmproved", e.proved));
+  txt.appendChild(el("div", "lmwhat", named(e.text)));
+  if (e.proved) txt.appendChild(el("div", "lmproved", named(e.proved)));
   box.appendChild(txt);
 }
 
@@ -790,8 +812,14 @@ function renderLog() {
       d.appendChild(f);
     }
     const w = el("div", "wrap");
-    w.appendChild(el("div", "what", e.text));
-    if (e.proved) w.appendChild(el("div", "proved", e.proved));
+    // The server narrates in seat numbers; the table knows names. Substituting
+    // here keeps the wire format stable and the log readable, and it is what
+    // makes the exhibition legible -- "Dylan's v0.7 A asked KV's FishBot B"
+    // instead of "P0 asked P1".
+    const named = (t) => S.names
+      ? t.replace(/\bP([0-5])\b/g, (m, d) => S.names[+d] || m) : t;
+    w.appendChild(el("div", "what", named(e.text)));
+    if (e.proved) w.appendChild(el("div", "proved", named(e.proved)));
     d.appendChild(w);
     box.appendChild(d);
   }
@@ -1228,6 +1256,10 @@ function render() {
   if (!s) return;
   $("t-us").textContent = s.score.you;
   $("t-them").textContent = s.score.them;
+  $("t-us-label").textContent = S.watch ? "Dylan's FishBot" : "your team";
+  $("t-them-label").textContent = S.watch ? "KV's FishBot" : "them";
+  $("t-think").hidden = !!s.spectate;
+  $("t-auto").parentElement.hidden = !!s.spectate;
   $("t-void").textContent = s.score.nulled ? `${s.score.nulled} void` : "";
   $("t-turn").textContent = s.terminal ? "Game over"
     : s.your_turn ? "Your turn." : `${nm(s.turn)} to move.`;
@@ -1281,6 +1313,8 @@ $("t-next").addEventListener("click", () => {
 });
 
 $("t-quit").addEventListener("click", () => {
+  S.watch = false;
+  if (S.watchTimer) { clearTimeout(S.watchTimer); S.watchTimer = null; }
   if (inRoom()) leaveRoom();
   else show("start");
 });
@@ -1337,5 +1371,67 @@ function maybeAutoThink() {
   think(true);
 }
 
+/* ------------------------------------------------------------------ watch
+ *
+ * The 3v3 exhibition: Dylan's FishBot v0.7 (github.com/dylann4500/fishbot,
+ * its own C++ engine bridged server-side) on seats 0/2/4 against this site's
+ * engine, "KV's FishBot", on 1/3/5. Nobody is dealt in; the client steps the
+ * table one engine move at a time at the normal pace and keeps a running
+ * series tally. When a game ends the next one deals itself: a broadcast, not
+ * a replay -- every move is computed when the table reaches it. */
+
+const WATCH_NAMES = ["Dylan's v0.7 A", "KV's FishBot A",
+                     "Dylan's v0.7 B", "KV's FishBot B",
+                     "Dylan's v0.7 C", "KV's FishBot C"];
+
+function watchTally() {
+  const t = S.series || { d: 0, k: 0, games: 0 };
+  return `series: Dylan ${t.d} sets — KV ${t.k} sets over ${t.games} game${t.games === 1 ? "" : "s"}`;
+}
+
+async function startWatch() {
+  S.watch = true;
+  S.series = S.series || { d: 0, k: 0, games: 0 };
+  S.names = WATCH_NAMES.slice();
+  S.actions = [];
+  S.token = null;
+  S.hint = null;
+  try {
+    const j = await api("new", { mode: "spectate", step: 1 });
+    S.token = j.token;
+    S.actions = j.actions || [];
+    S.snap = j;
+    S.gen += 1;
+    show("table");
+    render();
+    pace();
+  } catch (e) {
+    S.watch = false;
+    toast(e.message);
+    show("start");
+  }
+}
+
+function watchGameOver() {
+  const s = S.snap;
+  if (!s || !s.terminal) return;
+  S.series.d += s.score.you;
+  S.series.k += s.score.them;
+  S.series.games += 1;
+  $("t-turn").textContent =
+    `Game over — Dylan ${s.score.you}, KV ${s.score.them}` +
+    (s.score.nulled ? ` (${s.score.nulled} void)` : "") +
+    ` · ${watchTally()} · next deal in a moment…`;
+  S.watchTimer = setTimeout(() => {
+    if (S.watch) startWatch();
+  }, 6000);
+}
+
+function initWatch() {
+  $("s-watch").addEventListener("click", startWatch);
+  if (new URLSearchParams(location.search).get("watch")) startWatch();
+}
+
 initStart();
 initRoomScreens();
+initWatch();

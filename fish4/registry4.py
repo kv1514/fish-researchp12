@@ -155,6 +155,16 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 REGISTRY = dict(_V03)
 REGISTRY["fishbot4"] = FishBot4
 
+# Dylan's FishBot v0.7 (github.com/dylann4500/fishbot), bridged through the
+# decide binary. Imported lazily: the binary and its build are optional for
+# everything except the exhibition, and an import error here would take the
+# whole registry down with it.
+def _dylan_v07(**kw):
+    from .dylan_v07 import DylanV07
+    return DylanV07(**kw)
+
+REGISTRY["dylan_v07"] = _dylan_v07
+
 # Register into the v0.3 registry too, so tools that only know about that one
 # keep working. Mutating the dict is deliberate: it avoids forking v0.3 code.
 _V03.setdefault("fishbot4", FishBot4)
