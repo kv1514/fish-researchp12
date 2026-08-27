@@ -55,10 +55,15 @@ _ROOT = Path(__file__).resolve().parents[1]
 
 # The binary is looked for where the repo keeps it for local runs and where the
 # deployment bundles it.  First hit wins.
+# api/bin holds the DEPLOYABLE binary (static, portable flags); external_v07
+# holds whatever the local build script last produced, which may be dynamic
+# and tied to this machine's glibc. The deployable one therefore wins: the
+# first deploy shipped both and the loader refused the local one on the
+# function's older glibc ("version GLIBC_2.38 not found").
 _BIN_CANDIDATES = [
-    _ROOT / "external_v07" / "fish_v07_decide",
     _ROOT / "api" / "bin" / "fish_v07_decide",
     Path("/var/task/api/bin/fish_v07_decide"),
+    _ROOT / "external_v07" / "fish_v07_decide",
 ]
 
 _SPEC_FILE = _ROOT / "external_v07" / "v07_spec.txt"
