@@ -306,29 +306,59 @@ def _load_fixture():
     return rules, d["live"], d["seat"], states
 
 
-def test_the_position_the_memo_got_wrong():
+@pytest.mark.parametrize("use_memo", [True, False])
+def test_the_position_the_memo_got_wrong(use_memo):
     """Both bounds, on the position that actually violated them.
 
     Roughly ten seconds: the correct search visits about 12,000 nodes here
     where the broken one visited 154, which is the size of the merge that was
     happening.
+
+    Run BOTH ways on purpose. The memo now ships off, and with it off this
+    position cannot exercise the key at all -- the test would pass because the
+    code it guards never runs, which is the failure mode the fixture exists to
+    prevent. The ``True`` arm keeps the key under test; the ``False`` arm
+    tests what actually ships.
     """
     rules, live, seat, states = _load_fixture()
     w = [1.0 / len(states)] * len(states)
     sv = ExactII(rules, list(live), seat, SPEC)
+    sv.use_memo = use_memo
     sv.deadline = time.monotonic() + 120.0
     v = sv.solve([_clone(s) for s in states], list(w))
     cv = sv.champion_value([_clone(s) for s in states], list(w))
     assert v - cv >= -1e-9, (
         f"best response {v:+.6f} below the champion {cv:+.6f} on the position "
-        f"the history-less memo key got wrong")
+        f"the history-less memo key got wrong (memo {use_memo})")
 
     sv2 = ExactII(rules, list(live), seat, SPEC)
+    sv2.use_memo = use_memo
     sv2.deadline = time.monotonic() + 120.0
     tree = sv2.champion_tree_value([_clone(s) for s in states], list(w))
     assert abs(tree - cv) < 1e-9, (
         f"the same champion strategy scores {tree:+.6f} in the tree and "
         f"{cv:+.6f} in the rollout")
+
+
+def test_the_memo_changes_no_value():
+    """Turning the memo off must be invisible to the answer.
+
+    This is what licenses the default. The memo hits about one lookup in ten
+    thousand once the key carries the path, so it buys nothing and stores one
+    large entry per node; removing it is only a speedup if the number that
+    comes out is the same one. If this ever fails, the memo was doing something
+    other than remembering and the default should go back.
+    """
+    rules, live, seat, states = _load_fixture()
+    w = [1.0 / len(states)] * len(states)
+    vals = []
+    for flag in (True, False):
+        sv = ExactII(rules, list(live), seat, SPEC)
+        sv.use_memo = flag
+        sv.deadline = time.monotonic() + 120.0
+        vals.append(sv.solve([_clone(s) for s in states], list(w)))
+    assert vals[0] == vals[1], (
+        f"memo on gives {vals[0]:+.9f}, memo off gives {vals[1]:+.9f}")
 
 
 # ---------------------------------------------------------------------------

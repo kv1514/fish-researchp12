@@ -265,6 +265,18 @@ class ExactII:
         self.spec = spec
         self.nodes = 0
         self._memo: dict = {}
+        #: Transposition memo, OFF by default. Measured on a support-18 m = 2
+        #: position: 19 hits in 200,001 lookups, one in ten thousand. That is
+        #: not a near miss, it is the structure of the problem -- once the fix
+        #: for the history bug put the path since the root into the key, two
+        #: nodes can only share a key by being reached through the same public
+        #: events, and the search almost never does that twice. What remained
+        #: was a dict growing one large entry per node, 199,982 of them here
+        #: and millions on the positions this solver most needs to reach.
+        #: Switchable, not deleted: tests4/test_exact_ii.py runs a position
+        #: both ways and requires the same value, which is the only thing that
+        #: makes turning it off a speedup rather than a change of answer.
+        self.use_memo = False
         #: the optimal action AT THE ROOT, once solve() has run. The value
         #: alone says the champion leaves something on the table; this says
         #: what it should have done instead, which is what a policy change has
@@ -448,20 +460,25 @@ class ExactII:
         # the path identifies the history without rebuilding it -- keying on
         # ``states[0].history`` directly was equally correct and unusably slow,
         # since it re-reprs a hundred events at every node.
-        key = (depth, path, tuple(sorted(
-            (tuple(s.hands), s.turn, tuple(s.set_winner), round(w, 12))
-            for s, w in zip(states, weights))))
-        hit = self._memo.get(key)
-        if hit is not None:
-            return hit
+        key = None
+        if self.use_memo:
+            key = (depth, path, tuple(sorted(
+                (tuple(s.hands), s.turn, tuple(s.set_winner), round(w, 12))
+                for s, w in zip(states, weights))))
+            hit = self._memo.get(key)
+            if hit is not None:
+                return hit
         done = [self._value(s) for s in states]
         if all(v is not None for v in done):
             r = sum(w * v for w, v in zip(weights, done))
-            self._memo[key] = r
+            if key is not None:
+                self._memo[key] = r
             return r
         if depth >= MAX_PLIES:
-            self._memo[key] = 0.0   # unresolved scores for nobody, as the
-            return 0.0              # harness does
+            if key is not None:
+                self._memo[key] = 0.0
+            return 0.0              # unresolved scores for nobody, as the
+                                    # harness does
 
         turn = states[0].turn
         if any(s.turn != turn for s in states):
@@ -470,7 +487,8 @@ class ExactII:
 
         r = (self._deviator(states, weights, depth, path) if turn == self.me
              else self._opponent(states, weights, depth, turn, path))
-        self._memo[key] = r
+        if key is not None:
+            self._memo[key] = r
         return r
 
     def _legal(self, st: GameState):
