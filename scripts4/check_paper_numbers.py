@@ -571,6 +571,17 @@ WATCH = [
      "unsolved upper bound", "bounded into"),
     ("ii_bound_unsolved.json", "headline_solved_mean_matched", "{:+.4f}",
      "matched solved mean", "solved mean over the same\ngames is"),
+    # The m = 1 layer, and the calibration that retracted the exploratory
+    # reading. The gap slope is watched hardest: it is the number that turned a
+    # negative result about Fish into a negative result about the instrument,
+    # and a drift back would silently restore a conclusion that was withdrawn.
+    ("ii_bound_m1.json", "control_ok", "{:d}",
+     "m=1 bounds control passed", "The control holds on"),
+    ("ii_bound_m1.json", "oneply_already_optimal", "{:d}",
+     "m=1 positions where one move is the whole exploit",
+     "One deviation attains the optimum on"),
+    ("ii_bound_analysis.json", "gap_slope_t_m1", "{:+.2f}",
+     "m=1 gap-vs-support t", "Slope $+0.0236$ per deal, $t ="),
     ("ii_bound_analysis.json", "oneply_already_optimal", "{:d}",
      "positions where one move is the whole exploit", "of the $100$"),
     ("ii_bound_analysis.json", "mean_gap_exact_minus_oneply", "{:+.4f}",
@@ -581,8 +592,9 @@ WATCH = [
      "one-ply gain at or below the cap", "At or below the cap it averages"),
     ("ii_bound_analysis.json", "oneply_wide_mean", "{:+.4f}",
      "one-ply gain above the cap", "($n = 169$); above it,"),
-    ("ii_bound_analysis.json", "n", "{:d}",
-     "positions in the one-ply comparison", "over all $248$ is"),
+    # The analysis's own position count is not watched: it is the same 248 the
+    # collector reports, from the same journal, and the paper quotes it once.
+    # Two entries on one number check the number twice and the paper once.
     # The exploitability lower bound. Watched because it is the only figure in
     # the paper that contradicts a sentence the paper used to make -- "we
     # compute no exploitability bound" -- and a number that overturns a claim

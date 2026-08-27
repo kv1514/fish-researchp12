@@ -4246,12 +4246,14 @@ $3$; $204$ unsolved at $m = 2$ with median support $60$ against a
 solved median of $4$. The obvious reading is that both reported means are
 therefore \emph{lower} bounds on the gain over the whole layer.
 
-That reading is an extrapolation, and at $m = 2$ it does not survive
-being checked. \S\ref{sec:iibounds} bounds every position in the layer
-instead of solving it, and the only quantity measurable on both sides of the
-cap is flat across it. The slope above is real where it is fitted and it does
-not continue. No corrected figure is offered, and none is claimed to be
-needed: what changes is the direction the uncertainty points, not the number.
+That reading is an extrapolation, and \S\ref{sec:iibounds} tries to replace it
+with bounds that hold on every position rather than a slope read past its data.
+The attempt does not settle it: the bounds are real, they were validated on
+$716$ positions, and they are too loose to decide. It does establish something
+smaller and firmer --- that the cheap proxy which \emph{looked} like it settled
+the question cannot, because the proxy loosens as the belief widens. No
+corrected figure is offered. The honest position is that the direction of this
+bias is unknown, not that it is known and favourable.
 
 \subsection{Bounding the layer instead of solving it}
 \label{sec:iibounds}
@@ -4312,10 +4314,57 @@ exploitation is a local error and not a sustained plan --- which is what makes
 the cheap bound as tight as it is, and is a fact about the champion worth
 having on its own.
 
-\paragraph{Across the cap, the gain is flat (exploratory).} Because the
-one-ply gain is computable everywhere and the exact gain is not, it is the only
-\emph{matched} instrument spanning the support cap. Splitting at the study's
-$24$:
+\paragraph{The same bounds at $m = 1$.} Correcting one layer and leaving the
+other resting on the slope would leave a reader unable to tell whether $m = 1$
+was checked and held or simply not checked, so it was checked. Over $200$
+games the layer has $644$ positions, of which $340$ are pinned --- the belief
+admits one deal, the gain is zero by construction, and they are counted
+separately rather than averaged in. Of the $304$ with a real belief, $276$ are
+solved exactly here, at a mean gain of $+0.4116$ against the $+0.4405$ of
+\S\ref{sec:ii} over its $305$; the difference is which positions each run
+reached, not a disagreement. The control holds on \textbf{$616/616$}, which
+with the $m = 2$ layer's $100/100$ is $716$ positions whose exact value lies
+inside its own bounds. One deviation attains the optimum on $543$ of the $616$
+--- $88\%$, the same fraction as at $m = 2$, on six times the sample.
+
+Only $13$ of the $304$ sit above the support cap, so at $m = 1$ there is very
+little to extrapolate across in the first place: $95\%$ coverage means the
+question the previous section worries about is nearly moot here. It is the
+long solvable range, not the unsolved tail, that makes this layer useful --- it
+is what allows the next paragraph to be measured at all.
+
+\paragraph{The cheap instrument loosens as the belief widens, which is why it
+cannot settle this.} Because the one-ply gain is computable everywhere and the
+exact gain is not, it looked like the only \emph{matched} instrument spanning
+the support cap. Whether it is depends entirely on whether its looseness is
+constant in support, and at $m = 2$ that could not be checked: exact values
+exist only up to support $12$ there, over which the gap shows no trend
+($t = -0.04$). Running the same bounds on the $m = 1$ layer --- cheaper, and
+solvable exactly out to support $24$ --- gives the range to check it, and the
+answer is that the gap \textbf{grows}:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+$m = 1$ support & exact minus one-ply & $n$ \\
+\midrule
+$2$--$4$   & $+0.0785$ & $209$ \\
+$5$--$8$   & $+0.2496$ & $31$ \\
+$9$--$16$  & $+0.3920$ & $29$ \\
+$17$--$24$ & $+0.1667$ & $7$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Slope $+0.0236$ per deal, $t = \mathbf{+6.27}$ over $276$ positions. So a
+one-ply figure that flattens or falls above the cap is exactly what a
+loosening instrument produces, whether the true gain is flat or rising. The
+$m = 2$ null is not evidence that the trend stops; it is evidence that this
+instrument stops tracking. Reported here as a measurement of the instrument.
+
+For completeness, what the comparison showed before that was known --- and
+which nothing above licenses reading as a fact about Fish. Splitting at the
+study's $24$:
 
 \begin{center}
 \begin{tabular}{lrr}
@@ -4333,25 +4382,17 @@ $151$ and up  & $+0.1899$ & $27$ \\
 \end{center}
 
 At or below the cap it averages $+0.2541$ ($n = 169$); above it, $+0.2350$
-($n = 79$); Welch $t = -0.42$. The slope against support over all $248$ is
-$-0.00032$ per deal, $t = -1.13$. The rise measured over supports $2$--$24$
-peaks around $9$--$60$ and falls away rather than continuing, which if it
-holds is a statement about the game: exploitability is largest at
-\emph{intermediate} uncertainty, not at maximum uncertainty. When the belief
-leaves almost everything open, exact play has little more to work with than
-the heuristic does, and the two converge again.
+($n = 79$); Welch $t = -0.42$. Taken at face value that says the rise stops.
+Taken with the calibration above, it says the instrument stops --- and the two
+readings cannot be told apart from this data.
 
-This comparison is \textbf{exploratory} and the pre-registration records it as
-such: it was added after the upper bound turned out not to bind, and its bands
-were chosen after seeing the support distribution. Its weakness is stated with
-it --- $L$ is a lower bound whose looseness is calibrated only where the exact
-value is also computed, at supports up to $12$. If the one-ply policy captured
-steadily less of the exact gain as support grew, a flat $L$ would be consistent
-with a rising exact gain. The gap shows no trend against support
-($t = +0.57$ over $100$ positions), which is weak evidence of a fixed offset
-rather than evidence of one. What can be said without qualification is the
-negative: the claim that the headline is a lower bound rested on a trend, and
-the only measurement that spans the cap does not show that trend.
+The comparison was \textbf{exploratory} from the start, and the
+pre-registration records it as such: it was added after the upper bound turned
+out not to bind, and its bands were chosen after seeing the support
+distribution. It is left in because the negative result about the instrument is
+worth having, and because a comparison that was run and then quietly dropped
+once it stopped supporting a conclusion is the thing this project is trying not
+to do. The pre-registered verdict is unchanged and stands alone: not settled.
 
 \subsection{Where the disagreements are, and one that is provable}
 \label{sec:iidiff}

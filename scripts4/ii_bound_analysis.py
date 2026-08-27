@@ -35,6 +35,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 JOURNAL = ROOT / "results" / "ii_bound_journal.jsonl"
+JOURNAL_M1 = ROOT / "results" / "ii_bound_m1_journal.jsonl"
 BANDS = [(1, 2), (3, 8), (9, 24), (25, 60), (61, 150), (151, 10 ** 9)]
 
 
@@ -66,19 +67,57 @@ def _slope(xs, ys):
     return b, (b / se if se > 0 else float("inf")), n
 
 
+def _load(path):
+    rows = [json.loads(x) for x in path.read_text().splitlines() if x.strip()]
+    fps = sorted(set(r["solver"] for r in rows))
+    if len(fps) > 1:
+        keep = max(fps, key=lambda f: sum(1 for r in rows if r["solver"] == f))
+        rows = [r for r in rows if r["solver"] == keep]
+    return rows
+
+
+def calibration(rows, label, bands):
+    """How the one-ply bound's looseness moves with support.
+
+    This is the question the whole exploratory comparison turns on, and it is
+    reported before that comparison rather than after. If the gap between the
+    exact gain and the one-ply gain GROWS with support, then a one-ply figure
+    that flattens or falls above the cap is what a loosening instrument
+    produces whether or not the true gain is flat, and the comparison cannot
+    arbitrate. Pinned positions (support 1) are excluded: their gain is zero by
+    construction and including 340 of them at m = 1 would drag every mean and
+    fit a slope through a spike at x = 1.
+    """
+    sel = [r for r in rows if r.get("gain_exact") is not None
+           and r["support"] > 1]
+    if len(sel) < 5:
+        print(f"{label}: {len(sel)} unpinned solved positions, too few to "
+              f"calibrate. Nothing is concluded from the comparison below.")
+        return None
+    xs = [r["support"] for r in sel]
+    ys = [r["gain_exact"] - r["gain_lower"] for r in sel]
+    sl = _slope(xs, ys)
+    g = _stat(ys)
+    print(f"{label}: gap between exact and one-ply, "
+          f"{len(sel)} unpinned solved positions")
+    print(f"   support range covered: {min(xs)}-{max(xs)}")
+    for lo, hi in bands:
+        b = [y for x, y in zip(xs, ys) if lo <= x <= hi]
+        if b:
+            print(f"   support {lo:>3}-{hi:<3}  gap {sum(b)/len(b):+.4f}  "
+                  f"(n={len(b)})")
+    print(f"   mean {g[0]:+.4f}; slope {sl[0]:+.5f} per deal, t = {sl[1]:+.2f}")
+    return sl, g, (min(xs), max(xs)), len(sel)
+
+
 def main() -> int:
     if not JOURNAL.exists():
         print("no journal; run scripts4/ii_bound_unsolved.py first")
         return 1
-    rows = [json.loads(x) for x in JOURNAL.read_text().splitlines() if x.strip()]
-    fps = sorted(set(r["solver"] for r in rows))
-    if len(fps) > 1:
-        # Rows from two fingerprints are two different measurements. Mixing
-        # them would average a bound computed under one budget with a bound
-        # computed under another and report the result as one number.
-        keep = max(fps, key=lambda f: sum(1 for r in rows if r["solver"] == f))
-        print(f"journal holds {len(fps)} fingerprints; using {keep} only")
-        rows = [r for r in rows if r["solver"] == keep]
+    # Rows from two fingerprints are two different measurements. Mixing them
+    # would average a bound computed under one budget with a bound computed
+    # under another and report the result as one number.
+    rows = _load(JOURNAL)
     games = sorted(set(r["game"] for r in rows))
     print(f"{len(rows)} positions over {len(games)} games "
           f"({games[0]}-{games[-1]})\n")
@@ -146,6 +185,41 @@ def main() -> int:
                       "evidence of one.")
         print()
 
+    # -- 2b. the calibration that decides whether question 3 means anything --
+    print("2b. Does the one-ply bound loosen as the belief widens?")
+    cal2 = calibration(rows, "   m = 2",
+                       [(2, 2), (3, 4), (5, 8), (9, 12)])
+    cal1 = None
+    if JOURNAL_M1.exists():
+        m1 = _load(JOURNAL_M1)
+        print()
+        cal1 = calibration(m1, "   m = 1",
+                           [(2, 4), (5, 8), (9, 16), (17, 24)])
+        p1 = [r for r in m1 if r["support"] == 1]
+        live1 = [r for r in m1 if r["support"] > 1]
+        ex1 = [r for r in live1 if r.get("gain_exact") is not None]
+        n1 = _stat([r["gain_lower"] for r in live1 if r["support"] <= 24])
+        w1 = _stat([r["gain_lower"] for r in live1 if r["support"] > 24])
+        print(f"   m = 1 layer: {len(m1)} positions, {len(p1)} pinned, "
+              f"{len(live1)} with a real belief")
+        if ex1:
+            print(f"     exact gain over unpinned solved: "
+                  f"{_stat([r['gain_exact'] for r in ex1])[0]:+.4f} "
+                  f"(n={len(ex1)})")
+        if n1 and w1:
+            se = (n1[1] ** 2 + w1[1] ** 2) ** 0.5
+            t = (w1[0] - n1[0]) / se if se > 0 else 0.0
+            print(f"     one-ply, support 2-24: {n1[0]:+.4f} (n={n1[2]}); "
+                  f"above 24: {w1[0]:+.4f} (n={w1[2]}); Welch t = {t:+.2f}")
+    if cal1 and cal1[0][1] > 2:
+        print("\n   The gap GROWS with support where the range is long enough")
+        print("   to see it. A one-ply figure that flattens or falls above the")
+        print("   cap is what a loosening instrument produces whether or not")
+        print("   the true gain is flat, so the comparison below CANNOT decide")
+        print("   the question it was built for. It is reported as a")
+        print("   measurement of the instrument, not as evidence about Fish.")
+    print()
+
     # -- 3. what does the one-ply gain do across the range? ------------------
     print("3. The one-ply gain across the whole range (computable everywhere)")
     print("   band          n   mean L-C")
@@ -189,6 +263,13 @@ def main() -> int:
         "oneply_wide_mean": sw[0] if sw else None,
         "oneply_slope": sl[0] if sl else None,
         "oneply_slope_t": sl[1] if sl else None,
+        "gap_slope_m2": cal2[0][0] if cal2 else None,
+        "gap_slope_t_m2": cal2[0][1] if cal2 else None,
+        "gap_support_range_m2": list(cal2[2]) if cal2 else None,
+        "gap_slope_m1": cal1[0][0] if cal1 else None,
+        "gap_slope_t_m1": cal1[0][1] if cal1 else None,
+        "gap_support_range_m1": list(cal1[2]) if cal1 else None,
+        "gap_mean_m1": cal1[1][0] if cal1 else None,
     }, indent=1))
     print(f"\nwrote {out.relative_to(ROOT)}")
     return 0
