@@ -482,3 +482,64 @@ def test_the_fast_history_key_matches_the_slow_one():
     for st in states[1:]:
         assert tuple(repr(e) for e in st.history) == first, (
             "deals at one information set disagree about the public history")
+
+
+# ---------------------------------------------------------------------------
+# The champion oracle's cache is keyed by information set AND by policy.
+#
+# It was keyed by information set alone. Every script here solves with one spec
+# per process so nothing published was wrong, but the first run that used two --
+# the same positions against the champion and against a corrected policy -- got
+# byte-identical answers for both on all 290 positions, because the second was
+# reading the first one's cached moves. Same fault as the memo key that omitted
+# the history, and caught the same way: by a result that could not have happened
+# if the code were right.
+# ---------------------------------------------------------------------------
+
+
+def test_two_policies_do_not_share_cached_moves():
+    rules = RuleConfig()
+    other = ("fishbot4", {"opponent_gamma": 0.35, "endgame_m": 9,
+                          "endgame_d_info": 8.0, "endgame_d_certain": -8.0})
+    differ = same = 0
+    rng = random.Random(3)
+    for seed in range(5):
+        st = GameState.deal(rules, seed=5_000 + seed)
+        for _ in range(90):
+            if st.is_terminal:
+                break
+            p = st.turn
+            # Ask the champion FIRST, so a spec-blind cache would hand the
+            # champion's move back for the second policy.
+            a = _champion_action(SPEC, rules, p, st)
+            b = _champion_action(other, rules, p, st)
+            if a is None or b is None:
+                break
+            if repr(a) == repr(b):
+                same += 1
+            else:
+                differ += 1
+            st.apply(p, a)
+    assert differ > 0, (
+        f"two policies with very different ask weights agreed on all "
+        f"{same} decisions, which means the cache is handing one policy's "
+        f"moves to the other")
+
+
+def test_the_info_key_does_not_carry_the_spec():
+    """The fix must be a separate bucket, not a longer key.
+
+    The first eight bytes of the info key seed the champion's own RNG. Folding
+    the spec into the digest would have fixed the sharing and changed what the
+    champion plays, repricing every number measured against it -- so the key
+    must still be a function of the information set alone.
+    """
+    import inspect
+
+    from fish4 import exact_ii
+
+    src = inspect.getsource(exact_ii._info_key)
+    assert "spec" not in src, (
+        "the spec leaked into _info_key, which changes the champion's seed")
+    assert "repr(spec)" in inspect.getsource(exact_ii._champion_action), (
+        "the cache is no longer bucketed by spec")

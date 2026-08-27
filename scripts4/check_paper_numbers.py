@@ -587,6 +587,15 @@ WATCH = [
      "endgame ask, primary vs champion", "vs champion, registered"),
     ("endgame_ask_replication.json", "replication.diff", "{:+.4f}",
      "endgame ask, replication vs champion", "vs champion, replication"),
+    # The negative result beside the positive one. The best-response line is
+    # what says the correction does not reduce exploitability, and it is the
+    # figure most likely to be quietly dropped if it ever drifted.
+    ("ii_exploit_after_split_m1.json", "parts.best response.diff", "{:+.4f}",
+     "best response after the fix", "what a best response takes"),
+    ("ii_exploit_after_split_m1.json", "parts.policy's own value.diff",
+     "{:+.4f}", "policy value after the fix", "the policy's own value &"),
+    ("ii_exploit_after_split_m1.json", "n", "{:d}",
+     "positions paired across policies", "Over $285$"),
     ("ii_one_move_m1.json", "champ_p_mean", "{:.3f}",
      "m=1 champion ask hit rate", "$m = 1$ & $p ="),
     ("ii_one_move_m1.json", "best_p_mean", "{:.3f}",

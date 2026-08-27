@@ -4711,6 +4711,40 @@ running the entire exact solver in the endgame gains ($+0.0765$). The
 prediction that the endgame is too thin a slice of the game to matter was
 wrong, and it is recorded here because it was written down first.
 
+\paragraph{It wins more; it is not harder to exploit.} Winning duels and being
+less exploitable are different claims, and the solver can be asked the second
+one directly: it takes the opponents' policy as an argument, so the same
+positions can be solved twice. Over $285$ $m = 1$ positions from champion
+self-play, each solved against the champion and against the champion plus the
+correction --- same position, same belief, same hand, so nothing about the
+position can explain a difference:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+paired change & estimate & $95\%$ CI \\
+\midrule
+the policy's own value & $+0.0189$ & $[-0.0132, +0.0509]$ \\
+what a best response takes & $-0.0002$ & $[-0.0264, +0.0260]$ \\
+the gap between them & $-0.0190$ & $[-0.0587, +0.0206]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Neither clears zero, and the two nulls are not the same null. The own-value
+change is simply underpowered --- a half-width of $0.032$ around $+0.019$, with
+the sign the in-play result predicts. The best-response change is
+\emph{pinned}: $-0.0002$ with a half-width of $0.026$, an interval that
+excludes any reduction the size of the $+0.1220$ the correction gains in play.
+A best response still takes the same amount.
+
+So the correction does not buy its winnings by closing the hole. That is a
+limit on the method rather than on this particular fix, and it is worth stating
+because the method is the interesting part of this section: an exact best
+responder used as a \emph{critic} improves average-case play, and nothing about
+fixing the moves it flags makes the worst case harder to reach. Exploitability
+and strength are being measured, and they moved independently.
+
 \paragraph{What did not change.} FishBot4's own defaults. The champion is the
 reference point for every measurement in this paper, and moving it would
 silently reprice all of them at once; the correction ships in

@@ -195,11 +195,28 @@ def consistent_deals(obs: Observation, bel, hs: int) -> list:
     return out
 
 
-#: Memo for the champion oracle. It is a PURE FUNCTION of the information set
-#: -- that is the whole point of seeding it from the observation hash -- so
-#: caching it changes no value, only the time to get one. Without it the solver
-#: rebuilt an agent and replayed a hundred-event history at every node of every
-#: branch, and twenty games took over two hours to reach four.
+#: Memo for the champion oracle, ONE BUCKET PER SPEC. It is a pure function of
+#: the information set AND of the policy being asked -- that is the whole point
+#: of seeding it from the observation hash -- so caching it changes no value,
+#: only the time to get one. Without it the solver rebuilt an agent and replayed
+#: a hundred-event history at every node of every branch, and twenty games took
+#: over two hours to reach four.
+#:
+#: THE SPEC WAS MISSING FROM THE KEY. Every script here solves with a single
+#: spec per process, so nothing published was affected; the first run that used
+#: two -- solving the same positions against the champion and against a
+#: corrected policy, to ask whether the correction reduces exploitability --
+#: got byte-identical answers for both on all 290 positions, because the second
+#: policy was reading the first one's cached moves. A cache key that omits
+#: something the value depends on is the same fault as the memo key that
+#: omitted the history, found the same way: by a control that could not have
+#: passed if the code were right.
+#:
+#: Bucketing rather than folding the spec into the digest is deliberate. The
+#: first eight bytes of that digest seed the champion's own RNG, so extending
+#: it would change what the champion PLAYS and reprice every number measured
+#: against it. The info key stays byte-identical; only which dictionary it is
+#: looked up in changes.
 _CHAMP_CACHE: dict = {}
 
 
@@ -238,7 +255,10 @@ def _champion_action(spec, rules, seat, st, hist=None):
     from fish4.registry4 import make_agent
     obs = Observation.from_state(st, seat)
     key = _info_key(seat, obs, hist)
-    hit = _CHAMP_CACHE.get(key)
+    bucket = _CHAMP_CACHE.get(repr(spec))
+    if bucket is None:
+        bucket = _CHAMP_CACHE[repr(spec)] = {}
+    hit = bucket.get(key)
     if hit is not None:
         return hit[0]
     a = make_agent(spec)
@@ -247,7 +267,7 @@ def _champion_action(spec, rules, seat, st, hist=None):
         act = a.act(obs)
     except Exception:
         act = None
-    _CHAMP_CACHE[key] = (act,)
+    bucket[key] = (act,)
     return act
 
 
