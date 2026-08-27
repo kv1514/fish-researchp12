@@ -1,13 +1,13 @@
 % =====================================================================
-% FishBot v0.4
-% Exact Combinatorial Inference and Opponent Modelling in Six-Player
-% Literature
+% Exact Inference Is Not Enough
+% Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
+% in Six-Player Literature
 % =====================================================================
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=1in,top=0.95in,bottom=1.05in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
 \usepackage{microtype}
@@ -15,6 +15,30 @@
 \usepackage{natbib}
 \usepackage{multirow}
 \usepackage{xcolor}
+\usepackage[font=small,labelfont=bf,skip=6pt]{caption}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{setspace}
+
+% -- Spacing -----------------------------------------------------------
+% The complaint this addresses is white space, and in a document with 48
+% tables set inline the slack collects in three places: around headings,
+% around the display blocks holding those tables, and at the foot of a page
+% whose last paragraph will not fit. The first two are tightened here; the
+% third is left to \raggedbottom, which parks the slack in ONE gap at the
+% bottom rather than stretching every inter-paragraph space on the page to
+% hide it. Stretching is what makes a page look loose all over.
+\titlespacing*{\section}{0pt}{2.1ex plus .6ex minus .2ex}{1.2ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus .5ex minus .2ex}{0.9ex plus .2ex}
+\titlespacing*{\paragraph}{0pt}{1.3ex plus .3ex minus .2ex}{1em}
+\setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
+\setlist[enumerate]{itemsep=2pt,topsep=4pt,parsep=0pt}
+\setlist[itemize]{itemsep=2pt,topsep=4pt,parsep=0pt}
+\raggedbottom
+\clubpenalty=9999
+\widowpenalty=9999
+\displaywidowpenalty=9999
 
 \newtheorem{proposition}{Proposition}
 \newtheorem{lemma}{Lemma}
@@ -26,129 +50,88 @@
 \newcommand{\ind}[1]{\ensuremath{\mathbf{1}\!\left[#1\right]}}
 \newcommand{\sets}{\ensuremath{\Delta}}
 
-\title{\textbf{FishBot v0.4}\\[0.4em]
-\large Exact Combinatorial Inference, Opponent Modelling, and the Limits of
-the Uniform Posterior in Six-Player Literature}
+\title{\vspace{-1.6cm}\bfseries Exact Inference Is Not Enough:\\[0.1em]
+\large Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
+in Six-Player Literature\vspace{-0.2em}}
 
-\author{}
-\date{}
+\author{\normalsize Kausthubh Veldanda\\[-0.2em]
+\small\texttt{kveldanda987@gmail.com}}
+\date{\small 27 August 2026\vspace{-0.4em}}
 
 \begin{document}
 \maketitle
+\vspace{-2.2em}
 
 % =====================================================================
+% The abstract is set small and tight on purpose: it has to hold every
+% headline number in the paper and still finish on the first page, which is
+% where a reader decides whether to read the other seventy-two.
 \begin{abstract}
-Literature (also called Fish) is a six-player, two-team,
+\small\setstretch{0.95}\setlength{\parskip}{0pt}\noindent
+Literature --- also called Fish --- is a six-player, two-team,
 imperfect-information card game in which players interrogate opponents for
-specific cards and score by declaring the exact distribution of a six-card
-half-suit among their own team. It is a team game with hidden information and
-no legal communication channel, so neither the two-player zero-sum machinery
-that solved poker nor the fully cooperative machinery developed for Hanabi
-applies directly.
+named cards and score by declaring the exact distribution of a six-card
+half-suit among their own team. Hidden information plus no legal communication
+channel puts it outside both the two-player zero-sum machinery that solved
+poker and the fully cooperative machinery developed for Hanabi. This paper is
+the fourth iteration of an engine for it, organised around the results that
+contradicted the expectations motivating them.
 
-The previous version of this engine ended by naming its own bottleneck: its
-belief sampler was documented as \emph{not uniform} over the deals consistent
-with the public record, so every probability it reported inherited an
-unquantified bias. This paper removes that bias, and reports what happened.
+We first make the inference exact. Hidden-state inference here reduces to counting assignments in a
+degree-constrained bipartite system, $\#P$-complete in general but small in the
+dimension that matters: real positions carry $25.1$ unlocated cards but only
+$4.1$ \emph{distinct candidate sets}, so cards are exchangeable and the problem
+collapses onto a count matrix with at most nine rows. A dynamic program over
+that structure returns the exact partition function, marginals, uniform samples
+and joint probabilities, validated against exhaustive enumeration.
 
-We first show that hidden-state inference in Literature reduces to counting
-assignments in a degree-constrained bipartite system, which is $\#P$-complete
-in general but tiny in the dimension that matters here: real positions have
-$25.1$ unlocated cards on average but only $4.1$ \emph{distinct candidate
-sets}, so cards are exchangeable and the problem collapses onto a count matrix
-with at most $9$ rows across the corpus we measured. A dynamic program over that structure returns the exact partition
-function, exact marginals, exact uniform sampling and exact joint probabilities,
-validated against exhaustive enumeration. The one part it cannot absorb --- the
-disjunctive constraints certifying that an asker held a card of the half-suit
---- we handle by importance sampling with closed-form proposal densities, after
-measuring why the two obvious alternatives fail.
-
-The result is that the inference is now provably correct, and \textbf{it changed
-nothing}: against the previous champion, with the ask objective held fixed, the
-set differential was $-0.22$ per duplicate deal-pair, 95\% CI
-$[-0.96, +0.52]$.
-
-To find out why, we built a benchmark the previous version lacked: because the
-hidden hands exist in simulation, a posterior can be scored directly on how much
-probability it places on where the cards actually are. Over 517 decisions and
-13{,}640 uncertain-card predictions, the \emph{exactly uniform} posterior was
-\emph{worse} at predicting reality than the biased sampler it replaced
-(negative log-likelihood $1.362$ against $1.341$ at a matched budget). The
+Making the posterior exactly correct \textbf{changed nothing} in play
+($-0.22$ sets per duplicate deal-pair, 95\% CI $[-0.96, +0.52]$), and made it
+measurably \emph{worse} at predicting reality: over $517$ decisions and
+$13{,}640$ uncertain-card predictions the exactly uniform posterior scored a
+negative log-likelihood of $1.362$ against the biased sampler's $1.341$. The
 uniform posterior is a correct theorem about a false hypothesis --- that
-players' choices carry no information beyond legality --- and the old sampler's
-bias happened to encode a crude opponent model.
+players' choices carry no information beyond legality --- and the sampler it
+replaced had accidentally encoded a crude opponent model. Replacing the
+accident with an explicit one-parameter model recovers the loss and is worth
+$\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair}, 95\% CI
+$[+1.54, +2.17]$. Tripling the sampling budget is worth a further $+0.340$, more than three
+times what belief-space search buys: the leverage in this game sits in the
+belief rather than in what is computed from it.
 
-Replacing the accident with an explicit one --- a single parameter modelling the
-hypothesis that a player asks in a half-suit in proportion to how many cards of
-it they hold --- beats both on posterior accuracy ($1.325$) and is worth
-$\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair} in play, 95\% CI
-$[+1.23, +2.46]$, essentially flat over a threefold range of the parameter. For
-scale, the entire objective improvement separating the previous champion from
-its own baseline was $1.26$ sets per pair.
+We then solve the endgame. Its perfect-information value has a closed form
+verified at every $m$; under
+\emph{imperfect} information we compute exact best responses over information
+sets against the engine's own policy, measuring its exploitability rather than
+bounding it --- $+0.4405$ over $305$ positions at $95\%$ coverage with one
+half-suit live, $+0.3250$ at $35\%$ with two. Because two
+thirds of the second layer is out of reach, we bound it rather than
+extrapolate: a single-deal solve is the perfect-information relaxation and
+upper-bounds any imperfect-information best response, while the best one-ply
+deviation followed by incumbent play lower-bounds it. The exact value lies
+inside its own interval on all $716$ positions where both are computed. The
+bounds do not settle whether the reported figures are lower bounds on their
+layers, and they show that the cheap instrument which appeared to settle it
+cannot: its looseness \emph{grows} with belief support ($t = +6.27$).
 
-The resulting engine beats the previous champion by \textbf{+1.85 sets per
-deal-pair} $[+1.54, +2.17]$ over 500 duplicate deals, wins every pair against
-the two weakest policies in the ladder, and improves agreement with provably
-optimal play in exactly solved positions from $67.6\%$ to $72.5\%$. Nothing else
-we tried helped: an eleven-term ask objective, a learned half-suit value, a
-rollout-regression objective, and a widened exact endgame solver are all
-reported as nulls, and the one screening cell that did resolve failed to
-replicate twice. We also build the one search design the variance diagnosis
-leaves open --- a lookahead over the posterior rather than over sampled
-layouts --- and prove that its natural form is exactly greedy at every depth, so
-that only the quota coupling between candidates can make such a search
-non-trivial. Settling whether the coupled form helps took 9{,}700 duplicate
-deal-pairs across four rounds; the answer, from a pre-registered test over the
-final 6000, is $+0.104$ sets per deal-pair, 95\% CI $[+0.020, +0.189]$. The route
-there is the more useful finding, and the estimate over rounds is the shape of
-it: $+0.570$ at the 200-pair screening cell that started this, $+0.153$ pooled
-over the unselected cells, $+0.104$ pre-registered. Three runs of the
-identical configuration returned $+0.570$, $-0.044$ and $+0.386$ sets per
-deal-pair, disagreeing by more than their own intervals allow ($Q = 7.03$,
-$p = 0.030$), which suggested a between-run variance component that no interval
-in this paper models. We measured that directly --- 24 blocks of an A/A, where
-the true differential is exactly $0$ --- and it does not exist: coverage of the
-nominal 95\% interval is $23/24$, $Q = 18.41$ on 23 df at $p = 0.735$, and the
-estimated between-run standard deviation is $0.0000$. The intervals are honest
-and the three-cell disagreement was the one-in-thirty event. Establishing that
-required giving the harness the ability to observe its own null, which it did not
-have: under seat-based seeding an A/A is bit-identical in both halves of a
-duplicate pair and its differential is exactly zero for every deal. Two later results bear on where the remaining strength is. Tripling the
-posterior sampling budget, from 160 draws to 480, is worth
-$\mathbf{+0.340}$ \textbf{sets per deal-pair}, 95\% CI $[+0.243, +0.436]$ over a
-pre-registered 6000-pair run with all six blocks positive and $I^2 = 0\%$ --- the
-largest effect in this study after the opponent model itself, and more than three
-times the belief-space search. It is affordable because a decision costs
-$3.57$\,ms of fixed work plus $6.3\,\mu$s per draw, so tripling the sampler costs
-$1.38\times$ rather than $3\times$; profiling locates that fixed term in per-card
-dispatch inside a sequential sampler, where there is nothing to hoist. Since the
-objective ranks barely better than $\Prob(\text{success})$ alone and nearly every
-term added beside it is null, we read this as evidence that the leverage in this
-game is in the belief rather than in what is computed from it.
+The solver also does something no duel can: it names the move. Exploitation in
+the endgame is almost always \emph{one} move ($88/100$ at $m = 2$, $543/616$ at
+$m = 1$); that move is an ask rather than a declaration; and it is
+systematically riskier than the engine's ($p = 0.218$ against $0.799$, paired
+$t = -18.88$, with the engine asking a card it was \emph{certain} to receive on
+$73$ of $122$ positions and still being wrong). Fitting the ask objective
+against exact one-ply values overturns the obvious diagnosis --- de-weighting
+the success probability changes nothing --- and isolates certainty rather than
+probability as the defect. The resulting one-parameter correction, pre-registered and replicated, gains
+$\mathbf{+0.1220}$ $[+0.0711, +0.1729]$ sets on top of the configuration the
+public engine actually plays. It does \emph{not} make that policy harder to
+exploit: paired over $285$ positions, what a best response extracts moves by
+$-0.0002$, half-width $0.026$. An exact best responder used as a critic
+improves average-case play and leaves the worst case where it was. We also report two solver faults caught by controls needing no ground truth.
 
-The second is a retraction. This paper closed its objective-learning line on the
-claim that the belief tracker \emph{cannot} attach to a determinized mid-game
-position. It can, in a few lines. On identical positions, worlds and root asks,
-finishing rollouts with the full engine instead of a public-information
-heuristic raises the target's slope on $\Prob(\text{success})$ from
-$+0.040 \pm 0.045$ to $+0.681 \pm 0.142$, a paired difference of
-$+0.641 \pm 0.145$; the heuristic needs $181$ plies to finish a position the
-engine finishes in $26$. The diagnosis was right about the mechanism and wrong
-that it was a wall. We report it as the fifth appearance in this study of the
-same error --- reasoning about a quantity instead of measuring it --- and the
-first in which it closed a research direction rather than merely inflating a
-number, because a negative claim generates no experiment.
-
-We also report several
-methodological corrections, including a bias in the previous harness's handling
-of timed-out games that we demonstrate can place the true value outside a
-reported 95\% confidence interval; a measurement showing that the previous
-version's 600-pair experiment cells could not resolve effects below about
-$0.44$ sets per pair, so its smaller null results were uninformative rather
-than negative; and the finding that the per-pair standard deviation those
-calculations rest on is not a property of the game at all but of how often the
-two policies being compared diverge, which systematically over-sizes exactly the
-near-identical comparisons that most need care.
+\vspace{1pt}
+\noindent\textbf{Keywords:} imperfect-information games; exact inference;
+opponent modelling; exploitability; endgame solving.
 \end{abstract}
 
 % =====================================================================
@@ -400,10 +383,10 @@ An imperfect-information study is worthless if the agents can see the hidden
 state, and the failure mode is usually subtle rather than flagrant. The
 boundary is enforced four ways.
 
-\paragraph{Structural.} The engine's \texttt{GameState} never reaches a
-policy. Policies consume only an \texttt{Observation}: their own hand, the
-public event log, public hand counts, resolved half-suits, whose turn it is,
-and the rules.
+\paragraph{Structural.} The engine's \texttt{GameState} object never reaches a
+policy at all. Policies consume only an \texttt{Observation}: their own hand,
+the public event log, public hand counts, resolved half-suits, whose turn it
+is, and the rules.
 
 \paragraph{Proved by reconstruction.} \texttt{Observation.reconstruct} rebuilds
 a seat's entire view from nothing but (rules, that seat's initial hand, the
@@ -1302,7 +1285,7 @@ $6.7$\,ms (mean $8.3$, p90 $18.1$, over $40$ positions, minimum of three
 repetitions each) on the contended host of Section~\ref{sec:counting}.
 
 Against the configuration the lookahead runs actually used --- $160$ draws, the
-\texttt{fish4/agent4.py} default, since no lookahead cell in
+\path{fish4/agent4.py} default, since no lookahead cell in
 \texttt{results/v04\_duels.jsonl} overrides \texttt{n\_draws} --- the relevant
 posterior cost is the $31.9$\,ms row of Table~\ref{tab:posterior}, not the
 $\sim\!100$\,ms rows, which are all $512$-draw. So the bonus now adds roughly a
@@ -3301,7 +3284,7 @@ the unwatched figure was among the most load-bearing in the document, for the
 same reason: the numbers a paper repeats most are the ones nobody re-derives.
 
 The manifest cannot find its own gaps, so the check is now inverted as well.
-\texttt{scripts4/unwatched\_claims.py} extracts every number the paper asserts
+\path{scripts4/unwatched_claims.py} extracts every number the paper asserts
 in \textbf{bold} --- its strongest claims, the ones a reader takes as measured
 --- and requires each to be either pinned by the manifest or exempted with a
 \emph{stated reason}; an exemption with no reason is indistinguishable from an
@@ -3598,8 +3581,8 @@ argues that waiting to claim is close to free, and reports that over $150$
 duplicate deals the $0.97$ and $0.999$ policies never once diverged.
 
 That cell was selected out of $103$ for excluding zero, so it is inadmissible as
-evidence and \texttt{jobs/SCREENING\_DISCIPLINE.md} forbids it from sizing its
-own confirmation. \texttt{jobs/PREREGISTRATION\_claim\_threshold.md} fixes, in
+evidence and \path{jobs/SCREENING_DISCIPLINE.md} forbids it from sizing its
+own confirmation. \path{jobs/PREREGISTRATION_claim_threshold.md} fixes, in
 advance: two blocks of $1000$ fresh pairs; a minimum interesting effect of
 $+0.02$, deliberately an order of magnitude below the $+0.15$ used elsewhere,
 because this change is one constant and costs nothing to run; a fixed-effect
@@ -5298,7 +5281,7 @@ result invites replication; ``this cannot be done'' invites moving on, and the
 sentence that closes a direction is exactly the sentence nobody tests.
 
 Having been caught once, we swept the engine for the rest of them.
-\texttt{fish4/NEGATIVE\_CLAIMS.md} registers every load-bearing impossibility
+\path{fish4/NEGATIVE_CLAIMS.md} registers every load-bearing impossibility
 claim in the source with a verdict: one refuted (the above), one true in the
 limit and false where the engine operates (a proposal twist ``cannot change what
 the policy computes'' --- correct asymptotically, and at the shipped 160 draws it

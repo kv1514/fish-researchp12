@@ -146,7 +146,7 @@ WATCH = [
      "hsvalue held-out log-loss",
      "half-suit value model is good --- held-out log-loss"),
     ("precision_verdict.json", "pooled.fe", "{:.3f}", "precision pooled",
-     "posterior sampling budget, from 160 draws to 480"),
+     "Six blocks of $1000$ duplicate deal-pairs"),
     ("at_ask_verdict.json", "pooled.fe", "{:.4f}", "at-ask pooled",
      "sized against a minimum interesting effect"),
     ("continuation_compare.json", "v04.slope", "{:.3f}", "v04 slope",
@@ -250,17 +250,17 @@ WATCH = [
     # whole life, so the single most load-bearing number in the paper was the
     # one figure this manifest could not watch. It is quoted in five places.
     ("settle_verdict.json", "pooled.fe", "{:.3f}", "lookahead, pre-registered",
-     "final 6000, is"),
+     "four rounds and $6000$ pre-registered pairs"),
     ("settle_verdict.json", "secondary.pooled.fe", "{:.3f}",
      "lookahead, unselected pool", "secondary --- all ten unselected cells"),
     ("settle_verdict.json", "n_pairs", "{:d}", "pairs in the settling run",
-     "final 6000, is"),
+     "four rounds and $6000$ pre-registered pairs"),
     # The programme total. It was quoted as 15,600 in the abstract and again in
     # the results, and matched nothing: not the table (9,700), not the record
     # with the stacking run added (15,700). Nobody could recompute it, so it
     # drifted unchallenged. It is now computed from the duel record.
     ("settle_verdict.json", "programme_pairs", "{:,d}",
-     "the lookahead programme's cost", "duplicate\ndeal-pairs across four"),
+     "the lookahead programme's cost", "deal-pairs across four rounds"),
     ("settle_verdict.json", "programme_rounds.settling", "{:d}",
      "pairs in the settling round", "6000 in the pre-registered settling"),
     # The basis comparison. Its point is that the winner's margin CONTAINS
@@ -448,13 +448,16 @@ WATCH = [
     # figure in the paper, outside every drift check, because it lives in a
     # JSONL and everything else lives in JSON.
     ("duel:FINAL: v04 champion vs v03 champion", "diff_mean", "{:.2f}",
-     "margin over the v0.3 champion", "beats the previous champion by"),
+     "margin over the v0.3 champion",
+     "explicit one-parameter model recovers the loss"),
     ("duel:FINAL: v04 champion vs v03 champion", "n_pairs", "{:d}",
-     "pairs behind the headline", "over 500 duplicate deals"),
+     "pairs behind the headline", "champion (\\texttt{tuned})"),
     ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.0", "{:.2f}",
-     "headline interval, low", "beats the previous champion by"),
+     "headline interval, low",
+     "explicit one-parameter model recovers the loss"),
     ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.1", "{:.2f}",
-     "headline interval, high", "beats the previous champion by"),
+     "headline interval, high",
+     "explicit one-parameter model recovers the loss"),
     # The absolute-strength table. Its rates were computed in the LaTeX and
     # stored nowhere, so the table carrying this paper's independent
     # confirmation of the opponent model -- including the contrast the
