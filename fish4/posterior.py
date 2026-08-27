@@ -485,8 +485,11 @@ class Posterior:
         ``claim4.best_for_half_suit`` returns a pair -- the probability that a
         specific split is right, and the probability the half-suit is ours at
         all -- and ``forced_claim`` scores a declaration with both, as
-        ``p_exact - (1 - p_team)``. Under the baseline null rule the two carry
-        EQUAL weight in that ranking. The first came from this posterior; the
+        ``p_exact - (1 - p_team)``. Under the legacy null variant the two
+        carried EQUAL weight in that ranking; under the opponent-award
+        baseline ``p_team`` cancels out of it entirely (every wrong outcome
+        costs the same set), so this joint query now serves diagnostics and
+        the null-variant path rather than the shipped forced ranking. The first came from this posterior; the
         second was ``prod(sum of team marginals per card)``, an independence
         product over cards that compete for the same quota slots. The same
         method's own docstring says three lines earlier that the product of

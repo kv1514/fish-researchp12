@@ -10,10 +10,12 @@ What is worth testing is the part that is a claim about the rules:
 
 * a team that holds no card of a half-suit can never come to hold one, because
   the ask legality check requires the foothold;
-* a claim on a half-suit your team holds none of scores for the OPPONENTS, so
-  there is no denial available -- this is the step that rules out converting a
-  certain loss into a null, and it is the one an innocuous-looking change to
-  ``wrong_distribution_outcome`` could break;
+* a declaration on a half-suit your team holds none of scores for the
+  OPPONENTS, so there is no denial available. Under the legacy null variant
+  this was the step ruling out converting a certain loss into a null; under
+  the opponent-award baseline there are no nulls at all, so the property
+  only strengthens -- and it holds under BOTH settings, which the misdeclare
+  test below checks explicitly;
 * the greedy playout terminates and realises the formula.
 
 The third is checked on a handful of seeded positions, not on a sample large
@@ -84,17 +86,23 @@ def test_a_footholdless_team_cannot_deny_a_half_suit():
     assert seen > 0, "no footholdless half-suit ever arose; test is vacuous"
 
 
-def test_a_null_is_reachable_when_the_team_owns_the_whole_half_suit():
-    """The converse of the previous test. If nothing can ever null, that test
-    passes for the wrong reason."""
-    rules = RuleConfig()
+def test_a_misdeclared_wholly_owned_half_suit_costs_the_set_under_both_rules():
+    """The converse of the previous test. If a wrong order can never cost
+    anything, that test passes for the wrong reason. Under the baseline the
+    cost is the set awarded to the foe; under the pinned legacy variant it is
+    a null."""
     hands = [0] * NUM_PLAYERS
     for i in range(CARDS_PER_HALF_SUIT):
         hands[0 if i < 3 else 2] |= 1 << i
     hands[1] |= 1 << CARDS_PER_HALF_SUIT
     sw = [None, None] + [0] * 7
-    st = GameState.from_components(rules, hands, 0, sw)
     wrong = (2, 2, 2, 0, 0, 0)          # right team, wrong split
+    st = GameState.from_components(RuleConfig(), list(hands), 0, list(sw))
+    ev = st.apply(0, Claim(0, wrong))
+    assert ev.winner == 1
+    st = GameState.from_components(
+        RuleConfig(wrong_distribution_outcome="null"), list(hands), 0,
+        list(sw))
     ev = st.apply(0, Claim(0, wrong))
     assert ev.winner == NULL_TEAM
 

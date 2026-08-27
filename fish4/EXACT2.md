@@ -330,9 +330,13 @@ claim at most the f half-suits it has a foothold in *now*.
 
 **B. A team with no foothold in h cannot deny h.** All six cards of h are in
 opponents' hands, so in `_apply_claim` the `any(team_of(h) != team)` branch
-fires for every assignment it could submit and `winner = 1 - team`. There is no
-spite-null available: the mover cannot convert a certain -1 into a 0. Hence the
-opponents take all m - f regardless of what the mover does.
+fires for every assignment it could submit and `winner = 1 - team` -- under
+BOTH misdeclaration rules. Under the legacy null variant the further point
+was that no spite-null is available: the mover cannot convert a certain -1
+into a 0. Under the opponent-award baseline the premise only strengthens,
+since nulls do not exist at all (not even the owning team can void its own
+set; a wrong order gifts it instead). Hence the opponents take all m - f
+regardless of what the mover does.
 
 **C. The mover takes all f without surrendering the turn.** A hit retains the
 turn; `_apply_claim` never touches `self.turn`; a claim that empties the

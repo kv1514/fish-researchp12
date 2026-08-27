@@ -94,24 +94,25 @@ def test_the_headline_number_is_stored_not_just_printed():
 # What the registry may claim
 # ---------------------------------------------------------------------------
 
-def test_the_combined_spec_matches_what_the_website_plays():
-    """The registry named a configuration the site was already running unnamed.
+def test_the_deployed_spec_matches_what_the_website_plays():
+    """The registry names the configuration the site runs.
 
-    If the two drift, the constant stops describing the thing whose estimate is
-    quoted beside it -- and that estimate is chained from two runs of exactly
-    this spec.
+    If the two drift, the constant stops describing the thing whose estimate
+    is quoted beside it. Since the misdeclaration-rule correction the live
+    name is V06_DEPLOYED (V04_COMBINED minus the withdrawn endgame ask
+    correction); V04_COMBINED keeps its void-era definition and numbers.
     """
     sys.path.insert(0, str(ROOT))
     import os
     os.environ.setdefault("FISH_SECRET", "test-secret-for-registry-comparison")
-    from fish4.registry4 import V04_COMBINED
+    from fish4.registry4 import V06_DEPLOYED
     from api._engine import WEB_DRAWS, WEB_SPEC
 
-    _name, kw = V04_COMBINED
+    _name, kw = V06_DEPLOYED
     assert kw["n_draws"] == WEB_DRAWS, (
         f"registry says n_draws={kw['n_draws']}, the site plays {WEB_DRAWS}")
     for k, v in WEB_SPEC.items():
-        assert kw.get(k) == v, (
+        assert kw.get(k, 0) == v, (
             f"registry says {k}={kw.get(k)!r}, the site plays {v!r}")
 
 

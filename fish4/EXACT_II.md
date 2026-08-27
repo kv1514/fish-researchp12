@@ -120,11 +120,20 @@ tells the next reader a component is worthless is how a component gets removed.
 
 A team holding no card of half-suit `h` can never hold one -- `legal_asks` in
 `fish/engine.py` refuses an ask in a half-suit you have no card of (`if not
-mine: continue`), and cards move only by successful asks. So it can never claim
-`h`, and under the default `wrong_distribution_outcome = "null"` a wrong claim
-by the other team scores for nobody. Such a half-suit can pay that team at most
-0, not +1. That is the closed form's own foothold fact (`scripts4/closed_form_proof.py`,
-premise C) reused as a search bound, and it is correct.
+mine: continue`), and cards move only by successful asks. So it can never
+declare `h` for itself. Under the LEGACY `wrong_distribution_outcome =
+"null"` variant a wrong declaration by the other team also scored for
+nobody, so such a half-suit could pay the footholdless team at most 0, not
++1 -- the closed form's foothold fact (`scripts4/closed_form_proof.py`,
+premise C) reused as a search bound, correct THERE.
+
+**Under the opponent-award baseline this bound is UNSOUND and must not be
+resurrected**: the owning team's misdeclaration of `h` now awards it to the
+footholdless team, which is a +1 that the bound denies. It survives only
+against an infallible declarer, and the champion opponent model misdeclares
+with positive probability. Since the tightening was never merged (below),
+nothing computes wrongly; this note exists so nobody re-implements it from
+the old argument.
 
 Measured against the loose bound: **0 disagreements and 0 nodes saved.** The
 `m = 2` fixture went 12,086 -> 12,086; 22 real `m = 1` positions went

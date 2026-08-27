@@ -10,9 +10,11 @@ branch that prices claims completely differently.
 
     EV = p_exact - P(opponents hold one) + P(ours but mis-split) * loss
 
-With the shipped ``wrong_distribution_outcome="null"`` the last term is zero,
-so EV = ``p_exact - (1 - p_team)``. The doomed-ask branch ignores ``p_team``
-entirely and looks only at ``p_exact >= 0.5``.
+Under the era's shipped ``wrong_distribution_outcome="null"`` the last term
+was zero, so EV = ``p_exact - (1 - p_team)``; under the current
+opponent-award baseline the loss is -1 and the EV collapses to
+``2 * p_exact - 1``, where the doomed-ask branch's bare ``p_exact >= 0.5``
+is exactly break-even. The branch ignores ``p_team`` either way.
 
 WHICH WAY THE TWO DISAGREE, BEFORE ANY DATA
 -------------------------------------------

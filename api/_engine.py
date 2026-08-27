@@ -143,8 +143,15 @@ WEB_DRAWS = 480
 #: sweep maps where real strength peaks before anything above m = 2 ships
 #: again. m = 2 keeps the exact-solver diagnosis, the offline fit held out by
 #: game, and the exploitability check behind it, which no higher rung has.
+#: Under the opponent-award baseline the endgame ask correction is
+#: WITHDRAWN (endgame_m=0): fitted against void-era solver targets, it
+#: re-measures at -0.1040 [-0.2184, +0.0104] against its sibling and a tie
+#: against Dylan's v0.7 under the award rule (prereg/rules_award_baseline.md
+#: R4 and R2), so it no longer clears the ship bar. fish4/registry4.py
+#: names this configuration V06_DEPLOYED; a refit against award-rule
+#: targets is queued before anything above m=0 ships again.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
-            "endgame_m": 2, "endgame_d_info": 2.0}
+            "endgame_m": 0}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.
@@ -384,8 +391,14 @@ class Session:
         # A spectate token has no human seat, so the game starts at seat 0;
         # deriving starting_player from -1 would deal seat 5 in on the move.
         start = 0 if mode == "spectate" else int(d["s"]) % NUM_PLAYERS
+        # "w" seals the misdeclaration rule into the token so a replay is
+        # scored under the rules the game was actually played under, not
+        # whatever this deploy's default happens to be. Tokens minted before
+        # the field existed were void-era games; they default to "null" so
+        # their in-flight scores do not jump mid-game across the deploy.
         rules = RuleConfig(variant=d["v"], claims_any_time=bool(d["a"]),
-                           starting_player=start)
+                           starting_player=start,
+                           wrong_distribution_outcome=d.get("w", "null"))
         if log_hash(actions) != d.get("h"):
             # Either the log was altered or it belongs to another game. Both are
             # unrecoverable by retrying, and the two are not worth telling apart
@@ -409,6 +422,7 @@ class Session:
         return seal({"s": self.seat, "n": self.nonce, "g": self.gamma,
                      "v": self.rules.variant,
                      "a": int(bool(self.rules.claims_any_time)),
+                     "w": self.rules.wrong_distribution_outcome,
                      "m": self.mode,
                      "h": log_hash(self.wire_log)})
 
@@ -586,11 +600,16 @@ def new_session(body: dict) -> Session:
         # The 3v3 exhibition: Dylan's FishBot v0.7 on seats 0/2/4, this
         # project's engine on 1/3/5, nobody dealt in. The deal is still the
         # server's nonce -- a spectator does not pick the deck either.
-        rules = RuleConfig(variant="54", starting_player=0)
+        # The misdeclaration rule is pinned rather than inherited so the
+        # site's rule is audit-visible here and immune to library-default
+        # drift: a misdeclared set is the other team's set.
+        rules = RuleConfig(variant="54", starting_player=0,
+                           wrong_distribution_outcome="opponent")
         return Session(-1, secrets.token_urlsafe(12), rules, CHAMPION_GAMMA,
                        mode="spectate")
     seat = int(body.get("seat", 0)) % NUM_PLAYERS
-    rules = RuleConfig(variant="54", starting_player=seat)
+    rules = RuleConfig(variant="54", starting_player=seat,
+                       wrong_distribution_outcome="opponent")
     return Session(seat, secrets.token_urlsafe(12), rules, CHAMPION_GAMMA)
 
 

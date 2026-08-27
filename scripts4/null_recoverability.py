@@ -1,6 +1,13 @@
 """Every null is a mis-split of a half-suit the team already owned. Was it
 recoverable by waiting?
 
+RULE ERA: this instrument is about NULLS, which exist only under the legacy
+``wrong_distribution_outcome="null"`` variant (the engine default of the era
+this study ran in). It pins that variant explicitly below so a rerun
+reproduces the study instead of silently measuring a game with no nulls in
+it; under the current opponent-award baseline the same mistake is a gift
+worth a full set swing, which only strengthens the conclusion.
+
 ``fish/engine.py::_apply_claim`` awards NULL on exactly one branch: the whole
 half-suit is on the claiming team and the declared split is wrong. Any other
 error hands the half-suit to the opponents. So the mechanism is not a matter of
@@ -330,7 +337,10 @@ def play(rules, g, rng):
 
 
 def main(n_games: int = 40) -> int:
-    rules = RuleConfig()
+    # Pinned to the era's rule: this study's statistics are about
+    # nulls/void outcomes, which the opponent-award baseline cannot
+    # produce. A bare default here would silently measure nothing.
+    rules = RuleConfig(wrong_distribution_outcome="null")
     rng = random.Random(4242)
     all_nulls = []
     claims = games_n = 0

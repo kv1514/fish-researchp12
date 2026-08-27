@@ -230,15 +230,19 @@ def check_A(rules, n_games, rng, sabotage=False):
 # -- premise B: no foothold, no denial ----------------------------------------
 
 def check_B(rules, n_positions, rng):
-    """For a team with no card of h, enumerate its claims on h and confirm
-    every one of them scores for the OPPONENTS -- never a null, never itself.
+    """For a team with no card of h, enumerate its declarations on h and
+    confirm every one of them scores for the OPPONENTS -- never itself.
 
     The converse is checked too: where the team wholly owns h, a mis-ordered
-    assignment does produce a null. Without that half the check could pass by
-    never finding a claim that nulls anything.
+    assignment must cost the set -- awarded to the foe under the baseline
+    rule, and nulled under the explicitly pinned legacy variant. Without that
+    half the check could pass by never finding a declaration the engine
+    scores as wrong at all.
     """
+    from dataclasses import replace as _dc_replace
     denials = 0
     checked = 0
+    award_seen = 0
     null_seen = 0
     for _ in range(n_positions):
         st = random_position(rules, rng.randint(2, 9), rng)
@@ -265,22 +269,34 @@ def check_B(rules, n_positions, rng):
                         if w2 != 1 - team:
                             denials += 1
                 elif len(mine) == CARDS_PER_HALF_SUIT:
-                    # wholly owned: a wrong order must be able to null it
+                    # wholly owned: a wrong order must cost the set under
+                    # BOTH rules, in each rule's own way
                     asg = list(holders)
                     if len(set(asg)) > 1:
                         i, j = 0, next(k for k in range(1, 6)
                                        if asg[k] != asg[0])
                         asg[i], asg[j] = asg[j], asg[i]
-                        if _claim_outcome(st, claimer, hs,
-                                          tuple(asg)) == NULL_TEAM:
+                        arules = _dc_replace(
+                            st.rules, wrong_distribution_outcome="opponent")
+                        if _claim_outcome(st, claimer, hs, tuple(asg),
+                                          rules=arules) == 1 - team:
+                            award_seen += 1
+                        nrules = _dc_replace(
+                            st.rules, wrong_distribution_outcome="null")
+                        if _claim_outcome(st, claimer, hs, tuple(asg),
+                                          rules=nrules) == NULL_TEAM:
                             null_seen += 1
     return {"claims_checked": checked, "denials_found": denials,
+            "awards_demonstrated": award_seen,
             "nulls_demonstrated": null_seen}
 
 
-def _claim_outcome(st, claimer, hs, assignment) -> int:
-    """Outcome of a claim, without disturbing ``st``."""
-    probe = GameState.from_components(st.rules, list(st.hands), claimer,
+def _claim_outcome(st, claimer, hs, assignment, rules=None) -> int:
+    """Outcome of a declaration, without disturbing ``st``. ``rules``
+    overrides ``st.rules`` so the two misdeclaration variants can each be
+    probed on the same position."""
+    probe = GameState.from_components(rules if rules is not None else st.rules,
+                                      list(st.hands), claimer,
                                       list(st.set_winner))
     probe.turn = claimer
     ev = probe.apply(claimer, Claim(hs, assignment))
@@ -377,11 +393,12 @@ def main(n: int = 200) -> int:
 
     print("\nPREMISE B  a team with no foothold in h cannot deny h")
     b = check_B(rules, 60, rng)
-    print(f"  {b['claims_checked']} claims by a footholdless team: "
+    print(f"  {b['claims_checked']} declarations by a footholdless team: "
           f"{b['denials_found']} scored anything but the opponents")
-    print(f"  control: {b['nulls_demonstrated']} mis-ordered claims on a "
-          f"wholly-owned half-suit DID null "
-          f"-- {'nulls are reachable' if b['nulls_demonstrated'] else 'NO NULL EVER SEEN, check is vacuous'}")
+    print(f"  control: {b['awards_demonstrated']} mis-ordered declarations "
+          f"on a wholly-owned half-suit WERE awarded to the foe (baseline), "
+          f"{b['nulls_demonstrated']} nulled under the legacy variant "
+          f"-- {'both wrong-order paths are reachable' if b['awards_demonstrated'] and b['nulls_demonstrated'] else 'A CONTROL NEVER FIRED, check is vacuous'}")
 
     print("\nPREMISE C  the greedy playout realises 2f - m, at every layer")
     print(f"  {'m':>3}{'positions':>11}{'agree':>8}{'jams':>7}{'mean 2f-m':>12}")

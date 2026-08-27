@@ -28,9 +28,12 @@ WHAT IS TRANSLATED, AND WHAT IS NOT
   what their own game would have told it; and their out-of-turn declaration
   channel is never polled, because our rules do not have one.
 * Rules.  Their agent is constructed with ``outOfTurnDeclare=0`` so its own
-  view of the rules matches the game it is actually playing.  Wrong claims
-  score null here where their engine awards the set to the opponents; that
-  difference favours caution they would have wanted anyway.
+  view of the rules matches the game it is actually playing.  Since the
+  misdeclaration rule flipped to the opponent-award baseline, the two engines
+  agree on what a wrong declaration costs -- their policy's native risk model
+  is now exactly the rule it plays under.  (Games before the flip scored a
+  within-team misdeclaration as a void here where their engine expected an
+  award; that disclosed divergence is gone.)
 
 LEGALITY IS VERIFIED, NOT ASSUMED
 ---------------------------------

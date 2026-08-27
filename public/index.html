@@ -2,8 +2,8 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Fish — play FishBot v0.4</title>
-<meta name="description" content="Play six-player Literature against FishBot v0.4, a research engine with exact combinatorial belief tracking. Play solo against five bots, or with friends in a room.">
+<title>Fish — play KV's FishBot v0.6</title>
+<meta name="description" content="Play six-player Literature against KV's FishBot v0.6, a research engine with exact combinatorial belief tracking. Play solo against five bots, watch it battle Dylan's FishBot v0.7, or play with friends in a room.">
 <link rel="stylesheet" href="/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127183;</text></svg>">
 
@@ -62,8 +62,9 @@
         <p class="note" id="s-watchnote">A 3v3 exhibition — Dylan&rsquo;s FishBot v0.7
         (<a href="https://github.com/dylann4500/fishbot" target="_blank" rel="noopener">dylann4500/fishbot</a>,
         running its own C++ engine) on three seats against this site&rsquo;s engine on the
-        other three. Games play out live at the table pace; the next one deals
-        automatically.</p>
+        other three, under identical scoring — a misdeclared set goes to the
+        other team, in both engines&rsquo; native rules. Games play out live at the
+        table pace; the next one deals automatically.</p>
         <p class="note err" id="s-err"></p>
       </div>
 
@@ -111,8 +112,9 @@
           must already hold another card of its set, and not the card itself.
           Hit and you keep going; miss and the turn is theirs.</li>
         <li>Or <b>declare</b> a set: name where all six cards sit
-          <em>within your team</em>. Exactly right scores it. Any card with an
-          opponent gives it away. Right team, wrong split, and it is void.</li>
+          <em>within your team</em>. Exactly right scores it. Get anything
+          wrong — a card with an opponent, or the right team but the wrong
+          split — and the whole set goes to the other team.</li>
         <li>Nobody may bluff. So a failed ask tells the whole table that you
           hold another card of that set — the only signal in the game, and your
           opponents read it too.</li>
@@ -168,6 +170,7 @@
                min="0" max="20" step="1" value="12">
         <span class="pacev" id="t-pacev">12s</span>
       </label>
+      <button id="t-voice" class="ghost" title="Announce moves aloud">&#128266; Voice</button>
       <button id="t-think" class="ghost">Think</button>
       <label class="chk" title="Show the engine's read of the table on every one of your turns">
         <input type="checkbox" id="t-auto"> auto

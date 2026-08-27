@@ -38,10 +38,12 @@ def test_deterministic_replay():
 
 
 @pytest.mark.parametrize("kwargs", [
-    dict(wrong_distribution_outcome="opponent"),
+    # The award rule is now the default the other tests fuzz, so the
+    # deviation worth covering here is the legacy null variant.
+    dict(wrong_distribution_outcome="null"),
     dict(allow_bluff_asks=True),
     dict(starting_player=3),
-    dict(variant="48", wrong_distribution_outcome="opponent"),
+    dict(variant="48", wrong_distribution_outcome="null"),
 ])
 def test_rule_variants_fuzz(kwargs):
     rules = RuleConfig(**kwargs)

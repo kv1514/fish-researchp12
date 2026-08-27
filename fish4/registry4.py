@@ -5,6 +5,14 @@ Evaluation harnesses cross process boundaries, so agents are addressed by
 the v0.4 policies alongside the v0.3 ones; any worker process that imports it
 can therefore construct either generation, which is what makes head-to-head
 duplicate-deal matches between the two possible at all.
+
+RULE ERA. Every effect size quoted in this module's spec comments was
+measured while the engine's default misdeclaration rule was the null
+variant (a within-team misdeclaration voided the set). The baseline is now
+opponent-award, the specs construct identically under it (agents read the
+rule off the observation), and the re-measured baselines live in
+``prereg/rules_award_baseline.md``'s result files -- quote those beside any
+of the numbers below.
 """
 
 from __future__ import annotations
@@ -143,6 +151,20 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
                              "lookahead_beam": 4,
                              "endgame_m": 2, "endgame_d_info": 2.0})
+
+#: What the site deploys under the opponent-award baseline. It is
+#: V04_COMBINED minus the endgame ask correction, because the correction was
+#: fitted against void-era solver targets and re-measures under the award
+#: rule at -0.1040 [-0.2184, +0.0104] against its own sibling (design R4,
+#: results/r4_award_check.json) and at a tie against Dylan's v0.7 (design
+#: R2, results/foreign_award_check.json) -- it no longer clears the
+#: CI-excludes-zero bar every shipped knob is held to, so it is withdrawn
+#: pending a refit of scripts4/ii_ask_fit.py against award-rule targets
+#: (the ii journals are rule-fingerprinted for exactly that). V04_COMBINED
+#: keeps its void-era definition and numbers; this name is the live one.
+V06_DEPLOYED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
+                             "w_lookahead": 0.25, "lookahead_depth": 3,
+                             "lookahead_beam": 4, "endgame_m": 0})
 
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is

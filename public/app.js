@@ -22,6 +22,146 @@ const FC = window.FishCards;
 const face = FC.cardFace;
 const pretty = FC.prettyCard;
 
+/* The server narrates in seat numbers; the table knows names. One
+ * substitution function for every renderer AND the announcer, so the log,
+ * the felt banner and the spoken line can never disagree about who did
+ * what. */
+function namedText(t) {
+  return S.names ? t.replace(/\bP([0-5])\b/g, (m, d) => S.names[+d] || m) : t;
+}
+
+/* -- move announcements (speech synthesis) ------------------------------- */
+
+/* cards.js already owns SUIT_WORD/RANK_WORD in this shared namespace, so
+ * the spoken forms get their own names. */
+const SPOKEN_SUIT = { S: "spades", H: "hearts", D: "diamonds", C: "clubs" };
+const SPOKEN_RANK = { T: "ten", J: "jack", Q: "queen", K: "king", A: "ace" };
+
+function speakify(t) {
+  return t
+    .replace(/\bBJ\b/g, "the black joker")
+    .replace(/\bRJ\b/g, "the red joker")
+    .replace(/\b(10|[2-9TJQKA])([SHDC])\b/g,
+      (m, r, s) => `${SPOKEN_RANK[r] || r} of ${SPOKEN_SUIT[s]}`)
+    .replace(/—/g, ",");
+}
+
+function announce(text) {
+  // Built into the browser -- no account, no network, works offline. It is a
+  // garnish: any failure is swallowed rather than allowed to stop the table.
+  if (!S.tts || !("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.06;
+    speechSynthesis.speak(u);
+  } catch (e) { /* voice off is better than a broken table */ }
+}
+
+/* -- per-move seat badges and the flying card ---------------------------- */
+
+/* Called once per repaint from render(). Consumes log entries this client
+ * has not yet presented: sets S.anim (which renderSeats turns into badges
+ * under the two seats involved), schedules the pending->resolved flip and
+ * the card flight, and speaks the move. On a page restore the whole log is
+ * new to us but not to the viewer, so the first call only records the
+ * length. */
+function digestLog() {
+  const log = (S.snap && S.snap.log) || [];
+  if (S.seen === undefined || S.seen === null || S.seen > log.length) {
+    S.seen = log.length;
+    return;
+  }
+  if (S.seen === log.length) return;
+  const fresh = log.slice(S.seen);
+  S.seen = log.length;
+  handleEvent(fresh[fresh.length - 1]);
+}
+
+function handleEvent(e) {
+  if (e.t === "ask" && e.asker !== undefined) {
+    const anim = { kind: "ask", asker: e.asker, target: e.target,
+                   ok: e.ok, card: e.card, phase: "pending" };
+    S.anim = anim;
+    setTimeout(() => {
+      if (S.anim !== anim) return;
+      anim.phase = "resolved";
+      renderSeats();
+      if (anim.ok) flyCard(anim.target, anim.asker, anim.card);
+    }, 700);
+  } else if (e.t === "claim" && e.claimer !== undefined) {
+    S.anim = { kind: "claim", claimer: e.claimer,
+               ok: e.winner === (e.claimer % 2), phase: "resolved" };
+  } else {
+    S.anim = null;
+  }
+  announce(speakify(namedText(e.text)));
+}
+
+/* Spectator commentary derived from the public record alone. Two ask
+ * patterns confuse viewers: asking a player for the very card they just
+ * publicly took (a CERTAIN steal -- the transfer was face up), and asking
+ * for a card the public record already proves the target cannot hold (a
+ * deliberate turn surrender when nothing can land, or plain waste). Both
+ * are recomputed from the log each game, exactly as a careful spectator
+ * could. */
+function annotateLog() {
+  const log = (S.snap && S.snap.log) || [];
+  if (S.annCache && S.annCacheLen === log.length) return S.annCache;
+  const ann = new Array(log.length).fill(null);
+  const absent = new Set();          // "seat:card" proved not held
+  const taker = new Map();           // card -> seat that publicly took it
+  log.forEach((e, i) => {
+    if (e.t === "claim" && e.hs !== undefined && S.snap.half_suits) {
+      const hs = S.snap.half_suits[e.hs];
+      if (hs) for (const c of hs.cards) {
+        taker.delete(c.name);
+        for (let p = 0; p < 6; p++) absent.delete(p + ":" + c.name);
+      }
+      return;
+    }
+    if (e.t !== "ask" || e.asker === undefined) return;
+    if (absent.has(e.target + ":" + e.card)) {
+      ann[i] = "the table had already proved this must miss — a deliberate "
+        + "way to hand the turn over when nothing could land";
+    } else if (taker.get(e.card) === e.target) {
+      ann[i] = "a certain steal — everyone saw that card move, so the asker "
+        + "knew exactly where it was";
+    }
+    absent.add(e.asker + ":" + e.card);      // no-bluff: asker lacks it
+    if (e.ok) {
+      absent.delete(e.asker + ":" + e.card);
+      absent.add(e.target + ":" + e.card);
+      taker.set(e.card, e.asker);
+    } else {
+      absent.add(e.target + ":" + e.card);
+    }
+  });
+  S.annCache = ann;
+  S.annCacheLen = log.length;
+  return ann;
+}
+
+function flyCard(fromP, toP, card) {
+  const felt = $("t-felt");
+  if (!felt || !S.snap) return;
+  const anchor = S.snap.spectate ? 0 : S.snap.seat;
+  const offOf = (p) => (p - anchor + 6) % 6;
+  const a = seatPos(offOf(fromP));
+  const b = seatPos(offOf(toP));
+  const f = el("div", "flycard");
+  f.innerHTML = face(card);
+  f.style.left = a.x.toFixed(2) + "%";
+  f.style.top = a.y.toFixed(2) + "%";
+  felt.appendChild(f);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    f.style.left = b.x.toFixed(2) + "%";
+    f.style.top = b.y.toFixed(2) + "%";
+    f.style.opacity = "0";
+  }));
+  setTimeout(() => f.remove(), 1400);
+}
+
 const S = {
   token: null,
   actions: [],
@@ -624,6 +764,9 @@ function initStart() {
     try {
       S.actions = [];
       S.token = null;
+      S.seen = 0;
+      S.anim = null;
+      S.annCache = null;
       // No variant and no gamma: the site ships one deck and one engine.
       const j = await api("new", { seat: S.seat });
       S.token = j.token;
@@ -698,6 +841,27 @@ function renderSeats() {
     d.title = s.spectate
       ? `${name} — seat ${p}, ${mine ? "Dylan's" : "KV's"} team`
       : `${name} — seat ${p}, ${mine ? "your team" : "the other team"}`;
+    // The per-move badge: "?" under both seats while an ask hangs in the
+    // air, then both flip green (with the card sliding over) or red. A
+    // declaration badges only the declarer.
+    const a = S.anim;
+    if (a) {
+      const GLY = { S: "♠", H: "♥", D: "♦", C: "♣" };
+      const short = (n) => (n === "RJ" || n === "BJ")
+        ? "Joker" : n.slice(0, -1) + (GLY[n.slice(-1)] || "");
+      let chip = null;
+      if (a.kind === "ask" && (p === a.asker || p === a.target)) {
+        chip = a.phase === "pending"
+          ? el("div", "askchip",
+               p === a.asker ? `${short(a.card)}?` : "?")
+          : el("div", "askchip " + (a.ok ? "hit" : "miss"),
+               a.ok ? "✓" : "✕");
+      } else if (a.kind === "claim" && p === a.claimer) {
+        chip = el("div", "askchip " + (a.ok ? "hit" : "miss"),
+                  a.ok ? "✓ set" : "✕ set");
+      }
+      if (chip) d.appendChild(chip);
+    }
     box.appendChild(d);
   }
 }
@@ -781,7 +945,8 @@ function renderHand() {
 function renderLastMove() {
   const box = $("t-last");
   box.innerHTML = "";
-  const e = (S.snap.log || [])[S.snap.log.length - 1];
+  const log = S.snap.log || [];
+  const e = log[log.length - 1];
   if (!e) { box.className = "lastmove"; return; }
   box.className = "lastmove " + e.t
     + (e.ok === true ? " hit" : e.ok === false ? " miss" : "");
@@ -790,20 +955,24 @@ function renderLastMove() {
     f.innerHTML = face(e.card);
     box.appendChild(f);
   }
-  const named = (t) => S.names
-    ? t.replace(/\bP([0-5])\b/g, (m, d) => S.names[+d] || m) : t;
   const txt = el("div", "lmtext");
-  txt.appendChild(el("div", "lmwhat", named(e.text)));
-  if (e.proved) txt.appendChild(el("div", "lmproved", named(e.proved)));
+  txt.appendChild(el("div", "lmwhat", namedText(e.text)));
+  const note = annotateLog()[log.length - 1];
+  if (note) txt.appendChild(el("div", "lmannot", note));
+  if (e.proved) txt.appendChild(el("div", "lmproved", namedText(e.proved)));
   box.appendChild(txt);
 }
 
 function renderLog() {
   const box = $("t-log");
   box.innerHTML = "";
-  const items = (S.snap.log || []).slice(-14).reverse();
+  const log = S.snap.log || [];
+  const ann = annotateLog();
+  const start = Math.max(0, log.length - 14);
+  const items = log.slice(start).reverse();
   if (!items.length) box.appendChild(el("p", "dim", "Nothing yet."));
-  for (const e of items) {
+  items.forEach((e, ri) => {
+    const idx = log.length - 1 - ri;
     const d = el("div", "logrow " + e.t + (e.ok === false ? " miss" : "")
       + (e.ok === true ? " hit" : ""));
     if (e.card) {
@@ -812,17 +981,12 @@ function renderLog() {
       d.appendChild(f);
     }
     const w = el("div", "wrap");
-    // The server narrates in seat numbers; the table knows names. Substituting
-    // here keeps the wire format stable and the log readable, and it is what
-    // makes the exhibition legible -- "Dylan's v0.7 A asked KV's FishBot B"
-    // instead of "P0 asked P1".
-    const named = (t) => S.names
-      ? t.replace(/\bP([0-5])\b/g, (m, d) => S.names[+d] || m) : t;
-    w.appendChild(el("div", "what", named(e.text)));
-    if (e.proved) w.appendChild(el("div", "proved", named(e.proved)));
+    w.appendChild(el("div", "what", namedText(e.text)));
+    if (ann[idx]) w.appendChild(el("div", "annot", ann[idx]));
+    if (e.proved) w.appendChild(el("div", "proved", namedText(e.proved)));
     d.appendChild(w);
     box.appendChild(d);
-  }
+  });
 }
 
 /* -- the move ------------------------------------------------------------ */
@@ -972,7 +1136,7 @@ const TERM_BLURB = {
   reveal: "what the ask tells the table about your hand",
   deplete: "drawing down a dangerous opponent",
   expose: "how much it exposes your own half-suit",
-  claim: "progress toward a claimable set",
+  claim: "progress toward a declarable set",
   info: "information gained whether or not it lands",
   lookahead: "where the chain of asks after this one could go",
 };
@@ -1146,11 +1310,12 @@ async function openDeclare() {
   //
   // They used to be whatever the <select> picked first, which is the lowest
   // team seat - and for seat 0 that is *you*. So every card you did not hold
-  // defaulted to you, which is guaranteed wrong, and declaring without touching
-  // all six dropdowns voided the set. That is not the game being harsh: right
-  // team, wrong split scores for nobody, and the form was steering the player
-  // into it. Engine-vs-engine play voids nothing in 54 declarations; every void
-  // a human saw was this.
+  // defaulted to you, which is guaranteed wrong, and declaring without
+  // touching all six dropdowns threw the set away. Under the live rule that
+  // is worse than it ever was: right team, wrong split now HANDS the set to
+  // the other team (it merely voided in the old rules), and the form was
+  // steering the player into it. Engine-vs-engine play misdeclares nothing
+  // in 54 declarations; every thrown-away set a human saw was this.
   //
   // The engine already computes the posterior MAP for exactly this decision, so
   // the dialog opens on the engine's best guess and shows the probability
@@ -1173,9 +1338,9 @@ async function openDeclare() {
   openModal((box) => {
     box.appendChild(el("h3", null, "Declare a set"));
     box.appendChild(el("p", "dim",
-      "Name who on your team holds each of the six cards. Exactly right scores "
-      + "it; right team but wrong split scores for nobody; any card with an "
-      + "opponent hands it over."));
+      "Name who on your team holds each of the six cards. Exactly right "
+      + "scores it; anything wrong — a card with an opponent, or the right "
+      + "team but the wrong split — hands the whole set to the other team."));
 
     const pick = el("select");
     s.half_suits.forEach((hs, i) => {
@@ -1264,6 +1429,7 @@ function render() {
   $("t-turn").textContent = s.terminal ? "Game over"
     : s.your_turn ? "Your turn." : `${nm(s.turn)} to move.`;
   $("t-turn").className = "turnline" + (s.your_turn && !s.terminal ? " you" : "");
+  digestLog();
   renderLastMove();
   renderSeats();
   renderSets();
@@ -1296,6 +1462,15 @@ $("t-pause").addEventListener("click", () => {
   // Repaint the countdown so the "· paused" note appears immediately rather
   // than at the next tick.
   render();
+});
+S.tts = localStorage.getItem("fish_tts") === "1";
+$("t-voice").classList.toggle("on", S.tts);
+$("t-voice").addEventListener("click", () => {
+  S.tts = !S.tts;
+  try { localStorage.setItem("fish_tts", S.tts ? "1" : "0"); } catch (e) {}
+  $("t-voice").classList.toggle("on", S.tts);
+  if (S.tts) announce("Move announcements on.");
+  else if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); } catch (e) {} }
 });
 $("t-next").addEventListener("click", () => {
   // Cut the current wait short. Together with Pause this is a step-through: a
@@ -1396,6 +1571,9 @@ async function startWatch() {
   S.actions = [];
   S.token = null;
   S.hint = null;
+  S.seen = 0;      // a fresh deal: present (and speak) moves from the first
+  S.anim = null;
+  S.annCache = null;
   try {
     const j = await api("new", { mode: "spectate", step: 1 });
     S.token = j.token;
@@ -1422,6 +1600,11 @@ function watchGameOver() {
     `Game over — Dylan ${s.score.you}, KV ${s.score.them}` +
     (s.score.nulled ? ` (${s.score.nulled} void)` : "") +
     ` · ${watchTally()} · next deal in a moment…`;
+  announce(`Game over. Dylan's FishBot ${s.score.you}, `
+    + `KV's FishBot ${s.score.them}. `
+    + (s.score.you === s.score.them ? "A tie."
+      : s.score.you > s.score.them ? "Dylan takes the game."
+        : "KV takes the game."));
   S.watchTimer = setTimeout(() => {
     if (S.watch) startWatch();
   }, 6000);

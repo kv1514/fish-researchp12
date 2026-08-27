@@ -18,17 +18,23 @@ localises teammate holdings. Waiting is close to free, which is exactly what the
 sweep measured and what the EV model missed by treating the resolution of a
 split as a coin flip.
 
-The corollary is that the leverage in claiming is NOT the threshold. It is:
+The corollary is that the leverage in declaring is NOT the threshold. It is:
 
-  1. **Getting the declared distribution right.** Nulls cost roughly 0.6 sets
-     per deal-pair at v0.3's strength, and a null is a bookkeeping failure, not
-     an unlucky gamble. v0.3 chose the modal distribution over 32 sampled
-     worlds, which is a noisy estimator of the mode. v0.4 computes the exact
-     posterior probability of a candidate distribution, so the declared split
-     is the true MAP rather than a sample mode.
-  2. **Playing the forced claims well.** When no legal ask exists the agent
-     must claim something, and which half-suit it picks and how it declares it
-     is pure expected value, with no threshold involved at all.
+  1. **Getting the declared distribution right.** Misdeclarations cost roughly
+     0.6 sets per deal-pair at v0.3's strength under the old null variant, and
+     under the baseline rule (a misdeclared set is AWARDED to the opponents)
+     each one costs a full set swing, so the stakes doubled and the point
+     sharpened: a misdeclaration is a bookkeeping failure, not an unlucky
+     gamble. v0.3 chose the modal distribution over 32 sampled worlds, which
+     is a noisy estimator of the mode. v0.4 computes the exact posterior
+     probability of a candidate distribution, so the declared split is the
+     true MAP rather than a sample mode.
+  2. **Playing the forced declarations well.** When no legal ask exists the
+     agent must declare something, and which half-suit it picks and how it
+     declares it is pure expected value, with no threshold involved at all.
+     Under the baseline rule every wrong outcome costs the same set, so the
+     forced ranking reduces to maximising P(exact) alone; the ev() below
+     reads the rule off the observation and prices both variants correctly.
 
 STRATEGY FUSION WARNING (from the literature survey): a claim must never be
 selected by determinized search. Inside any determinization the searcher knows
@@ -253,12 +259,15 @@ class ClaimEvaluator:
         return None
 
     def forced_claim(self):
-        """The best claim available when we have no legal ask.
+        """The best declaration available when we have no legal ask.
 
-        Pure expected value in sets: an exactly-right declaration scores +1, a
-        declaration where any card sits with the opponents scores -1 for us, and
-        an all-ours-but-wrongly-split declaration nulls at 0 under the baseline
-        rule. So maximise ``p_exact - p_opponent_holds_one``.
+        Pure expected value in sets: an exactly-right declaration scores +1
+        and any wrong declaration scores -1 under the baseline rule (the set
+        goes to the opponents whether the miss names an opponent's card or
+        merely misorders our own), so the ranking is ``2*p_exact - 1`` --
+        maximise ``p_exact``. Under the legacy null variant an
+        all-ours-but-wrongly-split declaration costs 0 instead, and the rule
+        is read off the observation so both variants are priced correctly.
         """
         cands = self.candidates()
         if not cands:

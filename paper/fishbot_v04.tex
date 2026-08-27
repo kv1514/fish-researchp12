@@ -72,14 +72,14 @@ in Six-Player Literature\vspace{-0.2em}}
 
 \begin{document}
 \maketitle
-\vspace{-2.2em}
+\vspace{-2.8em}
 
 % =====================================================================
 % The abstract is set small and tight on purpose: it has to hold every
 % headline number in the paper and still finish on the first page, which is
 % where a reader decides whether to read the other seventy-two.
 \begin{abstract}
-\small\setstretch{0.95}\setlength{\parskip}{0pt}\noindent
+\small\setstretch{0.93}\setlength{\parskip}{0pt}\noindent
 Literature --- also called Fish --- is a six-player, two-team,
 imperfect-information card game in which players interrogate opponents for
 named cards and score by declaring the exact distribution of a six-card
@@ -107,7 +107,7 @@ players' choices carry no information beyond legality --- and the sampler it
 replaced had accidentally encoded a crude opponent model. Replacing the
 accident with an explicit one-parameter model recovers the loss and is worth
 $\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair}, 95\% CI
-$[+1.54, +2.17]$. Tripling the sampling budget is worth a further $+0.340$, more than three
+$[+1.54, +2.17]$ (void-era scoring; restated below). Tripling the sampling budget is worth a further $+0.340$, more than three
 times what belief-space search buys: the leverage in this game sits in the
 belief rather than in what is computed from it.
 
@@ -135,15 +135,26 @@ $73$ of $122$ positions and still being wrong). Fitting the ask objective
 against exact one-ply values overturns the obvious diagnosis --- de-weighting
 the success probability changes nothing --- and isolates certainty rather than
 probability as the defect. The resulting one-parameter correction, pre-registered and replicated, gains
-$\mathbf{+0.1220}$ $[+0.0711, +0.1729]$ sets on top of the configuration the
-public engine actually plays. It does \emph{not} make that policy harder to
+$\mathbf{+0.1220}$ $[+0.0711, +0.1729]$ sets on top of the void-era deployed
+configuration. It does \emph{not} make that policy harder to
 exploit: paired over $285$ positions, what a best response extracts moves by
 $-0.0002$, half-width $0.026$. An exact best responder used as a critic
 improves average-case play and leaves the worst case where it was. We also report two solver faults caught by controls needing no ground truth.
 
+Finally we correct the game itself. From v0.1 the engine scored a
+right-team, wrong-split declaration as a \emph{void}; the standard rule
+awards every misdeclared set to the opponents and is now the baseline,
+results labelled by rule era. Under standard scoring the deployed
+configuration beats the v0.3 champion by $\mathbf{+2.412}$
+$[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
+independently developed C++ engine running its own code --- it takes
+$64.3\%$ of decided sets, and the corrected rule cuts nearly twice as hard
+against the opponent ($306$ misdeclared sets to $160$); the endgame
+correction, fitted against void-era targets, re-measures at $-0.104$
+$[-0.218, +0.010]$ and is withdrawn pending a rule-matched refit.
+
 \vspace{1pt}
-\noindent\textbf{Keywords:} imperfect-information games; exact inference;
-opponent modelling; exploitability; endgame solving.
+\noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
 \end{abstract}
 
 % =====================================================================
@@ -348,20 +359,42 @@ of the four $8$s and two individually identified jokers, a Red Joker and a
 Black Joker. Each player is dealt nine cards. The classic 48-card,
 eight-half-suit variant is also supported.
 
-On turn, a player either \textbf{asks} or \textbf{claims}.
+On turn, a player either \textbf{asks} or \textbf{declares}.
 
 An \textbf{ask} names an opponent and a specific card. It is legal only if the
 asker holds at least one card of that card's half-suit and does not hold the
 card itself. If the opponent has it, the card transfers \emph{face up} and the
 asker keeps the turn; otherwise the turn passes to the opponent who was asked.
 
-A \textbf{claim} names a half-suit and declares which teammate holds each of
-its six cards. If the declaration is exactly right, the claiming team scores
-the half-suit. If any of the six is with an opponent, the opposing team scores
-it. If all six are within the claiming team but the declared distribution is
-wrong, the half-suit is nulled and nobody scores. The requirement to name the
-exact distribution, not merely to assert possession, is what makes Literature
-a game about inference rather than collection.
+A \textbf{declaration} names a half-suit and states which teammate holds each
+of its six cards. (The codebase, and earlier versions of this paper, call
+this move a \emph{claim}; the two words name the same move throughout.) If
+the declaration is exactly right, the declaring team scores the half-suit.
+\emph{Any} wrong declaration --- a card with an opponent, or all six within
+the declaring team but the split misstated --- awards the half-suit to the
+opposing team. The requirement to name the exact distribution, not merely to
+assert possession, is what makes Literature a game about inference rather
+than collection.
+
+\paragraph{The rule this engine got wrong for five versions.} From v0.1
+through the v0.4 measurement campaign, the engine's default scored the
+second kind of miss --- right team, wrong split --- as a \emph{void}: the
+half-suit was discarded and nobody scored it
+(\texttt{wrong\_distribution\_outcome=\char`\"null\char`\"}). That is a house
+variant, not the game: the reference rules, and the one foreign engine we
+test against, award every misdeclared set to the opponents. The default is
+now the award rule; the void variant remains implemented and pinned wherever
+a void-era measurement is reproduced. Every result in this paper is
+therefore labelled with its rule era: analyses proved rule-invariant
+(the closed form, the perfect-information solver and tablebases, whose
+declarations are certain by construction; posterior quality, which scores
+predictions rather than declarations) carry over unchanged, in-play
+measurements from the void era are marked as such, and the numbers the
+abstract and strategy sections assert are re-measured under the award rule
+per the pre-registration \path{prereg/rules_award_baseline.md}. The
+correction is not cosmetic in play: in the exhibition against Dylan's
+FishBot v0.7 the rule touches $466$ sets in $1{,}000$ games --- one set
+every other game whose fate the two rules disagree about.
 
 A player with no cards on move passes the turn to a teammate who has cards. If
 an entire team is out of cards, the other team must claim out the remaining
@@ -883,9 +916,12 @@ never receive one. Its foothold set only shrinks, and the mover's team can
 therefore claim at most the $f$ it has \emph{now}.
 \item[B. A team with no foothold in $h$ cannot deny $h$.] All six cards of $h$
 sit with the opponents, so every assignment it could submit reveals an opponent
-holder and \texttt{\_apply\_claim} awards the half-suit to the opponents. There
-is no spite-null available: a certain $-1$ cannot be converted into a $0$.
-Hence the opponents take all $m - f$ whatever the mover does.
+holder and \texttt{\_apply\_claim} awards the half-suit to the opponents ---
+under both misdeclaration rules. Under the legacy null variant the further
+point was that no spite-null is available (a certain $-1$ cannot be
+converted into a $0$); under the award baseline nulls do not exist at all,
+which only strengthens the premise. Hence the opponents take all $m - f$
+whatever the mover does.
 \item[C. The mover takes all $f$ without surrendering the turn.] A hit retains
 the turn, a claim never moves it, and a claim that empties the claimant passes
 within the team. With perfect information every ask can be made to hit, so the
@@ -1071,7 +1107,7 @@ success pins the asked card to us, a failure removes the target from that card's
 candidate set.
 
 % =====================================================================
-\section{Claiming}
+\section{Declaring}
 \label{sec:claiming}
 
 v0.3 swept the claim-confidence threshold directly and found two things. First,
@@ -1090,11 +1126,15 @@ teammate holdings. Waiting is close to free, which is exactly what the sweep
 measured and what v0.3's expected-value model missed by treating the resolution
 of a split as a coin flip.
 
-The corollary is that the leverage in claiming is not the threshold. It is
-(i)~getting the declared distribution right, since nulls cost roughly $0.6$ sets
-per deal-pair and a null is a bookkeeping failure rather than an unlucky gamble;
-and (ii)~playing the forced claims well, where no threshold is involved at all.
-v0.4 therefore keeps a high threshold and changes what happens underneath it:
+The corollary is that the leverage in declaring is not the threshold. It is
+(i)~getting the declared distribution right --- misdeclarations cost roughly
+$0.6$ sets per deal-pair at v0.3's strength \emph{under the void-era rule
+these games were played with}, and under the award baseline each one is a
+full-set swing, so the stakes have doubled since that measurement; either
+way a misdeclaration is a bookkeeping failure rather than an unlucky gamble
+--- and (ii)~playing the forced declarations well, where no threshold is
+involved at all. v0.4 therefore keeps a high threshold and changes what
+happens underneath it:
 
 \begin{itemize}
 \item The declared distribution is the posterior MAP, found by shortlisting on
@@ -1105,8 +1145,12 @@ same quota slots, so per-card modes can be jointly impossible.
 the dynamic program of Section~\ref{sec:counting}; where it is not, deduction
 still settles the extremes exactly, because a zero under the OR-free system
 implies a zero under the smaller OR-constrained one, and likewise for one.
-\item Forced claims maximise expected sets, $\Prob(\text{exact}) -
-\Prob(\text{an opponent holds one})$, rather than confidence.
+\item Forced declarations maximise expected sets rather than confidence, and
+the rule sets the objective: under the award baseline every wrong outcome
+costs the same set, so the ranking is $2\Prob(\text{exact}) - 1$ ---
+maximise $\Prob(\text{exact})$ alone --- while under the void-era variant it
+was $\Prob(\text{exact}) - \Prob(\text{an opponent holds one})$. The
+evaluator reads the rule off the observation and prices both.
 \end{itemize}
 
 That second probability was, until recently, an independence product, and the
@@ -1114,11 +1158,15 @@ first bullet is the sentence that condemns it. The claim evaluator returned the
 \emph{joint} for ``this split is right'' and $\prod_c \sum_{p \in
 \text{team}} \Prob(p \text{ holds } c)$ for ``the half-suit is ours at all'', in
 the same tuple, from the same method, three lines below its own docstring
-saying the product of marginals is not the joint. Under the baseline null rule
-the forced-claim ranking is $\Prob(\text{exact}) + \Prob(\text{ours}) - 1$, so
-the two carry equal weight; and their difference is read as ``ours but wrongly
-split'', a quantity subtracted across two different distributions and therefore
-able to come out negative --- which it did, and a clamp hid it.
+saying the product of marginals is not the joint. Under the void-era rule in
+force when this bug lived, the forced ranking was $\Prob(\text{exact}) +
+\Prob(\text{ours}) - 1$, so the two carried equal weight; and their
+difference was read as ``ours but wrongly split'', a quantity subtracted
+across two different distributions and therefore able to come out negative
+--- which it did, and a clamp hid it. (Under the award baseline
+$\Prob(\text{ours})$ cancels out of the forced ranking entirely, which
+shrinks this bug's surface but does not excuse it: the voluntary path and
+the void variant still consume the joint.)
 
 Measured over $29406$ half-suit queries in $60$ games of real play, the two
 disagree on $27902$, and on $86\%$ of those the product \emph{overstates} the
@@ -1511,15 +1559,16 @@ turn; the orange row is measured in \S\ref{sec:critic}.
 \centering
 \includegraphics[width=\linewidth]{figs/effects.pdf}
 \caption{Every settled in-play effect, on one axis. Blue rows ship in the
-deployed configuration; gray rows were evaluated and rejected (at-ask-time
-depth: a null at $n = 6000$; the learned whole-game weights: significantly
-worse). The orange row is the shipped endgame correction re-measured against a
-foreign engine, Dylan's FishBot v0.7 (\S\ref{sec:critic}): the paired effect is
-a tie whose interval excludes the sibling-measured $+0.12$, the paper's
+deployed configuration; gray rows were evaluated and not shipped ---
+at-ask-time depth a null at $n = 6000$, the learned whole-game weights
+significantly worse, and the endgame ask correction shipped in the void era
+and \emph{withdrawn} when the award baseline re-priced it below zero
+(\S\ref{sec:critic}). The orange row is that correction against a foreign
+engine, Dylan's FishBot v0.7, under the matched award rule: a tie whose
+interval excludes the sibling-measured void-era $+0.12$ --- the paper's
 recurring finding that gains measured inside an engine family shrink outside
 it. Intervals are 95\% confidence intervals over paired deals; $n$ counts
-pairs. Note the top row's scale: the opponent model is worth about twice the
-other shipped effects combined.}
+pairs.}
 \label{fig:effects}
 \end{figure}
 
@@ -2094,7 +2143,14 @@ v0.3 \texttt{probabilistic}    & 200 & 0.792 & $+2.785$ & $[+2.274, +3.296]$ \\
 \end{tabular}
 \caption{The v0.4 champion is
 \texttt{fishbot4($\gamma$=0.35)}: exact/unbiased inference, the opponent choice
-model, and v0.3's own ask weights. No new objective term is enabled.}
+model, and v0.3's own ask weights. No new objective term is enabled. Every
+row was played under the void-era misdeclaration rule; the standard-scoring
+restatement of this ladder's headline --- the full deployed configuration
+against the v0.3 champion, both sides pricing misdeclarations correctly ---
+is $+2.412$ $[+2.088, +2.736]$ over $500$ fresh pairs
+(design R1 of \texttt{prereg/rules\_award\_baseline.md},
+\texttt{results/award\_headline.json}; misdeclared-and-awarded sets $125$
+against the deployed side, $146$ against v0.3).}
 \label{tab:ladder}
 \end{table}
 
@@ -3061,7 +3117,16 @@ best-responder is future work.
 
 The engine supports several rule options, and a result that only holds under one
 configuration is a weaker result. Table~\ref{tab:rules} repeats the headline
-comparison under three of them.
+comparison under three of them. One row has since changed status: the games
+of this section were played under the void-era misdeclaration default, so
+``wrong split $\to$ opponents'' was a variant when it was measured --- it is
+now the baseline (\S\ref{sec:game}), and the row is the measurement the rule
+correction's continuity expectation was registered against. Its $+1.690$
+carries one caveat worth stating: both agents' declaration policies at the
+time still priced misses with void-era expected values, so the row shows the
+margin survives the rule, not that either side played it optimally --- the
+restated headline under the award baseline, with both sides pricing it
+correctly, is design R1 of \path{prereg/rules_award_baseline.md}.
 
 \begin{table}[t]
 \centering
@@ -3584,8 +3649,12 @@ where we would look next.
 
 \paragraph{What we did not compute, and why.} The obvious next step is to price
 the change: declaring on splits the engine currently waits on, against waiting
-and accepting the measured $23.4\%$ null rate on stuck half-suits, would beat
-waiting wherever the MAP is right more than $76.6\%$ of the time --- which the
+and accepting the measured $23.4\%$ misdeclaration rate on stuck half-suits,
+would beat waiting wherever the MAP is right more than $76.6\%$ of the time
+under the void-era rule this section's games were played with (a wrong
+declaration cost $0$ there; under the award baseline it costs $-1$, the
+eventual stuck declaration risks the same $-1$, and the break-even lands
+elsewhere --- one more reason the refusal below stands) --- which the
 table says it is, everywhere above $0.5$. Carried through, that arithmetic
 returns a number of the size this paper calls demonstrated.
 
@@ -3603,7 +3672,7 @@ the size of the answer, and went looking for why it was too good. Pricing this
 properly needs the null rate re-measured over this population, and until then
 there is no estimate and no queued run.
 
-\subsection{The claim threshold: the one screen that resolved, re-run}
+\subsection{The declaration threshold: the one screen that resolved, re-run}
 \label{sec:res-claimthreshold}
 
 Section~\ref{sec:res-null} reports a cell that lowers the claim bar from $0.97$
@@ -3706,7 +3775,10 @@ dead half-suits at peak & 3.13 & 3.13 & 3.15 \\
 nulls per game & 0.275 & 0.275 & \textbf{0.220} \\
 \bottomrule
 \end{tabular}
-\caption{Repetition and dead positions in 200 games of champion self-play.}
+\caption{Repetition and dead positions in 200 games of champion self-play,
+played under the void-era misdeclaration rule (the ``nulls per game'' row is
+that rule's statistic; under the award baseline the same mistakes are gifts
+and the row would read as misdeclarations per game).}
 \label{tab:perpetual}
 \end{table}
 
@@ -3768,7 +3840,12 @@ fires more often but is no longer free: it spends a turn to send one bit, and
 the tempo it concedes cancels the sets it saves. So the escape is real theory
 with a null in practice, and the honest summary is that Fish's stalemate is a
 genuine structural feature of the game that a strong engine is already handling
-adequately by other means.
+adequately by other means. One post-script from the rule correction: this
+ledger was priced in the void era, where each avoided misdeclaration was
+worth one point of differential; under the award baseline it is worth two,
+so the tempo-versus-sets cancellation is no longer arithmetic that can be
+assumed --- the duel is queued for re-measurement before ``buys no wins'' is
+repeated under the new rule.
 
 \subsection{Game statistics, and a statistic that stops working}
 \label{sec:res-analytics}
@@ -3787,7 +3864,7 @@ possessions gaining nothing & 44.5\% & 48.8\% \\
 failed-ask share & 40.9\% & 43.2\% \\
 asks per game & 100.3 & 96.5 \\
 ask accuracy, thirds of the game & 54.1 / 59.7 / 64.2\% & 52.2 / 58.0 / 60.8\% \\
-null rate (natural half-suits) & 4.4\% & 3.1\% \\
+misdeclaration rate, natural half-suits (void era) & 4.4\% & 3.1\% \\
 claim delay, median / p90 (actions) & 0 / 58 & 0 / 49 \\
 first-move advantage & $+0.23$ $[-0.27, +0.73]$ & $+0.32$ $[-0.22, +0.86]$ \\
 \bottomrule
@@ -3807,7 +3884,7 @@ Contradicted, and worth stating carefully: v0.3 named cards-per-possession
 ``the single best summary statistic of skill'', on the evidence that it doubled
 from the \texttt{memory} tier to the \texttt{probabilistic} tier. The stronger
 engine here scores \emph{lower} on it. The mechanism is visible in the other
-rows: v0.4 nulls fewer sets ($3.1\%$ against $4.4\%$) and claims sooner (p90 $49$
+rows: v0.4 misdeclares fewer sets ($3.1\%$ against $4.4\%$) and declares sooner (p90 $49$
 against $58$), so half-suits resolve faster and the game contains fewer, harder
 asks --- $96.5$ per game against $100.3$. Cards-per-possession compares two
 tables on how easy their asks were, and how easy the asks are depends on how
@@ -4458,8 +4535,11 @@ $m = 2 \dots 9$ & $480$ & $0$ \\
 
 Only at $m = 1$, and structurally: there the hand counts are tight enough that
 a mis-split is detectably infeasible, while above it there is slack enough that
-almost any team-only declaration fits some deal. Every such claim nulled:
-$+0.000$ sets each against $+0.968$ for the rest.
+almost any team-only declaration fits some deal. Every such declaration was
+wrong by construction: $+0.000$ sets each against $+0.968$ for the rest,
+under the void-era rule these games were played with --- under the award
+baseline each would have scored $-1$, a fact the adoption verdict below now
+carries.
 
 \subsection{The repair, and why it is not adopted}
 
@@ -4480,7 +4560,12 @@ not have won cannot cost anything.
 The bar fixed before the arm existed was $+0.05$. \textbf{It is not adopted},
 and the champion is unchanged. A provable error, a free repair, and an effect
 smaller than the smallest one this project agreed in advance to care about ---
-all three are the finding.
+all three are the finding. One caveat now attaches: the $+0.028$ was earned
+under the void rule, where a repaired impossible declaration saved one point
+of differential; under the award baseline it saves two, so the arm's value
+plausibly doubles and clears the bar. Re-running this 6000-pair design under
+the award rule is the one adoption decision the rule correction can
+plausibly reverse, and it is queued rather than presumed.
 
 % =====================================================================
 % =====================================================================
@@ -4590,10 +4675,14 @@ have no hidden first endgame decision at all. Every arm now reports how many
 decisions the flagged seats faced and how many the solver answered, and a run
 where it never fires refuses to print a differential.
 
-\paragraph{One mechanism, visible in the raw counts.} Over the $1200$ games the
-policy produced $446$ nulls against the control's $473$. A null is a claim
-with the right team and the wrong split, and the solver enumerates only
-declarations true in some consistent deal.
+\paragraph{One mechanism, visible in the raw counts.} Over the $1200$
+void-era games the policy produced $446$ misdeclarations against the
+control's $473$ --- a misdeclaration being a declaration with the right team
+and the wrong split, voided in these games, awarded to the opponents under
+the current baseline. The solver enumerates only declarations true in some
+consistent deal, and each avoided misdeclaration is worth twice as much
+under the award rule as it was here (design R4 of the rule-correction
+pre-registration re-prices this stack).
 
 \paragraph{Cross-play: the gain is not exploitation of one opponent.} The
 obvious objection is that \path{fish4/exact_ii} best-responds to the v0.4
@@ -4862,10 +4951,13 @@ different belief representation, different search, its 55-parameter policy
 frozen upstream after self-play tuning. It plays under this engine's arbiter
 through a process bridge that replays the public history to the frozen policy and
 legality-checks every move it proposes, substitutions counted rather than
-hidden; zero were needed across the $1{,}000$ games below. Two caveats travel
-with the comparison: v0.7 was tuned for a rule variant with out-of-turn
-declarations and plays here under this paper's rules, which its policy is
-told; and it is one foreign opponent, not a population.
+hidden; zero were needed across the $2{,}000$ games this section reports.
+Two caveats travel with the comparison: v0.7 was tuned for a rule variant
+with out-of-turn declarations and plays here under this paper's rules, which
+its policy is told; and it is one foreign opponent, not a population. A
+third caveat --- that the first run scored misdeclarations under this
+engine's void-era rule while v0.7's native game awards them --- was removed
+by re-running the whole design under the award baseline, below.
 
 The check was pre-registered before the first scored game
 (\path{prereg/foreign_opponent_m2.md}), outcomes fixed in advance: the
@@ -4887,15 +4979,69 @@ does not transfer.''
 The context the check ran in: with the correction on, the deployed
 configuration beats v0.7 by $+2.448$ sets per game ($+2.478$ with it off),
 taking 64.3\% of decided sets across the $1{,}000$ games. That margin is a
-claim about this game under this paper's rules against an engine tuned under
-slightly different ones, and it is quoted as context, not as a ranking of the
-two projects; the measurement the design paid for is the paired difference,
-which needs no ranking to be valid.
+statement about this game under this paper's rules against an engine tuned
+under slightly different ones, and it is quoted as context, not as a ranking
+of the two projects; the measurement the design paid for is the paired
+difference, which needs no ranking to be valid.
+
+\paragraph{The same check, rule-matched.} When the misdeclaration baseline
+flipped (\S\ref{sec:game}), the design was re-registered and re-run from
+scratch under the award rule (design R2 of
+\path{prereg/rules_award_baseline.md}: fresh seeds, its own journal, the
+rule pinned in the runner rather than inherited), which makes the two
+engines agree on what every wrong declaration costs --- v0.7's native risk
+model is now exactly the rule in force. Over another $500$ paired games the
+answer does not move: $-0.0440$ $[-0.1344, +0.0464]$ against Dylan's v0.7
+under the award rule --- no reversal, and the sibling-measured size is again
+excluded. The margin context: $+2.544$ sets per game with the correction on,
+$+2.588$ with it off, 64.3\% of decided sets over the $1{,}000$ games ---
+the share to the decimal of the void-era run, on disjoint deals, under a
+different scoring rule.
+
+What the rule-matched run adds is the accounting of the rule itself: $466$
+sets in those $1{,}000$ games were misdeclarations --- wholly-held
+half-suits declared with the wrong split, each now a set for the other side
+--- and they divide $160$ against this engine to $\mathbf{306}$ against
+v0.7. The correction the void rule had been silently granting was worth
+nearly twice as much to the opponent: v0.7's forced declarations come from
+a sampled best guess where this engine declares the exact posterior MAP
+(\S\ref{sec:claiming}), so scoring misdeclarations properly \emph{widened}
+nothing --- it is the reason the margin held rather than shrank when the
+game switched to the rule v0.7 was built for.
+
+\paragraph{Under the award rule the correction itself no longer earns its
+place, and is withdrawn.} Designs R3 and R4 of the same pre-registration
+close the loop. R3, the declaration-threshold sanity: against $0.999$ the
+shipped $0.97$ bar produces \emph{bit-identical} games --- $0$ of $200$
+pairs diverge, $+0.0000$ exactly --- and against $0.90$ the difference is
+$+0.0400$ $[-0.0278, +0.1078]$; the void-era finding that any high bar
+plays the same survives the rule change, as its rule-invariant mechanism
+said it should. R4, the correction stack re-priced: the registered
+expectation was that the sign would hold and the size could move. The
+expectation was wrong, and it is reported because it was written first:
+under the award rule the deployed configuration WITH the $m \le 2$
+correction scores $-0.1040$ $[-0.2184, +0.0104]$ against the same
+configuration without it, over $500$ fresh pairs --- and the correction arm
+misdeclares \emph{more} ($123$ against $106$). The mechanism is not
+mysterious: the correction's $d_{\text{info}} = 2.0$ was fitted against
+solver targets whose continuations priced a wrong declaration at zero, and
+the game no longer plays that price. Taken with the foreign tie above
+($-0.0440$ under the matched rule), the correction fails, under the
+baseline rule, the CI-excludes-zero bar every shipped knob in this project
+is held to. It is withdrawn from the deployed configuration ---
+\texttt{V06\_DEPLOYED} in the registry is \texttt{V04\_COMBINED} without it
+--- and the exact-solver diagnosis behind it, which is rule-invariant,
+awaits a refit against award-rule targets: the solver journals now carry
+the rule in their resume fingerprints so that refit cannot silently mix
+eras. The void-era $+0.1220$ stands as what it always was, a measurement
+of the void-era game.
 
 \paragraph{What did not change.} FishBot4's own defaults. The champion is the
 reference point for every measurement in this paper, and moving it would
-silently reprice all of them at once; the correction ships in
-\texttt{V04\_COMBINED} and in the site's spec. A test requires whole games to
+silently reprice all of them at once; the correction remains in the archival
+\texttt{V04\_COMBINED} spec exactly as measured (its withdrawal from the
+\emph{deployed} configuration under the award rule is the previous
+paragraph's, and the registry's, record). A test requires whole games to
 be \emph{bit-identical} when the knob is off, and requires the first divergence
 to fall at two live half-suits or fewer when it is on --- checked by replaying
 the shared prefix, not by asking the agent where it was.
@@ -4925,13 +5071,17 @@ misses. The practical corollary is that in a fully-known endgame the only thing
 that matters is \emph{how many live half-suits your team has a foothold in when
 it is your turn} --- not how many cards, not which cards.
 
-\paragraph{Do not agonise over when to declare.} Reproducing v0.3's finding on a
-much better posterior: raising the claim bar from $0.97$ to $0.99$ changes
-essentially no decisions. The reason is structural rather than statistical. If
-your team genuinely holds all six cards of a half-suit, no opponent holds any
-card of it, so no opponent can legally ask in it --- and a claim by a team that
-does not hold all six gives the set to you. Waiting is close to free. Wait until
-you know the split.
+\paragraph{Do not agonise over when to declare --- but never guess.}
+Reproducing v0.3's finding on a much better posterior: raising the
+declaration bar from $0.97$ to $0.99$ changes essentially no decisions. The
+reason is structural rather than statistical. If your team genuinely holds
+all six cards of a half-suit, no opponent holds any card of it, so no
+opponent can legally ask in it --- and a declaration by a team that does not
+hold all six gives the set to you. Waiting is close to free, and that
+mechanism is rule-invariant. What the award rule changes is the price of
+impatience: a guessed split that used to void the set now hands it to the
+other team, a two-set swing in the differential. Wait until you know the
+split; the rule correction doubled the fine for not waiting.
 
 \paragraph{Two tie-breakers really do hold up.} When two asks look about equally
 likely to land, prefer the one that, if it misses, hands the turn to the
@@ -4947,20 +5097,26 @@ were decided and only the declarations were left. Two consequences for a human.
 First, the last few turns are not a contest, so spend your attention earlier.
 Second --- and this is the one people get wrong --- if your team holds a half-suit
 outright, \emph{no opponent can legally ask in it}, so it cannot be taken from
-you. There is never a reason to rush that declaration. In our games, half-suits
-that reached ``ours but we cannot place the split'' were nulled $23.4\%$ of the
-time against $0.92\%$ otherwise, and accounted for $73\%$ of all nulls. Almost every
-one of those is a self-inflicted wound.
+you by any ask or by any opposing declaration. There is never a reason to
+rush that declaration. In our void-era games, half-suits that reached ``ours
+but we cannot place the split'' were misdeclared $23.4\%$ of the time
+against $0.92\%$ otherwise --- a factor of $25$ --- and under the award rule
+each of those is no longer a voided set but a set \emph{donated}. Almost
+every one is a self-inflicted wound, and the wound now costs twice as much.
 
 \paragraph{You can talk, and most players do not realise it.} You may not ask
 for a card you hold. So asking for a card \emph{proves to the table} that you do
 not have it --- and when your team already owns the half-suit, the ask cannot
 lose you anything, because no opponent holds a card of it to give. In that
 situation an ask is a free, legal message to your partners telling them exactly
-where a card is not. Use it when you are stuck on a split. (Our engine gains
-about 20\% fewer nulls doing this; it does not gain games, because the turn it
-spends is worth about as much as the sets it saves. For a human, who is far more
-likely to misplace a split than an engine is, the trade is probably better.)
+where a card is not. Use it when you are stuck on a split. (Our engine cut
+its misdeclarations about 20\% doing this in void-era measurement, and it
+did not gain games there, because the turn it spent was worth about as much
+as the sets it saved --- but that ledger was priced with a misdeclaration
+worth one point of differential, and the award rule prices it at two, so
+the trade has improved and its re-measurement is queued rather than
+presumed. For a human, who is far more likely to misplace a split than an
+engine is, the trade was probably favourable even at the old price.)
 
 \paragraph{Spend your effort on card-tracking, not on cleverness about which ask
 to make.} Three measurements in this study point the same way and none of them

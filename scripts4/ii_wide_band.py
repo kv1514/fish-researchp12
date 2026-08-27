@@ -56,8 +56,12 @@ JOURNAL = ROOT / "results" / "ii_wide_band_journal.jsonl"
 
 
 def _fp() -> str:
+    # The rules are part of what the stored numbers MEAN: a row computed
+    # under one misdeclaration rule must never be resumed into a run playing
+    # the other, so the rule set is in the hash.
     return hashlib.sha256(
-        (ROOT / "fish4" / "exact_ii.py").read_bytes()).hexdigest()[:12]
+        (ROOT / "fish4" / "exact_ii.py").read_bytes()
+        + repr(RuleConfig()).encode()).hexdigest()[:12]
 
 
 def main(n_games: int = 60, lo: int = 25, hi: int = 120) -> int:

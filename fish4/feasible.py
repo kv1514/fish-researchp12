@@ -1,7 +1,10 @@
 """Is a declared split consistent with ANY complete deal? An exact check.
 
-``results/impossible_claims.json`` finds that 9.2% of m=1 claims declare a
-split no complete consistent deal contains, and that every one of them nulls.
+``results/impossible_claims.json`` finds that 9.2% of m=1 declarations pick a
+split no complete consistent deal contains, and that every one of them is
+wrong by construction -- voided in the null-variant games that study
+measured, awarded to the opponents under the baseline rule, where this guard
+is accordingly worth more.
 The champion is not confused about any individual card -- 0 of 1080 claims put
 a card outside its own holder mask -- it is the JOINT that fails, exactly as
 ``claim4.best_for_half_suit``'s docstring warns: "cards compete for the same

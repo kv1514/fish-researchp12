@@ -55,9 +55,12 @@ JOURNAL = ROOT / "results" / "ii_first_endgame_journal.jsonl"
 def _solver_fingerprint() -> str:
     """Same guard as scripts4/ii_endgame.py, for the same reason: a journal
     written by a different solver is not a shortcut, it is last week's answer
-    reported under this week's name."""
+    reported under this week's name. The rules are in the hash for the same
+    reason: a row computed under one misdeclaration rule must never be
+    resumed into a run playing the other."""
     return hashlib.sha256(
-        (ROOT / "fish4" / "exact_ii.py").read_bytes()).hexdigest()[:12]
+        (ROOT / "fish4" / "exact_ii.py").read_bytes()
+        + repr(RuleConfig()).encode()).hexdigest()[:12]
 
 
 def main(n_games: int = 60) -> int:

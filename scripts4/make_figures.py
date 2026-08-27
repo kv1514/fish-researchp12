@@ -71,6 +71,9 @@ def fig_effects():
     d = _duel("FINAL: v04 champion vs v03 champion")
     rows.append(("Opponent model (v0.4 vs v0.3)", d["diff_mean"],
                  d["diff_ci"], "shipped", d["n_pairs"]))
+    aw = _load("award_headline.json")
+    rows.append(("Deployed vs v0.3, standard scoring", aw["estimate"],
+                 aw["ci"], "shipped", aw["n_pairs"]))
     p = _load("precision_verdict.json")
     fe, ci = fe_ci(p)
     rows.append(("Posterior budget 160→480 draws", fe, ci, "shipped",
@@ -85,9 +88,14 @@ def fig_effects():
     fe, ci = fe_ci(a)
     rows.append(("At-ask-time depth", fe, ci, "not shipped", a["n_pairs"]))
     e = _load("endgame_ask_stack.json")
-    rows.append(("Endgame ask correction (m≤2)", e["diff"], e["ci95"],
-                 "shipped", e["n_pairs"]))
-    f = _load("foreign_m2_check.json")
+    rows.append(("Endgame ask correction (void era)", e["diff"], e["ci95"],
+                 "not shipped", e["n_pairs"]))
+    r4 = _load("r4_award_check.json")
+    rows.append(("Endgame correction, award rule", r4["estimate"], r4["ci"],
+                 "not shipped", r4["n_pairs"]))
+    # The rule-matched (award-baseline) run; the void-era first run is in
+    # the text. Same design, disjoint deals, same conclusion.
+    f = _load("foreign_award_check.json")
     rows.append(("Endgame correction vs foreign v0.7", f["effect"],
                  f["ci95"], "context", f["n_pairs"]))
     w = _load("learned_weights_verdict.json")
@@ -95,7 +103,7 @@ def fig_effects():
                  "not shipped", w["n_pairs"]))
     rows.sort(key=lambda r: -r[1])
 
-    fig, ax = plt.subplots(figsize=(6.3, 2.9))
+    fig, ax = plt.subplots(figsize=(6.3, 3.45))
     ys = range(len(rows))[::-1]
     for y, (name, est, ci, kind, n) in zip(ys, rows):
         col = BLUE if kind == "shipped" else (
@@ -112,7 +120,7 @@ def fig_effects():
     ax.set_yticks(list(ys))
     ax.set_yticklabels([r[0] for r in rows], fontsize=8.5)
     ax.set_xlabel("sets per duplicate deal-pair (95% CI)")
-    ax.set_xlim(-1.75, 2.65)
+    ax.set_xlim(-1.75, 3.05)
     ax.spines["left"].set_visible(False)
     ax.tick_params(left=False)
     fig.tight_layout()

@@ -4,93 +4,94 @@
  "premise_B": {
   "claims_checked": 120,
   "denials_found": 0,
+  "awards_demonstrated": 10,
   "nulls_demonstrated": 10
  },
  "premise_C": [
   {
    "m": 1,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
    "mean_value": 1.0
   },
   {
    "m": 2,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 1.9
+   "mean_value": 1.91
   },
   {
    "m": 3,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 2.95
+   "mean_value": 2.9
   },
   {
    "m": 4,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 3.95
+   "mean_value": 3.87
   },
   {
    "m": 5,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 4.95
+   "mean_value": 4.83
   },
   {
    "m": 6,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 5.85
+   "mean_value": 5.87
   },
   {
    "m": 7,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 6.75
+   "mean_value": 6.84
   },
   {
    "m": 8,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 7.95
+   "mean_value": 7.88
   },
   {
    "m": 9,
-   "n": 40,
-   "agree": 40,
+   "n": 200,
+   "agree": 200,
    "jams": 0,
-   "mean_value": 8.8
+   "mean_value": 8.79
   }
  ],
  "premise_D": [
   {
    "m": 1,
-   "n": 20,
-   "formula_matches_exact": 20,
-   "playout_matches_exact": 20,
+   "n": 50,
+   "formula_matches_exact": 50,
+   "playout_matches_exact": 50,
    "examples": []
   },
   {
    "m": 2,
-   "n": 20,
-   "formula_matches_exact": 20,
-   "playout_matches_exact": 20,
+   "n": 50,
+   "formula_matches_exact": 50,
+   "playout_matches_exact": 50,
    "examples": []
   }
  ],
- "positions": 360,
- "agree": 360,
+ "positions": 1800,
+ "agree": 1800,
  "p_half_suit_all_opponents": 0.011461188248884459,
  "opening_expected_value_closed_form": 8.793698611520078,
- "opening_expected_value_measured": 8.8,
+ "opening_expected_value_measured": 8.79,
  "proved": true
 }

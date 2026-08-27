@@ -76,9 +76,10 @@ class Tablebase4Mixin:
             state.check_legal(obs.player, action)
         except Exception:
             return None
-        # The claim ban has to bite here too. A tablebase claim is certainly
-        # correct -- pinned_state only returns a state when the belief pins
-        # every live card -- so it can never cause a null, but it CAN resolve a
+        # The claim ban has to bite here too. A tablebase declaration is
+        # certainly correct -- pinned_state only returns a state when the
+        # belief pins every live card -- so it can never misfire under either
+        # misdeclaration rule, but it CAN resolve a
         # half-suit that a counterfactual is deliberately holding open, which
         # silently ends the replay. Empty on every shipped path.
         from fish.engine import Claim

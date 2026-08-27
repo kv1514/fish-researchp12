@@ -16,12 +16,14 @@ playing our game through a one-shot decision binary.
 - `build.sh` — local build. The deployed copy at `api/bin/fish_v07_decide` is
   built with `-static` and no `-march=native` so it runs on the Vercel runtime.
 
-The Python side is `fish4/dylan_v07.py`, registered as `dylan_v07`. Rule
-differences between the two projects (their engine allows out-of-turn
-declarations and awards misdeclared sets to the opponents; ours is
-claims-on-turn with wrong claims scoring null) are documented there — our
-engine arbitrates, their policy is told the rules it is actually playing under,
-and every proposed action is legality-checked with a counted fallback.
+The Python side is `fish4/dylan_v07.py`, registered as `dylan_v07`. The two
+projects now agree on misdeclaration scoring — a wrong declaration awards the
+set to the opponents in both engines (this repo's baseline since the rule
+correction; theirs always) — so the one remaining rule difference is their
+out-of-turn declaration channel versus our declarations-on-turn, documented
+there. Our engine arbitrates, their policy is told the rules it is actually
+playing under, and every proposed action is legality-checked with a counted
+fallback.
 Verification: full games with zero fallbacks across 20 mixed 3v3 games before
 anything shipped.
 

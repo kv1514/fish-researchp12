@@ -308,10 +308,15 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         order = sorted(range(len(asks)), key=lambda i: -scores[i])
         top = scores[order[0]]
         # If the ask we are ABOUT TO MAKE cannot land, it hands over the turn
-        # for certain, so a claim is worth considering instead - but only if it
-        # is more likely right than wrong, since otherwise it gifts a set on top
-        # of the lost turn, which is strictly worse than a doomed ask. v0.3 used
-        # the same 0.5 bar.
+        # for certain, so a declaration is worth considering instead - but only
+        # if it is more likely right than wrong, since otherwise it gifts a set
+        # on top of the lost turn, which is strictly worse than a doomed ask.
+        # v0.3 used the same 0.5 bar. Under the opponent-award baseline the
+        # bar is exactly break-even in sets (EV = 2p - 1 = 0 at p = 0.5, where
+        # under the legacy null variant an all-ours candidate at the bar was
+        # worth up to +0.5), so 0.5 remains defensible but is no longer
+        # conservative; whether a higher bar plays better is an open
+        # empirical question, deliberately not settled here by fiat.
         #
         # Note what this is NOT. An earlier version of this comment said "if no
         # ask can possibly land", which is a stricter condition - max(p) <= 0 -

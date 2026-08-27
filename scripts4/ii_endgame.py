@@ -85,7 +85,11 @@ def _solver_fingerprint() -> str:
     any that do not match its own.
     """
     src = (ROOT / "fish4" / "exact_ii.py").read_bytes()
-    return hashlib.sha256(src).hexdigest()[:12]
+    # The rules are part of what the stored numbers MEAN: a row
+    # computed under one misdeclaration rule must never be resumed
+    # into a run playing the other, so the rule set is in the hash.
+    return hashlib.sha256(
+        src + repr(RuleConfig()).encode()).hexdigest()[:12]
 
 
 def _journal_path(layer: int) -> Path:

@@ -639,9 +639,16 @@ class ExactII:
         """The declarations worth considering: those TRUE in some candidate.
 
         All 3^6 = 729 assignments over the team are legal, but a declaration
-        true in no candidate deal scores at most 0 in every one of them, while
-        one true in some candidate scores +1 there and no worse elsewhere. So
-        the rest are weakly dominated and enumerating them only costs tree.
+        true in no candidate deal scores its worst outcome in every one of
+        them (-1 under the opponent-award baseline; 0 or -1 under the legacy
+        null variant), while one true in some candidate scores +1 there and
+        no worse elsewhere. So the rest are weakly dominated under either
+        rule and enumerating them only costs tree. Outcomes are priced by
+        the engine through ``t.apply`` with the state's real rules, so the
+        search stays exact under both settings -- but the VALUE of a partly
+        wrong declaration differs between them (worth p under null, 2p-1
+        under opponent-award), which is why solver outputs are stamped with
+        the rules via the callers' fingerprints.
         """
         team = team_of(self.me)
         seen = set()

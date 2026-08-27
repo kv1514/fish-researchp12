@@ -64,6 +64,10 @@ def _fp() -> str:
     for f in ("fish4/exact_ii.py", "fish4/askfeat.py"):
         h.update((ROOT / f).read_bytes())
     h.update(Path(__file__).resolve().read_bytes())
+    # The rules are part of what the stored numbers MEAN: a row
+    # computed under one misdeclaration rule must never be resumed
+    # into a run playing the other, so the rule set is in the hash.
+    h.update(repr(RuleConfig()).encode())
     return h.hexdigest()[:12]
 
 
