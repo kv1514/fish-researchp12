@@ -125,10 +125,14 @@ WEB_DRAWS = 480
 #: eight blocks positive (results/endgame_m4_verdict.json). The rungs are
 #: GROWING -- +0.1220, +0.3025, +0.6995 -- which is itself evidence the defect
 #: was never about the endgame; the ladder continues.
-#: m = 5 rung: +1.0125 [+0.8961, +1.1289], eight of eight positive
-#: (results/endgame_m5_verdict.json). Four rungs, four growing gains.
+#: m = 5 rung: +1.0125 [+0.8961, +1.1289]. Then the amended coarse step to
+#: m = 9 -- ALWAYS ON, no longer an endgame correction at all: +4.2790
+#: [+4.1155, +4.4425] against the m = 5 rung, eight of eight blocks positive
+#: (results/endgame_m9_verdict.json). Shipped under the ladder's rule; the
+#: cross-play check against v0.3 (is this strength, or deception of the
+#: sibling's opponent model?) is run separately and recorded beside it.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
-            "endgame_m": 5, "endgame_d_info": 2.0}
+            "endgame_m": 9, "endgame_d_info": 2.0}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.
