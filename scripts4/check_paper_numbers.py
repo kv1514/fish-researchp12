@@ -389,7 +389,7 @@ WATCH = [
     # direction. Quoted in the advice section and in the results table, so a
     # stale figure here is advice to a human.
     ("retake_bonus_verdict.json", "estimate", "{:.3f}",
-     "rewarding the re-take", "(\\texttt{jobs/PREREGISTRATION\\_retake\\_bonus.md}), and it returns"),
+     "rewarding the re-take", "(\\path{jobs/PREREGISTRATION_retake_bonus.md}), and it returns"),
     ("retake_bonus_verdict.json", "n_pairs", "{:d}",
      "pairs in the bonus run", "It has now been, at"),
     ("retake_bonus_verdict.json", "contrast_vs_gated_penalty.delta", "{:.3f}",

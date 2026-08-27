@@ -7,6 +7,12 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+% Times for text and maths, Helvetica for headings. This is the conventional
+% pairing for a journal-style paper, and it also shrinks the file by an order
+% of magnitude: Computer Modern ships as cm-super Type1 outlines that embed at
+% roughly 900 kB, where these subset to a fraction of that.
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
 \usepackage[margin=1in,top=0.95in,bottom=1.05in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
@@ -35,6 +41,11 @@
 \setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
 \setlist[enumerate]{itemsep=2pt,topsep=4pt,parsep=0pt}
 \setlist[itemize]{itemsep=2pt,topsep=4pt,parsep=0pt}
+% Last resort before a line is allowed into the margin. This is only consulted
+% on the final pass for a paragraph TeX could not otherwise set, so it does not
+% loosen anything that already fits -- unlike \sloppy, which loosens the whole
+% document to fix five paragraphs.
+\emergencystretch=2em
 \raggedbottom
 \clubpenalty=9999
 \widowpenalty=9999
@@ -478,7 +489,7 @@ matchings in a degree-constrained bipartite graph, equivalently a restricted
 permanent, which is $\#P$-complete in general \citep{valiant1979complexity}.
 The instances arising here, however, are small in the only dimension that
 matters. Measured over the $360$ decision points of the stored corpus
-(\texttt{results/infer\_position\_stats.json}):
+(\path{results/infer_position_stats.json}):
 
 \begin{center}
 \begin{tabular}{lrrrr}
@@ -534,7 +545,7 @@ $O(\sum_{g \in A_p} \min(n_g,q_p))$ array operations. Second, the state space
 $\prod_g (n_g+1)$ is small in practice, because $G$ is small and not because
 $|F|$ is. An earlier draft put it at ``median $272$, mean $577$ over real
 positions''; those figures back nothing in
-\texttt{results/infer\_position\_stats.json}, which stored the \emph{quota}
+\path{results/infer_position_stats.json}, which stored the \emph{quota}
 lattice $\prod_p (q_p+1)$ under a similar name and never the group product at
 all. The group product is now measured alongside it, and the two are different
 quantities rather than two estimates of one.
@@ -640,7 +651,7 @@ known to discriminate. The Kish effective sample size is $\mathrm{ESS}/N = 0.52$
 on real positions (Section~\ref{sec:res-ess}), so the cost of steering the
 proposal is substantial and, more importantly, is reported rather than assumed.
 An earlier draft put it at $0.81$ here while Section~\ref{sec:res-ess} put it at
-$0.52$; the $0.52$ is what \texttt{results/ess\_probe.json} measures over $641$
+$0.52$; the $0.52$ is what \path{results/ess_probe.json} measures over $641$
 real decisions, and the two sentences had disagreed with each other for as long
 as both existed. Drawing the batch one card at a
 time across all draws in lockstep, rather than one draw at a time, makes this
@@ -848,7 +859,7 @@ $\mathbf{43{,}000\times}$ by total CPU time and
 $\mathbf{10{,}900\times}$ by median per position ($990$\,ms against
 $91\,\mu$s). An earlier draft reported ``131 further positions'' at
 $4{,}205\times$; there is no second corpus, and $4{,}205$ is not a ratio
-anything in \texttt{results/exact2\_cross\_check.json} produces.
+anything in \path{results/exact2_cross_check.json} produces.
 
 \subsection{A closed form for the perfect-information value}
 
@@ -1139,7 +1150,7 @@ a threshold of $0.97$. The shortcut is sound. What makes it sound is the margin 
 agreement between the two quantities --- the gap reaches $+0.255$ on individual
 half-suits --- so the tier is safe at these settings and would not survive a
 much lower threshold. That is now a stored measurement
-(\texttt{results/claim\_screen\_check.json}) with a test that fails if a
+(\path{results/claim_screen_check.json}) with a test that fails if a
 screened half-suit ever turns out to be claimable, rather than a comment.
 
 Finally, a hard architectural constraint taken from the literature: a claim must
@@ -1262,7 +1273,7 @@ legal asks has mean $45.0$, median $45$, p90 $81$ and maximum $102$, and exceeds
 $8$ in $94.6\%$ of decisions. (An earlier draft of this section said the
 branching factor ``averages 8''. That figure is the mean legal-action count of
 the \emph{exact-solver corpus} in
-\texttt{results/exact\_positions\_v2.json}, which consists of endgame positions
+\path{results/exact_positions_v2.json}, which consists of endgame positions
 with one or two live half-suits --- an endgame statistic read as a general one.)
 
 Continuations are beamed to the best $4$ candidates by immediate $p$. The root
@@ -1286,7 +1297,7 @@ repetitions each) on the contended host of Section~\ref{sec:counting}.
 
 Against the configuration the lookahead runs actually used --- $160$ draws, the
 \path{fish4/agent4.py} default, since no lookahead cell in
-\texttt{results/v04\_duels.jsonl} overrides \texttt{n\_draws} --- the relevant
+\path{results/v04_duels.jsonl} overrides \texttt{n\_draws} --- the relevant
 posterior cost is the $31.9$\,ms row of Table~\ref{tab:posterior}, not the
 $\sim\!100$\,ms rows, which are all $512$-draw. So the bonus now adds roughly a
 fifth to a decision. An earlier draft of this section claimed $15\%$ by comparing
@@ -1403,7 +1414,7 @@ of the constant at low share --- the only place the rule is ever \emph{used} ---
 was not established, and the paragraph said so. The gated re-take run has since
 landed two blocks at $s = 0.233$ and $s = 0.236$, and the prediction that the
 flat model over-states low-share noise by roughly $30\%$ was recorded in
-\texttt{jobs/PREREGISTRATION\_retake\_gate.md} \emph{before any pair of that run
+\path{jobs/PREREGISTRATION_retake_gate.md} \emph{before any pair of that run
 was played}. Scoring it out of sample, over the three cells now below $s = 0.5$:
 \begin{center}
 \begin{tabular}{lrrrr}
@@ -1581,7 +1592,7 @@ batch.
 \paragraph{A control this paragraph used to claim, and did not have.} Earlier
 drafts read ``$83.7$ effective \dots\ against $99.9$ with the opponent model
 disabled'', and reported $14$ exact decisions in $646$ for that arm. No such arm
-was ever run. \texttt{results/ess\_probe.json} holds four rows, all at
+was ever run. \path{results/ess_probe.json} holds four rows, all at
 $\gamma = 0.35$, differing only in the proposal tilt; the $99.9$ is the
 \emph{p90 of the champion row itself} ($99.986$), and the $14$ in $646$ has no
 source at all. A percentile of one arm had been written up as the mean of
@@ -2117,7 +2128,7 @@ played the shipped configuration against the reference in a single duel}, so
 every ``vs.\ champion'' figure in this document was for a spec that is not the
 one on the website.
 
-\texttt{jobs/PREREGISTRATION\_combined.md} fixes, before any pair: two blocks
+\path{jobs/PREREGISTRATION_combined.md} fixes, before any pair: two blocks
 of $1000$ fresh pairs; the A/A $3.796$ as the per-pair standard deviation
 rather than the divergence model, deliberately conservative because this arm
 differs from the champion by \emph{two} knobs and the model was fitted on arms
@@ -2165,7 +2176,7 @@ actually running.
 \paragraph{And it stops paying: precision's returns diminish.} If tripling the
 sampling budget is worth $+0.340$, the obvious question is whether tripling it
 again is worth as much. Pre-registered in
-\texttt{jobs/PREREGISTRATION\_precision2.md} with a \emph{minimum interesting
+\path{jobs/PREREGISTRATION_precision2.md} with a \emph{minimum interesting
 effect} of $0.150$ fixed before any pair was played --- so that a small positive
 would be reported as a small positive rather than promoted:
 \begin{center}
@@ -2207,7 +2218,7 @@ whatever its sign.
 \paragraph{A demonstrated effect that is deliberately not shipped.} At-ask-time
 depth at $\gamma = 1.0$ measures $+0.102$ over $6000$ pre-registered pairs and
 its interval excludes zero, so the effect is real. It is also below the $0.15$
-that \texttt{jobs/PREREGISTRATION\_at\_ask.md} fixed \emph{in advance} as the
+that \path{jobs/PREREGISTRATION_at_ask.md} fixed \emph{in advance} as the
 smallest effect worth adopting, and the upper end of its interval, $+0.197$,
 barely reaches that. It therefore does not ship, and \texttt{depth\_mode} stays
 \texttt{"initial"} in every named configuration. A real effect below a threshold
@@ -2512,7 +2523,7 @@ afterwards.} The no-declaration term was assembled into the importance weights
 and then overwritten: the batch sampler built it first and the opponent-model
 branch that follows did \texttt{logl = } rather than \texttt{logl += }, so
 whenever any non-self player had already asked --- $632$ of $641$ decisions in
-\texttt{results/ess\_probe.json} --- the term was discarded before use. In the
+\path{results/ess_probe.json} --- the term was discarded before use. In the
 handful of decisions where it survived, it addressed the half-suit by column
 indices built against the caller's free-card order and applied to a matrix whose
 columns are in the sampler's own sort; six of eight columns differ on a typical
@@ -2855,7 +2866,7 @@ and none was caught by being more careful --- each was caught by measuring the
 thing that had been reasoned about.
 
 \paragraph{The pre-registered run, and the answer.} So we wrote the analysis
-down before running it. \texttt{jobs/PREREGISTRATION\_lookahead.md} fixes, in
+down before running it. \path{jobs/PREREGISTRATION_lookahead.md} fixes, in
 advance: six blocks of 1000 fresh pairs; sizing against the \emph{unbiased}
 $+0.153$ rather than any figure containing the selected cell; a per-pair
 standard deviation of $3.796$ from the A/A rather than the older $3.869$; a
@@ -2914,7 +2925,7 @@ Setting \texttt{couple=False} also does not restore the proposition's hypotheses
 outright --- the transition still zeroes the asked row and decrements the
 target's count. What is demonstrated is narrower and still to the point. Instrumenting the
 search itself over $60{,}277$ multi-branch nodes on champion trajectories
-(\texttt{scripts4/greedy\_shadow.py}), the coupled arm departs from the
+(\path{scripts4/greedy_shadow.py}), the coupled arm departs from the
 highest-probability branch at $452$ of them, $0.750\%$; the uncoupled arm
 departs at $\mathbf{1}$, $0.0017\%$ --- a factor of $452$. Its set differential
 is a null at both 200 and 500 pairs ($+0.070$ and $+0.112$, both intervals
@@ -2941,7 +2952,7 @@ features of this version --- the belief-space search and the larger posterior
 sampling budget --- were each measured against the champion \emph{alone}, so
 neither says anything about the other. They could add, or the sharper belief
 could already be earning what the search was earning. Pre-registered in
-\texttt{jobs/PREREGISTRATION\_stack.md} and written at one of six blocks, which
+\path{jobs/PREREGISTRATION_stack.md} and written at one of six blocks, which
 is the only moment at which writing such a thing proves anything:
 \begin{center}
 \begin{tabular}{lrl}
@@ -3268,7 +3279,7 @@ there is not is a way to attribute it to individual terms as they currently
 stand.
 
 \paragraph{The two most-quoted figures in this paper were the two nothing could
-check.} \texttt{check\_paper\_numbers.py} watches over a hundred figures
+check.} \path{check_paper_numbers.py} watches over a hundred figures
 against the results files that produce them. It could not watch the abstract's
 headline --- the $+1.85$ margin over the previous champion --- because that
 lives in the JSONL duel pool while every other watched figure lives in a JSON
@@ -3278,7 +3289,7 @@ the \LaTeX{} from counts the pipeline stored, so the number the paper prints was
 never a number the pipeline held. Both are correct; both sat outside every drift
 check for reasons as dull as a file format and a division done in the wrong
 place. This is the third time the same shape has appeared --- after
-\texttt{settle\_verdict.py} printing the lookahead headline and persisting
+\path{settle_verdict.py} printing the lookahead headline and persisting
 nothing, and the deadlock quartet existing in no file at all --- and each time
 the unwatched figure was among the most load-bearing in the document, for the
 same reason: the numbers a paper repeats most are the ones nobody re-derives.
@@ -3299,7 +3310,7 @@ the champion posterior's own NLL and Brier scores.
 
 \paragraph{A supervisor a bystander could switch off.} The rollout pass is
 restarted by a shell supervisor whose liveness check was
-\texttt{pgrep -f "learn\_ask\_objective.py rollout --run v2"}. That matches the
+\path{pgrep -f "learn_ask_objective.py rollout --run v2"}. That matches the
 \emph{full command line of every process}, so a one-line loop written to
 \emph{watch} the pass --- one whose own command line contained that string ---
 was itself a match. The supervisor concluded the job was alive and stopped
@@ -3311,7 +3322,7 @@ This is the mirror image of a failure this paper already records, in which the
 same function returning \texttt{False} on any exception made a guard fail
 \emph{open}. Both come from reading ``this string appears somewhere in the
 process table'' as ``this job is running''. The check now walks
-\texttt{/proc} and counts a process only when it is a Python interpreter whose
+\path{/proc} and counts a process only when it is a Python interpreter whose
 own \texttt{argv} carries every token, excluding the caller and its ancestors;
 its test asserts both directions, including that \texttt{pgrep} really does
 match the bystander it is given.
@@ -3421,7 +3432,7 @@ tested, because testing it required exactly the thing it asserted was
 impossible.
 
 \paragraph{And the weights were played, which settles the line.} Everything
-above is estimation. \texttt{jobs/PREREGISTRATION\_learned\_weights.md} fixes,
+above is estimation. \path{jobs/PREREGISTRATION_learned_weights.md} fixes,
 before the fit was run and before any weight vector had been looked at, that
 the \emph{validation duel is the test}: two blocks of $1000$ fresh pairs, the
 pinned-$p$ vector only, the shipped champion as the baseline rather than the
@@ -3463,7 +3474,7 @@ individual signs are not findings. \texttt{certain} correlates $0.738$ with
 $\Prob(\text{success})$, which carries weight $1.0$ by convention, and the
 within-position feature fit reported earlier in this section gives the same
 term the \emph{opposite} sign on a different population
-(\texttt{results/target\_feature\_fit.json}, $+0.649$ against this
+(\path{results/target_feature_fit.json}, $+0.649$ against this
 $-0.502$). That is the collinearity this
 section already documented for $\Prob(\text{success})$'s own coefficient,
 arriving a second time.
@@ -3531,8 +3542,8 @@ two rows of a table about the \emph{sampler}, for a reason having nothing to do
 with the sampler. How well a stated probability is calibrated is a property of
 the posterior alone, so the bins are now fixed, the bar is reported separately
 where it belongs, and the whole table is stored in
-\texttt{results/stuck\_claim\_value.json} rather than printed --- which is the
-failure \texttt{scripts4/check\_verdicts.py} exists to catch, found here in a
+\path{results/stuck_claim_value.json} rather than printed --- which is the
+failure \path{scripts4/check_verdicts.py} exists to catch, found here in a
 table rather than a verdict.
 
 Two things follow. The distribution is \textbf{bimodal} --- $76\%$ of decisions
@@ -3576,7 +3587,7 @@ there is no estimate and no queued run.
 Section~\ref{sec:res-null} reports a cell that lowers the claim bar from $0.97$
 to $0.90$ and returns $+0.035$ $[+0.007, +0.063]$ over $400$ pairs. It is the
 only small, cheap, unexplained positive in a table the paper describes as mostly
-nulls, and it contradicts a documented conclusion: \texttt{fish4/claim4.py}
+nulls, and it contradicts a documented conclusion: \path{fish4/claim4.py}
 argues that waiting to claim is close to free, and reports that over $150$
 duplicate deals the $0.97$ and $0.999$ policies never once diverged.
 
@@ -3611,7 +3622,7 @@ before the run, over $998$ decisions carrying a claim candidate, found that
 raising the bar from $0.97$ to $0.90$ admits \emph{one extra claim in 998}. The
 run then diverged on $2.6\%$ of pairs. Two arms that make one different decision
 in a thousand and finish $97\%$ of deals identically are not a null from thin
-data; they are the same policy, and \texttt{claim4.py}'s argument survives its
+data; they are the same policy, and \path{claim4.py}'s argument survives its
 one piece of counter-evidence.
 
 \paragraph{The design missed its own power target, and says so.} The
@@ -3708,7 +3719,7 @@ half-suits that never get stuck --- a factor of $25$ --- so they account for
 Four figures in this paragraph were wrong in every draft before this one, and
 the way they were wrong is the reason the paragraph now names its denominators.
 They read $17.5\%$, $2.8\%$, a factor of $6.3$, and $27\%$ of all nulls. Those
-numbers appear in no results file: \texttt{perpetual\_study.py} tracked which
+numbers appear in no results file: \path{perpetual_study.py} tracked which
 \emph{teams} were stuck and recorded nothing per half-suit, so nothing in the
 pipeline could have checked them and nothing did. They were carried from draft
 to draft as though measured. The direction survives re-measurement --- it
@@ -3716,8 +3727,8 @@ survives it more strongly, since the true ratio is four times the one claimed
 --- but $27\%$ against a measured $73\%$ is not a rounding difference, and one
 of these numbers had already been used downstream as a threshold
 (Section~\ref{sec:res-splitcal}). Every figure here now comes from
-\texttt{results/perpetual\_study.json} and is checked by
-\texttt{scripts4/check\_paper\_numbers.py} against it.
+\path{results/perpetual_study.json} and is checked by
+\path{scripts4/check_paper_numbers.py} against it.
 
 \paragraph{The free-signalling escape works, and does not pay.} Turning on the
 protocol of Section~\ref{sec:perpetual} cuts nulls from $0.275$ to $0.220$ per
@@ -4088,7 +4099,7 @@ genuinely cannot see, which is a different question with a different answer.
 
 \subsection{An exact best response over information sets}
 
-\texttt{fish4/exact\_ii} enumerates the deals consistent with the public record
+\path{fish4/exact_ii} enumerates the deals consistent with the public record
 and optimises over the deviator's \emph{information sets} --- the same action
 at every deal it cannot tell apart --- by backward induction against champion
 opponents. There is no sampling anywhere in it.
@@ -4277,7 +4288,7 @@ on a guessed join checks nothing.
 $59$ games, the ones not solved exactly are bounded into
 $[\mathbf{+0.2976}, \mathbf{+1.7455}]$. The study's solved mean over the same
 games is $+0.3214$, which the interval straddles. The bounds are real and they
-are too loose to decide; \texttt{prereg/ii\_bounds.md} fixed that reading
+are too loose to decide; \path{prereg/ii_bounds.md} fixed that reading
 before the run.
 
 \paragraph{Perfect information is a bad bound for this game.} That is the
@@ -4453,7 +4464,7 @@ play champion-identically before it and optimally from it.
 The value is already a team differential: $+1$ for a half-suit the deviator's
 team takes and $-1$ for one the opponents take, so a half-suit changing hands
 moves it by $2$, exactly as it moves the set differential
-\texttt{scripts4/exploitability.py} reports. Over 60 games:
+\path{scripts4/exploitability.py} reports. Over 60 games:
 
 \begin{center}
 \begin{tabular}{lrr}
@@ -4471,7 +4482,7 @@ decision takes a positive amount --- and if the all-champion profile were an
 equilibrium, no single seat could gain by deviating at all. The rollout
 responder, deviating for a \emph{whole} game, measured $-0.4875$: it does not
 merely fail to find an exploit, it loses ground, which is what
-\texttt{fish4/bestresponse.py} warns strategy fusion can do to a PIMC
+\path{fish4/bestresponse.py} warns strategy fusion can do to a PIMC
 responder.
 
 \paragraph{Why the per-game figure is the smaller one, and why it is the right
@@ -4504,7 +4515,7 @@ profile is not an equilibrium.
 \label{sec:exactplay}
 
 Section~\ref{sec:iidiff} measures that the champion picks the exact optimum at
-under a third of hidden $m = 1$ decisions. \texttt{fish4/endgame\_ii.py} puts
+under a third of hidden $m = 1$ decisions. \path{fish4/endgame_ii.py} puts
 the solver in the agent at exactly those decisions. Duplicate-deal paired
 against the identical configuration with the flag off, so everything but the
 policy cancels:
@@ -4548,7 +4559,7 @@ with the right team and the wrong split, and the solver enumerates only
 declarations true in some consistent deal.
 
 \paragraph{Cross-play: the gain is not exploitation of one opponent.} The
-obvious objection is that \texttt{fish4/exact\_ii} best-responds to the v0.4
+obvious objection is that \path{fish4/exact_ii} best-responds to the v0.4
 champion, so a gain against that champion might be exploitation of it rather
 than better endgame play. Against \texttt{V03\_CHAMPION} --- a different agent,
 which the solver's opponent model is simply \emph{wrong} about --- over
@@ -4581,7 +4592,7 @@ direct evidence against that reading here, and the objection is much weaker
 than when it was written.
 
 The second stands unchanged: turning the flag on would change the champion, and
-the champion is what \texttt{fish4/exact\_ii} models. Every exact figure in
+the champion is what \path{fish4/exact_ii} models. Every exact figure in
 Sections~\ref{sec:ii} and~\ref{sec:noneq} is a statement about the current
 champion, and promoting this would invalidate all of them at once. That is a
 decision with a cascade behind it, to be taken deliberately and re-measured
@@ -4842,7 +4853,7 @@ That is small enough that the $200$-pair cells this study used for screening
 could not have resolved it either way, which is why no such cell was run.
 
 It has now been run at $2000$ pairs, pre-registered in
-\texttt{jobs/PREREGISTRATION\_retake\_gate.md} with the design, the five prior
+\path{jobs/PREREGISTRATION_retake_gate.md} with the design, the five prior
 failures and the analysis all fixed before a pair was played. The gated penalty
 scores $\mathbf{-0.004}$ sets per deal-pair $[-0.067, +0.059]$ against the
 champion --- indistinguishable from not having it. Against the ungated
@@ -4868,7 +4879,7 @@ not pay. Take the certain ask.
 \emph{withholds}. The opposite policy --- take the card straight back, trade
 hard inside the duel, which is what strong players more often describe doing
 --- had never been measured. It has now been, at $2000$ pre-registered pairs
-(\texttt{jobs/PREREGISTRATION\_retake\_bonus.md}), and it returns
+(\path{jobs/PREREGISTRATION_retake_bonus.md}), and it returns
 $\mathbf{+0.013}$ $[-0.052, +0.079]$: the seventh null in this family. Against
 the gated penalty's $-0.004$ the difference is $+0.017 \pm 0.046$. The two
 policies act on \emph{disjoint} slices of the same decision in opposite
@@ -5391,7 +5402,7 @@ more.
 
 The engine, agents, experiments and this paper are in one repository. v0.3's
 code is untouched, so its results remain reproducible alongside these; v0.4
-lives in \texttt{fish4/}.
+lives in \path{fish4/}.
 
 \begin{verbatim}
 py -m pytest tests  -q     # v0.3: rules, fuzz, leakage proofs, belief
@@ -5411,9 +5422,9 @@ py scripts4/analytics4.py 120 3          # strategy statistics
 py scripts4/check_tex.py                 # structural check on this document
 \end{verbatim}
 
-Every duel appends to \texttt{results/v04\_duels.jsonl} recording both random
+Every duel appends to \path{results/v04_duels.jsonl} recording both random
 seed streams, the full agent specifications, the rule configuration and the
-result. \texttt{summarise\_duels.py} prints, alongside every interval, the
+result. \path{summarise_duels.py} prints, alongside every interval, the
 smallest effect that run could have detected --- which is the column that stops
 a null being read as a negative.
 
