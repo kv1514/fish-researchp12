@@ -379,18 +379,31 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT,
     print(f"  loosened by budget: {fb_pos} positions took the trivial upper "
           f"bound for at least one deal, {sk_pos} left at least one action "
           f"unevaluated in the lower bound")
-    head = None
+    # The comparison figure, restricted to the games this run actually
+    # covered. The study ran 60 games; a chunked run may cover fewer, and
+    # comparing an unsolved mean over games 0-19 with a solved mean over games
+    # 0-59 would smuggle in an assumption that the games are interchangeable.
+    # The whole-study figure is printed too, so the two can be seen to agree
+    # or not.
+    head = head_all = None
     m2 = ROOT / "results" / "ii_endgame_m2.json"
+    covered = set(r["game"] for r in rows)
     if m2.exists():
-        head = json.loads(m2.read_text())["mean_gain"]
+        d = json.loads(m2.read_text())
+        head_all = d["mean_gain"]
+        matched = [r["gain"] for r in d["solved"] if r["game"] in covered]
+        head = (sum(matched) / len(matched)) if matched else head_all
+        print(f"\n  the study's solved mean over these {len(covered)} games: "
+              f"{head:+.4f} ({len(matched)} positions); over all 60 games it "
+              f"is {head_all:+.4f}")
     if uu:
         print(f"  where it is not: bounds [{ul[0]:+.4f}, {uu[0]:+.4f}] "
               f"over {uu[2]} positions "
               f"(upper 95% CI [{uu[0]-1.96*uu[1]:+.4f}, "
               f"{uu[0]+1.96*uu[1]:+.4f}])")
     if uu and head is not None:
-        print(f"\n  the paper reports {head:+.4f} over the solved positions "
-              f"and calls it a lower bound on the layer.")
+        print(f"  the paper calls that solved mean a lower bound on the "
+              f"layer.")
         if uu[0] <= head:
             print(f"  REFUTED: the unsolved positions cannot average more "
                   f"than {uu[0]:+.4f}, which is below it.")
@@ -415,7 +428,9 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT,
             1 for r in rows if r.get("actions_skipped")),
         "pi_nodes": PI_NODES, "control_max_support": CONTROL_MAX_SUPPORT,
         "n_never_attempted_exactly": len(untried),
-        "headline_solved_mean": head,
+        "headline_solved_mean_matched": head,
+        "headline_solved_mean_all_games": head_all,
+        "games_covered": sorted(covered),
         "solved_exact_mean": se[0] if se else None,
         "solved_lower_mean": sl[0] if sl else None,
         "solved_upper_mean": su[0] if su else None,
