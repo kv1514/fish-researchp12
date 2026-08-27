@@ -1,0 +1,12 @@
+{
+ "n_pairs": 500,
+ "effect": -0.03,
+ "ci95": [
+  -0.10813934626594818,
+  0.04813934626594818
+ ],
+ "kv_margin_on": 2.448,
+ "kv_margin_off": 2.478,
+ "bridge_fallbacks": 0,
+ "verdict": "no-reversal"
+}
