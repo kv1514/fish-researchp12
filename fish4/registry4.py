@@ -115,6 +115,14 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 #:     raising m from 4 to 5        +1.0125  [+0.8961, +1.1289]   2000 pairs
 #:     m 5 to 9 (always on)         +4.2790  [+4.1155, +4.4425]   2000 pairs
 #:
+#: THE LAST FOUR ROWS ARE WITHDRAWN AS EVIDENCE OF STRENGTH. All of them
+#: duel the sibling, whose opponent model conditions on ask choices, and
+#: cross-play against v0.3 shows the m = 9 "gain" was deception of that
+#: model: the m = 9 config LOSES to v0.3 by 2.14 sets on seeds where the
+#: m = 5 config wins by 1.35. The rungs grew with m because more of the game
+#: was spent poisoning the sibling's inference, not because play improved.
+#: Only m = 2 keeps non-sibling evidence behind it, and only it ships.
+#:
 #: The third is what licensed the default moving and is what the site gained;
 #: it is slightly LARGER on the stronger base, so the depth-3 lookahead was not
 #: already finding these asks.
@@ -134,7 +142,7 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
                              "lookahead_beam": 4,
-                             "endgame_m": 9, "endgame_d_info": 2.0})
+                             "endgame_m": 2, "endgame_d_info": 2.0})
 
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is

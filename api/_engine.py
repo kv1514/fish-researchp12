@@ -125,14 +125,26 @@ WEB_DRAWS = 480
 #: eight blocks positive (results/endgame_m4_verdict.json). The rungs are
 #: GROWING -- +0.1220, +0.3025, +0.6995 -- which is itself evidence the defect
 #: was never about the endgame; the ladder continues.
-#: m = 5 rung: +1.0125 [+0.8961, +1.1289]. Then the amended coarse step to
-#: m = 9 -- ALWAYS ON, no longer an endgame correction at all: +4.2790
-#: [+4.1155, +4.4425] against the m = 5 rung, eight of eight blocks positive
-#: (results/endgame_m9_verdict.json). Shipped under the ladder's rule; the
-#: cross-play check against v0.3 (is this strength, or deception of the
-#: sibling's opponent model?) is run separately and recorded beside it.
+#: THE LADDER ABOVE m = 2 IS REVERTED, and the reason matters more than any
+#: rung. Every rung was measured against the SIBLING configuration, whose
+#: opponent model conditions on which half-suit a player chooses to ask.
+#: Information-seeking asks systematically violate that model, so they poison
+#: the sibling's inference -- and the "gains" grew with m because more of the
+#: game was spent poisoning. Cross-play against v0.3, a foreign opponent with
+#: different inference, on identical seeds:
+#:
+#:     m = 5 config vs v0.3:  -1.352 (the config wins by 1.35)
+#:     m = 9 config vs v0.3:  +2.144 (v0.3 WINS by 2.14)
+#:
+#: The +4.2790 the m = 9 rung showed against its sibling was deception, not
+#: strength -- the first demonstrated in this project, and demonstrated by
+#: accident. The bare v0.4 champion beats v0.3 by +1.854, so even the m = 5
+#: config may sit BELOW the pre-ladder baseline against foreign opponents; a
+#: sweep maps where real strength peaks before anything above m = 2 ships
+#: again. m = 2 keeps the exact-solver diagnosis, the offline fit held out by
+#: game, and the exploitability check behind it, which no higher rung has.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
-            "endgame_m": 9, "endgame_d_info": 2.0}
+            "endgame_m": 2, "endgame_d_info": 2.0}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.
