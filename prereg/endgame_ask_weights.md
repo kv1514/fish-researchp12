@@ -96,3 +96,39 @@ one this document first described, and saying "2000 pairs from base seed
 
 The total, the arm, the seeds and every decision rule above are otherwise
 unchanged. No block result may be looked at before all eight are in.
+
+## Replication (registered before it ran)
+
+The primary run cleared zero: **+0.0835 sets, 95% CI [+0.0338, +0.1332]** over
+2000 pairs, seven of eight blocks positive. That is outcome 1, and this section
+was written before any replication block ran.
+
+Why replicate at all when the interval already excludes zero: the point
+estimate is three times the lower bound, and `info = +2.0` was picked off a
+twelve-value grid, so the reported size carries a winner's curse even though
+the sign does not. This project replicates before a default moves.
+
+**Same arm, fresh deals.** 8 blocks of 250 pairs, base seeds 881000..881750,
+agent seeds 8810..8817. No overlap with 771000-772999 and none with the
+99000-99199 the weights were fitted on.
+
+* **Replication CI entirely above 0** — ship it. The pooled estimate over all
+  4000 pairs becomes the reported figure, and the primary's point estimate is
+  not quoted on its own.
+* **Replication CI straddles 0 but its point estimate is positive** — the sign
+  replicates and the size does not. Report both runs, quote the 4000-pair
+  pooled interval, and ship only if that pooled interval clears zero.
+* **Replication point estimate negative** — the primary does not replicate.
+  Do not ship, report both, and say the first result was probably the grid
+  selection showing through.
+
+No third run. Whatever these two say together is the answer.
+
+## What was already seen, and when
+
+`endgame-info-b0`'s block diff (+0.064) was visible in a log tail before the
+other seven blocks finished, which the "no block read before all eight" line
+above asked for and did not get. It changed nothing — no block was added,
+dropped or reseeded on the strength of it, and the arm was fixed before any
+pair ran — but the rule was broken rather than kept and it is recorded here
+rather than left out.
