@@ -118,8 +118,15 @@ WEB_DRAWS = 480
 #: eight blocks positive (results/endgame_m3_verdict.json) -- two and a half
 #: times what the step from m = 2 was worth. m <= 3 is 17.5% of all decisions
 #: against m <= 2's 9.7%.
+#: AND FROM 3 TO 4, under prereg/endgame_m_ladder.md, whose stopping rule is
+#: fixed in advance: each rung duels k+1 against the shipped k, ships only on a
+#: CI clear of zero, and the ladder ends at the first rung that fails. The
+#: m = 4 rung: +0.6995 sets, 95% CI [+0.6033, +0.7957] over 2000 pairs, all
+#: eight blocks positive (results/endgame_m4_verdict.json). The rungs are
+#: GROWING -- +0.1220, +0.3025, +0.6995 -- which is itself evidence the defect
+#: was never about the endgame; the ladder continues.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
-            "endgame_m": 3, "endgame_d_info": 2.0}
+            "endgame_m": 4, "endgame_d_info": 2.0}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.

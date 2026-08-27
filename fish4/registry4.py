@@ -111,6 +111,7 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 #:     vs champion, pooled          +0.0907  [+0.0555, +0.1260]   4000 pairs
 #:     ON TOP OF THIS SPEC          +0.1220  [+0.0711, +0.1729]   2000 pairs
 #:     raising m from 2 to 3        +0.3025  [+0.2271, +0.3779]   2000 pairs
+#:     raising m from 3 to 4        +0.6995  [+0.6033, +0.7957]   2000 pairs
 #:
 #: The third is what licensed the default moving and is what the site gained;
 #: it is slightly LARGER on the stronger base, so the depth-3 lookahead was not
@@ -131,7 +132,7 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
                              "lookahead_beam": 4,
-                             "endgame_m": 3, "endgame_d_info": 2.0})
+                             "endgame_m": 4, "endgame_d_info": 2.0})
 
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is

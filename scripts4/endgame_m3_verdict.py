@@ -31,7 +31,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DUELS = ROOT / "results" / "v04_duels.jsonl"
-PREFIX = "endgame-m3-"
+PREFIX = sys.argv[1] if len(sys.argv) > 1 else "endgame-m3-"
 EXPECTED = 8
 
 
@@ -74,27 +74,31 @@ def main() -> int:
           f"timeouts {sum(r['timeouts'] for r in b)}, "
           f"dropped {sum(r['dropped_pairs'] for r in b)}")
 
+    prev = ROOT / "results" / "endgame_m3_verdict.json"
     m2 = json.loads((ROOT / "results" / "endgame_ask_stack.json").read_text())
-    print(f"\n  for scale, taking the same correction from m<=1 to m<=2 was "
-          f"worth {m2['diff']:+.4f}")
+    print(f"\n  the ladder so far: m<=1 to m<=2 {m2['diff']:+.4f}")
+    if prev.exists() and PREFIX != "endgame-m3-":
+        d3 = json.loads(prev.read_text())
+        print(f"                     m<=2 to m<=3 {d3['diff']:+.4f} "
+              f"[{d3['ci95'][0]:+.4f}, {d3['ci95'][1]:+.4f}]")
     if lo > 0:
-        print("\n  Outcome 1: it extends. Ship endgame_m = 3.")
+        print("\n  Clears zero: this rung of the ladder holds. Ship it and "
+              "take the next step.")
         v = "extends"
     elif m > 0:
-        print("\n  Outcome 2: unresolved. The point estimate is positive and "
-              "the interval is\n  not. The offline evidence does not license "
-              "a default change on its own,\n  which is the rule the m = 2 "
-              "stacking run was held to. Not shipped, and no\n  second run.")
+        print("\n  Does not clear zero. Under prereg/endgame_m_ladder.md the "
+              "ladder STOPS here:\n  not shipped, no higher value tried, no "
+              "re-run with more pairs. This step\n  is a result and is "
+              "reported as one -- it says where the defect the exact\n  "
+              "solver found stops converting into play.")
         v = "unresolved"
     else:
-        print("\n  Outcome 3: it does NOT extend. That is worth more than the "
-              "change would\n  have been: the sampled one-ply target "
-              "identified a defect at m = 3 that\n  does not convert into "
-              "play, so the target stops predicting play somewhere\n  between "
-              "m = 2 and m = 3, and anything built on it above the endgame is\n"
-              "  suspect.")
+        print("\n  Negative. The ladder stops here, and this rung actively "
+              "costs: extending the\n  correction this far makes play worse, "
+              "not merely no better.")
         v = "does-not-extend"
-    dest = ROOT / "results" / "endgame_m3_verdict.json"
+    dest = ROOT / "results" / (PREFIX.strip("-").replace("-", "_")
+                               + "_verdict.json")
     dest.write_text(json.dumps({
         "n_pairs": n, "n_blocks": len(b), "duplicates_dropped": dropped,
         "engine": digs[0], "diff": m, "ci95": [lo, hi],
