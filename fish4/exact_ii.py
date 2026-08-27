@@ -203,18 +203,41 @@ def consistent_deals(obs: Observation, bel, hs: int) -> list:
 _CHAMP_CACHE: dict = {}
 
 
-def _info_key(seat, obs) -> bytes:
+def _info_key(seat, obs, hist=None) -> bytes:
+    """Hash the whole information set.
+
+    ``hist`` is ``tuple(repr(e) for e in obs.history)``, which a caller may
+    pass in when it already has it. Every deal in an information set shares the
+    public history by definition -- that is what makes it an information set --
+    so at an opponent node this tuple is the same for all of them, and building
+    it per deal meant re-running a hundred generated dataclass ``__repr__``
+    calls to get the same strings back. The profile put that at a sixth of the
+    solver's runtime.
+
+    Passing it in does NOT change the key: the same tuple goes into the same
+    ``repr`` and the same digest comes out, byte for byte. That matters more
+    than the speed does, because the first eight bytes of this digest seed the
+    champion's own RNG -- it samples its posterior and breaks ties between
+    equally scored asks with it. A key that changed here would change what the
+    champion PLAYS, and every measured number with it. So the shared work moves
+    and the key does not.
+    """
+    if hist is None:
+        hist = tuple(repr(e) for e in obs.history)
     return hashlib.sha256(repr((seat, obs.hand, tuple(obs.hand_counts),
-                                tuple(obs.set_winner),
-                                tuple(repr(e) for e in obs.history)))
+                                tuple(obs.set_winner), hist))
                           .encode()).digest()
 
 
-def _champion_action(spec, rules, seat, st):
-    """The champion's move, as a pure function of its information set."""
+def _champion_action(spec, rules, seat, st, hist=None):
+    """The champion's move, as a pure function of its information set.
+
+    ``hist`` is the pre-built history reprs shared by every deal at a node; see
+    ``_info_key``. Omitted by the rollout, whose history changes every ply.
+    """
     from fish4.registry4 import make_agent
     obs = Observation.from_state(st, seat)
-    key = _info_key(seat, obs)
+    key = _info_key(seat, obs, hist)
     hit = _CHAMP_CACHE.get(key)
     if hit is not None:
         return hit[0]
@@ -299,6 +322,14 @@ class ExactII:
         #: counted and reported instead.
         self.opp_dropped = 0
         self.dev_skipped = 0
+        #: reprs of the history at the ROOT, filled on the first solve. A node's
+        #: history is the root's plus one event per ply since, and ``path``
+        #: already holds the repr of each of those events, so the champion's
+        #: cache key can be assembled by concatenation instead of by walking a
+        #: hundred events again at every node. Guarded by a length check rather
+        #: than by trusting that identity: if the two ever disagree the tuple is
+        #: rebuilt from the state.
+        self._root_hist = None
 
     # -- terminal value ------------------------------------------------------
 
@@ -326,15 +357,26 @@ class ExactII:
         tot = 0.0
         for st, w in zip(states, weights):
             t = _clone(st)
+            # The rollout's history grows by one event a ply, so the key's
+            # expensive part can be EXTENDED instead of rebuilt: without this
+            # a forty-ply rollout re-reprs the same hundred-event prefix forty
+            # times. The length check is the guard -- if a move ever appends
+            # something other than exactly one event the tuple is rebuilt from
+            # the state, so the key stays a function of the real history and
+            # not of an assumption about the engine.
+            hist = tuple(repr(e) for e in t.history)
             for _ in range(max_plies):
                 v = self._value(t)
                 if v is not None:
                     break
-                a = _champion_action(self.spec, self.rules, t.turn, t)
+                a = _champion_action(self.spec, self.rules, t.turn, t, hist)
                 if a is None:
                     break
                 try:
                     t.apply(t.turn, a)
+                    hist = (hist + (repr(t.history[-1]),)
+                            if len(t.history) == len(hist) + 1
+                            else tuple(repr(e) for e in t.history))
                 except Exception:
                     break
             v = self._value(t)
@@ -436,6 +478,8 @@ class ExactII:
         which is what makes this a best response over INFORMATION SETS rather
         than a per-deal cheat.
         """
+        if depth == 0:
+            self._root_hist = tuple(repr(e) for e in states[0].history)
         self.nodes += 1
         if self.max_nodes is not None and self.nodes > self.max_nodes:
             raise SolveTimeout(f"exceeded {self.max_nodes} nodes")
@@ -616,8 +660,16 @@ class ExactII:
         """
         buckets = {}
         stuck = 0.0
+        # Once for the node, not once per deal: the deals share the history.
+        # And by concatenation when the lengths line up, not by walking it.
+        hist = None
+        if self._root_hist is not None and \
+                len(self._root_hist) + len(path) == len(states[0].history):
+            hist = self._root_hist + path
+        else:
+            hist = tuple(repr(e) for e in states[0].history)
         for s, w in zip(states, weights):
-            a = _champion_action(self.spec, self.rules, seat, s)
+            a = _champion_action(self.spec, self.rules, seat, s, hist)
             t = _clone(s)
             if a is None:
                 self.opp_dropped += 1

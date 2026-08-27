@@ -98,6 +98,12 @@ PI_BACKSTOP = 25.0
 #: beats bounding a handful tightly and calling the rest unknown.
 PI_TOTAL_NODES = 400_000
 PI_TOTAL_SECONDS = 90.0
+#: Budget for the lower-bound stage. Taking the max over a SUBSET of the
+#: actions is still a lower bound -- it can only be smaller -- so running out
+#: of time here costs tightness and never soundness. The champion's own action
+#: is always evaluated first, so however little budget is left the bound is at
+#: least the champion's value and the reported gain cannot go negative.
+LOWER_SECONDS = 120.0
 #: How wide a support this run will enumerate. The exact study capped at 24;
 #: this is the whole point of the run, so it goes far wider. Positions above it
 #: are counted and reported, never silently dropped.
@@ -173,9 +179,17 @@ def _one_ply_lower(rules, live, me, states, weights):
     champ = _champion_action(SPEC, rules, me, states[0])
     if champ is not None and not any(repr(a) == repr(champ) for a in acts):
         acts.append(champ)
+    # Champion first, unconditionally: it is what makes L >= C true.
+    if champ is not None:
+        acts.sort(key=lambda a: repr(a) != repr(champ))
     best = None
     best_act = None
+    stop = time.monotonic() + LOWER_SECONDS
+    skipped = 0
     for a in acts:
+        if best is not None and time.monotonic() > stop:
+            skipped += 1
+            continue
         tot = 0.0
         ok = True
         for s, w in zip(states, weights):
@@ -190,7 +204,7 @@ def _one_ply_lower(rules, live, me, states, weights):
             continue
         if best is None or tot > best:
             best, best_act = tot, a
-    return (best if best is not None else 0.0), repr(best_act)
+    return (best if best is not None else 0.0), repr(best_act), skipped
 
 
 def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
@@ -245,7 +259,8 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
                         c = probe.champion_value(
                             [_clone(s) for s in states], list(w))
                         u, fb, pn = _pi_upper(rules, live, p, states, w)
-                        lo, act = _one_ply_lower(rules, live, p, states, w)
+                        lo, act, skipped = _one_ply_lower(
+                            rules, live, p, states, w)
                         exact = None
                         if len(deals) <= CONTROL_MAX_SUPPORT:
                             sv = ExactII(rules, list(live), p, SPEC)
@@ -265,6 +280,7 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
                                               else exact - c),
                                "pi_fallbacks": fb, "pi_nodes": pn,
                                "best_one_ply": act,
+                               "actions_skipped": skipped,
                                "seconds": time.time() - t0}
                         rows.append(rec)
                         with JOURNAL.open("a") as fh:
@@ -273,8 +289,8 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
                               else f"  exact {exact-c:+.3f}")
                         print(f"    g{g} sup {len(deals):>4}  gain in "
                               f"[{lo-c:+.3f}, {u-c:+.3f}]{ex}  "
-                              f"{fb} fallbacks  {time.time()-t0:5.1f}s",
-                              flush=True)
+                              f"{fb} fb / {skipped} skip  "
+                              f"{time.time()-t0:5.1f}s", flush=True)
             st.apply(p, agents[p].act(obs))
 
     if not rows:
@@ -348,6 +364,15 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
               f"{se[0]-sl[0]:+.4f}")
     uu = stat([r["gain_upper"] for r in uns])
     ul = stat([r["gain_lower"] for r in uns])
+    # How loose the bounds were allowed to get, said out loud. A fallback
+    # loosens the upper bound and a skipped action loosens the lower one, so a
+    # run where both are common is a run whose interval is wide by budget
+    # rather than by the game.
+    fb_pos = sum(1 for r in rows if r["pi_fallbacks"])
+    sk_pos = sum(1 for r in rows if r.get("actions_skipped"))
+    print(f"  loosened by budget: {fb_pos} positions took the trivial upper "
+          f"bound for at least one deal, {sk_pos} left at least one action "
+          f"unevaluated in the lower bound")
     head = None
     m2 = ROOT / "results" / "ii_endgame_m2.json"
     if m2.exists():
@@ -378,6 +403,10 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
         "n_bounded": len(rows), "n_also_solved": len(sol),
         "n_unsolved": len(uns), "too_wide": too_wide,
         "control_checked": checked, "control_ok": checked - viol,
+        "positions_with_pi_fallback": sum(1 for r in rows
+                                          if r["pi_fallbacks"]),
+        "positions_with_skipped_actions": sum(
+            1 for r in rows if r.get("actions_skipped")),
         "pi_nodes": PI_NODES, "control_max_support": CONTROL_MAX_SUPPORT,
         "n_never_attempted_exactly": len(untried),
         "headline_solved_mean": head,

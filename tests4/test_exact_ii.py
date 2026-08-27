@@ -39,7 +39,8 @@ from fish.cards import NUM_PLAYERS
 from fish.engine import (AskEvent, ClaimEvent, GameState, PassEvent)
 from fish.observation import Observation
 from fish.rules import RuleConfig
-from fish4.exact_ii import (ExactII, SolveTimeout, _champion_action, _clone,
+from fish4.exact_ii import (ExactII, SolveTimeout, _champion_action,
+                            _clone, _info_key,
                             consistent_deals)
 from fish4.registry4 import make_agent
 
@@ -413,3 +414,71 @@ def test_a_stuck_deal_keeps_its_weight():
     assert abs(tree - roll) < 1e-9, (
         f"a stuck deal is being reweighted away: tree {tree:+.6f} against a "
         f"rollout of {roll:+.6f} with {sv.opp_dropped} state(s) stuck")
+
+
+# ---------------------------------------------------------------------------
+# The identity the champion oracle's fast cache key rests on.
+#
+# _opponent assembles that key as root_history + path rather than walking the
+# history again, which is only correct if every applied move appends exactly
+# one event AND the signature the search stores for it is that event's repr.
+# Both are true of the engine today. Neither is enforced by anything else, and
+# if either stopped being true the champion would be answering from another
+# information set's cache entry -- the same class of fault as the memo bug,
+# and just as invisible in the output.
+# ---------------------------------------------------------------------------
+
+
+def test_apply_returns_exactly_the_event_it_appends():
+    """Every move type, on real games rather than a random walk.
+
+    A random walk from a fresh deal produced 720 asks and not one claim or
+    pass, which is the move space this test least needs to check -- a claim is
+    the move most likely to append something unusual. Champion agents playing
+    games out reach all three, because a game ENDS by claiming.
+    """
+    rules = RuleConfig()
+    counts = {"AskEvent": 0, "ClaimEvent": 0, "PassEvent": 0}
+    for seed in range(6):
+        agents = [make_agent(SPEC) for _ in range(NUM_PLAYERS)]
+        st = GameState.deal(rules, seed=4_000 + seed)
+        rng = random.Random(seed)
+        for p, a in enumerate(agents):
+            a.begin_game(p, rules, rng.getrandbits(64))
+        for _ in range(400):
+            if st.is_terminal:
+                break
+            p = st.turn
+            act = agents[p].act(Observation.from_state(st, p))
+            before = len(st.history)
+            ev = st.apply(p, act)
+            assert len(st.history) == before + 1, (
+                f"{act!r} appended {len(st.history) - before} events, not "
+                f"one; the concatenated cache key would fall out of step")
+            assert repr(ev) == repr(st.history[-1]), (
+                "apply returned something other than the event it appended, "
+                "so path signatures are not the history")
+            counts[type(ev).__name__] = counts.get(type(ev).__name__, 0) + 1
+    assert counts["AskEvent"] > 50, counts
+    assert counts["ClaimEvent"] > 10, (
+        f"no claims reached, so the move most likely to append something "
+        f"unusual went unchecked: {counts}")
+
+
+def test_the_fast_history_key_matches_the_slow_one():
+    """The assembled key and the walked key must be the same bytes.
+
+    Not "the same value" -- the same bytes. The first eight of them seed the
+    champion's RNG, so a key that differed anywhere would change what the
+    champion plays rather than merely how long it takes to ask.
+    """
+    rules, live, seat, states = _load_fixture()
+    for st in states:
+        obs = Observation.from_state(st, seat)
+        walked = tuple(repr(e) for e in obs.history)
+        assert _info_key(seat, obs) == _info_key(seat, obs, walked)
+    # and every deal at the node really does share the public history
+    first = tuple(repr(e) for e in states[0].history)
+    for st in states[1:]:
+        assert tuple(repr(e) for e in st.history) == first, (
+            "deals at one information set disagree about the public history")
