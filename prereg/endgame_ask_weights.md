@@ -76,4 +76,23 @@ rather than an independent sample, and no combining is claimed.
 
 ## Amendments
 
-None yet.
+### Amendment 1 — the run is executed in blocks, and that is not free
+
+Recorded before any block is run. This environment caps a process at ten
+minutes and `scripts4/duel.py` records a job only when it completes, so a
+single 2000-pair job (about 47 minutes) loses everything when it is killed. The
+run is therefore **8 blocks of 250 pairs**, base seeds 771000, 771250, ...,
+771750 and agent seeds 7710..7717, pooled by fixed effect.
+
+The deals are the same 2000 — `play_matchup` uses `base_seed + i` — but two
+things do not match a single 2000-pair run. The seat rotation is `i % 6` with
+`i` restarting each block, so each block covers rotations 0-5 evenly rather
+than continuing the sequence; and the agent-seed stream restarts, which is why
+the agent seed is varied per block instead of repeated. Neither biases the
+comparison — both agents in a pair see the same deal and the same rotation, and
+the pairing is what the test rests on — but the run is not bit-identical to the
+one this document first described, and saying "2000 pairs from base seed
+771000" without this note would have implied it was.
+
+The total, the arm, the seeds and every decision rule above are otherwise
+unchanged. No block result may be looked at before all eight are in.
