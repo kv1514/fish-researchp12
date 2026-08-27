@@ -1,0 +1,1236 @@
+{
+ "layer": 1,
+ "n_pairs": 131,
+ "n_differing": 122,
+ "champ_p_mean": 0.799121779859485,
+ "best_p_mean": 0.21757578714545925,
+ "paired_diff": -0.5815459927140254,
+ "paired_se": 0.030802410148386646,
+ "better_is_riskier": 113,
+ "better_is_safer": 0,
+ "champion_certain_and_beaten": 73,
+ "same_target": 29,
+ "same_half_suit": 122,
+ "pairs": [
+  {
+   "game": 4,
+   "index": 2,
+   "support": 48,
+   "gain": 0.14583333333333334,
+   "champ_p": 0.4999999999999998,
+   "best_p": 0.3749999999999999,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 4,
+   "index": 3,
+   "support": 10,
+   "gain": 0.20000000000000004,
+   "champ_p": 0.4,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 4,
+   "index": 4,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 0.5,
+   "best_p": 0.25,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 7,
+   "index": 1,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 10,
+   "index": 1,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 13,
+   "index": 1,
+   "support": 12,
+   "gain": 0.8333333333333333,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 13,
+   "index": 2,
+   "support": 12,
+   "gain": 0.8333333333333333,
+   "champ_p": 0.25,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 13,
+   "index": 3,
+   "support": 9,
+   "gain": 0.4444444444444445,
+   "champ_p": 1.0000000000000002,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 13,
+   "index": 5,
+   "support": 6,
+   "gain": 0.3333333333333333,
+   "champ_p": 0.3333333333333333,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 13,
+   "index": 8,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 0.5,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 13,
+   "index": 9,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 15,
+   "index": 2,
+   "support": 48,
+   "gain": 0.10416666666666667,
+   "champ_p": 0.4999999999999998,
+   "best_p": 0.3749999999999999,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 15,
+   "index": 3,
+   "support": 12,
+   "gain": 0.16666666666666666,
+   "champ_p": 0.49999999999999994,
+   "best_p": 0.16666666666666666,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 15,
+   "index": 5,
+   "support": 4,
+   "gain": 0.25,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 15,
+   "index": 7,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 15,
+   "index": 8,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 17,
+   "index": 2,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 17,
+   "index": 5,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 19,
+   "index": 1,
+   "support": 9,
+   "gain": 0.8888888888888888,
+   "champ_p": 0.6666666666666667,
+   "best_p": 0.1111111111111111,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 19,
+   "index": 2,
+   "support": 6,
+   "gain": 0.33333333333333337,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.3333333333333333,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 19,
+   "index": 3,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 0.5,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 19,
+   "index": 5,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 21,
+   "index": 1,
+   "support": 4,
+   "gain": 0.25,
+   "champ_p": 1.0,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 21,
+   "index": 2,
+   "support": 4,
+   "gain": 0.25,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 21,
+   "index": 3,
+   "support": 4,
+   "gain": 0.75,
+   "champ_p": 0.5,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 26,
+   "index": 2,
+   "support": 3,
+   "gain": 0.6666666666666666,
+   "champ_p": 1.0,
+   "best_p": 0.3333333333333333,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 26,
+   "index": 3,
+   "support": 3,
+   "gain": 0.6666666666666666,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.3333333333333333,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 30,
+   "index": 2,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 30,
+   "index": 3,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 41,
+   "index": 2,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 41,
+   "index": 3,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 42,
+   "index": 2,
+   "support": 7,
+   "gain": 0.8571428571428571,
+   "champ_p": 0.9999999999999998,
+   "best_p": 0.42857142857142855,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 42,
+   "index": 3,
+   "support": 7,
+   "gain": 0.8571428571428571,
+   "champ_p": 0.5714285714285714,
+   "best_p": 0.42857142857142855,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 42,
+   "index": 4,
+   "support": 4,
+   "gain": 1.0,
+   "champ_p": 0.5,
+   "best_p": 0.25,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 44,
+   "index": 2,
+   "support": 12,
+   "gain": 0.25,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 44,
+   "index": 3,
+   "support": 12,
+   "gain": 0.16666666666666669,
+   "champ_p": 0.49999999999999994,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 44,
+   "index": 5,
+   "support": 4,
+   "gain": 0.25,
+   "champ_p": 0.5,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 51,
+   "index": 2,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 51,
+   "index": 3,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 51,
+   "index": 4,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 59,
+   "index": 1,
+   "support": 6,
+   "gain": 0.6666666666666666,
+   "champ_p": 0.5,
+   "best_p": 0.16666666666666666,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 59,
+   "index": 2,
+   "support": 3,
+   "gain": 0.6666666666666666,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 59,
+   "index": 3,
+   "support": 3,
+   "gain": 0.6666666666666666,
+   "champ_p": 1.0,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 59,
+   "index": 4,
+   "support": 3,
+   "gain": 0.6666666666666666,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 64,
+   "index": 2,
+   "support": 12,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 64,
+   "index": 3,
+   "support": 12,
+   "gain": 0.5,
+   "champ_p": 0.49999999999999994,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 64,
+   "index": 4,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 64,
+   "index": 5,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 0.5,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 65,
+   "index": 1,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 65,
+   "index": 3,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 72,
+   "index": 1,
+   "support": 6,
+   "gain": 0.33333333333333337,
+   "champ_p": 0.9999999999999999,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 72,
+   "index": 5,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 72,
+   "index": 6,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 73,
+   "index": 1,
+   "support": 21,
+   "gain": 0.19047619047619047,
+   "champ_p": 0.5714285714285714,
+   "best_p": 0.2857142857142857,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 73,
+   "index": 4,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 90,
+   "index": 2,
+   "support": 18,
+   "gain": 0.4444444444444445,
+   "champ_p": 0.5000000000000001,
+   "best_p": 0.33333333333333337,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 90,
+   "index": 4,
+   "support": 6,
+   "gain": 0.3333333333333333,
+   "champ_p": 0.3333333333333333,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 90,
+   "index": 5,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 90,
+   "index": 6,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 93,
+   "index": 2,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 105,
+   "index": 1,
+   "support": 60,
+   "gain": 0.15,
+   "champ_p": 0.19999999999999998,
+   "best_p": 0.19999999999999998,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 105,
+   "index": 2,
+   "support": 48,
+   "gain": 0.10416666666666667,
+   "champ_p": 0.4999999999999998,
+   "best_p": 0.3749999999999999,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 105,
+   "index": 3,
+   "support": 24,
+   "gain": 0.08333333333333331,
+   "champ_p": 0.24999999999999997,
+   "best_p": 0.24999999999999997,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 105,
+   "index": 5,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 105,
+   "index": 7,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 0.5,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 111,
+   "index": 3,
+   "support": 12,
+   "gain": 0.08333333333333336,
+   "champ_p": 1.0,
+   "best_p": 0.16666666666666666,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 111,
+   "index": 4,
+   "support": 12,
+   "gain": 0.16666666666666666,
+   "champ_p": 0.49999999999999994,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 111,
+   "index": 6,
+   "support": 4,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 111,
+   "index": 7,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 111,
+   "index": 8,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 0.5,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 122,
+   "index": 1,
+   "support": 4,
+   "gain": 0.25,
+   "champ_p": 0.5,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 128,
+   "index": 1,
+   "support": 6,
+   "gain": 0.1666666666666667,
+   "champ_p": 0.9999999999999999,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 128,
+   "index": 2,
+   "support": 6,
+   "gain": 0.33333333333333337,
+   "champ_p": 0.9999999999999999,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 128,
+   "index": 4,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 128,
+   "index": 5,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 128,
+   "index": 7,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 128,
+   "index": 8,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 134,
+   "index": 1,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 0.5,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 143,
+   "index": 2,
+   "support": 18,
+   "gain": 0.22222222222222227,
+   "champ_p": 0.33333333333333337,
+   "best_p": 0.2222222222222222,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 143,
+   "index": 3,
+   "support": 12,
+   "gain": 0.25,
+   "champ_p": 1.0,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 143,
+   "index": 4,
+   "support": 12,
+   "gain": 0.25,
+   "champ_p": 0.49999999999999994,
+   "best_p": 0.16666666666666666,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 143,
+   "index": 5,
+   "support": 6,
+   "gain": 0.16666666666666666,
+   "champ_p": 0.9999999999999999,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 144,
+   "index": 2,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 144,
+   "index": 3,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 144,
+   "index": 4,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 149,
+   "index": 1,
+   "support": 9,
+   "gain": 0.6666666666666667,
+   "champ_p": 1.0000000000000002,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 149,
+   "index": 2,
+   "support": 9,
+   "gain": 0.2222222222222222,
+   "champ_p": 0.6666666666666667,
+   "best_p": 0.4444444444444444,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 149,
+   "index": 3,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 150,
+   "index": 2,
+   "support": 6,
+   "gain": 0.6666666666666666,
+   "champ_p": 0.9999999999999999,
+   "best_p": 0.16666666666666666,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 150,
+   "index": 3,
+   "support": 6,
+   "gain": 0.6666666666666666,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.16666666666666666,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 150,
+   "index": 4,
+   "support": 4,
+   "gain": 0.75,
+   "champ_p": 0.5,
+   "best_p": 0.25,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 152,
+   "index": 1,
+   "support": 9,
+   "gain": 0.1111111111111111,
+   "champ_p": 1.0000000000000002,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 152,
+   "index": 2,
+   "support": 9,
+   "gain": 0.2222222222222222,
+   "champ_p": 0.6666666666666667,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 152,
+   "index": 4,
+   "support": 3,
+   "gain": 0.3333333333333333,
+   "champ_p": 1.0,
+   "best_p": 0.3333333333333333,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 152,
+   "index": 5,
+   "support": 3,
+   "gain": 0.3333333333333333,
+   "champ_p": 1.0,
+   "best_p": 0.3333333333333333,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 152,
+   "index": 6,
+   "support": 3,
+   "gain": 0.3333333333333333,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 153,
+   "index": 5,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 153,
+   "index": 7,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 163,
+   "index": 1,
+   "support": 6,
+   "gain": 1.0,
+   "champ_p": 0.9999999999999999,
+   "best_p": 0.16666666666666666,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 163,
+   "index": 2,
+   "support": 6,
+   "gain": 0.6666666666666667,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 163,
+   "index": 4,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 163,
+   "index": 5,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 164,
+   "index": 2,
+   "support": 3,
+   "gain": 0.6666666666666666,
+   "champ_p": 1.0,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 164,
+   "index": 3,
+   "support": 3,
+   "gain": 1.3333333333333333,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 165,
+   "index": 1,
+   "support": 96,
+   "gain": 0.02083333333333333,
+   "champ_p": 0.2499999999999999,
+   "best_p": 0.18749999999999994,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 165,
+   "index": 2,
+   "support": 72,
+   "gain": 0.19444444444444448,
+   "champ_p": 0.3333333333333334,
+   "best_p": 0.1666666666666667,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 165,
+   "index": 4,
+   "support": 18,
+   "gain": 0.1111111111111111,
+   "champ_p": 1.0000000000000002,
+   "best_p": 0.2222222222222222,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 178,
+   "index": 1,
+   "support": 18,
+   "gain": 0.2222222222222223,
+   "champ_p": 1.0000000000000002,
+   "best_p": 0.33333333333333337,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 178,
+   "index": 2,
+   "support": 18,
+   "gain": 0.2777777777777779,
+   "champ_p": 0.33333333333333337,
+   "best_p": 0.2222222222222222,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 178,
+   "index": 3,
+   "support": 12,
+   "gain": 0.16666666666666666,
+   "champ_p": 1.0,
+   "best_p": 0.16666666666666666,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 178,
+   "index": 4,
+   "support": 12,
+   "gain": 0.25,
+   "champ_p": 0.49999999999999994,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 189,
+   "index": 2,
+   "support": 9,
+   "gain": 0.3333333333333333,
+   "champ_p": 1.0000000000000002,
+   "best_p": 0.6666666666666667,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 189,
+   "index": 3,
+   "support": 9,
+   "gain": 0.2222222222222222,
+   "champ_p": 0.6666666666666667,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 189,
+   "index": 4,
+   "support": 6,
+   "gain": 0.16666666666666666,
+   "champ_p": 0.3333333333333333,
+   "best_p": 0.3333333333333333,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 189,
+   "index": 5,
+   "support": 4,
+   "gain": 0.25,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 189,
+   "index": 7,
+   "support": 4,
+   "gain": 0.5,
+   "champ_p": 0.5,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 189,
+   "index": 8,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 189,
+   "index": 9,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 197,
+   "index": 1,
+   "support": 6,
+   "gain": 0.33333333333333337,
+   "champ_p": 0.6666666666666666,
+   "best_p": 0.0,
+   "same_target": true,
+   "same_hs": true
+  },
+  {
+   "game": 197,
+   "index": 2,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 197,
+   "index": 3,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.5,
+   "same_target": false,
+   "same_hs": true
+  },
+  {
+   "game": 198,
+   "index": 2,
+   "support": 2,
+   "gain": 1.0,
+   "champ_p": 1.0,
+   "best_p": 0.0,
+   "same_target": false,
+   "same_hs": true
+  }
+ ]
+}
