@@ -89,9 +89,40 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 #: This is also what the public table actually plays: api/_engine.py sets
 #: WEB_DRAWS = 480 and WEB_SPEC's lookahead. The site was running an
 #: unnamed configuration while this module declined to name it.
+#: THE ENDGAME ASK CORRECTION, added after the above was written.
+#:
+#: The exact imperfect-information solver made a claim about this objective
+#: that no duel could have: on 51% of unpinned m = 1 positions and 61% at
+#: m = 2 the champion's ask is provably beaten by another ask, the better move
+#: is an ASK rather than a claim (131/154 and 128/138), and it is RISKIER --
+#: p = 0.218 against 0.799 at m = 1, paired t = -18.88, with the champion's ask
+#: a CERTAIN hit on 73 of 122 and still wrong.
+#:
+#: Simply de-weighting the success probability does not fix it: the
+#: one-parameter scale family, which spans every positive weight on p, picks
+#: k = 1. What helps is the information term, fitted against exact one-ply
+#: values on 388 endgame positions and held out by game.
+#:
+#: Then measured three times rather than once, because an effect measured
+#: against a weak base does not transfer by assumption:
+#:
+#:     vs champion, registered      +0.0835  [+0.0338, +0.1332]   2000 pairs
+#:     vs champion, replication     +0.0980  [+0.0480, +0.1480]   2000 pairs
+#:     vs champion, pooled          +0.0907  [+0.0555, +0.1260]   4000 pairs
+#:     ON TOP OF THIS SPEC          +0.1220  [+0.0711, +0.1729]   2000 pairs
+#:
+#: The last is the one that licenses the default moving, and the one to quote:
+#: it is what the site gained. It is slightly LARGER on the stronger base, so
+#: the depth-3 lookahead was not already finding these asks.
+#:
+#: FishBot4's own defaults are untouched. The champion is the reference point
+#: for every measurement in the paper, and moving it would silently reprice all
+#: of them; tests4/test_endgame_weights.py requires whole games to be
+#: bit-identical when the knob is off.
 V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
-                             "lookahead_beam": 4})
+                             "lookahead_beam": 4,
+                             "endgame_m": 2, "endgame_d_info": 2.0})
 
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is

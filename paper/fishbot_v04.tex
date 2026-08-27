@@ -4604,6 +4604,121 @@ champion, and promoting this would invalidate all of them at once. That is a
 decision with a cascade behind it, to be taken deliberately and re-measured
 afterwards, not a consequence of a good table.
 
+\section{The solver as a critic: a defect found, fixed and shipped}
+\label{sec:critic}
+
+\begin{quote}
+\emph{Every improvement in this project until now came from a duel. This one
+came from a proof, and the duel only confirmed it.}
+\end{quote}
+
+The exact solver was built to measure exploitability. It also does something a
+duel cannot: it says \emph{which move} was wrong, in a position, with a number
+attached. \S\ref{sec:iibounds} established that beating the champion in the
+endgame is almost always \emph{one} move --- on $88$ of $100$ exactly solved
+$m = 2$ positions and $543$ of $616$ at $m = 1$, a single deviation followed by
+ordinary champion play attains the exact optimum. A defect that is one move
+wide is a defect that can be looked at.
+
+\paragraph{The move is an ask, and it is riskier than the champion's.} The
+improving move is an ask rather than a claim on $131$ of $154$ improvable
+$m = 1$ positions and $128$ of $138$ at $m = 2$, so the defect is in ask
+selection. Paired within each position --- same belief, same hand, so nothing
+about the position can explain the difference:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+& champion's ask & better ask & paired $t$ & $n$ \\
+\midrule
+$m = 1$ & $p = 0.799$ & $p = 0.218$ & $-18.88$ & $122$ \\
+$m = 2$ & $p = 0.611$ & $p = 0.219$ & $-10.02$ & $91$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The better ask is riskier on $113$ of $122$ at $m = 1$ and safer on
+\emph{none}. On $73$ of those $122$ the champion asked a card it was
+\textbf{certain} to get, and that was still a mistake.
+
+\paragraph{But it is certainty, not probability.} The obvious fix --- weigh
+the success probability less --- does not work, and the data says so before any
+duel. The objective is $\mathrm{score}(a) = p(a) + F(a)\cdot w$, and since the
+argmax is scale-invariant, $p + F\cdot(kw)$ ranks asks exactly as
+$(1/k)p + F\cdot w$: the existing objective already spans every positive weight
+on $p$. Searching that one-parameter family over $388$ endgame positions
+carrying the exact one-ply value of every candidate ask returns $k = 1$. No
+change.
+
+What helps is the information term, which rewards asks the belief cannot call.
+Held out by \emph{game}, so positions from one deal cannot sit on both sides:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+model & train & held out \\
+\midrule
+champion (0 parameters)      & $+0.0805$ & $+0.1498$ \\
+scale $k$ (1 parameter)      & $+0.0805$ & $+0.1498$ \\
+$\mathtt{info} = +2.00$      & $+0.1236$ & $+0.1591$ \\
+$\mathtt{certain} = -0.50$   & $+0.1212$ & $+0.1784$ \\
+full search (11 parameters)  & $+0.1786$ & $[+0.1281, +0.1884]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The eleven-parameter fit gains most on train and its held-out score is an
+\emph{interval}, not a number: run at four search seeds with the budget fixed,
+it lands anywhere from below the champion to above every one-parameter model.
+That is a property of which random restarts came up, not of the model, and one
+run of it would have reported whichever number that happened to be. The
+one-parameter models have no such freedom --- their grid is exhaustive --- which
+is a reason to prefer them beyond their score. $\mathtt{info} = +2.0$ was
+chosen on train and confirmed by leave-one-game-out cross-validation inside the
+training games; $\mathtt{certain}$ scored better on the held-out set and was
+\emph{not} chosen, because picking it would be picking by the check.
+
+\paragraph{Three duels, because an effect measured against a weak base does not
+transfer by assumption.} The correction applies only when at most two
+half-suits are live. Every run was pre-registered with its arm, size, seeds and
+readings fixed first, and on deals the fit never saw:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& diff (sets) & $95\%$ CI & pairs \\
+\midrule
+vs champion, registered   & $+0.0835$ & $[+0.0338, +0.1332]$ & $2000$ \\
+vs champion, replication  & $+0.0980$ & $[+0.0480, +0.1480]$ & $2000$ \\
+vs champion, pooled       & $+0.0907$ & $[+0.0555, +0.1260]$ & $4000$ \\
+\textbf{on top of what ships} & $\mathbf{+0.1220}$ &
+  $\mathbf{[+0.0711, +0.1729]}$ & $2000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The last row is the one that moved a default and the one to quote: the site
+plays a depth-3 belief-space lookahead, which searches exactly the positions
+this correction is about, and it might already have been finding these asks.
+It was not --- the effect is if anything \emph{larger} on the stronger base,
+$15$ of $16$ blocks positive.
+
+\paragraph{What was predicted and was wrong.} The pre-registration said the
+effect would be small and the test might be underpowered to see it: the
+correction moves a handful of decisions a game, and offline it was worth
+$+0.0093$ in half-suit units. It is worth $+0.1220$ sets in play, about what
+running the entire exact solver in the endgame gains ($+0.0765$). The
+prediction that the endgame is too thin a slice of the game to matter was
+wrong, and it is recorded here because it was written down first.
+
+\paragraph{What did not change.} FishBot4's own defaults. The champion is the
+reference point for every measurement in this paper, and moving it would
+silently reprice all of them at once; the correction ships in
+\texttt{V04\_COMBINED} and in the site's spec. A test requires whole games to
+be \emph{bit-identical} when the knob is off, and requires the first divergence
+to fall at two live half-suits or fewer when it is on --- checked by replaying
+the shared prefix, not by asking the agent where it was.
+
 \section{What this says about playing Fish}
 \label{sec:strategy}
 

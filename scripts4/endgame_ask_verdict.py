@@ -25,6 +25,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DUELS = ROOT / "results" / "v04_duels.jsonl"
 PREFIX = "endgame-info-b"
 REPLICA = "endgame-info-r"
+STACK = "endgame-on-combined-c"
+STACK_N = 16
 EXPECTED = 8
 
 
@@ -123,6 +125,40 @@ def main() -> int:
     elif rep:
         print(f"\n{len(rep)}/{EXPECTED} replication blocks so far; "
               f"not read until all eight are in.")
+
+    # -- the stacking test on V04_COMBINED ----------------------------------
+    st = [r for r in rows if r.get("label", "").startswith(STACK)]
+    if len(st) == STACK_N:
+        sd, sm, sse = _report("on V04_COMBINED", st)
+        slo, shi = sm - 1.96 * sse, sm + 1.96 * sse
+        print(f"\n  against the champion the same knob gave "
+              f"{allm:+.4f} [{alo:+.4f}, {ahi:+.4f}]")
+        if slo > 0:
+            print("\n  Outcome 1: it STACKS. Ship into V04_COMBINED and "
+                  "WEB_SPEC, and quote\n  this interval as what the site "
+                  "gained -- not the champion-relative one.")
+            dec = "stack-ship"
+        elif sm > 0:
+            print("\n  Outcome 2: cannot resolve. The point estimate is "
+                  "positive and the\n  interval is not. The "
+                  "champion-relative result does not license a default\n  "
+                  "change on a base where the effect was not demonstrated, "
+                  "so it is NOT\n  shipped, and no second run is done.")
+            dec = "stack-unresolved"
+        else:
+            print("\n  Outcome 3: it does not stack. Either the lookahead "
+                  "already finds these\n  asks or the two interfere; "
+                  "nothing here separates those and neither is\n  claimed. "
+                  "Not shipped.")
+            dec = "stack-none"
+        (ROOT / "results" / "endgame_ask_stack.json").write_text(json.dumps({
+            "n_pairs": len(sd), "diff": sm, "ci95": [slo, shi],
+            "vs_champion": {"n": alln, "diff": allm, "ci95": [alo, ahi]},
+            "decision": dec}, indent=1))
+        print("  wrote results/endgame_ask_stack.json")
+    elif st:
+        print(f"\n{len(st)}/{STACK_N} stacking blocks so far; not read "
+              f"until all are in.")
 
     if lo > 0:
         verdict = ("pays", "Outcome 1: the correction pays in play.")

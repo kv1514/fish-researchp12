@@ -575,6 +575,25 @@ WATCH = [
     # reading. The gap slope is watched hardest: it is the number that turned a
     # negative result about Fish into a negative result about the instrument,
     # and a drift back would silently restore a conclusion that was withdrawn.
+    # The correction the solver found, fixed and shipped. Watched at every
+    # rung: a drift in the stacking figure would misstate what the site
+    # actually gained, and that is the only one of the four that moved a
+    # default.
+    ("endgame_ask_stack.json", "diff", "{:+.4f}",
+     "endgame ask, on top of what ships", "on top of what ships"),
+    ("endgame_ask_replication.json", "pooled.diff", "{:+.4f}",
+     "endgame ask, pooled vs champion", "vs champion, pooled"),
+    ("endgame_ask_replication.json", "primary.diff", "{:+.4f}",
+     "endgame ask, primary vs champion", "vs champion, registered"),
+    ("endgame_ask_replication.json", "replication.diff", "{:+.4f}",
+     "endgame ask, replication vs champion", "vs champion, replication"),
+    ("ii_one_move_m1.json", "champ_p_mean", "{:.3f}",
+     "m=1 champion ask hit rate", "$m = 1$ & $p ="),
+    ("ii_one_move_m1.json", "best_p_mean", "{:.3f}",
+     "m=1 better ask hit rate", "$m = 1$ & $p = 0.799$ & $p ="),
+    ("ii_one_move_m1.json", "champion_certain_and_beaten", "{:d}",
+     "m=1 certain asks that were still wrong",
+     "the champion asked a card it was"),
     ("ii_bound_m1.json", "control_ok", "{:d}",
      "m=1 bounds control passed", "The control holds on"),
     ("ii_bound_m1.json", "oneply_already_optimal", "{:d}",

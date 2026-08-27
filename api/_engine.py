@@ -97,7 +97,17 @@ WEB_DRAWS = 480
 #: Deliberately NOT expressed as registry4.V04_STRONGEST: that constant carries
 #: opponent_gamma, and gamma is a choice the visitor makes in the lobby. Only
 #: the parts the visitor does not choose belong here.
-WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}
+#: The endgame ask correction. The exact solver showed the ask objective picks
+#: the wrong move on 51-61% of endgame positions and that the better move is
+#: almost always a RISKIER ask; raising the information term when at most two
+#: half-suits are live is the one-parameter form of that, fitted against exact
+#: values on games this never played. Registered, replicated, and then measured
+#: again ON TOP OF the rest of this spec rather than assumed to transfer:
+#: +0.1220 sets, 95% CI [+0.0711, +0.1729] over 2000 pairs against WEB_SPEC
+#: without it, 15 of 16 blocks positive (results/endgame_ask_stack.json). It
+#: stacks slightly LARGER on this base than on the bare champion's +0.0907.
+WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
+            "endgame_m": 2, "endgame_d_info": 2.0}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.
