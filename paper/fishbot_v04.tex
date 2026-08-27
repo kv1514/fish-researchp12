@@ -15,6 +15,7 @@
 \usepackage[scaled=0.92]{helvet}
 \usepackage[margin=1in,top=0.95in,bottom=1.05in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{microtype}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
@@ -565,8 +566,8 @@ $\Prob(f(c) = p) = \Ex[k_{g(c)p}] / n_{g(c)}$.
 take is drawn from its exact conditional, so a draw is exactly uniform on
 $\Omega_0$.
 \item \textbf{Exact joint probabilities.} Pinning named cards reduces $n_g$ and
-$q_p$ by one each, so $\Prob(\text{a declared claim distribution is exactly
-right})$ is a ratio of two evaluations of \eqref{eq:Z}. Because cards are
+$q_p$ by one each, so the probability that a declared claim distribution is
+exactly right is a ratio of two evaluations of \eqref{eq:Z}. Because cards are
 labelled throughout, no extra combinatorial factor is needed.
 \end{itemize}
 
@@ -1500,6 +1501,27 @@ Table~\ref{tab:terms} passes both.
 % =====================================================================
 \section{Results}
 \label{sec:results}
+
+Figure~\ref{fig:effects} is this section on one axis: every in-play effect the
+paper settles, each measured by the paired duplicate-deal design of
+\S\ref{sec:eval}, sorted by size. The subsections that follow take the rows in
+turn; the orange row is measured in \S\ref{sec:critic}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/effects.pdf}
+\caption{Every settled in-play effect, on one axis. Blue rows ship in the
+deployed configuration; gray rows were evaluated and rejected (at-ask-time
+depth: a null at $n = 6000$; the learned whole-game weights: significantly
+worse). The orange row is the shipped endgame correction re-measured against a
+foreign engine, Dylan's FishBot v0.7 (\S\ref{sec:critic}): the paired effect is
+a tie whose interval excludes the sibling-measured $+0.12$, the paper's
+recurring finding that gains measured inside an engine family shrink outside
+it. Intervals are 95\% confidence intervals over paired deals; $n$ counts
+pairs. Note the top row's scale: the opponent model is worth about twice the
+other shipped effects combined.}
+\label{fig:effects}
+\end{figure}
 
 \subsection{Exact inference alone changes nothing}
 \label{sec:res-exact}
@@ -4229,10 +4251,25 @@ $m = 2$ & $+0.2553$ ($n=63$) & $+0.4205$ ($n=46$) & $+2.06$ \\
 \end{center}
 
 At $m = 1$ the trend is solid on its own ($r = +0.190$ against support,
-$t = +3.37$ over $305$ positions); at $m = 2$ it is suggestive rather than
-significant ($r = +0.145$, $t = +1.52$), and the two agree in sign and rough
-magnitude. The mechanism is the obvious one: the more the belief leaves open,
-the more an exact answer is worth over a heuristic.
+$t = +3.37$ over $305$ positions; Figure~\ref{fig:support}); at $m = 2$ it is
+suggestive rather than significant ($r = +0.145$, $t = +1.52$), and the two
+agree in sign and rough magnitude. The mechanism is the obvious one: the more
+the belief leaves open, the more an exact answer is worth over a heuristic.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/support.pdf}
+\caption{What an exact deviation is worth, against how much the belief leaves
+open, over the $305$ solved $m = 1$ positions. Gray points are positions
+(jittered for visibility); blue points are means over support bands with 95\%
+confidence intervals. The gain rises with support --- and the unsolved
+positions lie beyond the right edge of this plot, at a median support of $48$
+against a solved median of $3$. That is why the solved-layer means read as
+lower bounds, why \S\ref{sec:iibounds} tries to replace that extrapolation
+with bounds, and why the honest answer is that the plot cannot be read past
+its own right edge.}
+\label{fig:support}
+\end{figure}
 
 The positions the solver cannot reach are precisely the wide ones --- $16$
 unsolved at $m = 1$ with median support $48$, against a solved median of
@@ -4776,7 +4813,23 @@ always on & $-2.160$ & $-5.166\ [-5.643, -4.689]$ \\
 \end{tabular}
 \end{center}
 
-Monotone, and the mirror image of the sibling ladder: every rung above $2$ is
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/ladder.pdf}
+\caption{The deception ladder, both measurements of the same knob. Top: each
+pre-registered rung's gain over its sibling incumbent, growing with the
+threshold $m$ --- eight of eight blocks positive at every rung. Bottom: the
+same configurations against the foreign v0.3 champion on $500$ shared deals;
+every rung above the shipped $m \le 2$ is a significant loss, and always-on
+loses to v0.3 outright. The panels share an x-axis, so each column is one
+configuration read against two opponents: the rungs were not measuring
+strength, they were measuring how much of the game was spent poisoning the
+sibling's opponent model.}
+\label{fig:ladder}
+\end{figure}
+
+Monotone, and the mirror image of the sibling ladder
+(Figure~\ref{fig:ladder}): every rung above $2$ is
 a significant \emph{loss} against a foreign opponent, ending at a
 configuration that loses to v0.3 outright. The always-on rung was shipped for
 minutes on the strength of $+4.28$ and reverted when the first cross-play
@@ -4798,6 +4851,46 @@ preceding paragraphs is a gain against the engine's own family, bounded
 against v0.3 inside $[-0.448, +0.264]$; the exact solver's diagnosis stands,
 and what its repair bought is play that is better against the family and no
 worse outside it.
+
+\paragraph{The same question against an engine nobody here wrote.} Everything
+above still measures the correction against relatives: the sibling ladder, and
+a v0.3 that shares this project's rules engine and most of its ancestry. What
+the withdrawal actually demands is an opponent with \emph{no} shared code, and
+one exists: \textbf{FishBot v0.7} by dylann4500, an independently written
+C++ engine for the same six-player, 54-card game --- different author,
+different belief representation, different search, its 55-parameter policy
+frozen upstream after self-play tuning. It plays under this engine's arbiter
+through a process bridge that replays the public history to the frozen policy and
+legality-checks every move it proposes, substitutions counted rather than
+hidden; zero were needed across the $1{,}000$ games below. Two caveats travel
+with the comparison: v0.7 was tuned for a rule variant with out-of-turn
+declarations and plays here under this paper's rules, which its policy is
+told; and it is one foreign opponent, not a population.
+
+The check was pre-registered before the first scored game
+(\path{prereg/foreign_opponent_m2.md}), outcomes fixed in advance: the
+deployed configuration with the correction on, and the same configuration
+with it off, each played three copies of v0.7 on $250$ deals in both
+rotations --- $500$ games per arm --- the statistic being the on-minus-off
+difference of set margins on the same deal and rotation. The registered
+question was reversal, and the answer is no: $-0.0300$
+$[-0.1081, +0.0481]$ against Dylan's v0.7, at a power sized for
+deception-scale flips. The sharper reading is what the interval
+\emph{excludes}: $+0.1220$, the correction's own sibling-measured size. On a
+third, unrelated opponent the effect is a tie, so the sibling number does not
+transfer at anything like face value --- the section's finding again,
+demonstrated this time on an engine from outside the project entirely, and
+converging with the upstream author's own documentation, which reports of its
+final tuning stage that ``the advantage is a self-play advantage \dots\ it
+does not transfer.''
+
+The context the check ran in: with the correction on, the deployed
+configuration beats v0.7 by $+2.448$ sets per game ($+2.478$ with it off),
+taking 64.3\% of decided sets across the $1{,}000$ games. That margin is a
+claim about this game under this paper's rules against an engine tuned under
+slightly different ones, and it is quoted as context, not as a ranking of the
+two projects; the measurement the design paid for is the paired difference,
+which needs no ranking to be valid.
 
 \paragraph{What did not change.} FishBot4's own defaults. The champion is the
 reference point for every measurement in this paper, and moving it would

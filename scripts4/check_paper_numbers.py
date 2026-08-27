@@ -604,6 +604,26 @@ WATCH = [
      "always-on against v0.3, paired vs none", "always on & $-2.160$"),
     ("endgame_m9_verdict.json", "diff", "{:+.4f}",
      "the sibling rung that was deception", "the amended coarse step to"),
+    # The foreign-opponent check of the shipped correction, against an engine
+    # from outside the project entirely (dylann4500's v0.7 over the process
+    # bridge). Watched because it is the only measurement in the paper whose
+    # opponent shares no code with this engine, and because its interval is
+    # quoted for what it EXCLUDES (+0.1220): if these drifted, the paper
+    # would misstate the one result that answers "against whom".
+    ("foreign_m2_check.json", "effect", "{:+.4f}",
+     "m<=2 effect vs Dylan v0.7", "against Dylan's v0.7"),
+    ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
+     "m<=2 vs v0.7, CI low", "against Dylan's v0.7"),
+    ("foreign_m2_check.json", "ci95.1", "{:+.4f}",
+     "m<=2 vs v0.7, CI high", "against Dylan's v0.7"),
+    ("foreign_m2_check.json", "n_pairs", "{:d}",
+     "foreign-opponent paired games", "games per arm"),
+    ("foreign_m2_check.json", "kv_margin_on", "{:+.3f}",
+     "margin over v0.7, correction on", "beats v0.7 by"),
+    ("foreign_m2_check.json", "kv_margin_off", "{:+.3f}",
+     "margin over v0.7, correction off", "beats v0.7 by"),
+    ("foreign_m2_check.json", "kv_set_share", "{:.1%}",
+     "share of decided sets vs v0.7", "of decided sets across"),
     ("ii_exploit_after_split_m1.json", "parts.best response.diff", "{:+.4f}",
      "best response after the fix", "what a best response takes"),
     ("ii_exploit_after_split_m1.json", "parts.policy's own value.diff",

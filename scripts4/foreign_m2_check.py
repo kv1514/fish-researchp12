@@ -108,6 +108,8 @@ def main(n_deals: int = 250, first: int = 0) -> int:
     lo, hi = m - 1.96 * se, m + 1.96 * se
     on = [r["margin"] for r in by.values() if r["arm"] == "on"]
     off = [r["margin"] for r in by.values() if r["arm"] == "off"]
+    kv_sets = sum(r["kv"] for r in by.values())
+    dy_sets = sum(r["dylan"] for r in by.values())
     print(f"\n{n} paired games vs Dylan's v0.7; bridge fallbacks {fbs}")
     print(f"  KV margin over Dylan, correction ON : "
           f"{sum(on)/len(on):+.3f} sets/game")
@@ -130,6 +132,8 @@ def main(n_deals: int = 250, first: int = 0) -> int:
         "n_pairs": n, "effect": m, "ci95": [lo, hi],
         "kv_margin_on": sum(on) / len(on),
         "kv_margin_off": sum(off) / len(off),
+        "kv_sets": kv_sets, "dylan_sets": dy_sets,
+        "kv_set_share": kv_sets / (kv_sets + dy_sets),
         "bridge_fallbacks": fbs, "verdict": v[0]}, indent=1))
     print("wrote results/foreign_m2_check.json")
     return 0
