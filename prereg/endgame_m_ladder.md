@@ -58,3 +58,35 @@ pooling refuses to mix digests.
 ## Amendments
 
 None yet.
+
+## Amendment 1 — one coarse step to the top, recorded before it runs
+
+Four rungs have now cleared, each larger than the last:
+
+| rung | in play | 95% CI |
+|---|---|---|
+| m ≤ 1 → 2 | +0.1220 | [+0.0711, +0.1729] |
+| m ≤ 2 → 3 | +0.3025 | [+0.2271, +0.3779] |
+| m ≤ 3 → 4 | +0.6995 | [+0.6033, +0.7957] |
+| m ≤ 4 → 5 | +1.0125 | [+0.8961, +1.1289] |
+
+The remaining span is m = 6, 7, 8, 9, and m = 9 is "always on" — at that point
+`endgame_d_info` stops being an endgame correction and becomes a change to the
+ask objective itself. Four more rungs at 2000 pairs each would spend eight
+thousand pairs establishing what four monotone, accelerating, individually
+significant rungs already make the strong default expectation.
+
+**The amendment:** the next step is m ≤ 5 → m ≤ 9 in one duel, same size, fresh
+seeds (661000+, agent seeds 6611+).
+
+* **CI above 0** — ship `endgame_m = 9`. The intermediate rungs 6–8 are then
+  never individually measured, and no per-rung figure will be claimed for them.
+* **CI not above 0** — the coarse step is treated as the ladder's stop at m = 5,
+  and one bisection at m = 7 is run to locate the turn, after which the ladder
+  ends regardless of that outcome. This is the only situation in which a
+  further value is tried after a failure, and it is fixed here in advance.
+
+The stopping rule is otherwise unchanged. What is being traded away is
+resolution about WHERE the gain stops growing between 5 and 9, in exchange for
+four thousand fewer pairs; if the coarse step clears, that resolution is gone
+for good and this amendment is why.

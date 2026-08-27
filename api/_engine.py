@@ -125,8 +125,10 @@ WEB_DRAWS = 480
 #: eight blocks positive (results/endgame_m4_verdict.json). The rungs are
 #: GROWING -- +0.1220, +0.3025, +0.6995 -- which is itself evidence the defect
 #: was never about the endgame; the ladder continues.
+#: m = 5 rung: +1.0125 [+0.8961, +1.1289], eight of eight positive
+#: (results/endgame_m5_verdict.json). Four rungs, four growing gains.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
-            "endgame_m": 4, "endgame_d_info": 2.0}
+            "endgame_m": 5, "endgame_d_info": 2.0}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.
