@@ -110,10 +110,19 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 #:     vs champion, replication     +0.0980  [+0.0480, +0.1480]   2000 pairs
 #:     vs champion, pooled          +0.0907  [+0.0555, +0.1260]   4000 pairs
 #:     ON TOP OF THIS SPEC          +0.1220  [+0.0711, +0.1729]   2000 pairs
+#:     raising m from 2 to 3        +0.3025  [+0.2271, +0.3779]   2000 pairs
 #:
-#: The last is the one that licenses the default moving, and the one to quote:
-#: it is what the site gained. It is slightly LARGER on the stronger base, so
-#: the depth-3 lookahead was not already finding these asks.
+#: The third is what licensed the default moving and is what the site gained;
+#: it is slightly LARGER on the stronger base, so the depth-3 lookahead was not
+#: already finding these asks.
+#:
+#: The fourth extends the SAME weight to three live half-suits without
+#: refitting it, which takes the correction from 9.7% of decisions to 17.5%.
+#: That step is worth two and a half times the one before it, and it was only
+#: reachable because a SAMPLED one-ply target stands in for the exact one where
+#: exact solving cannot go -- validated first, at a cost of +0.0033 in the exact
+#: target's own units, and cross-fitted against the selection bias that
+#: maximising a noisy target introduces (49% of the naive figure).
 #:
 #: FishBot4's own defaults are untouched. The champion is the reference point
 #: for every measurement in the paper, and moving it would silently reprice all
@@ -122,7 +131,7 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
                              "lookahead_beam": 4,
-                             "endgame_m": 2, "endgame_d_info": 2.0})
+                             "endgame_m": 3, "endgame_d_info": 2.0})
 
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is

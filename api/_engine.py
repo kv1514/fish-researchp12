@@ -106,8 +106,20 @@ WEB_DRAWS = 480
 #: +0.1220 sets, 95% CI [+0.0711, +0.1729] over 2000 pairs against WEB_SPEC
 #: without it, 15 of 16 blocks positive (results/endgame_ask_stack.json). It
 #: stacks slightly LARGER on this base than on the bare champion's +0.0907.
+#:
+#: THEN RAISED FROM 2 TO 3. A sampled one-ply target -- posterior worlds in
+#: place of an enumerated belief -- reproduces the exact target's decisions at a
+#: cost of +0.0033 in its own units, so the diagnosis travels past the point
+#: where exact solving stops. At m = 3 the engine's ask is beaten on 23 of 24
+#: positions and the better ask is riskier on 19 of them; cross-fitting that on
+#: independent samples leaves +0.2979 [+0.0966, +0.4992] after 49% of the naive
+#: figure turns out to be selection bias. In play the extension is worth
+#: +0.3025 sets, 95% CI [+0.2271, +0.3779] over 2000 pre-registered pairs, all
+#: eight blocks positive (results/endgame_m3_verdict.json) -- two and a half
+#: times what the step from m = 2 was worth. m <= 3 is 17.5% of all decisions
+#: against m <= 2's 9.7%.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
-            "endgame_m": 2, "endgame_d_info": 2.0}
+            "endgame_m": 3, "endgame_d_info": 2.0}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.
