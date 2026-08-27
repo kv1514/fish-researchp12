@@ -670,6 +670,19 @@ WATCH = [
      "threshold sweep CI low", "against $0.90$ the difference"),
     ("r3_lo_check.json", "ci.1", "{:+.4f}",
      "threshold sweep CI high", "against $0.90$ the difference"),
+    # R5: the signalling re-measure. Watched because its summary sentence
+    # changed from "buys no wins" to "right sign, unproven at this power" --
+    # a drift in either direction would misstate a stays-off decision.
+    ("r5_signal_check.json", "estimate", "{:+.4f}",
+     "signalling under award rule", "the effect moves to"),
+    ("r5_signal_check.json", "ci.0", "{:+.4f}",
+     "signalling CI low", "the effect moves to"),
+    ("r5_signal_check.json", "ci.1", "{:+.4f}",
+     "signalling CI high", "the effect moves to"),
+    ("r5_signal_check.json", "x_misdeclares", "{:d}",
+     "misdeclares with signalling on", "cuts misdeclarations ---"),
+    ("r5_signal_check.json", "y_misdeclares", "{:d}",
+     "misdeclares with signalling off", "cuts misdeclarations ---"),
     ("ii_exploit_after_split_m1.json", "parts.best response.diff", "{:+.4f}",
      "best response after the fix", "what a best response takes"),
     ("ii_exploit_after_split_m1.json", "parts.policy's own value.diff",

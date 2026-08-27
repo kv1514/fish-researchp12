@@ -288,6 +288,31 @@ result about exactly the failure mode this paper attacks from the other side ---
 they identify that action history carries information their determinizations
 ignore; we quantify how much, and put it in.
 
+\paragraph{The concurrent engine.} The one serious exception is
+\citet{dylan2026fishbot}: an independently developed C++ engine for
+six-player, 54-card Literature, with its own seven-version paper series ---
+the engine this paper's exhibition and foreign-opponent checks play against
+(\S\ref{sec:critic}). Read after those checks ran, its documentation turns
+out to contain this paper's central finding, arrived at independently on a
+different architecture: its \emph{exact} rules-posterior is the worst
+predictor of where cards sit (NLL $1.422$ against $1.382$ for its
+behaviour-aware approximation), and substituting the exact object into the
+same policy loses in play --- their phrasing, ``exactness and
+behaviour-awareness are not available in the same object here'', is our
+Section~\ref{sec:res-posterior} in different words. The convergences run
+further: their first-order behaviour prior (an ask-tally over every seat,
+teammates included) is this paper's choice model with two parameters in
+place of one; their unguarded determinized search lost $35.7$ points to its
+own blueprint, our sampled searches all lost to their prior
+(\S\ref{sec:lookahead}); and their deception feature (``feint'') cost
+$-2.2$ replicated where our deception ladder had to be withdrawn wholesale.
+Where the projects genuinely differ --- their deployed belief is an
+approximate Sinkhorn object seeded by the prior where ours is exact
+counting reweighted by the model; their declarations price by a learned
+state value where ours declare at a fixed certainty bar --- the
+disagreements are now measurable across a real engine boundary, which
+neither project could do alone.
+
 \paragraph{Determinization and its pathologies.} Evaluating an
 imperfect-information position by sampling consistent worlds and solving each
 one perfectly is the standard technique, and its two failure modes are named:
@@ -3843,9 +3868,17 @@ genuine structural feature of the game that a strong engine is already handling
 adequately by other means. One post-script from the rule correction: this
 ledger was priced in the void era, where each avoided misdeclaration was
 worth one point of differential; under the award baseline it is worth two,
-so the tempo-versus-sets cancellation is no longer arithmetic that can be
-assumed --- the duel is queued for re-measurement before ``buys no wins'' is
-repeated under the new rule.
+so the duel was re-run rather than re-asserted (design R5 of
+\path{prereg/rules_award_baseline.md}, outcomes fixed before any pair).
+Over $500$ fresh pairs of \texttt{V06\_DEPLOYED} with the protocol on
+against itself with it off, the protocol again cuts misdeclarations ---
+$109$ against $138$ --- and the effect moves to $+0.0680$
+$[-0.0326, +0.1686]$: the sign the re-pricing predicts, at about the size
+the arithmetic suggests, and an interval that still straddles zero. Per
+the registered outcome it stays off; what changed is the honest summary,
+from ``buys no wins'' to ``plausibly worth about a set every fifteen
+games, not yet demonstrated at this power'' --- a properly sized
+extension is registered future work rather than a post-hoc one.
 
 \subsection{Game statistics, and a statistic that stops working}
 \label{sec:res-analytics}
@@ -5110,13 +5143,14 @@ not have it --- and when your team already owns the half-suit, the ask cannot
 lose you anything, because no opponent holds a card of it to give. In that
 situation an ask is a free, legal message to your partners telling them exactly
 where a card is not. Use it when you are stuck on a split. (Our engine cut
-its misdeclarations about 20\% doing this in void-era measurement, and it
-did not gain games there, because the turn it spent was worth about as much
-as the sets it saved --- but that ledger was priced with a misdeclaration
-worth one point of differential, and the award rule prices it at two, so
-the trade has improved and its re-measurement is queued rather than
-presumed. For a human, who is far more likely to misplace a split than an
-engine is, the trade was probably favourable even at the old price.)
+its misdeclarations about 20\% doing this in void-era measurement and it did
+not gain games there; re-measured under the award rule, where each save is
+worth two points of differential instead of one, the cut persists --- $109$
+misdeclarations against $138$ --- and the measured value comes back
+$+0.0680$ $[-0.0326, +0.1686]$ over $500$ pairs: the right sign, about the
+predicted size, still unproven at that power, so the protocol stays off in
+the engine. For a human, who is far more likely to misplace a split than an
+engine is, the trade is almost certainly worth it.)
 
 \paragraph{Spend your effort on card-tracking, not on cleverness about which ask
 to make.} Three measurements in this study point the same way and none of them
@@ -5780,6 +5814,13 @@ the deal, for a seated player and for an anonymous visitor alike.
 
 % =====================================================================
 \begin{thebibliography}{99}
+
+\bibitem[Nguyen(2026)]{dylan2026fishbot}
+Dylan Nguyen.
+\newblock FishBot: an engine for six-player Literature, versions 0.2--0.7.
+\newblock Software repository and technical reports,
+  \url{https://github.com/dylann4500/fishbot}, 2026. Version 0.7 pinned at
+  commit \texttt{d017fbc} for every game reported here.
 
 \bibitem[Celli and Gatti(2018)]{celli2018computational}
 Andrea Celli and Nicola Gatti.
