@@ -102,3 +102,34 @@ reused, and the full run recomputes them.
 
 None yet. Any change to the bounds, budgets or decision rule after the run
 starts gets appended here with its reason, before the numbers are read.
+
+## Amendment 1 — the matched-instrument comparison is exploratory
+
+Added after the first 20 games, and after seeing that the upper bound is
+near-trivial on wide positions: 12 of 72 positions had **every** deal fall back
+to `_upper`, and the wide bands average `U - C` of about +1.8 against a
+ceiling of +2. Outcome 1 above is therefore unreachable with this budget. The
+upper bound cannot refute anything, and saying so is the first result.
+
+That leaves the pre-registered rules pointing at outcome 3 — "not settled" —
+and outcome 3 as written stops there. `scripts4/ii_bound_analysis.py` goes
+further, and this records that it does so **after** the data, not before:
+
+The one-ply gain `L - C` is computable on every position, above the cap and
+below it. The exact gain is not. So it is the only *matched* instrument that
+spans the cap, and the trend the paper extrapolates can be checked with it
+directly instead of extrapolated. That comparison is **exploratory**. It was
+not specified in advance, its bands were chosen after looking at the support
+distribution, and it must be reported as exploratory wherever it is reported.
+
+What it cannot do, stated with it: `L` is a lower bound, and its looseness is
+calibrated only where the exact value is also computed — supports at or below
+12. If the one-ply policy captures steadily less of the exact gain as support
+grows, a flat `L` trend is consistent with a rising exact trend, and this
+sample cannot tell those apart. The gap between exact and one-ply shows no
+trend against support (`t = -0.38` over 24 positions), which is weak evidence
+of a fixed offset and not evidence of one.
+
+No decision rule is being changed. Outcome 3 stands as the pre-registered
+verdict; the exploratory comparison is reported beside it, labelled, and is not
+allowed to turn "not settled" into a settled claim in either direction.

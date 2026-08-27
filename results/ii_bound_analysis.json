@@ -1,5 +1,5 @@
 {
- "n": 38,
+ "n": 72,
  "games": [
   0,
   1,
@@ -10,13 +10,23 @@
   6,
   7,
   8,
-  9
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19
  ],
- "positions_with_trivial_upper": 6,
- "n_exact": 15,
- "mean_gap_exact_minus_oneply": 0.15555555555555556,
- "oneply_narrow_mean": 0.21367521367521367,
- "oneply_wide_mean": 0.2834355151345781,
- "oneply_slope": -5.9038032676848355e-05,
- "oneply_slope_t": -0.09480984863529306
+ "positions_with_trivial_upper": 12,
+ "n_exact": 24,
+ "mean_gap_exact_minus_oneply": 0.1388888888888889,
+ "oneply_narrow_mean": 0.27222222222222225,
+ "oneply_wide_mean": 0.2366869505954543,
+ "oneply_slope": -0.00021509569177347666,
+ "oneply_slope_t": -0.4972297372224714
 }
