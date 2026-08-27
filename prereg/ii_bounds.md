@@ -133,3 +133,35 @@ of a fixed offset and not evidence of one.
 No decision rule is being changed. Outcome 3 stands as the pre-registered
 verdict; the exploratory comparison is reported beside it, labelled, and is not
 allowed to turn "not settled" into a settled claim in either direction.
+
+## Amendment 2 — the exploratory comparison is withdrawn as evidence about Fish
+
+Amendment 1 added the matched one-ply comparison and named its weakness: `L`'s
+looseness is calibrated only where the exact value is also computed, so if the
+one-ply policy captures steadily less of the exact gain as support grows, a
+flat `L` is consistent with a rising exact gain. At m = 2 that gap showed no
+trend (`t = -0.04`) over supports 2-12, which is all the range there is there.
+
+Running the same bounds on the m = 1 layer gives the range. It is solvable
+exactly out to support 24, and over 276 unpinned solved positions the gap
+**grows** with support: +0.0785 at supports 2-4, +0.2496 at 5-8, +0.3920 at
+9-16, slope +0.0236 per deal, `t = +6.27`. The m = 2 null is a null over a
+window that closes before the effect starts.
+
+The named condition therefore holds. The comparison is withdrawn as evidence
+about the game and kept as a measurement of the instrument. Nothing in it may
+be read as showing that the gain stops rising above the cap.
+
+The pre-registered decision rule is untouched and its verdict is unchanged:
+**outcome 3, not settled.** That was the answer before the exploratory analysis
+was added and it is the answer after it is withdrawn — which is the point of
+having fixed it in advance.
+
+## What would settle it
+
+Not more of this. The upper bound needs the per-deal perfect-information solves
+to finish, and at m = 2 they do not; the lower bound needs a policy class that
+keeps up as the belief widens, and one ply does not. A two-ply or n-ply
+deviation would push the calibration further before it fails, at a cost that
+multiplies by the action count each ply. Whether that buys enough range to
+reach support 60 is itself a measurement, and it has not been made.
