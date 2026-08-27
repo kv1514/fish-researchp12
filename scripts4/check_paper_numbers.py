@@ -593,6 +593,17 @@ WATCH = [
     # The negative result beside the positive one. The best-response line is
     # what says the correction does not reduce exploitability, and it is the
     # figure most likely to be quietly dropped if it ever drifted.
+    # The deception sweep. The paired-vs-m0 rows are the withdrawal of the
+    # ladder and the bound on what the shipped correction costs against a
+    # foreign opponent; the m9 margin is the number that reverted a ship.
+    ("xplay_sweep.json", "by_m.2.vs_m0", "{:+.3f}",
+     "m<=2 against v0.3, paired vs none", "$m \\le 2$ & $+2.914$"),
+    ("xplay_sweep.json", "by_m.3.vs_m0", "{:+.3f}",
+     "m<=3 against v0.3, paired vs none", "$m \\le 3$ & $+2.568$"),
+    ("xplay_sweep.json", "by_m.9.vs_m0", "{:+.3f}",
+     "always-on against v0.3, paired vs none", "always on & $-2.160$"),
+    ("endgame_m9_verdict.json", "diff", "{:+.4f}",
+     "the sibling rung that was deception", "the amended coarse step to"),
     ("ii_exploit_after_split_m1.json", "parts.best response.diff", "{:+.4f}",
      "best response after the fix", "what a best response takes"),
     ("ii_exploit_after_split_m1.json", "parts.policy's own value.diff",

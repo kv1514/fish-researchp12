@@ -4739,6 +4739,66 @@ responder used as a \emph{critic} improves average-case play, and nothing about
 fixing the moves it flags makes the worst case harder to reach. Exploitability
 and strength are being measured, and they moved independently.
 
+\paragraph{Pushing the correction up the game measured deception, not strength.}
+What happened when the correction was extended past the endgame is reported in
+full because it is the sharpest methodological result in this paper, and
+because half of it is a finding about the game.
+
+The correction applies below a threshold $m$ of live half-suits. A
+pre-registered ladder raised the threshold one rung at a time, each rung
+duelling the incumbent, each shipping only on a CI clear of zero. Every rung
+cleared, and the rungs \emph{grew}: $+0.1220$ to $m \le 2$, $+0.3025$ to
+$m \le 3$, $+0.6995$ to $m \le 4$, $+1.0125$ to $m \le 5$, and $+4.2790$ for
+the amended coarse step to always-on --- a bigger single gain than the whole
+v0.3-to-v0.4 release. Eight of eight blocks positive at every rung, no
+timeouts, engine digests matched.
+
+All of it was an artefact of \emph{who was on the other side of the table}.
+Each rung duelled the sibling configuration, and the sibling's opponent model
+conditions on which half-suit a player chooses to ask. Information-seeking
+asks violate that model systematically, so they poison the sibling's
+inference; the rungs grew with $m$ because a higher threshold spends more of
+the game poisoning. Against the v0.3 champion --- a foreign opponent whose
+inference is built differently --- with every configuration playing the same
+$500$ deals and per-deal differencing against no correction:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+threshold & margin over v0.3 & paired $\Delta$ vs.\ no correction \\
+\midrule
+none      & $+3.006$ & --- \\
+$m \le 2$ & $+2.914$ & $-0.092\ [-0.448, +0.264]$ \\
+$m \le 3$ & $+2.568$ & $-0.438\ [-0.829, -0.047]$ \\
+$m \le 5$ & $+1.526$ & $-1.480\ [-1.888, -1.072]$ \\
+always on & $-2.160$ & $-5.166\ [-5.643, -4.689]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Monotone, and the mirror image of the sibling ladder: every rung above $2$ is
+a significant \emph{loss} against a foreign opponent, ending at a
+configuration that loses to v0.3 outright. The always-on rung was shipped for
+minutes on the strength of $+4.28$ and reverted when the first cross-play
+block came back; every rung above $2$ is withdrawn, and the shipped threshold
+is back at $m \le 2$ --- whose foreign-relative effect is a paired tie, and
+which alone rests on evidence that is not a sibling duel.
+
+Three readings, stated separately. \emph{About the game}: exploiting an
+opponent model that conditions on action choices is worth several sets per
+game in six-player Literature, which makes deception a first-class strategic
+resource here, found by accident and measured to $\pm 0.24$. \emph{About the
+method}: a pre-registered ladder with a fixed stopping rule, eight-of-eight
+block agreement, matched engine digests and growing effects passed every
+check this paper uses --- and measured the wrong quantity at every rung,
+because no rule asked \emph{against whom} the gain was defined. Robustness
+of the opponent pool now belongs beside pre-registration in the discipline,
+not downstream of it. \emph{About the correction}: the $+0.1220$ of the
+preceding paragraphs is a gain against the engine's own family, bounded
+against v0.3 inside $[-0.448, +0.264]$; the exact solver's diagnosis stands,
+and what its repair bought is play that is better against the family and no
+worse outside it.
+
 \paragraph{What did not change.} FishBot4's own defaults. The champion is the
 reference point for every measurement in this paper, and moving it would
 silently reprice all of them at once; the correction ships in
