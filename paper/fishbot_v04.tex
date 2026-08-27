@@ -4243,13 +4243,115 @@ the more an exact answer is worth over a heuristic.
 The positions the solver cannot reach are precisely the wide ones --- $16$
 unsolved at $m = 1$ with median support $48$, against a solved median of
 $3$; $204$ unsolved at $m = 2$ with median support $60$ against a
-solved median of $4$. So both reported means are \emph{lower} bounds on
-the gain over the whole layer, and $m = 2$'s is the looser of the two.
+solved median of $4$. The obvious reading is that both reported means are
+therefore \emph{lower} bounds on the gain over the whole layer.
 
-No corrected figure is offered. The slope is fitted over the supports the
-solver reaches and the missing positions run to $60{,}480$ deals; extrapolating
-across that would be inventing a number for the part of the layer nobody has
-solved.
+That reading is an extrapolation, and at $m = 2$ it does not survive
+being checked. \S\ref{sec:iibounds} bounds every position in the layer
+instead of solving it, and the only quantity measurable on both sides of the
+cap is flat across it. The slope above is real where it is fitted and it does
+not continue. No corrected figure is offered, and none is claimed to be
+needed: what changes is the direction the uncertainty points, not the number.
+
+\subsection{Bounding the layer instead of solving it}
+\label{sec:iibounds}
+
+Two thirds of $m = 2$ is unsolved, and the previous section leant on a slope
+fitted below the cap to say which way that biases the headline. A slope
+fitted over supports $2$--$24$ and read across a gap running to $60{,}480$
+deals is an argument, not a measurement. Two quantities replace it, and both
+hold by construction on \emph{every} position, reachable or not.
+
+\paragraph{The two bounds.} For a position with belief support $\{d\}$,
+weights $\{w_d\}$ and champion value $C$:
+
+\begin{itemize}
+\item \textbf{Upper.} $U = \sum_d w_d\,V_{\mathrm{PI}}(d)$, where
+  $V_{\mathrm{PI}}(d)$ is the solver run on the single deal $d$. Solving one
+  deal is the perfect-information relaxation --- the deviator is told the deal
+  and may answer differently in each --- and any genuine
+  imperfect-information policy is one the relaxation may also play. Hence
+  $V_{\mathrm{II}} \le U$. No new solver is involved: \texttt{ExactII} on a
+  single state \emph{is} $V_{\mathrm{PI}}(d)$.
+\item \textbf{Lower.} $L = \max_a \sum_d w_d\,\mathrm{champion}(d \mid a)$
+  over root actions legal in every deal: play $a$, then revert to champion
+  play. One policy is attainable, so $V_{\mathrm{II}} \ge L$. The champion's
+  own root action is a candidate, so $L \ge C$ and the bounded gain can never
+  come out negative.
+\end{itemize}
+
+\paragraph{The control.} Positions with support at most $12$ are also solved
+exactly, in the same run and on the same state object, and the exact gain must
+lie inside its own bounds. It does, on \textbf{$100/100$}. The control is
+computed in place rather than joined to the results of \S\ref{sec:iim2}: that
+file keys its rows by game alone, several to a game and only for the positions
+it attempted, so any alignment would have been a guess --- and a control built
+on a guessed join checks nothing.
+
+\paragraph{The pre-registered answer is: not settled.} Over $248$ positions in
+$59$ games, the ones not solved exactly are bounded into
+$[\mathbf{+0.2976}, \mathbf{+1.7455}]$. The study's solved mean over the same
+games is $+0.3214$, which the interval straddles. The bounds are real and they
+are too loose to decide; \texttt{prereg/ii\_bounds.md} fixed that reading
+before the run.
+
+\paragraph{Perfect information is a bad bound for this game.} That is the
+first thing the run establishes, and it is worth stating because the PI
+relaxation is the standard tool reached for here. Where the truth is known it
+overshoots by $+0.3278$, against the one-ply policy's $+0.0585$ undershoot ---
+five times looser, on the same positions. On $36$ of $248$ positions
+\emph{every} deal exceeded its budget and fell back to the trivial figure, so
+those are bounded by arithmetic rather than by any search. Above support
+$150$, $82\%$ of all deals fall back.
+
+\paragraph{Exploiting the champion at $m = 2$ is almost always one move.}
+On \textbf{$88$ of the $100$} positions solved exactly, playing the single best
+deviation and then reverting to champion play attains the exact optimum. Over
+all hundred the gap averages $+0.0585$ ($95\%$ CI $[+0.0197, +0.0974]$). The
+exploitation is a local error and not a sustained plan --- which is what makes
+the cheap bound as tight as it is, and is a fact about the champion worth
+having on its own.
+
+\paragraph{Across the cap, the gain is flat (exploratory).} Because the
+one-ply gain is computable everywhere and the exact gain is not, it is the only
+\emph{matched} instrument spanning the support cap. Splitting at the study's
+$24$:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+support & one-ply gain & $n$ \\
+\midrule
+$1$--$2$      & $+0.1111$ & $54$ \\
+$3$--$8$      & $+0.2618$ & $63$ \\
+$9$--$24$     & $+0.3933$ & $52$ \\
+$25$--$60$    & $+0.3408$ & $33$ \\
+$61$--$150$   & $+0.1155$ & $19$ \\
+$151$ and up  & $+0.1899$ & $27$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+At or below the cap it averages $+0.2541$ ($n = 169$); above it, $+0.2350$
+($n = 79$); Welch $t = -0.42$. The slope against support over all $248$ is
+$-0.00032$ per deal, $t = -1.13$. The rise measured over supports $2$--$24$
+peaks around $9$--$60$ and falls away rather than continuing, which if it
+holds is a statement about the game: exploitability is largest at
+\emph{intermediate} uncertainty, not at maximum uncertainty. When the belief
+leaves almost everything open, exact play has little more to work with than
+the heuristic does, and the two converge again.
+
+This comparison is \textbf{exploratory} and the pre-registration records it as
+such: it was added after the upper bound turned out not to bind, and its bands
+were chosen after seeing the support distribution. Its weakness is stated with
+it --- $L$ is a lower bound whose looseness is calibrated only where the exact
+value is also computed, at supports up to $12$. If the one-ply policy captured
+steadily less of the exact gain as support grew, a flat $L$ would be consistent
+with a rising exact gain. The gap shows no trend against support
+($t = +0.57$ over $100$ positions), which is weak evidence of a fixed offset
+rather than evidence of one. What can be said without qualification is the
+negative: the claim that the headline is a lower bound rested on a trend, and
+the only measurement that spans the cap does not show that trend.
 
 \subsection{Where the disagreements are, and one that is provable}
 \label{sec:iidiff}

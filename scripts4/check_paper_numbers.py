@@ -556,6 +556,33 @@ WATCH = [
      "tree and rollout, same champion strategy"),
     ("ii_endgame_m2.json", "n_solved", "{:d}",
      "exact-II m=2 positions solved", "positions were solved"),
+    # The bounds on the layer. Watched because they are what stops the "lower
+    # bound" reading from being restored by accident: the control count is the
+    # only thing that says the interval is real, and the one-ply means are the
+    # only figures in the paper that span the support cap. A drift in either
+    # would turn a negative result back into the positive one it replaced.
+    ("ii_bound_unsolved.json", "control_ok", "{:d}",
+     "bounds control passed", "lie inside its own bounds. It does, on"),
+    ("ii_bound_unsolved.json", "n_bounded", "{:d}",
+     "positions bounded", "positions in\n$59$ games"),
+    ("ii_bound_unsolved.json", "unsolved_lower_mean", "{:+.4f}",
+     "unsolved lower bound", "bounded into"),
+    ("ii_bound_unsolved.json", "unsolved_upper_mean", "{:+.4f}",
+     "unsolved upper bound", "bounded into"),
+    ("ii_bound_unsolved.json", "headline_solved_mean_matched", "{:+.4f}",
+     "matched solved mean", "solved mean over the same\ngames is"),
+    ("ii_bound_analysis.json", "oneply_already_optimal", "{:d}",
+     "positions where one move is the whole exploit", "of the $100$"),
+    ("ii_bound_analysis.json", "mean_gap_exact_minus_oneply", "{:+.4f}",
+     "exact minus one-ply gap", "the gap averages"),
+    ("ii_bound_analysis.json", "positions_with_trivial_upper", "{:d}",
+     "positions with a trivial upper bound", "positions\n\\emph{every} deal"),
+    ("ii_bound_analysis.json", "oneply_narrow_mean", "{:+.4f}",
+     "one-ply gain at or below the cap", "At or below the cap it averages"),
+    ("ii_bound_analysis.json", "oneply_wide_mean", "{:+.4f}",
+     "one-ply gain above the cap", "($n = 169$); above it,"),
+    ("ii_bound_analysis.json", "n", "{:d}",
+     "positions in the one-ply comparison", "over all $248$ is"),
     # The exploitability lower bound. Watched because it is the only figure in
     # the paper that contradicts a sentence the paper used to make -- "we
     # compute no exploitability bound" -- and a number that overturns a claim

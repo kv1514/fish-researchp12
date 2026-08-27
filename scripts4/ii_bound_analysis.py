@@ -175,6 +175,13 @@ def main() -> int:
         "n": len(rows), "games": games,
         "positions_with_trivial_upper": allfb,
         "n_exact": len(both),
+        # The count the paper bolds. Stored so the manifest can watch it: a
+        # bolded number with nothing behind it is what tests4 rejects, and it
+        # is right to -- "88 of 100" is the whole claim that the exploitation
+        # is one move.
+        "oneply_already_optimal": sum(
+            1 for r in both
+            if abs(r["gain_exact"] - r["gain_lower"]) < 1e-9),
         "mean_gap_exact_minus_oneply": (_stat(
             [r["gain_exact"] - r["gain_lower"] for r in both])[0]
             if len(both) >= 3 else None),

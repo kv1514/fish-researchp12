@@ -63,6 +63,7 @@
  ],
  "positions_with_trivial_upper": 36,
  "n_exact": 100,
+ "oneply_already_optimal": 88,
  "mean_gap_exact_minus_oneply": 0.05852777777777776,
  "oneply_narrow_mean": 0.25410828487751563,
  "oneply_wide_mean": 0.23504093111648794,
