@@ -63,7 +63,7 @@ comes back at or below +0.3250, then the true gain there is at or below it too,
 the whole-layer mean is BELOW the reported one, and the claim is refuted -- not
 weakened, refuted, and by a bound rather than by an extrapolation.
 
-    py scripts4/ii_bound_unsolved.py [n_games] [max_support]
+    py scripts4/ii_bound_unsolved.py [n_games] [max_support] [first_game]
 """
 
 from __future__ import annotations
@@ -117,7 +117,7 @@ MAX_SUPPORT = 400
 #: nothing. Recomputing costs a few seconds a position and removes the join.
 CONTROL_MAX_SUPPORT = 12
 CONTROL_NODES = 300_000
-CONTROL_BACKSTOP = 120.0
+CONTROL_BACKSTOP = 45.0
 JOURNAL = ROOT / "results" / "ii_bound_journal.jsonl"
 
 
@@ -207,7 +207,8 @@ def _one_ply_lower(rules, live, me, states, weights):
     return (best if best is not None else 0.0), repr(best_act), skipped
 
 
-def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
+def main(n_games: int = 60, max_support: int = MAX_SUPPORT,
+         first_game: int = 0) -> int:
     rules = RuleConfig()
     fp = _fp()
     done = set()
@@ -222,7 +223,12 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
     print(f"  solver {fp}; {len(done)} positions already bounded")
 
     too_wide = 0
-    for g in range(n_games):
+    # Games are replayed to reach their m = 2 positions, so a run resumed at
+    # game 50 would replay the first fifty for nothing -- the journal skips the
+    # bounding work but not the replay. ``first_game`` lets a long run be taken
+    # in chunks without paying that quadratic cost. The seeds are per-game, so
+    # a chunk covers exactly the games it names and no others.
+    for g in range(first_game, n_games):
         agents = [make_agent(SPEC) for _ in range(NUM_PLAYERS)]
         st = GameState.deal(rules, seed=99_000 + g)
         ar = random.Random(99_500 + g)
@@ -424,4 +430,5 @@ def main(n_games: int = 60, max_support: int = MAX_SUPPORT) -> int:
 if __name__ == "__main__":
     a = sys.argv[1:]
     raise SystemExit(main(int(a[0]) if a else 60,
-                          int(a[1]) if len(a) > 1 else MAX_SUPPORT))
+                          int(a[1]) if len(a) > 1 else MAX_SUPPORT,
+                          int(a[2]) if len(a) > 2 else 0))
