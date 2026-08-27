@@ -203,11 +203,49 @@ def main(restarts: int = 12) -> int:
         print(f"   {name:<22} {vtr_:>+9.4f} "
               f"{policy_value(test, wv):>+9.4f}")
 
-    rng = random.Random(20260827)
-    w, vtr = search(train, w0, restarts, rng)
-    ladder.append(("11: full search", w, vtr))
-    print(f"   {'11: full search':<22} {vtr:>+9.4f} "
-          f"{policy_value(test, w):>+9.4f}")
+    # Which one-parameter model to carry into a play test, chosen by
+    # leave-one-game-out CV INSIDE the training games. The train margin
+    # between the two is +0.0024, which is not a margin; and choosing by the
+    # held-out set would be choosing by the thing that is supposed to be the
+    # check. CV uses neither.
+    tg = sorted(set(r["game"] for r in train))
+    cv = {}
+    for term in ("info", "certain"):
+        j = TERM_NAMES.index(term)
+        tot = 0.0
+        for held in tg:
+            inner = [r for r in train if r["game"] != held]
+            out = [r for r in train if r["game"] == held]
+            if not out:
+                continue
+            _, g = one_extra(inner, w0, term, GRID)
+            wt = np.array(w0, dtype=float)
+            wt[j] = g
+            tot += policy_value(out, wt) * len(out)
+        cv[term] = tot / len(train)
+    pick = max(cv, key=cv.get)
+    print(f"\n  leave-one-game-out CV on the training games: "
+          + ", ".join(f"{k} {v:+.4f}" for k, v in cv.items())
+          + f"  ->  carrying {pick}")
+
+    # The eleven-parameter fit is run at several SEARCH SEEDS with the budget
+    # held fixed. Its held-out score is not a property of the model then, it is
+    # a property of which random restarts happened to come up -- and reporting
+    # one run would have reported whichever number that was. The
+    # one-parameter models have no such freedom: their grid is exhaustive, so
+    # they return the same weights every time.
+    fulls = []
+    for sd in (0, 1, 2, 3):
+        w_, v_ = search(train, w0, restarts, random.Random(20260827 + sd))
+        fulls.append((w_, v_, policy_value(test, w_)))
+    tr_s = [f[1] for f in fulls]
+    te_s = [f[2] for f in fulls]
+    print(f"   {'11: full search':<22} {sum(tr_s)/len(tr_s):>+9.4f} "
+          f"{sum(te_s)/len(te_s):>+9.4f}   "
+          f"held-out over {len(fulls)} search seeds: "
+          f"[{min(te_s):+.4f}, {max(te_s):+.4f}]")
+    ladder.append(("11: full search", fulls[0][0], fulls[0][1]))
+    w, vtr = fulls[0][0], fulls[0][1]
     vte = policy_value(test, w)
     c_tr, c_te = policy_value(train, w0), policy_value(test, w0)
     o_tr, o_te = oracle_value(train), oracle_value(test)
@@ -249,6 +287,7 @@ def main(restarts: int = 12) -> int:
                     "train": float(tv),
                     "test": float(policy_value(test, wv))}
                    for nm, wv, tv in ladder],
+        "cv_choice": pick, "cv_scores": cv,
         "weights": {n: float(x) for n, x in zip(TERM_NAMES, w)},
         "champion_weights": {n: float(x) for n, x in zip(TERM_NAMES, w0)},
     }, indent=1))

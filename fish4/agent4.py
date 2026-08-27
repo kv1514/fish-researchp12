@@ -38,6 +38,8 @@ from fish.beliefs import BeliefContradiction, BeliefState
 from fish.engine import Action
 from fish.observation import Observation
 
+from dataclasses import replace
+
 from .askfeat import AskWeights, DecisionContext, score_asks
 from .claim4 import ClaimConfig, ClaimEvaluator, choose_pass
 from .hsvalue import HalfSuitValue, score_asks_by_value
@@ -106,6 +108,16 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  retake_window: int = 8,
                  retake_min_depth: int = 0,
                  w_behind: float = 0.0,
+                 # -- endgame-only ask weights. The exact solver shows the ask
+                 # objective is wrong in a specific way once few half-suits are
+                 # live, and wrong in a way that is not the same as being wrong
+                 # everywhere -- so the correction is applied there and nowhere
+                 # else. Zero deltas leave the incumbent weights untouched at
+                 # every m, which is what makes the default bit-identical to
+                 # the champion rather than merely close to it.
+                 endgame_m: int = 0,
+                 endgame_d_info: float = 0.0,
+                 endgame_d_certain: float = 0.0,
                  # -- belief-space lookahead
                  w_lookahead: float = 0.0,
                  lookahead_depth: int = 1,
@@ -165,6 +177,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.retake_window = retake_window
         self.retake_min_depth = retake_min_depth
         self.w_behind = w_behind
+        self.endgame_m = endgame_m
+        self.endgame_d_info = endgame_d_info
+        self.endgame_d_certain = endgame_d_certain
         self.w_lookahead = w_lookahead
         self.lookahead_depth = lookahead_depth
         self.lookahead_beam = lookahead_beam
@@ -255,6 +270,12 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             # is behind weighs its tie-breakers differently from one that is
             # ahead. Zero leaves the incumbent weights untouched.
             wts = self.weights
+            if self.endgame_m:
+                live = sum(1 for x in obs.set_winner if x is None)
+                if live <= self.endgame_m:
+                    wts = replace(
+                        wts, info=wts.info + self.endgame_d_info,
+                        certain=wts.certain + self.endgame_d_certain)
             if self.w_behind:
                 from .adaptive import adjust_weights
                 wts = adjust_weights(wts, obs, self.w_behind)
