@@ -83,3 +83,20 @@ Each R1/R2 block also records how many sets per game the flip actually
 touches: the count of within-team-split misdeclarations (previously
 voided, now awarded). This is the effect-size denominator for the whole
 correction and goes in the paper beside the rule change.
+
+## R5 -- the signalling protocol, re-priced (added after R1-R4 ran)
+
+Written before any R5 pair is played. The void-era verdict on
+`signal_mode="stuck"` was "cuts misdeclarations 20%, buys no wins"
+(+0.002 [-0.086, +0.090], 500 pairs): the turn it spends cancelled the
+sets it saved, at one point of differential per save. The award rule
+prices each save at two. Design: V06_DEPLOYED + signal_mode="stuck" vs
+V06_DEPLOYED, 500 pairs in 20 blocks, seeds 440000+, opponent-award
+pinned, misdeclare counts recorded per side. Outcomes fixed now:
+- CI clear of zero, positive: signalling ships in the deployed spec (it
+  is pure team play -- deliberately informing partners -- and this is
+  the first rule era in which its ledger can pay).
+- CI straddles zero: it stays off; the result is reported with its
+  interval and the misdeclare split, not summarised as "useless".
+- CI clear of zero, negative: stays off, reported, and the void-era
+  mechanism story gets re-examined rather than reasserted.

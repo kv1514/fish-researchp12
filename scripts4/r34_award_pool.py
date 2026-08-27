@@ -19,6 +19,7 @@ GROUPS = {
     "r4_award_check.json": re.compile(r"^R4-award-\d{2}$"),
     "r3_hi_check.json": re.compile(r"^R3-hi-\d{2}$"),
     "r3_lo_check.json": re.compile(r"^R3-lo-\d{2}$"),
+    "r5_signal_check.json": re.compile(r"^R5-signal-\d{2}$"),
 }
 
 
