@@ -90,3 +90,30 @@ The stopping rule is otherwise unchanged. What is being traded away is
 resolution about WHERE the gain stops growing between 5 and 9, in exchange for
 four thousand fewer pairs; if the coarse step clears, that resolution is gone
 for good and this amendment is why.
+
+## Amendment 2 — the ladder's rungs were deception; a foreign-opponent sweep replaces it
+
+Recorded after the cross-play check and before the sweep it commits to.
+
+The m = 9 rung's +4.2790 does not survive a foreign opponent: against v0.3 on
+identical seeds the m = 9 config **loses by 2.144** where the m = 5 config wins
+by 1.352. The sibling's opponent model conditions on ask choices;
+information-seeking asks violate it systematically; every rung of this ladder
+was measured against the sibling and therefore measured, in unknown proportion,
+the poisoning of its inference rather than better play. All rungs above m = 2
+are withdrawn and the shipped configuration is back at m = 2.
+
+**The sweep:** `endgame_m` ∈ {0, 2, 3} each against `V03_CHAMPION` (`tuned`),
+2 blocks of 250 pairs each, base seeds 441000/441250 — the same seeds the m = 5
+and m = 9 cross-play blocks used, so all five configurations are compared on
+identical deals. A second block each for m = 5 and m = 9 completes the pairs.
+
+Decision rule, fixed now: the configuration that ships is the one whose
+v0.3-relative mean is highest **among those whose evidence does not reduce to
+sibling duels** — i.e. a higher-m config ships only if its v0.3-relative mean
+beats m = 2's by a margin its interval supports. Ties or unresolved
+differences default to m = 2.
+
+What this cannot fix: v0.3 is one foreign opponent, not all of them. A config
+chosen on this sweep is chosen for not-exploiting-one-model, which is weaker
+than robustness. That limit is accepted and stated.
