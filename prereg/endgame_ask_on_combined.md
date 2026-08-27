@@ -55,4 +55,20 @@ claimed.
 
 ## Amendments
 
-None yet.
+### Amendment 1 — block size, forced by the clock
+
+Recorded before any block completed. `V04_COMBINED` runs at about 4.25 s a pair
+(480 draws and a depth-3 lookahead, on both sides), against 1.4 s for the
+champion, so the 250-pair blocks this document specified do not fit in the
+ten-minute process cap — the first one was killed with nothing recorded.
+
+The run is **16 blocks of 125 pairs**, base seeds 991000, 991125, ..., 992875
+and agent seeds 9910..9925. Same 2000 deals, same contiguous seed range, same
+arm; only the block boundaries move. As in the champion-relative run, the seat
+rotation `i % 6` restarts each block and the agent-seed stream restarts, so
+this is not bit-identical to one 2000-pair job — but both agents in a pair
+still see the same deal and the same rotation, which is what the pairing rests
+on.
+
+Nothing else changes: not the arm, not the total, not the seeds, not the
+decision rules.
