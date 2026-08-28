@@ -44,6 +44,7 @@ from check_paper_numbers import PAPER, WATCH, _get, _load          # noqa: E402
 EXEMPT = {
     "FishBot v0.4": "a version number",
     "FishBot v0.7": "the foreign opponent's name; its margins are watched",
+    "FishBot v0.6": "this engine's own version; its margins are watched",
     "v0.3 sampler, 512 draws": "a configuration label; its NLL is watched",
     "v0.4 champion": "a row label",
     "v0.4 no-gamma": "a row label",

@@ -64,15 +64,16 @@
 
 \title{\vspace{-1.6cm}\bfseries Exact Inference Is Not Enough:\\[0.1em]
 \large Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
-in Six-Player Literature\vspace{-0.2em}}
+in Six-Player Literature\\[0.15em]
+\normalsize\normalfont FishBot v0.6\vspace{-0.5em}}
 
 \author{\normalsize Kausthubh Veldanda\\[-0.2em]
 \small\texttt{kveldanda987@gmail.com}}
-\date{\small 27 August 2026\vspace{-0.4em}}
+\date{\small 28 August 2026\vspace{-0.4em}}
 
 \begin{document}
 \maketitle
-\vspace{-2.8em}
+\vspace{-3.2em}
 
 % =====================================================================
 % The abstract is set small and tight on purpose: it has to hold every
@@ -85,9 +86,11 @@ imperfect-information card game in which players interrogate opponents for
 named cards and score by declaring the exact distribution of a six-card
 half-suit among their own team. Hidden information plus no legal communication
 channel puts it outside both the two-player zero-sum machinery that solved
-poker and the fully cooperative machinery developed for Hanabi. This paper is
-the fourth iteration of an engine for it, organised around the results that
-contradicted the expectations motivating them.
+poker and the fully cooperative machinery developed for Hanabi. This paper
+covers two iterations of an engine for it --- v0.4, which built the
+inference, and v0.6, which corrected a rule and re-measured what depended on
+it --- organised around the results that contradicted the expectations
+motivating them.
 
 We first make the inference exact. Hidden-state inference here reduces to counting assignments in a
 degree-constrained bipartite system, $\#P$-complete in general but small in the
@@ -150,8 +153,8 @@ $[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
 independently developed C++ engine running its own code --- it takes
 $64.3\%$ of decided sets, and the corrected rule cuts nearly twice as hard
 against the opponent ($306$ misdeclared sets to $160$); the endgame
-correction, fitted against void-era targets, re-measures at $-0.104$
-$[-0.218, +0.010]$ and is withdrawn pending a rule-matched refit.
+correction, fitted against void-era targets, re-measures at $-0.104$ and is
+withdrawn.
 
 \vspace{1pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
@@ -170,8 +173,17 @@ hidden information and \emph{no legal communication channel}, so neither the
 two-player zero-sum machinery that solved poker nor the fully cooperative
 machinery developed for Hanabi applies directly.
 
-This paper is the fourth iteration of an engine for the game. The previous
-version, v0.3, established three results that frame everything here. First,
+This paper covers the fourth and sixth iterations of an engine for the game.
+The bulk of it is v0.4, which built the inference and the evaluation
+discipline; \S\ref{sec:critic} then reports v0.6, whose first act was to
+discover that this engine had been playing a house variant of the
+misdeclaration rule since v0.1 and whose remaining work was re-measuring, and
+in two cases withdrawing, everything that had depended on it. The shipped
+configuration is named \texttt{V06\_DEPLOYED} in the code and
+\textbf{FishBot v0.6} on the site, and there is exactly one of it.
+
+The previous version, v0.3, established three results that frame everything
+here. First,
 exact belief tracking dominates: an agent that merely chains every logical
 implication of the public record beats a public-information heuristic by
 $11.86$ sets per duplicate deal-pair. Second, and more surprisingly, search

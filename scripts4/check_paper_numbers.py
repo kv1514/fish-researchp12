@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PAPER = ROOT / "paper" / "fishbot_v04.tex"
+PAPER = ROOT / "paper" / "fishbot_v06.tex"
 
 
 def _get(d, path):

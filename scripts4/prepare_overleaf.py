@@ -25,8 +25,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TEX = ROOT / "paper" / "fishbot_v04.tex"
-OUT = ROOT / "paper" / "fishbot_v04_overleaf.zip"
+TEX = ROOT / "paper" / "fishbot_v06.tex"
+OUT = ROOT / "paper" / "fishbot_v06_overleaf.zip"
 
 # Packages the document loads; each maps to a command that proves it is used.
 PROBES = {

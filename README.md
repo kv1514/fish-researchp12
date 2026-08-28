@@ -65,7 +65,7 @@ merges.
   [fish4/evalx/README.md](fish4/evalx/README.md), and in the raw duel records at
   `results/v04_duels.jsonl`)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
-- Research paper, v0.4 (current): [paper/fishbot_v04.tex](paper/fishbot_v04.tex)
+- Research paper, v0.4 (current): [paper/fishbot_v06.tex](paper/fishbot_v06.tex)
 - Research paper, v0.3 (superseded, kept because its results still reproduce):
   [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
@@ -340,7 +340,7 @@ about 2.4x the gap between the best and worst candidate move, so evaluating
 different moves against different guessed layouts ranks luck. That measurement
 is v0.3's, in [PAPER.md](PAPER.md); what it rules out is *sampling* rather than
 search, and the design it leaves open is in
-[paper/fishbot_v04.tex](paper/fishbot_v04.tex) under "Search over the belief".
+[paper/fishbot_v06.tex](paper/fishbot_v06.tex) under "Search over the belief".
 
 ## Three things this engine gets right that are easy to get wrong
 

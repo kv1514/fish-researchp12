@@ -9,7 +9,7 @@ result to a confounded cell that nobody could reconstruct afterwards.
     py scripts4/lookahead_table.py --plain    # the same rows, readable
     py scripts4/lookahead_table.py --write    # splice it into the paper
 
-``--write`` edits paper/fishbot_v04.tex in place, between the sentinel comments,
+``--write`` edits paper/fishbot_v06.tex in place, between the sentinel comments,
 rather than emitting a file to \input. That is not a style preference:
 prepare_overleaf.py packages main.tex as the only source and does not follow
 \input, so a separate file would ship an Overleaf bundle with a missing table
@@ -152,7 +152,7 @@ def write_into_paper() -> int:
     if missing:
         print("refusing to write: some cells have not run", file=sys.stderr)
         return 1
-    p = ROOT / "paper" / "fishbot_v04.tex"
+    p = ROOT / "paper" / "fishbot_v06.tex"
     s = p.read_text()
     i, j = s.find(BEGIN), s.find(END)
     if i < 0 or j < 0 or j < i:

@@ -5,7 +5,7 @@ that constrains this document is in **Pilot** below.
 
 ## The claim under test
 
-`paper/fishbot_v04.tex`, section "Both gains are lower bounds", says the
+`paper/fishbot_v06.tex`, section "Both gains are lower bounds", says the
 reported exact gain at m = 2 -- **+0.3250 over 109 solved positions** -- is a
 lower bound on the gain over the whole layer, because the positions the solver
 cannot reach are the wide-support ones and the gain rises with support.
