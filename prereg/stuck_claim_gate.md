@@ -213,9 +213,16 @@ only thing that makes the prediction worth having written down.
 not an answer.** A deferred declaration is not a free one: it leaves a
 half-suit live, which changes every subsequent ask on both sides. The two-sets
 arithmetic prices the error and ignores the tempo, and the gap between $+0.128$
-and $+0.058$ is where that difference would live. Measuring it needs a
-different instrument than this one --- the paired margin cannot see it, because
-both arms are paying it.
+and $+0.058$ is where that difference would live.
+
+That last sentence needs a correction to an earlier draft of it, which said
+the paired margin "cannot see" the tempo cost because both arms pay it. They
+do not: arm B defers and arm A does not, so the paired difference is exactly
+the net of the error saved against the tempo spent, and the margin measures
+that net perfectly well. What it cannot do is *attribute* the shortfall.
+$+0.058$ is consistent with a large error saving minus a large tempo cost and
+equally with a modest one of each, and separating them needs an instrument
+that prices a live half-suit on its own.
 
 **Not run, and why.** The v0.3 champion guard was specified for "the winning
 rung, if any". There is no winning rung, so it is not run: a guard against

@@ -132,6 +132,25 @@ def _one(args) -> dict:
                 p_true = float(evaluator.post.prob_assignment(cards, actual))
             except Exception:
                 continue
+            # The question the two masses above only gesture at: was OUR pick
+            # the best one available? At one live half-suit the team space is
+            # 3^6 = 729 assignments, small enough to settle by enumeration
+            # rather than by inference about the shortlist. Above that it is
+            # left None rather than guessed.
+            p_best, best_is_true, best_beats_ours = None, None, None
+            if n_live == 1:
+                team = [q for q in range(NUM_PLAYERS)
+                        if team_of(q) == team_of(mover)]
+                import itertools
+                bp, ba = -1.0, None
+                for cand in itertools.product(team, repeat=len(cards)):
+                    v = float(evaluator.post.prob_assignment(cards,
+                                                             list(cand)))
+                    if v > bp:
+                        bp, ba = v, list(cand)
+                p_best = round(bp, 6)
+                best_is_true = int(ba == actual)
+                best_beats_ours = int(bp > p_named + 1e-9)
             rows.append({
                 "hs": ev.half_suit, "live": n_live, "opp_cards": opp_cards,
                 "my_cards": my_cards,
@@ -144,6 +163,8 @@ def _one(args) -> dict:
                 # a declaration that names the true split but is scored wrong
                 # would be an engine bug; recorded so it cannot hide
                 "named_is_true": int(named == actual),
+                "p_best": p_best, "best_is_true": best_is_true,
+                "best_beats_ours": best_beats_ours,
             })
     finally:
         ClaimEvaluator.best_for_half_suit = real
@@ -234,6 +255,13 @@ def main(n_deals=120, n_jobs=0, vs="self") -> int:
             if (i + 1) % 50 == 0:
                 print(f"  {i+1}/{len(todo)} {(time.time()-t0)/60:.1f} min",
                       flush=True)
+    jl = ROOT / "results" / f"forced_ceiling_{vs}.jsonl"
+    with jl.open("w") as fh:
+        for r in rows:
+            for c in r["forced"]:
+                fh.write(json.dumps(dict(c, deal=r["deal"],
+                                         kv_even=r["kv_even"])) + "\n")
+    print("wrote", jl.relative_to(ROOT))
     out = {"rules": RULES_D, "vs": vs, **report(rows)}
     dest = ROOT / "results" / f"forced_ceiling_{vs}.json"
     dest.write_text(json.dumps(out, indent=1))
