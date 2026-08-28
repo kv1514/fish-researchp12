@@ -2316,8 +2316,11 @@ restatement of this ladder's headline --- the full deployed configuration
 against the v0.3 champion, both sides pricing misdeclarations correctly ---
 is $+2.412$ $[+2.088, +2.736]$ over $500$ fresh pairs
 (design R1 of \texttt{prereg/rules\_award\_baseline.md},
-\texttt{results/award\_headline.json}; misdeclared-and-awarded sets $125$
-against the deployed side, $146$ against v0.3).}
+\texttt{results/award\_headline.json}; wholly-held half-suits declared with
+the wrong split, and so awarded to the opponents: $125$ against the deployed
+side, $146$ against v0.3. That counter is the allocation class alone --- a
+declaration naming a card the opponents actually held is a gift rather than a
+misdeclaration and is counted separately, \texttt{fish4/match.py}).}
 \label{tab:ladder}
 \end{table}
 
@@ -5659,7 +5662,8 @@ expectation was wrong, and it is reported because it was written first:
 under the award rule the deployed configuration WITH the $m \le 2$
 correction scores $-0.1040$ $[-0.2184, +0.0104]$ against the same
 configuration without it, over $500$ fresh pairs --- and the correction arm
-misdeclares \emph{more} ($123$ against $106$). The mechanism is not
+misdeclares \emph{more} ($123$ against $106$, again wholly-held splits; both
+arms are counted the same way, so the comparison is what it looks like). The mechanism is not
 mysterious: the correction's $d_{\text{info}} = 2.0$ was fitted against
 solver targets whose continuations priced a wrong declaration at zero, and
 the game no longer plays that price. Taken with the foreign tie above

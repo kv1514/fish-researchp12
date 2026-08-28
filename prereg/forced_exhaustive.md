@@ -164,3 +164,64 @@ pre-registered v0.7 arm is queued. **Nothing ships until that is reported**,
 even though the ship criterion is the primary and the primary passed: a
 registration that names a secondary and then does not run it is not a
 registration that was honoured.
+
+---
+
+## OUTCOME, part 2: the pre-registered secondary, and the ship decision
+
+### The secondary, run as registered
+
+1,000 games against dylan_v07 through `BRIDGE_REV = 2`, zero fallbacks, zero
+unfinished.
+
+| arm | right | of | accuracy | 95% CI |
+|---|---|---|---|---|
+| A_shipped | $28$ | $87$ | $0.3218$ | $[0.2330, 0.4257]$ |
+| B_full | $37$ | $87$ | $\mathbf{0.4253}$ | $[0.3267, 0.5302]$ |
+
+Paired: $+0.0090$ more correct last declarations per game,
+$[+0.0031, +0.0149]$ --- clear of zero. **Guard 2 passes exactly**: every
+other live-count bucket is identical between the arms ($54/74$, $10/18$,
+$2/4$, $0/2$).
+
+Margin: $+0.0180$ $[+0.0063, +0.0297]$, which contains the $+0.028$ predicted
+in advance and excludes zero.
+
+### It replicates three times over
+
+| population | accuracy gain |
+|---|---|
+| screen, 104 positions | $17.3\% \to 30.8\%$ ($+13.5$) |
+| confirm, self-play, 258 positions | $29.84\% \to 40.70\%$ ($+10.9$) |
+| confirm, v0.7, 87 positions | $32.18\% \to 42.53\%$ ($+10.4$) |
+
+Different seed blocks, different opponents, the same effect.
+
+### Guard 3, runtime, and what the measurement does and does not support
+
+Twelve games each way: $1.235$ s/game unarmed against $1.005$ s/game armed,
+which is $-18.7\%$ and cannot be read as a speed-up. It was taken while three
+workers were saturating the box, so it is contaminated by load and the sign is
+not meaningful. What it does support is the only thing the guard asks: there
+is no evidence of a slowdown. The structural argument is the stronger one --
+the enumeration is capped at 1,024 assignments, fires only at one live
+half-suit, and does so about $0.2$ times a game. A clean timing on an idle box
+is worth taking before the next release note quotes a number.
+
+### The decision
+
+Every condition the pre-registration fixed in advance is met. The primary
+rises with the interval clear of zero **in both populations**; guards 2 and 3
+pass; no withdrawal condition triggers --- accuracy did not fail to rise,
+the margin did not move negatively, and runtime shows no problem.
+
+**This ships.** It is the first change of this session to clear its own bar.
+
+**Sequenced, not immediate.** Two other pre-registered runs are in flight
+against `V06_DEPLOYED` as their arm A. Changing the champion while they run
+would leave their recorded baseline labelled as something the repository no
+longer contains. The knob is flipped once the queue drains, and
+`tests4/test_forced_exhaustive.py`'s bit-identity test has to be rewritten
+when it is: after shipping, "the default reproduces the champion" is a
+statement about the *new* champion, and the test that currently asserts the
+knob is off would be asserting the opposite of the truth.
