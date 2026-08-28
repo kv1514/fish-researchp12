@@ -729,6 +729,15 @@ WATCH = [
      "teammate arm, cards pinned per game", "cards pinned/game"),
     ("ceiling_split.json", "arms.O_opp.pinned_by_cheat_per_game", "{:.1f}",
      "opponent arm, cards pinned per game", "cards pinned/game"),
+    # The concentration retest's verdict. Watched because tab:nulls retains the
+    # v1 screen row and the dagger beneath it now carries the v2 outcome; a
+    # drift there would leave a retained-as-history row pointing at nothing.
+    ("concent_confirm.json", "arms.C_dose.effect", "{:+.4f}",
+     "concentration at w=1.50", "worse than shipped"),
+    ("concent_confirm.json", "arms.C_dose.ci95.1", "{:+.4f}",
+     "concentration at w=1.50, CI high", "worse than shipped"),
+    ("concent_confirm.json", "mechanism.C_dose.allocation_per_game", "{:.4f}",
+     "allocation errors at w=1.50", "rose\nmonotonically instead"),
     ("foreign_award_check.json", "effect", "{:+.4f}",
      "rule-matched foreign effect", "under the award rule --- no reversal"),
     ("foreign_award_check.json", "ci95.0", "{:+.4f}",

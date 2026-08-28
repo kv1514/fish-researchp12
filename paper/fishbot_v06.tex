@@ -3192,15 +3192,34 @@ takes a weight near $1.0$ to reach $8\%$. A $160$-pair run of a knob acting on
 one decision in sixty, reporting an interval four times the ship bar in each
 direction, is a statement about the harness rather than about the idea.
 
-The retest matters because this is the only term in the basis that points at
+The retest mattered because this is the only term in the basis that points at
 the error we actually make. Of our $0.1759$ wrong declarations a game, $0.1676$
 are allocation class --- our own team held all six and we named the wrong split
 --- against $0.0083$ ownership errors, and a half-suit held entirely in one
-hand has no split to name. It is registered at
+hand has no split to name. It was registered at
 \path{prereg/concentration_v2.md} at $4{,}000$ games, with arms at $0.60$ and
-$1.50$ and with the mechanism (allocation errors falling, concentration at
-declaration time rising) as a \emph{withdrawal condition} rather than a
-secondary.
+$1.50$ and with the mechanism as a \emph{withdrawal condition} rather than a
+secondary: allocation errors had to fall and concentration at declaration time
+had to rise.
+
+\textbf{It ran and it is withdrawn, on condition 1.} At $w = 0.60$ the effect is
+$-0.0430$ $[-0.1369, +0.0509]$ and at $1.50$ it is $-0.1445$ $[-0.2490,
+-0.0400]$, worse than shipped. Allocation errors were required to fall and rose
+monotonically instead: $0.1557$, $0.1772$, $0.1827$. Condition 2 passed ---
+concentration really did rise, $0.8106 \to 0.8168$ --- so the corrected feature
+computes what it claims and the \emph{strategy} is what is wrong, which is a
+more useful outcome than a null.
+
+The reason is the resource the argument for the term ignored.
+\texttt{GameState.legal\_asks} requires the asker to hold a card of the
+half-suit, so concentrating a team's holding into one hand narrows the set of
+half-suits that hand can ask in --- and being unable to ask is the definition of
+being forced. Forced declarations rise monotonically with the weight, $0.167 \to
+0.197 \to 0.218$ a game, and the forced path is $47$--$49\%$ wrong. The term
+buys a marginally better split and pays for it in the one currency that keeps a
+seat able to act. (Stated as consistent-with rather than proven: the run does
+not instrument askable half-suits per seat, and the monotone dose response in
+the harm is the strongest evidence here.)
 
 $^\dagger$\,\textbf{These two rows measured nothing, and we found out
 afterwards.} The no-declaration term was assembled into the importance weights
