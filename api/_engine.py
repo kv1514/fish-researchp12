@@ -155,8 +155,14 @@ LOG_TAIL = 60
 #: R4 and R2), so it no longer clears the ship bar. fish4/registry4.py
 #: names this configuration V06_DEPLOYED; a refit against award-rule
 #: targets is queued before anything above m=0 ships again.
+#: `claim_forced_exhaustive` shipped into V06_DEPLOYED on 2026-08-28
+#: (prereg/forced_exhaustive.md). It is here because the site plays the
+#: champion, and it is threaded into Analyser rather than listed as inert
+#: because it is NOT inert at 1: it changes the split suggested for a forced
+#: declaration at the last live half-suit, which is exactly the panel a player
+#: is reading when it matters.
 WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
-            "endgame_m": 0}
+            "endgame_m": 0, "claim_forced_exhaustive": 1}
 #: The opponent-model weight the champion carries. Not a knob the client can
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.

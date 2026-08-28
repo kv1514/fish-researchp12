@@ -127,3 +127,108 @@ push asks toward players holding fewer cards, and that may be worth something
 for reasons that have nothing to do with tempo. A plausible outcome is that
 removing it costs sets, which would be a more useful result than confirming
 the arithmetic.
+
+---
+
+# Outcome, recorded against the registration above
+
+Run 2026-08-28, `scripts4/tempo_confirm.py 500 3`, 1,000 games per arm on
+identical deals, both parities, `BRIDGE_REV = 2`, zero fallbacks, zero
+unfinished. `results/tempo_confirm.json`, `results/tempo_journal.jsonl`.
+
+| arm | margin | vs A |
+|---|---|---|
+| A shipped, one tempo rate | +2.1220 | — |
+| B `turn_free_below` 0.50, scale 0.0 | +2.3500 | **+0.2280** [+0.0076, +0.4484] |
+| C same threshold, scale 0.5 | +2.2060 | +0.0840 [−0.1216, +0.2896] |
+
+## The mechanism check passes, and that is the strongest thing here
+
+The registration predicted a specific causal chain and did not know its sign.
+The chain appeared:
+
+| arm | turns | asks | landed | hit rate |
+|---|---|---|---|---|
+| A | 56.522 | 51.235 | 26.775 | 0.5226 |
+| B | 58.565 | 53.201 | 27.364 | 0.5144 |
+| C | 57.016 | 51.678 | 26.926 | 0.5210 |
+
+More turns, more asks, a *lower* hit rate, and more cards landed. That is
+exactly "when the turn is free, take the long shot": worse asks by success
+probability, more of them, more cards. And the dose rung is monotone in dose —
+full charge $+0.0000$, half charge $+0.0840$, no charge $+0.2280$ — which is
+the internal consistency that makes an effect believable past its interval.
+
+## Withdrawal conditions, checked in order
+
+1. **B negative beyond noise.** No.
+2. **C beats B.** No: $+0.0840$ against $+0.2280$. The threshold from §tempo
+   survives its own dose test.
+3. **Hit rate falls without the margin rising.** The hit rate fell
+   ($0.5226 \to 0.5144$) and the margin rose. Not triggered — and the fall is
+   the predicted direction, not a warning sign.
+
+Nothing fired. The run is valid.
+
+## A note on arm A's absolute margin, because it looks wrong
+
+A came in at $+2.1220$ against a $10{,}000$-game headline of $+2.3466$, which
+is $2.4$ standard errors low. Across the five runs that carry an untreated A
+the $z$ scores against the headline are $-2.43$, $+1.42$, $+1.21$, $-0.49$,
+$+0.20$: $\chi^2 = 9.7$ on 5 degrees of freedom, $p \approx 0.09$. A is fine;
+this block drew low. It does not touch the estimate, because B is paired to A
+on every deal and a shared low draw cancels in the difference. It is recorded
+because an unexplained $2.4\sigma$ in a headline figure is exactly the kind of
+thing that should not be noticed for the first time by a reader.
+
+## The bar does not have one reading, and that is a defect in the record
+
+`prereg/tempo_regime.md` says, in full: **"Point estimate $\geq +0.15$ with the
+interval clear of zero."** B is $+0.2280$ with a lower bound of $+0.0076$. By
+the document, **B ships**.
+
+`scripts4/tempo_confirm.py` implemented something else. It shipped only when
+the whole interval sat above $0.15$, and it carried a `CONDITIONAL = 0.05`
+band whose comment cited "the pre-registration" — which contains no such band.
+By the code, **B does not ship**.
+
+Both artifacts predate the run. Neither can be dismissed as post-hoc, and I am
+not going to pick the one that gives the answer I would prefer. Picking either
+here is bar-shopping, and the fact that the two readings would resolve
+identically on every previous run in this project — including the signalling
+gate this morning — is why the disagreement went unnoticed until a result
+landed between them.
+
+The runner now computes and prints **both** readings on every run, and the
+invented conditional band is gone.
+
+## Verdict: unresolved, and resolved by a bigger run rather than by a choice
+
+**B does not ship today.** The interval is wide for a reason this project
+measured this morning: `scripts4/pairing_value.py` shows that pairing's value
+is governed by how often a knob changes a decision, and this knob fires on
+$53\%$ of ask decisions, so the arms diverge immediately and pairing removes
+almost nothing. The width is a sample-size problem with a known cure, not an
+ambiguity to be argued away.
+
+### Addendum, fixed before any game of it is played
+
+- **Design.** Identical to the above in every respect except size and base.
+- **Size.** $8{,}000$ games per arm — $4{,}000$ deals $\times$ 2 parities —
+  fixed now, analysed **once**, at the end. No interim looks, no stopping
+  early. At the observed paired sd this puts the standard error near $0.040$,
+  which is the point at which the two readings of the bar coincide for an
+  effect of the size measured.
+- **Base.** The current champion, which as of today carries
+  `claim_forced_exhaustive=1` (`prereg/forced_exhaustive.md`). This makes the
+  new run a **replication against a different base**, not an extension: the
+  $1{,}000$ games above are the evidence that motivated it and are **not
+  pooled** with it.
+- **Bar, disambiguated in advance.** Ship **only if both readings agree** —
+  point estimate $\geq +0.15$ *and* interval lower bound $> +0.15$. If they
+  disagree again, the result is reported as unresolved and nothing ships. This
+  is the stricter of the two, chosen because the cost of being wrong in that
+  direction is a delayed ship and the cost of being wrong in the other is a
+  false positive in the champion and in the paper.
+- **Withdrawal conditions.** Unchanged, plus: if C beats B at this size, the
+  threshold argument from §tempo is withdrawn regardless of B's own number.

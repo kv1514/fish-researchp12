@@ -1,14 +1,24 @@
-"""The forced declaration's full search must be off, and must only ever help.
+"""The forced declaration's full search is SHIPPED, and must only ever help.
 
 `claim4.best_for_half_suit` shortlists two holders per card and scores three
 combinations. `forced_exhaustive` replaces that with the true argmax at the
 last half-suit, where the declaration ends the game and nothing is traded
-away. Three things have to hold, and the third is the one that makes this a
-search improvement rather than a policy change:
+away.
 
-  1. at the default the champion is reproduced move for move;
-  2. armed, it actually changes some game -- otherwise (1) proves nothing;
-  3. the split it picks NEVER scores lower on the joint than the split the
+This file was written while the knob was off by default, and asserted "at the
+default the champion is reproduced move for move". It shipped on 2026-08-28
+under prereg/forced_exhaustive.md, and that sentence is now a claim about the
+OLD champion. Kept as an assertion it would have quietly inverted: the default
+still reproduces the champion, but the champion is the armed one, so the arm
+that has to be named explicitly is the disarmed one.
+
+Four things have to hold, and the last is what makes this a search improvement
+rather than a policy change:
+
+  1. the deployed champion actually carries the knob -- the ship happened;
+  2. disarming it changes some game, so (1) and (3) are not vacuous;
+  3. setting it back to the champion's own value changes nothing;
+  4. the split it picks NEVER scores lower on the joint than the split the
      incumbent picked. It is a better search of the same objective.
 """
 
@@ -49,23 +59,41 @@ def _play(params, seed):
     return moves, list(st.set_winner)
 
 
-def test_the_default_changes_nothing():
+def test_the_champion_carries_it():
+    """The ship itself, asserted rather than assumed.
+
+    Without this, a revert of registry4.py would leave every other test in
+    this file passing -- they would simply all be measuring the disarmed
+    engine against itself.
+    """
+    assert BASE.get("claim_forced_exhaustive") == 1, (
+        "V06_DEPLOYED no longer carries claim_forced_exhaustive=1, which "
+        "prereg/forced_exhaustive.md shipped on 2026-08-28")
+
+
+def test_restating_the_champions_own_value_changes_nothing():
     for seed in range(4):
         a, wa = _play(dict(BASE), 8_300 + seed)
-        b, wb = _play(dict(BASE, claim_forced_exhaustive=0), 8_300 + seed)
+        b, wb = _play(dict(BASE, claim_forced_exhaustive=1), 8_300 + seed)
         assert a == b and wa == wb, (
-            f"seed {seed}: claim_forced_exhaustive=0 changed the game")
+            f"seed {seed}: restating the shipped value changed the game")
         assert len(a) > 20
 
 
-def test_arming_it_changes_some_game():
+def test_disarming_it_changes_some_game():
+    """The knob is live. Before the ship this test armed it; now it disarms.
+
+    It is the same assertion either way -- that the two settings are two
+    settings -- and it is what stops the identity test above from passing
+    because the parameter does nothing.
+    """
     changed = 0
     for seed in range(6):
         a, _ = _play(dict(BASE), 8_100 + seed)
-        c, _ = _play(dict(BASE, claim_forced_exhaustive=1), 8_100 + seed)
+        c, _ = _play(dict(BASE, claim_forced_exhaustive=0), 8_100 + seed)
         if a != c:
             changed += 1
-    assert changed, "arming the full search changed no game in 6"
+    assert changed, "disarming the full search changed no game in 6"
 
 
 def test_it_never_picks_a_worse_split():

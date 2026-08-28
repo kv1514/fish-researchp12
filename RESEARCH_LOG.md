@@ -15,13 +15,30 @@ experiment, CI reported), **PROMISING** (preliminary), **SPECULATIVE**
 
 ## Current bottleneck analysis
 
+Rewritten 2026-08-28. The previous table was from the era when search losing
+to its own prior was the live problem; that is settled and the table had not
+moved since. Ranked by measured size, not by how interesting the problem is.
+
 | rank | bottleneck | evidence | status |
 |---|---|---|---|
-| 1 | Search cannot yet exploit beliefs | PIMC and ISMCTS both LOST to their own prior; paired search reached only parity | value net now trained, decisive test running |
-| 2 | Belief sampling cost | measured 736 us/world, 30x the cost of belief updates per decision | **improved 4.1x to 178 us/world** via cached OR-seeded sampler |
-| 3 | Sampling is not uniform over consistent worlds | OR seeding and quota weighting skew draws | open: needs importance weighting or MCMC refinement |
-| 4 | No ground truth for "is this move right?" | every metric was relative | **exact subgame solver built** |
-| 5 | Claim policy is a fixed confidence threshold | not decision-theoretic | open: next major item |
+| 1 | We cannot locate our own teammates' cards | 0.1676 of our 0.1759 wrong declarations a game are allocation class -- our team held all six and we named the wrong split. Ownership errors are 0.0083 a game (`results/margin_decomposition.json`) | open, and the largest single lever left. See rank 2 for why it is hard |
+| 2 | The channel freezes before the question is asked | once a team holds all six, `legal_asks` bars every opponent from asking there, so no public event can ever touch the split again. The team jointly knows the answer and no member does: a distributed-knowledge problem, not an inference one | the only channel is a deliberately failed ask, priced at +0.1220 [+0.0291, +0.2149] and adding an error almost as often as it avoids one (`prereg/deadline_signalling.md`) |
+| 3 | The ask objective charges a constant rate for a turn whose price is not constant | a turn is free below p_best = 0.50 and costs ~+0.45 above it; 53% of ask decisions are in the free regime and pay the full charge | 1,000 games give +0.2280 [+0.0076, +0.4484], which ships under the pre-registration as written and not under the runner's stricter reading. An 8,000-game replication decides it |
+| 4 | Sampling is not uniform over consistent worlds | OR seeding and quota weighting skew draws | open since session 2: needs importance weighting or MCMC refinement. Every probability the engine reports inherits this |
+| 5 | The transcript is read for constraints and not for choices | the posterior conditions on what an ask PROVED and never on the fact that this ask was chosen over the others. For teammates the policy is known exactly, which is the case where inversion is safe | open (task #53). The opponent-side version already failed once: the fitted exponent is -1.00 against our own +1.21 |
+
+What is NOT a bottleneck, measured rather than assumed:
+
+- **The deal.** Its share of a game's outcome variance is -1.3% [-4.0%, +1.5%]
+  over 5,000 duplicated deals (`results/deal_luck.json`). There are no high
+  cards in Fish and the cards move continuously, so a hand can be awkward but
+  not weak.
+- **Reading the table.** Our declaration accuracy is 96.5% and 95% of what is
+  left is the teammate problem above, not the opponent one.
+- **Game-level form.** Declaration accuracy has an overdispersion of 1.07 and
+  an across-parity correlation of +0.018: there is no such thing as a game
+  where anybody read the cards better. What looks like it in a loss is
+  selection on coin flips.
 
 ---
 
@@ -417,3 +434,104 @@ frequently as recovery points.
    difficult information states, train a policy head, put it back in search.
 6. **Exploiter search.** Train a best response against the champion; feed
    its wins back into training.
+
+---
+
+## Session 2026-08-28 (second half) - what the corpus already knew
+
+Four results, none of which cost a game to obtain, plus one ship and one
+unresolved verdict.
+
+### The deal decides nothing (DEMONSTRATED)
+
+The 10,000-game head-to-head played every deal from both seat parities, which
+identifies the deal's contribution: under that design the deal's share of a
+game's variance is identically minus the correlation between the two parities'
+margins. Measured, +0.0127 [-0.0150, +0.0404], so the share is -1.3% [-4.0%,
++1.5%]. `scripts4/deal_luck.py`.
+
+Fish has no high cards -- every half-suit is worth one set -- so a hand can be
+awkwardly distributed but not weak, and continuous card movement dissolves the
+arrangement by the middlegame. The deal does leave a *symmetric* trace: our
+ask hit rate correlates +0.087 [+0.060, +0.115] across the two parities, so
+some deals are clumped enough that asks land more often for everybody. A deal
+can be textured without being unfair.
+
+I got the estimator wrong first and it is worth recording. The natural-looking
+var(diff)/(var(sum)+var(diff)) is 0.5 whenever the correlation is zero, so it
+reported "49.4% of the outcome is the deal" from data saying zero, and would
+have reported about the same from any data. `tests4/test_deal_luck.py` now
+builds synthetic corpora with a chosen deal effect and fails if the estimator
+cannot tell zero from dominant.
+
+### Pairing is worth 1.1x to 414x, and firing rate decides which (DEMONSTRATED)
+
+Swapping seats on a deal buys 0.99x, because the antisymmetric advantage it
+removes is not there. Holding the deal, seats and opponents fixed and moving
+one knob is a different pairing and is the one every ship decision rests on.
+Priced over every multi-arm journal (`scripts4/pairing_value.py`):
+
+| knob | identical games | rho | efficiency |
+|---|---|---|---|
+| gamma (every decision) | 19.9% | 0.089 | 1.1x |
+| signalling gate | 79.8% | 0.853 | 6.8x |
+| doomed-ask gate | 88.1% | 0.899 | 9.9x |
+| forced search vs v0.7 | 99.1% | 0.998 | 414x |
+
+**The sample size a screen needs is set by how often its knob changes a
+decision, not by how large the effect is.** This project has sized runs by
+effect size alone. The forced-search secondary resolved +0.0180 to +-0.012 on
+1,000 games; G1, same design, 1,600 games, could not resolve finer than +-0.19.
+
+### A loss is not a day when they read better (DEMONSTRATED)
+
+Of what separates the 1,959 games we lose, the rows that top the ranking are
+terms of the score identity and are the scoreboard restated. Of the rest, the
+largest is our ask hit rate, 0.535 against 0.460. But a game carries fifty
+asks, so the binomial sd of that rate is 0.071 and the whole gap is 0.074.
+
+Overdispersion against fifty coin flips at the pooled rate: our hit rate 1.72,
+theirs 1.71, our declaration accuracy 1.07, theirs 1.03. **Declaration
+accuracy has no game-level structure on either side.** "Their accuracy rises
+from 0.754 to 0.925 in games we lose" is selection on coin flips. The camping
+theory was refuted earlier this session; this says there was never a channel
+for it to work through.
+
+The hit rate is the one rate with structure, and it splits 58.3% binomial /
+8.7% deal texture / **33.0% the position our own play built**. That last third
+is the only part a policy can move.
+
+### 95% of our wrong declarations are the teammate problem (DEMONSTRATED)
+
+`results/margin_decomposition.json`: our 0.1759 wrong declarations a game are
+0.1676 allocation and 0.0083 ownership. We essentially never claim a half-suit
+an opponent still holds. What we cannot do is say which teammate has what --
+and once our team holds all six, no opponent may legally ask there, so the
+split is frozen and no further public event can inform it.
+
+That reframes it as distributed knowledge rather than inference: every card is
+held by someone who knows they hold it, and no one member knows the split.
+`scripts4/declarer_holding.py` is the instrument for the one free lever --
+that any teammate may declare, and the one holding four cards guesses two
+while the one holding one guesses five. A 12-game smoke put 29.6% of
+wholly-held declarations in the hands of someone a teammate could have
+out-informed.
+
+### Shipped
+
+`claim_forced_exhaustive=1` into `V06_DEPLOYED`, per
+`prereg/forced_exhaustive.md`: self-play +0.0233 [+0.0133, +0.0334], and
+against v0.7 the last declaration goes 28/87 to 37/87 correct, paired +0.0090
+[+0.0031, +0.0149], guard 2 passing exactly.
+
+### Unresolved, and deliberately left so
+
+The tempo term. B_free returned +0.2280 [+0.0076, +0.4484] over 1,000 games,
+with the predicted mechanism intact (more turns, more asks, lower hit rate,
+more cards landed) and a monotone dose response. It ships under
+`prereg/tempo_regime.md` as written -- "point estimate >= +0.15 with the
+interval clear of zero" -- and does not ship under the stricter rule
+`scripts4/tempo_confirm.py` had implemented. Both artifacts predate the run,
+so picking one would be bar-shopping. An 8,000-game replication against the
+new champion, fixed in size in advance and analysed once, decides it, and it
+ships only if both readings agree.

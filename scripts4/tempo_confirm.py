@@ -46,11 +46,29 @@ from scripts4.journal import finish, in_flight, to_read
 from scripts4.path_ledger import PATHS, _path_of
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
-SEED0 = 4_800_000
+#: Overridable so the 8,000-game replication in the addendum of
+#: prereg/tempo_regime.md gets a seed block of its own. It runs
+#: against a DIFFERENT champion (claim_forced_exhaustive shipped
+#: the same day), so its rows must never land in the same journal
+#: as the first run's, and reusing deals would invite exactly that.
+SEED0 = int(os.environ.get("TEMPO_SEED0", 4_800_000))
 AGENT0 = 48_000
 MIN_INTERESTING = 0.15
-#: the conditional band from the pre-registration: ships only with the ledger
-CONDITIONAL = 0.05
+#: THE BAR, and a discrepancy this file used to contain.
+#:
+#: prereg/tempo_regime.md says, in full: "Point estimate >= +0.15 with the
+#: interval clear of zero." This module implemented something else -- it shipped
+#: only when the whole interval sat above 0.15, and it carried a CONDITIONAL =
+#: 0.05 band whose comment cited "the pre-registration", which contains no such
+#: band. Two artifacts written before the run disagreed about the contract, and
+#: the disagreement only surfaced when a result landed between them: B_free at
+#: +0.2280 [+0.0076, +0.4484] ships under the document and does not ship under
+#: the code.
+#:
+#: Neither reading is retro-fitted here. Both are computed and both are
+#: printed, every run, so a result that lands between them is visible as such
+#: instead of being silently adjudicated by whichever one the code happened to
+#: implement.
 ARMS = {
     "A_shipped": {},
     "B_free": {"turn_free_below": 0.50, "turn_free_scale": 0.0},
@@ -196,7 +214,7 @@ def report(rows) -> dict:
           f"each played once per arm on the identical deal\n")
     print(f"  arm A_shipped (one tempo rate)   {sum(base)/n:+.4f} sets/game")
     out = {"rules": RULES_D, "bridge_rev": BRIDGE_REV, "n_games": n,
-           "min_interesting": MIN_INTERESTING, "conditional": CONDITIONAL,
+           "min_interesting": MIN_INTERESTING,
            "margin_A": sum(base) / n, "arms": {}, "ledger": {}}
     for arm in ARMS:
         out["ledger"][arm] = _ledger(rows, arm, n)
@@ -206,20 +224,30 @@ def report(rows) -> dict:
         var = sum((x - m) ** 2 for x in d) / (n - 1)
         se = (var / n) ** 0.5
         lo, hi = m - 1.96 * se, m + 1.96 * se
-        if lo > MIN_INTERESTING:
-            verdict = "SHIPS: clears the pre-registered bar"
-        elif lo > CONDITIONAL:
-            verdict = "conditional band: ships only if the ledger confirms"
-        elif lo > 0:
-            verdict = "positive but under the conditional floor -- does not ship"
+        # As written in prereg/tempo_regime.md: point estimate at the bar,
+        # interval clear of zero.
+        by_doc = m >= MIN_INTERESTING and lo > 0
+        # As this module used to implement it: the whole interval above the bar.
+        by_code = lo > MIN_INTERESTING
+        if by_doc and by_code:
+            verdict = "SHIPS on both readings of the bar"
+        elif by_doc or by_code:
+            verdict = ("UNRESOLVED: ships on the pre-registration as written, "
+                       "not on the stricter reading" if by_doc else
+                       "UNRESOLVED: ships on the stricter reading only, which "
+                       "cannot happen and means the bar code is wrong")
         elif hi < 0:
             verdict = "WORSE than shipped"
+        elif lo > 0:
+            verdict = "positive, below the bar -- does not ship"
         else:
             verdict = "no detectable difference"
         print(f"  arm {arm:12s} {sum(r[arm]['margin'] for r in rows)/n:+.4f} "
               f"sets/game")
         print(f"       vs shipped: {m:+.4f}  [{lo:+.4f}, {hi:+.4f}]   {verdict}")
         out["arms"][arm] = {"params": ARMS[arm], "effect": m, "ci95": [lo, hi],
+                            "ships_by_document": by_doc,
+                            "ships_by_stricter_reading": by_code,
                             "margin": sum(r[arm]["margin"] for r in rows) / n,
                             "verdict": verdict}
 
@@ -301,7 +329,14 @@ def main(n_deals: int = 500, n_jobs: int = 0) -> int:
         print(f"{len(rows)} games; too few to report")
         return 1
     out = report(rows)
-    dest = ROOT / "results" / "tempo_confirm.json"
+    # Named after the journal, so the 8,000-game replication cannot silently
+    # overwrite the 1,000-game run that prereg/tempo_regime.md quotes. Two runs
+    # against two different champions must not share a filename; the older
+    # figure would vanish and the prereg would point at a file describing
+    # something else.
+    stem = JOURNAL.stem.replace("_journal", "")
+    dest = ROOT / "results" / (
+        "tempo_confirm.json" if stem == "tempo" else f"{stem}_confirm.json")
     dest.write_text(json.dumps(out, indent=1))
     finish(JOURNAL)
     print("wrote", dest.relative_to(ROOT))

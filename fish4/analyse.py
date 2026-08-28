@@ -142,9 +142,16 @@ class Analyser:
                  value_model: Optional[HalfSuitValue] = None,
                  n_draws: int = 320, gamma: float = 0.35, seed: int = 0,
                  w_lookahead: float = 0.0, lookahead_depth: int = 1,
-                 lookahead_beam: int = 4, lookahead_couple: bool = True):
+                 lookahead_beam: int = 4, lookahead_couple: bool = True,
+                 claim_forced_exhaustive: int = 0):
         self.rules = rules
         self.seat = seat
+        #: Threaded through to ClaimConfig so the split this class SUGGESTS is
+        #: the split the engine would actually play. It shipped in
+        #: V06_DEPLOYED on 2026-08-28, and an explanation of a policy the site
+        #: is not playing is the exact failure api/_engine._analyser_spec was
+        #: written to make loud rather than silent.
+        self.claim_forced_exhaustive = int(claim_forced_exhaustive)
         self.weights = weights or AskWeights()
         self.value = value_model
         self.n_draws = n_draws
@@ -333,7 +340,8 @@ class Analyser:
 
     def _claim_table(self, ctx) -> list:
         from .claim4 import ClaimConfig, ClaimEvaluator
-        ev = ClaimEvaluator(ctx, ClaimConfig())
+        ev = ClaimEvaluator(ctx, ClaimConfig(
+            forced_exhaustive=self.claim_forced_exhaustive))
         out = []
         for hs in ctx.obs.claimable_half_suits():
             r = ev.best_for_half_suit(hs)

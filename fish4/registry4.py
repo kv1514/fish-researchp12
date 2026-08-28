@@ -162,9 +162,22 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 #: pending a refit of scripts4/ii_ask_fit.py against award-rule targets
 #: (the ii journals are rule-fingerprinted for exactly that). V04_COMBINED
 #: keeps its void-era definition and numbers; this name is the live one.
+#: `claim_forced_exhaustive=1` is the one addition, shipped 2026-08-28 under
+#: prereg/forced_exhaustive.md. When a seat is FORCED to declare -- it holds
+#: cards but no legal ask exists -- and at most one half-suit is still live,
+#: the split is chosen by enumerating the whole team space under the joint
+#: rather than by the greedy per-card argmax, with propagator-pinned cards
+#: fixed and a guarantee never to return a split the joint scores below the
+#: incumbent's. It cleared its pre-registered bar in both populations:
+#: self-play +0.0233 [+0.0133, +0.0334] sets/game over 2,400 games, and
+#: against Dylan's v0.7 the last declaration goes from 28/87 correct to 37/87,
+#: paired +0.0090 [+0.0031, +0.0149] with accuracy in every other bucket
+#: unmoved (guard 2 passed exactly). It fires on 0.9% of games, which is why
+#: the paired interval is so tight -- see sec:dealluck of the paper.
 V06_DEPLOYED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
-                             "lookahead_beam": 4, "endgame_m": 0})
+                             "lookahead_beam": 4, "endgame_m": 0,
+                             "claim_forced_exhaustive": 1})
 
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is

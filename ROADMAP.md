@@ -97,11 +97,48 @@ opponents, and which opponent receives the turn on failure. `TunedAgent`-style
 weights make each term individually ablatable so the data, not intuition,
 sets them.
 
+**2026-08-28: one of those terms is now measured and mis-specified.** The
+tempo term charges `0.6 * (1-p) * turn_risk` at a constant rate, but a turn is
+free below `p_best = 0.50` and worth about +0.45 above it, and 53% of ask
+decisions sit in the free regime. Switching the term off below the threshold
+returned +0.2280 [+0.0076, +0.4484] over 1,000 games against v0.7 with the
+predicted mechanism intact -- more turns, more asks, a lower hit rate, more
+cards landed -- and a monotone dose response. It is unresolved rather than
+shipped: see `prereg/tempo_regime.md`, where two artifacts written before the
+run disagree about the bar, and an 8,000-game replication settles it.
+
+The wider point for this item: 33.0% of the game-to-game variance in our ask
+hit rate is neither the deal (8.7%) nor binomial noise (58.3%) but the
+position our own play built (`results/deal_luck.json`). That third is the
+budget any learned objective is competing for.
+
 ### 3. Finish the claim study
 The EV model derives a claim threshold near 0.70, well below the 0.97 that
 was used by intuition. The threshold sweep is the direct test. Then extend
 the model with the terms it currently approximates: score dependence, number
 of unresolved sets, and the probability an opponent claims first.
+
+**2026-08-28: the claim study's remaining mass is one specific failure.** Of
+our 0.1759 wrong declarations a game, 0.1676 are allocation class -- our own
+team held all six and we named the wrong split -- against 0.0083 ownership
+errors. Threshold tuning cannot touch that: the question is not *whether* to
+declare a set we own, it is *how it is split*, and once the team holds all six
+`legal_asks` bars every opponent from asking there, so no further public event
+can inform it. The split is frozen at the moment the last card arrives.
+
+That makes it a distributed-knowledge problem: every card is held by someone
+who knows they hold it, and no member of the team knows the split. Two levers
+exist, and only one is free.
+
+- **Costly:** a deliberately failed ask, the signalling protocol. Priced at
+  +0.1220 [+0.0291, +0.2149], below the ship bar, and it adds an error almost
+  as often as it avoids one (52 games against 72). `prereg/deadline_signalling.md`.
+- **Free:** *who* declares. Any teammate may, on their own turn; the one
+  holding four cards of it guesses two while the one holding one guesses five,
+  and because the channel is frozen, waiting for a better-placed teammate
+  costs tempo and no information at all. `scripts4/declarer_holding.py` is the
+  instrument; a 12-game smoke put 29.6% of wholly-held declarations in the
+  hands of someone a teammate could have out-informed.
 
 ### 4. Fix sampler bias
 The world sampler satisfies every constraint but is not uniform over the
