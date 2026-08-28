@@ -11,7 +11,8 @@ Setup unless stated otherwise: 54-card variant (nine half-suits including
 8s + Red Joker + Black Joker), Wikipedia-baseline rules, six players, teams
 0/2/4 vs 1/3/5. Evaluation uses **paired deals**: every deal is played twice
 with the teams swapped, on the same cards and the same agent randomness, so
-"pair score" and "set differential" are luck-controlled. Analytics come from
+"pair score" and "set differential" are luck-controlled — though see §1 on how
+little luck there turned out to be to control. Analytics come from
 400-game homogeneous tables at two skill tiers: `memory` (perfect logical
 bookkeeping) and `probabilistic` (belief sampling).
 
@@ -46,6 +47,57 @@ worlds adds a further **2.07** [1.50, 2.63] (120 pairs).
 Practical reading: the gap between a casual player and a good one is almost
 entirely "did you track, and chain, every implication of every question".
 The gap between good and expert is probabilistic judgement on top of that.
+
+---
+
+### DEMONSTRATED - The cards you are dealt do not decide the game
+
+Ten thousand deals, each played from both seat parities so that in the second
+game one side holds exactly what the other held in the first. Under that
+design the deal's share of a game's outcome variance is identically minus the
+correlation between the two parities' margins, and that correlation is
+**+0.0127** [−0.0150, +0.0404]. The share is **−1.3%** [−4.0%, +1.5%]: zero.
+
+This is not what duplicate bridge finds, and the reason is structural. Fish has
+**no high cards** — every half-suit is worth exactly one set, so a hand can be
+awkwardly distributed but it cannot be strong — and cards move continuously, so
+whatever the deal arranged is largely dissolved by the middlegame.
+
+The deal does leave a *symmetric* trace: some deals are clumped enough that
+asks land more often **for everybody**, and our ask hit rate correlates +0.087
+[+0.060, +0.115] across the two parities of a deal. A deal can be textured
+without being unfair, which is exactly why the texture shows up in the hit rate
+and not in the margin.
+
+**For a player:** losing a game is not evidence about the deal, and neither is
+winning one. If you find yourself explaining a result by the cards, the
+explanation is almost certainly wrong.
+
+### DEMONSTRATED - One game tells you almost nothing about how you played
+
+A game carries about fifty of your asks, so the binomial standard deviation of
+your hit rate over one game is about 0.071. Across 10,000 games, the whole gap
+between a won game (0.535) and a lost one (0.460) is 0.074 — one such
+deviation.
+
+Testing that properly: compare the observed spread of each rate across games
+with the spread fifty coin flips at the pooled rate would produce on their own.
+
+| rate | overdispersion | correlation across the two parities of a deal |
+|---|---|---|
+| our ask hit rate | 1.72 | +0.087 [+0.060, +0.115] |
+| their ask hit rate | 1.71 | +0.073 [+0.046, +0.101] |
+| our declaration accuracy | **1.07** | +0.018 [−0.010, +0.046] |
+| their declaration accuracy | **1.03** | +0.027 [−0.001, +0.054] |
+
+**Declaration accuracy has no game-level structure at all, on either side.**
+There is no such thing as a game in which somebody read the cards better than
+usual. "They declared unusually well today" is selection on coin flips.
+
+The ask hit rate is the one rate with real structure, and it splits three ways:
+**58.3%** binomial noise, **8.7%** the deal's texture, **33.0% the position you
+built for yourself.** That last third is the only part any amount of skill can
+move, and seeing it takes more than one game.
 
 ---
 
@@ -270,6 +322,52 @@ cards mis-declaring the distribution).
 
 ---
 
+### DEMONSTRATED - Nearly everything you get wrong is your own team's split
+
+Between engines, over 10,000 games, our wrong declarations break down as
+
+| | per game |
+|---|---|
+| **allocation** — our team held all six, we named the wrong split | **0.1676** |
+| **ownership** — an opponent still held one | 0.0083 |
+
+**95.3%** of the errors are the split. Claiming a half-suit an opponent still
+holds is, at this level, essentially a solved problem; saying which of your own
+teammates has what is not.
+
+### DEMONSTRATED - The split freezes, and it freezes before you decide
+
+This is the structural fact behind the number above, and it follows from one
+rule. You may only ask in a half-suit you hold a card of. So **the moment your
+team holds all six, no opponent can legally ask there again** — and since you
+cannot ask a teammate, no public event will ever touch that half-suit again.
+
+The split is frozen at the instant the last card arrives, with exactly the
+cards that were dealt and never asked for still unknown. Measured directly: of
+the misplaced cards in a disclosure probe, **398 of 398** had never moved in
+public.
+
+Two things follow that matter at the table.
+
+**Waiting gains you nothing.** There is no information coming. Whatever you
+know about the split when the sixth card lands is what you will know at the
+deadline. The usual instinct to hold off and watch is worthless here — it is
+worthless specifically here, and not in general.
+
+**It is a communication problem, not a deduction problem.** Every card is held
+by someone who knows they hold it. The team collectively has the answer and no
+member of it does, and the game supplies no channel to share it. The only
+channel that exists is a deliberately failed ask in the frozen suit, which
+certifies that you hold a card of it — and measured in play that costs a turn,
+gains +0.12 sets a game, and *adds* an error almost as often as it avoids one.
+
+**PROMISING** — the untested lever is that any member of the team may declare,
+on their own turn. Someone holding four of the six guesses two; someone holding
+one guesses five, and the information is frozen either way so waiting for the
+better-placed teammate costs tempo and nothing else.
+
+---
+
 ## 4. The 8s + Jokers half-suit
 
 ### DEMONSTRATED - It plays essentially like any other half-suit
@@ -368,8 +466,16 @@ thinking ahead at all.
 
 ## 7. Open questions (experiments queued)
 
-- **SPECULATIVE** Is information leakage from asking a real cost? Asking in
-  a half-suit publicly reveals you hold one of it.
+- **RESOLVED, and inverted.** Is information leakage from asking a real cost?
+  The camping theory said our silence causes their misdeclarations; it was
+  refuted, and the overdispersion measurement in §1 says there was never a
+  channel for it to work through — declaration accuracy has no game-level
+  structure on either side, so no amount of what we do makes them read better
+  or worse *that game*.
+- **SPECULATIVE** Who on a team should declare a frozen half-suit. Any member
+  may, on their own turn; the one holding four of the six guesses two while the
+  one holding one guesses five, and the information is frozen either way. See
+  §3.
 - **SPECULATIVE** Optimal claim threshold, and how it should shift with the
   score and the number of unresolved sets.
 - **SPECULATIVE** Target selection: should you interrogate the opponent with
