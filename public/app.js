@@ -1198,7 +1198,8 @@ function loadRecord() {
     const r = JSON.parse(localStorage.getItem(RECORD_KEY) || "null");
     if (r && typeof r.games === "number") return r;
   } catch (e) { /* private mode, or cleared */ }
-  return { games: 0, declared: 0, right: 0, split: 0, ownership: 0 };
+  return { games: 0, declared: 0, right: 0, split: 0, ownership: 0,
+           asks: 0, hits: 0 };
 }
 
 function saveRecord(r) {
@@ -1226,14 +1227,22 @@ function gameKey(s) {
 }
 
 function absorbRecord(s) {
+  if (s.spectate) return loadRecord();
   const rows = (s.declarations || []).filter(
-    (r) => !s.spectate && new Set([s.seat, ...s.teammates]).has(r.claimer));
-  if (!rows.length) return loadRecord();
+    (r) => new Set([s.seat, ...s.teammates]).has(r.claimer));
+  const tally = (s.ask_tally || [])[s.seat];
+  // A game where you declared nothing still had you asking, and the ask
+  // record is the half of the ledger with any game-level signal in it (see
+  // the note on ENGINE_ASK_HIT). The first version returned early on an empty
+  // declaration list, which silently dropped every such game from BOTH
+  // counters -- and those are exactly the games a struggling player has.
+  if (!rows.length && !tally) return loadRecord();
   const rec = loadRecord();
   const id = gameKey(s);
   if (rec.last === id) return rec;
   rec.last = id;
   rec.games += 1;
+  if (tally) { rec.asks += tally[0]; rec.hits += tally[1]; }
   for (const r of rows) {
     rec.declared += 1;
     if (r.klass === "right") rec.right += 1;
@@ -1265,6 +1274,75 @@ function drawRecord(box, s) {
     render();
   };
   box.appendChild(reset);
+}
+
+/* The engine's own ask hit rate, and its opponent's, over the 10,000-game
+ * head-to-head (results/deal_luck.json -> overdispersion.*.pooled). Shown as
+ * the yardstick for the same reason the declaration record shows one.
+ *
+ * The interval below it is doing more work than a yardstick, though. That
+ * same file measured how much of the game-to-game spread in this rate is
+ * simply the arithmetic of about fifty independent asks: 58.3% of it, with
+ * only 8.7% attributable to the deal and 33.0% to the position a player
+ * builds. So a single game's hit rate is mostly a coin, and a player who
+ * reads one game's number as a verdict on their play is reading noise. The
+ * honest presentation is the cumulative rate with an interval wide enough to
+ * say so, and an explicit sentence about whether the gap to the engine
+ * survives it.
+ */
+const ENGINE_ASK_HIT = { us: 0.517, them: 0.481 };
+
+/* Wilson score interval, not the textbook p +- 1.96 sqrt(p(1-p)/n).
+ *
+ * A player arrives here with tens of asks, not thousands, and often at a rate
+ * near the edges early on. The normal approximation is badly wrong there --
+ * at 3 hits from 4 asks it runs past 1.0, and a panel whose whole point is to
+ * be honest about noise cannot print an impossible bound. Wilson stays inside
+ * [0,1] by construction and is well behaved at small n.
+ */
+function wilson(k, n) {
+  if (!n) return [0, 1];
+  const z = 1.96;
+  const p = k / n;
+  const d = 1 + (z * z) / n;
+  const centre = p + (z * z) / (2 * n);
+  const half = z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n));
+  return [Math.max(0, (centre - half) / d), Math.min(1, (centre + half) / d)];
+}
+
+function drawAsks(box, s) {
+  const rec = loadRecord();
+  const tally = (s.ask_tally || [])[s.seat];
+  if (!rec.asks && !tally) return;
+  box.appendChild(el("h4", null, "Your asks"));
+  if (tally && tally[0]) {
+    box.appendChild(el("p", "dim",
+      `This game you asked ${tally[0]} time${tally[0] === 1 ? "" : "s"} and `
+      + `got ${tally[1]} — ${pct(tally[1] / tally[0])}.`));
+  }
+  if (!rec.asks) return;
+  const [lo, hi] = wilson(rec.hits, rec.asks);
+  const eng = ENGINE_ASK_HIT.us;
+  const inside = eng >= lo && eng <= hi;
+  box.appendChild(el("p", "dim",
+    `Across ${rec.games} game${rec.games === 1 ? "" : "s"}: `
+    + `${rec.hits} of ${rec.asks}, ${pctFine(rec.hits / rec.asks)} `
+    + `[${pctFine(lo)}, ${pctFine(hi)}].`));
+  box.appendChild(el("p", "dim",
+    `This engine hits ${pctFine(eng)} of its asks against Dylan's FishBot. `
+    + (inside
+      ? `That is inside your interval, so on this much play the two are not `
+        + `distinguishable — a gap this size is what ${rec.asks} coin flips `
+        + `look like on their own.`
+      : `That is outside your interval, so the difference is larger than `
+        + `chance over ${rec.asks} asks can account for.`)));
+  box.appendChild(el("p", "dim",
+    `One game says very little here. Over ten thousand games, 58% of the `
+    + `variation in this rate between games is the arithmetic of about fifty `
+    + `independent asks, and 9% is the deal being clumped or spread. The `
+    + `remaining third is the position a player builds for themselves, and `
+    + `it is the only part worth reading — which takes more than one game to `
+    + `see.`));
 }
 
 function drawLedger(box, s) {
@@ -1340,7 +1418,7 @@ function renderAction() {
     }
     if (s.declarations && s.declarations.length) {
       drawLedger(box, s);
-      if (!s.spectate) drawRecord(box, s);
+      if (!s.spectate) { drawRecord(box, s); drawAsks(box, s); }
     }
     const again = el("button", "primary", "Deal again");
     again.onclick = () => show("start");

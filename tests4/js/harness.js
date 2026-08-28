@@ -122,7 +122,9 @@ function load() {
     + "\nglobalThis.__openModal = openModal;"
     + "\nglobalThis.__pctFine = pctFine;"
     + "\nglobalThis.__renderAction = renderAction;"
-    + "\nglobalThis.__loadRecord = loadRecord;", ctx);
+    + "\nglobalThis.__loadRecord = loadRecord;"
+    + "\nglobalThis.__wilson = wilson;"
+    + "\nglobalThis.__ENGINE_ASK_HIT = ENGINE_ASK_HIT;", ctx);
   return { ctx, els, get, calls, replies };
 }
 

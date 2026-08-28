@@ -644,6 +644,30 @@ class Session:
         """
         return [r for r in self.log if r.get("t") == "claim"]
 
+    def _ask_tally(self) -> list:
+        """Asks and hits per seat, over the WHOLE game, not the log tail.
+
+        Same reason `_declarations` reads `self.log` rather than the slice the
+        client is sent, and here the gap is larger: a game runs about a
+        hundred asks against a sixty-action tail, so a client-side tally would
+        miss roughly the first half of them and present the remainder as the
+        total. A hit rate computed over an unmarked subset of the asks is
+        worse than no hit rate.
+
+        No new information. Every ask and its outcome was public when it
+        happened and was already on the wire; this only spares the client from
+        having to have kept it.
+        """
+        out = [[0, 0] for _ in range(NUM_PLAYERS)]
+        for r in self.log:
+            if r.get("t") == "ask":
+                a = r.get("asker")
+                if isinstance(a, int) and 0 <= a < NUM_PLAYERS:
+                    out[a][0] += 1
+                    if r.get("ok"):
+                        out[a][1] += 1
+        return out
+
     def _why_for_log(self) -> dict:
         """Traces rebased onto the log slice the client is actually sent.
 
@@ -715,6 +739,7 @@ class Session:
                 # reveal map, so the exhibition gets the panel too.
                 snap["reveal"] = self._reveal_rows()
                 snap["declarations"] = self._declarations()
+                snap["ask_tally"] = self._ask_tally()
             return snap
         mine = team_of(self.seat)
         hand = st.hands[self.seat]
@@ -748,6 +773,7 @@ class Session:
             "reveal": self._reveal_rows() if st.is_terminal else None,
             "declarations": (self._declarations()
                              if st.is_terminal else None),
+            "ask_tally": self._ask_tally() if st.is_terminal else None,
         }
 
     def deductions(self) -> dict:
