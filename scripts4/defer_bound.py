@@ -111,6 +111,21 @@ def _one(args) -> dict:
                                  if team_of(o) != ct),
                 "my_cards": counts[ev.claimer],
                 "hidden_mine": hidden_mine,
+                #: Cards of the declared half-suit in the declarer's OWN hand
+                #: at the moment of declaring. Zero is an ANCHORLESS
+                #: declaration: the declarer names six owners in a half-suit it
+                #: holds nothing of, purely from deduction.
+                #:
+                #: (A subagent's version of this comment added "so the declarer
+                #: stays on move and declares again rather than passing". That
+                #: is true but not distinctive: fish/engine.py:_apply_claim
+                #: never touches self.turn, so the declarer keeps the move after
+                #: ANY declaration. What is actually particular to the
+                #: anchorless case is narrower -- it removes none of the
+                #: declarer's own cards, so it can never be the declaration
+                #: that empties a hand and forces a pass.)
+                "my_in_hs": sum(1 for c in half_suit_cards(ev.half_suit)
+                                if hand_before >> c & 1),
                 "mate_cards": [counts[m] for m in mates],
                 "live": sum(1 for x in st.set_winner if x is None) + 1,
                 #: how many claimable half-suits the declarer had to choose
