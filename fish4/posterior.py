@@ -85,7 +85,7 @@ class Posterior:
     share the same DP tables and the same batch of weighted draws.
     """
 
-    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma",
+    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma", "gamma_team",
                  "stats", "n", "_sys", "_card_group", "_free", "_marg",
                  "_worlds", "_batch", "_sampler", "_exact_ok", "_idx",
                  "_free_pos", "depth_mode", "count_mode", "opp_lambda",
@@ -97,10 +97,14 @@ class Posterior:
                  depth_mode: str = "initial", count_mode: str = "linear",
                  opp_lambda: float = 0.0, gamma_schedule: float = 0.0,
                  sis_tilt: float = 0.0, silence_delta: float = 1.0,
+                 gamma_team: Optional[float] = None,
                  stats: Optional[PosteriorStats] = None):
         self.bel = belief
         self.obs = obs
         self.gamma = gamma if obs is not None else 0.0
+        # A separate sharpness for our own side's asks. None means one number
+        # for both sides, which is the incumbent and is bit-identical to it.
+        self.gamma_team = gamma_team if obs is not None else None
         # Like gamma, the silence prior conditions on behaviour, so it needs
         # the observation; without one it is inert.
         self.silence_delta = float(silence_delta) if obs is not None else 1.0
@@ -172,7 +176,11 @@ class Posterior:
         # bit-identical result -- a null that looked like a measurement. A
         # value of exactly 0 still means off, and every gamma > 0 path is
         # untouched.
-        if self.gamma != 0.0 or self.opp_lambda > 0.0:
+        # gamma_team can make the model live even when gamma itself is zero:
+        # "believe nothing about opponents, something about teammates" is a
+        # coherent configuration and one the sweep visits.
+        if (self.gamma != 0.0 or self.opp_lambda > 0.0
+                or (self.gamma_team is not None and self.gamma_team != 0.0)):
             from .oppmodel import build as build_opponent
             opp, slot = build_opponent(bel, self.obs, self.gamma,
                                        depth_mode=self.depth_mode,
@@ -180,6 +188,7 @@ class Posterior:
                                        opp_lambda=self.opp_lambda,
                                        gamma_schedule=self.gamma_schedule,
                                        sis_tilt=self.sis_tilt,
+                                       gamma_team=self.gamma_team,
                                        order=free)
         # The exact DP answers the uniform-target question only. An opponent
         # model changes the target, so it forces the sampling path even when no

@@ -212,9 +212,189 @@ def fig_support():
     plt.close(fig)
 
 
+def _wilson(k, n, z=1.96):
+    """Wilson interval. Several of these cells have zero errors in thousands of
+    declarations, where the normal interval is [0, 0] and says nothing."""
+    if not n:
+        return 0.0, 0.0, 0.0
+    ph = k / n
+    d = 1.0 + z * z / n
+    c = (ph + z * z / (2 * n)) / d
+    h = z * ((ph * (1 - ph) / n + z * z / (4 * n * n)) ** 0.5) / d
+    return ph, max(0.0, c - h), min(1.0, c + h)
+
+
+def fig_mediator():
+    """The natural lever against the one that actually carries the risk.
+
+    Left: error rate against how many of the six the declarer HOLDS. This is
+    the lever everyone reaches for, and it is not even monotone -- holding all
+    six is the safest state of all, so the curve turns over.
+
+    Right: the same declarations against how many of the six have never been
+    publicly LOCATED. That one is monotone and spans zero to eleven percent.
+    """
+    d = _load("declarer_holding_self.json")
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.3, 2.5), sharey=True)
+
+    ks = sorted(int(k) for k in d["err_by_k"])
+    kv = [d["err_by_k"][str(k)] for k in ks]
+    pk = [_wilson(r["wrong"], r["n"]) for r in kv]
+    a1.plot(ks, [p[0] for p in pk], "-o", ms=4.5, lw=1.4, color=LGRAY,
+            mec="none", zorder=3)
+    for k, (m, lo, hi) in zip(ks, pk):
+        a1.plot([k, k], [lo, hi], color=LGRAY, lw=1.1, zorder=2)
+    a1.set_xlabel("cards of the six the declarer holds")
+    a1.set_ylabel("misdeclaration rate", fontsize=8)
+    a1.set_xticks(ks)
+    a1.annotate("not monotone:\nholding all six\nis the safest", (6, 0.004),
+                fontsize=7, color=GRAY, ha="right", va="bottom")
+
+    us = sorted(int(k) for k in d["err_by_unmoved"])
+    uv = [d["err_by_unmoved"][str(u)] for u in us]
+    pu = [_wilson(r["wrong"], r["n"]) for r in uv]
+    a2.plot(us, [p[0] for p in pu], "-o", ms=4.5, lw=1.4, color=BLUE,
+            mec="none", zorder=3)
+    for u, (m, lo, hi) in zip(us, pu):
+        a2.plot([u, u], [lo, hi], color=BLUE, lw=1.1, zorder=2)
+    a2.set_xlabel("cards of the six never publicly located")
+    a2.set_xticks(us)
+    last = uv[-1]
+    a2.annotate("zero errors in 4,980\ndeclarations at one", (1, 0.070),
+                fontsize=7, color=BLUE, ha="left")
+    a2.annotate(f"n={last['n']}", (us[-1] - 0.14, pu[-1][0]), fontsize=6.5,
+                color=GRAY, ha="right", va="center")
+    n = d["n_claims_ours"]
+    fig.suptitle(f"the same {n:,} declarations, cut two ways", fontsize=8.5,
+                 color=GRAY, y=0.985)
+    # Leave the top strip for the suptitle: tight_layout does not reserve it,
+    # so without the rect the title is clipped by the figure edge.
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "mediator.pdf")
+    plt.close(fig)
+
+
+def fig_paths():
+    """Where the misdeclarations actually are: all of them are compelled.
+
+    Two of the four paths a declaration can arrive by are exactly perfect over
+    thousands of declarations. Every error the engine makes comes from the two
+    paths where it declares because it must, not because it wants to.
+    """
+    d = _load("declarer_holding_self.json")["by_path"]
+    order = ["voluntary", "exact", "gate", "forced"]
+    label = {"voluntary": "voluntary", "exact": "exact solver",
+             "gate": "gated", "forced": "forced"}
+    fig, ax = plt.subplots(figsize=(6.3, 1.9))
+    ys = range(len(order))
+    for y, key in zip(ys, order):
+        r = d[key]
+        m, lo, hi = _wilson(r["wrong"], r["n"])
+        col = ORANGE if r["wrong"] else BLUE
+        ax.plot([lo, hi], [y, y], color=col, lw=1.4, zorder=2)
+        ax.plot([m], [y], "o", ms=5.5, color=col, mec="none", zorder=3)
+        txt = (f"{r['wrong']:,} of {r['n']:,} wrong"
+               if r["wrong"] else f"0 of {r['n']:,} wrong")
+        ax.annotate(txt, (hi + 0.012, y), va="center", fontsize=7.5,
+                    color=col)
+    ax.set_yticks(list(ys))
+    ax.set_yticklabels([label[k] for k in order])
+    ax.set_ylim(-0.6, len(order) - 0.4)
+    ax.set_xlim(-0.02, 0.62)
+    ax.set_xlabel("misdeclaration rate, with 95% Wilson interval")
+    ax.invert_yaxis()
+    fig.tight_layout()
+    fig.savefig(FIGS / "paths.pdf")
+    plt.close(fig)
+
+
+def fig_ceiling():
+    """What perfect card-reading is worth, one side of the table at a time.
+
+    EVERY VALUE HERE IS OBTAINED BY CHEATING. The arms are handed the true
+    deal; the opposition never is. These are bounds on what information could
+    buy, not strength measurements, and they never appear in a ladder.
+    """
+    d = _load("ceiling_split.json")
+    rows = [("its teammates' cards", d["arms"]["T_team"]),
+            ("its opponents' cards", d["arms"]["O_opp"]),
+            ("every hand at the table", d["arms"]["F_all"])]
+    fig, ax = plt.subplots(figsize=(6.3, 1.9))
+    for y, (name, r) in enumerate(rows):
+        lo, hi = r["ci95"]
+        col = BLUE if y < 2 else GRAY
+        ax.plot([lo, hi], [y, y], color=col, lw=1.4, zorder=2)
+        ax.plot([r["ceiling"]], [y], "o", ms=5.5, color=col, mec="none",
+                zorder=3)
+        ax.annotate(f"{r['ceiling']:+.2f}", (hi + 0.12, y), va="center",
+                    fontsize=7.5, color=col)
+    t, o = d["arms"]["T_team"]["ceiling"], d["arms"]["O_opp"]["ceiling"]
+    ax.annotate(f"{t / o:.1f}x, at "
+                f"{d['arms']['T_team']['pinned_by_cheat_per_game']:.0f} against "
+                f"{d['arms']['O_opp']['pinned_by_cheat_per_game']:.0f} "
+                f"cards pinned a game",
+                (0.99, 0.97), xycoords="axes fraction", ha="right",
+                va="top", fontsize=7, color=GRAY)
+    ax.set_yticks(range(len(rows)))
+    ax.set_yticklabels([n for n, _ in rows])
+    ax.set_ylim(-0.6, len(rows) - 0.4)
+    ax.set_xlim(0, 7.6)
+    ax.set_xlabel("sets per game over the honest engine\n"
+                  "(a bound obtained by cheating, not a strength)")
+    ax.invert_yaxis()
+    fig.tight_layout()
+    fig.savefig(FIGS / "ceiling.pdf")
+    plt.close(fig)
+
+
+def fig_gamma_split():
+    """Posterior accuracy when the two sides of the table are priced apart."""
+    path = ROOT / "results" / "gamma_split.json"
+    if not path.exists():
+        print("  (skipping gammasplit: results/gamma_split.json not present)")
+        return
+    d = json.loads(path.read_text())
+    rows = d["rows"]
+    fig, ax = plt.subplots(figsize=(6.3, 2.4))
+    opps = sorted({r["gamma_opp"] for r in rows})
+    for i, go in enumerate(opps):
+        sel = sorted((r for r in rows if r["gamma_opp"] == go),
+                     key=lambda r: r["gamma_team"])
+        col = BLUE if go == 0.35 else LGRAY
+        lw = 1.6 if go == 0.35 else 1.0
+        ax.plot([r["gamma_team"] for r in sel], [r["team_nll"] for r in sel],
+                "-o", ms=3.5, lw=lw, color=col, mec="none",
+                zorder=4 if go == 0.35 else 2)
+        ax.annotate(rf"$\gamma_{{\mathrm{{opp}}}}={go:g}$",
+                    (sel[-1]["gamma_team"] + 0.06, sel[-1]["team_nll"]),
+                    fontsize=7, color=col, va="center")
+    base = next((r for r in rows if r["gamma_opp"] == 0.35
+                 and r["gamma_team"] == 0.35), None)
+    if base:
+        ax.plot([0.35], [base["team_nll"]], "o", ms=7, mfc="none",
+                mec=ORANGE, mew=1.4, zorder=5)
+        ax.annotate("incumbent\n(one $\\gamma$ for both sides)",
+                    (0.35, base["team_nll"]), textcoords="offset points",
+                    xytext=(8, 12), fontsize=7, color=ORANGE)
+    ax.set_xlabel(r"$\gamma_{\mathrm{team}}$ "
+                  "(sharpness applied to our own side's asks)")
+    ax.set_ylabel("teammate-side\nposterior NLL", fontsize=8)
+    ax.annotate(f"{d['decisions']:,} decisions over {d['n_games']} games; "
+                "lower is better",
+                (0.98, 0.94), xycoords="axes fraction", ha="right",
+                fontsize=7, color=GRAY)
+    fig.tight_layout()
+    fig.savefig(FIGS / "gammasplit.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     fig_effects()
     fig_ladder()
     fig_support()
+    fig_mediator()
+    fig_paths()
+    fig_ceiling()
+    fig_gamma_split()
     for f in sorted(FIGS.glob("*.pdf")):
         print(f"{f.relative_to(ROOT)}  {f.stat().st_size:,} bytes")

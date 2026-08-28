@@ -63,13 +63,17 @@
 \newcommand{\ind}[1]{\ensuremath{\mathbf{1}\!\left[#1\right]}}
 \newcommand{\sets}{\ensuremath{\Delta}}
 
-\title{\vspace{-1.6cm}\bfseries Exact Inference Is Not Enough:\\[0.1em]
-\large Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
-in Six-Player Literature\\[0.15em]
+% One line, and it names the finding rather than listing the parts. Making the
+% inference exact changed nothing in play; what paid was modelling how players
+% choose, and what is left to win is knowing our own team's cards. "Exact
+% inference is not enough" is that result, and the subtitle it used to carry
+% was a table of contents.
+\title{\vspace{-1.6cm}\bfseries\large
+Exact Inference Is Not Enough: Opponent Models and Endgames in Six-Player
+Literature\\[0.35em]
 \normalsize\normalfont KRAKEN v1.0\vspace{-0.5em}}
 
-\author{\normalsize Kausthubh Veldanda\\[-0.2em]
-\small\texttt{kveldanda987@gmail.com}}
+\author{\normalsize Kausthubh Veldanda}
 \date{\small 28 August 2026\vspace{-0.4em}}
 
 \begin{document}
@@ -3025,6 +3029,35 @@ a rare branch played better is a rare improvement, however cleanly measured.
 Both facts are the same fact, and \S\ref{sec:dealluck} is where it is priced in
 general.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/mediator.pdf}
+\caption{The lever everyone reaches for, and the one that carries the risk.
+\emph{Left:} misdeclaration rate against how many of the six the declarer
+holds. It is not even monotone --- holding all six is the safest state there
+is, so the curve turns over at the right-hand end, and any policy tuned on this
+covariate is tuned on a confound. \emph{Right:} the same declarations against
+how many of the six have \emph{never been publicly located}. That one runs from
+zero errors in $4{,}980$ declarations up to eleven percent. The dip at six is
+$30$ errors in $342$ declarations and its interval covers the point before it.
+Bars are $95\%$ Wilson intervals, which is why the zero cell has a visible
+upper limit rather than a degenerate one.}
+\label{fig:mediator}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/paths.pdf}
+\caption{Every misdeclaration this engine makes is compelled. Split by the path
+the declaration arrived on: the two paths it takes because it \emph{wants} to
+are exactly perfect over $14{,}678$ declarations between them, and both paths
+where it declares because it \emph{must} --- the endgame gate, and a forced
+declaration with no cards left to ask with --- carry the whole error rate.
+This is why the headroom in \S\ref{sec:missing} is not a calibration problem.
+The policy already declines every declaration it is entitled to decline.}
+\label{fig:paths}
+\end{figure}
+
 \paragraph{What the declaration is actually risking, and a lever that looked
 free and was not.} Of our $0.1759$ wrong declarations a game, $0.1676$ are
 allocation class --- our own team held all six and we named the wrong split ---
@@ -3094,6 +3127,21 @@ possible if waiting supplied something.
 where our \emph{errors} are. Those are not the same question, and the
 difference is settleable by handing a seat information it should not have and
 seeing what it does with it.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/ceiling.pdf}
+\caption{What perfect card-reading is worth, one side of the table at a time.
+\textbf{Every value here is obtained by cheating}: the arm is handed the true
+deal and the opposition never is, so these bound what information could buy and
+are not strength measurements. They never appear in a ladder. The two partial
+arms are told almost exactly the same \emph{number} of cards --- $40.7$ against
+$40.4$ a game --- and the teammate side is worth $2.6\times$ the opponent side
+anyway. We predicted the reverse. The two do not sum to the whole
+($4.72$ against $6.61$), so the sides are complements rather than separable
+contributions.}
+\label{fig:ceiling}
+\end{figure}
 
 \textbf{Every figure in this paragraph is a bound obtained by cheating.} The
 arms are \path{fish4/oracle.py} handed the true deal; the opposition never

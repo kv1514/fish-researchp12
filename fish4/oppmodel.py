@@ -173,7 +173,8 @@ def schedule_factor(resolved: int, n_half_suits: int, s: float) -> float:
 def build(bel, obs, gamma: float, include_self: bool = False,
           depth_mode: str = "initial", count_mode: str = "linear",
           opp_lambda: float = 0.0, order=None,
-          gamma_schedule: float = 0.0, sis_tilt: float = 0.0):
+          gamma_schedule: float = 0.0, sis_tilt: float = 0.0,
+          gamma_team: float | None = None):
     """Build an ``(OpponentModel, card_slot)`` pair, or ``(None, None)``.
 
     ``card_slot`` maps ``(player, card)`` to the model slot for that player and
@@ -241,7 +242,15 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     """
     # See the note in posterior.py: a negative gamma is a real setting (tilt
     # toward shallow), not a synonym for off. Only exactly zero is off.
-    if gamma == 0.0 and opp_lambda <= 0.0:
+    #
+    # gamma_team has to be in this guard too. "Believe nothing about opponents,
+    # something about teammates" is a coherent configuration and one the sweep
+    # in scripts4/gamma_split.py visits; without the extra clause it returned
+    # the uniform posterior for EVERY gamma_team at gamma == 0, so a whole row
+    # of the grid reported bit-identical numbers that looked like a measured
+    # null. Exactly the collapse the `> 0` guard on gamma caused before it.
+    off_team = gamma_team is None or gamma_team == 0.0
+    if gamma == 0.0 and off_team and opp_lambda <= 0.0:
         return None, None
     counts: dict[tuple[int, int], int] = {}
     #: Sum of per-ask schedule factors per slot, for gamma_schedule. Left equal
@@ -302,7 +311,21 @@ def build(bel, obs, gamma: float, include_self: bool = False,
             n = math.sqrt(n)
         elif count_mode == "capped":
             n = 1.0
-        weight[i] = gamma * n * mean_f
+        # One gamma per SIDE. The choice model is a property of the asker's
+        # policy and is the same for everyone; gamma is not the model, it is
+        # how sharply the model is believed as a likelihood weight, and the two
+        # sides are believed for different jobs. Teammate evidence is what
+        # resolves an allocation -- which of our own seats holds which card of
+        # a half-suit our team already owns outright -- and 95.3% of this
+        # engine's residual errors are of exactly that kind. Opponent evidence
+        # is what picks the next ask. A single gamma forces one compromise
+        # between two jobs whose returns were measured to differ by 2.6x
+        # (prereg/information_ceiling_split.md). gamma_team=None keeps one
+        # number for both and is bit-identical to the incumbent.
+        g = gamma
+        if gamma_team is not None and (key[0] % 2) == (me % 2):
+            g = gamma_team
+        weight[i] = g * n * mean_f
     # base[i] = cards of that half-suit already pinned to that player by the
     # propagator, i.e. depth contributed by cards the sampler will not re-draw
     if depth_mode == "attime":

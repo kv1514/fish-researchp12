@@ -71,6 +71,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  n_draws: int = 160,
                  infer_mode: str = "auto",
                  opponent_gamma: float = 0.0,
+                 gamma_team: float | None = None,
                  depth_mode: str = "initial",
                  count_mode: str = "linear",
                  opp_lambda: float = 0.0,
@@ -180,6 +181,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.n_draws = n_draws
         self.infer_mode = infer_mode
         self.opponent_gamma = opponent_gamma
+        #: Sharpness for our OWN side's asks. None -> one gamma for both
+        #: sides, which is the incumbent and bit-identical to it.
+        self.gamma_team = gamma_team
         self.depth_mode = depth_mode
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda
@@ -294,6 +298,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         post = Posterior(self.bel, self.rng, n_draws=self.n_draws,
                          n_worlds=self.n_worlds, mode=self.infer_mode,
                          obs=obs, gamma=self.opponent_gamma,
+                         gamma_team=self.gamma_team,
                          depth_mode=self.depth_mode,
                          count_mode=self.count_mode,
                          opp_lambda=self.opp_lambda,
