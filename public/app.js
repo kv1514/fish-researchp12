@@ -1336,7 +1336,13 @@ function renderHint(box) {
       + best.verdict.charAt(0).toUpperCase() + best.verdict.slice(1) + "."));
   }
 
-  for (const n of (h.notes || []).slice(0, 3)) {
+  // Four, not three. Measured over 81 real positions the analyser produces 0
+  // notes at 42, one at 35, two at 3 and three at 1 -- so the cap almost never
+  // bites. But the note it would drop is the LAST one appended, which is the
+  // frozen-half-suit warning, and that is the one with the longest lead time:
+  // the others are about the move in front of you and the action panel shows
+  // those options anyway. Cheaper to raise the cap than to re-argue priority.
+  for (const n of (h.notes || []).slice(0, 4)) {
     p.appendChild(el("p", "dim", n));
   }
   box.appendChild(p);
