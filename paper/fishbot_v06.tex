@@ -1418,12 +1418,103 @@ since the optimisation is exact and postdates them.
 
 \subsection{Duplicate deals}
 
-Raw win rates in a card game are dominated by the deal. Every result here uses
-\textbf{duplicate (paired) deals}: each deal is played twice with the teams
-swapped, on identical cards, an identical rotated starting seat, and identical
-agent randomness. Only the policy assignment differs, so per-pair set
-differentials are i.i.d.\ across deals and confidence intervals mean what they
-say.
+Every result here uses \textbf{duplicate (paired) deals}: each deal is played
+twice with the teams swapped, on identical cards, an identical rotated starting
+seat, and identical agent randomness. Only the policy assignment differs, so
+per-pair set differentials are i.i.d.\ across deals and confidence intervals
+mean what they say.
+
+Earlier versions of this section justified that design by asserting that raw
+win rates in a card game are dominated by the deal. That is the standard
+argument for duplicate play and it is borrowed from bridge. It is false here,
+and the head-to-head corpus was large enough to say so without playing a game.
+
+\subsection{The deal decides nothing}
+\label{sec:dealluck}
+
+The $10{,}000$-game match against v0.7 (\S\ref{sec:headtohead}) played every deal
+from both seat parities, so in the second game our engine holds exactly the
+cards the opponent held in the first. Writing $D_d$ for whatever the deal is
+worth to whoever sits on the even seats and $E$ for play noise,
+%
+\begin{equation}
+m_{\text{even}}(d) = \mu + D_d + E_e,
+\qquad
+m_{\text{odd}}(d) = \mu - D_d + E_o ,
+\end{equation}
+%
+so $\operatorname{var}(m_{\text{even}} + m_{\text{odd}}) = 2\sigma^2$ and
+$\operatorname{var}(m_{\text{even}} - m_{\text{odd}}) = 4\operatorname{var}(D)
++ 2\sigma^2$. The deal's share of one game's variance is then
+$\operatorname{var}(D)/(\operatorname{var}(D)+\sigma^2)$, which under this model
+is identically $-\rho$, the correlation of the two parities' margins.
+
+Measured over $5{,}000$ deals: $\rho = +0.0127$ $[-0.0150, +0.0404]$, so the
+deal's share is $-1.3\%$ $[-4.0\%, +1.5\%]$. The sample variances are
+$15.267$ against $14.884$ for sum and difference, and the implied
+$\operatorname{var}(D)$ is $-0.096$ --- zero, measured with noise.
+\textbf{Which cards you are dealt does not measurably decide a game of
+six-handed Fish} (\texttt{scripts4/deal\_luck.py},
+\texttt{results/deal\_luck.json}).
+
+The mechanism is not mysterious. There are no high cards: every half-suit is
+worth exactly one set, so a hand cannot be strong, only awkwardly or
+conveniently distributed. And cards move continuously, so whatever the deal
+arranged is largely dissolved by the middlegame. The deal does leave a
+\emph{symmetric} trace --- some deals are clumped enough that asks land more
+often for everybody, and our ask hit rate correlates $+0.087$
+$[+0.060, +0.115]$ across the two parities of a deal --- but a symmetric
+texture is not an advantage to either side, which is why it appears in the hit
+rate and not in the margin. A deal can be textured without being unfair.
+
+Two consequences follow, and the second is the useful one.
+
+\paragraph{Swapping seats buys nothing.} Duplicating a deal across seat
+parities is worth $0.99\times$ the games, because the antisymmetric deal
+advantage it exists to remove is not there.
+
+\paragraph{Holding the knob fixed buys between $1.1\times$ and $414\times$, and
+the rate the knob fires sets which.} That is a different pairing and it is the
+one every ship decision in this project rests on: arms $A$ and $B$ play the
+identical deal from the identical seats against the identical opponents and
+differ by one parameter. Table~\ref{tab:pairing} prices it on every multi-arm
+journal the repository holds (\texttt{scripts4/pairing\_value.py}).
+
+\begin{table}[t]
+\centering
+\begin{tabular}{llrrr}
+\toprule
+run & arm & identical games & $\rho$ & efficiency \\
+\midrule
+$\gamma$ policy specificity (G1) & \texttt{B\_none} & $19.9\%$ & $0.089$ & $1.1\times$ \\
+$\gamma$ policy specificity (G1) & \texttt{C\_measured} & $21.2\%$ & $0.088$ & $1.1\times$ \\
+signalling gate & \texttt{C\_measured} & $79.8\%$ & $0.853$ & $6.8\times$ \\
+signalling gate & \texttt{B\_incumbent} & $83.4\%$ & $0.877$ & $8.1\times$ \\
+doomed-ask gate & \texttt{B2\_mid} & $86.1\%$ & $0.889$ & $9.0\times$ \\
+doomed-ask gate & \texttt{B\_defer} & $88.1\%$ & $0.899$ & $9.9\times$ \\
+forced search, self-play & \texttt{B\_full} & $98.4\%$ & $0.996$ & $268\times$ \\
+forced search, vs v0.7 & \texttt{B\_full} & $99.1\%$ & $0.998$ & $414\times$ \\
+\bottomrule
+\end{tabular}
+\caption{How many times the games an unpaired design would need to match the
+precision each paired run achieved. ``Identical games'' is the share of games
+the two arms finished on the same margin, and it orders the table: a knob that
+fires on a rare branch leaves nearly every game bit-identical and pairing
+removes almost all the variance, while $\gamma$ re-weights every posterior
+sample on every decision, the games diverge immediately, and pairing removes
+nothing.}
+\label{tab:pairing}
+\end{table}
+
+The planning consequence is worth stating plainly, because this project has
+sized runs by effect size alone and that is the wrong variable. \textbf{The
+sample size a screen needs is governed by how often its knob changes a
+decision, not by how large the effect is.} The forced-search secondary
+resolved a $+0.0180$ effect to $\pm 0.012$ on $1{,}000$ games; G1, at $1{,}600$
+games and the same design, could resolve nothing finer than $\pm 0.19$. That is
+a sixteen-fold difference in precision from the same number of deals, and it
+is entirely attributable to one knob firing on $0.9\%$ of games and the other
+on $80\%$.
 
 \subsection{How much can an experiment of size \texorpdfstring{$n$}{n} resolve?}
 
@@ -5422,7 +5513,9 @@ halves of the pair. What is restated is the \emph{context} the R2 file
 reports beside its verdict: the margin and set share, which are absolute
 rather than paired, and which the corrected head-to-head below supersedes.
 
-\paragraph{The head-to-head, re-measured through the repaired bridge.} This
+\paragraph{The head-to-head, re-measured through the repaired bridge.}
+\label{sec:headtohead}
+This
 is the figure the paper stands behind, and the only one taken through bridge
 revision~2: $10{,}000$ games on the same deals the retracted run used, seats
 rotated so neither engine opens more often, both engines on their native

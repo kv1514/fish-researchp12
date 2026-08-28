@@ -645,6 +645,23 @@ WATCH = [
      "deployed allocation misdeclares in R1", "so awarded to the opponents"),
     ("award_headline.json", "y_misdeclares", "{:d}",
      "v0.3 allocation misdeclares in R1", "so awarded to the opponents"),
+    # The deal-luck decomposition and the pairing table. Watched because
+    # sec:dealluck overturns a premise the evaluation section stated for four
+    # versions -- that raw win rates are dominated by the deal -- and a claim
+    # that strong should not be allowed to drift away from the file behind it.
+    ("deal_luck.json", "deal_component.corr_parities", "{:+.4f}",
+     "parity correlation of the margin", "identically $-\\rho$"),
+    ("deal_luck.json", "deal_component.pairing_efficiency", "{:.2f}",
+     "seat-swap pairing efficiency", "the antisymmetric deal"),
+    ("deal_luck.json", "deal_component.var_sum", "{:.3f}",
+     "variance of the paired sum", "The sample variances are"),
+    ("deal_luck.json", "deal_component.var_diff", "{:.3f}",
+     "variance of the paired difference", "The sample variances are"),
+    ("deal_luck.json", "overdispersion.our hit rate.corr_across_parities",
+     "{:+.3f}", "hit-rate correlation across parities",
+     "a symmetric\ntexture is not an advantage"),
+    ("pairing_value.json", "runs.0.pairs.B_none.efficiency", "{:.1f}",
+     "G1 arm pairing efficiency", "identical games"),
     ("foreign_award_check.json", "effect", "{:+.4f}",
      "rule-matched foreign effect", "under the award rule --- no reversal"),
     ("foreign_award_check.json", "ci95.0", "{:+.4f}",
