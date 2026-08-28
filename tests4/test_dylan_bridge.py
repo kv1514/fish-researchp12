@@ -71,3 +71,38 @@ def test_the_old_behaviour_really_was_different():
     obs = _obs(["2H"], live=list(range(9)))
     claimable = list(range(9))
     assert DylanV07._forced_half_suit(obs, claimable) != claimable[0]
+
+
+# -- the spec override -------------------------------------------------------
+#
+# Every headline number in this project is a claim about the FROZEN v0.7 spec.
+# The override exists so a verified-equivalent variant can buy throughput on
+# screens, and the one thing that must never happen is a runner silently
+# playing a different policy under the same name. These pin that.
+
+def test_the_default_spec_is_the_frozen_one():
+    from fish4.dylan_v07 import _EMBEDDED_SPEC, _load_spec
+    a = DylanV07.__new__(DylanV07)
+    assert (None or _load_spec()) == _load_spec()
+    assert "s1=1" in _load_spec()
+    assert _EMBEDDED_SPEC.count("s1=") == 1
+
+
+def test_the_fast_spec_differs_by_exactly_one_key():
+    """The equivalence screen's variant must be one key from the frozen spec.
+
+    Derived by substitution rather than retyped, so it cannot drift into being
+    a second policy change nobody noticed.
+    """
+    from fish4.dylan_v07 import _EMBEDDED_SPEC
+    from scripts4.v07_s1_equivalence import FAST_SPEC
+    assert FAST_SPEC != _EMBEDDED_SPEC
+    assert FAST_SPEC.count("s1=0") == 1
+    assert "s1=1" not in FAST_SPEC
+    assert FAST_SPEC.replace("s1=0", "s1=1") == _EMBEDDED_SPEC
+
+
+def test_equivalence_bound_matches_the_projects_ship_bar():
+    """A bound looser than the ship bar would license a real difference."""
+    from scripts4.v07_s1_equivalence import EQUIV_BOUND
+    assert EQUIV_BOUND == 0.15

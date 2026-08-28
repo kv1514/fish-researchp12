@@ -163,7 +163,18 @@ class DylanV07(Agent):
 
     name = "dylan_v07"
 
-    def __init__(self, timeout: float = 60.0):
+    def __init__(self, timeout: float = 60.0, spec: str = None):
+        """``spec`` overrides the frozen v0.7 spec string. Use with care.
+
+        The default is and must remain the frozen spec: every headline number
+        in this project is a statement about THAT policy, and a runner that
+        quietly played a variant would be measuring something else under the
+        same name. The override exists for one legitimate purpose --
+        establishing, by paired measurement, that some coordinate of their
+        spec does not change their strength, after which that variant may be
+        used to buy throughput on SCREENS (never on a headline). See
+        scripts4/v07_s1_equivalence.py.
+        """
         super().__init__()
         self.timeout = timeout
         self.fallbacks = 0
@@ -171,7 +182,7 @@ class DylanV07(Agent):
         #: (kind, detail) per fallback, for the verification harness — a
         #: fallback with no recorded reason is a silent substitution.
         self.fallback_log: list = []
-        self._spec = _load_spec()
+        self._spec = spec or _load_spec()
         self._bin = str(_find_binary())
         self._seed = 1
 
