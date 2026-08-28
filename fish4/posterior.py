@@ -163,7 +163,16 @@ class Posterior:
             self.stats.infeasible += 1
         active = self._active_clauses()
         opp = slot = None
-        if self.gamma > 0.0 or self.opp_lambda > 0.0:
+        # `!= 0`, not `> 0`. The model is a log-linear tilt -- the weight
+        # multiplies log(depth) -- so a NEGATIVE gamma is well defined and
+        # means "this seat asks where it is SHALLOW". That is not academic:
+        # v0.7's measured exponent is -1.0041 (results/choice_curve_foreign).
+        # The old `> 0` guard silently turned a negative gamma into gamma = 0,
+        # which made an experiment arm collapse into another arm and report a
+        # bit-identical result -- a null that looked like a measurement. A
+        # value of exactly 0 still means off, and every gamma > 0 path is
+        # untouched.
+        if self.gamma != 0.0 or self.opp_lambda > 0.0:
             from .oppmodel import build as build_opponent
             opp, slot = build_opponent(bel, self.obs, self.gamma,
                                        depth_mode=self.depth_mode,

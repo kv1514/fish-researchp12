@@ -91,7 +91,33 @@ def _one(args) -> dict:
     return out
 
 
+def _assert_arms_are_distinct(rows) -> None:
+    """Two arms that produce identical play are not two arms.
+
+    G1's first run reported arm B (gamma 0.0) and arm C (gamma -1.00) at
+    bit-identical margins over 800 deals, with identical intervals. That was
+    not a finding, it was fish4/posterior.py gating the opponent model on
+    `gamma > 0.0`, so a negative gamma silently became zero and arm C
+    collapsed into arm B. The result LOOKED like a clean measurement, which is
+    the dangerous kind of broken.
+
+    A duplicated arm is detectable without knowing the cause: if two arms agree
+    on every deal, either the knob does nothing or it was never applied, and
+    both mean the run cannot be reported.
+    """
+    names = list(ARMS)
+    for i, a in enumerate(names):
+        for bname in names[i + 1:]:
+            if all(r[a]["margin"] == r[bname]["margin"] for r in rows):
+                raise SystemExit(
+                    f"arms {a!r} (gamma {ARMS[a]}) and {bname!r} (gamma "
+                    f"{ARMS[bname]}) produced IDENTICAL margins on all "
+                    f"{len(rows)} deals. Either the parameter does nothing or "
+                    f"it never reached the engine. Refusing to report.")
+
+
 def report(rows) -> dict:
+    _assert_arms_are_distinct(rows)
     n = len(rows)
     base = [r["A_shipped"]["margin"] for r in rows]
     print(f"\n=== G1: what the opponent model's sign costs against v0.7 ===")
