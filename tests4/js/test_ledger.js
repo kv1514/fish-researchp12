@@ -67,4 +67,17 @@ assert.ok(!/miss[\s\S]*2S was/.test(txt),
 assert.ok(/Your team declared 2/.test(txt), "our count is wrong: " + txt.slice(0, 400));
 assert.ok(/they declared 1/.test(txt), "their count is wrong");
 
-console.log("ok - the ledger is complete and separates the two errors");
+/* --- a spectator has no seat, so the tally must name the two engines --- */
+S.snap.spectate = true;
+S.snap.seat = -1;
+S.snap.teammates = [];
+ctx.__renderAction();
+const spec = deep(get("t-action"));
+assert.ok(/Dylan's FishBot declared 2/.test(spec),
+  "the exhibition ledger did not count the even seats as Dylan's: "
+  + spec.slice(0, 500));
+assert.ok(!/Your team/.test(spec),
+  "a spectator was told about \"your team\", which does not exist there");
+
+console.log("ok - the ledger is complete, separates the two errors, and "
+  + "knows when there is no \"you\"");

@@ -1173,15 +1173,22 @@ function renderLog() {
  * wrong. A ledger that says only "wrong" teaches neither.
  */
 function drawLedger(box, s) {
-  const mine = new Set([s.seat, ...s.teammates]);
   const rows = s.declarations;
-  const ours = rows.filter((r) => mine.has(r.claimer));
   const bad = (rs) => rs.filter((r) => r.klass !== "right").length;
+  // A spectator has no seat, so "your team" is meaningless there and would
+  // have counted every declaration as the opponents'. The exhibition names
+  // its two sides by engine, exactly as the scoreboard above it does.
+  const spec = !!s.spectate;
+  const isA = (r) => (spec ? r.claimer % 2 === 0 : new Set(
+    [s.seat, ...s.teammates]).has(r.claimer));
+  const A = rows.filter(isA);
+  const nameA = spec ? "Dylan's FishBot" : "Your team";
+  const nameB = spec ? "KV's FishBot" : "they";
   box.appendChild(el("h4", null, "Every declaration in this game"));
   box.appendChild(el("p", "dim",
-    `Your team declared ${ours.length} and got ${bad(ours)} wrong; `
-    + `they declared ${rows.length - ours.length} and got `
-    + `${bad(rows) - bad(ours)} wrong. A set is only ever won by someone `
+    `${nameA} declared ${A.length} and got ${bad(A)} wrong; `
+    + `${nameB} declared ${rows.length - A.length} and got `
+    + `${bad(rows) - bad(A)} wrong. A set is only ever won by someone `
     + `naming it, so this list is the scoreboard with its reasons attached.`));
   const t = el("div", "ledger");
   for (const r of rows) {
