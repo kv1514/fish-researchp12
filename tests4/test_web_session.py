@@ -270,3 +270,35 @@ def test_trace_keys_index_the_log_that_was_actually_sent():
         tok, log = cur.token(), list(cur.wire_log)
     assert checked_past_the_tail, (
         "fixture never got past the log tail, so the regression is untested")
+
+
+def test_the_evaluation_branches_actually_differ():
+    """Three documented fields were identical by construction, and inert.
+
+    _rank_moves evaluates a candidate by mutating ctx.M -- forcing the asked
+    card to us for the success branch, redistributing it away from the target
+    for the failure branch -- and calling _live_eval in between. That only
+    works if _live_eval reads M. It read ctx.team_exp / ctx.opp_exp instead,
+    which DecisionContext freezes at construction, so both branches returned
+    the same number: measured, 8 of 8 ranked asks had
+    eval_if_success == eval_if_fail == eval_expected, all 0.000000.
+
+    Any caption built on the difference -- "this move cost you X sets" -- would
+    have printed zero forever, which is worse than printing nothing.
+    """
+    s = new_session({"seat": 0})
+    moves = s.analysis()["moves"]
+    assert len(moves) > 5, "fixture too small"
+    differing = [m for m in moves
+                 if m["eval_if_success"] != m["eval_if_fail"]]
+    assert len(differing) > len(moves) // 2, (
+        f"only {len(differing)}/{len(moves)} candidates distinguish landing "
+        f"from missing")
+    for m in moves:
+        # Landing a card can never be worth LESS than missing it: the success
+        # branch puts the card in our own hand, the miss branch puts it
+        # anywhere but the target.
+        assert m["eval_if_success"] >= m["eval_if_fail"] - 1e-9, m
+        # And the expectation must sit between its own branches.
+        lo, hi = sorted((m["eval_if_fail"], m["eval_if_success"]))
+        assert lo - 1e-9 <= m["eval_expected"] <= hi + 1e-9, m

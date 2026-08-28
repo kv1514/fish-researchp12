@@ -237,14 +237,41 @@ class Analyser:
         return out
 
     def _live_eval(self, ctx) -> float:
+        """Expected half-suit differential, read from the CURRENT marginals.
+
+        The caller evaluates a candidate by mutating ``ctx.M`` -- forcing the
+        asked card to us for the success branch, redistributing it away from
+        the target for the failure branch -- and calling this in between. That
+        only works if this function reads M.
+
+        It used to read ``ctx.team_exp`` / ``ctx.opp_exp``, which
+        DecisionContext computes once at construction and never refreshes
+        (fish4/askfeat.py:178-186). So the two branches returned the same
+        number by construction: measured on the live site, 8 of 8 ranked asks
+        had eval_if_success == eval_if_fail == eval_expected, all of them
+        0.000000. Three fields the dataclass documents as "evaluation in sets"
+        were inert, and any caption built on their difference -- "this move
+        costs you X" -- would have printed zero forever.
+
+        The quantity is the same one askfeat computes, just re-derived from the
+        block that was mutated: a column sum over the six cards of the
+        half-suit, split by team.
+        """
         tot = 0.0
+        mine = ctx.my_team
         for hs in range(ctx.n_hs):
             if ctx.obs.set_winner[hs] is not None:
                 continue
             if self.value is not None:
                 tot += float(self.value.value(half_suit_features(ctx, hs)))
             else:
-                tot += float(ctx.team_exp[hs] / 6.0 - ctx.opp_exp[hs] / 6.0)
+                block = ctx.M[hs * 6:hs * 6 + 6]
+                per_player = block.sum(axis=0)
+                team = sum(per_player[p] for p in range(NUM_PLAYERS)
+                           if p % 2 == mine)
+                opp = sum(per_player[p] for p in range(NUM_PLAYERS)
+                          if p % 2 != mine)
+                tot += float(team / 6.0 - opp / 6.0)
         return tot
 
     # -- principal variation ----------------------------------------------------
