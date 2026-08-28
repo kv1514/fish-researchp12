@@ -83,12 +83,21 @@ def _one(args) -> dict:
     hs_first = [None] * NHS
     hs_out = {}
     ply = 0
+    #: (ply, whose turn, how many cards the opponents still hold). The
+    #: DEADLINE is the first ply at which they hold none: after it we have no
+    #: legal ask, so the last chance to spend a turn on a signal has gone.
+    #: `GameState.legal_asks` needs an opponent with cards, so this is not an
+    #: interpretation of the rules, it is the rule.
+    timeline = []
     for _ in range(600):
         if st_.is_terminal:
             break
         mover = st_.turn
         side = 0 if team_of(mover) == us else 1
         turns[side] += 1
+        timeline.append((side, sum(bin(st_.hands[q]).count("1")
+                                   for q in range(NUM_PLAYERS)
+                                   if team_of(q) != us)))
         # who owns what, before the move
         for hs in range(NHS):
             if st_.set_winner[hs] is not None:
@@ -125,10 +134,24 @@ def _one(args) -> dict:
         ply += 1
     ours_sets = sum(1 for w in st_.set_winner if w == us)
     theirs = sum(1 for w in st_.set_winner if w == 1 - us)
+    # Where the deadline fell, and how many of OUR turns each half-suit had
+    # between the moment we assembled it and that deadline. This is the
+    # feasibility question for signalling: a set assembled two plies before
+    # the deadline cannot be signalled by any policy, and one assembled with
+    # ten of our turns left and still misdeclared is a policy failure.
+    dead = next((i for i, (_, opp) in enumerate(timeline) if opp == 0),
+                len(timeline))
+    for v in hs_out.values():
+        f = v["first"]
+        v["turns_left"] = (0 if f is None else
+                           sum(1 for i in range(f, dead)
+                               if timeline[i][0] == 0))
+        v["deadline"] = dead
     return {"deal": deal_seed, "kv_even": kv_even,
             "margin": ours_sets - theirs,
             "asks": asks, "hits": hits, "turns": turns, "passes": passes,
             "sat": sat, "assembled": [len(assembled[0]), len(assembled[1])],
+            "deadline": dead, "plies": len(timeline),
             "hs": [dict(v, hs=k) for k, v in sorted(hs_out.items())]}
 
 
@@ -202,6 +225,20 @@ def report(rows) -> dict:
             print(f"  {lab:<20}{len(sub):>7}{w:>8}{w/len(sub):>9.4f}")
             out["by_sat"][lab] = {"n": len(sub), "wrong": w,
                                  "err": round(w / len(sub), 4)}
+        wrong = [c for c in hs if not c["right"]]
+        if wrong:
+            tl = sorted(c["turns_left"] for c in wrong)
+            print(f"\n  --- WAS THERE TIME? our turns between assembling a "
+                  f"set and the deadline ---")
+            print(f"  over the {len(wrong)} half-suits we declared WRONGLY: "
+                  f"median {st.median(tl)}, "
+                  f"min {tl[0]}, max {tl[-1]}")
+            none = sum(1 for x in tl if x == 0)
+            print(f"    assembled at or after the deadline (no turn to "
+                  f"spend): {none}/{len(wrong)}")
+            out["wrong_turns_left"] = {
+                "n": len(wrong), "median": st.median(tl),
+                "min": tl[0], "max": tl[-1], "no_turn": none}
         sat_w = [c["sat"] for c in hs if not c["right"]]
         sat_r = [c["sat"] for c in hs if c["right"]]
         if sat_w and sat_r:
