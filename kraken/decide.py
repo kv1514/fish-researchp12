@@ -1,4 +1,4 @@
-"""FishBot v0.6 as a language-neutral decision service.
+"""KRAKEN v1.0 as a language-neutral decision service.
 
 This is the mirror image of the bridge this project built to run dylann4500's
 FishBot v0.7 inside our engine: it lets ANY host -- a C++ engine, a
@@ -69,8 +69,8 @@ same seed and the same public record the same move comes back, which is
 what makes a host's replays reproducible. Omitted, a seed is derived from
 the history length, so a match is still reproducible from its own log.
 
-    python -m fishbot_v06.decide          # speaks the protocol on stdio
-    python -m fishbot_v06.decide --self-test
+    python -m kraken.decide          # speaks the protocol on stdio
+    python -m kraken.decide --self-test
 """
 
 from __future__ import annotations
@@ -93,8 +93,9 @@ from fish.rules import RuleConfig
 #: playing against, and so there is exactly one answer to "which bot is
 #: this?". Mirrors fish4.registry4.V06_DEPLOYED; the self-test asserts it.
 SPEC = {"opponent_gamma": 0.35, "n_draws": 480, "w_lookahead": 0.25,
-        "lookahead_depth": 3, "lookahead_beam": 4, "endgame_m": 0}
-VERSION = "0.6"
+        "lookahead_depth": 3, "lookahead_beam": 4, "endgame_m": 0,
+        "claim_forced_exhaustive": 1}
+VERSION = "1.0"
 
 
 def _card_id(x) -> int:
@@ -234,7 +235,7 @@ def decide(req: dict) -> dict:
         if op == "cards":
             return _card_table()
         if op in ("version", "hello"):
-            return {"bot": f"KV's FishBot v{VERSION}", "spec": SPEC,
+            return {"bot": f"KRAKEN v{VERSION}", "spec": SPEC,
                     "protocol": 2,
                     "ops": ["decide", "offturn", "cards", "version"],
                     "declares_off_turn": True}
@@ -256,7 +257,7 @@ def decide(req: dict) -> dict:
         out = {"action": _encode(action)}
         if req.get("explain"):
             out["explain"] = {
-                "bot": f"KV's FishBot v{VERSION}",
+                "bot": f"KRAKEN v{VERSION}",
                 "unresolved_half_suits": sum(1 for w in obs.set_winner
                                              if w is None),
                 "seed": int(seed)}

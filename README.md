@@ -65,7 +65,7 @@ merges.
   [fish4/evalx/README.md](fish4/evalx/README.md), and in the raw duel records at
   `results/v04_duels.jsonl`)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
-- Research paper, v0.4 (current): [paper/fishbot_v06.tex](paper/fishbot_v06.tex)
+- Research paper (current): [paper/kraken.tex](paper/kraken.tex) — KRAKEN v1.0
 - Research paper, v0.3 (superseded, kept because its results still reproduce):
   [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
@@ -76,7 +76,9 @@ The front of this file described `tuned-v1` as the current champion for two
 versions after it stopped being one. It is not; that section is retitled below
 and kept because its findings still hold for the rung it describes.
 
-The deployed engine is **`V06_DEPLOYED`** in `fish4/registry4.py`. Against
+The deployed engine is **KRAKEN v1.0** (`V06_DEPLOYED` in
+`fish4/registry4.py`; it was called KV's FishBot v0.6 before 2026-08-28 and the
+identifiers did not move with the name — see `fish4/brand.py` for why). Against
 **Dylan's FishBot v0.7** (github.com/dylann4500/fishbot, a genuinely foreign
 engine sharing no code with this one), over 10,000 duplicate deals through
 bridge revision 2:
@@ -101,7 +103,7 @@ Four things measured since, each of which changed what the project believes:
   changes a decision is what decides which.** Not the effect size. This is now
   how runs here are sized.
 
-`PAPER.md` and `paper/fishbot_v06.tex` carry the full argument;
+`PAPER.md` and `paper/kraken.tex` carry the full argument;
 `prereg/` holds the registrations, each with its outcome recorded against the
 conditions fixed before the run.
 
@@ -379,7 +381,7 @@ about 2.4x the gap between the best and worst candidate move, so evaluating
 different moves against different guessed layouts ranks luck. That measurement
 is v0.3's, in [PAPER.md](PAPER.md); what it rules out is *sampling* rather than
 search, and the design it leaves open is in
-[paper/fishbot_v06.tex](paper/fishbot_v06.tex) under "Search over the belief".
+[paper/kraken.tex](paper/kraken.tex) under "Search over the belief".
 
 ## Three things this engine gets right that are easy to get wrong
 

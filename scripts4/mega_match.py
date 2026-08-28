@@ -1,4 +1,4 @@
-"""The large-scale head-to-head: KV's FishBot v0.6 vs Dylan's FishBot v0.7.
+"""The large-scale head-to-head: KRAKEN v1.0 vs Dylan's FishBot v0.7.
 
 Parallel across every core, journalled per game so a run survives the
 process cap and never replays a game it already has.
@@ -170,7 +170,7 @@ def report(rows) -> dict:
     dk, ndk = r2("dec", "kv")
     dd, ndd = r2("dec", "dy")
     dist = Counter(m)
-    print(f"\n=== KV's FishBot v0.6  vs  Dylan's FishBot v0.7 ===")
+    print(f"\n=== KRAKEN v1.0  vs  Dylan's FishBot v0.7 ===")
     print(f"{n:,} games   bridge fallbacks {sum(x['fallbacks'] for x in g)}   "
           f"unfinished {sum(1 for x in g if not x['terminal'])}")
     print(f"  margin        {mean:+.4f} sets/game  "

@@ -21,6 +21,7 @@
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{natbib}
 \usepackage{multirow}
+\usepackage{multicol}
 \usepackage{xcolor}
 \usepackage[font=small,labelfont=bf,skip=6pt]{caption}
 \usepackage{enumitem}
@@ -65,7 +66,7 @@
 \title{\vspace{-1.6cm}\bfseries Exact Inference Is Not Enough:\\[0.1em]
 \large Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
 in Six-Player Literature\\[0.15em]
-\normalsize\normalfont FishBot v0.6\vspace{-0.5em}}
+\normalsize\normalfont KRAKEN v1.0\vspace{-0.5em}}
 
 \author{\normalsize Kausthubh Veldanda\\[-0.2em]
 \small\texttt{kveldanda987@gmail.com}}
@@ -87,9 +88,11 @@ named cards and score by declaring the exact distribution of a six-card
 half-suit among their own team. Hidden information plus no legal communication
 channel puts it outside both the two-player zero-sum machinery that solved
 poker and the fully cooperative machinery developed for Hanabi. This paper
-covers two iterations of an engine for it --- v0.4, which built the
-inference, and v0.6, which corrected a rule and re-measured what depended on
-it --- organised around results that contradicted the expectations motivating them.
+covers three iterations of an engine for it, \textbf{KRAKEN} --- v0.4, which
+built the inference; v0.6, which corrected a rule and re-measured everything
+that depended on it; and v1.0, which asked where the remaining errors are and
+found that the answer had almost nothing to do with card-reading --- organised
+throughout around results that contradicted the expectations motivating them.
 
 We first make the inference exact. Hidden-state inference here reduces to counting assignments in a
 degree-constrained bipartite system, $\#P$-complete in general but small in the
@@ -153,9 +156,44 @@ worth $-0.08$ to them is repaired;
 the endgame correction, fitted against void-era targets, re-measures at
 $-0.104$ and is withdrawn.
 
+Version 1.0 then asks where the rest of the margin is, and every answer is a
+surprise. Our residual errors are not failures to \emph{find} cards:
+$\mathbf{95.3\%}$ of them are \emph{allocation} errors --- our team held all
+six and we split them wrongly --- at $0.1676$ a game against $0.0083$
+ownership errors. What a declaration risks turns out not to be how many of the
+six the declarer holds, which is the natural lever and is worth nothing, but
+how many have \emph{never been publicly located}; the counting channel alone
+resolves $53.4\%$ of wholly-held sets, which is why the obvious lever has
+nothing left to move. Handing a seat the true deal one side at a time prices
+the two halves of the information ceiling separately: teammates' cards are
+worth $\mathbf{+3.41}$ $[+3.16, +3.66]$ against opponents' $+1.31$
+$[+1.01, +1.61]$ --- $2.6\times$, and we predicted the reverse. Two
+methodological results underwrite the rest: the deal contributes
+\textbf{nothing} to a game's outcome variance ($-1.3\%$ $[-4.0\%, +1.5\%]$
+over $5{,}000$ deals played from both parities), and the value of pairing runs
+from $1.1\times$ to $414\times$ the games, set by \emph{how often a knob
+changes a decision} rather than by effect size --- which is now how runs here
+are sized. One change shipped from this round, an exhaustive search on forced
+declarations worth $+0.0233$ $[+0.0133, +0.0334]$ on $0.9\%$ of games; four
+candidates were withdrawn, each on a condition fixed before its run.
+
 \vspace{1pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
 \end{abstract}
+
+% =====================================================================
+% Contents. Set two-column, small, and without the vertical slack \tableofcontents
+% normally claims: at thirty-four sections the default single column runs to
+% two pages and pushes the introduction onto the third, which is exactly the
+% white space this paper has been trying to get rid of.
+{\small
+\setlength{\columnsep}{2em}
+\begin{multicols}{2}
+\setcounter{tocdepth}{1}
+\vspace{-1.2em}
+\tableofcontents
+\end{multicols}}
+\vspace{-1.4em}
 
 % =====================================================================
 \section{Introduction}
@@ -170,14 +208,25 @@ hidden information and \emph{no legal communication channel}, so neither the
 two-player zero-sum machinery that solved poker nor the fully cooperative
 machinery developed for Hanabi applies directly.
 
-This paper covers the fourth and sixth iterations of an engine for the game.
-The bulk of it is v0.4, which built the inference and the evaluation
-discipline; \S\ref{sec:critic} then reports v0.6, whose first act was to
-discover that this engine had been playing a house variant of the
+This paper covers three iterations of an engine for the game, which is called
+\textbf{KRAKEN}. The bulk of it is v0.4, which built the inference and the
+evaluation discipline; \S\ref{sec:critic} then reports v0.6, whose first act
+was to discover that this engine had been playing a house variant of the
 misdeclaration rule since v0.1 and whose remaining work was re-measuring, and
-in two cases withdrawing, everything that had depended on it. The shipped
-configuration is named \texttt{V06\_DEPLOYED} in the code and
-\textbf{FishBot v0.6} on the site, and there is exactly one of it.
+in two cases withdrawing, everything that had depended on it. Version~1.0 is
+v0.6 plus one shipped change (\S\ref{sec:missing}) and a body of work that
+did not change the policy at all: it asked where the remaining errors are, and
+the answers redirected the project away from card-reading entirely.
+
+A note on names, because the identifiers in this paper do not match the title.
+The engine was called \emph{KV's FishBot v0.6} until August 2026 and is called
+KRAKEN now, but the shipped configuration is still named
+\texttt{V06\_DEPLOYED} in the code and \texttt{fishbot4} in the registry.
+Those identifiers are frozen deliberately: they are what the pre-registration
+documents in \path{prereg/} name as their arms, and a registration that fixes
+its arms before the data is worth nothing if the arms can be renamed
+afterwards. The display name moved; the record did not. There is exactly one
+configuration either way.
 
 The previous version, v0.3, established three results that frame everything
 here. First,
@@ -1695,7 +1744,7 @@ weight demonstrably changes some decision. Every term in
 Table~\ref{tab:terms} passes both.
 
 % =====================================================================
-\section{Results}
+\section{Results: what the inference is worth}
 \label{sec:results}
 
 Figure~\ref{fig:effects} is this section on one axis: every in-play effect the
@@ -2383,6 +2432,10 @@ which is exactly the situation the opponent model is used in throughout this
 paper, and exactly not the situation of a human table. The profile is a fact
 about this policy's behaviour, not about Fish.
 
+% =====================================================================
+\section{Strength, absolute and relative}
+\label{sec:strength}
+
 \subsection{The strength ladder}
 \label{sec:res-ladder}
 
@@ -2660,6 +2713,10 @@ demonstrably suffered, not extra strength.
 agrees with optimal play $78.7\%$ of the time. The missing fifth is not in the
 endgame in the sense v0.3 meant --- these positions \emph{are} the endgame --- it
 is in choosing correctly when the hidden information genuinely has not resolved.
+
+% =====================================================================
+\section{Where the strength is missing}
+\label{sec:missing}
 
 \subsection{How much the ask objective leaves on the table}
 \label{sec:res-regret}
@@ -3073,6 +3130,10 @@ arms are sub-additive, $+4.7167$ against $+6.6067$ for omniscience, where the
 registration braced for the opposite: knowing where a card is \emph{not} pays
 only if you can also act on it.
 
+% =====================================================================
+\section{What did not work}
+\label{sec:negative}
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 
@@ -3373,6 +3434,10 @@ independently-motivated changes that stack, exactly as v0.3's two winning terms
 had) and a point estimate twice the sum of its parts --- which should have been
 the tell. Promoting it would have shipped a change worth nothing and, worse,
 would have anchored the next version's baseline on it.
+
+% =====================================================================
+\section{Search over the belief, measured}
+\label{sec:searchres}
 
 \subsection{Belief-space search: four rounds to one answer}
 \label{sec:res-lookahead}
@@ -3782,6 +3847,10 @@ therefore never gets a turn of its own while a teammate still has some. v0.4
 polls off-turn seats for a claim they can make \emph{by deduction alone}, which
 costs a belief update rather than a posterior per seat, and offers it identically
 to both generations so that the comparison stays a comparison of one thing.
+
+% =====================================================================
+\section{Learning the objective from data}
+\label{sec:learnres}
 
 \subsection{Learning the ask objective}
 \label{sec:res-learn}
@@ -4376,8 +4445,15 @@ fix. A model extrapolated an order of magnitude past its data has no business
 being right, and it is not; what is worth recording is that the term added to it
 keeps earning its place where it cannot have been tuned.
 
+% =====================================================================
+\section{The shape of the game}
+\label{sec:shape}
+
 \subsection{Perpetual states, measured}
 \label{sec:res-perpetual}
+
+This is the measurement; \S\ref{sec:perpetual} is the question it answers,
+in three layers of which only the third turns out to be interesting.
 
 Two hundred games per column, with ground truth used for analysis only.
 
@@ -6778,6 +6854,76 @@ more.
 % =====================================================================
 \appendix
 
+% =====================================================================
+\section{Interoperating with a foreign engine}
+\label{sec:bridges}
+
+Every cross-engine number in this paper --- the $+2.3466$ headline, the
+declaration decomposition, the transfer failures --- exists only because two
+independently written engines can be made to play one game. That is an
+artifact in its own right, and it has a failure mode severe enough to have
+already destroyed one set of results (\S\ref{sec:critic}), so it is documented
+here rather than left in the code.
+
+\paragraph{Two directions, deliberately.} A bridge is asymmetric: whoever owns
+the game loop owns the rules, the RNG, and every tie-break. If only one side
+can host, every published number is measured through that side's arbiter and
+the two claims ``our engine is stronger'' and ``our arbiter favours us'' are not
+separable. This project therefore ships both directions.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+& \emph{their engine inside ours} & \emph{our engine inside theirs} \\
+\midrule
+entry point & \path{external_v07/shim_decide.cpp} & \path{fish4/decide.py} \\
+host owns & our arbiter & their arbiter \\
+transport & one decision per process & one decision per line \\
+cards identified by & integer id & \textbf{card name} \\
+state supplied by caller & hand counts, scores & \textbf{nothing derived} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{The two asymmetries are the lesson.} They are not stylistic. Their
+shim takes card \emph{integers}, and the two engines number the deck over
+different permutations of the half-suits; a host passing its own integers gets
+a bot playing a scrambled hand --- legally, badly, and with no error raised
+anywhere. It does not look like a broken integration. It looks like a weak
+bot. Names are unambiguous between any two implementations of a $54$-card deck,
+so the reverse bridge takes names and refuses anything else.
+
+The second asymmetry is the same argument applied to derived state. Their shim
+accepts hand counts and scores on every event line, so a caller that miscounts
+silently poisons the policy's view of the table. Ours \emph{derives} both by
+replaying the event log, which means the only thing a caller can send is the
+public record: there is no field through which a mistake --- or a hostile host
+--- can reach the policy. An event stream that no deal could have produced is
+rejected by name, with the three ways it usually happens listed, rather than
+raising the contradiction from inside the belief propagator.
+
+\paragraph{A bridge is a measurement instrument and is calibrated as one.}
+Bridge revision~1 substituted a legal move whenever the foreign engine returned
+one our arbiter rejected. That is not a neutral repair --- it plays for them,
+badly --- and it was worth $-0.08$ sets a game \emph{to them}. Revision~2
+removes substitution entirely and every reported match records zero fallbacks;
+the $10{,}000$-deal headline was replayed under both revisions to price the
+difference rather than assert it. The principle this project now works to:
+\emph{an absolute measured through a bridge is a statement about the bridge as
+well as about the engines, whereas a paired contrast whose arms share the
+bridge is not.} Every absolute here is reported with its bridge revision, and
+that is why.
+
+\paragraph{Verification.} The reverse bridge is checked by playing complete
+games in the normal way and, at every decision, serialising the position onto
+the wire and requiring the bridge to answer what a freshly seeded agent
+answers --- freshly seeded rather than the in-game agent, because a stateless
+bridge cannot share an RNG stream with a long-lived one. Over two games this
+compares $150+$ decisions and exercises both the ask and the declaration path.
+The JSON-transport handout runs the same comparison at a larger scale as its
+self-test: $329$ decisions, $0$ mismatches, plus $520$ off-turn polls.
+
 \section{Reproducing this work}
 \label{app:repro}
 
@@ -6801,7 +6947,18 @@ py scripts4/exact_bench4.py              # agreement with provably optimal play
 py scripts4/fit_hsvalue.py 200 3         # fit the half-suit value model
 py scripts4/analytics4.py 120 3          # strategy statistics
 py scripts4/check_tex.py                 # structural check on this document
+py scripts4/check_paper_numbers.py       # every watched figure vs results/
+
+py -m kraken.decide --self-test          # the drop-in handout, end to end
+py -m pytest tests4/test_decide_bridge.py -q     # the reverse bridge
 \end{verbatim}
+
+Two entry points exist for running this engine outside this repository, both
+documented in \S\ref{sec:bridges}: \path{kraken/decide.py} speaks one JSON
+object per line and is the one to use from another language, and
+\path{fish4/decide.py} speaks the line protocol that mirrors the C++ shim.
+\path{kraken/README.md} is a complete integration guide with no research code
+in it.
 
 Every duel appends to \path{results/v04_duels.jsonl} recording both random
 seed streams, the full agent specifications, the rule configuration and the

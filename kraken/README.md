@@ -1,9 +1,10 @@
-# KV's FishBot v0.6 — drop-in integration
+# KRAKEN v1.0 — drop-in integration
 
 One bot. One entry point. No knobs.
 
-This directory is everything another project needs to play **KV's FishBot
-v0.6** on its own site or in its own engine, without reading the research
+This directory is everything another project needs to play **KRAKEN
+v1.0** (the engine this project called KV's FishBot v0.6 until 2026-08-28)
+on its own site or in its own engine, without reading the research
 code. It is the mirror of the bridge this project built to run
 [dylann4500/fishbot](https://github.com/dylann4500/fishbot) v0.7 inside our
 engine, and it works the same way: the host owns the game, the bot answers
@@ -13,8 +14,8 @@ one question at a time.
 
 | | |
 |---|---|
-| name | **KV's FishBot v0.6** |
-| configuration | `opponent_gamma 0.35 · n_draws 480 · lookahead 0.25 / depth 3 / beam 4 · endgame_m 0` |
+| name | **KRAKEN v1.0** |
+| configuration | `opponent_gamma 0.35 · n_draws 480 · lookahead 0.25 / depth 3 / beam 4 · endgame_m 0 · claim_forced_exhaustive 1` |
 | defined in | `fish4/registry4.py` as `V06_DEPLOYED` (the self-test asserts this file matches it) |
 | requires | Python 3.11+, `numpy`. Nothing else. No network, no model files, no GPU. |
 
@@ -25,8 +26,8 @@ pick between.
 ## Quick start
 
 ```bash
-python -m fishbot_v06.decide --self-test     # ~30 s, proves the door works
-echo '{"op":"version"}' | python -m fishbot_v06.decide
+python -m kraken.decide --self-test     # ~30 s, proves the door works
+echo '{"op":"version"}' | python -m kraken.decide
 ```
 
 Then drive it: one JSON object per line in, one per line out. Keep the
@@ -39,11 +40,11 @@ echo '{"seat":0,"turn":0,
        "hand":["2C","3C","4C","2H","3H","9D","TD","JD","QD"],
        "hand_counts":[9,9,9,9,9,9],
        "set_winner":[null,null,null,null,null,null,null,null,null],
-       "history":[]}' | python -m fishbot_v06.decide
+       "history":[]}' | python -m kraken.decide
 # {"action": {"type": "ask", "target": 1, "card": "5C"}}
 ```
 
-`python -m fishbot_v06.decide` speaks the protocol documented in full at the
+`python -m kraken.decide` speaks the protocol documented in full at the
 top of `decide.py` — request fields, the three action shapes, the event
 shapes, and the seeding rule. Two conveniences worth knowing:
 
@@ -197,6 +198,6 @@ up in §21 of our paper, with the table.
 ## Licence and attribution
 
 Research code, published for interoperability and comparison. If you run it,
-please call it **KV's FishBot v0.6** so results stay attributable to a
+please call it **KRAKEN v1.0** so results stay attributable to a
 specific configuration, and cite the repository. We labelled your bot the
 same way on our site.

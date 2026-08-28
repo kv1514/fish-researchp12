@@ -179,6 +179,11 @@ V06_DEPLOYED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "lookahead_beam": 4, "endgame_m": 0,
                              "claim_forced_exhaustive": 1})
 
+#: The same tuple under the name the engine now carries. V06_DEPLOYED is the
+#: spelling in the pre-registration documents that fixed it as arm A, so it
+#: stays; KRAKEN_V1 is the spelling for anything written after the rename.
+KRAKEN_V1 = V06_DEPLOYED
+
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is
 #: deliberately not shipped, because jobs/PREREGISTRATION_at_ask.md fixed 0.15
@@ -189,6 +194,13 @@ V06_DEPLOYED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 
 REGISTRY = dict(_V03)
 REGISTRY["fishbot4"] = FishBot4
+
+#: The engine was renamed KRAKEN on 2026-08-28 (see fish4/brand.py for why the
+#: identifiers did not move with it). "kraken" is the name to write in new
+#: code; "fishbot4" is what every recorded journal, job spec and
+#: pre-registration document says, and resolving both to the same class is what
+#: lets those replay unchanged.
+REGISTRY["kraken"] = FishBot4
 
 # Dylan's FishBot v0.7 (github.com/dylann4500/fishbot), bridged through the
 # decide binary. Imported lazily: the binary and its build are optional for

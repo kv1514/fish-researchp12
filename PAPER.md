@@ -3,7 +3,7 @@
 **A computational study of a team-based imperfect-information card game**
 
 > **This is the v0.4-era paper and it is superseded.** The live document is
-> `paper/fishbot_v06.tex`, which is where every result since v0.4 lives --
+> `paper/kraken.tex`, which is where every result since v0.4 lives --
 > among them the opponent-award rule change, the bridge-revision retraction,
 > the 10,000-game head-to-head against Dylan's FishBot v0.7 (+2.3466
 > [+2.2928, +2.4004] sets/game), the declaration path ledger, and the finding

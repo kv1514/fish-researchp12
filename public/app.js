@@ -848,10 +848,10 @@ function renderSeats() {
     d.appendChild(el("div", "cards",
       s.hand_counts[p] + (s.hand_counts[p] === 1 ? " card" : " cards")));
     d.appendChild(el("div", "tag",
-      s.spectate ? (mine ? "team Dylan" : "team KV")
+      s.spectate ? (mine ? "team Dylan" : "team KRAKEN")
         : p === s.seat ? "you" : mine ? "partner" : "opponent"));
     d.title = s.spectate
-      ? `${name} — seat ${p}, ${mine ? "Dylan's" : "KV's"} team`
+      ? `${name} — seat ${p}, ${mine ? "Dylan's" : "KRAKEN's"} team`
       : `${name} — seat ${p}, ${mine ? "your team" : "the other team"}`;
     // The per-move badge: "?" under both seats while an ask hangs in the
     // air, then both flip green (with the card sliding over) or red. A
@@ -930,7 +930,7 @@ function renderHand() {
     hb.innerHTML = "";
     hb.appendChild(el("p", "dim",
       "You're spectating: Dylan's FishBot v0.7 (seats 0/2/4) vs " +
-      "KV's FishBot (seats 1/3/5). Hands stay hidden, as they are " +
+      "KRAKEN (seats 1/3/5). Hands stay hidden, as they are " +
       "from the players themselves."));
     $("t-handtitle").textContent = "Spectating";
     return;
@@ -1356,7 +1356,7 @@ function drawLedger(box, s) {
     [s.seat, ...s.teammates]).has(r.claimer));
   const A = rows.filter(isA);
   const nameA = spec ? "Dylan's FishBot" : "Your team";
-  const nameB = spec ? "KV's FishBot" : "they";
+  const nameB = spec ? "KRAKEN" : "they";
   box.appendChild(el("h4", null, "Every declaration in this game"));
   box.appendChild(el("p", "dim",
     `${nameA} declared ${A.length} and got ${bad(A)} wrong; `
@@ -1960,7 +1960,7 @@ function render() {
   $("t-us").textContent = s.score.you;
   $("t-them").textContent = s.score.them;
   $("t-us-label").textContent = S.watch ? "Dylan's FishBot" : "your team";
-  $("t-them-label").textContent = S.watch ? "KV's FishBot" : "them";
+  $("t-them-label").textContent = S.watch ? "KRAKEN" : "them";
   $("t-think").hidden = !!s.spectate;
   $("t-auto").parentElement.hidden = !!s.spectate;
   $("t-void").textContent = s.score.nulled ? `${s.score.nulled} void` : "";
@@ -2090,21 +2090,21 @@ function maybeAutoThink() {
  *
  * The 3v3 exhibition: Dylan's FishBot v0.7 (github.com/dylann4500/fishbot,
  * its own C++ engine bridged server-side) on seats 0/2/4 against this site's
- * engine, "KV's FishBot", on 1/3/5. Nobody is dealt in; the client steps the
+ * engine, "KRAKEN", on 1/3/5. Nobody is dealt in; the client steps the
  * table one engine move at a time at the normal pace and keeps a running
  * series tally. When a game ends the next one deals itself: a broadcast, not
  * a replay -- every move is computed when the table reaches it. */
 
 // One engine per team, three seats each. The seat number is part of the
-// name so the labels cannot read as three different bots: every KV seat is
+// name so the labels cannot read as three different bots: every KRAKEN seat is
 // the same single deployed FishBot, every Dylan seat the same frozen v0.7.
-const WATCH_NAMES = ["Dylan's v0.7 (s0)", "KV's FishBot (s1)",
-                     "Dylan's v0.7 (s2)", "KV's FishBot (s3)",
-                     "Dylan's v0.7 (s4)", "KV's FishBot (s5)"];
+const WATCH_NAMES = ["Dylan's v0.7 (s0)", "KRAKEN (s1)",
+                     "Dylan's v0.7 (s2)", "KRAKEN (s3)",
+                     "Dylan's v0.7 (s4)", "KRAKEN (s5)"];
 
 function watchTally() {
   const t = S.series || { d: 0, k: 0, games: 0 };
-  return `series: Dylan ${t.d} sets — KV ${t.k} sets over ${t.games} game${t.games === 1 ? "" : "s"}`;
+  return `series: Dylan ${t.d} sets — KRAKEN ${t.k} sets over ${t.games} game${t.games === 1 ? "" : "s"}`;
 }
 
 async function startWatch() {
@@ -2142,14 +2142,14 @@ function watchGameOver() {
   S.series.k += s.score.them;
   S.series.games += 1;
   $("t-turn").textContent =
-    `Game over — Dylan ${s.score.you}, KV ${s.score.them}` +
+    `Game over — Dylan ${s.score.you}, KRAKEN ${s.score.them}` +
     (s.score.nulled ? ` (${s.score.nulled} void)` : "") +
     ` · ${watchTally()} · next deal in a moment…`;
   announce(`Game over. Dylan's FishBot ${s.score.you}, `
-    + `KV's FishBot ${s.score.them}. `
+    + `KRAKEN ${s.score.them}. `
     + (s.score.you === s.score.them ? "A tie."
       : s.score.you > s.score.them ? "Dylan takes the game."
-        : "KV takes the game."));
+        : "KRAKEN takes the game."));
   S.watchTimer = setTimeout(() => {
     if (S.watch) startWatch();
   }, 6000);

@@ -1,4 +1,4 @@
-"""The headline match: KV's FishBot v0.6 against Dylan's FishBot v0.7.
+"""The headline match: KRAKEN v1.0 against Dylan's FishBot v0.7.
 
 Not another screen -- this is the number the README and the paper quote, so
 it is run on its own fresh seeds, journalled, and reported with the detail
@@ -129,7 +129,7 @@ def main(n_deals: int = 250) -> int:
         for hs, v in g["by_hs"].items():
             hs_edge[int(hs)] = hs_edge.get(int(hs), 0) + v
 
-    print(f"\n=== KV's FishBot v0.6  vs  Dylan's FishBot v0.7 ===")
+    print(f"\n=== KRAKEN v1.0  vs  Dylan's FishBot v0.7 ===")
     print(f"{n} games, {fb} bridge fallbacks, "
           f"{sum(1 for g in games if not g['terminal'])} unfinished")
     print(f"  margin      {mean:+.3f} sets/game  [{lo:+.3f}, {hi:+.3f}]")
