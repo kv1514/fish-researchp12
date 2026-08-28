@@ -107,3 +107,100 @@ def test_a_token_whose_seat_was_tampered_with_does_not_replay():
     bad = tok[:8] + ("A" if tok[8] != "A" else "B") + tok[9:]
     with pytest.raises(ValueError):
         Session.restore(bad, s.wire_log)
+
+
+# -- the analysis path, which no test covered until it broke in production ----
+#
+# WEB_SPEC gained "endgame_m": 0 with v0.6 and api/_engine.py splatted the
+# whole spec into Analyser, which has never had that parameter. Every call
+# raised TypeError, api/index.py turned it into {"error": "internal error"},
+# and the Think button, the auto-analysis checkbox, the posterior panel and the
+# declare dialog's suggested split were all dead on the live site. Nothing
+# failed loudly, because nothing exercised the route.
+
+def test_analysis_actually_returns_an_analysis():
+    """The regression test proper: this raised TypeError in production."""
+    s = new_session({"seat": 0})
+    a = s.analysis()
+    assert not a.get("terminal")
+    assert a["moves"], "an analysis with no ranked moves explains nothing"
+    assert a["seat"] == 0
+
+
+def test_every_web_spec_key_is_either_understood_or_registered_inert():
+    """The guard that makes the fix a fix rather than a patch.
+
+    Silently dropping a spec key the Analyser cannot represent would leave the
+    page confidently explaining a policy the site is not playing -- a worse
+    failure than the 500, because it looks like it works.
+    """
+    from api._engine import WEB_SPEC, _ANALYSER_INERT, _analyser_spec
+    import inspect
+
+    from fish4.analyse import Analyser
+    accepted = set(inspect.signature(Analyser.__init__).parameters)
+    spec = _analyser_spec()
+    for k, v in WEB_SPEC.items():
+        if k in accepted:
+            assert spec[k] == v, f"{k} must reach the Analyser unchanged"
+        else:
+            assert k in _ANALYSER_INERT, (
+                f"{k} is dropped from the analysis with no justification")
+            assert v == _ANALYSER_INERT[k]
+            assert k not in spec
+
+
+def test_a_non_inert_unknown_key_is_a_loud_error_not_a_wrong_panel():
+    """endgame_m is queued to ship non-zero; when it does, this must shout."""
+    import api._engine as eng
+    from api._engine import _analyser_spec
+
+    original = dict(eng.WEB_SPEC)
+    try:
+        eng.WEB_SPEC["endgame_m"] = 2          # the queued refit, hypothetically
+        with pytest.raises(RuntimeError, match="different policy"):
+            _analyser_spec()
+        eng.WEB_SPEC.clear()
+        eng.WEB_SPEC.update(original)
+        eng.WEB_SPEC["some_future_knob"] = 1.0
+        with pytest.raises(RuntimeError, match="not registered as inert"):
+            _analyser_spec()
+    finally:
+        eng.WEB_SPEC.clear()
+        eng.WEB_SPEC.update(original)
+    assert _analyser_spec()                     # restored, and working again
+
+
+def test_a_restored_session_remembers_where_the_cards_were():
+    """The end-of-game review panel was empty on every refresh.
+
+    ``revealed`` is what the "where the cards actually were as each set
+    resolved" panel reads. ``advance`` and ``play`` recorded it, but the
+    ``restore`` replay did not -- and since EVERY request restores from the
+    token, the map only ever held what resolved inside the current request.
+    A finished game showed 0 of its 54 cards on a refresh.
+    """
+    s = new_session({"seat": 0})
+    tok, log = s.token(), list(s.wire_log)
+    for _ in range(200):
+        cur = Session.restore(tok, log)
+        if cur.state.is_terminal:
+            break
+        if cur.state.turn == cur.seat:
+            obs = cur.obs()
+            acts = obs.legal_asks() or obs.legal_passes()
+            if not acts:
+                break
+            cur.play(acts[0])
+        else:
+            cur.advance(3)
+        tok, log = cur.token(), list(cur.wire_log)
+
+    final = Session.restore(tok, log)
+    resolved = sum(1 for w in final.state.set_winner if w is not None)
+    assert resolved, "fixture never resolved a half-suit"
+    assert len(final.revealed) == 6 * resolved, (
+        f"{len(final.revealed)} cards recorded for {resolved} resolved "
+        f"half-suits; the review panel reads this map")
+    for holder in final.revealed.values():
+        assert 0 <= holder < NUM_PLAYERS

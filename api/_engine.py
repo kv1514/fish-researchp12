@@ -156,6 +156,52 @@ WEB_SPEC = {"w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
 #: turn: the site ships one engine, and this is the value every measurement in
 #: the paper was taken at.
 CHAMPION_GAMMA = 0.35
+
+#: Keys of WEB_SPEC that the Analyser does not implement, and the value each
+#: must hold for its absence to be harmless. A key listed here at its inert
+#: value changes nothing about the policy, so an explanation built without it
+#: still describes what the site plays.
+_ANALYSER_INERT = {"endgame_m": 0}
+
+
+def _analyser_spec() -> dict:
+    """WEB_SPEC reduced to what Analyser accepts -- loudly, not silently.
+
+    WEB_SPEC describes the POLICY the site plays. Analyser is a different class
+    that EXPLAINS that policy, and it does not implement every knob: endgame_m
+    arrived in WEB_SPEC with v0.6 and Analyser has never had it. Splatting the
+    whole spec therefore raised TypeError on every call, api/index.py turned it
+    into a 500, and the Think button, the auto-analysis checkbox, the posterior
+    panel and the declare dialog's suggested split were all dead on the live
+    site until an audit caught it. No test covered the path.
+
+    Dropping unknown keys silently would be the worse bug. An explanation of a
+    policy the site is not playing is a lie the page tells confidently, and
+    endgame_m is queued to ship non-zero once it is refit against award-rule
+    targets. So a key may be dropped only while it sits at its inert value;
+    anything else raises here, where it is one obvious failure, rather than
+    showing a plausible wrong panel there.
+    """
+    import inspect
+
+    from fish4.analyse import Analyser
+    accepted = set(inspect.signature(Analyser.__init__).parameters)
+    out, dropped = {}, {}
+    for k, v in WEB_SPEC.items():
+        (out if k in accepted else dropped)[k] = v
+    for k, v in dropped.items():
+        if k not in _ANALYSER_INERT:
+            raise RuntimeError(
+                f"WEB_SPEC key {k!r} is not accepted by Analyser and is not "
+                f"registered as inert; the site would explain a policy it is "
+                f"not playing. Add it to Analyser or to _ANALYSER_INERT.")
+        if v != _ANALYSER_INERT[k]:
+            raise RuntimeError(
+                f"WEB_SPEC sets {k}={v!r}, but Analyser cannot represent it "
+                f"and it is only harmless at {_ANALYSER_INERT[k]!r}. The "
+                f"analysis would describe a different policy than the one "
+                f"playing. Teach Analyser this knob before shipping it.")
+    return out
 #: Ceiling on engine moves computed in one request. A human's turn is normally
 #: at most a few engine possessions away; this only bounds a pathological game.
 MAX_ADVANCE = 400
@@ -416,6 +462,13 @@ class Session:
                 # far into the game it is.
                 ev = s.state.apply(s.state.turn, _action_of(a))
                 s.log.append(narrate(ev))
+                # Replay must rebuild the reveal map too. Every request
+                # restores from the token, so without this `revealed` holds
+                # only what happened to resolve inside the current request --
+                # and the end-of-game panel that shows where each half-suit's
+                # cards actually were came back empty on any refresh, which is
+                # the one moment a player most wants to check their reading.
+                s.note_reveal(ev)
         return s
 
     def token(self) -> str:
@@ -562,7 +615,7 @@ class Session:
         from fish4.analyse import Analyser
         an = Analyser(self.rules, self.seat, value_model=None,
                       gamma=self.gamma, n_draws=self.draws,
-                      seed=self.seed & 0x7FFFFFFF, **WEB_SPEC)
+                      seed=self.seed & 0x7FFFFFFF, **_analyser_spec())
         return an.analyse(self.obs()).to_dict()
 
 
