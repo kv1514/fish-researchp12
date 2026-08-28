@@ -155,20 +155,46 @@ def report(rows) -> dict:
     return out
 
 
+G1_KEYS = {"deal", "kv_even", "rev"}
+
+
+def _load_journal():
+    """Read the journal, and refuse to read one that is not ours.
+
+    A row missing the G1 shape is not an old revision to skip past: it
+    means something else wrote to this path.  G1's first journal was
+    lost exactly that way -- a sibling process overwrote the file, the
+    `rev` filter skipped all 478 foreign rows without a word, and a
+    clobbered journal read as an empty one.  The silence was the bug.
+    A resumable runner that cannot tell "nothing here yet" from "this
+    is somebody else's file" will happily replay 17 minutes of work
+    and call the result reproducible.
+    """
+    done, rows = set(), []
+    if not JOURNAL.exists():
+        return done, rows
+    for n, line in enumerate(JOURNAL.read_text().splitlines(), 1):
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        if not G1_KEYS <= r.keys():
+            raise SystemExit(
+                f"{JOURNAL}:{n} is not a G1 row (keys present: "
+                f"{sorted(r)}).  Something else wrote to this journal. "
+                f"Move it aside; do not append to it.")
+        if r["rev"] != BRIDGE_REV:
+            continue
+        key = (r["deal"], r["kv_even"])
+        if key in done:
+            continue
+        done.add(key)
+        rows.append(r)
+    return done, rows
+
+
 def main(n_deals: int = 400, n_jobs: int = 0) -> int:
     n_jobs = n_jobs or max(1, (os.cpu_count() or 2))
-    done, rows = set(), []
-    if JOURNAL.exists():
-        for line in JOURNAL.read_text().splitlines():
-            if line.strip():
-                r = json.loads(line)
-                if r.get("rev") != BRIDGE_REV:
-                    continue
-                key = (r["deal"], r["kv_even"])
-                if key in done:
-                    continue
-                done.add(key)
-                rows.append(r)
+    done, rows = _load_journal()
     todo = [(SEED0 + i, ke) for i in range(n_deals) for ke in (True, False)
             if (SEED0 + i, ke) not in done]
     print(f"{len(done):,} journalled, {len(todo):,} to play on {n_jobs} workers",
