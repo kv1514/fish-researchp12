@@ -89,6 +89,27 @@ def _one(args) -> dict:
         a.begin_game(p, rules, AGENT0 + deal_seed * 13 + p)
     our_team = 0 if kv_even else 1
 
+    # The probability the engine ASSIGNED to the split it named, captured where
+    # it is computed and thrown away.
+    #
+    # `forced_claim` already maximises p_exact across live half-suits, so the
+    # lever there is not which suit it picks -- it is whether p_exact is
+    # CALIBRATED. results/forced_ceiling_self.json found it overconfident in
+    # the middle band: 94 declarations claiming 0.528 were right 0.362 of the
+    # time. If that miscalibration is a function of how much of the half-suit
+    # the declarer holds, the argmax systematically over-picks suits it knows
+    # least about, and that is a defect with a direct fix.
+    from fish4.claim4 import ClaimEvaluator
+    real_bfh = ClaimEvaluator.best_for_half_suit
+    priced = {}
+
+    def spy(self, hs):
+        r = real_bfh(self, hs)
+        if r is not None:
+            priced[(int(self.me), int(hs))] = (float(r[0]), float(r[1]))
+        return r
+    ClaimEvaluator.best_for_half_suit = spy
+
     rows = []
     for _ in range(600):
         if st.is_terminal:
@@ -123,7 +144,10 @@ def _one(args) -> dict:
             "is_best": int(held[mover] == k_best),
             "holders": sum(1 for v in held.values() if v),
             "live": sum(1 for x in st.set_winner if x is None),
+            "p_exact": (priced.get((mover, hs)) or (None, None))[0],
+            "p_team": (priced.get((mover, hs)) or (None, None))[1],
         })
+    ClaimEvaluator.best_for_half_suit = real_bfh
     ours_sets = sum(1 for w in st.set_winner if w == our_team)
     return {"deal": deal_seed, "kv_even": kv_even,
             "margin": 2 * ours_sets - 9, "claims": rows}
@@ -207,7 +231,29 @@ def report(games, vs) -> dict:
         print(f"  {p:<11}{n:>7}{w:>7}{_rate(n, w):>8.3f}"
               f"{sum(ks)/len(ks):>8.2f}{sum(kb)/len(kb):>13.2f}")
 
-    return {"vs": vs, "n_games": len(games),
+    cal = [c for c in whole if c["p_exact"] is not None]
+    if cal:
+        print(f"\n  is p_exact calibrated, and does that depend on how much "
+              f"the\n  declarer holds? ({len(cal):,} wholly-held "
+              f"declarations that were priced)")
+        print(f"  {'k':>3} {'n':>7} {'claimed':>9} {'observed':>9} {'gap':>8}")
+        cal_out = {}
+        for k in sorted({c["k"] for c in cal}):
+            g = [c for c in cal if c["k"] == k]
+            claimed = sum(c["p_exact"] for c in g) / len(g)
+            obs = sum(c["right"] for c in g) / len(g)
+            print(f"  {k:>3} {len(g):>7} {claimed:>9.3f} {obs:>9.3f} "
+                  f"{obs - claimed:>+8.3f}")
+            cal_out[str(k)] = {"n": len(g), "claimed": claimed,
+                               "observed": obs, "gap": obs - claimed}
+        print("  A negative gap is overconfidence. forced_claim takes the "
+              "argmax of\n  p_exact, so a gap that VARIES with k means the "
+              "argmax is biased toward\n  the half-suits the declarer knows "
+              "least about.")
+    else:
+        cal_out = {}
+
+    return {"vs": vs, "n_games": len(games), "calibration_by_k": cal_out,
             "n_claims_ours": len(claims), "n_wholly_held": len(whole),
             "err_by_k": {str(k): {"n": by_k[k][0], "wrong": by_k[k][1],
                                   "err": curve[k]} for k in sorted(by_k)},
