@@ -150,11 +150,11 @@ awards every misdeclared set to the opponents and is now the baseline,
 results labelled by rule era. Under standard scoring the deployed
 configuration beats the v0.3 champion by $\mathbf{+2.412}$
 $[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
-independently developed C++ engine running its own code --- it takes
-$64.3\%$ of decided sets, and the corrected rule cuts nearly twice as hard
-against the opponent ($306$ misdeclared sets to $160$); the endgame
-correction, fitted against void-era targets, re-measures at $-0.104$ and is
-withdrawn.
+independently developed C++ engine running its own code --- it wins
+$\mathbf{+2.375}$ sets per game, declaring correctly $96.7\%$ against
+$78.9\%$, once a bridge defect of ours worth $-0.09$ to them is repaired;
+the endgame correction, fitted against void-era targets, re-measures at
+$-0.104$ and is withdrawn.
 
 \vspace{1pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
@@ -5048,11 +5048,84 @@ sets in those $1{,}000$ games were misdeclarations --- wholly-held
 half-suits declared with the wrong split, each now a set for the other side
 --- and they divide $160$ against this engine to $\mathbf{306}$ against
 v0.7. The correction the void rule had been silently granting was worth
-nearly twice as much to the opponent: v0.7's forced declarations come from
-a sampled best guess where this engine declares the exact posterior MAP
-(\S\ref{sec:claiming}), so scoring misdeclarations properly \emph{widened}
-nothing --- it is the reason the margin held rather than shrank when the
-game switched to the rule v0.7 was built for.
+nearly twice as much to the opponent, so scoring misdeclarations properly
+\emph{widened} nothing --- it is the reason the margin held rather than
+shrank when the game switched to the rule v0.7 was built for. This paper
+first attributed that gap to v0.7's forced declarations, which come from a
+sampled best guess where this engine declares the exact posterior MAP
+(\S\ref{sec:claiming}). The next paragraph withdraws that attribution: the
+split is unchanged by a repair that fixes the forced declarations outright,
+so it belongs to their voluntary declaration gate instead.
+
+\paragraph{A defect in the bridge, found from the other side, that had been
+flattering this engine.} Every figure above was taken through this project's
+bridge into v0.7, and an adversarial read of their C++ --- their source, not
+their paper --- found a defect in that bridge rather than in either engine.
+Forced to declare, their own driver picks the first live half-suit the mover
+\emph{holds a card in} (\texttt{engine/src/game.hpp:535}); this bridge passed
+the first live half-suit, full stop. Their \texttt{bestGuess} was therefore
+periodically asked to name all six owners of a half-suit it held nothing of
+--- a question with no anchor in its own hand, which their own driver never
+puts them in a position to be asked, and which under the award rule hands
+the set here.
+
+The defect ran in this engine's favour, which is the direction a project does
+not catch by reading its own results and nodding. Priced paired --- $4{,}000$
+deals replayed under both bridge revisions, identical deals and identical
+seating, the same duplicate-deal design every screen in this paper uses
+(\path{scripts4/bridge_bug_price.py}) --- it is worth $\mathbf{-0.0915}$
+$[-0.1076, -0.0754]$ sets per game: real, and about $4\%$ of the margin. It
+is also an order of magnitude smaller than the $0.30$ sets per game the same
+read estimated from $40$ games, which is what the paired instrument is for.
+Under the repair their declaration accuracy rises from $76.04\%$ to
+$78.85\%$, while this engine's moves from $96.88\%$ to $96.69\%$ --- the
+control that confirms the repair touches only their side of the bridge.
+
+What the repair does \emph{not} move is the misdeclaration split, and the
+reason corrects the mechanism the previous paragraph had assumed. The
+anchorless forced declarations were \emph{ownership}-class errors ---
+half-suits the opposing team still held a card of --- whereas the
+$160$-to-$306$ split counts \emph{allocation}-class errors, wholly-held
+half-suits declared with the wrong split. Across the same $4{,}000$ paired
+deals the allocation split is flat: $1{,}078$ against v0.7 before the
+repair, $1{,}070$ after. The finding that this engine misdeclares roughly
+half as often survives intact; the explanation for it does not, and the gap
+is a property of their voluntary declaration gate rather than of a question
+this bridge was mis-posing. The pre-registered R2 contrast is likewise
+undisturbed,
+because the defect is common-mode across its two arms --- both the
+correction-on and correction-off games ran through the same bridge, and a
+paired difference cannot see an error that appears identically in both
+halves of the pair. What is restated is the \emph{context} the R2 file
+reports beside its verdict: the margin and set share, which are absolute
+rather than paired, and which the corrected head-to-head below supersedes.
+
+\paragraph{The head-to-head, re-measured through the repaired bridge.} This
+is the figure the paper stands behind, and the only one taken through bridge
+revision~2: $4{,}000$ fresh games, seats rotated so neither engine opens more
+often, both engines on their native misdeclaration rule, zero substituted
+moves and zero unfinished games (\path{scripts4/mega_match.py} $\rightarrow$
+\path{results/mega_match.json}).
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+margin & $\mathbf{+2.3750}$ $[+2.2896, +2.4604]$ sets/game \\
+sets & $22{,}750$ to $13{,}250$ ($63.19\%$ of decided) \\
+games won & $80.70\% \pm 1.22$ ($3{,}228$W / $0$T / $772$L) \\
+ask hit rate & $51.82\%$ against $48.18\%$ \\
+declaration accuracy & $\mathbf{96.69\%}$ against $\mathbf{78.85\%}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The mechanism of the margin is in the last row and not the one
+above it. A $3.6$-point edge in ask accuracy is worth something, but the two
+engines find cards at broadly comparable rates; where they diverge is in
+knowing when a half-suit is \emph{finished}, and an $18$-point gap there is
+the difference between cashing a set and handing it over. That is the same
+claim \S\ref{sec:claiming} makes from the inference side, arrived at here
+from the scoreboard.
 
 \paragraph{What this measurement is, stated with the other project's own
 scope in view.} Their paper is unusually careful about what it does not
@@ -5069,9 +5142,10 @@ beyond that lineage would require \citep{dylan2026fishbot}.
 That ingredient now exists in both directions, and it is worth being
 precise about what each side may therefore say. We can report a margin
 against an engine nobody here wrote, which is a stronger kind of evidence
-than either project's internal ladders: $+2.544$ sets per game, $64.3\%$ of
-decided sets, over $1{,}000$ games under rules both engines implement
-natively, with zero substituted moves. What that does \emph{not} establish
+than either project's internal ladders: $+2.375$ $[+2.290, +2.460]$ sets per
+game, $63.2\%$ of decided sets, over $4{,}000$ games under rules both engines
+implement natively, with zero substituted moves and a bridge whose one known
+defect has been found, priced and repaired. What that does \emph{not} establish
 is a global ranking of the two projects, and this paper declines that claim
 for the same reasons theirs does: one opponent is not a population, their
 engine was frozen before ours had the exhibition bridge to test against,

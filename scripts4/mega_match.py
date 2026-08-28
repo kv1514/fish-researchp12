@@ -58,12 +58,9 @@ SEED0 = 900_000
 AGENT0 = 9000
 JOURNAL = ROOT / "results" / "mega_match_journal.jsonl"
 
-#: Bump whenever the BRIDGE's behaviour changes, and old rows stop being
-#: comparable. Rows are tagged with it and a resume drops anything that does
-#: not match, so a fixed bridge can never be averaged together with the games
-#: the bug produced. rev 2: the forced declaration now picks a half-suit they
-#: hold a card in, as their own driver does (see fish4/dylan_v07.py).
-BRIDGE_REV = 2
+#: Defined in the bridge itself, next to the behaviour it describes, so this
+#: runner cannot disagree with the thing it is measuring. See fish4/dylan_v07.
+from fish4.dylan_v07 import BRIDGE_REV
 
 
 def _one(args) -> dict:

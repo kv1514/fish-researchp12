@@ -127,6 +127,21 @@ def _build_maps() -> tuple[list[int], list[int]]:
 
 _OURS_TO_THEIRS, _THEIRS_TO_OURS = _build_maps()
 
+#: The BRIDGE's behavioural revision -- not their engine's version, which is
+#: frozen, and not this file's git hash, which changes for comments too. Bump
+#: it only when a change here alters what their engine is asked or answers,
+#: because that is exactly when games measured before and after stop being
+#: comparable. Runners stamp it into every journal row and drop rows that do
+#: not match on resume, so a repaired bridge can never be averaged together
+#: with the games a defective one produced.
+#:
+#:   rev 1  the original bridge.
+#:   rev 2  forced declarations now pick a half-suit they hold a card in, as
+#:          their own driver does. See DylanV07._forced_half_suit. Priced at
+#:          -0.0792 sets/game against us; results/BRIDGE_REVISIONS.md lists
+#:          which stored journals are which.
+BRIDGE_REV = 2
+
 
 #: The frozen v0.7 spec (their engine/fishbot_v07.json, "allparamsSpec"),
 #: embedded so the deployed function does not depend on any file beyond the

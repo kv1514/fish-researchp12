@@ -135,12 +135,42 @@ by both sides, seats rotated — under the standard misdeclaration rule.
 
 | against | result |
 |---|---|
-| **FishBot v0.7** (frozen `v07:r12=25…`, its own C++ engine, 1,000 games) | **+2.54 sets/game, 64.3% of decided sets**, zero substituted moves |
-| **FishBot v0.7**, later 4,000-game screen (baseline arm) | **+2.73 sets/game** |
+| **FishBot v0.7** (frozen `v07:r12=25…`, its own C++ engine, 4,000 games) | **+2.375** [+2.290, +2.460] sets/game, **63.2% of decided sets**, 80.7% of games won, zero substituted moves |
 | this project's own v0.3 champion, 500 pairs | **+2.412** [+2.088, +2.736] sets/pair |
 
 The full method, the pre-registrations, and the results files behind these
 are in `paper/fishbot_v06.pdf` and `prereg/`.
+
+Where the margin comes from is worth knowing before you run it, because it
+is not where people expect. The two engines find cards at similar rates —
+51.8% of asks hit against 48.2%. They differ on knowing when a half-suit is
+**finished**: this bot declares correctly 96.7% of the time against 78.9%.
+Card-reading is the visible skill; knowing when to stop reading is the one
+that scores.
+
+### One number we took back
+
+An earlier version of this table said **+2.54 sets/game, 64.3%**, from a
+1,000-game run, and a 10,000-game run here reported +2.425. Those are
+withdrawn. Reading v0.7's C++ adversarially turned up a defect not in either
+engine but in **our** bridge into his, and it ran in our favour: forced to
+declare, his own driver picks the first live half-suit the mover holds a card
+in (`engine/src/game.hpp:535`), and our bridge passed the first live
+half-suit, full stop. His `bestGuess` was therefore sometimes asked to name
+all six owners of a half-suit it held nothing of — a question his own driver
+never asks him, which he gets wrong nearly every time, and which under the
+opponent-award rule hands us the set.
+
+Priced paired on 4,000 deals replayed under both bridge revisions: worth
+**−0.0915** [−0.1076, −0.0754] sets/game to us. Real, about 4% of the margin,
+and an order of magnitude smaller than the first estimate off 40 games. His
+declaration accuracy rises 76.0% → 78.9% under the repair; ours moves 96.9%
+→ 96.7%, which is the control. The table above is the repaired number, and
+`results/BRIDGE_REVISIONS.md` says which stored journal is which.
+
+We mention it because you are being asked to run this bot against your own,
+and a margin measured through our apparatus is a claim about our apparatus
+too. If you find another one, we would rather hear it than not.
 
 ## What we tried from your side and could not make work
 

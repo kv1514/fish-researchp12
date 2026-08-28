@@ -1,0 +1,18 @@
+{
+ "n_paired_games": 4000,
+ "margin_rev1": 2.4665,
+ "margin_rev2": 2.375,
+ "paired_difference": -0.0915,
+ "ci95": [
+  -0.10762376770706095,
+  -0.07537623229293905
+ ],
+ "their_anchorless_rev1": null,
+ "their_anchorless_rev2": 435,
+ "our_anchorless_rev1": null,
+ "our_anchorless_rev2": 883,
+ "their_declare_acc_rev1": 0.7603785103785103,
+ "their_declare_acc_rev2": 0.7884976819947375,
+ "our_declare_acc_rev1": 0.9688073394495413,
+ "our_declare_acc_rev2": 0.966862960375287
+}
