@@ -43,6 +43,7 @@ someone to delete working output.
 | `combined_verdict.json` | `fish4/registry4.py`, `scripts4/check_paper_numbers.py`, `scripts4/check_verdicts.py`, `scripts4/combined_verdict.py`, `scripts4/make_figures.py` | 1,310 | 2026-08-24 22:56 |
 | `continuation_compare.json` | `scripts4/check_paper_numbers.py`, `scripts4/continuation_compare.py` | 1,163 | 2026-08-24 22:56 |
 | `continuation_length.json` | `scripts4/check_paper_numbers.py`, `scripts4/continuation_length.py` | 265 | 2026-08-24 22:56 |
+| `deal_luck.json` | `scripts4/deal_luck.py`, `tests4/test_deal_luck.py` | 5,223 | 2026-08-28 13:41 |
 | `decision_cost_profile.json` | `scripts4/check_paper_numbers.py`, `scripts4/decision_cost_profile.py` | 422 | 2026-08-24 22:56 |
 | `determinization_gap.json` | `scripts4/closed_form_proof.py`, `scripts4/determinization_gap.py`, `scripts4/ground_truth_coverage.py` | 1,129 | 2026-08-25 02:40 |
 | `dialect_gap.json` | `fishbot_v06/decide.py`, `scripts4/dialect_gap.py` | 591 | 2026-08-28 03:42 |
@@ -57,7 +58,7 @@ someone to delete working output.
 | `endgame_m4_verdict.json` | `api/_engine.py`, `scripts4/exact_endgame_duel.py` | 240 | 2026-08-27 17:52 |
 | `endgame_m5_verdict.json` | `scripts4/exact_endgame_duel.py` | 240 | 2026-08-27 18:21 |
 | `endgame_m9_verdict.json` | `scripts4/check_paper_numbers.py`, `scripts4/exact_endgame_duel.py` | 237 | 2026-08-27 18:45 |
-| `error_value.json` | `scripts4/error_value.py`, `scripts4/signal_gate_confirm.py` | 2,424 | 2026-08-28 12:47 |
+| `error_value.json` | `scripts4/error_value.py`, `scripts4/signal_gate_confirm.py` | 2,709 | 2026-08-28 13:48 |
 | `ess_probe.json` | `fish4/sisbatch.py`, `scripts4/check_paper_numbers.py`, `scripts4/ess_probe.py`, `tests4/test_opp_lambda.py` | 1,229 | 2026-08-24 22:56 |
 | `exact2_cross_check.json` | `scripts4/check_paper_numbers.py`, `tests4/test_exact2.py` | 420 | 2026-08-24 22:56 |
 | `exact2_study.json` | `fish4/exact2_study.py`, `scripts4/check_paper_numbers.py`, `tests4/test_exact2.py`, `tests4/test_negative_claims.py` | 6,417 | 2026-08-24 22:56 |
@@ -79,10 +80,11 @@ someone to delete working output.
 | `exploitability.json` | `api/_engine.py`, `fish4/bestresponse.py`, `fish4/exact_ii.py`, `fish4/oracle.py`, `scripts4/champion_mixing.py`, `scripts4/check_paper_numbers.py`, `scripts4/exact_endgame_duel.py`, `scripts4/exploitability.py`, `scripts4/ii_endgame.py`, `scripts4/ii_exploit_after.py`, `scripts4/ii_exploit_after_analysis.py`, `scripts4/ii_first_endgame.py`, `scripts4/pool_verdict.py` | 831 | 2026-08-25 03:55 |
 | `fit_prefix_check_v2.json` | `scripts4/check_paper_numbers.py`, `scripts4/fit_prefix_check.py`, `scripts4/learn_ask_objective.py` | 1,114 | 2026-08-24 22:56 |
 | `forced_ceiling_self.json` | `scripts4/forced_ceiling.py` | 723 | 2026-08-28 12:12 |
-| `forced_exhaustive_self.json` | `scripts4/forced_exhaustive_confirm.py` | 1,244 | 2026-08-28 12:47 |
+| `forced_exhaustive_self.json` | `scripts4/forced_exhaustive_confirm.py` | 1,263 | 2026-08-28 13:19 |
+| `forced_exhaustive_v07.json` | `scripts4/forced_exhaustive_confirm.py` | 953 | 2026-08-28 13:30 |
 | `foreign_award_check.json` | `fish4/registry4.py`, `scripts4/check_paper_numbers.py`, `scripts4/foreign_award_check.py`, `scripts4/make_figures.py` | 533 | 2026-08-27 21:21 |
 | `foreign_m2_check.json` | `scripts4/check_paper_numbers.py`, `scripts4/foreign_award_check.py`, `scripts4/foreign_m2_check.py` | 274 | 2026-08-27 20:23 |
-| `g1_gamma_cost.json` | `scripts4/check_paper_numbers.py`, `scripts4/g1_gamma_cost.py`, `scripts4/signal_gate_confirm.py`, `scripts4/stuck_gate_confirm.py` | 588 | 2026-08-28 11:51 |
+| `g1_gamma_cost.json` | `scripts4/check_paper_numbers.py`, `scripts4/g1_gamma_cost.py`, `scripts4/signal_gate_confirm.py`, `scripts4/stuck_gate_confirm.py`, `scripts4/tempo_confirm.py` | 588 | 2026-08-28 11:51 |
 | `gamma_schedule_verdict.json` | `scripts4/check_verdicts.py` | 1,203 | 2026-08-25 04:10 |
 | `greedy_shadow.json` | `scripts4/check_paper_numbers.py`, `scripts4/greedy_shadow.py` | 107,033 | 2026-08-24 22:56 |
 | `ground_truth_coverage.json` | `scripts4/ground_truth_coverage.py` | 895 | 2026-08-25 02:43 |
@@ -113,9 +115,9 @@ someone to delete working output.
 | `inference_curve.json` | `scripts4/determinization_gap.py`, `scripts4/doomed_ask_information.py`, `scripts4/inference_ceiling.py`, `scripts4/null_lever.py`, `scripts4/posterior_card_equivalents.py`, `scripts4/turn_price.py` | 1,589 | 2026-08-25 01:59 |
 | `large_study_strategy.json` | `scripts/run_large_study.py` | 10,777 | 2026-08-24 22:56 |
 | `learned_weights_verdict.json` | `scripts4/check_paper_numbers.py`, `scripts4/check_verdicts.py`, `scripts4/learned_weights_verdict.py`, `scripts4/make_figures.py` | 1,124 | 2026-08-24 22:56 |
-| `margin_decomposition.json` | `api/_engine.py`, `scripts4/acquisition.py`, `scripts4/check_paper_numbers.py`, `scripts4/error_value.py`, `scripts4/margin_decomposition.py` | 920 | 2026-08-28 11:50 |
+| `margin_decomposition.json` | `api/_engine.py`, `scripts4/acquisition.py`, `scripts4/check_paper_numbers.py`, `scripts4/error_value.py`, `scripts4/margin_decomposition.py` | 1,356 | 2026-08-28 13:28 |
 | `mde_recheck.json` | `scripts4/check_paper_numbers.py`, `scripts4/recheck_mdes.py` | 10,737 | 2026-08-24 22:56 |
-| `mega_match.json` | `scripts4/bridge_bug_price.py`, `scripts4/camp_probe.py`, `scripts4/check_paper_numbers.py`, `scripts4/leak_forensics.py`, `scripts4/mega_match.py` | 840 | 2026-08-28 06:31 |
+| `mega_match.json` | `scripts4/bridge_bug_price.py`, `scripts4/camp_probe.py`, `scripts4/check_paper_numbers.py`, `scripts4/deal_luck.py`, `scripts4/leak_forensics.py`, `scripts4/margin_decomposition.py`, `scripts4/mega_match.py` | 929 | 2026-08-28 13:30 |
 | `normaliser_variation.json` | `scripts4/normaliser_variation.py` | 1,132 | 2026-08-24 22:56 |
 | `null_lever.json` | `scripts4/doomed_ask_diag.py`, `scripts4/null_lever.py` | 646 | 2026-08-25 03:42 |
 | `null_recoverability.json` | `fish4/claim4.py`, `scripts4/doomed_ask_diag.py`, `scripts4/null_recoverability.py`, `scripts4/precision_nulls.py`, `tests4/test_closed_form.py` | 47,448 | 2026-08-25 04:21 |
@@ -150,6 +152,7 @@ someone to delete working output.
 | `rollout_target_robust.json` | `fish4/learn/rollout.py`, `scripts4/rollout_target.py`, `scripts4/rollout_target_robust.py` | 1,237 | 2026-08-24 22:56 |
 | `search_param_sweep.json` | `scripts/sweep_search_params.py` | 2,799 | 2026-08-24 22:56 |
 | `settle_verdict.json` | `scripts4/check_paper_numbers.py`, `scripts4/check_seeds.py`, `scripts4/check_verdicts.py`, `scripts4/make_figures.py`, `scripts4/precision_verdict.py`, `scripts4/settle_verdict.py`, `tests4/test_paper_numbers.py`, `tests4/test_verdict_coverage.py` | 2,997 | 2026-08-24 22:56 |
+| `signal_gate_confirm.json` | `scripts4/signal_gate_confirm.py` | 2,021 | 2026-08-28 13:44 |
 | `slope_by_resolution.json` | `scripts4/slope_by_resolution.py` | 1,311 | 2026-08-24 22:56 |
 | `stack_verdict.json` | `scripts4/check_paper_numbers.py`, `scripts4/check_verdicts.py`, `scripts4/combined_estimate.py`, `scripts4/stack_verdict.py` | 1,761 | 2026-08-24 22:56 |
 | `stall_asymmetry.json` | `scripts4/check_paper_numbers.py`, `scripts4/stall_asymmetry.py` | 456 | 2026-08-24 22:56 |
@@ -158,8 +161,9 @@ someone to delete working output.
 | `target_feature_fit.json` | `scripts4/basis_search.py`, `scripts4/check_paper_numbers.py`, `scripts4/rollout_target.py`, `scripts4/target_feature_fit.py` | 3,138 | 2026-08-24 22:56 |
 | `teammate_reading_champion.json` | `scripts4/teammate_reading_demo.py` | 596 | 2026-08-27 21:57 |
 | `teammate_reading_deployed.json` | `scripts4/teammate_reading_demo.py` | 682 | 2026-08-27 22:00 |
+| `tempo_regime.json` | `fish4/agent4.py`, `scripts4/tempo_confirm.py`, `scripts4/tempo_regime.py` | 526 | 2026-08-28 13:13 |
 | `tilt_accuracy.json` | `scripts4/tilt_accuracy.py`, `tests4/test_sis_tilt.py` | 687 | 2026-08-24 22:56 |
-| `turn_price.json` | `scripts4/doomed_ask_information.py`, `scripts4/turn_price.py` | 23,696 | 2026-08-25 05:07 |
+| `turn_price.json` | `scripts4/doomed_ask_information.py`, `scripts4/tempo_regime.py`, `scripts4/turn_price.py` | 23,696 | 2026-08-25 05:07 |
 | `turn_price_bands.json` | **orphan** | 23,764 | 2026-08-25 05:56 |
 | `turn_price_late.json` | `scripts4/doomed_ask_information.py` | 24,491 | 2026-08-25 05:26 |
 | `v04_ablation_guard.json` | `scripts4/run_ablation_guard.py` | 5,444 | 2026-08-24 22:56 |
@@ -226,6 +230,8 @@ someone to delete working output.
 - **`scripts4/combined_estimate.py`** --- What is the strongest configuration worth, and has anyone actually played it?
 - **`scripts4/combined_verdict.py`** --- The pre-registered verdict on the shipped configuration.
 - **`scripts4/continuation_compare.py`** --- Is the rollout target's slope about the continuation, or about the positions?
+- **`scripts4/deal_luck.py`** --- How much of a Fish game is decided by the deal, and what does a loss look like?
+- **`tests4/test_deal_luck.py`** --- The deal-luck decomposition, checked against data whose answer we chose.
 - **`scripts4/determinization_gap.py`** --- Is the tablebase ground truth for Fish? Measuring what determinization costs.
 - **`scripts4/ground_truth_coverage.py`** --- How much of a real Fish game do we actually have ground truth for?
 - **`fishbot_v06/decide.py`** --- FishBot v0.6 as a language-neutral decision service.
@@ -265,6 +271,7 @@ someone to delete working output.
 - **`scripts4/foreign_award_check.py`** --- R2 of prereg/rules_award_baseline.md: the foreign check, rule-matched.
 - **`scripts4/foreign_m2_check.py`** --- The foreign-opponent check of the m=2 correction (prereg/foreign_opponent_m2.md).
 - **`scripts4/stuck_gate_confirm.py`** --- prereg/stuck_claim_gate.md: does the doomed-ask gate cost sets against v0.7?
+- **`scripts4/tempo_confirm.py`** --- prereg/tempo_regime.md: the ask objective charges for a turn that is free.
 - **`scripts4/greedy_shadow.py`** --- Proposition 1's empirical shadow, measured instead of asserted.
 - **`scripts/head2head.py`** --- Head-to-head between two champion candidates.
 - **`scripts4/heterogeneity_across_runs.py`** --- Is between-block disagreement a property of the harness, or of one effect?
@@ -324,6 +331,7 @@ someone to delete working output.
 - **`tests4/test_paper_numbers.py`** --- The paper's most drift-prone figures must match the results files.
 - **`scripts4/stack_verdict.py`** --- The pre-registered verdict on whether the lookahead still pays on precision.
 - **`scripts4/teammate_reading_demo.py`** --- Does the choice model sharpen the engine's read of its own TEAMMATES?
+- **`scripts4/tempo_regime.py`** --- How often is the engine in the regime where the turn it risks is free?
 - **`scripts4/tilt_accuracy.py`** --- Does the twisted proposal estimate the same posterior, only better?
 - **`tests4/test_sis_tilt.py`** --- The twisted proposal, and why it is off by default.
 - **`scripts4/run_ablation_guard.py`** --- Run the ablation guard over every TunedAgent term before trusting a duel.

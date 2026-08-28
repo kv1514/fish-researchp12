@@ -2,125 +2,129 @@
  "n_games": 1000,
  "assumed_value": 2.0,
  "arms": {
-  "B_defer": {
+  "A_shipped": {
+   "arm": "A_shipped",
+   "error": "the arm avoided the same number of errors in every game"
+  },
+  "B_incumbent": {
    "cuts": {
     "no error avoided": {
-     "n": 930,
-     "mean": -0.047311827956989246,
+     "n": 889,
+     "mean": 0.04274465691788527,
      "ci95": [
-      -0.1018604817273632,
-      0.007236825813384709
+      -0.02032648207024449,
+      0.10581579590601503
      ]
     },
     "one avoided": {
-     "n": 48,
-     "mean": 1.5,
+     "n": 56,
+     "mean": 1.7857142857142858,
      "ci95": [
-      0.8216257178616906,
-      2.1783742821383094
+      1.0604212414900909,
+      2.5110073299384807
      ]
     },
     "two or more avoided": {
-     "n": 12,
-     "mean": 4.166666666666667,
+     "n": 6,
+     "mean": 3.3333333333333335,
      "ci95": [
-      2.1818698210125533,
-      6.151463512320781
+      1.8245246298511115,
+      4.842142036815556
      ]
     },
     "errors ADDED": {
-     "n": 10,
-     "mean": -2.0,
+     "n": 49,
+     "mean": -0.8163265306122449,
      "ci95": [
-      -3.2396128427860047,
-      -0.7603871572139953
+      -1.5829784086121728,
+      -0.04967465261231707
      ]
     }
    },
-   "arm": "B_defer",
+   "arm": "B_incumbent",
    "n_games": 1000,
    "value_per_avoided_error": {
-    "est": 1.7898198455819172,
+    "est": 1.3375705821813253,
     "ci95": [
-     1.592651450644513,
-     1.9869882405193213
+     1.1277435361465447,
+     1.547397628216106
     ],
     "assumed": 2.0,
     "excludes_assumed": true
    },
    "cost_when_it_avoids_nothing": {
-    "est": -0.0565484701172427,
+    "est": 0.09927401184946144,
     "ci95": [
-     -0.12370160564801544,
-     0.01060466541353005
+     0.019650246228472293,
+     0.1788977774704506
     ]
    },
-   "errors_avoided_per_game": 0.064,
-   "declarations_deferred_per_game": 0.224,
-   "deferred_per_game_where_no_error_avoided": 0.15591397849462366,
-   "cost_per_deferral": -0.3626901876485221,
-   "margin": 0.058,
-   "reconstructed": 0.058
+   "errors_avoided_per_game": 0.014,
+   "declarations_deferred_per_game": 0.213,
+   "deferred_per_game_where_no_error_avoided": 0.1361079865016873,
+   "cost_per_deferral": 0.7293768308609192,
+   "margin": 0.118,
+   "reconstructed": 0.118
   },
-  "B2_mid": {
+  "C_measured": {
    "cuts": {
     "no error avoided": {
-     "n": 918,
-     "mean": -0.06100217864923747,
+     "n": 876,
+     "mean": 0.0502283105022831,
      "ci95": [
-      -0.11972973516853402,
-      -0.002274622129940916
+      -0.024844149929681494,
+      0.12530077093424768
      ]
     },
     "one avoided": {
-     "n": 55,
-     "mean": 1.490909090909091,
+     "n": 66,
+     "mean": 1.606060606060606,
      "ci95": [
-      0.9012963763939132,
-      2.0805218054242687
+      0.9818888126472004,
+      2.2302323994740116
      ]
     },
     "two or more avoided": {
-     "n": 12,
-     "mean": 4.166666666666667,
+     "n": 6,
+     "mean": 3.6666666666666665,
      "ci95": [
-      2.1818698210125533,
-      6.151463512320781
+      0.9861415660912556,
+      6.3471917672420775
      ]
     },
     "errors ADDED": {
-     "n": 15,
-     "mean": -2.4,
+     "n": 52,
+     "mean": -0.9615384615384616,
      "ci95": [
-      -3.3202496279693774,
-      -1.4797503720306224
+      -1.6399194561000947,
+      -0.2831574669768284
      ]
     }
    },
-   "arm": "B2_mid",
+   "arm": "C_measured",
    "n_games": 1000,
    "value_per_avoided_error": {
-    "est": 1.838827601824623,
+    "est": 1.278422945990946,
     "ci95": [
-     1.6432762718916873,
-     2.0343789317575585
+     1.0642463201929113,
+     1.4925995717889806
     ],
     "assumed": 2.0,
-    "excludes_assumed": false
+    "excludes_assumed": true
    },
    "cost_when_it_avoids_nothing": {
-    "est": -0.08136262172042513,
+    "est": 0.09898838697216297,
     "ci95": [
-     -0.15132519241171075,
-     -0.011400051029139519
+     0.011726195340583362,
+     0.18625057860374258
     ]
    },
-   "errors_avoided_per_game": 0.066,
-   "declarations_deferred_per_game": 0.273,
-   "deferred_per_game_where_no_error_avoided": 0.1906318082788671,
-   "cost_per_deferral": -0.42680506708200155,
-   "margin": 0.04,
-   "reconstructed": 0.039999999999999994
+   "errors_avoided_per_game": 0.018,
+   "declarations_deferred_per_game": 0.21,
+   "deferred_per_game_where_no_error_avoided": 0.1324200913242009,
+   "cost_per_deferral": 0.7475329912725411,
+   "margin": 0.122,
+   "reconstructed": 0.122
   }
  }
 }
