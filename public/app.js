@@ -1555,9 +1555,12 @@ function maybeAutoThink() {
  * series tally. When a game ends the next one deals itself: a broadcast, not
  * a replay -- every move is computed when the table reaches it. */
 
-const WATCH_NAMES = ["Dylan's v0.7 A", "KV's FishBot A",
-                     "Dylan's v0.7 B", "KV's FishBot B",
-                     "Dylan's v0.7 C", "KV's FishBot C"];
+// One engine per team, three seats each. The seat number is part of the
+// name so the labels cannot read as three different bots: every KV seat is
+// the same single deployed FishBot, every Dylan seat the same frozen v0.7.
+const WATCH_NAMES = ["Dylan's v0.7 (s0)", "KV's FishBot (s1)",
+                     "Dylan's v0.7 (s2)", "KV's FishBot (s3)",
+                     "Dylan's v0.7 (s4)", "KV's FishBot (s5)"];
 
 function watchTally() {
   const t = S.series || { d: 0, k: 0, games: 0 };

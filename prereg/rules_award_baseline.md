@@ -100,3 +100,41 @@ pinned, misdeclare counts recorded per side. Outcomes fixed now:
   interval and the misdeclare split, not summarised as "useless".
 - CI clear of zero, negative: stays off, reported, and the void-era
   mechanism story gets re-examined rather than reasserted.
+
+## R6 -- contestation and silence, dose-swept against Dylan (added after R5)
+
+Written before any R6 pair is played. Two new knobs, both bit-identical at
+their defaults (verified over replayed games before this entry):
+
+- `w_contest` (signed): adaptive.contest_bonus, (1-p_hit) x (opponent mass
+  of the half-suit /6) x (unplaced cards /6). Positive = Dylan's v0.7
+  mechanism (fight in contested suits; his attribution credits it with his
+  whole cycle gain). Negative = the off-limits reading proposed by the
+  exhibition's viewer (avoid them unless the ask is a certain steal --
+  p_hit=1 zeroes the term under either sign).
+- `silence_delta` (<1): posterior down-weights sampled worlds where a live
+  half-suit sits wholly in one team now -- the table's silence argues
+  against worlds someone would already have declared.
+
+DESIGN, stage 1 (screen): arms are V06_DEPLOYED plus one knob each --
+contest in {-1.0, -0.3, +0.3, +1.0, +3.0}, silence_delta in {0.7, 0.9} --
+plus the unmodified baseline. Every arm plays 3 copies vs 3x dylan_v07 on
+identical deals and rotations (seeds 333000+, 250 deals x 2 rotations, own
+journal), statistic the paired diff of margins vs the baseline arm. The
+opponent is Dylan BY DESIGN: the objective is his engine, and sibling-only
+sweeps are how the deception ladder happened.
+
+Stage 2 (confirm): the best screening arm, IF its screen CI clears zero,
+replays against fresh seeds (334000+, another 500 paired games) and must
+clear zero there on its own -- the screen picks, the confirm proves, so
+winner's-curse selection cannot ship a noise peak (Dylan's own repo
+documents five mechanisms that cleared small screens and were zero at 3x).
+
+Stage 3 (guard): the confirmed arm duels the v0.3 champion, 200 pairs; its
+CI must not sit entirely below zero. A knob that beats Dylan by exploiting
+him while collapsing against an unrelated engine is the ladder's mistake
+with a new name, and does not ship.
+
+Outcomes: pass all three -> ships in V06_DEPLOYED and the site; fail
+confirm or guard -> reported with intervals, not shipped; no screening arm
+clears -> both knobs stay at defaults and the negative is reported.

@@ -138,7 +138,18 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  stall_window: int = 80,
                  smart_pass: bool = False,
                  signal_mode: str = "off",
-                 signal_max_p: float = 0.15):
+                 signal_max_p: float = 0.15,
+                 #: Signed weight on adaptive.contest_bonus. Positive fights
+                 #: in opponent-dominated ambiguous half-suits (Dylan's v0.7
+                 #: carries the analogous term strongly positive); negative is
+                 #: the off-limits reading (avoid them unless the ask is a
+                 #: certain steal). 0.0 = incumbent, bit-identical.
+                 w_contest: float = 0.0,
+                 #: Silence prior: down-weight sampled worlds in which a live
+                 #: half-suit sits wholly within one team right now, because
+                 #: a team that held it all and could place it would usually
+                 #: have declared. 1.0 = off, bit-identical.
+                 silence_delta: float = 1.0):
         super().__init__()
         self.n_worlds = n_worlds
         self.n_draws = n_draws
@@ -198,6 +209,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.smart_pass = smart_pass
         self.signal_mode = signal_mode
         self.signal_max_p = signal_max_p
+        self.w_contest = float(w_contest)
+        self.silence_delta = float(silence_delta)
         self.stats = PosteriorStats()
         self.bel: Optional[BeliefState] = None
 
@@ -233,6 +246,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                          opp_lambda=self.opp_lambda,
                          gamma_schedule=self.gamma_schedule,
                          sis_tilt=self.sis_tilt,
+                         silence_delta=self.silence_delta,
                          stats=self.stats)
         ctx = DecisionContext(obs, self.bel, post)
 
@@ -299,6 +313,13 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             from .adaptive import retake_flags
             scores = scores - self.w_retake * retake_flags(
                 obs, asks, self.retake_window, self.retake_min_depth)
+
+        # Half-suit contestation, signed: see adaptive.contest_bonus. At the
+        # default 0.0 this branch never runs and the incumbent is reproduced
+        # decision for decision.
+        if self.w_contest:
+            from .adaptive import contest_bonus
+            scores = scores + self.w_contest * contest_bonus(ctx, asks, p)
 
         if self.w_lookahead and self.lookahead_depth > 1:
             from .lookahead import lookahead_bonus
