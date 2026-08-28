@@ -4176,6 +4176,34 @@ from ``buys no wins'' to ``plausibly worth about a set every fifteen
 games, not yet demonstrated at this power'' --- a properly sized
 extension is registered future work rather than a post-hoc one.
 
+\paragraph{And there is a specific reason to expect that extension to land
+differently, which is not a reason we had at the time.} Both measurements of
+this protocol fired it at the same threshold. The relaxed mode signals only
+when the ask the seat would otherwise make has $p \leq 0.15$
+(\texttt{signal\_max\_p}), a number chosen when there was no scale to choose it
+against. \S\ref{sec:tempo} then supplied one, bucketed by exactly that
+probability, and it says a turn is worth $-0.043 \pm 0.169$ below $p = 0.25$
+and $+0.004 \pm 0.143$ in $[0.25, 0.50)$ --- free, twice over --- and about
+$+0.45$ only above $0.50$. The gate sits at less than a third of the way to
+where this paper's own measured price of a turn crosses zero, and the two
+sections have never been read against each other. The sweep in
+\path{jobs/j14_signalling.json} tried $0.35$ and stopped.
+
+Two other things are now known that were not. What an avoided misdeclaration
+is worth in play is $+1.7898$ $[+1.5927, +1.9870]$ sets
+(\S\ref{sec:res-pathledger}), measured rather than taken from the rulebook, so
+a signal pays whenever its chance of placing a split we would otherwise get
+wrong exceeds the turn's price divided by $1.79$ --- and below $0.50$ that
+numerator is indistinguishable from zero. And the population it would act on
+is reachable: of the $130$ half-suits we declared wrongly over $800$
+cross-engine games, the median number of \emph{our own} turns between
+assembling the set and the deadline is $25.5$, with only $16$ having none
+left.
+
+\texttt{prereg/deadline\_signalling.md} registers exactly that, with the
+incumbent $0.15$ carried as a replication arm --- if it does not reproduce the
+$+0.068$ above, the new rung means nothing.
+
 \subsection{Game statistics, and a statistic that stops working}
 \label{sec:res-analytics}
 
