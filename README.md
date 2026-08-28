@@ -70,6 +70,41 @@ merges.
   [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
 
+## Where the engine is now
+
+The front of this file described `tuned-v1` as the current champion for two
+versions after it stopped being one. It is not; that section is retitled below
+and kept because its findings still hold for the rung it describes.
+
+The deployed engine is **`V06_DEPLOYED`** in `fish4/registry4.py`. Against
+**Dylan's FishBot v0.7** (github.com/dylann4500/fishbot, a genuinely foreign
+engine sharing no code with this one), over 10,000 duplicate deals through
+bridge revision 2:
+
+**+2.3466 sets/game** [+2.2928, +2.4004] · 63.0% of decided sets · 80.4% of
+games won · zero substituted moves.
+
+Four things measured since, each of which changed what the project believes:
+
+- **57% of that margin is declaration accounting**, not card acquisition. We
+  make 0.176 wrong declarations a game against their 0.844.
+- **95% of what we get wrong is our own team's split** — allocation class,
+  0.1676 a game against 0.0083 ownership errors. Once a team holds all six of
+  a half-suit no opponent may legally ask in it, so the split freezes with the
+  dealt-and-never-asked-for cards still unknown. It is a distributed-knowledge
+  problem: the team has the answer and no member of it does.
+- **The deal decides nothing.** Its share of a game's outcome variance is
+  −1.3% [−4.0%, +1.5%] over 5,000 deals played from both seat parities. Fish
+  has no high cards, and continuous movement dissolves the deal by the
+  middlegame.
+- **Pairing is worth between 1.1× and 414× the games, and how often a knob
+  changes a decision is what decides which.** Not the effect size. This is now
+  how runs here are sized.
+
+`PAPER.md` and `paper/fishbot_v06.tex` carry the full argument;
+`prereg/` holds the registrations, each with its outcome recorded against the
+conditions fixed before the run.
+
 ## Main variant
 
 54 cards: a standard deck plus two distinct jokers. Nine 6-card half-suits;
@@ -319,9 +354,13 @@ tests/               rules, fuzz, leakage proofs, belief soundness,
 scripts/             tournaments, ablations, profiling, search diagnostics
 ```
 
-## What the engine learned
+## What v0.3 learned
 
-The current champion (`tuned-v1`) beats the previous best belief policy by
+Kept as history. `tuned-v1` was the champion when this was written and is two
+versions behind the deployed engine; see **Where the engine is now** above.
+The findings below are still true of the rung they describe.
+
+The v0.3 champion (`tuned-v1`) beats the previous best belief policy by
 **+1.28 sets per duplicate deal-pair** (95% CI [1.03, 1.52], 800 pairs). It
 gets there from two considerations the old policy ignored completely:
 
