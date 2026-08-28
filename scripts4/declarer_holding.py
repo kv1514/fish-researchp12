@@ -135,6 +135,10 @@ def _one(args) -> dict:
     # the asker's hand. `asked` is the weak one: a failed ask proves only that
     # the target does not hold it, which constrains without locating.
     taken, asked = set(), set()
+    # Who a successful ask last put each card with. After a half-suit freezes
+    # nothing in it moves (you cannot ask a teammate), so for any card ever
+    # taken this IS its public current location.
+    last_taken = {}
 
     rows = []
     for _ in range(600):
@@ -153,6 +157,7 @@ def _one(args) -> dict:
             asked.add(ev.card)
             if ev.success:
                 taken.add(ev.card)
+                last_taken[ev.card] = ev.asker
         if not isinstance(ev, ClaimEvent) or pre is None:
             continue
         team = team_of(mover)
@@ -180,11 +185,44 @@ def _one(args) -> dict:
                              if c not in taken),
             "n_unasked": sum(1 for c in range(hs * 6, hs * 6 + 6)
                              if c not in asked),
+            # WHAT THE PROPAGATOR DERIVED, over and above the declarer's own
+            # hand and the cards a successful ask publicly located.
+            #
+            # This is the quantity behind a claim I got wrong: that once a team
+            # holds all six "nothing further can inform the split". No further
+            # ask can NAME one of those cards, true -- but fish/beliefs.py
+            # keeps propagating. Public hand counts exclude a player whose
+            # quota hits zero from every unresolved card and pin cards to a
+            # player whose quota equals what they could still hold, and failed
+            # asks exclude too. All of that accrues while a set sits.
+            #
+            # `derived` counts the cards pinned to a specific player that were
+            # neither in the declarer's hand nor publicly located by an ask. It
+            # is what waiting actually bought, per declaration.
+            **_derived(agents[mover], hs, pre[mover], last_taken),
         })
     ClaimEvaluator.best_for_half_suit = real_bfh
     ours_sets = sum(1 for w in st.set_winner if w == our_team)
     return {"deal": deal_seed, "kv_even": kv_even,
             "margin": 2 * ours_sets - 9, "claims": rows}
+
+
+def _derived(agent, hs, own_mask, last_taken) -> dict:
+    """Cards the propagator pinned beyond the hand and the public record."""
+    bel = getattr(agent, "bel", None)
+    if bel is None:
+        return {"n_pinned": None, "n_derived": None}
+    pinned = free_known = 0
+    for c in range(hs * 6, hs * 6 + 6):
+        try:
+            m = bel.current_holder_mask(c)
+        except Exception:
+            return {"n_pinned": None, "n_derived": None}
+        if m and not (m & (m - 1)):
+            pinned += 1
+            if not (own_mask >> c & 1) and c not in last_taken:
+                free_known += 1
+    return {"n_pinned": pinned, "n_derived": free_known}
 
 
 def _rate(n, wrong):
@@ -298,6 +336,28 @@ def report(games, vs) -> dict:
     else:
         strat = {}
 
+    dv = [c for c in whole if c.get("n_derived") is not None]
+    if dv:
+        tot = len(dv)
+        any_d = sum(1 for c in dv if c["n_derived"] > 0)
+        print(f"\n  what waiting actually bought: cards pinned beyond the "
+              f"declarer's\n  own hand and the public record "
+              f"({tot:,} wholly-held declarations)")
+        print(f"  {'derived':>8} {'n':>7} {'share':>8} {'wrong':>7} {'err':>8}")
+        for d in sorted({c["n_derived"] for c in dv}):
+            g = [c for c in dv if c["n_derived"] == d]
+            w = sum(1 - c["right"] for c in g)
+            print(f"  {d:>8} {len(g):>7} {len(g)/tot:>8.1%} {w:>7} "
+                  f"{_rate(len(g), w):>8.3f}")
+        print(f"\n  at least one card derived: {any_d:,} of {tot:,} "
+              f"({any_d/tot:.1%})")
+        print("  A claim I made and had to retract was that once a team holds")
+        print("  all six, nothing further can inform the split. No further ASK")
+        print("  can name those cards; the propagator keeps working. This row")
+        print("  is how often that mattered.")
+    else:
+        any_d = 0
+
     cal = [c for c in whole if c["p_exact"] is not None]
     if cal:
         print(f"\n  is p_exact calibrated, and does that depend on how much "
@@ -321,6 +381,7 @@ def report(games, vs) -> dict:
         cal_out = {}
 
     return {"vs": vs, "n_games": len(games), "calibration_by_k": cal_out,
+            "declarations_with_a_derived_card": any_d,
             "err_by_unmoved": {
                 str(u): {"n": len([c for c in med if c["n_unmoved"] == u]),
                          "wrong": sum(1 - c["right"] for c in med
