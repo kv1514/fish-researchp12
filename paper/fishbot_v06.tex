@@ -2968,6 +2968,71 @@ a rare branch played better is a rare improvement, however cleanly measured.
 Both facts are the same fact, and \S\ref{sec:dealluck} is where it is priced in
 general.
 
+\paragraph{What the declaration is actually risking, and a lever that looked
+free and was not.} Of our $0.1759$ wrong declarations a game, $0.1676$ are
+allocation class --- our own team held all six and we named the wrong split ---
+against $0.0083$ ownership errors. That is $95.3\%$, and it is a different
+problem from reading the opposition: every card is held by someone who knows
+they hold it, so the team has the answer and no member of it does.
+
+The obvious lever is that a declaration may be made by any member of the team,
+on their own turn. Someone holding four of the six guesses two; someone holding
+one guesses five. Over $1{,}800$ self-play games and $16{,}156$ wholly-held
+declarations, $30.4\%$ were made by a player a teammate could have
+out-informed, so the opportunity is real. The lever is not:
+
+\begin{center}
+\small
+\begin{tabular}{lrrlrr}
+\toprule
+declarer's own cards & $n$ & error & & $n$ & error \\
+\midrule
+1 & $2{,}640$ & $0.017$ & \emph{cards never located}: 1 & $4{,}980$ & $0.000$ \\
+2 & $2{,}024$ & $0.048$ & \hspace{1em} 2 & $4{,}234$ & $0.006$ \\
+3 & $1{,}282$ & $0.042$ & \hspace{1em} 3 & $2{,}990$ & $0.032$ \\
+4 & $1{,}494$ & $0.063$ & \hspace{1em} 4 & $2{,}344$ & $0.055$ \\
+5 & $1{,}830$ & $\mathbf{0.068}$ & \hspace{1em} 5 & $1{,}266$ & $\mathbf{0.111}$ \\
+6 & $6{,}468$ & $0.000$ & \hspace{1em} 6 & $342$ & $0.088$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The error rate \emph{rises} with the declarer's own holding, so deferring to
+the better-placed teammate would move declarations up that curve. Six is
+trivially perfect --- hold every card and there is nothing to name.
+
+The right variable is on the right, and it is selection that connects them. A
+player holding one card of a half-suit only declares it when the other five are
+already pinned; holding five leaves exactly one card unaccounted for, and if
+that card was dealt and never asked for it is a coin flip between two teammates
+on a set that feels certain. Held at fixed ``never publicly located'' the
+$k$-effect flattens: in the best-populated stratum ($4$ unlocated, $n=2{,}344$)
+the error rate across $k = 0 \ldots 5$ runs $0.050$, $0.068$, $0.057$, $0.057$,
+$0.042$, $0.077$, with no trend. \textbf{What a declaration risks is not how
+many cards you are missing but how many of them have never moved.}
+
+\paragraph{And the split is not frozen, which we asserted before checking.}
+It is natural to say that once a team holds all six no opponent may legally ask
+in the half-suit, so nothing further can inform the split. The first clause is
+right and the conclusion does not follow. Hand counts are public and
+\texttt{fish/beliefs.py::\_propagate} uses them: a player whose quota reaches
+zero is excluded from every unresolved card, and a player whose quota equals
+what they could still be holding has those cards pinned. So the split keeps
+resolving after it freezes --- not through anything happening in that half-suit,
+but through the rest of the game draining hands.
+
+Measured, over the same corpus, as cards pinned to a specific player beyond the
+declarer's own hand and beyond anything a successful ask publicly located:
+$46.6\%$ of wholly-held declarations derive nothing, $33.2\%$ derive one card,
+$15.1\%$ two, $5.1\%$ three or more. \textbf{$8{,}626$ of $16{,}156$ --- $53.4\%$ --- carry at least one
+derived card}, and the error rate falls from $0.046$ with none to $0.011$ with
+one and $0.000$ with three. Deriving cards after the freeze is not a curiosity
+at the margin; it is what makes a declaration safe, and it is the common case.
+The doomed-ask gate had already implied as much and we read it the other way:
+it deferred $0.224$ declarations a game while adding only $0.084$ forced ones,
+so about $0.14$ moved into a \emph{confident} declaration, which is only
+possible if waiting supplied something.
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 

@@ -706,6 +706,18 @@ WATCH = [
      "arms.B_defer.deferred_per_game_where_no_error_avoided", "{:.3f}",
      "deferrals per game where nothing was avoided",
      "defer about"),
+    # The declaration-risk finding: what a declaration risks is how many of the
+    # six have never moved, not how many the declarer holds. Watched because
+    # the paper prints the two curves side by side and the whole argument is
+    # that the right-hand one is steeper.
+    ("declarer_holding_self.json", "n_wholly_held", "{:,d}",
+     "wholly-held declarations", "wholly-held\ndeclarations"),
+    ("declarer_holding_self.json", "declarations_with_a_derived_card", "{:,d}",
+     "declarations with a derived card", "carry at least one"),
+    ("declarer_holding_self.json", "err_by_k.5.err", "{:.3f}",
+     "error rate at five cards held", "declarer's own cards"),
+    ("declarer_holding_self.json", "err_by_unmoved.5.n", "{:,d}",
+     "declarations with five never located", "cards never located"),
     ("foreign_award_check.json", "effect", "{:+.4f}",
      "rule-matched foreign effect", "under the award rule --- no reversal"),
     ("foreign_award_check.json", "ci95.0", "{:+.4f}",

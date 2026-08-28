@@ -382,6 +382,16 @@ def report(games, vs) -> dict:
 
     return {"vs": vs, "n_games": len(games), "calibration_by_k": cal_out,
             "declarations_with_a_derived_card": any_d,
+            # The table this finding rests on was printed and not stored, so
+            # the paper quoted a number no results file held -- the same shape
+            # as the error_value.json overwrite, arriving as an omission
+            # rather than a clobber. A figure the paper cites has to be in a
+            # file the drift check can read.
+            "err_by_derived": {
+                str(d): {"n": len([c for c in dv if c["n_derived"] == d]),
+                         "wrong": sum(1 - c["right"] for c in dv
+                                      if c["n_derived"] == d)}
+                for d in sorted({c["n_derived"] for c in dv})} if dv else {},
             "err_by_unmoved": {
                 str(u): {"n": len([c for c in med if c["n_unmoved"] == u]),
                          "wrong": sum(1 - c["right"] for c in med
