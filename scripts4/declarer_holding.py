@@ -50,13 +50,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from fish.cards import NUM_PLAYERS, half_suit_mask, team_of
-from fish.engine import ClaimEvent, GameState
+from fish.engine import AskEvent, ClaimEvent, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
 SEED0 = 9_100_000
 AGENT0 = 91_000
+#: Below this, the run prints its report and writes no file. See main().
+MIN_GAMES_TO_WRITE = 400
 
 PATHS = {"exact": "exact", "voluntary": "voluntary",
          "gate": "cannot land", "forced": "forced"}
@@ -119,6 +121,21 @@ def _one(args) -> dict:
         return r
     ClaimEvaluator.best_for_half_suit = spy
 
+    # Cards the public record has actually touched.
+    #
+    # This is the variable the k-curve pointed at. The error rate RISES with
+    # the declarer's own holding, which is selection: holding one card you only
+    # declare when the other five are pinned, while holding five leaves exactly
+    # one card that may never have moved and is then a coin flip between two
+    # teammates. If that story is right, "how many of these six have never been
+    # publicly located" should predict the error better than k does, and the
+    # k-effect should largely vanish once it is held fixed.
+    #
+    # `taken` is the strong notion: a successful ask publicly LOCATES a card in
+    # the asker's hand. `asked` is the weak one: a failed ask proves only that
+    # the target does not hold it, which constrains without locating.
+    taken, asked = set(), set()
+
     rows = []
     for _ in range(600):
         if st.is_terminal:
@@ -132,6 +149,10 @@ def _one(args) -> dict:
         hs = getattr(act, "half_suit", None)
         pre = list(st.hands) if hs is not None else None
         ev = st.apply(mover, act)
+        if isinstance(ev, AskEvent):
+            asked.add(ev.card)
+            if ev.success:
+                taken.add(ev.card)
         if not isinstance(ev, ClaimEvent) or pre is None:
             continue
         team = team_of(mover)
@@ -155,6 +176,10 @@ def _one(args) -> dict:
             "live": sum(1 for x in st.set_winner if x is None),
             "p_exact": (priced.get((mover, hs)) or (None, None))[0],
             "p_team": (priced.get((mover, hs)) or (None, None))[1],
+            "n_unmoved": sum(1 for c in range(hs * 6, hs * 6 + 6)
+                             if c not in taken),
+            "n_unasked": sum(1 for c in range(hs * 6, hs * 6 + 6)
+                             if c not in asked),
         })
     ClaimEvaluator.best_for_half_suit = real_bfh
     ours_sets = sum(1 for w in st.set_winner if w == our_team)
@@ -240,6 +265,39 @@ def report(games, vs) -> dict:
         print(f"  {p:<11}{n:>7}{w:>7}{_rate(n, w):>8.3f}"
               f"{sum(ks)/len(ks):>8.2f}{sum(kb)/len(kb):>13.2f}")
 
+    med = [c for c in whole if c.get("n_unmoved") is not None]
+    if med:
+        print(f"\n  the mediator: how many of the six have never been "
+              f"publicly LOCATED\n  (never taken by a successful ask)")
+        print(f"  {'unmoved':>8} {'n':>7} {'wrong':>7} {'err':>8}")
+        for u in sorted({c["n_unmoved"] for c in med}):
+            g = [c for c in med if c["n_unmoved"] == u]
+            w = sum(1 - c["right"] for c in g)
+            print(f"  {u:>8} {len(g):>7} {w:>7} {_rate(len(g), w):>8.3f}")
+        print(f"\n  and the k-effect HELD AT FIXED unmoved. If the k-curve is"
+              f"\n  selection on this variable, the rows should flatten.")
+        print(f"  {'unmoved':>8} " + " ".join(f"{'k=' + str(k):>9}"
+                                              for k in range(7)))
+        strat = {}
+        for u in sorted({c["n_unmoved"] for c in med}):
+            cells, row = [], {}
+            for k in range(7):
+                g = [c for c in med if c["n_unmoved"] == u and c["k"] == k]
+                if len(g) < 25:
+                    cells.append(f"{'-':>9}")
+                    continue
+                w = sum(1 - c["right"] for c in g)
+                cells.append(f"{_rate(len(g), w):>9.3f}")
+                row[str(k)] = {"n": len(g), "wrong": w,
+                               "err": _rate(len(g), w)}
+            print(f"  {u:>8} " + " ".join(cells))
+            if row:
+                strat[str(u)] = row
+        print("  (cells with fewer than 25 declarations are left blank rather"
+              "\n  than printed as a rate over a handful)")
+    else:
+        strat = {}
+
     cal = [c for c in whole if c["p_exact"] is not None]
     if cal:
         print(f"\n  is p_exact calibrated, and does that depend on how much "
@@ -263,6 +321,12 @@ def report(games, vs) -> dict:
         cal_out = {}
 
     return {"vs": vs, "n_games": len(games), "calibration_by_k": cal_out,
+            "err_by_unmoved": {
+                str(u): {"n": len([c for c in med if c["n_unmoved"] == u]),
+                         "wrong": sum(1 - c["right"] for c in med
+                                      if c["n_unmoved"] == u)}
+                for u in sorted({c["n_unmoved"] for c in med})} if med else {},
+            "err_by_unmoved_and_k": strat,
             "n_claims_ours": len(claims), "n_wholly_held": len(whole),
             "err_by_k": {str(k): {"n": by_k[k][0], "wrong": by_k[k][1],
                                   "err": curve[k]} for k in sorted(by_k)},
@@ -285,7 +349,18 @@ def main(n_deals=200, n_jobs=0, vs="v07") -> int:
                 print(f"  {i+1:,}/{len(todo):,}  "
                       f"{(time.time()-t0)/60:.1f} min", flush=True)
     out = report(games, vs)
+    # A smoke run must not overwrite a real one. This script writes to a fixed
+    # path, and an 8-game check of the instrumentation duly replaced an
+    # 1,800-game result with eight games of noise -- the same failure the
+    # confirm runners had when a scratch journal wrote into results/, arriving
+    # by a different route. The report is still printed; only the file is
+    # withheld, so a small run stays useful for what small runs are for.
     dest = ROOT / "results" / f"declarer_holding_{vs}.json"
+    if len(games) < MIN_GAMES_TO_WRITE:
+        print(f"\n{len(games)} games is below the {MIN_GAMES_TO_WRITE}-game "
+              f"floor for writing {dest.name}.\nReport above is complete; the "
+              f"file is left alone.")
+        return 0
     dest.write_text(json.dumps(out, indent=1))
     print(f"\nwrote results/{dest.name}")
     return 0
