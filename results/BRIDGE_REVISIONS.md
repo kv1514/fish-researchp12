@@ -64,6 +64,39 @@ decided sets, 80.41% of games won, zero substituted moves.
 | `foreign_m2_journal.jsonl` | 1 | Same common-mode argument as R2. |
 | `dialect_gap_journal.jsonl` | 1 | The three off-turn-declaration arms. Common-mode again; the arm *gaps* are what the finding rests on. |
 
+## The rev-2 era: everything measured on 2026-08-28 after the repair
+
+All of the following ran through rev 2 and carry `"rev": 2` where the journal
+has a revision field. None of the rev-1 caveats above apply to them.
+
+| journal / result | games | what it is |
+|---|---|---|
+| `g1_gamma_cost_journal.jsonl` | 1,600 | G1 of `prereg/gamma_policy_specific.md`. Three arms on identical deals. |
+| `stuck_gate_journal.jsonl` | 1,000 | `prereg/stuck_claim_gate.md`. Three arms on identical deals, with the path ledger. |
+| `camp_probe2.jsonl` | 600 | The disclosure decomposition, and the source of `margin_decomposition.json`. |
+| `acquisition_v07.json` | 800 | The volume/conversion split. Summary only; no journal. |
+| `forced_exhaustive_v07_journal.jsonl` | 1,000 | `prereg/forced_exhaustive.md`, secondary. |
+| `signal_gate_journal.jsonl` | 1,000 | `prereg/deadline_signalling.md`. |
+| `tempo_journal.jsonl` | 1,000 | `prereg/tempo_regime.md`. |
+
+Applying this file's own rule to them, because it is easier to write the
+distinction down now than to reconstruct it later:
+
+- **Paired contrasts, bridge-independent.** Every arm-versus-A difference in
+  G1, the gate, the forced search, the signalling gate and the tempo term.
+  Both arms share the bridge, so a defect in it cancels. These would survive a
+  rev 3.
+- **Absolutes, which are statements about rev 2 as well as the engines.** The
+  per-arm margins (`margin_A` in each result file), the whole of
+  `margin_decomposition.json` — including the headline that 61% of the margin
+  is declaration accounting — and the acquisition figures for turns, asks and
+  hit rate. If the bridge changes again these need re-measuring, not
+  repricing.
+
+The self-play journals are outside this ledger's scope entirely: they never
+touch the bridge. That includes `forced_exhaustive_journal.jsonl`,
+`forced_ceiling_self.json`, `path_ledger_self.json` and `tempo_regime.json`.
+
 ## The rule this file exists to enforce
 
 An absolute measured through a bridge is a statement about the bridge as

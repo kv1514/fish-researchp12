@@ -38,6 +38,7 @@ from fish.cards import NUM_PLAYERS, team_of
 from fish.engine import ClaimEvent, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
+from scripts4.journal import finish, in_flight, to_read
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
 SEED0 = 8_800_000
@@ -176,8 +177,13 @@ def report(rows) -> dict:
     print(f"  A_shipped {sum(base)/n:+.4f} sets/game")
     print(f"  B_full    {sum(r['B_full']['margin'] for r in rows)/n:+.4f}")
     print(f"       vs shipped: {m:+.4f}  [{m-1.96*se:+.4f}, {m+1.96*se:+.4f}]")
-    print("  The pre-registration predicted +0.028 and predicted that this\n"
-          "  interval would contain zero. It is reported, not acted on.")
+    lo, hi = m - 1.96 * se, m + 1.96 * se
+    print(f"  The pre-registration predicted +0.028 and predicted that this\n"
+          f"  interval would contain zero. It contains the prediction"
+          f"{'' if lo <= 0.028 <= hi else ' -- NO, it does not'}, and it does"
+          f"{'' if lo <= 0 <= hi else ' NOT'} contain zero.\n"
+          f"  Either way it is reported, not acted on: the ship criterion is\n"
+          f"  the primary.")
     out["margin"] = {"A": sum(base) / n,
                      "B": sum(r["B_full"]["margin"] for r in rows) / n,
                      "effect": round(m, 4),
