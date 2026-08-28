@@ -133,12 +133,21 @@ exist, and only one is free.
 - **Costly:** a deliberately failed ask, the signalling protocol. Priced at
   +0.1220 [+0.0291, +0.2149], below the ship bar, and it adds an error almost
   as often as it avoids one (52 games against 72). `prereg/deadline_signalling.md`.
-- **Free:** *who* declares. Any teammate may, on their own turn; the one
-  holding four cards of it guesses two while the one holding one guesses five,
-  and because the channel is frozen, waiting for a better-placed teammate
-  costs tempo and no information at all. `scripts4/declarer_holding.py` is the
-  instrument; a 12-game smoke put 29.6% of wholly-held declarations in the
-  hands of someone a teammate could have out-informed.
+- **Free, and it does not work.** *Who* declares. Any teammate may, on their
+  own turn, and 30.4% of wholly-held declarations are made by someone a
+  teammate could have out-informed — so the opportunity is there. But measured
+  over 16,156 of them (`scripts4/declarer_holding.py`,
+  `results/declarer_holding_self.json`) the error rate *rises* with the
+  declarer's own holding: 0.017 at one card, 0.068 at five, and trivially 0.000
+  at six. Selection, not skill: a player holding one card only declares when
+  the other five are publicly pinned, while holding five leaves exactly one
+  card that may never have moved and is then a coin flip between two teammates.
+  Deferring to the better-placed teammate would move declarations *up* that
+  curve. Closed without a pre-registration.
+
+  What it leaves behind is a better statement of the problem: the residual risk
+  on a wholly-held half-suit is not proportional to how much you are missing,
+  it is about whether what you are missing has ever moved in public.
 
 ### 4. Fix sampler bias
 The world sampler satisfies every constraint but is not uniform over the

@@ -361,10 +361,34 @@ channel that exists is a deliberately failed ask in the frozen suit, which
 certifies that you hold a card of it — and measured in play that costs a turn,
 gains +0.12 sets a game, and *adds* an error almost as often as it avoids one.
 
-**PROMISING** — the untested lever is that any member of the team may declare,
-on their own turn. Someone holding four of the six guesses two; someone holding
-one guesses five, and the information is frozen either way so waiting for the
-better-placed teammate costs tempo and nothing else.
+**REFUTED, and it inverted.** The obvious lever is that any member of the team
+may declare, on their own turn: someone holding four of the six guesses two,
+someone holding one guesses five, and the information is frozen either way so
+waiting for the better-placed teammate should cost tempo and nothing else.
+Measured over 16,156 wholly-held declarations, the error rate goes the other
+way — it *rises* with how much the declarer holds:
+
+| the declarer's own cards | n | error rate |
+|---|---|---|
+| 1 | 2,640 | 0.017 |
+| 2 | 2,024 | 0.048 |
+| 3 | 1,282 | 0.042 |
+| 4 | 1,494 | 0.063 |
+| 5 | 1,830 | 0.068 |
+| 6 | 6,468 | 0.000 |
+
+Six is trivially perfect: you hold every card and there is nothing to name.
+Over the rest it is selection. A player holding *one* card of a half-suit only
+declares it when the other five are already pinned by the public record — those
+are the positions where the information happened to be there. Holding *five*
+leaves exactly one card unaccounted for, and if that card never moved in public
+it is a coin flip between two teammates, on a set that feels certain.
+
+**The lesson for a player is the useful part.** Your risk on a set your team
+wholly holds is not proportional to how many of it you are missing. It is about
+whether the cards you are missing have ever moved. Five in your hand and one
+that was dealt and never asked for is a **worse** position than one in your hand
+and five that have all been seen — and it does not feel that way.
 
 ---
 
