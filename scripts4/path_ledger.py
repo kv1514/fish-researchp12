@@ -102,7 +102,7 @@ def _one(args) -> dict:
             mover = st.turn
             seen.pop(mover, None)
             act = agents[mover].act(Observation.from_state(st, mover))
-            tr = agents[mover].last_trace
+            tr = getattr(agents[mover], "last_trace", None)
             ev = st.apply(mover, act)
             if not isinstance(ev, ClaimEvent):
                 continue
