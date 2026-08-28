@@ -83,7 +83,16 @@ def _one(args) -> dict:
         elif vs == "v07":
             agents.append(make_agent(("dylan_v07", {})))
         else:
-            agents.append(make_agent(("fishbot4", dict(V06_DEPLOYED[1]))))
+            # trace=True on BOTH sides in self-play. Without it the opposing
+            # seats carry no trace, `why` is empty, and _path_of drops every
+            # one of their declarations into "other" -- which is exactly what
+            # the first 1,800-game run did: 8,078 declarations in "other"
+            # against 8,078 across the four real paths, the two halves equal
+            # to the card. A path ledger whose largest bucket is "unattributed"
+            # is not a ledger, and it looked like a finding about self-play
+            # rather than a missing keyword argument.
+            agents.append(make_agent(("fishbot4",
+                                      dict(V06_DEPLOYED[1], trace=True))))
     st = GameState.deal(rules, seed=deal_seed)
     for p, a in enumerate(agents):
         a.begin_game(p, rules, AGENT0 + deal_seed * 13 + p)

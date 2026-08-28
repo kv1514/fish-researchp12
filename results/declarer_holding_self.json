@@ -1,67 +1,72 @@
 {
  "vs": "self",
- "n_games": 12,
- "n_claims_ours": 54,
- "n_wholly_held": 54,
+ "n_games": 1800,
+ "n_claims_ours": 16200,
+ "n_wholly_held": 16156,
  "err_by_k": {
   "0": {
-   "n": 1,
-   "wrong": 0,
-   "err": 0.0
+   "n": 418,
+   "wrong": 2,
+   "err": 0.004784688995215311
   },
   "1": {
-   "n": 9,
-   "wrong": 0,
-   "err": 0.0
+   "n": 2640,
+   "wrong": 46,
+   "err": 0.017424242424242425
   },
   "2": {
-   "n": 6,
-   "wrong": 0,
-   "err": 0.0
+   "n": 2024,
+   "wrong": 98,
+   "err": 0.04841897233201581
   },
   "3": {
-   "n": 7,
-   "wrong": 0,
-   "err": 0.0
+   "n": 1282,
+   "wrong": 54,
+   "err": 0.0421216848673947
   },
   "4": {
-   "n": 8,
-   "wrong": 0,
-   "err": 0.0
+   "n": 1494,
+   "wrong": 94,
+   "err": 0.06291834002677377
   },
   "5": {
-   "n": 6,
-   "wrong": 0,
-   "err": 0.0
+   "n": 1830,
+   "wrong": 124,
+   "err": 0.06775956284153005
   },
   "6": {
-   "n": 17,
+   "n": 6468,
    "wrong": 0,
    "err": 0.0
   }
  },
- "not_best_placed": 16,
- "bound_wrong_per_game_saved": 0.0,
+ "not_best_placed": 4912,
+ "bound_wrong_per_game_saved": -0.10478962979442213,
  "by_path": {
+  "other": {
+   "n": 8078,
+   "wrong": 209,
+   "err": 0.025872740777420154
+  },
   "voluntary": {
-   "n": 43,
+   "n": 6369,
    "wrong": 0,
    "err": 0.0
   },
   "exact": {
-   "n": 7,
+   "n": 970,
    "wrong": 0,
    "err": 0.0
   },
   "forced": {
-   "n": 2,
-   "wrong": 0,
-   "err": 0.0
+   "n": 335,
+   "wrong": 143,
+   "err": 0.42686567164179107
   },
   "gate": {
-   "n": 2,
-   "wrong": 0,
-   "err": 0.0
+   "n": 404,
+   "wrong": 66,
+   "err": 0.16336633663366337
   }
  }
 }
