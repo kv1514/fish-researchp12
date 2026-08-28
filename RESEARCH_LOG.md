@@ -21,7 +21,7 @@ moved since. Ranked by measured size, not by how interesting the problem is.
 
 | rank | bottleneck | evidence | status |
 |---|---|---|---|
-| 1 | We cannot locate our own teammates' cards | 0.1676 of our 0.1759 wrong declarations a game are allocation class -- our team held all six and we named the wrong split. Ownership errors are 0.0083 a game (`results/margin_decomposition.json`) | open, and the largest single lever left. See rank 2 for why it is hard |
+| 1 | We cannot locate our own teammates' cards | 0.1676 of our 0.1759 wrong declarations a game are allocation class -- our team held all six and we named the wrong split. Ownership errors are 0.0083 a game (`results/margin_decomposition.json`). Now priced as HEADROOM and not merely as errors: a cheating arm handed its teammates' cards gains **+3.4100** [+3.1625, +3.6575] sets/game, against **+1.3067** [+1.0070, +1.6063] for one handed the opponents' (`results/ceiling_split.json` -- bounds, not strength) | open, and the largest single lever left. See rank 2 for why it is hard |
 | 2 | The channel freezes before the question is asked | once a team holds all six, `legal_asks` bars every opponent from asking there, so no ask will ever again NAME one of those cards -- though public hand counts still constrain it, and a teammate whose quota reaches zero is excluded from every unresolved card. The team jointly knows the answer and no member does: a distributed-knowledge problem, not an inference one | the only channel is a deliberately failed ask, priced at +0.1220 [+0.0291, +0.2149] and adding an error almost as often as it avoids one (`prereg/deadline_signalling.md`) |
 | 3 | The ask objective charges a constant rate for a turn whose price is not constant | a turn is free below p_best = 0.50 and costs ~+0.45 above it; 53% of ask decisions are in the free regime and pay the full charge | 1,000 games give +0.2280 [+0.0076, +0.4484], which ships under the pre-registration as written and not under the runner's stricter reading. An 8,000-game replication decides it |
 | 4 | Sampling is not uniform over consistent worlds | OR seeding and quota weighting skew draws | open since session 2: needs importance weighting or MCMC refinement. Every probability the engine reports inherits this |
@@ -592,6 +592,45 @@ re-prices around. The table is a statement about the cheap estimator, not
 about the engine's confidence, and it is recorded here so that nobody
 (including me) later quotes it as the latter. The gap does not trend with k,
 so it gives no reason to think `forced_claim`'s argmax is distorted.
+
+### Teammate knowledge is worth 2.6x opponent knowledge, and I predicted the reverse
+
+`prereg/information_ceiling_split.md`, 600 games per arm. **Every figure here is
+a bound obtained by cheating** -- not strength, never in a ladder, never beside
+an honest margin.
+
+| arm | ceiling over honest |
+|---|---|
+| teammates' cards known | **+3.4100** [+3.1625, +3.6575] |
+| opponents' cards known | **+1.3067** [+1.0070, +1.6063] |
+| everything known | +6.6067 [+6.4004, +6.8129] |
+
+I registered the opposite prediction, and the reasoning behind it: knowing
+opponents' cards makes every ask land, while knowing teammates' cards only
+improves a declaration on a set already assembled -- so the error ledger
+measures where our mistakes are rather than where our headroom is. That was
+wrong. **The error ledger's 95/5 split does translate into an information-value
+split**, and the rank-1 entry in the table above is ranked correctly.
+
+Two things about the mechanism table are worth separating.
+
+**The teammate arm's zero allocation errors are definitional, not evidence.** A
+seat that knows every teammate's cards and its own reads the split off rather
+than inferring it. Registering that as a mechanism check was a design mistake:
+a check that cannot fail cannot confirm.
+
+**The opponent arm's 2.4950 allocation errors a game are the informative cell**
+-- sixteen times the honest baseline. Perfect opponent knowledge zeroes
+ownership errors as expected and leaves the split exactly as hidden, while the
+engine assembles far more sets. A hypothesis for the rate rising, consistent
+with this session's mediator result and NOT measured here: an engine that never
+misses an ask assembles half-suits fast, before the public record has located
+anything, so it declares sets whose cards have never moved.
+
+And they are **sub-additive**: T + O = +4.7167 against F = +6.6067. The
+registration braced for the opposite -- that the elimination effect would make
+the halves over-count -- so the two kinds of knowledge are complementary rather
+than overlapping. Knowing where a card is not only helps if you can act on it.
 
 ### Shipped
 

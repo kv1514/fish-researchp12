@@ -125,3 +125,86 @@ and not about where our *headroom* is, and those are different questions that
 this project has been at risk of conflating — including in the bottleneck table
 I rewrote in `RESEARCH_LOG.md` this morning, which ranks the teammate problem
 first on error share alone.
+
+---
+
+# Outcome: the prediction was wrong, and the error ledger was right
+
+Run 2026-08-28, `scripts4/ceiling_split.py 300 3`, 600 games per arm on
+identical deals, both parities, `BRIDGE_REV = 2`, zero fallbacks, zero
+unfinished. `results/ceiling_split.json`.
+
+**Every figure below is a bound obtained by cheating.** None is a strength
+measurement, none belongs in a ladder, and none may be quoted beside an honest
+margin.
+
+| arm | margin | ceiling over honest |
+|---|---|---|
+| A honest | +2.3033 | — |
+| **T** teammates' cards known | +5.7133 | **+3.4100** [+3.1625, +3.6575] |
+| **O** opponents' cards known | +3.6100 | **+1.3067** [+1.0070, +1.6063] |
+| F everything known | +8.9100 | +6.6067 [+6.4004, +6.8129] |
+
+## The registered prediction, and how wrong it was
+
+I predicted **O would beat T**, reasoning that knowing opponents' cards makes
+every ask land while knowing teammates' cards only improves a declaration on a
+set already assembled — and I wrote that this would be "surprising to anyone
+reading only the error ledger", and that the error ledger measures where our
+mistakes are rather than where our headroom is.
+
+T beats O by a factor of **2.6**. The error ledger was right and my gloss on it
+was wrong: the allocation/ownership split *does* translate into an
+information-value split, and the bottleneck table in `RESEARCH_LOG.md` that
+ranks the teammate problem first on error share alone is ranking it correctly.
+
+## What the mechanism table does and does not show
+
+| arm | allocation/game | ownership/game |
+|---|---|---|
+| A honest | 0.1533 | 0.0083 |
+| T | **0.0000** | 0.0000 |
+| O | **2.4950** | 0.0000 |
+| F | 0.0000 | 0.0000 |
+
+**T's zero is definitional, not evidence.** A seat that knows every teammate's
+cards and its own knows the whole team's holding, so the split is not inferred
+— it is read off. Registering that as a mechanism check was a mistake: the
+check cannot fail, so it cannot confirm anything either.
+
+**O's 2.4950 is the informative cell**, and it is sixteen times the honest
+baseline. Perfect opponent knowledge means never claiming a half-suit an
+opponent still holds — ownership errors go to zero, as expected — while the
+split among teammates stays exactly as hidden as before. The engine assembles
+far more sets and misplaces a far larger share of them.
+
+There is a hypothesis for *why* the rate rather than merely the count rises,
+and it is this session's own mediator result: what a declaration risks is how
+many of its six cards have never been publicly located. An engine that never
+misses an ask assembles half-suits **fast**, before the public record has
+located anything, so it declares sets whose cards have never moved. That is
+consistent with `results/declarer_holding_self.json` and it is **not measured
+here** — the ceiling runner does not record the unlocated count, and this
+paragraph is a hypothesis rather than a result.
+
+## Sub-additive, which is the opposite of what the registration braced for
+
+$T + O = +4.7167$ against $F = +6.6067$. The registration included the
+omniscient arm expecting the *elimination* effect to make the two halves
+over-count — "if team + opp exceeds all, that is the elimination effect being
+double-counted". They fall short instead by $1.89$ sets, so the two kinds of
+knowledge are **complementary**: holding both is worth more than the sum of
+holding each alone. The reason is plain once seen — knowing where a card is not
+only helps if you can act on it, and acting requires knowing whose turn it is
+worth taking.
+
+## Consequence for task #53
+
+Transcript inversion aimed at **teammates** is the priority, and this is the
+run that licenses saying so. It is also the safe half of that idea: teammates
+run the same engine, so their policy is known exactly, where the opponent
+choice model has already been measured with the wrong sign ($-1.0041$
+[$-1.1434$, $-0.8648$] against our own $+1.2071$).
+
+The ceiling is $+3.4100$ and no realistic inference gets near it. But it is now
+a measured target rather than a guess, and it is 2.6 times the other one.
