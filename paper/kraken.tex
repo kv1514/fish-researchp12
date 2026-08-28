@@ -5,7 +5,6 @@
 % =====================================================================
 \documentclass[11pt,a4paper]{article}
 
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 % Times for text and maths, Helvetica for headings. This is the conventional
 % pairing for a journal-style paper, and it also shrinks the file by an order
@@ -3071,7 +3070,8 @@ one guesses five. Over $1{,}800$ self-play games and $16{,}156$ wholly-held
 declarations, $30.4\%$ were made by a player a teammate could have
 out-informed, so the opportunity is real. The lever is not:
 
-\begin{center}
+\begin{table}[t]
+\centering
 \small
 \begin{tabular}{lrrlrr}
 \toprule
@@ -3085,7 +3085,9 @@ declarer's own cards & $n$ & error & & $n$ & error \\
 6 & $6{,}468$ & $0.000$ & \hspace{1em} 6 & $342$ & $0.088$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{The declarer-holding lever against the mediator, on the same $16{,}156$ wholly-held declarations. \emph{Left:} error rate by how many of the six the declarer holds --- the lever, which is not monotone and peaks at five. \emph{Right:} by how many have never been publicly located, which is what the risk actually tracks. Figure~\ref{fig:mediator} plots both with intervals.}
+\label{tab:mediator}
+\end{table}
 
 The error rate \emph{rises} with the declarer's own holding, so deferring to
 the better-placed teammate would move declarations up that curve. Six is
@@ -4178,7 +4180,8 @@ run already holds every scored ask, so we checked it before spending anything.
 Eighteen candidate bases, each scored by \emph{leave-one-position-out}
 cross-validated within-position $R^2$ (position-level folds, because asks inside
 a position share worlds, seeds and a value level):
-\begin{center}
+\begin{table}[t]
+\centering
 \begin{tabular}{lrr}
 \toprule
 basis & CV $R^2$ & vs.\ the full basis \\
@@ -4191,7 +4194,9 @@ $\Prob(\text{success})$ alone & $0.0430$ & $-0.0530 \pm 0.0234$ \\
 principal components, $k = 4$ & $0.0150$ & $-0.0809 \pm 0.0306$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{Eighteen candidate bases for the ask objective, scored by leave-one-position-out cross-validated within-position $R^2$. Folds are at the position level because asks inside one position share worlds, seeds and a value level, so an ask-level fold would leak. Six representative rows; selecting the strongest three terms \emph{within} each fold is the only basis that beats the full one, and by less than twice its own standard error.}
+\label{tab:basis}
+\end{table}
 The best of them beats the basis in use by $+0.0070 \pm 0.0038$, an interval
 that \emph{contains zero}. Ranked by point estimate a three-term basis wins;
 measured against the spread across positions, nothing here is distinguishable
@@ -4709,7 +4714,8 @@ believe.
 Homogeneous tables of each champion, 100 games each, on the measures v0.3 used
 to characterise skill:
 
-\begin{center}
+\begin{table}[t]
+\centering
 \small
 \begin{tabular}{lrr}
 \toprule
@@ -4725,7 +4731,9 @@ claim delay, median / p90 (actions) & 0 / 58 & 0 / 49 \\
 first-move advantage & $+0.23$ $[-0.27, +0.73]$ & $+0.32$ $[-0.22, +0.86]$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{Homogeneous tables of each champion, 100 games each, on the measures v0.3 used to characterise skill. The v0.4 champion is stronger and looks worse on almost every one of them: it gains fewer cards per possession and fails more asks. These statistics stop tracking strength once the engine is willing to spend a turn buying information.}
+\label{tab:analytics}
+\end{table}
 
 Three of these reproduce v0.3 and one contradicts it.
 
@@ -5133,7 +5141,8 @@ scored where it stands. At $m = 2$ that case is routine --- 2,821 deals over
 the run --- and at $m = 1$ it never happens once, which is why the fault was
 invisible in the layer above.
 
-\begin{center}
+\begin{table}[t]
+\centering
 \begin{tabular}{lr}
 \toprule
 pinned positions matching the closed form & $34/34$ \\
@@ -5147,7 +5156,9 @@ exact gain from deviating & $\mathbf{+0.3250}$ \\
 negative entries & $\mathbf{0/109}$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{The $m = 2$ layer of the exact imperfect-information solve, with the controls that need no ground truth. The three agreement checks are what caught the two solver faults; the zero negative entries are the post-fix state of the defect that produced impossible negative gains.}
+\label{tab:m2}
+\end{table}
 
 \paragraph{This number is not comparable with $m = 1$'s, and the reason is
 coverage.} Only 109 of 313 genuinely hidden positions were solved ---
@@ -5330,7 +5341,8 @@ For completeness, what the comparison showed before that was known --- and
 which nothing above licenses reading as a fact about Fish. Splitting at the
 study's $24$:
 
-\begin{center}
+\begin{table}[t]
+\centering
 \begin{tabular}{lrr}
 \toprule
 support & one-ply gain & $n$ \\
@@ -5343,7 +5355,9 @@ $61$--$150$   & $+0.1155$ & $19$ \\
 $151$ and up  & $+0.1899$ & $27$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{One-ply gain against belief support at $m = 1$, split at the study's $24$. Reported for completeness and \emph{not} as a fact about Fish: \S\ref{sec:noneq} shows the cheap instrument's looseness grows with support ($t = +6.27$), so the fall-off in the last two rows is the instrument losing its grip rather than the game getting easier.}
+\label{tab:support}
+\end{table}
 
 At or below the cap it averages $+0.2541$ ($n = 169$); above it, $+0.2350$
 ($n = 79$); Welch $t = -0.42$. Taken at face value that says the rise stops.
@@ -6190,7 +6204,8 @@ arms plus an unmodified baseline each played $500$ games against three
 copies of v0.7 on identical deals and rotations, paired against the
 baseline: $4{,}000$ games, zero substituted moves.
 
-\begin{center}
+\begin{table}[t]
+\centering
 \begin{tabular}{lrr}
 \toprule
 arm & paired $\Delta$ vs.\ baseline & margin over v0.7 \\
@@ -6205,7 +6220,9 @@ silence $\delta = 0.7$           & $-0.1960\ [-0.4775, +0.0855]$ & $+2.536$ \\
 silence $\delta = 0.9$           & $-0.2880\ [-0.4883, -0.0877]$ & $+2.444$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{Seven arms against three copies of v0.7 on identical deals and rotations, each paired against an unmodified baseline: $4{,}000$ games, zero substituted moves. Every arm loses, and the two largest weights lose most --- a dose-response, which refutes the mechanism rather than merely failing to find it.}
+\label{tab:contestation}
+\end{table}
 
 Every arm is negative; four are significantly so, and the largest positive
 dose is the worst cell in the table. No arm clears the registered bar, so
@@ -6517,7 +6534,8 @@ both are refuted --- not as nulls, but with a dose-response, which is the more
 informative outcome because the gradient confirms the mechanism rather than
 merely the sign. All cells are 200 duplicate deal-pairs against the champion.
 
-\begin{center}
+\begin{table}[t]
+\centering
 \small
 \begin{tabular}{lrl}
 \toprule
@@ -6533,7 +6551,9 @@ tie-breakers up when behind, $w_{\mathrm{behind}} = 1.00$ & $\mathbf{-0.890}$ & 
 tie-breakers down when behind, $w_{\mathrm{behind}} = -0.50$ & $-0.075$ & $[-0.552, +0.402]$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\caption{Two ideas for the information the engine does not carry between turns, each ablatable to zero and each refuted with a dose-response. All cells are duplicate deal-pairs against the champion. The gated and sign-reversed rows are the controls: both are flat, so the loss is the term firing where no duel exists rather than the duel being mispriced.}
+\label{tab:memory}
+\end{table}
 
 \emph{Breaking the duel} penalises taking back a card this seat just lost to that
 same opponent. Section~\ref{sec:game} notes that the state graph is cyclic
