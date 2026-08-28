@@ -1,0 +1,171 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 2,
+ "n_games": 90,
+ "min_interesting": 0.15,
+ "margin_A": 2.1777777777777776,
+ "arms": {
+  "B_turnsized": {
+   "params": {
+    "w_concent": 0.6
+   },
+   "effect": 0.37777777777777777,
+   "ci95": [
+    -0.22243433435703763,
+    0.9779898899125932
+   ],
+   "ships_by_document": false,
+   "ships_by_stricter_reading": false,
+   "margin": 2.5555555555555554,
+   "verdict": "no detectable difference"
+  },
+  "C_dose": {
+   "params": {
+    "w_concent": 1.5
+   },
+   "effect": 0.1111111111111111,
+   "ci95": [
+    -0.5796487660781524,
+    0.8018709883003745
+   ],
+   "ships_by_document": false,
+   "ships_by_stricter_reading": false,
+   "margin": 2.2888888888888888,
+   "verdict": "no detectable difference"
+  }
+ },
+ "ledger": {
+  "A_shipped": {
+   "exact": {
+    "n": 62,
+    "per_game": 0.6889,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 334,
+    "per_game": 3.7111,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "gate": {
+    "n": 24,
+    "per_game": 0.2667,
+    "wrong": 6,
+    "err": 0.25
+   },
+   "forced": {
+    "n": 25,
+    "per_game": 0.2778,
+    "wrong": 7,
+    "err": 0.28
+   },
+   "_wrong_per_game": 0.1444
+  },
+  "B_turnsized": {
+   "exact": {
+    "n": 72,
+    "per_game": 0.8,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 336,
+    "per_game": 3.7333,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "gate": {
+    "n": 27,
+    "per_game": 0.3,
+    "wrong": 7,
+    "err": 0.2593
+   },
+   "forced": {
+    "n": 17,
+    "per_game": 0.1889,
+    "wrong": 7,
+    "err": 0.4118
+   },
+   "_wrong_per_game": 0.1556
+  },
+  "C_dose": {
+   "exact": {
+    "n": 79,
+    "per_game": 0.8778,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 327,
+    "per_game": 3.6333,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "gate": {
+    "n": 20,
+    "per_game": 0.2222,
+    "wrong": 6,
+    "err": 0.3
+   },
+   "forced": {
+    "n": 16,
+    "per_game": 0.1778,
+    "wrong": 9,
+    "err": 0.5625
+   },
+   "_wrong_per_game": 0.1667
+  }
+ },
+ "tempo": {
+  "A_shipped": {
+   "turns_per_game": 56.9778,
+   "asks_per_game": 51.7667,
+   "landed_per_game": 27.5889,
+   "hit_rate": 0.5329
+  },
+  "B_turnsized": {
+   "turns_per_game": 56.2,
+   "asks_per_game": 50.8778,
+   "landed_per_game": 27.8556,
+   "hit_rate": 0.5475
+  },
+  "C_dose": {
+   "turns_per_game": 58.0,
+   "asks_per_game": 52.8,
+   "landed_per_game": 28.4333,
+   "hit_rate": 0.5385
+  }
+ },
+ "mechanism": {
+  "A_shipped": {
+   "allocation_per_game": 0.14444444444444443,
+   "ownership_per_game": 0.0,
+   "wholly_held_declarations": 445,
+   "mean_best_share": 0.8187265917602998,
+   "mean_declarer_share": 0.6730337078651686
+  },
+  "B_turnsized": {
+   "allocation_per_game": 0.15555555555555556,
+   "ownership_per_game": 0.0,
+   "wholly_held_declarations": 452,
+   "mean_best_share": 0.8237463126843656,
+   "mean_declarer_share": 0.6858407079646015,
+   "allocation_fell": false,
+   "concentration_rose": true
+  },
+  "C_dose": {
+   "allocation_per_game": 0.15555555555555556,
+   "ownership_per_game": 0.011111111111111112,
+   "wholly_held_declarations": 441,
+   "mean_best_share": 0.8227513227513226,
+   "mean_declarer_share": 0.6504157218442931,
+   "allocation_fell": false,
+   "concentration_rose": true
+  }
+ },
+ "bridge_fallbacks": 0,
+ "unfinished": 0
+}

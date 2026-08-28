@@ -1856,6 +1856,36 @@ async function openDeclare() {
       verdict.appendChild(el("p", "declnum",
         `<b>${pctFine(r.p_team)}</b> — the chance your team holds all six, `
         + `however they are divided.`));
+      /* Which of the six you are actually choosing.
+       *
+       * A player looking at six dropdowns cannot tell which of them the public
+       * record has already settled and which are guesses, and the difference is
+       * the entire allocation problem: of the misplaced cards in the engines'
+       * own disclosure probe, 398 of 398 had never moved in public. Once a team
+       * holds all six of a half-suit no opponent may legally ask in it, so
+       * nothing can ever locate the rest -- the split freezes with exactly the
+       * dealt-and-never-asked-for cards still unknown.
+       *
+       * Not a hint. A pinned card is pinned BY THE PUBLIC RECORD, derivable by
+       * anyone at the table from events everybody saw, which is the same
+       * boundary the proof sheet already sits on.
+       */
+      if (Array.isArray(r.free) && Array.isArray(r.pinned)
+          && (r.free.length || r.pinned.length)) {
+        const f = r.free.length;
+        verdict.appendChild(el("p", "dim",
+          f === 0
+            ? "Every card here is pinned by the public record — there is "
+              + "nothing left to guess."
+            : `${r.pinned.length} of the six ${r.pinned.length === 1
+                ? "is" : "are"} pinned by the public record. The `
+              + `${f === 1 ? "other one is a guess" : `other ${f} are guesses`}`
+              + `: ${r.free.slice(0, 4).map(face).join(" ")}`
+              + `${f > 4 ? ` and ${f - 4} more` : ""}. Those are the cards `
+              + `that were dealt and never asked for, and once your team holds `
+              + `all six no opponent may ask in this suit again — so nothing `
+              + `that happens later will place them.`));
+      }
       if (r.p_team - r.p_exact > 0.15) {
         verdict.appendChild(el("p", "dim",
           "Your team probably has it, but you have not placed the split. "

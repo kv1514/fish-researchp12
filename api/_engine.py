@@ -918,12 +918,32 @@ class Session:
         # obviously a card in the player's OWN hand assigned to a teammate.
         # `current_holder_mask` is the propagator's full answer and is the
         # same one the proof sheet reads.
+        # Which of the six the public record PINS, and which are guesses.
+        #
+        # This is the distinction the whole allocation problem turns on and it
+        # is not visible anywhere on the page. Of the misplaced cards in the
+        # disclosure probe, 398 of 398 were cards that had never moved in
+        # public (results/margin_decomposition.json): once a team holds all six
+        # of a half-suit no opponent may legally ask in it, so nothing further
+        # can ever locate the rest, and the split is frozen with exactly the
+        # cards that were dealt and never asked for still unknown.
+        #
+        # A player looking at six dropdowns cannot tell which three of them
+        # they are actually choosing. Saying so is not a hint -- a pinned card
+        # is pinned BY THE PUBLIC RECORD, derivable by anyone at the table from
+        # events they all saw, which is the same boundary `deductions` sits on.
+        pinned, free = [], []
         refuted = []
         for c, want in zip(cards, owners):
             try:
                 m = ctx.bel.current_holder_mask(c)
             except Exception:
                 m = None
+            if m and not (m & (m - 1)):
+                pinned.append({"card": card_name(c),
+                               "player": m.bit_length() - 1})
+            else:
+                free.append(card_name(c))
             if m and not (m >> want & 1):
                 mine = bool(obs.hand >> c & 1)
                 if mine:
@@ -936,6 +956,7 @@ class Session:
         return {"half_suit": hs, "assignment": owners,
                 "p_exact": round(yours, 6), "p_team": round(team_all, 6),
                 "impossible": bool(refuted), "refuted": refuted,
+                "pinned": pinned, "free": free,
                 "engine": engine}
 
     def analysis(self) -> dict:

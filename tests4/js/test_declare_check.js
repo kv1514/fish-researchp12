@@ -80,6 +80,8 @@ async function open() {
   const want = cardSels.map((s) => +s.value);
   replies.push({ half_suit: 0, assignment: want, p_exact: 0.12,
                  p_team: 0.83,
+                 pinned: [{ card: "2S", player: 0 }, { card: "3S", player: 2 }],
+                 free: ["4S", "5S", "6S", "7S"],
                  engine: { p_exact: 0.44, assignment: [0, 0, 2, 2, 4, 4],
                            same: false } });
   const buttons = b.querySelectorAll("button");
@@ -98,6 +100,19 @@ async function open() {
   assert.ok(/12%/.test(after), "the player's own split was not priced");
   assert.ok(/44%/.test(after), "the engine's figure was not revealed");
 
+  /* --- 5b. and the player is told which of the six they are guessing ---
+   *
+   * The allocation problem in one sentence: 398 of 398 misplaced cards in the
+   * engines' disclosure probe had never moved in public. A player facing six
+   * dropdowns cannot tell which the record has already settled, and that is
+   * exactly the set of cards their mistakes will come from. */
+  assert.ok(/2 of the six are pinned/.test(after),
+    "the pinned count was not shown: " + after.slice(0, 900));
+  assert.ok(/other 4 are guesses/.test(after),
+    "the guessed cards were not named as such");
+  assert.ok(/no opponent may ask in this suit again/.test(after),
+    "the panel did not say why the guesses will never be resolved");
+
   /* --- 6. a small probability must not round to the same thing as zero --- *
    * Driving the real page showed three "0%" in a row, because pct() rounds to
    * a whole percent and every opening split is well under one. Unlikely, very
@@ -113,7 +128,7 @@ async function open() {
 
   /* --- 7. a refuted split is stated as a proof, not priced as a long shot --- */
   replies.push({ half_suit: 0, assignment: want, p_exact: 0.0, p_team: 0.004,
-                 impossible: true,
+                 impossible: true, pinned: [], free: [],
                  refuted: [{ card: "2S", why: "you are holding it yourself" }],
                  engine: null });
   await check.onclick();
