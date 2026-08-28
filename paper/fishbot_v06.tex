@@ -2048,6 +2048,71 @@ the sweep of Table~\ref{tab:gamma}: it is the unique exponent at which this
 likelihood is correctly specified. That sweep never tested it; $0.90$ and $1.50$
 bracket it at 150 pairs each, an MDE of $0.87$, which separates nothing.
 
+\paragraph{Every number above was measured on one population, and against a
+foreign policy the exponent changes sign.} The corpus behind
+Table~\ref{tab:choicecurve} is this engine playing a copy of itself. That is
+the population the opponent model is used in \emph{when the table is all one
+engine}, and it is also the one population in which the assumption cannot
+fail: a policy that asks where it is deep, modelled by a policy that assumes
+opponents ask where they are deep, will confirm itself.
+
+The obvious control had never been run. Repeating the identical design ---
+same alternatives, same covariate, same conditional likelihood, same block
+bootstrap over deals, with only \emph{whose asks are recorded} changed ---
+against v0.7 over $6{,}090$ of its asks in $150$ cross-engine games gives
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+depth on the initial deal & $1$ & $2$ & $3$ & $4$ \\
+\midrule
+observed / expected & $1.258$ & $0.762$ & $0.548$ & $0.656$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent and a fitted $\alpha = \mathbf{-1.0041}$, 95\%
+$[-1.1434, -0.8648]$, against this engine's own $+1.2071$ on the same
+estimator. The signs are opposite and the exponents lie $2.21$ apart. A
+sampler applying $\gamma = +0.35$ to that seat is not merely mis-scaled; it
+re-weights the world set in the wrong direction on every one of that seat's
+asks, and every marginal the ask objective and the declaration gate read is
+drawn from the result.
+
+The mechanism was written down in this project before it was checked, and then
+not checked. Section~\ref{sec:res-choicecurve}'s own premise notes that depth
+and opportunity pull opposite ways --- holding five of six leaves one card to
+ask for, holding one of six leaves five --- so linear-in-depth was never
+obviously right \emph{in sign}. v0.7's objective is dominated by a single
+coefficient on $\Prob(\text{success})$ roughly three times its next largest,
+which is precisely the objective that prefers the shallower half-suit because
+it offers more cards to name. What the self-play corpus measured was not a law
+of the game but a fixed point of one policy against itself.
+
+Two conclusions, and the second is the load-bearing one. The narrow one is
+that the limit on this model is not the curve's shape (worth $110$ nats) or
+even the covariate (worth $4{,}654$): it is that a single global exponent
+cannot describe a mixed table, and both of those bounds were computed inside
+the population where the exponent happens to be constant. The broad one is a
+warning this paper is in a position to give and few others are: \emph{an
+opponent model validated only in self-play has been validated against the
+assumption it encodes}. Nothing in the fit diagnostics of
+\S\ref{sec:res-choicecurve} --- not the $1402$-nat margin over $\alpha = 0$,
+not the saturated-alternative comparison, not the phase split --- could have
+detected this, because all of them are computed on the same self-consistent
+corpus. It took a second engine.
+
+We are deliberately not shipping a per-seat exponent on the strength of this.
+The measurement identifies where our inference is wrong about \emph{one}
+opponent, and \S\ref{sec:critic} records what happened the last time this
+project turned an opponent-model discrepancy into a knob: the gains grew with
+the dose and evaporated against a third engine, because what was being
+measured was deception of a sibling's inference rather than strength. A
+per-seat exponent fitted on v0.7 and validated on v0.7 would reproduce that
+error exactly. It needs its own pre-registration and a foreign opponent that
+is not the one it was fitted on.
+
 \paragraph{And in play, it is real and not worth buying.}
 \label{sec:res-atask} Everything above is an
 argument from likelihood and from a normaliser, not from a duel, so the

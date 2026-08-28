@@ -703,6 +703,27 @@ WATCH = [
     # than most rows, because a retraction is the one kind of number a project
     # has an incentive to let rot: every figure the correction turns on is
     # here, including the two accuracies that form its control.
+    # The foreign choice curve: the opponent model measured against a policy
+    # that is not a copy of ourselves. Watched in full because the whole point
+    # is a sign, and a sign that drifts silently is the worst kind of stale.
+    ("choice_curve_foreign.json", "alpha", "{:+.4f}",
+     "foreign choice-model exponent", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
+    ("choice_curve_foreign.json", "ci95.0", "{:+.4f}",
+     "foreign exponent CI low", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
+    ("choice_curve_foreign.json", "ci95.1", "{:+.4f}",
+     "foreign exponent CI high", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
+    ("choice_curve_foreign.json", "n_records", "{:,d}",
+     "foreign asks in the corpus", "against v0.7 over"),
+    ("choice_curve_foreign.json", "n_games", "{:d}",
+     "foreign cross-engine games", "cross-engine games gives"),
+    ("choice_curve_foreign.json", "curve.1.relative", "{:.3f}",
+     "foreign O/E at depth 1", "observed / expected"),
+    ("choice_curve_foreign.json", "curve.2.relative", "{:.3f}",
+     "foreign O/E at depth 2", "observed / expected"),
+    ("choice_curve_foreign.json", "curve.3.relative", "{:.3f}",
+     "foreign O/E at depth 3", "observed / expected"),
+    ("choice_curve_foreign.json", "curve.4.relative", "{:.3f}",
+     "foreign O/E at depth 4", "observed / expected"),
     ("bridge_bug_price.json", "paired_difference", "{:+.4f}",
      "price of the bridge defect", "sets per game: real, and about"),
     ("bridge_bug_price.json", "ci95.0", "{:+.4f}",
