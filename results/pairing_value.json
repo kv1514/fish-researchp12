@@ -98,7 +98,30 @@
      "efficiency": 268.3509113431272
     }
    }
+  },
+  {
+   "journal": "tempo_journal.jsonl",
+   "n_games": 1000,
+   "base": "A_shipped",
+   "pairs": {
+    "B_free": {
+     "effect": 0.228,
+     "se_paired": 0.11246628234570842,
+     "se_unpaired": 0.1236685485881915,
+     "corr": 0.17298884133405612,
+     "same_margin_share": 0.239,
+     "efficiency": 1.2091323721020963
+    },
+    "C_half": {
+     "effect": 0.084,
+     "se_paired": 0.10489970423193737,
+     "se_unpaired": 0.12269365808277824,
+     "corr": 0.2691802370395239,
+     "same_margin_share": 0.232,
+     "efficiency": 1.3680302564990756
+    }
+   }
   }
  ],
- "median_efficiency": 8.989207968901706
+ "median_efficiency": 8.09041699700731
 }

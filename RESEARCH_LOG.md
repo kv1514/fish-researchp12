@@ -535,3 +535,39 @@ interval clear of zero" -- and does not ship under the stricter rule
 so picking one would be bar-shopping. An 8,000-game replication against the
 new champion, fixed in size in advance and analysed once, decides it, and it
 ships only if both readings agree.
+
+### The one basis term that points at the error we make, and why its screen said nothing
+
+`concent` has been in the ask basis since v0.4 and weighted zero since. It was
+screened once -- 0.15, 160 pairs, -0.037 [-0.653, +0.578] -- and filed with a
+dozen other speculative terms. Both halves of that screen were unable to find
+anything.
+
+**The formula could not express the preference.** v1 was
+`team_concentration[hs]`: one number per half-suit, identical for every
+candidate ask in it, independent of the target and of who would end up holding
+the card. A term with the same value on every ask in a half-suit can only tilt
+the choice of half-suit. And its sign is backwards in the case it exists for --
+when the concentration sits with a TEAMMATE, my taking a card breaks it up, and
+v1 scored that ask highest precisely because the half-suit was concentrated.
+Same defect `claim` carried at v1, same remedy: corrected in place to the
+expected CHANGE the ask causes, `TERM_VERSIONS["concent"]` bumped to 2, so
+`stale_terms()` flags every harvest fitted against the old column.
+
+**And the weight was inert.** `scripts4/concent_scale.py` over 596 decisions
+with a real choice and 30,065 candidate asks: the corrected feature has median
+magnitude 0.0299 and median within-decision spread 0.0677. At 0.15 it changes
+which ask is taken on **1.7% of decisions**; it takes about 1.0 to reach 8%.
+A 160-pair run of a knob acting on one decision in sixty, reporting an interval
+four times the ship bar in each direction, is a statement about the harness.
+
+Why it is worth reinstating rather than deleting: 0.1676 of our 0.1759 wrong
+declarations a game are allocation class. A half-suit held entirely in one hand
+has no split to name, and this is the only term in the basis that points there.
+
+Registered at `prereg/concentration_v2.md`, 4,000 games, arms at 0.60 (equal to
+`w_turn`, the largest existing weight) and 1.50. The mechanism -- allocation
+errors falling, and concentration at declaration time rising -- is a
+**withdrawal condition** rather than a secondary: a margin that rises without
+them means the term is being paid for something other than the reason it was
+reinstated, and shipping it would put the wrong explanation in the paper.
