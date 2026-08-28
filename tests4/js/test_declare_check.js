@@ -111,7 +111,16 @@ async function open() {
   assert.ok(/other 4 are guesses/.test(after),
     "the guessed cards were not named as such");
   assert.ok(/no opponent may ask in this suit again/.test(after),
-    "the panel did not say why the guesses will never be resolved");
+    "the panel did not say why no later ask will name the guesses");
+  /* And it must not overstate that. The suit is cut off from the channel that
+   * NAMES cards, not from inference: public hand counts keep constraining it,
+   * and a teammate whose quota reaches zero is excluded from every unresolved
+   * card (fish/beliefs.py::_propagate). An earlier wording said "nothing that
+   * happens later will place them", which is false and is the sort of false
+   * that makes a player stop counting. */
+  assert.ok(/Only the counting can/.test(after),
+    "the panel claimed the split can never be resolved, which is wrong: "
+    + "hand counts still constrain it");
 
   /* --- 6. a small probability must not round to the same thing as zero --- *
    * Driving the real page showed three "0%" in a row, because pct() rounds to

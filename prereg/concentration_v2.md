@@ -17,7 +17,7 @@ Over 10,000 games against v0.7 (`results/margin_decomposition.json`):
 never claim a half-suit an opponent still holds. What we cannot do is say which
 of our own teammates has what --- and once our team holds all six,
 `GameState.legal_asks` bars every opponent from asking there, so no public
-event can ever inform it again. The split is frozen at the moment the last card
+ask can ever NAME one of those cards again (public hand counts still constrain it). The split is frozen to direct evidence at the moment the last card
 arrives, and every misplaced card in the disclosure probe was one that had
 never moved in public (398 of 398, `results/margin_decomposition.json`).
 

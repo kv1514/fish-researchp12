@@ -1863,8 +1863,10 @@ async function openDeclare() {
        * the entire allocation problem: of the misplaced cards in the engines'
        * own disclosure probe, 398 of 398 had never moved in public. Once a team
        * holds all six of a half-suit no opponent may legally ask in it, so
-       * nothing can ever locate the rest -- the split freezes with exactly the
-       * dealt-and-never-asked-for cards still unknown.
+       * no later ask can NAME the rest -- the split freezes to direct evidence
+       * with exactly the dealt-and-never-asked-for cards still unknown. (Public
+       * hand counts do keep constraining it, so it is not sealed; it is just
+       * cut off from the one channel that names cards.)
        *
        * Not a hint. A pinned card is pinned BY THE PUBLIC RECORD, derivable by
        * anyone at the table from events everybody saw, which is the same
@@ -1883,8 +1885,10 @@ async function openDeclare() {
               + `: ${r.free.slice(0, 4).map(face).join(" ")}`
               + `${f > 4 ? ` and ${f - 4} more` : ""}. Those are the cards `
               + `that were dealt and never asked for, and once your team holds `
-              + `all six no opponent may ask in this suit again — so nothing `
-              + `that happens later will place them.`));
+              + `all six no opponent may ask in this suit again, so nothing `
+              + `later will name them. Only the counting can: as your `
+              + `teammates spend their other cards, who can still be `
+              + `holding these narrows.`));
       }
       if (r.p_team - r.p_exact > 0.15) {
         verdict.appendChild(el("p", "dim",

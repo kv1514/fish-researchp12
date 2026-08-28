@@ -123,8 +123,9 @@ our 0.1759 wrong declarations a game, 0.1676 are allocation class -- our own
 team held all six and we named the wrong split -- against 0.0083 ownership
 errors. Threshold tuning cannot touch that: the question is not *whether* to
 declare a set we own, it is *how it is split*, and once the team holds all six
-`legal_asks` bars every opponent from asking there, so no further public event
-can inform it. The split is frozen at the moment the last card arrives.
+`legal_asks` bars every opponent from asking there, so no further ask can NAME
+one of those cards. Public hand counts still constrain it, so the split can be
+settled later by the rest of the game draining teammates' hands. The split is frozen at the moment the last card arrives.
 
 That makes it a distributed-knowledge problem: every card is held by someone
 who knows they hold it, and no member of the team knows the split. Two levers

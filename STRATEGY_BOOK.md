@@ -349,10 +349,35 @@ public.
 
 Two things follow that matter at the table.
 
-**Waiting gains you nothing.** There is no information coming. Whatever you
-know about the split when the sixth card lands is what you will know at the
-deadline. The usual instinct to hold off and watch is worthless here — it is
-worthless specifically here, and not in general.
+**Waiting gains you nothing *directly*, and something indirectly.** No further
+ask will ever name a card of this half-suit. But hand counts are public, so as
+your teammates spend their other cards the arithmetic tightens — a teammate who
+runs out entirely is proved to hold none of it, and a teammate whose remaining
+count matches what they could still be holding has those cards pinned to them.
+So the instinct to hold off and watch is not worthless here; it just pays
+through counting rather than through anything happening in the suit itself.
+**One correction, and it matters.** I first wrote that once a team holds all six
+"nothing further can ever inform the split", and that waiting therefore gains
+nothing. The first half is right about DIRECT evidence and the second half is
+wrong. No opponent may ask in the half-suit again, so no ask event will ever
+name one of those cards. But hand counts are public and the propagator uses
+them (`fish/beliefs.py::_propagate`): as teammates give up cards of *other*
+half-suits their remaining quota shrinks, and when a teammate's quota reaches
+zero they are excluded from every unresolved card, this half-suit's included.
+Symmetrically, when a teammate's quota equals the number of cards they could
+still be holding, those cards are pinned to them.
+
+So the split can be resolved after it freezes -- not by anything happening in
+that half-suit, but by the rest of the game draining hands.
+
+The project's own data already said so and I read it wrong. The doomed-ask gate
+experiment deferred 0.224 declarations a game and added only 0.084 forced ones,
+so about 0.14 a game moved out of a gated guess and into a confident voluntary
+declaration -- which is only possible if waiting supplied something. Wrong
+declarations fell by 0.064 [-0.085, -0.043] as a result.
+
+What is not measured is how much of that is the counting channel as against
+simply declining a bad bet, and this file does not claim to know.
 
 **It is a communication problem, not a deduction problem.** Every card is held
 by someone who knows they hold it. The team collectively has the answer and no

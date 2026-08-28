@@ -22,7 +22,7 @@ moved since. Ranked by measured size, not by how interesting the problem is.
 | rank | bottleneck | evidence | status |
 |---|---|---|---|
 | 1 | We cannot locate our own teammates' cards | 0.1676 of our 0.1759 wrong declarations a game are allocation class -- our team held all six and we named the wrong split. Ownership errors are 0.0083 a game (`results/margin_decomposition.json`) | open, and the largest single lever left. See rank 2 for why it is hard |
-| 2 | The channel freezes before the question is asked | once a team holds all six, `legal_asks` bars every opponent from asking there, so no public event can ever touch the split again. The team jointly knows the answer and no member does: a distributed-knowledge problem, not an inference one | the only channel is a deliberately failed ask, priced at +0.1220 [+0.0291, +0.2149] and adding an error almost as often as it avoids one (`prereg/deadline_signalling.md`) |
+| 2 | The channel freezes before the question is asked | once a team holds all six, `legal_asks` bars every opponent from asking there, so no ask will ever again NAME one of those cards -- though public hand counts still constrain it, and a teammate whose quota reaches zero is excluded from every unresolved card. The team jointly knows the answer and no member does: a distributed-knowledge problem, not an inference one | the only channel is a deliberately failed ask, priced at +0.1220 [+0.0291, +0.2149] and adding an error almost as often as it avoids one (`prereg/deadline_signalling.md`) |
 | 3 | The ask objective charges a constant rate for a turn whose price is not constant | a turn is free below p_best = 0.50 and costs ~+0.45 above it; 53% of ask decisions are in the free regime and pay the full charge | 1,000 games give +0.2280 [+0.0076, +0.4484], which ships under the pre-registration as written and not under the runner's stricter reading. An 8,000-game replication decides it |
 | 4 | Sampling is not uniform over consistent worlds | OR seeding and quota weighting skew draws | open since session 2: needs importance weighting or MCMC refinement. Every probability the engine reports inherits this |
 | 5 | The transcript is read for constraints and not for choices | the posterior conditions on what an ask PROVED and never on the fact that this ask was chosen over the others. For teammates the policy is known exactly, which is the case where inversion is safe | open (task #53). The opponent-side version already failed once: the fitted exponent is -1.00 against our own +1.21 |
@@ -507,7 +507,7 @@ is the only part a policy can move.
 0.1676 allocation and 0.0083 ownership. We essentially never claim a half-suit
 an opponent still holds. What we cannot do is say which teammate has what --
 and once our team holds all six, no opponent may legally ask there, so the
-split is frozen and no further public event can inform it.
+split is frozen to direct evidence: no ask will name those cards again. It is not frozen to counting -- public hand counts keep tightening as teammates spend their other cards.
 
 That reframes it as distributed knowledge rather than inference: every card is
 held by someone who knows they hold it, and no one member knows the split.
