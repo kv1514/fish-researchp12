@@ -713,7 +713,7 @@ WATCH = [
     ("declarer_holding_self.json", "n_wholly_held", "{:,d}",
      "wholly-held declarations", "wholly-held\ndeclarations"),
     ("declarer_holding_self.json", "declarations_with_a_derived_card", "{:,d}",
-     "declarations with a derived card", "carry at least one"),
+     "declarations with a derived card", "least one derived card"),
     ("declarer_holding_self.json", "err_by_k.5.err", "{:.3f}",
      "error rate at five cards held", "declarer's own cards"),
     ("declarer_holding_self.json", "err_by_unmoved.5.n", "{:,d}",
