@@ -34,6 +34,7 @@ from typing import Optional
 from fish.agents.base import Agent
 from .endgame_ii import ExactEndgameMixin
 from .tablebase4 import Tablebase4Mixin
+from . import trace as _tr
 from fish.beliefs import BeliefContradiction, BeliefState
 from fish.engine import Action
 from fish.observation import Observation
@@ -145,6 +146,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  #: the off-limits reading (avoid them unless the ask is a
                  #: certain steal). 0.0 = incumbent, bit-identical.
                  w_contest: float = 0.0,
+                 trace: bool = False,
                  #: Silence prior: down-weight sampled worlds in which a live
                  #: half-suit sits wholly within one team right now, because
                  #: a team that held it all and could place it would usually
@@ -212,7 +214,24 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.w_contest = float(w_contest)
         self.silence_delta = float(silence_delta)
         self.stats = PosteriorStats()
+        #: Capture WHY each decision was made, for the site's explanation
+        #: panels. Off by default and free when off: the builders in
+        #: fish4/trace.py read arrays the policy has already computed and
+        #: never touch the RNG, so a traced agent and an untraced one play
+        #: bit-identical games from the same seed (tests4/test_trace.py).
+        self.trace = bool(trace)
+        #: The trace of the most recent act(), or None.
+        self.last_trace = None
         self.bel: Optional[BeliefState] = None
+
+    def _t(self, build, *args, **kw) -> None:
+        """Record a trace, or do nothing at all.
+
+        Deliberately takes the BUILDER rather than a built dict, so that with
+        tracing off none of the formatting work happens either.
+        """
+        if self.trace:
+            self.last_trace = build(*args, **kw)
 
     # -- lifecycle -----------------------------------------------------------
 
@@ -224,18 +243,23 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
 
     def act(self, obs: Observation) -> Action:
         self.bel.update(obs)
+        self.last_trace = None
 
         # Nothing hidden left? Solve the position instead of estimating it.
         # (Leak-free: the reconstruction uses only public events plus our own
         # hand, and refuses unless every live card is already pinned.)
         exact = self.tablebase_action(obs)
         if exact is not None:
+            self._t(_tr.simple_trace, "exact",
+                    solver="tablebase", note="every live card already pinned")
             return exact
 
         # Nothing pinned, but one half-suit left and few enough deals to solve
         # it exactly under imperfect information. Off by default.
         exact = self.exact_ii_action(obs)
         if exact is not None:
+            self._t(_tr.simple_trace, "exact", solver="imperfect-information",
+                    note="one half-suit left and few enough deals to solve")
             return exact
 
         post = Posterior(self.bel, self.rng, n_draws=self.n_draws,
@@ -255,12 +279,20 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             if self.smart_pass:
                 pick = choose_pass(ctx, passes)
                 if pick is not None:
+                    self._t(_tr.simple_trace, "pass",
+                            teammate=int(pick.teammate), chosen="scored")
                     return pick
-            return max(passes, key=lambda p: obs.hand_counts[p.teammate])
+            fallback = max(passes, key=lambda q: obs.hand_counts[q.teammate])
+            self._t(_tr.simple_trace, "pass",
+                    teammate=int(fallback.teammate), chosen="largest hand")
+            return fallback
 
         claims = ClaimEvaluator(ctx, self.claim_cfg)
         voluntary = claims.voluntary_claim()
         if voluntary is not None:
+            best = claims.best_candidate()
+            self._t(_tr.claim_trace, voluntary, why="voluntary",
+                    confidence=(best[0] if best else None))
             return voluntary
 
         asks = obs.legal_asks()
@@ -268,6 +300,11 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         if not asks or (stalled and obs.claimable_half_suits()):
             forced = claims.forced_claim()
             if forced is not None:
+                best = claims.best_candidate()
+                self._t(_tr.claim_trace, forced,
+                        why=("forced: no legal ask" if not asks
+                             else "forced: stalled with a claimable half-suit"),
+                        confidence=(best[0] if best else None))
                 return forced
         if not asks:
             raise BeliefContradiction("no legal ask and no claimable half-suit")
@@ -371,11 +408,19 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                     obs, self.bel, ctx,
                     require_dead=(self.signal_mode == "dead"))
                 if sig is not None:
+                    self._t(_tr.simple_trace, "signal",
+                            target=int(sig.target),
+                            note="a deliberately dead ask that proves to a "
+                                 "partner which card this seat does not hold")
                     return sig
 
         if p[order[0]] <= 0.0:
             best = claims.best_candidate()
             if best is not None and best[0] >= 0.5:
+                self._t(_tr.claim_trace, best[2],
+                        why="the best-scoring ask cannot land, so the turn is "
+                            "lost anyway and this claim is better than even",
+                        confidence=best[0])
                 return best[2]
             # No claim, and the ask we are about to make cannot land -- so it
             # surrenders the turn for certain. Measured over 15,542 decisions
@@ -402,7 +447,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                     order = live
                     top = scores[order[0]]
         pool = [i for i in order if scores[i] >= top - 1e-9]
-        return asks[self.rng.choice(pool)]
+        pick = int(self.rng.choice(pool))
+        self._t(_tr.ask_trace, obs, asks, scores, p, order, pool, pick)
+        return asks[pick]
 
     # -- out-of-turn claiming --------------------------------------------------
 
