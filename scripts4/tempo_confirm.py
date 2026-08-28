@@ -335,7 +335,16 @@ def main(n_deals: int = 500, n_jobs: int = 0) -> int:
     # figure would vanish and the prereg would point at a file describing
     # something else.
     stem = JOURNAL.stem.replace("_journal", "")
-    dest = ROOT / "results" / (
+    # Written next to the journal when that journal lives outside results/,
+    # so a scratch run cannot leave a permanent file in the repository. See
+    # the same note in scripts4/concent_confirm.py.
+    home = ROOT / "results"
+    try:
+        JOURNAL.resolve().relative_to(home.resolve())
+        out_dir = home
+    except ValueError:
+        out_dir = JOURNAL.parent
+    dest = out_dir / (
         "tempo_confirm.json" if stem == "tempo" else f"{stem}_confirm.json")
     dest.write_text(json.dumps(out, indent=1))
     finish(JOURNAL)

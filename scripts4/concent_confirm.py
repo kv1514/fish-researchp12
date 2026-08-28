@@ -387,13 +387,20 @@ def main(n_deals: int = 500, n_jobs: int = 0) -> int:
         print(f"{len(rows)} games; too few to report")
         return 1
     out = report(rows)
-    # Named after the journal, so the 8,000-game replication cannot silently
-    # overwrite the 1,000-game run that prereg/tempo_regime.md quotes. Two runs
-    # against two different champions must not share a filename; the older
-    # figure would vanish and the prereg would point at a file describing
-    # something else.
+    # Named after the journal so two runs cannot silently overwrite each
+    # other's result, and written NEXT TO the journal when that journal lives
+    # outside results/. A smoke test pointed at a scratch journal otherwise
+    # dropped `cj_confirm.json` into the repository, where the results indexer
+    # duly listed it as an orphan -- a throwaway run leaving a permanent file
+    # that looks like a finding.
     stem = JOURNAL.stem.replace("_journal", "")
-    dest = ROOT / "results" / f"{stem}_confirm.json"
+    home = ROOT / "results"
+    try:
+        JOURNAL.resolve().relative_to(home.resolve())
+        out_dir = home
+    except ValueError:
+        out_dir = JOURNAL.parent
+    dest = out_dir / f"{stem}_confirm.json"
     dest.write_text(json.dumps(out, indent=1))
     finish(JOURNAL)
     print("wrote", dest.relative_to(ROOT))
