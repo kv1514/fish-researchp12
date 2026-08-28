@@ -16,6 +16,7 @@ Usage: python scripts4/index_results.py
 from __future__ import annotations
 
 import datetime as _dt
+import pathlib
 import json
 import re
 import sys
@@ -36,6 +37,36 @@ def _first_sentence(path: Path) -> str:
     return m.group(1).strip() if m else ""
 
 
+def _keys(f) -> list[str]:
+    """Every string a source file might contain that names this result.
+
+    THIRD blind spot in this matcher, and the same failure each time: a name
+    the producer never writes out in full. The first version missed stems, the
+    second missed whole directories, and this one missed the f-string --
+    `acquisition.py` writes `f"acquisition_{vs}.json"`, so neither
+    "acquisition_v07.json" nor its stem appears anywhere in the tree and three
+    of today's results were reported as leftovers.
+
+    The fix is to look for the INTERPOLATION, not a bare prefix. A first
+    attempt tried every underscore-cut prefix of the stem, which is far too
+    loose in a codebase full of identifiers like `forced_claim` and
+    `turn_risk`: it credited `forced_ceiling_self.json` to six agent modules
+    and `turn_price_bands.json` to a dozen files, and took the orphan count to
+    zero. A checker that flags nothing is exactly as useless as one that flags
+    everything, and it is more dangerous because it looks clean.
+
+    So the extra keys are prefixes followed by an opening brace --
+    `acquisition_{` matches `f"acquisition_{vs}.json"` and matches nothing
+    else. Precise rather than loose, because the looser version was measurably
+    wrong rather than merely over-generous.
+    """
+    keys = [f.name, f.stem]
+    parts = f.stem.split("_")
+    for i in range(len(parts) - 1, 0, -1):
+        keys.append("_".join(parts[:i]) + "_{")
+    return keys
+
+
 def main() -> int:
     # Search scripts4/ AND fish4/, and match the STEM as well as the full
     # filename. The first version matched only the full "name.json" inside
@@ -53,10 +84,16 @@ def main() -> int:
     for src in sources:
         if "__pycache__" in src.parts or ".git" in src.parts:
             continue
+        # Not itself. This file names result files in its own docstrings to
+        # explain the matcher, which made it a "producer" of every file it
+        # discussed -- including `turn_price_bands.json`, whose only credited
+        # producer became the checker complaining that it had none.
+        if src.resolve() == pathlib.Path(__file__).resolve():
+            continue
         body = src.read_text(encoding="utf-8", errors="replace")
         rel = src.relative_to(ROOT).as_posix()
         for f in RESULTS.glob("*.json"):
-            if f.name in body or f.stem in body:
+            if any(k in body for k in _keys(f)):
                 producers.setdefault(f.name, []).append(rel)
 
     rows = []
