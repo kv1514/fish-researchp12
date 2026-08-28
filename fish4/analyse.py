@@ -432,6 +432,13 @@ class Analyser:
                 f"(P={claims[0].p_declaration_exact:.3f}).")
         if dead and dead.get("is_dead"):
             notes.append(dead["summary"])
+        elif dead and dead.get("unplaceable"):
+            # Not a dead position, but a frozen half-suit inside a live one:
+            # ours, unplaceable, and beyond reach of anything an opponent can
+            # do. Worth saying while there are still turns to spend on it --
+            # the previous behaviour said nothing until the whole position had
+            # died, by which point the choice has usually been made for you.
+            notes.append(dead["summary"])
 
         return Analysis(
             seat=obs.player, team=my_team, turn=obs.turn, banked=banked,

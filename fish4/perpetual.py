@@ -201,9 +201,11 @@ def diagnose(obs, bel, ctx) -> Optional[dict]:
     theirs = [hs for hs, t in dead if t != ctx.my_team]
     stuck = [hs for hs in ours if unplaceable(obs, bel, ctx, hs)]
 
+    left = sum(obs.hand_counts[o] for o in range(len(obs.hand_counts))
+               if team_of(o) != ctx.my_team)
     if not dead:
         return {"is_dead": False, "dead_half_suits": [], "frozen": False,
-                "summary": ""}
+                "unplaceable": [], "opponent_cards": left, "summary": ""}
 
     if all_dead:
         summary = (
@@ -222,6 +224,25 @@ def diagnose(obs, bel, ctx) -> Optional[dict]:
         summary = (
             f"{len(dead)} of {len(live)} live half-suits are dead (one team "
             f"holds all six), so no ask in them can ever succeed.")
+        if stuck:
+            # The part the earlier version only said once the WHOLE position
+            # was dead, which is far too late to act on. A half-suit our team
+            # owns is one no opponent can ask in -- legal_asks requires the
+            # asker to hold a card of it -- so from the moment we collect it,
+            # nothing anyone else does can tell us how it is split. The one
+            # remaining channel is an ask of our own that we know will fail,
+            # and that costs a turn. The deadline for spending one is public:
+            # when the opponents run out of cards there is no legal ask left
+            # at all, and the split must be named from whatever is known then.
+            summary += (
+                f" {', '.join(HALF_SUIT_NAMES[h] for h in stuck)} "
+                f"{'is' if len(stuck) == 1 else 'are'} already ours and not "
+                f"yet placeable, and no opponent can ask there again, so "
+                f"nothing they do will place it. Only a deliberately failed "
+                f"ask of our own can, and it costs the turn. The opponents "
+                f"hold {left} card{'' if left == 1 else 's'} between them; "
+                f"when that reaches zero there is no legal ask left and the "
+                f"split must be named from whatever is known by then.")
 
     return {
         "is_dead": all_dead,
@@ -232,5 +253,8 @@ def diagnose(obs, bel, ctx) -> Optional[dict]:
              "placeable": hs not in stuck}
             for hs, t in dead],
         "unplaceable": [HALF_SUIT_NAMES[h] for h in stuck],
+        #: cards the opponents still hold between them. Public, and it is the
+        #: clock on the only channel that can still place a frozen half-suit.
+        "opponent_cards": left,
         "summary": summary,
     }
