@@ -36,3 +36,8 @@ results/ii_first_endgame_journal.jsonl
 # measurement. The scripts stamp them "Do not cite it"; committing one puts a
 # citable-looking file in results/ saying the opposite.
 results/*_smoke.json
+
+# A run in flight appends here; scripts4/journal.py renames it on completion.
+# See that file: a tracked journal that changes on every flush means the tree
+# is never clean while a measurement is running.
+*.jsonl.partial

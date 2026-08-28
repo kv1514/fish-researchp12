@@ -44,6 +44,7 @@ from fish.engine import ClaimEvent, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.dylan_v07 import BRIDGE_REV
+from scripts4.journal import finish, in_flight, to_read
 from scripts4.path_ledger import PATHS, _path_of
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
@@ -235,15 +236,16 @@ def report(rows) -> dict:
 def _load_journal():
     """Refuse a journal that is not ours. See scripts4/g1_gamma_cost.py."""
     done, rows = set(), []
-    if not JOURNAL.exists():
+    src = to_read(JOURNAL)
+    if not src.exists():
         return done, rows
-    for i, line in enumerate(JOURNAL.read_text().splitlines(), 1):
+    for i, line in enumerate(src.read_text().splitlines(), 1):
         if not line.strip():
             continue
         r = json.loads(line)
         if not ROW_KEYS <= r.keys():
             raise SystemExit(
-                f"{JOURNAL}:{i} is not a stuck-gate row (keys present: "
+                f"{src}:{i} is not a stuck-gate row (keys present: "
                 f"{sorted(r)}). Something else wrote to this journal. Move it "
                 f"aside; do not append to it.")
         if r["rev"] != BRIDGE_REV:
@@ -265,7 +267,7 @@ def main(n_deals: int = 500, n_jobs: int = 0) -> int:
           f"workers", flush=True)
     t0 = time.time()
     if todo:
-        with Pool(n_jobs) as pool, JOURNAL.open("a") as fh:
+        with Pool(n_jobs) as pool, in_flight(JOURNAL).open("a") as fh:
             for i, r in enumerate(pool.imap_unordered(_one, todo, chunksize=2)):
                 rows.append(r)
                 fh.write(json.dumps(r) + "\n")
@@ -279,6 +281,7 @@ def main(n_deals: int = 500, n_jobs: int = 0) -> int:
     out = report(rows)
     dest = ROOT / "results" / "stuck_gate_confirm.json"
     dest.write_text(json.dumps(out, indent=1))
+    finish(JOURNAL)
     print("wrote", dest.relative_to(ROOT))
     return 0
 

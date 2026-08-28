@@ -192,15 +192,16 @@ def report(rows) -> dict:
 
 def _load_journal():
     done, rows = set(), []
-    if not JOURNAL.exists():
+    src = to_read(JOURNAL)
+    if not src.exists():
         return done, rows
-    for i, line in enumerate(JOURNAL.read_text().splitlines(), 1):
+    for i, line in enumerate(src.read_text().splitlines(), 1):
         if not line.strip():
             continue
         r = json.loads(line)
         if not ROW_KEYS <= r.keys() or "A_shipped" not in r:
             raise SystemExit(
-                f"{JOURNAL}:{i} is not a forced-exhaustive row (keys: "
+                f"{src}:{i} is not a forced-exhaustive row (keys: "
                 f"{sorted(r)}). Something else wrote to this journal.")
         key = (r["deal"], r["kv_even"])
         if key in done:
@@ -219,7 +220,7 @@ def main(n_deals=400, n_jobs=0, vs="self") -> int:
           f"workers", flush=True)
     t0 = time.time()
     if todo:
-        with Pool(n_jobs) as pool, JOURNAL.open("a") as fh:
+        with Pool(n_jobs) as pool, in_flight(JOURNAL).open("a") as fh:
             for i, r in enumerate(pool.imap_unordered(_one, todo, chunksize=2)):
                 rows.append(r)
                 fh.write(json.dumps(r) + "\n")
@@ -233,6 +234,7 @@ def main(n_deals=400, n_jobs=0, vs="self") -> int:
     out = {"vs": vs, **report(rows)}
     dest = ROOT / "results" / f"forced_exhaustive_{vs}.json"
     dest.write_text(json.dumps(out, indent=1))
+    finish(JOURNAL)
     print("wrote", dest.relative_to(ROOT))
     return 0
 
