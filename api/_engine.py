@@ -762,6 +762,86 @@ class Session:
                 "n_proved": sum(len(r["cards"]) for r in proved),
                 "n_unresolved": unresolved}
 
+    def claim_check(self, half_suit: int, assignment: list) -> dict:
+        """Price the split the PLAYER built, before they commit to it.
+
+        Two numbers, and the difference between them is the whole lesson.
+        `p_exact` is the probability this precise assignment is right;
+        `p_team` is the probability our team holds all six however they are
+        split. A player who has those confused declares a half-suit they own
+        and hands it away on the ordering -- which is not a hypothetical:
+        allocation-class errors are 0.255 a game between engines, and the
+        engine's own doomed-ask gate was found reading p_exact while ignoring
+        p_team (prereg/stuck_claim_gate.md).
+
+        NOT A LEAK, and the argument is worth stating because it is the one
+        thing that could make this route dangerous. The posterior is a
+        deterministic function of THIS SEAT'S observation -- BeliefState is
+        fed public events plus this seat's own hand and nothing else -- so
+        querying it, in any pattern and any number of times, returns a
+        function of information the client already holds. A joint is more than
+        the marginals the client already receives in `card_table`, but it is
+        more of the same estimate, not more of the truth. What it cannot do is
+        distinguish two worlds this seat cannot legally distinguish.
+
+        The engine's own answer is returned alongside, and the client is
+        responsible for not showing it until the player has committed. That
+        ordering is a teaching decision, not a security one; anyone reading
+        the wire can see both.
+        """
+        if self.mode == "spectate":
+            raise ValueError("no claim check in spectate mode")
+        if self.state.is_terminal:
+            return {"terminal": True}
+        hs = int(half_suit)
+        obs = self.obs()
+        if not (0 <= hs < len(obs.set_winner)) or obs.set_winner[hs] is not None:
+            raise ValueError("that set is already resolved")
+        cards = list(half_suit_cards(hs))
+        owners = [int(x) for x in assignment]
+        if len(owners) != len(cards):
+            raise ValueError(f"expected {len(cards)} owners, got {len(owners)}")
+        team = {p for p in range(NUM_PLAYERS) if p % 2 == self.seat % 2}
+        for q in owners:
+            if q not in team:
+                # A declaration names only your own team; the engine would
+                # reject it too, and saying so beats returning 0.0 as though
+                # it were a probability.
+                raise ValueError("every card must be assigned to your own team")
+
+        from fish4.analyse import Analyser
+        an = Analyser(self.rules, self.seat, value_model=None,
+                      gamma=self.gamma, n_draws=self.draws,
+                      seed=self.seed & 0x7FFFFFFF, **_analyser_spec())
+        ctx = an.context(obs)
+        from fish4.claim4 import ClaimConfig, ClaimEvaluator
+        cfg = ClaimConfig()
+        yours = float(ctx.post.prob_assignment(cards, owners))
+        # the SAME enumeration cap the evaluator uses, so the two p_team
+        # figures on screen are the same quantity and not two estimates of it
+        team_all = float(ctx.post.prob_all_with(cards, sorted(team),
+                                                cfg.max_enumerate))
+        r = ClaimEvaluator(ctx, cfg).best_for_half_suit(hs)
+        engine = None
+        if r is not None:
+            theirs = [int(x) for x in r[2].assignment]
+            # RE-PRICE the engine's split through the same call, rather than
+            # quoting the number it returned. `best_for_half_suit` has two
+            # tiers: when the team enumeration exceeds its cap it returns a
+            # PRODUCT of per-card marginals, which at the opening it always
+            # does. That figure is fine where it is used, because there both
+            # halves of the pair are products and stay internally consistent
+            # -- but putting it beside an exact joint on the same screen would
+            # be two methods wearing one label. Whatever this panel shows, it
+            # shows computed one way.
+            engine = {"p_exact": round(
+                          float(ctx.post.prob_assignment(cards, theirs)), 4),
+                      "assignment": theirs,
+                      "same": theirs == owners}
+        return {"half_suit": hs, "assignment": owners,
+                "p_exact": round(yours, 4), "p_team": round(team_all, 4),
+                "engine": engine}
+
     def analysis(self) -> dict:
         if self.mode == "spectate":
             # There is no "you" to analyse for, and obs() at seat -1 would

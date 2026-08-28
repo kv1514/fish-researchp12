@@ -386,13 +386,23 @@ class Analyser:
 
     # -- the main entry point ------------------------------------------------------
 
-    def analyse(self, obs: Observation, pv_depth: int = 5) -> Analysis:
-        import time
-        t0 = time.perf_counter()
+    def context(self, obs: Observation) -> DecisionContext:
+        """The belief update and posterior draw behind one decision.
+
+        Factored out so that a caller wanting one number off the posterior --
+        the price of a split the player built themselves, say -- reads it from
+        the same context `analyse` ranks moves with, rather than from a second
+        construction that could drift away from it.
+        """
         self.bel.update(obs)
         post = Posterior(self.bel, self.rng, n_draws=self.n_draws,
                          mode="auto", obs=obs, gamma=self.gamma)
-        ctx = DecisionContext(obs, self.bel, post)
+        return DecisionContext(obs, self.bel, post)
+
+    def analyse(self, obs: Observation, pv_depth: int = 5) -> Analysis:
+        import time
+        t0 = time.perf_counter()
+        ctx = self.context(obs)
         asks = obs.legal_asks()
         a, b, nulls = _scores(obs)
         my_team = team_of(obs.player)

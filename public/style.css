@@ -359,6 +359,14 @@ button.ghost.on {
 .card.xs { width: 26px; flex: 0 0 auto; }
 
 .declverdict { font-size: .85rem; margin: .5rem 0 .2rem; }
+/* The two numbers the check returns are the point of the dialog, so they are
+   read at a glance rather than hunted for in a paragraph. */
+.declverdict .declnum { margin: .25rem 0; font-size: .95rem; }
+.declverdict .declnum b { font-variant-numeric: tabular-nums; }
+.declverdict button { margin-top: .4rem; }
+.declbar { display: flex; gap: .6rem; margin-top: .6rem; }
+.declbar button { flex: 1; }
+.declbar button[disabled] { opacity: .45; cursor: not-allowed; }
 .declrow select { flex: 1; }
 
 @media (max-width: 560px) {

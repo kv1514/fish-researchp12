@@ -1459,34 +1459,29 @@ async function openDeclare() {
   const s = S.snap;
   const team = [s.seat, ...s.teammates].sort((a, b) => a - b);
 
-  // THE DEFAULTS ARE THE WHOLE POINT OF THIS DIALOG.
+  // THE DEFAULTS ARE THE WHOLE POINT OF THIS DIALOG, and they have now been
+  // wrong twice in opposite directions.
   //
-  // They used to be whatever the <select> picked first, which is the lowest
-  // team seat - and for seat 0 that is *you*. So every card you did not hold
-  // defaulted to you, which is guaranteed wrong, and declaring without
-  // touching all six dropdowns threw the set away. Under the live rule that
-  // is worse than it ever was: right team, wrong split now HANDS the set to
-  // the other team (it merely voided in the old rules), and the form was
-  // steering the player into it. Engine-vs-engine play misdeclares nothing
-  // in 54 declarations; every thrown-away set a human saw was this.
+  // Originally they were whatever the <select> picked first, which is the
+  // lowest team seat -- and for seat 0 that is *you*. So every card you did
+  // not hold defaulted to you, which is guaranteed wrong, and declaring
+  // without touching all six threw the set away. That was fixed by opening on
+  // the engine's posterior MAP with the engine's marginal beside every option.
   //
-  // The engine already computes the posterior MAP for exactly this decision, so
-  // the dialog opens on the engine's best guess and shows the probability
-  // behind every option. You can still overrule it - you know things it does
-  // not - but the starting point is now the best available answer.
-  let an = hint();
-  if (!an) {
-    try {
-      an = inRoom() ? await room("analyse", {})
-                    : await api("analyse", { token: S.token,
-                                             actions: S.actions });
-    }
-    catch (e) { an = null; }
-  }
-  const table = {};
-  for (const r of (an && an.card_table) || []) table[r.card] = r.probs;
-  const best = {};
-  for (const c of (an && an.claims) || []) best[c.half_suit] = c;
+  // Which went one step too far the other way. A dialog that opens on the
+  // answer and annotates every alternative with its probability is the site
+  // playing for you: you can score a set having reasoned about nothing, and
+  // learn nothing from having done it. Declaring is where a human loses whole
+  // sets at once, so it is the one place worth making them think.
+  //
+  // So: nothing is pre-filled and no probability is shown until you have built
+  // a split and asked for it. Then you get the price of YOUR split, the
+  // probability your team holds all six however it is divided, and only then
+  // what the engine would have named. The gap between those first two numbers
+  // is the actual skill -- knowing when your team's holding is PLACED and when
+  // it is merely PROBABLE -- and it is a distinction this project found its own
+  // engine failing to draw (prereg/stuck_claim_gate.md).
+  const UNSET = "";
 
   openModal((box) => {
     box.appendChild(el("h3", null, "Declare a set"));
@@ -1498,9 +1493,7 @@ async function openDeclare() {
     const pick = el("select");
     s.half_suits.forEach((hs, i) => {
       if (s.set_winner[i]) return;
-      const c = best[i];
-      const p = c ? ` — engine: ${(100 * c.p_declaration_exact).toFixed(0)}%` : "";
-      const o = el("option", null, hs.name + p);
+      const o = el("option", null, hs.name);
       o.value = String(i);
       pick.appendChild(o);
     });
@@ -1511,59 +1504,118 @@ async function openDeclare() {
     box.appendChild(el("label", null, "Which set"));
     box.appendChild(pick);
 
-    const verdict = el("p", "dim declverdict");
-    box.appendChild(verdict);
     const rows = el("div", "declrows");
     box.appendChild(rows);
+    const verdict = el("div", "declverdict");
+    box.appendChild(verdict);
+
+    const check = el("button", null, "Check this split");
+    const go = el("button", "primary", "Declare");
+
+    const chosen = () => [...rows.querySelectorAll("select")]
+      .map((x) => (x.value === UNSET ? null : +x.value));
+    const complete = () => chosen().every((q) => q !== null);
+    const sync = () => {
+      const ok = complete();
+      go.disabled = !ok;
+      check.disabled = !ok;
+    };
 
     const draw = () => {
-      const idx = +pick.value;
-      const hs = s.half_suits[idx];
-      const c = best[idx];
-      verdict.textContent = c
-        ? `The engine puts your team holding all six at `
-          + `${(100 * c.p_team_holds_all).toFixed(0)}%, and this exact split at `
-          + `${(100 * c.p_declaration_exact).toFixed(0)}%. ${c.verdict}.`
-        : "";
       rows.innerHTML = "";
-      hs.cards.forEach((card, k) => {
+      verdict.innerHTML = "";
+      const hs = s.half_suits[+pick.value];
+      hs.cards.forEach((card) => {
         const r = el("div", "declrow");
         const cell = el("span", "card sm");
         cell.innerHTML = face(card.name);
         r.appendChild(cell);
         const sel = el("select");
         sel.dataset.card = String(card.id);
-        const probs = table[card.id] || [];
-        // The engine's MAP for this half-suit, falling back to the per-card
-        // most likely teammate, falling back to whoever holds it if that is us.
-        let want = c && c.declaration ? c.declaration[k]
-          : (card.mine ? s.seat : null);
-        if (want == null && probs.length) {
-          let bp = -1;
-          for (const q of team) if ((probs[q] || 0) > bp) { bp = probs[q]; want = q; }
-        }
+        const blank = el("option", null, "—");
+        blank.value = UNSET;
+        sel.appendChild(blank);
         for (const q of team) {
-          const pct = probs.length ? ` · ${(100 * (probs[q] || 0)).toFixed(0)}%` : "";
-          const o = el("option", null, (q === s.seat ? "you" : nm(q)) + pct);
+          // No probability on the label. That number IS the answer, and this
+          // dialog is asking the question.
+          const o = el("option", null, q === s.seat ? "you" : nm(q));
           o.value = String(q);
-          if (q === (want != null ? want : team[0])) o.selected = true;
           sel.appendChild(o);
         }
+        // A card in your own hand is not a judgement call -- you can see it.
+        if (card.mine) sel.value = String(s.seat);
+        sel.onchange = sync;
         r.appendChild(sel);
         rows.appendChild(r);
       });
+      sync();
     };
     pick.onchange = draw;
     draw();
 
-    const go = el("button", "primary", "Declare");
+    check.onclick = async () => {
+      const assignment = chosen();
+      if (!assignment.every((q) => q !== null)) return;
+      check.disabled = true;
+      verdict.textContent = "checking…";
+      let r;
+      try {
+        const body = { half_suit: +pick.value, assignment };
+        r = inRoom() ? await room("claimcheck", body)
+                     : await api("claimcheck",
+                                 Object.assign({ token: S.token,
+                                                 actions: S.actions }, body));
+      } catch (e) {
+        verdict.textContent = "could not check that split: " + e.message;
+        check.disabled = false;
+        return;
+      }
+      check.disabled = false;
+      verdict.innerHTML = "";
+      verdict.appendChild(el("p", "declnum",
+        `<b>${pct(r.p_exact)}</b> — the chance this exact split is right.`));
+      verdict.appendChild(el("p", "declnum",
+        `<b>${pct(r.p_team)}</b> — the chance your team holds all six, `
+        + `however they are divided.`));
+      if (r.p_team - r.p_exact > 0.15) {
+        verdict.appendChild(el("p", "dim",
+          "Your team probably has it, but you have not placed the split. "
+          + "Declaring now is the expensive kind of wrong: the set goes to "
+          + "them even though every card was on your side."));
+      }
+      if (r.engine) {
+        verdict.appendChild(el("p", "dim",
+          r.engine.same
+            ? `The engine names the same split, and prices it at `
+              + `${pct(r.engine.p_exact)}.`
+            : `The engine would name a different split, at `
+              + `${pct(r.engine.p_exact)}. Both figures are computed the same `
+              + `way, so they are comparable.`));
+        if (!r.engine.same) {
+          const use = el("button", null, "Use the engine's split");
+          use.onclick = () => {
+            const sels = [...rows.querySelectorAll("select")];
+            r.engine.assignment.forEach((q, k) => {
+              if (sels[k]) sels[k].value = String(q);
+            });
+            sync();
+          };
+          verdict.appendChild(use);
+        }
+      }
+    };
+
     go.onclick = () => {
-      const assignment = [...rows.querySelectorAll("select")].map((x) => +x.value);
+      const assignment = chosen();
+      if (!assignment.every((q) => q !== null)) return;
       closeModal();
       send("act", { action: { type: "claim", half_suit: +pick.value,
                               assignment }, step: 1 }).then(() => pace());
     };
-    box.appendChild(go);
+    const bar = el("div", "declbar");
+    bar.appendChild(check);
+    bar.appendChild(go);
+    box.appendChild(bar);
   });
 }
 

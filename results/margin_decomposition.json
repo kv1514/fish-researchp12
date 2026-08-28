@@ -1,0 +1,61 @@
+{
+ "source": "camp_probe2.jsonl",
+ "decomposition": {
+  "n_games": 600,
+  "margin": {
+   "mean": 2.5,
+   "ci95": [
+    2.2772,
+    2.7228
+   ]
+  },
+  "their_errors": {
+   "ownership_per_game": 0.65,
+   "allocation_per_game": 0.2683,
+   "sets_credited": 1.8367
+  },
+  "our_errors": {
+   "per_game": 0.15,
+   "sets_conceded": 0.3
+  },
+  "residual": {
+   "mean": 0.9633,
+   "ci95": [
+    0.7375,
+    1.1892
+   ]
+  },
+  "share_from_declarations": 0.6147
+ },
+ "mechanism": {
+  "cards_misplaced": 398,
+  "publicly_pinned": 0,
+  "dark": 398,
+  "buckets": {
+   "asked_only": {
+    "n": 0,
+    "wrong": 0,
+    "rate": null
+   },
+   "took_only": {
+    "n": 411,
+    "wrong": 13,
+    "rate": 0.0316
+   },
+   "both": {
+    "n": 1927,
+    "wrong": 371,
+    "rate": 0.1925
+   },
+   "silent": {
+    "n": 73,
+    "wrong": 6,
+    "rate": 0.0822
+   }
+  },
+  "hazard_per_1000_plies": {
+   "we_asked": 45.377,
+   "not_asked": 0.675
+  }
+ }
+}

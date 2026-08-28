@@ -302,3 +302,88 @@ def test_the_evaluation_branches_actually_differ():
         # And the expectation must sit between its own branches.
         lo, hi = sorted((m["eval_if_fail"], m["eval_if_success"]))
         assert lo - 1e-9 <= m["eval_expected"] <= hi + 1e-9, m
+
+
+# --------------------------------------------------------------- claim check
+
+
+def test_claim_check_prices_the_players_own_split():
+    """The number returned is about the split that was SENT, not the engine's.
+
+    The whole feature is that a player can be told their split is wrong.  A
+    route that quietly re-prices the engine's answer would return a
+    reassuring number for every input, and would be worse than no route.
+    """
+    s = new_session({"seat": 0})
+    snap = s.snapshot()
+    team = sorted([snap["seat"]] + list(snap["teammates"]))
+    hs = next(i for i, w in enumerate(snap["set_winner"]) if not w)
+
+    r = s.claim_check(hs, [team[0]] * 6)
+    assert r["assignment"] == [team[0]] * 6
+    assert 0.0 <= r["p_exact"] <= 1.0
+    assert 0.0 <= r["p_team"] <= 1.0
+    # p_team is over ALL splits, so it can never be below any one of them
+    assert r["p_team"] >= r["p_exact"] - 1e-9, (r["p_team"], r["p_exact"])
+
+    # and a different split must be able to get a different number
+    other = s.claim_check(hs, r["engine"]["assignment"])
+    assert other["engine"]["same"] is True
+    assert other["p_team"] == r["p_team"], "p_team is a property of the set"
+
+
+def test_the_engines_figure_is_recomputed_the_same_way_as_the_players():
+    """Two methods wearing one label is the failure this guards against.
+
+    `claim4.best_for_half_suit` has two tiers: above its enumeration cap it
+    returns a PRODUCT of per-card marginals rather than a joint, which at the
+    opening it always does.  Quoting that beside an exact joint would put two
+    different estimators side by side under one heading.
+    """
+    from fish4.analyse import Analyser
+    from fish4.claim4 import ClaimConfig, ClaimEvaluator
+    from fish.cards import half_suit_cards
+    from api._engine import _analyser_spec
+
+    s = new_session({"seat": 0})
+    snap = s.snapshot()
+    hs = next(i for i, w in enumerate(snap["set_winner"]) if not w)
+    r = s.claim_check(hs, [snap["seat"]] * 6)
+
+    obs = s.obs()
+    an = Analyser(s.rules, s.seat, value_model=None, gamma=s.gamma,
+                  n_draws=s.draws, seed=s.seed & 0x7FFFFFFF, **_analyser_spec())
+    ctx = an.context(obs)
+    ev = ClaimEvaluator(ctx, ClaimConfig()).best_for_half_suit(hs)
+    assert ev is not None
+    direct = float(ctx.post.prob_assignment(list(half_suit_cards(hs)),
+                                            list(ev[2].assignment)))
+    assert abs(r["engine"]["p_exact"] - round(direct, 4)) < 1e-9, (
+        "the engine's figure was quoted rather than recomputed")
+
+
+def test_claim_check_refuses_what_the_engine_would_refuse():
+    s = new_session({"seat": 0})
+    snap = s.snapshot()
+    team = sorted([snap["seat"]] + list(snap["teammates"]))
+    hs = next(i for i, w in enumerate(snap["set_winner"]) if not w)
+    opp = next(p for p in range(6) if p not in team)
+
+    for bad, why in (([team[0]] * 5, "wrong length"),
+                     ([opp] * 6, "a card on the other team")):
+        try:
+            s.claim_check(hs, bad)
+        except ValueError:
+            continue
+        raise AssertionError(f"{why} was accepted")
+
+
+def test_no_claim_check_for_a_spectator():
+    """Same trap analysis() and deductions() guard: seat -1 would silently
+    build seat 5's view, and price a split using another player's hand."""
+    s = new_session({"mode": "spectate"})
+    try:
+        s.claim_check(0, [0] * 6)
+    except ValueError:
+        return
+    raise AssertionError("a spectator was allowed to price a split")

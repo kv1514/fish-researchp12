@@ -120,11 +120,17 @@ def report(rows) -> dict:
     _assert_arms_are_distinct(rows)
     n = len(rows)
     base = [r["A_shipped"]["margin"] for r in rows]
+    # n is GAMES, not deals: every deal seed is played in both seat parities,
+    # so a run of `n_deals` produces 2*n_deals rows. The first report of this
+    # experiment printed this number under the word "deals", which understated
+    # nothing and misnamed everything.
     print(f"\n=== G1: what the opponent model's sign costs against v0.7 ===")
-    print(f"{n:,} deals, each played once per arm on the identical deal\n")
+    print(f"{n:,} games ({n//2:,} deals x 2 seat parities), each played once "
+          f"per arm on the identical deal\n")
     print(f"  arm A (gamma +0.35, shipped)   "
           f"{sum(base)/n:+.4f} sets/game")
-    out = {"rules": RULES_D, "bridge_rev": BRIDGE_REV, "n_deals": n,
+    out = {"rules": RULES_D, "bridge_rev": BRIDGE_REV,
+           "n_games": n, "n_deals": n // 2,
            "min_interesting": MIN_INTERESTING,
            "margin_A": sum(base) / n, "arms": {}}
     for arm in ("B_none", "C_measured"):
