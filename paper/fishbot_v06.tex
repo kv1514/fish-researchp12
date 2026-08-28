@@ -2808,8 +2808,8 @@ avoided two or more & $12$ & $+4.1667$ $[+2.1819, +6.1515]$ \\
 Three things follow. The two-sets arithmetic is right, and now measured
 rather than assumed: an \emph{added} misdeclaration costs exactly $-2.0000$
 sets, which is the award rule's own arithmetic recovered from play rather than
-asserted from the rulebook. Deferring a declaration costs about $0.25$ to
-$0.30$ sets each, and for the heavier arm that cost excludes zero --- a price
+asserted from the rulebook. Deferring a declaration costs about $0.36$ to
+$0.43$ sets each, and for the heavier arm that cost excludes zero --- a price
 this project did not have, and precisely the quantity the pre-registration
 called out as unattributable from the margin alone. It is attributable, just
 not from the margin alone: $0.0640$ errors avoided at $1.79$ is $0.1146$,
@@ -2822,9 +2822,16 @@ the set --- the half-suit stays live and can still be lost. At $n = 48$ and
 $n = 10$ the two intervals overlap comfortably and this is a hypothesis the
 design was not built to settle.
 
-What makes the intercept causal rather than a selection artefact is the
-pairing: both arms play the identical deal, so ``deals on which the error
-count did not change'' is a property of the deal and not of an assignment.
+What the intercept is, precisely, because the first draft of this paragraph
+overclaimed it. Both arms play every deal, so the error difference is a
+deterministic function of the deal and conditioning on it selects \emph{deals}
+rather than assignments --- which does make the estimate causal on that
+subpopulation. It is not the cost of deferring in general: the subpopulation is
+selected by an outcome, and deals where no error was avoided defer about
+$30\%$ less often than average ($0.156$ against $0.224$ per game). The
+per-declaration figures above therefore divide by that subpopulation's own
+deferral rate. Dividing by the overall rate, which is what a first pass did,
+understates the price of a deferral by exactly that $30\%$.
 
 \subsection{Everything else we tried}
 \label{sec:res-null}

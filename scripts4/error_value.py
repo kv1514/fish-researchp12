@@ -25,6 +25,15 @@ pre-registrations) is the assumption v = 2, from the award rule: a
 misdeclared set goes to the opponents, so getting it right instead is a
 two-set swing. That is right about the SET and silent about the position.
 
+WHAT THE INTERCEPT IS, precisely. It is the paired treatment effect on the
+deals where the arm avoided no error. Both arms play every deal, so dw is a
+deterministic function of the deal and conditioning on it selects DEALS rather
+than assignments -- which makes the estimate causal on that subpopulation. It
+is not "the cost of deferring in general": the subpopulation is selected by an
+outcome, and deals where no error was avoided defer about 30% less often than
+average. The per-deferral figure therefore divides by that subpopulation's own
+deferral rate, not the overall one.
+
 Reads the journal a paired arm-vs-arm runner already wrote. Costs no games.
 
     py scripts4/error_value.py [journal.jsonl] [--arms A,B,...]
@@ -73,7 +82,14 @@ def fit(rows, arm) -> dict:
     # v is the value of avoiding ONE error, and x counts errors added, so the
     # slope's sign flips
     v, se_v = -b, se_b
-    defer = sum(_deferred(r, arm) for r in rows) / n
+    # The deferral rate ON THE DEALS THE INTERCEPT DESCRIBES, not overall.
+    # The intercept is the treatment effect where dw == 0, and those deals
+    # defer LESS than average -- fewer deferrals means fewer chances to avoid
+    # an error, so the selection is not neutral. Dividing the intercept by the
+    # overall rate understated the per-deferral cost by about 30%.
+    zero = [r for r, d in zip(rows, x) if d == 0]
+    defer = (sum(_deferred(r, arm) for r in zero) / len(zero)) if zero else 0.0
+    defer_all = sum(_deferred(r, arm) for r in rows) / n
 
     # The same question without a linear model, because the regressor takes
     # about four values and a straight line through four levels is close to a
@@ -103,7 +119,8 @@ def fit(rows, arm) -> dict:
         "cost_when_it_avoids_nothing": {
             "est": a, "ci95": [a - 1.96 * se_a, a + 1.96 * se_a]},
         "errors_avoided_per_game": -mx,
-        "declarations_deferred_per_game": defer,
+        "declarations_deferred_per_game": defer_all,
+        "deferred_per_game_where_no_error_avoided": defer,
         "cost_per_deferral": (a / defer if defer else None),
         "margin": my,
         "reconstructed": a + b * mx,
@@ -135,7 +152,9 @@ def report(rows, arms) -> dict:
               f"{f['declarations_deferred_per_game']:+.4f}")
         if f["cost_per_deferral"] is not None:
             print(f"    -> {f['cost_per_deferral']:+.4f} sets per deferred "
-                  f"declaration")
+                  f"declaration, dividing by the "
+                  f"{f['deferred_per_game_where_no_error_avoided']:.4f} "
+                  f"deferrals/game on the deals the intercept describes")
         print(f"    net {f['margin']:+.4f}, reconstructed "
               f"{f['reconstructed']:+.4f}")
         print(f"    the same thing without a model, paired margin by how "

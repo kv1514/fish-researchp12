@@ -57,7 +57,8 @@
    },
    "errors_avoided_per_game": 0.064,
    "declarations_deferred_per_game": 0.224,
-   "cost_per_deferral": -0.2524485273091192,
+   "deferred_per_game_where_no_error_avoided": 0.15591397849462366,
+   "cost_per_deferral": -0.3626901876485221,
    "margin": 0.058,
    "reconstructed": 0.058
   },
@@ -116,7 +117,8 @@
    },
    "errors_avoided_per_game": 0.066,
    "declarations_deferred_per_game": 0.273,
-   "cost_per_deferral": -0.2980315813934986,
+   "deferred_per_game_where_no_error_avoided": 0.1906318082788671,
+   "cost_per_deferral": -0.42680506708200155,
    "margin": 0.04,
    "reconstructed": 0.039999999999999994
   }
