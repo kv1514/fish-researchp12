@@ -232,3 +232,81 @@ ambiguity to be argued away.
   false positive in the champion and in the paper.
 - **Withdrawal conditions.** Unchanged, plus: if C beats B at this size, the
   threshold argument from §tempo is withdrawn regardless of B's own number.
+
+---
+
+# Addendum outcome: it does not replicate, and condition 3 fires
+
+Run 2026-08-28, `scripts4/tempo_confirm.py 4000 3` with `TEMPO_SEED0=7700000`
+against the current champion (`claim_forced_exhaustive=1`), 8,000 games per arm
+on identical deals, both parities, `BRIDGE_REV = 2`, zero fallbacks, zero
+unfinished. `results/tempo_rep8k_confirm.json`.
+
+| arm | 1,000 games | 8,000 games |
+|---|---|---|
+| A shipped | +2.4760 | +2.4038 |
+| **B** `turn_free_below` 0.50 | **+0.2280** [+0.0076, +0.4484] | **−0.0163** [−0.0973, +0.0648] |
+| C same threshold, half weight | +0.0840 [−0.1216, +0.2896] | **−0.0985** [−0.1746, −0.0224] |
+
+**B does not replicate.** The point estimate moves from $+0.2280$ to
+$-0.0163$ and the interval now contains zero comfortably. The two intervals
+overlap only on $[+0.0076, +0.0648]$ — the first run's lower bound was
+$+0.0076$, which is what a false positive looks like when it clears zero by a
+hair.
+
+**C is worse than shipped beyond noise**, $-0.0985$ $[-0.1746, -0.0224]$. And
+the dose response has inverted: it ran $A < C < B$ monotone increasing at 1,000
+games and runs $B > A > C$ now.
+
+## Withdrawal conditions
+
+3. **Hit rate falls without the margin rising.** B's hit rate goes $0.5195 \to
+   0.5104$ and its margin does not rise ($-0.0163$). **Triggered. Withdrawn.**
+
+1 and 2 do not fire (B is not negative beyond noise; C does not beat B).
+Condition 3 is sufficient on its own and it is the one that was written for
+exactly this shape.
+
+## What the mechanism did, since it is not what failed
+
+The causal chain the registration predicted appeared again and bought nothing:
+turns $57.700 \to 58.899$, asks $52.346 \to 53.518$, cards landed $27.196 \to
+27.314$, hit rate down as designed. **More asks, more cards, no more sets** —
+and slightly worse declarations, with the gate path's error rate rising
+$0.262 \to 0.309$ and wrong declarations per game $0.1603 \to 0.1633$.
+
+The error-value decomposition on this run's own journal
+(`results/error_value_tempo_rep8k.json`) says the same thing arithmetically:
+B avoids $-0.0030$ errors a game — it *adds* them on net. Conditioned rather
+than fitted, 868 games avoided one error at $+1.6198$ and 972 games added one
+at $-1.4979$. Nearly balanced, slightly the wrong way.
+
+## What survives, and what does not
+
+**§tempo's measurement stands.** A turn really is worth about nothing below
+$p_\text{best} = 0.50$ and about $+0.45$ above it; that is a measurement of a
+price and this run does not touch it. The objective really does charge a
+constant rate for it on $53\%$ of decisions, and that really is a
+mis-specification.
+
+**Acting on it does not pay.** Twice now — once here and once with the
+signalling gate this morning — the tempo table has correctly identified
+something the engine gets wrong and the correction has failed to buy sets.
+That is worth stating as a pattern rather than as two nulls: a term can be
+mis-specified against a measured scale and still be doing useful work for a
+reason the scale does not capture. The registration said as much in advance:
+`turn_risk` is $-(\text{target's hand size} - \text{mean})$, so it also pushes
+asks toward players holding fewer cards.
+
+## The reason this run existed, which is the most important line here
+
+The 1,000-game result **shipped under the pre-registration as written** — point
+estimate $+0.2280 \geq +0.15$, interval lower bound $+0.0076 > 0$ — and did not
+ship under the stricter reading the runner had implemented. I refused to pick
+between two pre-written artifacts and ran 8,000 games instead, with the bar
+disambiguated in advance as "ship only if both readings agree".
+
+Had I taken the document's literal reading, **the champion would now carry a
+knob whose true effect is $-0.0163$**. The ambiguity was not a nuisance to be
+argued away; resolving it with data is the only reason this did not become a
+shipped false positive.

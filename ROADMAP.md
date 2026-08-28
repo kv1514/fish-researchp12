@@ -97,15 +97,22 @@ opponents, and which opponent receives the turn on failure. `TunedAgent`-style
 weights make each term individually ablatable so the data, not intuition,
 sets them.
 
-**2026-08-28: one of those terms is now measured and mis-specified.** The
-tempo term charges `0.6 * (1-p) * turn_risk` at a constant rate, but a turn is
-free below `p_best = 0.50` and worth about +0.45 above it, and 53% of ask
-decisions sit in the free regime. Switching the term off below the threshold
-returned +0.2280 [+0.0076, +0.4484] over 1,000 games against v0.7 with the
-predicted mechanism intact -- more turns, more asks, a lower hit rate, more
-cards landed -- and a monotone dose response. It is unresolved rather than
-shipped: see `prereg/tempo_regime.md`, where two artifacts written before the
-run disagree about the bar, and an 8,000-game replication settles it.
+**2026-08-28: one of those terms is measured, mis-specified, and correcting it
+does not pay.** The tempo term charges `0.6 * (1-p) * turn_risk` at a constant
+rate, but a turn is free below `p_best = 0.50` and worth about +0.45 above it,
+and 53% of ask decisions sit in the free regime. Switching the term off below
+the threshold returned +0.2280 [+0.0076, +0.4484] over 1,000 games; the
+8,000-game replication returns **-0.0163 [-0.0973, +0.0648]**, with the half-
+weight rung at -0.0985 [-0.1746, -0.0224], worse than shipped. Withdrawal
+condition 3 fired (hit rate fell, margin did not rise) and it is withdrawn.
+
+The measurement still stands; acting on it does not. That is now twice -- here
+and the signalling gate -- that the tempo table has correctly identified
+something the engine gets wrong and the fix has bought no sets. The lesson for
+this item is that a term can be mis-specified against a measured scale and
+still be earning its weight for a reason the scale does not capture: `turn_risk`
+is minus the target's hand size, so it also steers asks toward short hands.
+Any learned objective has to beat that, not merely notice it.
 
 The wider point for this item: 33.0% of the game-to-game variance in our ask
 hit rate is neither the deal (8.7%) nor binomial noise (58.3%) but the

@@ -600,17 +600,43 @@ so it gives no reason to think `forced_claim`'s argmax is distorted.
 against v0.7 the last declaration goes 28/87 to 37/87 correct, paired +0.0090
 [+0.0031, +0.0149], guard 2 passing exactly.
 
-### Unresolved, and deliberately left so
+### The tempo term does not replicate, and the bar ambiguity is why that matters
 
-The tempo term. B_free returned +0.2280 [+0.0076, +0.4484] over 1,000 games,
-with the predicted mechanism intact (more turns, more asks, lower hit rate,
-more cards landed) and a monotone dose response. It ships under
-`prereg/tempo_regime.md` as written -- "point estimate >= +0.15 with the
-interval clear of zero" -- and does not ship under the stricter rule
-`scripts4/tempo_confirm.py` had implemented. Both artifacts predate the run,
-so picking one would be bar-shopping. An 8,000-game replication against the
-new champion, fixed in size in advance and analysed once, decides it, and it
-ships only if both readings agree.
+The 1,000-game run gave B_free **+0.2280 [+0.0076, +0.4484]** with the
+predicted mechanism intact and a monotone dose response. The 8,000-game
+replication against the current champion gives **-0.0163 [-0.0973, +0.0648]**,
+and C_half comes in at **-0.0985 [-0.1746, -0.0224]** -- worse than shipped
+beyond noise. The dose response inverted: A < C < B at 1,000 games, B > A > C
+at 8,000.
+
+**Withdrawal condition 3 fired**: the hit rate fell (0.5195 -> 0.5104) and the
+margin did not rise. Withdrawn.
+
+The mechanism appeared again and bought nothing: turns 57.700 -> 58.899, asks
+52.346 -> 53.518, cards landed 27.196 -> 27.314. **More asks, more cards, no
+more sets** -- and slightly worse declarations, the gate path's error rate
+rising 0.262 -> 0.309. The error-value decomposition agrees arithmetically: B
+avoids -0.0030 errors a game, adding them on net, with 868 games avoiding one
+at +1.6198 against 972 adding one at -1.4979.
+
+**What survives.** Section tempo's measurement is untouched -- a turn really is
+worth about nothing below p_best = 0.50 and about +0.45 above it, and the
+objective really does charge a constant rate on 53% of decisions. What is
+refuted is that correcting the mis-specification pays. Twice now, here and with
+the signalling gate, the tempo table has correctly identified something the
+engine gets wrong and the fix has bought no sets. A term can be mis-specified
+against a measured scale and still be doing useful work for a reason the scale
+does not capture -- `turn_risk` is minus the target's hand size, so it also
+pushes asks toward players holding fewer cards.
+
+**And the reason the run existed.** The 1,000-game result SHIPPED under the
+pre-registration as written (+0.2280 >= +0.15, lower bound +0.0076 > 0) and did
+not ship under the stricter rule the runner had implemented. Rather than pick
+between two artifacts both written before the run, I disambiguated in advance
+-- ship only if both readings agree -- and bought 8,000 games. Had I taken the
+document's literal reading, the champion would now carry a knob whose true
+effect is -0.0163. The ambiguity was not a nuisance to argue away; resolving it
+with data is the only thing that stopped a shipped false positive.
 
 ### The one basis term that points at the error we make, and why its screen said nothing
 
