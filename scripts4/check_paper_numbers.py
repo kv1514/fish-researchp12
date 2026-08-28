@@ -828,6 +828,34 @@ WATCH = [
      "claim feasibility interval, low", "over $6000$\npre-registered pairs"),
     ("claim_feasibility_verdict.json", "ci.1", "{:+.3f}",
      "claim feasibility interval, high", "over $6000$\npre-registered pairs"),
+    # G1: what the mis-signed opponent model costs in play. The two arms are
+    # watched separately because the section's argument needs BOTH -- that
+    # removing the model loses, and that adopting the fitted exponent loses
+    # more. Either alone reads as a different result.
+    ("g1_gamma_cost.json", "arms.B_none.effect", "{:+.4f}",
+     "G1 arm B, no opponent model", "respect but one scalar, played on"),
+    ("g1_gamma_cost.json", "arms.C_measured.effect", "{:+.4f}",
+     "G1 arm C, his fitted exponent", "respect but one scalar, played on"),
+    # thousands separator: the paper writes 1{,}600, which main() normalises
+    ("g1_gamma_cost.json", "n_games", "{:,d}",
+     "G1 games", "respect but one scalar, played on"),
+    # The margin decomposition. This is the one that re-prices the headline, so
+    # the residual and the leak are both pinned: quoting the leak without the
+    # residual, or the other way round, would let the section drift into a
+    # claim the file does not support.
+    ("margin_decomposition.json", "decomposition.margin.mean", "{:+.4f}",
+     "decomposed margin", "Sixty-one per cent of the margin"),
+    ("margin_decomposition.json", "decomposition.residual.mean", "{:+.4f}",
+     "margin residual after declarations", "Sixty-one per cent of the margin"),
+    ("margin_decomposition.json", "decomposition.their_errors.ownership_per_game",
+     "{:.3f}", "their ownership-class error rate",
+     "Sixty-one per cent of the margin"),
+    ("margin_decomposition.json", "mechanism.dark", "{:d}",
+     "their misplaced cards that never moved in public",
+     "never publicly moved since the deal"),
+    ("margin_decomposition.json", "mechanism.publicly_pinned", "{:d}",
+     "their misplaced cards that were publicly ours",
+     "publicly pinned to us by an ask we had won"),
 ]
 
 

@@ -2113,6 +2113,51 @@ per-seat exponent fitted on v0.7 and validated on v0.7 would reproduce that
 error exactly. It needs its own pre-registration and a foreign opponent that
 is not the one it was fitted on.
 
+\paragraph{It got one, and the answer is that describing his asks well and
+beating him are different problems.} The pre-registration is
+\texttt{prereg/gamma\_policy\_specific.md}, written before a game was played,
+and it fixed two things in advance: that nothing would ship on a run whose
+treatment arm was both fitted on v0.7 and measured against v0.7, and that the
+smallest effect worth adopting was $+0.15$. Three arms, identical in every
+respect but one scalar, played on $1{,}600$ games ($800$ deals in both seat
+parities), each arm seeing the identical deal from the identical seat:
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+arm & $\gamma$ & sets/game & paired difference vs shipped \\
+\midrule
+A, shipped        & $+0.35$ & $+2.3613$ & --- \\
+B, no model       & $\phantom{+}0.00$ & $+1.9563$ & $-0.4050$ $[-0.5911, -0.2189]$ \\
+C, his exponent   & $-1.00$ & $+1.2588$ & $-1.1025$ $[-1.2897, -0.9153]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Both directions lose, and the fitted one loses by more than twice as
+much as switching the model off. The exponent that maximises the likelihood of
+v0.7's asks is, in play against v0.7, worse than an exponent with the wrong
+sign and worse than no opponent model at all.
+
+That is not a paradox once the two objects are named apart. The fit is a
+\emph{marginal} description of which half-suit a policy names, estimated on
+depth in the initial deal. The sampler uses it as a \emph{conditional}
+likelihood, applied to a world set that has already been cut down by the
+no-bluff certifications, the failed asks and the resolved sets --- and it is
+scored not by how well it predicts the next ask but by where it puts posterior
+mass over card locations. A re-weighting can be better calibrated about his
+choices and worse about his cards. Nothing in the estimator we used, which is
+the standard one, has any purchase on that distinction: it was never asked to.
+
+So the honest position is narrower than either the worry or the reassurance.
+The self-play validation of \S\ref{sec:res-choicecurve} really was circular,
+and finding that out took a second engine. But the repair the circularity
+seemed to imply --- adopt the exponent the foreign data want --- is measurably
+worse than the error, and the pre-registration is what stops that from being
+discovered after the fact. Arm C does not clear $+0.15$; G2, against the v0.3
+champion, therefore does not run, and nothing ships.
+
 \paragraph{And in play, it is real and not worth buying.}
 \label{sec:res-atask} Everything above is an
 argument from likelihood and from a normaliser, not from a duel, so the
@@ -5194,6 +5239,86 @@ knowing when a half-suit is \emph{finished}, and an $18$-point gap there is
 the difference between cashing a set and handing it over. That is the same
 claim \S\ref{sec:claiming} makes from the inference side, arrived at here
 from the scoreboard.
+
+\paragraph{How much of the margin is that, exactly.} The paragraph above is a
+qualitative reading of two rows, and it had never been priced. It can be:
+every declaration in a game is either right or one of two kinds of wrong, and
+under the award rule each wrong one moves the margin by two sets, so the
+scoreboard decomposes exactly. Over $600$ cross-engine games
+(\path{scripts4/margin_decomposition.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+component & rate & contribution to margin \\
+\midrule
+measured margin & --- & $+2.5000$ $[+2.2772, +2.7228]$ \\
+their ownership-class errors & $0.650$/game & $+1.3000$ \\
+their allocation-class errors & $0.268$/game & $+0.5367$ \\
+our own wrong declarations & $0.150$/game & $-0.3000$ \\
+\midrule
+everything else & --- & $+0.9633$ $[+0.7375, +1.1892]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Sixty-one per cent of the margin is declaration
+accounting.} The edge is real and it is sixfold --- we declare wrongly $0.150$
+times a game against their $0.918$ --- but it is a \emph{declaration} edge, and
+this project has spent the large majority of its compute on the ask objective.
+The residual, everything the asking and the inference and the lookahead
+between them produce once the declarations are netted out, is $+0.963$ sets
+per game: a real margin, and a little over a third of the headline one.
+
+This is a decomposition of where the sets landed, not a counterfactual. A
+declaration that did not happen changes every ply after it, and no arithmetic
+on a finished game recovers those plies; the residual row is what remains
+after the netting, not the margin a differently-declaring v0.7 would have
+conceded. The distinction is worth insisting on because the temptation is to
+read the last row as ``our true strength'', and it is not that.
+
+\paragraph{What their errors are made of, which is not what we guessed.} The
+obvious hypothesis about the ownership-class leak --- the $0.650$ sets a game
+they hand over by declaring a half-suit we still hold a card of --- was that
+our \emph{silence} causes it: under the no-bluff rule an ask certifies a
+holding, so a half-suit we have never asked in is one their posterior has
+little reason to place us in. That is backwards. Over the same games, the $398$
+cards of ours sitting inside their $390$ ownership errors split as
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+publicly pinned to us by an ask we had won & $0$ \\
+never publicly moved since the deal & $398$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Their engine does not misplace a card it has seen move; it only ever
+loses one with no public trace. And the leak concentrates where we have
+spoken, not where we have been quiet. Weighting by exposure --- plies during
+which our team held exactly one card of a live half-suit --- gives $45.4$
+ownership errors per $1{,}000$ plies in half-suits we had asked in against
+$0.675$ where we had not, a rate ratio of $67$ $[42, 107]$. Sorted by what had
+happened in the half-suit before they declared it, $1{,}927$ declarations
+followed both an ask of ours and a later successful ask that took one of that
+half-suit off us, and $19.25\%$ of those were ownership-wrong; $411$ followed
+only the taking, and $3.16\%$ were.
+
+The mechanism this points at is specific, and it is a hypothesis about their
+engine formed from outside it rather than a reading of their source. Our ask
+certifies that we hold at least one \emph{other} card of the half-suit. When an
+opponent later takes one card of it off us, their inference appears to treat
+that certification as discharged --- as though ``at least one'' had been
+``exactly one'' --- and every card it then loses is one that never moved in
+public. We are not building a feature on this. An exploit of one engine's
+inference is exactly the shape of the withdrawn deception ladder of
+\S\ref{sec:critic}, and a term that farmed it would grow with its dose against
+v0.7 and mean nothing anywhere else. It is reported because a margin whose
+majority component has an identified cause is a different object from one whose
+does not, and readers of the head-to-head are entitled to know which they have.
 
 \paragraph{What this measurement is, stated with the other project's own
 scope in view.} Their paper is unusually careful about what it does not
