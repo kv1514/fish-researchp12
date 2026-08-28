@@ -1,0 +1,12 @@
+{
+ "rules": {
+  "variant": "54",
+  "claims_any_time": false,
+  "allow_bluff_asks": false,
+  "wrong_distribution_outcome": "opponent",
+  "mandatory_claim_known": false,
+  "starting_player": 0
+ },
+ "arms": {},
+ "bridge_fallbacks": 0
+}
