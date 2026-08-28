@@ -2927,6 +2927,47 @@ per-declaration figures above therefore divide by that subpopulation's own
 deferral rate. Dividing by the overall rate, which is what a first pass did,
 understates the price of a deferral by exactly that $30\%$.
 
+\paragraph{The fourth row is a search problem, and it is the one thing this
+section produced that shipped.} A forced declaration --- cards in hand, no legal
+ask anywhere --- is wrong $57.9\%$ of the time. The engine reaches its split
+there the same way it reaches every other one: \texttt{best\_for\_half\_suit}
+shortlists two candidate holders per card and scores three combinations. At the
+last live half-suit that is a shortlist over a space small enough to enumerate
+completely, and enumerating it is not a change of policy but a better search of
+the same objective.
+
+\texttt{claim\_forced\_exhaustive} does exactly that: at or below one live
+half-suit it enumerates the whole team assignment space under the joint, fixes
+any card the propagator has already pinned, and --- the property that makes it a
+search fix rather than a new policy --- never returns a split the joint scores
+below the incumbent's. Registered at \path{prereg/forced_exhaustive.md} with
+the ship bar and the guards fixed first, it cleared in both populations:
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+population & effect & interval \\
+\midrule
+self-play, $2{,}400$ games & $+0.0233$ & $[+0.0133, +0.0334]$ sets/game \\
+vs.\ v0.7, last declaration correct & $28/87 \to 37/87$ & paired $+0.0090$ $[+0.0031, +0.0149]$ \\
+vs.\ v0.7, set margin & $+0.0180$ & $[+0.0063, +0.0297]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent with accuracy in every other live-half-suit bucket unmoved, which was
+guard 2 and which it passed exactly. It is in \texttt{V06\_DEPLOYED}.
+
+Two things about those intervals are worth noticing, because they look too
+tight for $1{,}000$ games and they are not. The knob fires only on forced
+declarations at the last half-suit, so $99.1\%$ of games finish bit-identical
+in both arms and pairing removes almost all the variance --- $414\times$, the
+top row of Table~\ref{tab:pairing}. And the effect is correspondingly small:
+a rare branch played better is a rare improvement, however cleanly measured.
+Both facts are the same fact, and \S\ref{sec:dealluck} is where it is priced in
+general.
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 
@@ -2993,7 +3034,7 @@ claim progress & $0.30$ & 160 & $-0.206$ & $[-0.807, +0.395]$ \\
 signalling & $+0.25$ & 160 & $-0.300$ & $[-0.890, +0.290]$ \\
 signalling & $-0.25$ (conceal) & 160 & $+0.056$ & $[-0.530, +0.642]$ \\
 information gain & $0.10$ & 160 & $-0.394$ & $[-0.932, +0.144]$ \\
-concentration & $0.15$ & 160 & $-0.037$ & $[-0.653, +0.578]$ \\
+concentration$^\ddagger$ & $0.15$ & 160 & $-0.037$ & $[-0.653, +0.578]$ \\
 turn-risk retune & $0.35$ (from $0.60$) & 160 & $-0.075$ & $[-0.670, +0.520]$ \\
 scarcity retune & $0.35$ (from $0.20$) & 160 & $+0.125$ & $[-0.381, +0.631]$ \\
 \midrule
@@ -3017,6 +3058,44 @@ not ``shown not to matter''.}
 \end{table}
 
 Four of these deserve comment.
+
+$^\ddagger$\,\textbf{This row is retained as history and does not describe the
+code.} Both halves of it were incapable of finding an effect, and the reason is
+worth more than the row.
+
+The \emph{formula} could not express the preference it was written for.
+\texttt{concent} at v1 was \texttt{ctx.team\_concentration[hs]}: one number per
+half-suit, identical for every candidate ask in it and independent of the
+target and of who would end up holding the card. A term taking the same value
+on every ask in a half-suit can tilt the choice of half-suit and nothing else.
+Worse, its sign is backwards in the case it exists for --- when the
+concentration sits with a \emph{teammate}, taking a card breaks it up, and v1
+scored that ask highest precisely because the half-suit was concentrated. This
+is the defect \texttt{claim} carried at v1, and it takes the same remedy:
+corrected in place to the expected \emph{change} the ask would cause, with
+\texttt{TERM\_VERSIONS["concent"]} bumped to $2$ so that
+\texttt{stale\_terms()} flags every stored harvest fitted against the old
+column.
+
+And the \emph{weight} was inert. Measured over $596$ decisions with a real
+choice and $30{,}065$ candidate asks
+(\path{scripts4/concent_scale.py} $\rightarrow$
+\path{results/concent_scale.json}), the corrected feature has median magnitude
+$0.0299$ and a median within-decision spread of $0.0677$. At the screened
+weight of $0.15$ it changes which ask is taken on $1.7\%$ of decisions; it
+takes a weight near $1.0$ to reach $8\%$. A $160$-pair run of a knob acting on
+one decision in sixty, reporting an interval four times the ship bar in each
+direction, is a statement about the harness rather than about the idea.
+
+The retest matters because this is the only term in the basis that points at
+the error we actually make. Of our $0.1759$ wrong declarations a game, $0.1676$
+are allocation class --- our own team held all six and we named the wrong split
+--- against $0.0083$ ownership errors, and a half-suit held entirely in one
+hand has no split to name. It is registered at
+\path{prereg/concentration_v2.md} at $4{,}000$ games, with arms at $0.60$ and
+$1.50$ and with the mechanism (allocation errors falling, concentration at
+declaration time rising) as a \emph{withdrawal condition} rather than a
+secondary.
 
 $^\dagger$\,\textbf{These two rows measured nothing, and we found out
 afterwards.} The no-declaration term was assembled into the importance weights
@@ -4301,9 +4380,80 @@ cross-engine games, the median number of \emph{our own} turns between
 assembling the set and the deadline is $25.5$, with only $16$ having none
 left.
 
-\texttt{prereg/deadline\_signalling.md} registers exactly that, with the
-incumbent $0.15$ carried as a replication arm --- if it does not reproduce the
-$+0.068$ above, the new rung means nothing.
+\texttt{prereg/deadline\_signalling.md} registered exactly that, with the
+incumbent $0.15$ carried as a replication arm --- if it did not reproduce the
+$+0.068$ above, the new rung would mean nothing.
+
+\paragraph{It ran, and the argument was right about the price of a turn and
+wrong about what was limiting the mechanism.} $1{,}000$ games per arm against
+v0.7 on identical deals, both parities, bridge revision 2, zero fallbacks
+(\path{results/signal_gate_confirm.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+arm & margin & vs.\ A \\
+\midrule
+A, signalling off & $+2.4760$ & --- \\
+B, $\texttt{signal\_max\_p} = 0.15$ & $+2.5940$ & $+0.1180$ $[+0.0325, +0.2035]$ \\
+C, $\texttt{signal\_max\_p} = 0.50$ & $+2.5980$ & $+0.1220$ $[+0.0291, +0.2149]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+B replicates: its interval contains the $+0.068$ it was carried to reproduce,
+so C means something. Wrong declarations fell rather than rose, $0.170 \to
+0.152$ a game. No withdrawal condition fired. And C did not ship: the bar was a
+point estimate at or above $+0.15$ with the interval clear of zero, and
+$+0.1220$ clears zero without reaching the bar.
+
+The prediction was that C would beat B, because a threshold three times higher
+should fire three times more often. It did not --- and the path ledger says
+why. Signalling moves about $210$ declarations out of the gated path and into
+the forced path, and \emph{B and C move almost the same ones}: $75$ gated
+declarations against $78$, a difference of three in a thousand games. Widening
+the gate by a factor of $3.3$ changed the engine's behaviour on three
+declarations.
+
+So the gate was never the binding constraint, and the reason is visible once
+stated: the protocol fires when a seat is stuck, and a stuck seat is one whose
+best ask is already bad, so $p_{\text{best}} \leq 0.15$ is very nearly
+\emph{implied} by the situation it fires in. \S\ref{sec:tempo} was right about
+the price of a turn and wrong about which quantity was limiting this mechanism.
+That retires the hypothesis, which is worth more than the $+0.004$ it bought.
+
+What the effect is made of, conditioned rather than fitted
+(\path{scripts4/error_value.py} on this run's own journal, arm C):
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+games & paired margin \\
+\midrule
+avoided no error, $n = 876$ & $+0.0502$ $[-0.0248, +0.1253]$ \\
+avoided one, $n = 66$ & $+1.6061$ $[+0.9819, +2.2302]$ \\
+avoided two or more, $n = 6$ & $+3.6667$ $[+0.9861, +6.3472]$ \\
+\textbf{added} an error, $n = 52$ & $-0.9615$ $[-1.6399, -0.2832]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The whole effect is avoided errors: the $876$ games where nothing was avoided
+contribute $+0.044$ with an interval containing zero, the $72$ where something
+was contribute $+0.128$. And the ceiling on the mechanism is the last row ---
+it \emph{adds} an error almost as often as it avoids one, $52$ games against
+$72$. That, not the gate, is what a future attempt would have to attack.
+
+One methodological note, recorded rather than buried. The regression form of
+the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
+$[+0.0117, +0.1863]$, excluding zero, where the directly conditioned figure is
+$+0.0502$ $[-0.0248, +0.1253]$, which contains it. The line is misspecified:
+avoiding an error is worth $+1.61$ and adding one costs only $-0.96$, so the
+errors this protocol adds are cheaper than the ones it avoids, and a straight
+line through both cannot represent that. The conditional mean is the one to
+believe.
 
 \subsection{Game statistics, and a statistic that stops working}
 \label{sec:res-analytics}

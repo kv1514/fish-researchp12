@@ -662,6 +662,23 @@ WATCH = [
      "a symmetric\ntexture is not an advantage"),
     ("pairing_value.json", "runs.0.pairs.B_none.efficiency", "{:.1f}",
      "G1 arm pairing efficiency", "identical games"),
+    # The signalling gate and the forced search, both reported in full in
+    # sec:res-perpetual and sec:res-pathledger. Watched because each is quoted
+    # for what its interval EXCLUDES -- the gate for failing to reach +0.15,
+    # the search for clearing zero -- and a drifted bound would invert the
+    # verdict rather than merely blur it.
+    # Anchored on the table's own first row rather than on the prose that
+    # follows it: `+0.1220` also occurs in the foreign-opponent discussion, and
+    # a loose anchor let the effect match there while its own CI bound, three
+    # characters away in the source, fell outside the window.
+    ("signal_gate_confirm.json", "arms.C_measured.effect", "{:+.4f}",
+     "signalling gate at 0.50", "A, signalling off"),
+    ("signal_gate_confirm.json", "arms.C_measured.ci95.0", "{:+.4f}",
+     "signalling gate CI low", "A, signalling off"),
+    ("signal_gate_confirm.json", "arms.B_incumbent.effect", "{:+.4f}",
+     "signalling gate replication arm", "A, signalling off"),
+    ("forced_exhaustive_v07.json", "margin.effect", "{:+.4f}",
+     "forced search margin vs v0.7", "guard 2 and which it passed exactly"),
     ("foreign_award_check.json", "effect", "{:+.4f}",
      "rule-matched foreign effect", "under the award rule --- no reversal"),
     ("foreign_award_check.json", "ci95.0", "{:+.4f}",
