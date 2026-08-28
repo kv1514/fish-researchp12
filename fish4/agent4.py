@@ -123,6 +123,15 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  retake_window: int = 8,
                  retake_min_depth: int = 0,
                  w_behind: float = 0.0,
+                 #: Scale the tempo term down when the turn it is protecting
+                 #: is worth nothing. See prereg/tempo_regime.md: the paper
+                 #: measured a turn at -0.043 +- 0.169 below p_best 0.25 and
+                 #: +0.004 +- 0.143 in [0.25, 0.50), and the objective charges
+                 #: the same 0.6*(1-p)*turn_risk at every one of them -- which
+                 #: is 57% of all ask decisions. At 0.0 the test can never pass
+                 #: and the champion is bit-identical.
+                 turn_free_below: float = 0.0,
+                 turn_free_scale: float = 0.0,
                  # -- endgame-only ask weights. The exact solver shows the ask
                  # objective is wrong in a specific way once few half-suits are
                  # live, and wrong in a way that is not the same as being wrong
@@ -208,6 +217,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.retake_window = retake_window
         self.retake_min_depth = retake_min_depth
         self.w_behind = w_behind
+        self.turn_free_below = float(turn_free_below)
+        self.turn_free_scale = float(turn_free_scale)
         self.endgame_m = endgame_m
         self.endgame_d_info = endgame_d_info
         self.endgame_d_certain = endgame_d_certain
@@ -349,6 +360,19 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                 from .adaptive import adjust_weights
                 wts = adjust_weights(wts, obs, self.w_behind)
             scores, p = score_asks(ctx, asks, wts)
+            # Two passes, and the second one only sometimes. p_best is defined
+            # as the success probability of the ask the INCUMBENT objective
+            # would have chosen, because that is exactly the quantity the
+            # paper's tempo section bucketed its price by. Using max(p) would
+            # be cheaper and would not be the same number, so the first pass
+            # stands and the tempo column is re-weighted only when it turns
+            # out to have been charging for a turn worth nothing.
+            if self.turn_free_below > 0.0 and len(p):
+                top = max(range(len(scores)), key=lambda i: scores[i])
+                if float(p[top]) < self.turn_free_below:
+                    scores, p = score_asks(
+                        ctx, asks,
+                        replace(wts, turn=wts.turn * self.turn_free_scale))
             if self.w_value and model is not None:
                 # No keep_value here, deliberately: this branch ADDS the value
                 # objective to the heuristic one, and the heuristic already
