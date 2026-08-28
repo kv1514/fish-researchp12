@@ -714,6 +714,54 @@ class Session:
             "reveal": self._reveal_rows() if st.is_terminal else None,
         }
 
+    def deductions(self) -> dict:
+        """What the PUBLIC RECORD alone proves, from this seat's chair.
+
+        This is the one thing the table can hand a player that is not the
+        engine's opinion: a derivation they could have made themselves, from
+        facts everyone at the table saw. It is therefore not a hint and not a
+        leak -- BeliefState(observer=seat) is fed only public events plus this
+        seat's own hand, which is exactly the information boundary the whole
+        engine is built around.
+
+        Two deliberate omissions. It carries NO probabilities: the analysis
+        panel already does estimates, and mixing a proof with a guess in one
+        list teaches a player to trust them equally. And it reports only what
+        the propagator actually proved, which is a subset of what is provable
+        -- so the payload says how many cards remain unresolved rather than
+        implying the list is complete.
+        """
+        if self.mode == "spectate":
+            # obs() at seat -1 would quietly build seat 5's view, which is the
+            # same trap analysis() guards against. A spectator proof sheet is
+            # worth having and needs a public-only observer that does not
+            # exist yet; refusing is better than answering as seat 5.
+            raise ValueError("no deductions in spectate mode")
+        from fish.beliefs import BeliefState
+
+        bel = BeliefState(self.rules, observer=self.seat)
+        obs = self.obs()
+        bel.update(obs)
+        hands = bel.known_current_hands()
+        proved = [{"player": p,
+                   "cards": sorted(card_name(c) for c in mask_to_cards(hands[p]))}
+                  for p in range(NUM_PLAYERS)
+                  if p != self.seat and hands[p]]
+        at_least_one = [
+            {"player": p, "cards": [card_name(c) for c in cards]}
+            for cards, p in bel.ors[:12] if p != self.seat]
+        unresolved = 0
+        for hs, w in enumerate(obs.set_winner):
+            if w is not None:
+                continue
+            for c in half_suit_cards(hs):
+                m = bel.current_holder_mask(c)
+                if m and m & (m - 1):
+                    unresolved += 1
+        return {"proved": proved, "at_least_one": at_least_one,
+                "n_proved": sum(len(r["cards"]) for r in proved),
+                "n_unresolved": unresolved}
+
     def analysis(self) -> dict:
         if self.mode == "spectate":
             # There is no "you" to analyse for, and obs() at seat -1 would

@@ -319,3 +319,75 @@ def test_the_rollback_oracle_is_real_and_is_documented_as_such():
     doc = eng.log_hash.__doc__
     assert "does **not** close" in doc.lower() or "NOT** CLOSE" in doc
     assert "not evidence of honest play" in doc
+
+
+# -- the proof sheet ---------------------------------------------------------
+#
+# The one thing the table can hand a player that is not the engine's opinion:
+# a derivation from facts everyone saw. That makes it safe in principle, and
+# these check it is safe in fact.
+
+def test_the_proof_sheet_only_proves_what_the_seat_could_prove_itself():
+    """Every asserted holding must be true, and derived from public data.
+
+    BeliefState(observer=seat) is fed the public event log plus this seat's own
+    hand -- the same boundary the acting policy respects. So a proven holding
+    is something the player could have worked out, and it must also be RIGHT:
+    a proof sheet that is merely probable is a lie with a confident label.
+    """
+    s = new_session({"seat": 0})
+    tok, log = s.token(), list(s.wire_log)
+    checked = 0
+    for _ in range(40):
+        cur = Session.restore(tok, log)
+        if cur.state.is_terminal:
+            break
+        d = cur.deductions()
+        for row in d["proved"]:
+            assert row["player"] != cur.seat, "it told the seat its own hand"
+            held = {card_name(c) for c in mask_to_cards(
+                cur.state.hands[row["player"]])}
+            for name in row["cards"]:
+                assert name in held, (
+                    f"claimed P{row['player']} holds {name} and they do not")
+                checked += 1
+        for row in d["at_least_one"]:
+            held = {card_name(c) for c in mask_to_cards(
+                cur.state.hands[row["player"]])}
+            assert held & set(row["cards"]), (
+                f"'at least one of' was false for P{row['player']}")
+        if cur.state.turn == cur.seat:
+            cur.play(cur.suggest())
+        else:
+            cur.advance(3)
+        tok, log = cur.token(), list(cur.wire_log)
+    assert checked > 5, "fixture proved almost nothing; the test is vacuous"
+
+
+def test_the_proof_sheet_says_how_much_it_has_not_proved():
+    """A list that looks complete and is not teaches the wrong lesson."""
+    s = new_session({"seat": 0})
+    tok, log = s.token(), list(s.wire_log)
+    saw_unresolved = False
+    for _ in range(40):
+        cur = Session.restore(tok, log)
+        if cur.state.is_terminal:
+            break
+        d = cur.deductions()
+        assert "n_unresolved" in d and d["n_unresolved"] >= 0
+        assert d["n_proved"] == sum(len(r["cards"]) for r in d["proved"])
+        if d["n_unresolved"] > 0:
+            saw_unresolved = True
+        if cur.state.turn == cur.seat:
+            cur.play(cur.suggest())
+        else:
+            cur.advance(3)
+        tok, log = cur.token(), list(cur.wire_log)
+    assert saw_unresolved, "fixture never had an unresolved card to report"
+
+
+def test_the_proof_sheet_refuses_spectate_rather_than_answering_as_seat_five():
+    """obs() at seat -1 silently builds seat 5's view. Refusing is correct."""
+    sp = new_session({"mode": "spectate", "step": 1})
+    with pytest.raises(ValueError, match="spectate"):
+        sp.deductions()

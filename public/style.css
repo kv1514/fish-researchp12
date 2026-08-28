@@ -947,3 +947,12 @@ button.sm { padding: 5px 9px; font-size: 13px; }
   font-variant-numeric: tabular-nums;
   margin-top: 1px;
 }
+
+/* The proof sheet: certainties only, so it reads as a ledger rather than a
+   chart. Quieter than the action, louder than the posterior panel's guesses. */
+.proof { display: flex; flex-direction: column; gap: .28rem; }
+.proofrow { display: flex; gap: .45rem; align-items: center; flex-wrap: wrap;
+            font-size: .82rem; }
+.proofrow.weak { opacity: .68; font-style: italic; }
+.proofrow .pcards { display: flex; gap: .18rem; flex-wrap: wrap; }
+.proofrow .pmaybe { font-size: .76rem; }

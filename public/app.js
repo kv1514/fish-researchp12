@@ -183,6 +183,12 @@ const S = {
   roomPoll: null,
   busy: false,
   hint: null,
+  /* The proof sheet's cache and its guards, mirroring the hint's. `proofGen`
+   * is the snapshot generation the cached deductions belong to, so a stale
+   * sheet is never shown beside a newer position. */
+  proof: null,
+  proofGen: -1,
+  proofBusy: false,
   // Which position the hint in hand was computed for. `gen` counts snapshots;
   // `hintGen` records the one `hint` belongs to. Two bugs made this necessary
   // rather than defensive. Dealing a new game replaced token, actions and snap
@@ -1018,6 +1024,69 @@ function whyAt(idx) {
   return whyText(w[String(idx)]);
 }
 
+/* ---------------------------------------------------------- the proof sheet
+ * Deliberately separate from the posterior panel, and deliberately without a
+ * single probability. The posterior panel says where the cards PROBABLY are;
+ * this one says only what is certain. Merging them would teach a reader to
+ * trust an estimate as much as a proof, which is the specific habit that
+ * loses games of Fish.
+ */
+async function refreshProof() {
+  const panel = $("t-proofpanel");
+  if (!S.snap || S.snap.spectate || S.snap.terminal) { panel.hidden = true; return; }
+  // Guarded exactly like the hint, and for the same reason: render() calls
+  // this on every repaint, so without a generation check one position would
+  // fetch its own proof sheet a dozen times. S.gen advances on every new
+  // snapshot, which is precisely when the deductions can have changed.
+  if (S.proofBusy || S.proofGen === S.gen) {
+    if (S.proofGen === S.gen && S.proof) drawProof(S.proof);
+    return;
+  }
+  S.proofBusy = true;
+  const gen = S.gen;
+  let d;
+  try {
+    d = await api("deduce", { token: S.token, actions: S.actions });
+  } catch (e) { panel.hidden = true; return; } finally { S.proofBusy = false; }
+  if (!d || d.error) { panel.hidden = true; return; }
+  if (gen !== S.gen) return;          // the table moved on while we waited
+  S.proofGen = gen;
+  S.proof = d;
+  drawProof(d);
+}
+
+function drawProof(d) {
+  const panel = $("t-proofpanel");
+  const box = $("t-proof");
+  box.innerHTML = "";
+  const rows = (d.proved || []).filter(r => r.cards.length);
+  const ors = d.at_least_one || [];
+  if (!rows.length && !ors.length) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  rows.forEach(r => {
+    const line = el("div", "proofrow");
+    line.appendChild(el("b", null, nm(r.player)));
+    const cards = el("span", "pcards");
+    cards.innerHTML = r.cards.map(c => `<span class="card xs">${face(c)}</span>`).join("");
+    line.appendChild(cards);
+    box.appendChild(line);
+  });
+  ors.forEach(r => {
+    const line = el("div", "proofrow weak");
+    line.appendChild(el("b", null, nm(r.player)));
+    line.appendChild(el("span", "pmaybe",
+      "at least one of " + r.cards.join(", ")));
+    box.appendChild(line);
+  });
+  // Say what is NOT proved, so the list is never mistaken for the whole truth.
+  $("t-proofn").textContent = d.n_unresolved
+    ? `${d.n_proved} certain, ${d.n_unresolved} still open`
+    : `${d.n_proved} certain`;
+}
+
 function renderLog() {
   const box = $("t-log");
   box.innerHTML = "";
@@ -1494,6 +1563,7 @@ function render() {
   renderLog();
   renderAction();
   renderPosterior();
+  refreshProof();
   maybeAutoThink();
 }
 

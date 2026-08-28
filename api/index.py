@@ -138,6 +138,9 @@ class handler(BaseHTTPRequestHandler):
             if op == "analyse":
                 return self._send(s.analysis())
 
+            if op == "deduce":
+                return self._send(s.deductions())
+
             if op == "act":
                 if not s.snapshot()["your_turn"]:
                     return self._send({"error": "not your turn"}, 400)
