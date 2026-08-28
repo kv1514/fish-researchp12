@@ -120,7 +120,8 @@ function load() {
     + "\nglobalThis.__absorbWhy = absorbWhy;"
     + "\nglobalThis.__openDeclare = openDeclare;"
     + "\nglobalThis.__openModal = openModal;"
-    + "\nglobalThis.__pctFine = pctFine;", ctx);
+    + "\nglobalThis.__pctFine = pctFine;"
+    + "\nglobalThis.__renderAction = renderAction;", ctx);
   return { ctx, els, get, calls, replies };
 }
 

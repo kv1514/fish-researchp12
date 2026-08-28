@@ -89,39 +89,34 @@ channel puts it outside both the two-player zero-sum machinery that solved
 poker and the fully cooperative machinery developed for Hanabi. This paper
 covers two iterations of an engine for it --- v0.4, which built the
 inference, and v0.6, which corrected a rule and re-measured what depended on
-it --- organised around the results that contradicted the expectations
-motivating them.
+it --- organised around results that contradicted the expectations motivating them.
 
 We first make the inference exact. Hidden-state inference here reduces to counting assignments in a
 degree-constrained bipartite system, $\#P$-complete in general but small in the
 dimension that matters: real positions carry $25.1$ unlocated cards but only
 $4.1$ \emph{distinct candidate sets}, so cards are exchangeable and the problem
-collapses onto a count matrix with at most nine rows. A dynamic program over
-that structure returns the exact partition function, marginals, uniform samples
+collapses onto a count matrix with at most nine rows. A dynamic program over it returns the exact partition function, marginals, uniform samples
 and joint probabilities, validated against exhaustive enumeration.
 
 Making the posterior exactly correct \textbf{changed nothing} in play
 ($-0.22$ sets per duplicate deal-pair, 95\% CI $[-0.96, +0.52]$), and made it
-measurably \emph{worse} at predicting reality: over $517$ decisions and
-$13{,}640$ uncertain-card predictions the exactly uniform posterior scored a
+measurably \emph{worse} at predicting reality: over $13{,}640$ uncertain-card predictions the uniform posterior scored a
 negative log-likelihood of $1.362$ against the biased sampler's $1.341$. The
 uniform posterior is a correct theorem about a false hypothesis --- that
-players' choices carry no information beyond legality --- and the sampler it
-replaced had accidentally encoded a crude opponent model. Replacing the
+players' choices carry no information beyond legality --- and the sampler it replaced had accidentally encoded an opponent model. Replacing the
 accident with an explicit one-parameter model recovers the loss and is worth
 $\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair}, 95\% CI
-$[+1.54, +2.17]$ (void-era scoring; restated below). Tripling the sampling budget is worth a further $+0.340$, more than three
-times what belief-space search buys: the leverage in this game sits in the
-belief rather than in what is computed from it.
+$[+1.54, +2.17]$ (void-era scoring; restated below). Tripling the sampling budget is worth a further $+0.340$, three times what
+belief-space search buys: the leverage sits in the belief rather than in what
+is computed from it.
 
 We then solve the endgame. Its perfect-information value has a closed form
 verified at every $m$; under
 \emph{imperfect} information we compute exact best responses over information
 sets against the engine's own policy, measuring its exploitability rather than
 bounding it --- $+0.4405$ over $305$ positions at $95\%$ coverage with one
-half-suit live, $+0.3250$ at $35\%$ with two. Because two
-thirds of the second layer is out of reach, we bound it rather than
-extrapolate: a single-deal solve is the perfect-information relaxation and
+half-suit live, $+0.3250$ at $35\%$ with two. Because two thirds of the second layer is out of
+reach we bound it rather than extrapolate: a single-deal solve is the perfect-information relaxation and
 upper-bounds any imperfect-information best response, while the best one-ply
 deviation followed by incumbent play lower-bounds it. The exact value lies
 inside its own interval on all $716$ positions where both are computed. The
@@ -131,18 +126,19 @@ cannot: its looseness \emph{grows} with belief support ($t = +6.27$).
 
 The solver also does something no duel can: it names the move. Exploitation in
 the endgame is almost always \emph{one} move ($88/100$ at $m = 2$, $543/616$ at
-$m = 1$); that move is an ask rather than a declaration; and it is
-systematically riskier than the engine's ($p = 0.218$ against $0.799$, paired
-$t = -18.88$, with the engine asking a card it was \emph{certain} to receive on
-$73$ of $122$ positions and still being wrong). Fitting the ask objective
+$m = 1$); it is an ask rather than a declaration; and it is systematically
+riskier than the engine's ($p = 0.218$ against $0.799$, paired $t = -18.88$,
+the engine asking a card it was \emph{certain} to receive on $73$ of $122$
+positions and still being wrong). Fitting the ask objective
 against exact one-ply values overturns the obvious diagnosis --- de-weighting
-the success probability changes nothing --- and isolates certainty rather than
+success probability changes nothing --- and isolates certainty rather than
 probability as the defect. The resulting one-parameter correction, pre-registered and replicated, gains
 $\mathbf{+0.1220}$ $[+0.0711, +0.1729]$ sets on top of the void-era deployed
 configuration. It does \emph{not} make that policy harder to
-exploit: paired over $285$ positions, what a best response extracts moves by
-$-0.0002$, half-width $0.026$. An exact best responder used as a critic
-improves average-case play and leaves the worst case where it was. We also report two solver faults caught by controls needing no ground truth.
+exploit: over $285$ paired positions what a best response extracts moves by
+$-0.0002$, half-width $0.026$ --- as a critic it improves average-case play
+and leaves the worst case where it was. Two solver faults, caught by controls
+needing no ground truth, are reported with it.
 
 Finally we correct the game itself. From v0.1 the engine scored a
 right-team, wrong-split declaration as a \emph{void}; the standard rule
@@ -151,8 +147,9 @@ results labelled by rule era. Under standard scoring the deployed
 configuration beats the v0.3 champion by $\mathbf{+2.412}$
 $[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
 independently developed C++ engine running its own code --- it wins
-$\mathbf{+2.347}$ sets per game, declaring correctly $96.5\%$ against
-$78.9\%$, once a bridge defect of ours worth $-0.08$ to them is repaired;
+$\mathbf{+2.347}$ sets per game, of which $\mathbf{61\%}$ is declaration
+accounting ($96.5\%$ correct against $78.9\%$), once a bridge defect of ours
+worth $-0.08$ to them is repaired;
 the endgame correction, fitted against void-era targets, re-measures at
 $-0.104$ and is withdrawn.
 

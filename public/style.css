@@ -964,3 +964,23 @@ button.sm { padding: 5px 9px; font-size: 13px; }
 .proofrow.weak { opacity: .68; font-style: italic; }
 .proofrow .pcards { display: flex; gap: .18rem; flex-wrap: wrap; }
 .proofrow .pmaybe { font-size: .76rem; }
+
+/* The declaration ledger at game over. Colour is not the only signal -- every
+   row carries its verdict in words -- so a viewer who cannot separate the two
+   reds loses nothing. */
+.ledger { display: grid; gap: .35rem; margin: .4rem 0 .8rem; }
+.ledgerrow {
+  display: grid; grid-template-columns: 7rem 9rem 1fr; gap: .5rem;
+  align-items: baseline; font-size: .85rem;
+  padding: .35rem .5rem; border-radius: .35rem;
+  border-left: 3px solid transparent;
+}
+.ledgerrow .who { font-weight: 600; }
+.ledgerrow .what { opacity: .8; }
+.ledgerrow .miss { grid-column: 1 / -1; opacity: .75; font-size: .8rem; }
+.ledgerrow.right { border-left-color: #4b8; }
+.ledgerrow.split { border-left-color: #e93; background: rgba(238,153,51,.08); }
+.ledgerrow.ownership { border-left-color: #d55; background: rgba(221,85,85,.08); }
+@media (max-width: 560px) {
+  .ledgerrow { grid-template-columns: 1fr; gap: .15rem; }
+}

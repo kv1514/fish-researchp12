@@ -1157,6 +1157,61 @@ function renderLog() {
 
 /* -- the move ------------------------------------------------------------ */
 
+/* The declaration ledger.
+ *
+ * Every set in Fish is won by somebody declaring it, so the scoreboard IS a
+ * declaration record -- and until now the only thing a player was told about
+ * their declarations was the running score. This project's own measurement of
+ * where a margin comes from says that is the wrong emphasis: between engines,
+ * 61% of the margin is declaration accounting and only a third is everything
+ * else put together (results/margin_decomposition.json).
+ *
+ * The two ways to be wrong are shown apart, because they are different
+ * mistakes with different cures. An ALLOCATION error means your team held all
+ * six and you misordered them: you read the table right and placed it wrong.
+ * An OWNERSHIP error means an opponent still had one: you read the table
+ * wrong. A ledger that says only "wrong" teaches neither.
+ */
+function drawLedger(box, s) {
+  const mine = new Set([s.seat, ...s.teammates]);
+  const rows = s.declarations;
+  const ours = rows.filter((r) => mine.has(r.claimer));
+  const bad = (rs) => rs.filter((r) => r.klass !== "right").length;
+  box.appendChild(el("h4", null, "Every declaration in this game"));
+  box.appendChild(el("p", "dim",
+    `Your team declared ${ours.length} and got ${bad(ours)} wrong; `
+    + `they declared ${rows.length - ours.length} and got `
+    + `${bad(rows) - bad(ours)} wrong. A set is only ever won by someone `
+    + `naming it, so this list is the scoreboard with its reasons attached.`));
+  const t = el("div", "ledger");
+  for (const r of rows) {
+    const hs = s.half_suits[r.hs];
+    const verdict =
+      r.klass === "right" ? "correct"
+        : r.klass === "split"
+          ? "right team, wrong split — the set went to the other side"
+          : "an opponent still held one — the set went to the other side";
+    const row = el("div", "ledgerrow " + r.klass);
+    row.appendChild(el("span", "who", nm(r.claimer)));
+    row.appendChild(el("span", "what", hs ? hs.name : "set " + r.hs));
+    row.appendChild(el("span", "verdict", verdict));
+    if (r.klass !== "right" && hs) {
+      // Name the cards that moved the verdict, not all six: the ones placed
+      // correctly are not what there is to learn from.
+      const miss = [];
+      hs.cards.forEach((c, k) => {
+        if (r.declared[k] !== r.revealed[k]) {
+          miss.push(`${face(c.name)} was ${nm(r.revealed[k])}, `
+            + `not ${nm(r.declared[k])}`);
+        }
+      });
+      if (miss.length) row.appendChild(el("span", "miss", miss.join("; ")));
+    }
+    t.appendChild(row);
+  }
+  box.appendChild(t);
+}
+
 function renderAction() {
   const s = S.snap;
   const box = $("t-action");
@@ -1181,6 +1236,7 @@ function renderAction() {
       box.appendChild(el("h4", null, "Where the cards were as each set resolved"));
       box.appendChild(r);
     }
+    if (s.declarations && s.declarations.length) drawLedger(box, s);
     const again = el("button", "primary", "Deal again");
     again.onclick = () => show("start");
     box.appendChild(again);

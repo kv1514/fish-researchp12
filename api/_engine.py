@@ -405,8 +405,26 @@ def narrate(ev) -> dict:
                 "proved": proved}
     if isinstance(ev, ClaimEvent):
         who = ("team " + str(ev.winner)) if ev.winner in (0, 1) else "nobody"
+        ct = team_of(ev.claimer)
+        # The two ways to be wrong, and they are not the same mistake. The
+        # research ledger this mirrors measures them apart because they have
+        # different causes: an ALLOCATION error means the claimer's own team
+        # held all six and misordered them, and is a failure of placement; an
+        # OWNERSHIP error means an opponent still held one, and is a failure
+        # of reading the table. Between engines they run 0.268 and 0.650 a
+        # game respectively (results/margin_decomposition.json), so a player
+        # who only ever sees "wrong" is being shown the smaller half of what
+        # went wrong.
+        if ev.winner == ct:
+            klass = "right"
+        elif all(team_of(h) == ct for h in ev.revealed):
+            klass = "split"
+        else:
+            klass = "ownership"
         return {"t": "claim", "claimer": ev.claimer, "hs": ev.half_suit,
-                "winner": ev.winner,
+                "winner": ev.winner, "klass": klass,
+                "declared": [int(h) for h in ev.declared],
+                "revealed": [int(h) for h in ev.revealed],
                 "text": (f"P{ev.claimer} declared "
                          f"{HALF_SUIT_NAMES[ev.half_suit]} — {who} scores"),
                 "proved": ", ".join(
@@ -611,6 +629,21 @@ class Session:
         return [[card_name(c) for c in sorted(self.revealed)
                  if self.revealed[c] == p] for p in range(NUM_PLAYERS)]
 
+    def _declarations(self) -> list:
+        """Every declaration in the game, in order, whatever the log tail is.
+
+        The log the client is sent is the last LOG_TAIL actions, which in a
+        long game drops the early half-suits -- and a ledger with the first
+        three declarations missing is worse than no ledger, because it reads
+        as a complete one. `self.log` holds the whole narrated history on the
+        server, so the ledger is filtered from that rather than from the
+        slice.
+
+        No new information: a declaration is public the moment it resolves,
+        and every row here was already on the wire when it happened.
+        """
+        return [r for r in self.log if r.get("t") == "claim"]
+
     def _why_for_log(self) -> dict:
         """Traces rebased onto the log slice the client is actually sent.
 
@@ -681,6 +714,7 @@ class Session:
                 # It can carry the real thing now that restore() rebuilds the
                 # reveal map, so the exhibition gets the panel too.
                 snap["reveal"] = self._reveal_rows()
+                snap["declarations"] = self._declarations()
             return snap
         mine = team_of(self.seat)
         hand = st.hands[self.seat]
@@ -712,6 +746,8 @@ class Session:
             # server has the layout and the client does not, which is the whole
             # point of sealing the seed.
             "reveal": self._reveal_rows() if st.is_terminal else None,
+            "declarations": (self._declarations()
+                             if st.is_terminal else None),
         }
 
     def deductions(self) -> dict:

@@ -387,3 +387,54 @@ def test_no_claim_check_for_a_spectator():
     except ValueError:
         return
     raise AssertionError("a spectator was allowed to price a split")
+
+
+def test_the_declaration_ledger_survives_the_log_tail():
+    """A ledger missing its first rows reads as a complete one.
+
+    The client is sent `self.log[-LOG_TAIL:]`, and a full game runs well past
+    LOG_TAIL actions, so a ledger filtered from the slice would silently lose
+    the early half-suits. It has to come from the whole history.
+    """
+    from api._engine import LOG_TAIL
+
+    s = new_session({"seat": 0})
+    s.advance(600)
+    while not s.state.is_terminal:
+        s.play(s.suggest())
+    snap = s.snapshot()
+    assert snap["terminal"]
+    led = snap["declarations"]
+
+    # every set that resolved has exactly one declaration behind it
+    resolved = sum(1 for w in s.state.set_winner if w is not None)
+    assert len(led) == resolved, (
+        f"{len(led)} ledger rows for {resolved} resolved sets")
+    assert len(s.log) > LOG_TAIL, (
+        "this game was short enough that the tail could not have trimmed "
+        "anything, so the test proves nothing -- pick a longer one")
+    in_tail = [r for r in snap["log"] if r.get("t") == "claim"]
+    assert len(led) >= len(in_tail)
+    assert len(led) > len(in_tail) or len(s.log) - LOG_TAIL < 1
+
+
+def test_every_declaration_is_classified_and_the_classes_are_exclusive():
+    """right / split / ownership, and the split class means what it says."""
+    from fish.cards import team_of
+
+    s = new_session({"seat": 0})
+    s.advance(600)
+    while not s.state.is_terminal:
+        s.play(s.suggest())
+    for r in s.snapshot()["declarations"]:
+        assert r["klass"] in ("right", "split", "ownership"), r["klass"]
+        ct = team_of(r["claimer"])
+        if r["klass"] == "right":
+            assert r["winner"] == ct
+            assert r["declared"] == r["revealed"]
+        elif r["klass"] == "split":
+            # the defining property: our own team held all six anyway
+            assert all(team_of(h) == ct for h in r["revealed"])
+            assert r["declared"] != r["revealed"]
+        else:
+            assert any(team_of(h) != ct for h in r["revealed"])
