@@ -1,0 +1,200 @@
+{
+ "journal": "mega_match_journal.jsonl",
+ "n_games": 10000,
+ "deal_component": {
+  "n_deals": 5000,
+  "corr_parities": 0.012718119139544092,
+  "corr_ci95": [
+   -0.015006973493080096,
+   0.040423670045530234
+  ],
+  "var_game": 7.537422182218125,
+  "var_sum": 15.267327225445033,
+  "var_diff": 14.883871334266725,
+  "sigma2_play_noise": 7.633663612722517,
+  "var_deal_effect": -0.09586397279457692,
+  "deal_share_of_variance": -0.012718119139544092,
+  "deal_share_ci95": [
+   -0.040423670045530234,
+   0.015006973493080096
+  ],
+  "skill_margin": 2.3466,
+  "pairing_efficiency": 0.9873924978376055,
+  "won_both_sides": 3236,
+  "won_one_side": 1569,
+  "lost_both_sides": 195
+ },
+ "loss_modes": {
+  "n_won": 8041,
+  "n_lost": 1959,
+  "by_statistic": {
+   "our asks": {
+    "won": 53.67466732993409,
+    "lost": 46.00663603879531,
+    "gap": -7.668031291138782,
+    "cohens_d": -0.6348844549318038,
+    "kind": "free"
+   },
+   "our hit rate": {
+    "won": 0.5349432831646965,
+    "lost": 0.4604758540213633,
+    "gap": -0.07446742914333321,
+    "cohens_d": -0.8485958635186678,
+    "kind": "free"
+   },
+   "their asks": {
+    "won": 47.93197363512001,
+    "lost": 51.299132210311384,
+    "gap": 3.3671585751913753,
+    "cohens_d": 0.31040591230240655,
+    "kind": "free"
+   },
+   "their hit rate": {
+    "won": 0.47867935902712766,
+    "lost": 0.5215101277702829,
+    "gap": 0.04283076874315528,
+    "cohens_d": 0.45583087852765813,
+    "kind": "free"
+   },
+   "our declarations": {
+    "won": 5.362641462504664,
+    "lost": 3.5370086778968863,
+    "gap": -1.8256327846077776,
+    "cohens_d": -1.6109949220350832,
+    "kind": "pinned"
+   },
+   "our declarations right": {
+    "won": 5.227086183310534,
+    "lost": 3.195507912200102,
+    "gap": -2.0315782711104315,
+    "cohens_d": -1.8300334173710755,
+    "kind": "pinned"
+   },
+   "our wrong declarations": {
+    "won": 0.13555527919413007,
+    "lost": 0.34150076569678406,
+    "gap": 0.20594548650265398,
+    "cohens_d": 0.4852643945528303,
+    "kind": "pinned"
+   },
+   "our declaration accuracy": {
+    "won": 0.9760723810313424,
+    "lost": 0.9171115000364602,
+    "gap": -0.05896088099488217,
+    "cohens_d": -0.6818085250552668,
+    "kind": "ratio"
+   },
+   "their declarations": {
+    "won": 3.6373585374953366,
+    "lost": 5.462991322103114,
+    "gap": 1.8256327846077771,
+    "cohens_d": 1.610994922035083,
+    "kind": "pinned"
+   },
+   "their wrong declarations": {
+    "won": 0.9396841188906853,
+    "lost": 0.45227156712608474,
+    "gap": -0.4874125517646005,
+    "cohens_d": -0.5654407404858388,
+    "kind": "pinned"
+   },
+   "their declaration accuracy": {
+    "won": 0.7539674643642008,
+    "lost": 0.9246655647115013,
+    "gap": 0.17069810034730049,
+    "cohens_d": 0.7908453540752537,
+    "kind": "ratio"
+   },
+   "total asks (both)": {
+    "won": 101.6066409650541,
+    "lost": 97.30576824910669,
+    "gap": -4.300872715947406,
+    "cohens_d": -0.19501990629982227,
+    "kind": "free"
+   }
+  },
+  "largest_free_separator": "our hit rate"
+ },
+ "overdispersion": {
+  "our hit rate": {
+   "pooled": 0.5174584311658441,
+   "mean_n": 52.1725,
+   "var_observed": 0.00857355833910668,
+   "var_binomial": 0.004996073111293849,
+   "overdispersion": 1.7160594226945487,
+   "corr_across_parities": 0.08726939117537304,
+   "corr_ci95": [
+    0.05969399431675232,
+    0.11471169525032936
+   ],
+   "n_pairs": 5000
+  },
+  "their hit rate": {
+   "pooled": 0.48138361362869303,
+   "mean_n": 48.5916,
+   "var_observed": 0.009116970628879631,
+   "var_binomial": 0.005321729465633825,
+   "overdispersion": 1.7131593568884638,
+   "corr_across_parities": 0.07339516631908027,
+   "corr_ci95": [
+    0.04576848025033053,
+    0.10090966767072755
+   ],
+   "n_pairs": 5000
+  },
+  "our declaration accuracy": {
+   "pooled": 0.9648551448551449,
+   "mean_n": 5.005500550055006,
+   "var_observed": 0.00793296598391685,
+   "var_binomial": 0.007435200437967588,
+   "overdispersion": 1.0669471590042736,
+   "corr_across_parities": 0.018201031437874556,
+   "corr_ci95": [
+    -0.00952635001988728,
+    0.04590044567339101
+   ],
+   "n_pairs": 4999
+  },
+  "their declaration accuracy": {
+   "pooled": 0.7886858573216521,
+   "mean_n": 4.005414076599158,
+   "var_observed": 0.049686511828195855,
+   "var_binomial": 0.04840030416830505,
+   "overdispersion": 1.0265743714216795,
+   "corr_across_parities": 0.026689512295615562,
+   "corr_ci95": [
+    -0.0011034683892962487,
+    0.054441292140385386
+   ],
+   "n_pairs": 4974
+  }
+ },
+ "synthesis": {
+  "our hit rate": {
+   "var_total": 0.00857355833910668,
+   "var_binomial": 0.004996073111293849,
+   "var_deal": 0.0007482092164603825,
+   "var_play": 0.002829276011352449,
+   "share_binomial": 0.5827304036067729,
+   "share_deal": 0.08726939117537304,
+   "share_play": 0.3300002052178541,
+   "share_deal_ci95": [
+    0.05969399431675232,
+    0.11471169525032936
+   ]
+  },
+  "their hit rate": {
+   "var_total": 0.009116970628879631,
+   "var_binomial": 0.005321729465633825,
+   "var_deal": 0.0006691415756327904,
+   "var_play": 0.0031260995876130158,
+   "share_binomial": 0.5837168597183254,
+   "share_deal": 0.07339516631908027,
+   "share_play": 0.3428879739625943,
+   "share_deal_ci95": [
+    0.04576848025033053,
+    0.10090966767072755
+   ]
+  }
+ }
+}
