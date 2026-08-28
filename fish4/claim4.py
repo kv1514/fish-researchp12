@@ -62,6 +62,16 @@ class ClaimConfig:
     exact_candidates: int = 3
     #: cap on the enumeration of team assignments for unpinned cards
     max_enumerate: int = 4096
+    #: The most live half-suits at which `forced_claim` searches the FULL team
+    #: space instead of the marginal shortlist. See prereg/forced_exhaustive.md:
+    #: the shortlist keeps two holders per card and scores three combinations,
+    #: which is a speed heuristic that costs nothing at a decision made every
+    #: ply and costs accuracy at the one where the game ends. 0 = never, and
+    #: the shipped champion is bit-identical.
+    forced_exhaustive: int = 0
+    #: refuse to enumerate above this many assignments, so the knob above can
+    #: never turn into a stall on the web table
+    forced_exhaustive_cap: int = 1024
     #: refuse a declaration that no complete consistent deal contains. See
     #: jobs/PREREGISTRATION_claim_feasibility.md. Off by default; the shipped
     #: champion is unchanged.
@@ -304,7 +314,57 @@ class ClaimEvaluator:
             loss_split = -1.0 if wrong_gives_opponent else 0.0
             return p_exact - p_opp + p_split * loss_split
 
-        return max(cands, key=ev)[2]
+        best = max(cands, key=ev)[2]
+        if self.cfg.forced_exhaustive:
+            better = self._exhaustive_split(best)
+            if better is not None:
+                best = better
+        return best
+
+    def _exhaustive_split(self, claim):
+        """The true argmax over team assignments, when it is cheap and right.
+
+        Only at or below `cfg.forced_exhaustive` live half-suits. At one live
+        half-suit the declaration ends the game, so there is no downstream
+        position to trade against and the objective is exactly 2*p_exact - 1 --
+        monotone in p_exact, so the argmax is simply correct. Cards the
+        propagator has already pinned are fixed rather than enumerated, which
+        is what usually keeps the space far under 3**6.
+
+        Returns None when it declines, and never returns something the joint
+        scores LOWER than what it was handed: the guarantee this makes is that
+        it is a better SEARCH of the same objective, not a different objective.
+        """
+        live = sum(1 for w in self.obs.set_winner if w is None)
+        if live > self.cfg.forced_exhaustive:
+            return None
+        cards = list(half_suit_cards(claim.half_suit))
+        fixed, free = {}, []
+        for i, c in enumerate(cards):
+            m = self.bel.current_holder_mask(c)
+            if m and m & (m - 1) == 0:
+                holder = m.bit_length() - 1
+                if team_of(holder) != self.my_team:
+                    return None      # not ours to place; leave it alone
+                fixed[i] = holder
+            else:
+                free.append(i)
+        if len(self.team) ** len(free) > self.cfg.forced_exhaustive_cap:
+            return None
+        base = float(self.post.prob_assignment(cards, list(claim.assignment)))
+        best_p, best_a = base, list(claim.assignment)
+        for combo in iproduct(self.team, repeat=len(free)):
+            asg = [None] * len(cards)
+            for i, h in fixed.items():
+                asg[i] = h
+            for k, i in enumerate(free):
+                asg[i] = combo[k]
+            pr = float(self.post.prob_assignment(cards, asg))
+            if pr > best_p:
+                best_p, best_a = pr, asg
+        if best_a == list(claim.assignment):
+            return None
+        return Claim(claim.half_suit, tuple(best_a))
 
 
 def choose_pass(ctx, passes):

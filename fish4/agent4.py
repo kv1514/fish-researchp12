@@ -114,6 +114,10 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  #: bit-identical -- the same discipline as endgame_m=0 and
                  #: w_contest=0.0.
                  stuck_team_certain: float = 1.01,
+                 #: search the FULL team space at the forced declaration when
+                 #: at most this many half-suits are live. See
+                 #: prereg/forced_exhaustive.md. 0 = never; bit-identical.
+                 claim_forced_exhaustive: int = 0,
                  # -- adaptive style
                  w_retake: float = 0.0,
                  retake_window: int = 8,
@@ -195,7 +199,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.claim_cfg = ClaimConfig(feasibility=bool(claim_feasibility),
                                      threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
-                                     use_exact=claim_exact)
+                                     use_exact=claim_exact,
+                                     forced_exhaustive=int(
+                                         claim_forced_exhaustive))
         self.claim_stuck_threshold = float(claim_stuck_threshold)
         self.stuck_team_certain = float(stuck_team_certain)
         self.w_retake = w_retake
