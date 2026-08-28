@@ -2672,6 +2672,94 @@ of decisions, and one-step improvements do not add. A regret under half a set pe
 decision is compatible with enormous headroom. The argument rests only on the
 three measurements that are in the same units as each other.
 
+\subsection{Where the declarations actually go wrong}
+\label{sec:res-pathledger}
+
+Section~\ref{sec:claiming} predicted where the leverage in declaring would be:
+not the threshold, but getting the distribution right and playing the forced
+declarations well. It never checked. A paired margin cannot check it, because a
+paired margin is blind by construction to anything both arms do equally badly
+--- the difference cancels it. So we built a different instrument.
+
+\paragraph{The path ledger.} Every declaration reaches the board through one
+of four branches of \texttt{fish4/agent4.py}, and the ledger
+(\path{scripts4/path_ledger.py}) attributes each one to its branch and scores
+that branch alone. Because every set is declared, sets are conserved and an
+unattributed declaration is a visible hole rather than a silent omission. Over
+$1{,}000$ games against v0.7, our seats only:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+path & $n$ & per game & wrong & error rate \\
+\midrule
+exact (tablebase) & $778$ & $0.778$ & $0$ & $0.000$ \\
+voluntary (bar $0.97$) & $3704$ & $3.704$ & $1$ & $0.000$ \\
+the doomed-ask gate & $317$ & $0.317$ & $89$ & $\mathbf{0.281}$ \\
+forced (no legal ask) & $178$ & $0.178$ & $103$ & $\mathbf{0.579}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The two paths that carry $90\%$ of all declarations have \emph{one}
+error between them in $4{,}482$ attempts. Every other error --- $192$ of them
+--- lives in $495$ declarations, $9.9\%$ of the total. The prediction was
+right, and the threshold really is not where the money is.
+
+\paragraph{The engine had a second claim policy, and it did not ask the
+question.} The third row is not a tuned decision. \texttt{agent4.py}'s
+doomed-ask branch fires when the ask it was about to make cannot land, and
+declares if $\Prob(\text{exact}) \geq 0.5$ --- bypassing the $0.97$ bar
+entirely. \texttt{best\_candidate} is an argmax over $\Prob(\text{exact})$ that
+never reads the second element of the tuple it returns, and that element is
+$\Prob(\text{our team holds all six})$ --- the number \texttt{forced\_claim}
+prices its own version of the same decision with, seventy lines below in the
+same module. The bar had been $0.5$ since v0.3, appeared in no results file, no
+pre-registration and nowhere in this paper, and the comment above it conceded
+that ``whether a higher bar plays better is an open empirical question,
+deliberately not settled here by fiat''.
+
+A screen said the gate is \emph{least} accurate exactly where
+$\Prob(\text{team}) = 1$ --- which is precisely where
+Section~\ref{sec:claiming} argues waiting is nearly free. So we
+pre-registered deferring it there (\texttt{prereg/stuck\_claim\_gate.md}),
+fixed the ship bar at $+0.15$ and the withdrawal conditions in advance, and
+ran $1{,}000$ games per arm on identical deals.
+
+The mechanism moved decisively and the margin did not:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+per game, paired & defer at $0.97$ & middle rung at $0.70$ \\
+\midrule
+gate declarations & $-0.2240$ $[-0.2558, -0.1922]$ & $-0.2730$ $[-0.3075, -0.2385]$ \\
+forced declarations & $+0.0840$ $[+0.0599, +0.1081]$ & $+0.1000$ $[+0.0728, +0.1272]$ \\
+\textbf{wrong declarations} & $\mathbf{-0.0640}$ $[-0.0847, -0.0433]$ & $\mathbf{-0.0660}$ $[-0.0878, -0.0442]$ \\
+\midrule
+set margin & $+0.0580$ $[-0.0177, +0.1337]$ & $+0.0400$ $[-0.0396, +0.1196]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The gate's own error rate falls from $0.281$ to $0.086$; the
+voluntary path absorbs the deferrals and stays at one error in $3{,}795$; gate
+claims fall by $0.224$ against a rise of $0.084$ in forced, so the deferral is
+not being paid for at the deadline. A third of our remaining wrong
+declarations disappear, with an interval nowhere near zero --- and neither
+margin interval clears zero, so under the pre-registration \textbf{nothing
+ships} and the knob stays at its inert default.
+
+At two sets of differential per avoided error the ledger predicts $+0.128$ and
+the duel measures $+0.058$. The prediction sits inside the interval, so this
+run neither confirms nor refutes the conversion; what it establishes is that
+whatever the conversion is, it does not clear a bar fixed in advance at
+$+0.15$ on a thousand games. The pre-registration's expected-outcome
+paragraph, written before the run, predicted exactly this and added that a
+result above $+0.15$ should have prompted suspicion rather than pleasure.
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 

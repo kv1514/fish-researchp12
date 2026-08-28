@@ -617,7 +617,7 @@ WATCH = [
     ("foreign_m2_check.json", "ci95.1", "{:+.4f}",
      "m<=2 vs v0.7, CI high", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "n_pairs", "{:d}",
-     "foreign-opponent paired games", "games per arm"),
+     "foreign-opponent paired games", "rotations --- $500$ games per arm"),
     ("foreign_m2_check.json", "kv_margin_on", "{:+.3f}",
      "margin over v0.7, correction on", "beats v0.7 by"),
     ("foreign_m2_check.json", "kv_margin_off", "{:+.3f}",
@@ -856,6 +856,17 @@ WATCH = [
     ("margin_decomposition.json", "mechanism.publicly_pinned", "{:d}",
      "their misplaced cards that were publicly ours",
      "publicly pinned to us by an ask we had won"),
+    # The path ledger, and the gate arm it licensed. The margin and the
+    # mechanism are both watched: this section's whole point is that they
+    # disagree, so quoting either alone would be a different result.
+    ("stuck_gate_confirm.json", "ledger.A_shipped.gate.err", "{:.3f}",
+     "the doomed-ask gate's error rate", "the doomed-ask gate &"),
+    ("stuck_gate_confirm.json", "ledger.A_shipped.forced.err", "{:.3f}",
+     "the forced path's error rate", "forced (no legal ask) &"),
+    ("stuck_gate_confirm.json", "arms.B_defer.effect", "{:+.4f}",
+     "gate deferral, margin", "so the deferral is"),
+    ("stuck_gate_confirm.json", "ledger.B_defer.gate.err", "{:.3f}",
+     "gate error rate once deferred", "falls from $0.281$ to"),
 ]
 
 
