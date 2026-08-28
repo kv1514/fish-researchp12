@@ -718,6 +718,17 @@ WATCH = [
      "error rate at five cards held", "declarer's own cards"),
     ("declarer_holding_self.json", "err_by_unmoved.5.n", "{:,d}",
      "declarations with five never located", "cards never located"),
+    # The ceiling split. Watched because the paragraph's whole argument rests
+    # on the two partial arms being told nearly the SAME number of cards, so a
+    # drift in either pinned-per-game figure would silently dissolve it.
+    ("ceiling_split.json", "arms.T_team.ceiling", "{:+.4f}",
+     "teammate-knowledge ceiling", "its \\textbf{teammates'} cards"),
+    ("ceiling_split.json", "arms.O_opp.ceiling", "{:+.4f}",
+     "opponent-knowledge ceiling", "its \\textbf{opponents'} cards"),
+    ("ceiling_split.json", "arms.T_team.pinned_by_cheat_per_game", "{:.1f}",
+     "teammate arm, cards pinned per game", "cards pinned/game"),
+    ("ceiling_split.json", "arms.O_opp.pinned_by_cheat_per_game", "{:.1f}",
+     "opponent arm, cards pinned per game", "cards pinned/game"),
     ("foreign_award_check.json", "effect", "{:+.4f}",
      "rule-matched foreign effect", "under the award rule --- no reversal"),
     ("foreign_award_check.json", "ci95.0", "{:+.4f}",

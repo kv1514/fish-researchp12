@@ -3033,6 +3033,46 @@ it deferred $0.224$ declarations a game while adding only $0.084$ forced ones,
 so about $0.14$ moved into a \emph{confident} declaration, which is only
 possible if waiting supplied something.
 
+\paragraph{Is that where the headroom is, though?} The paragraphs above say
+where our \emph{errors} are. Those are not the same question, and the
+difference is settleable by handing a seat information it should not have and
+seeing what it does with it.
+
+\textbf{Every figure in this paragraph is a bound obtained by cheating.} The
+arms are \path{fish4/oracle.py} handed the true deal; the opposition never
+cheats. They are not strength measurements, they do not belong in a ladder, and
+they must not be read beside an honest margin. Over $600$ games per arm on
+identical deals (\path{prereg/information_ceiling_split.md} $\rightarrow$
+\path{results/ceiling_split.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+told the true location of & cards pinned/game & ceiling over honest & \\
+\midrule
+its \textbf{teammates'} cards & $40.7$ & $+3.4100$ & $[+3.1625, +3.6575]$ \\
+its \textbf{opponents'} cards & $40.4$ & $+1.3067$ & $[+1.0070, +1.6063]$ \\
+everything & $59.8$ & $+6.6067$ & $[+6.4004, +6.8129]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The middle column is the point. The two partial arms are told \emph{almost exactly
+the same number of cards} and one is worth $2.6$ times the other, so this
+controls for how much a seat knows and isolates what it knows about. The
+allocation/ownership split in the error ledger does translate into a split in
+information value, and the answer to the question in this paragraph's title is
+yes.
+
+Two cautions, both of which the pre-registration owes the reader. The teammate
+arm's zero allocation errors are \emph{definitional} --- a seat that knows every
+teammate's cards and its own reads the split off rather than inferring it, so
+that cell could not have come out any other way and confirms nothing. And the
+arms are sub-additive, $+4.7167$ against $+6.6067$ for omniscience, where the
+registration braced for the opposite: knowing where a card is \emph{not} pays
+only if you can also act on it.
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 
