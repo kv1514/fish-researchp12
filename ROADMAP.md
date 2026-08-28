@@ -141,6 +141,15 @@ exist, and only one is free.
 - **Costly:** a deliberately failed ask, the signalling protocol. Priced at
   +0.1220 [+0.0291, +0.2149], below the ship bar, and it adds an error almost
   as often as it avoids one (52 games against 72). `prereg/deadline_signalling.md`.
+- **Concentration: refuted, with a reason.** Preferring asks that concentrate
+  the team's holding returned -0.0430 [-0.1369, +0.0509] at w=0.60 and
+  -0.1445 [-0.2490, -0.0400] at w=1.50, and allocation errors ROSE rather than
+  fell, so `prereg/concentration_v2.md` withdrew on its own condition 1.
+  `legal_asks` requires holding a card of the half-suit, so concentrating a
+  holding narrows what that hand can ask in -- forced declarations rose 30%
+  across the dose ladder and the forced path is 47-49% wrong. The term buys a
+  better split and pays in the resource that keeps a seat able to act.
+
 - **Free, and it does not work.** *Who* declares. Any teammate may, on their
   own turn, and 30.4% of wholly-held declarations are made by someone a
   teammate could have out-informed — so the opportunity is there. But measured

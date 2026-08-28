@@ -148,3 +148,83 @@ declarable with certainty rather than merely more cheaply, so the payoff in
 allocation errors may be convex in concentration rather than linear. If it is,
 C should beat B by more than the dose ratio, and that --- not the margin --- is
 the signature to look for.
+
+---
+
+# Outcome: withdrawn on condition 1, and the theory is wrong rather than weak
+
+Run 2026-08-28, `scripts4/concent_confirm.py 2000 3`, 4,000 games per arm on
+identical deals, both parities, `BRIDGE_REV = 2`, zero fallbacks, zero
+unfinished. `results/concent_confirm.json`.
+
+| arm | margin | vs A |
+|---|---|---|
+| A `w_concent` 0 | +2.4405 | — |
+| B `w_concent` 0.60 | +2.3975 | $-0.0430$ $[-0.1369, +0.0509]$ |
+| C `w_concent` 1.50 | +2.2960 | $-0.1445$ $[-0.2490, -0.0400]$ |
+
+## Withdrawal condition 1 fires
+
+| arm | allocation/game | ownership/game | mean best share |
+|---|---|---|---|
+| A | **0.1557** | 0.0077 | 0.8106 |
+| B | **0.1772** | 0.0073 | 0.8115 |
+| C | **0.1827** | 0.0067 | 0.8168 |
+
+Allocation errors were required to fall. They **rose**, monotonically in the
+weight. **Withdrawn.**
+
+Condition 2 is satisfied and it is the least interesting thing here:
+concentration at declaration time did rise, $0.8106 \to 0.8168$. So the feature
+computes what it says it computes, and the theory attached to it is wrong. That
+is a better outcome than a null — a null would have left the idea alive.
+
+## Why it fails, which is the opposite of the argument for it
+
+The path ledger, per game:
+
+| arm | exact | voluntary | gate | **forced** | wrong/game |
+|---|---|---|---|---|---|
+| A | 0.793 | 3.751 | 0.312 | **0.167** | 0.1635 |
+| B | 0.795 | 3.702 | 0.313 | **0.197** | 0.1845 |
+| C | 0.813 | 3.652 | 0.305 | **0.218** | 0.1895 |
+
+Forced declarations rise monotonically with the weight, by $30\%$ from A to C,
+and the forced path is $47$–$49\%$ wrong. That is where the extra allocation
+errors come from.
+
+The mechanism is visible once stated, and it is exactly the resource the
+argument for the term ignored. `GameState.legal_asks` requires the asker to
+**hold a card of the half-suit**. Concentrating a team's holding into one hand
+therefore narrows the set of half-suits that hand can ask in — and being unable
+to ask is the definition of being forced. The term buys a marginally better
+split and pays for it in the one currency that keeps a seat able to act at all.
+
+Stated as consistent-with rather than proven: this run does not instrument the
+count of askable half-suits per seat, so the chain from concentration to
+narrowed options to forced declarations is inferred from the ledger's shape.
+The dose response is monotone in the harm, which is the strongest evidence
+available here.
+
+## Against the registered expectation
+
+The registration predicted "a small positive that does not clear the bar" and
+"the mechanism check to pass — allocation errors falling by something like 0.01
+to 0.02 a game". Both halves are wrong: the effect is negative and allocation
+errors rose by $0.02$ to $0.03$ instead.
+
+It also named the way it could be surprised: if the payoff were convex in
+concentration, C would beat B by more than the dose ratio. C is *worse* than B,
+monotone in the wrong direction, so the surprise arrived from the other side.
+
+## What survives
+
+The v1 formula really was broken and the v2 correction really does compute the
+change rather than the level — `tests4/test_concent_v2.py` pins that
+independently of any of this. What is refuted is the strategic claim that
+concentrating a team's holding is worth anything, and it is refuted for a
+concrete reason rather than for want of power.
+
+`w_concent` stays at $0$ and the term should be regarded as understood rather
+than untested. The next person to notice that $95\%$ of our errors are
+allocation class and reach for this feature now has a measured answer.

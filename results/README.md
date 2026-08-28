@@ -24,6 +24,7 @@ someone to delete working output.
 | `award_headline.json` | `scripts4/check_paper_numbers.py`, `scripts4/make_figures.py`, `scripts4/r1_award_pool.py` | 759 | 2026-08-27 21:28 |
 | `basis_search.json` | `scripts4/basis_search.py`, `scripts4/check_paper_numbers.py` | 1,670 | 2026-08-24 22:56 |
 | `bridge_bug_price.json` | `scripts4/bridge_bug_price.py`, `scripts4/check_paper_numbers.py` | 476 | 2026-08-28 06:31 |
+| `ceiling_split.json` | `scripts4/ceiling_split.py`, `scripts4/check_paper_numbers.py`, `scripts4/forced_ceiling.py` | 1,285 | 2026-08-28 16:17 |
 | `champion_confirm.json` | **orphan** | 703 | 2026-08-24 22:56 |
 | `champion_mixing.json` | `scripts4/champion_mixing.py` | 330 | 2026-08-25 08:45 |
 | `champion_search.json` | `scripts/find_champion.py` | 3,558 | 2026-08-24 22:56 |
@@ -41,12 +42,13 @@ someone to delete working output.
 | `combined_estimate.json` | `fish4/registry4.py`, `scripts4/check_paper_numbers.py`, `scripts4/combined_estimate.py`, `scripts4/combined_verdict.py`, `tests4/test_verdict_coverage.py` | 504 | 2026-08-24 22:56 |
 | `combined_reblock_verdict.json` | `scripts4/check_verdicts.py` | 716 | 2026-08-25 04:10 |
 | `combined_verdict.json` | `fish4/registry4.py`, `scripts4/check_paper_numbers.py`, `scripts4/check_verdicts.py`, `scripts4/combined_verdict.py`, `scripts4/make_figures.py` | 1,310 | 2026-08-24 22:56 |
+| `concent_confirm.json` | `scripts4/concent_confirm.py`, `tests4/test_result_paths.py` | 3,250 | 2026-08-28 17:13 |
 | `concent_scale.json` | `scripts4/concent_confirm.py`, `scripts4/concent_scale.py` | 538 | 2026-08-28 14:19 |
 | `continuation_compare.json` | `scripts4/check_paper_numbers.py`, `scripts4/continuation_compare.py` | 1,163 | 2026-08-24 22:56 |
 | `continuation_length.json` | `scripts4/check_paper_numbers.py`, `scripts4/continuation_length.py` | 265 | 2026-08-24 22:56 |
-| `deal_luck.json` | `scripts4/check_paper_numbers.py`, `scripts4/deal_luck.py`, `scripts4/pairing_value.py`, `tests4/test_deal_luck.py` | 5,223 | 2026-08-28 13:41 |
+| `deal_luck.json` | `scripts4/check_paper_numbers.py`, `scripts4/deal_luck.py`, `scripts4/pairing_value.py`, `tests4/test_deal_luck.py` | 5,237 | 2026-08-28 14:36 |
 | `decision_cost_profile.json` | `scripts4/check_paper_numbers.py`, `scripts4/decision_cost_profile.py` | 422 | 2026-08-24 22:56 |
-| `declarer_holding_self.json` | `scripts4/declarer_holding.py` | 788 | 2026-08-28 13:58 |
+| `declarer_holding_self.json` | `scripts4/check_paper_numbers.py`, `scripts4/declarer_holding.py`, `scripts4/journal.py`, `tests4/test_result_paths.py` | 4,540 | 2026-08-28 15:30 |
 | `determinization_gap.json` | `scripts4/closed_form_proof.py`, `scripts4/determinization_gap.py`, `scripts4/ground_truth_coverage.py` | 1,129 | 2026-08-25 02:40 |
 | `dialect_gap.json` | `fishbot_v06/decide.py`, `scripts4/dialect_gap.py` | 591 | 2026-08-28 03:42 |
 | `doomed_ask_counterfactual.json` | `scripts4/doomed_ask_counterfactual.py`, `scripts4/doomed_ask_information.py` | 729 | 2026-08-25 05:35 |
@@ -60,7 +62,9 @@ someone to delete working output.
 | `endgame_m4_verdict.json` | `api/_engine.py`, `scripts4/exact_endgame_duel.py` | 240 | 2026-08-27 17:52 |
 | `endgame_m5_verdict.json` | `scripts4/exact_endgame_duel.py` | 240 | 2026-08-27 18:21 |
 | `endgame_m9_verdict.json` | `scripts4/check_paper_numbers.py`, `scripts4/exact_endgame_duel.py` | 237 | 2026-08-27 18:45 |
-| `error_value.json` | `scripts4/declarer_holding.py`, `scripts4/error_value.py`, `scripts4/signal_gate_confirm.py` | 2,709 | 2026-08-28 13:48 |
+| `error_value.json` | `scripts4/check_paper_numbers.py`, `scripts4/declarer_holding.py`, `scripts4/error_value.py`, `scripts4/journal.py`, `scripts4/signal_gate_confirm.py`, `tests4/test_result_paths.py` | 2,600 | 2026-08-28 14:54 |
+| `error_value_signal_gate.json` | `tests4/test_result_paths.py` | 2,750 | 2026-08-28 14:54 |
+| `error_value_tempo_rep8k.json` | **orphan** | 2,649 | 2026-08-28 16:11 |
 | `ess_probe.json` | `fish4/sisbatch.py`, `scripts4/check_paper_numbers.py`, `scripts4/ess_probe.py`, `tests4/test_opp_lambda.py` | 1,229 | 2026-08-24 22:56 |
 | `exact2_cross_check.json` | `scripts4/check_paper_numbers.py`, `tests4/test_exact2.py` | 420 | 2026-08-24 22:56 |
 | `exact2_study.json` | `fish4/exact2_study.py`, `scripts4/check_paper_numbers.py`, `tests4/test_exact2.py`, `tests4/test_negative_claims.py` | 6,417 | 2026-08-24 22:56 |
@@ -81,7 +85,7 @@ someone to delete working output.
 | `exact_positions_v2.json` | `fish4/exact2_corpus.py`, `scripts4/exact_bench4.py`, `tests4/test_exact2.py` | 12,316,963 | 2026-08-24 22:56 |
 | `exploitability.json` | `api/_engine.py`, `fish4/bestresponse.py`, `fish4/exact_ii.py`, `fish4/oracle.py`, `scripts4/champion_mixing.py`, `scripts4/check_paper_numbers.py`, `scripts4/exact_endgame_duel.py`, `scripts4/exploitability.py`, `scripts4/ii_endgame.py`, `scripts4/ii_exploit_after.py`, `scripts4/ii_exploit_after_analysis.py`, `scripts4/ii_first_endgame.py`, `scripts4/pool_verdict.py` | 831 | 2026-08-25 03:55 |
 | `fit_prefix_check_v2.json` | `scripts4/check_paper_numbers.py`, `scripts4/fit_prefix_check.py`, `scripts4/learn_ask_objective.py` | 1,114 | 2026-08-24 22:56 |
-| `forced_ceiling_self.json` | `scripts4/forced_ceiling.py` | 723 | 2026-08-28 12:12 |
+| `forced_ceiling_self.json` | `scripts4/declarer_holding.py`, `scripts4/forced_ceiling.py` | 723 | 2026-08-28 12:12 |
 | `forced_exhaustive_self.json` | `scripts4/forced_exhaustive_confirm.py` | 1,263 | 2026-08-28 13:19 |
 | `forced_exhaustive_v07.json` | `scripts4/check_paper_numbers.py`, `scripts4/forced_exhaustive_confirm.py`, `scripts4/pairing_value.py` | 953 | 2026-08-28 13:30 |
 | `foreign_award_check.json` | `fish4/registry4.py`, `scripts4/check_paper_numbers.py`, `scripts4/foreign_award_check.py`, `scripts4/make_figures.py` | 533 | 2026-08-27 21:21 |
@@ -113,7 +117,7 @@ someone to delete working output.
 | `infer_frontier.json` | `fish4/infer/base.py`, `scripts4/infer_frontier.py` | 27,179 | 2026-08-24 22:56 |
 | `infer_hybrid.json` | `scripts4/infer_frontier.py` | 7,156 | 2026-08-24 22:56 |
 | `infer_position_stats.json` | `scripts4/check_paper_numbers.py`, `scripts4/infer_frontier.py` | 815 | 2026-08-24 22:56 |
-| `inference_ceiling.json` | `scripts4/inference_ceiling.py`, `scripts4/oracle_foothold_check.py` | 427 | 2026-08-25 01:53 |
+| `inference_ceiling.json` | `scripts4/ceiling_split.py`, `scripts4/inference_ceiling.py`, `scripts4/oracle_foothold_check.py` | 427 | 2026-08-25 01:53 |
 | `inference_curve.json` | `scripts4/determinization_gap.py`, `scripts4/doomed_ask_information.py`, `scripts4/inference_ceiling.py`, `scripts4/null_lever.py`, `scripts4/posterior_card_equivalents.py`, `scripts4/turn_price.py` | 1,589 | 2026-08-25 01:59 |
 | `large_study_strategy.json` | `scripts/run_large_study.py` | 10,777 | 2026-08-24 22:56 |
 | `learned_weights_verdict.json` | `scripts4/check_paper_numbers.py`, `scripts4/check_verdicts.py`, `scripts4/learned_weights_verdict.py`, `scripts4/make_figures.py` | 1,124 | 2026-08-24 22:56 |
@@ -164,8 +168,9 @@ someone to delete working output.
 | `target_feature_fit.json` | `scripts4/basis_search.py`, `scripts4/check_paper_numbers.py`, `scripts4/rollout_target.py`, `scripts4/target_feature_fit.py` | 3,138 | 2026-08-24 22:56 |
 | `teammate_reading_champion.json` | `scripts4/teammate_reading_demo.py` | 596 | 2026-08-27 21:57 |
 | `teammate_reading_deployed.json` | `scripts4/teammate_reading_demo.py` | 682 | 2026-08-27 22:00 |
-| `tempo_confirm.json` | `scripts4/tempo_confirm.py` | 2,404 | 2026-08-28 13:58 |
+| `tempo_confirm.json` | `scripts4/journal.py`, `scripts4/tempo_confirm.py`, `tests4/test_result_paths.py` | 2,404 | 2026-08-28 13:58 |
 | `tempo_regime.json` | `fish4/agent4.py`, `scripts4/concent_confirm.py`, `scripts4/tempo_confirm.py`, `scripts4/tempo_regime.py` | 526 | 2026-08-28 13:13 |
+| `tempo_rep8k_confirm.json` | `scripts4/journal.py`, `tests4/test_result_paths.py` | 2,542 | 2026-08-28 16:11 |
 | `tilt_accuracy.json` | `scripts4/tilt_accuracy.py`, `tests4/test_sis_tilt.py` | 687 | 2026-08-24 22:56 |
 | `turn_price.json` | `scripts4/doomed_ask_information.py`, `scripts4/tempo_regime.py`, `scripts4/turn_price.py` | 23,696 | 2026-08-25 05:07 |
 | `turn_price_bands.json` | **orphan** | 23,764 | 2026-08-25 05:56 |
@@ -208,6 +213,8 @@ someone to delete working output.
 - **`scripts4/r1_award_pool.py`** --- Pool the R1-award blocks (prereg/rules_award_baseline.md, design R1).
 - **`scripts4/basis_search.py`** --- If the feature basis is the obstacle, which basis is not?
 - **`scripts4/bridge_bug_price.py`** --- What did the bridge defect cost their engine? Paired, on the same deals.
+- **`scripts4/ceiling_split.py`** --- prereg/information_ceiling_split.md: is the information we are missing our
+- **`scripts4/forced_ceiling.py`** --- Is the forced declaration a coin flip because the information is gone, or
 - **`scripts4/champion_mixing.py`** --- How much does the champion randomise at m = 1? The caveat on the exact BR.
 - **`scripts/find_champion.py`** --- Search for a new champion policy from the terms that individually won.
 - **`fish4/oppmodel.py`** --- Inferring hidden cards from what players CHOSE to ask, not just legality.
@@ -234,12 +241,14 @@ someone to delete working output.
 - **`scripts4/combined_estimate.py`** --- What is the strongest configuration worth, and has anyone actually played it?
 - **`scripts4/combined_verdict.py`** --- The pre-registered verdict on the shipped configuration.
 - **`scripts4/concent_confirm.py`** --- prereg/concentration_v2.md: is the one basis term that points at our actual
+- **`tests4/test_result_paths.py`** --- A runner must not overwrite another run's result, and the rule is one rule.
 - **`scripts4/concent_scale.py`** --- How big is the corrected concentration feature, and at what weight does it
 - **`scripts4/continuation_compare.py`** --- Is the rollout target's slope about the continuation, or about the positions?
 - **`scripts4/deal_luck.py`** --- How much of a Fish game is decided by the deal, and what does a loss look like?
 - **`scripts4/pairing_value.py`** --- What is pairing actually worth in this project's experiments?
 - **`tests4/test_deal_luck.py`** --- The deal-luck decomposition, checked against data whose answer we chose.
 - **`scripts4/declarer_holding.py`** --- Who declares matters: does the declarer's own holding predict the split?
+- **`scripts4/journal.py`** --- Where a resumable runner appends while it is still running.
 - **`scripts4/determinization_gap.py`** --- Is the tablebase ground truth for Fish? Measuring what determinization costs.
 - **`scripts4/ground_truth_coverage.py`** --- How much of a real Fish game do we actually have ground truth for?
 - **`fishbot_v06/decide.py`** --- FishBot v0.6 as a language-neutral decision service.
@@ -274,7 +283,6 @@ someone to delete working output.
 - **`scripts4/ii_first_endgame.py`** --- One exact deviation per game, so the number is comparable to exploitability.
 - **`scripts4/pool_verdict.py`** --- Verdicts for the four v0.5 pools that had none, each against its own rule.
 - **`scripts4/fit_prefix_check.py`** --- Does the learned weight vector depend on where the rollout pass happened to be?
-- **`scripts4/forced_ceiling.py`** --- Is the forced declaration a coin flip because the information is gone, or
 - **`scripts4/forced_exhaustive_confirm.py`** --- prereg/forced_exhaustive.md: does searching the last declaration properly
 - **`scripts4/foreign_award_check.py`** --- R2 of prereg/rules_award_baseline.md: the foreign check, rule-matched.
 - **`scripts4/foreign_m2_check.py`** --- The foreign-opponent check of the m=2 correction (prereg/foreign_opponent_m2.md).
@@ -364,6 +372,7 @@ Nothing in `scripts4/` writes these. Either the producer was
 renamed, or the file is left over from a superseded run.
 
 - `champion_confirm.json`
+- `error_value_tempo_rep8k.json`
 - `ii_exploit_after_m1.json`
 - `ii_one_move_m2.json`
 - `oneply_crossfit_m3.json`

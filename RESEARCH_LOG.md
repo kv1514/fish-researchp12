@@ -639,6 +639,38 @@ registration braced for the opposite -- that the elimination effect would make
 the halves over-count -- so the two kinds of knowledge are complementary rather
 than overlapping. Knowing where a card is not only helps if you can act on it.
 
+### The concentration term is refuted for a reason, not for want of power
+
+`prereg/concentration_v2.md`, 4,000 games per arm. B (`w_concent` 0.60)
+returns -0.0430 [-0.1369, +0.0509]; C (1.50) returns **-0.1445 [-0.2490,
+-0.0400]**, worse than shipped.
+
+**Withdrawal condition 1 fired.** Allocation errors were required to fall and
+rose monotonically instead: 0.1557, 0.1772, 0.1827. Condition 2 is satisfied
+and is the least interesting line -- concentration at declaration time did rise
+(0.8106 -> 0.8168), so the corrected feature computes what it claims and the
+theory attached to it is wrong. That is better than a null, which would have
+left the idea alive.
+
+**Why it fails is the resource the argument ignored.** Forced declarations rise
+monotonically with the weight -- 0.167, 0.197, 0.218 a game, up 30% -- and the
+forced path is 47-49% wrong. `GameState.legal_asks` requires the asker to hold
+a card of the half-suit, so concentrating a team's holding into one hand
+narrows the set of half-suits that hand can ask in, and being unable to ask is
+the definition of being forced. The term buys a marginally better split and
+pays in the one currency that keeps a seat able to act.
+
+Stated as consistent-with rather than proven: the run does not instrument
+askable half-suits per seat, so the chain is inferred from the ledger's shape.
+The dose response is monotone in the harm.
+
+Against the registration, which predicted "a small positive that does not clear
+the bar" with allocation errors falling 0.01 to 0.02: both halves wrong. It
+also named its own surprise -- convexity would make C beat B by more than the
+dose ratio -- and C is worse than B, so the surprise came from the other side.
+
+`w_concent` stays at 0, and the term is now understood rather than untested.
+
 ### Shipped
 
 `claim_forced_exhaustive=1` into `V06_DEPLOYED`, per
