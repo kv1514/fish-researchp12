@@ -90,7 +90,8 @@ function load() {
   // outside. Evaluate it inside a function that hands the bindings back.
   vm.runInContext(src + "\n;globalThis.__S = S; globalThis.__hint = hint;"
     + "\nglobalThis.__think = think;"
-    + "\nglobalThis.__whyAt = whyAt; globalThis.__whyText = whyText;", ctx);
+    + "\nglobalThis.__whyAt = whyAt; globalThis.__whyText = whyText;"
+    + "\nglobalThis.__absorbWhy = absorbWhy;", ctx);
   return { ctx, els, get, calls, replies };
 }
 

@@ -183,6 +183,10 @@ const S = {
   roomPoll: null,
   busy: false,
   hint: null,
+  /* Every engine trace seen so far, keyed by ABSOLUTE action index. Cleared
+   * with the game, not with the request, so a move keeps its explanation as it
+   * scrolls down the log. */
+  why: {},
   /* The proof sheet's cache and its guards, mirroring the hint's. `proofGen`
    * is the snapshot generation the cached deductions belong to, so a stale
    * sheet is never shown beside a newer position. */
@@ -392,6 +396,7 @@ async function send(path, body) {
     if (/expired/i.test(e.message)) {
       S.token = null;
       S.actions = [];
+      S.why = {};
       setTimeout(() => show("start"), 1200);
     }
     return null;
@@ -776,6 +781,7 @@ function initStart() {
       // No variant and no gamma: the site ships one deck and one engine.
       const j = await api("new", { seat: S.seat });
       S.token = j.token;
+      S.why = {};
       S.actions = j.actions || [];
       S.snap = j;
       S.hint = null;
@@ -1018,10 +1024,31 @@ function whyText(tr) {
   return null;
 }
 
-function whyAt(idx) {
+/* Traces arrive only for moves generated in THIS request -- a replayed move
+ * was not decided again, so the server has nothing honest to say about it.
+ * That is right on the wire and wrong on the screen: without a client-side
+ * store, exactly one row of the log carries an explanation and the rest go
+ * bare as they scroll, which reads like the feature is broken.
+ *
+ * So the client keeps them. The wire index addresses the log SLICE the server
+ * sent, which shifts as the log grows, so it is converted to an absolute
+ * action index once on arrival and stored under that. */
+function absorbWhy() {
   const w = S.snap && S.snap.why;
-  if (!w) return null;
-  return whyText(w[String(idx)]);
+  const log = (S.snap && S.snap.log) || [];
+  if (!w || !log.length) return;
+  const offset = (S.actions ? S.actions.length : log.length) - log.length;
+  for (const k of Object.keys(w)) {
+    const abs = offset + Number(k);
+    if (abs >= 0 && !S.why[abs]) S.why[abs] = w[k];
+  }
+}
+
+function whyAt(idx) {
+  const log = (S.snap && S.snap.log) || [];
+  const offset = (S.actions ? S.actions.length : log.length) - log.length;
+  const tr = S.why[offset + idx];
+  return tr ? whyText(tr) : null;
 }
 
 /* ---------------------------------------------------------- the proof sheet
@@ -1556,6 +1583,7 @@ function render() {
     : s.your_turn ? "Your turn." : `${nm(s.turn)} to move.`;
   $("t-turn").className = "turnline" + (s.your_turn && !s.terminal ? " you" : "");
   digestLog();
+  absorbWhy();
   renderLastMove();
   renderSeats();
   renderSets();
@@ -1699,6 +1727,8 @@ async function startWatch() {
   S.series = S.series || { d: 0, k: 0, games: 0 };
   S.names = WATCH_NAMES.slice();
   S.actions = [];
+  S.why = {};      // a new deal renumbers actions; a kept trace would be
+                   // attributed to somebody else's move
   S.token = null;
   S.hint = null;
   S.seen = 0;      // a fresh deal: present (and speak) moves from the first

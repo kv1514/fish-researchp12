@@ -15,10 +15,10 @@ const { ctx } = load();
 
 const S = ctx.__S;
 
-function whyText(tr) {
-  S.snap = { why: { "0": tr } };
-  return ctx.__whyAt(0);
-}
+/* This suite is about the WORDING, so it calls the formatter directly. Where
+   the trace comes from -- the wire, or the client-side store that keeps it as
+   the row scrolls -- is test_why_store.js's job. */
+const whyText = ctx.__whyText;
 
 /* ------------------------------------------------------------------ ties */
 
@@ -94,11 +94,15 @@ assert.ok(/deliberately dead/.test(whyText({ kind: "signal", seat: 1 })));
 
 /* ------------------------------------------------------------- absence */
 
-S.snap = {};
-assert.strictEqual(ctx.__whyAt(0), null, "no `why` map must render nothing");
-S.snap = { why: {} };
-assert.strictEqual(ctx.__whyAt(3), null, "an untraced move must render nothing");
-S.snap = { why: { "0": { kind: "ask", n_legal: 5, tie_group: 1, ranked: [] } } };
-assert.strictEqual(ctx.__whyAt(0), null, "an empty ranking must render nothing");
+assert.strictEqual(whyText(null), null, "an absent trace must render nothing");
+assert.strictEqual(
+  whyText({ kind: "ask", n_legal: 5, tie_group: 1, ranked: [] }), null,
+  "an empty ranking must render nothing");
+
+/* And the lookup path: no store, no reasoning -- never an invented one. */
+S.why = {};
+S.actions = new Array(3);
+S.snap = { log: new Array(3) };
+assert.strictEqual(ctx.__whyAt(0), null, "an untraced move must render nothing");
 
 console.log("ok - engine reasoning renders honestly");
