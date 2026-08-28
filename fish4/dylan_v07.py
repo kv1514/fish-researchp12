@@ -27,6 +27,12 @@ WHAT IS TRANSLATED, AND WHAT IS NOT
   fails, and their Event format cannot carry that, so their belief learns only
   what their own game would have told it; and their out-of-turn declaration
   channel is never polled, because our rules do not have one.
+* The forced declaration.  When a seat holds only complete sets it must
+  declare, and the DRIVER picks which half-suit.  Theirs takes the first live
+  one the mover holds a card in; ours took the first live one, period, which
+  periodically asked their ``bestGuess`` to name owners in a half-suit it held
+  nothing of.  See ``_forced_half_suit``.  This was a bridge defect biased in
+  our favour and it is fixed; the published margin was re-measured after.
 * Rules.  Their agent is constructed with ``outOfTurnDeclare=0`` so its own
   view of the rules matches the game it is actually playing.  Since the
   misdeclaration rule flipped to the opponent-award baseline, the two engines
@@ -50,7 +56,7 @@ import subprocess
 from pathlib import Path
 
 from fish.agents.base import Agent
-from fish.cards import CARDS_PER_HALF_SUIT
+from fish.cards import CARDS_PER_HALF_SUIT, half_suit_mask
 from fish.engine import Ask, AskEvent, Claim, ClaimEvent, Pass, PassEvent
 from fish.observation import Observation
 
@@ -237,7 +243,7 @@ class DylanV07(Agent):
         if not obs.legal_asks():
             claimable = obs.claimable_half_suits()
             if claimable:
-                hs = claimable[0]
+                hs = self._forced_half_suit(obs, claimable)
                 their_set = _OURS_TO_THEIRS[hs * 6] // 6
                 out = self._run(lines + [f"DECIDE FORCED {their_set}"])
                 claim = self._claim_from(out.split(), obs, force_hs=hs)
@@ -276,7 +282,7 @@ class DylanV07(Agent):
             return asks[0]
         claimable = obs.claimable_half_suits()
         if claimable:
-            hs = claimable[0]
+            hs = self._forced_half_suit(obs, claimable)
             their_set = _OURS_TO_THEIRS[hs * 6] // 6
             out = self._run(self._feed(obs) + [f"DECIDE FORCED {their_set}"])
             claim = self._claim_from(out.split(), obs, force_hs=hs)
@@ -285,6 +291,37 @@ class DylanV07(Agent):
             team = [p for p in range(6) if p % 2 == self.player % 2]
             return Claim(hs, tuple(self.player for _ in range(6)))
         return obs.legal_passes()[0]
+
+    @staticmethod
+    def _forced_half_suit(obs: Observation, claimable: list[int]) -> int:
+        """Which half-suit their engine would be made to declare, their way.
+
+        Their own driver (``engine/src/game.hpp:535``) does NOT hand the
+        forced declaration an arbitrary live half-suit -- it takes the first
+        active one the player still HOLDS A CARD IN::
+
+            for (int st = 0; st < NSET; st++)
+              if (g.pub.setActive[st] && (g.hand[g.turn] & setMask(st)))
+                { chosen = st; break; }
+
+        This bridge used to pass ``claimable[0]`` instead. That is not a
+        translation of their rule, it is a harder question: forced to name
+        the owners of a half-suit they hold nothing of, their ``bestGuess``
+        has no anchor and is wrong nearly every time -- and under the
+        opponent-award rule every one of those donates the set to US. An
+        adversarial read of their engine caught it at six of eighteen forced
+        claims, all six wrong, which flatters our published margin by roughly
+        0.3 sets/game. A measurement that beats an opponent by mis-asking
+        them a question their own driver never asks is not a measurement.
+
+        The fallback is the same list as before, for the case their driver
+        does not have to handle: it ends the game (``res.hitLimit``) when the
+        mover holds no card in any live half-suit, and ours must still act.
+        """
+        for hs in claimable:
+            if obs.hand & half_suit_mask(hs):
+                return hs
+        return claimable[0]
 
     def _claim_from(self, parts, obs: Observation, force_hs=None):
         try:

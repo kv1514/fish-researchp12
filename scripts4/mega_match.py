@@ -24,6 +24,15 @@ those rather than just a mean.
 
 Each deal is played twice, once with our seats even and once odd, so
 neither engine gets the opening move more often.
+
+WHY THE JOURNAL RESTARTED AT REV 2. The first 10,000 games under this script
+were measured through a bridge that handed their engine the wrong forced
+declaration -- the first LIVE half-suit rather than the first live one they
+hold a card in, which is what their own driver does. It cost them accuracy on
+a decision their real driver never has to make, in our favour. Those games
+are kept at ``results/mega_match_journal_prefix_bridgebug.jsonl`` because
+retracted numbers should stay readable, but they are not comparable to these
+and the ``rev`` tag stops a resume from averaging the two together.
 """
 
 from __future__ import annotations
@@ -49,6 +58,13 @@ SEED0 = 900_000
 AGENT0 = 9000
 JOURNAL = ROOT / "results" / "mega_match_journal.jsonl"
 
+#: Bump whenever the BRIDGE's behaviour changes, and old rows stop being
+#: comparable. Rows are tagged with it and a resume drops anything that does
+#: not match, so a fixed bridge can never be averaged together with the games
+#: the bug produced. rev 2: the forced declaration now picks a half-suit they
+#: hold a card in, as their own driver does (see fish4/dylan_v07.py).
+BRIDGE_REV = 2
+
 
 def _one(args) -> dict:
     deal_seed, kv_even = args
@@ -73,6 +89,14 @@ def _one(args) -> dict:
     ask = {"kv": [0, 0], "dy": [0, 0]}
     dec = {"kv": [0, 0], "dy": [0, 0]}
     mis = {"kv": 0, "dy": 0}
+    # Declarations by a seat holding no card of the half-suit it names. Read
+    # this asymmetrically, because it is not one phenomenon. Done from a
+    # deduced posterior it is a strong play -- a set your teammates hold, seen
+    # and cashed -- and ours does it deliberately. Done because a bridge FORCED
+    # the choice it is the rev-2 defect, and their driver never puts them
+    # there. So the number to watch is theirs, and only its fall between rev 1
+    # and rev 2 is evidence; ours is expected to be the larger of the two.
+    anchorless = {"kv": 0, "dy": 0}
     for ev in st.history:
         if isinstance(ev, AskEvent):
             s = "kv" if team_of(ev.asker) == kv_team else "dy"
@@ -81,14 +105,16 @@ def _one(args) -> dict:
         elif isinstance(ev, ClaimEvent):
             s = "kv" if team_of(ev.claimer) == kv_team else "dy"
             dec[s][1] += 1
+            if ev.claimer not in ev.revealed:
+                anchorless[s] += 1
             if ev.winner == team_of(ev.claimer):
                 dec[s][0] += 1
             elif all(team_of(h) == team_of(ev.claimer) for h in ev.revealed):
                 mis[s] += 1
     return {"deal": deal_seed, "kv_even": kv_even, "kv": kv, "dylan": dy,
-            "margin": kv - dy, "terminal": st.is_terminal,
+            "margin": kv - dy, "terminal": st.is_terminal, "rev": BRIDGE_REV,
             "fallbacks": sum(getattr(a, "fallbacks", 0) for a in agents),
-            "ask": ask, "dec": dec, "mis": mis}
+            "ask": ask, "dec": dec, "mis": mis, "anchorless": anchorless}
 
 
 def report(rows) -> dict:
@@ -134,6 +160,10 @@ def report(rows) -> dict:
           f"Dylan {100*dd:.2f}% (n={ndd:,})")
     print(f"  misdeclares   KV {sum(x['mis']['kv'] for x in g):,}   "
           f"Dylan {sum(x['mis']['dy'] for x in g):,}")
+    ak_ = sum(x.get("anchorless", {}).get("kv", 0) for x in g)
+    ad_ = sum(x.get("anchorless", {}).get("dy", 0) for x in g)
+    print(f"  anchorless    KV {ak_:,}   Dylan {ad_:,}   (declared a half-suit "
+          f"the declarer held none of; ours deliberate, theirs the rev-1 tell)")
     print("  margin distribution (sets, ours minus theirs):")
     for k in sorted(dist):
         bar = "#" * max(1, round(60 * dist[k] / n))
@@ -147,6 +177,11 @@ def report(rows) -> dict:
             "declare_right_kv": dk, "declare_right_dylan": dd,
             "misdeclares_kv": sum(x["mis"]["kv"] for x in g),
             "misdeclares_dylan": sum(x["mis"]["dy"] for x in g),
+            "bridge_rev": BRIDGE_REV,
+            "anchorless_kv": sum(x.get("anchorless", {}).get("kv", 0)
+                                 for x in g),
+            "anchorless_dylan": sum(x.get("anchorless", {}).get("dy", 0)
+                                    for x in g),
             "bridge_fallbacks": sum(x["fallbacks"] for x in g),
             "margin_distribution": {str(k): dist[k] for k in sorted(dist)}}
 
@@ -154,12 +189,18 @@ def report(rows) -> dict:
 def main(n_deals: int = 2000, n_jobs: int = 0) -> int:
     n_jobs = n_jobs or max(1, (os.cpu_count() or 2))
     done, rows = set(), []
+    stale = 0
     if JOURNAL.exists():
         for line in JOURNAL.read_text().splitlines():
             if line.strip():
                 r = json.loads(line)
+                if r.get("rev") != BRIDGE_REV:
+                    stale += 1        # a different bridge; not comparable
+                    continue
                 done.add((r["deal"], r["kv_even"]))
                 rows.append(r)
+    if stale:
+        print(f"ignoring {stale:,} games from an older bridge revision")
     todo = [(SEED0 + i, ke) for i in range(n_deals) for ke in (True, False)
             if (SEED0 + i, ke) not in done]
     print(f"{len(done):,} games journalled, {len(todo):,} to play "
