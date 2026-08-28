@@ -507,10 +507,15 @@ is the only part a policy can move.
 0.1676 allocation and 0.0083 ownership. We essentially never claim a half-suit
 an opponent still holds. What we cannot do is say which teammate has what --
 and once our team holds all six, no opponent may legally ask there, so the
-split is frozen to direct evidence: no ask will name those cards again. It is not frozen to counting -- public hand counts keep tightening as teammates spend their other cards.
+split is frozen to direct evidence: no ask will name those cards again. It is
+NOT frozen to counting -- public hand counts keep tightening as teammates spend
+their other cards, and `fish/beliefs.py::_propagate` uses them.
 
-That reframes it as distributed knowledge rather than inference: every card is
-held by someone who knows they hold it, and no one member knows the split.
+That makes it mostly a distributed-knowledge problem rather than an inference
+one: every card is held by someone who knows they hold it, no one member knows
+the split, and the game supplies no channel to say so. "Mostly", because the
+counting channel is a real second route and I spent most of a session claiming
+it did not exist.
 The one free lever looked like *who* declares -- any teammate may, on their own
 turn, and 30.4% of wholly-held declarations are made by someone a teammate
 could have out-informed. **It is refuted, and it inverted.** Over 16,156
