@@ -1236,6 +1236,29 @@ much lower threshold. That is now a stored measurement
 (\path{results/claim_screen_check.json}) with a test that fails if a
 screened half-suit ever turns out to be claimable, rather than a comment.
 
+\paragraph{``Waiting is close to free'' is true about sets and false about
+information.} The mechanism above is right that an opponent cannot take a
+half-suit our team wholly owns: a claim by a player whose team does not hold
+all six \emph{gives} the set to us. But the same fact that makes waiting safe
+makes it sterile, and the argument as first written did not notice.
+\texttt{GameState.legal\_asks} requires the asker to hold a card of the
+half-suit they are asking in. Once our team holds all six, no opponent holds
+one, so \emph{no opponent can ever ask in it again}. Every public event that
+could still localise the split inside our team has been removed from the game
+by our own success at collecting it.
+
+One channel remains and it is not free: an ask of our own that we know will
+fail. Under the no-bluff rule it certifies that the asker does not hold the
+named card, which is exactly the fact a partner needs, and it costs the turn
+(\texttt{fish4/perpetual.py}). So a half-suit that becomes ours before we can
+place it is a half-suit whose split we will know at the deadline exactly as
+well as we know it now, unless we spend a turn.
+
+This changes what ``waiting'' means at the two ends of the game. It remains
+free in sets at risk. It is not free in information, and the bill arrives at
+the forced declaration, where no legal ask exists and the split must be named
+from whatever was known when the last opponent ran out of cards.
+
 Finally, a hard architectural constraint taken from the literature: a claim must
 never be selected by determinized search. Inside any determinization the
 searcher knows the true layout, so every claim evaluates as a certain gain and
