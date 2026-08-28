@@ -511,11 +511,21 @@ split is frozen and no further public event can inform it.
 
 That reframes it as distributed knowledge rather than inference: every card is
 held by someone who knows they hold it, and no one member knows the split.
-`scripts4/declarer_holding.py` is the instrument for the one free lever --
-that any teammate may declare, and the one holding four cards guesses two
-while the one holding one guesses five. A 12-game smoke put 29.6% of
-wholly-held declarations in the hands of someone a teammate could have
-out-informed.
+The one free lever looked like *who* declares -- any teammate may, on their own
+turn, and 30.4% of wholly-held declarations are made by someone a teammate
+could have out-informed. **It is refuted, and it inverted.** Over 16,156
+wholly-held declarations (`scripts4/declarer_holding.py`) the error rate rises
+with the declarer's own holding: 0.017 at one card, 0.048 at two, 0.063 at
+four, 0.068 at five, and trivially 0.000 at six. Selection, not skill: holding
+one card you only declare when the other five are publicly pinned; holding five
+leaves exactly one card unaccounted for, and if it never moved it is a coin
+flip between two teammates.
+
+What survives is a sharper statement of the problem. **The residual risk on a
+wholly-held half-suit is not proportional to how much you are missing -- it is
+about whether what you are missing has ever moved in public.** Five in hand and
+one dealt-and-never-asked-for is worse than one in hand and five that have all
+been seen, and it does not feel that way.
 
 ### Shipped
 
