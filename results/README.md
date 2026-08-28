@@ -42,7 +42,7 @@ someone to delete working output.
 | `combined_estimate.json` | `fish4/registry4.py`, `scripts4/check_paper_numbers.py`, `scripts4/combined_estimate.py`, `scripts4/combined_verdict.py`, `tests4/test_verdict_coverage.py` | 504 | 2026-08-24 22:56 |
 | `combined_reblock_verdict.json` | `scripts4/check_verdicts.py` | 716 | 2026-08-25 04:10 |
 | `combined_verdict.json` | `fish4/registry4.py`, `scripts4/check_paper_numbers.py`, `scripts4/check_verdicts.py`, `scripts4/combined_verdict.py`, `scripts4/make_figures.py` | 1,310 | 2026-08-24 22:56 |
-| `concent_confirm.json` | `scripts4/concent_confirm.py`, `tests4/test_result_paths.py` | 3,250 | 2026-08-28 17:13 |
+| `concent_confirm.json` | `scripts4/check_paper_numbers.py`, `scripts4/concent_confirm.py`, `tests4/test_result_paths.py` | 3,250 | 2026-08-28 17:13 |
 | `concent_scale.json` | `scripts4/concent_confirm.py`, `scripts4/concent_scale.py` | 538 | 2026-08-28 14:19 |
 | `continuation_compare.json` | `scripts4/check_paper_numbers.py`, `scripts4/continuation_compare.py` | 1,163 | 2026-08-24 22:56 |
 | `continuation_length.json` | `scripts4/check_paper_numbers.py`, `scripts4/continuation_length.py` | 265 | 2026-08-24 22:56 |
@@ -50,7 +50,7 @@ someone to delete working output.
 | `decision_cost_profile.json` | `scripts4/check_paper_numbers.py`, `scripts4/decision_cost_profile.py` | 422 | 2026-08-24 22:56 |
 | `declarer_holding_self.json` | `scripts4/check_paper_numbers.py`, `scripts4/declarer_holding.py`, `scripts4/journal.py`, `tests4/test_result_paths.py` | 4,540 | 2026-08-28 15:30 |
 | `determinization_gap.json` | `scripts4/closed_form_proof.py`, `scripts4/determinization_gap.py`, `scripts4/ground_truth_coverage.py` | 1,129 | 2026-08-25 02:40 |
-| `dialect_gap.json` | `fishbot_v06/decide.py`, `scripts4/dialect_gap.py` | 591 | 2026-08-28 03:42 |
+| `dialect_gap.json` | `kraken/decide.py`, `scripts4/dialect_gap.py` | 591 | 2026-08-28 03:42 |
 | `doomed_ask_counterfactual.json` | `scripts4/doomed_ask_counterfactual.py`, `scripts4/doomed_ask_information.py` | 729 | 2026-08-25 05:35 |
 | `doomed_ask_diag.json` | `fish4/agent4.py`, `scripts4/doomed_ask_diag.py` | 101,991 | 2026-08-25 04:21 |
 | `doomed_ask_information.json` | `scripts4/doomed_ask_counterfactual.py`, `scripts4/doomed_ask_information.py` | 511 | 2026-08-25 05:31 |
@@ -251,7 +251,7 @@ someone to delete working output.
 - **`scripts4/journal.py`** --- Where a resumable runner appends while it is still running.
 - **`scripts4/determinization_gap.py`** --- Is the tablebase ground truth for Fish? Measuring what determinization costs.
 - **`scripts4/ground_truth_coverage.py`** --- How much of a real Fish game do we actually have ground truth for?
-- **`fishbot_v06/decide.py`** --- FishBot v0.6 as a language-neutral decision service.
+- **`kraken/decide.py`** --- KRAKEN v1.0 as a language-neutral decision service.
 - **`scripts4/dialect_gap.py`** --- Why do we lose on HIS host when we win on ours? Measure the dialect gap.
 - **`scripts4/doomed_ask_counterfactual.py`** --- What ``avoid_doomed_asks`` actually removes, measured as a paired difference.
 - **`fish4/agent4.py`** --- FishBot v0.4: exact-posterior play with a wide, ablatable ask objective.
@@ -320,7 +320,7 @@ someone to delete working output.
 - **`scripts4/recheck_mdes.py`** --- Does using each cell's own noise change any verdict already reported?
 - **`scripts4/camp_probe.py`** --- Does showing our hand in a half-suit stop v0.7 gambling on it?
 - **`scripts4/leak_forensics.py`** --- Per-move forensics on the deployed head-to-head, replayed from journal seeds.
-- **`scripts4/mega_match.py`** --- The large-scale head-to-head: KV's FishBot v0.6 vs Dylan's FishBot v0.7.
+- **`scripts4/mega_match.py`** --- The large-scale head-to-head: KRAKEN v1.0 vs Dylan's FishBot v0.7.
 - **`scripts4/precision_nulls.py`** --- A prediction from the null mechanism, scored against data that already exists.
 - **`scripts4/oneply_crossfit_control.py`** --- Is the m = 3 defect real, or is it the maximum of a noisy estimate?
 - **`scripts4/oneply_m3_defect.py`** --- Does the endgame ask defect extend to m = 3, where exact solving cannot go?
