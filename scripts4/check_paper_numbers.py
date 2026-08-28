@@ -683,6 +683,22 @@ WATCH = [
      "misdeclares with signalling on", "cuts misdeclarations ---"),
     ("r5_signal_check.json", "y_misdeclares", "{:d}",
      "misdeclares with signalling off", "cuts misdeclarations ---"),
+    # R6: the ported contestation term and the silence prior, both measured
+    # against Dylan and both rejected. Watched because a negative result is
+    # exactly the kind of number that rots quietly -- and because the
+    # baseline margin in the same table is what the rejection is relative to.
+    ("r6_screen.json", "arms.c+30.effect", "{:+.4f}",
+     "contestation +3.0 vs baseline", "contestation $+3.0$"),
+    ("r6_screen.json", "arms.c+10.effect", "{:+.4f}",
+     "contestation +1.0 vs baseline", "contestation $+1.0$"),
+    ("r6_screen.json", "arms.c-10.effect", "{:+.4f}",
+     "contestation -1.0 vs baseline", "contestation $-1.0$"),
+    ("r6_screen.json", "arms.d07.effect", "{:+.4f}",
+     "silence 0.7 vs baseline", "silence $\\delta = 0.7$"),
+    ("r6_screen.json", "arms.d09.effect", "{:+.4f}",
+     "silence 0.9 vs baseline", "silence $\\delta = 0.9$"),
+    ("r6_screen.json", "arms.c+30.base_margin", "{:+.3f}",
+     "R6 baseline margin over v0.7", "baseline (neither knob)"),
     ("ii_exploit_after_split_m1.json", "parts.best response.diff", "{:+.4f}",
      "best response after the fix", "what a best response takes"),
     ("ii_exploit_after_split_m1.json", "parts.policy's own value.diff",

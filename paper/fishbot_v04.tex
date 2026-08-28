@@ -5098,6 +5098,69 @@ the rule in their resume fingerprints so that refit cannot silently mix
 eras. The void-era $+0.1220$ stands as what it always was, a measurement
 of the void-era game.
 
+\paragraph{Their one load-bearing mechanism, ported and measured here: it
+does not transfer.} The other project's attribution study credits a single
+coordinate with essentially the whole gain of its v0.7 cycle --- a
+\emph{contestation} term that scores a candidate ask by
+$(1 - p_{\text{hit}}) \times (\text{opponent-held mass of the half-suit}/6)
+\times (\text{cards of it nobody can place}/6)$ and carries a strongly
+positive weight, deliberately spending likely-miss asks in
+opponent-dominated, still-ambiguous half-suits
+\citep{dylan2026fishbot}. Because their engine and ours now play the same
+game under the same rules, that claim is directly testable outside the
+lineage it was measured in, which is the kind of question neither project
+could ask alone.
+
+Design R6 of the pre-registration ports it and sweeps the dose in both
+directions, with two arms of a second idea alongside --- a
+\emph{silence prior} that down-weights sampled worlds in which a live
+half-suit already sits wholly within one team, on the ground that a team
+holding all six and able to place them would usually have declared. Seven
+arms plus an unmodified baseline each played $500$ games against three
+copies of v0.7 on identical deals and rotations, paired against the
+baseline: $4{,}000$ games, zero substituted moves.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+arm & paired $\Delta$ vs.\ baseline & margin over v0.7 \\
+\midrule
+baseline (neither knob)          & ---                       & $+2.732$ \\
+contestation $-1.0$              & $-0.4200\ [-0.7137, -0.1263]$ & $+2.312$ \\
+contestation $-0.3$              & $-0.2400\ [-0.5085, +0.0285]$ & $+2.492$ \\
+contestation $+0.3$              & $-0.3200\ [-0.5790, -0.0610]$ & $+2.412$ \\
+contestation $+1.0$              & $-0.2920\ [-0.6261, +0.0421]$ & $+2.440$ \\
+contestation $+3.0$              & $-1.1240\ [-1.4735, -0.7745]$ & $+1.608$ \\
+silence $\delta = 0.7$           & $-0.1960\ [-0.4775, +0.0855]$ & $+2.536$ \\
+silence $\delta = 0.9$           & $-0.2880\ [-0.4883, -0.0877]$ & $+2.444$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every arm is negative; four are significantly so, and the largest positive
+dose is the worst cell in the table. No arm clears the registered bar, so
+by the outcome fixed in advance neither knob ships, stages 2 and 3 do not
+run, and the negative is reported rather than swept into a footnote. The
+strongest reading the data supports is monotone in the wrong direction:
+the more of their mechanism we add, the more of our margin over them we
+lose.
+
+This is the third time this paper has watched a gain fail to survive a
+change of opponent family, and the first time in the direction that costs
+\emph{us} something to admit. The deception ladder's rungs were real
+against siblings and vanished against v0.3; the endgame correction was
+real under one scoring rule and reversed under another; and their
+contestation term is, by their own careful measurement, worth several
+points inside their engine and is worth nothing but damage inside ours.
+The mechanism is not thereby refuted --- it plainly works where it was
+fitted --- and the honest conclusion is narrower and more useful than
+either ``it works'' or ``it does not'': an ask-scoring coordinate tuned
+against one belief representation is not a portable strategic insight,
+even between two engines playing an identical game. Their belief is a
+Sinkhorn approximation seeded by a behavioural prior; ours is exact
+counting reweighted by a choice model. A term that pays in the first is
+apparently already priced in the second.
+
 \paragraph{What did not change.} FishBot4's own defaults. The champion is the
 reference point for every measurement in this paper, and moving it would
 silently reprice all of them at once; the correction remains in the archival

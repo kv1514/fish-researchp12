@@ -64,8 +64,40 @@ def play(deal_seed: int, kv_even: bool, arm: str, agent0: int) -> dict:
             "terminal": st.is_terminal, "fallbacks": fb}
 
 
+def _claim_lock(journal: Path):
+    """One writer per journal, or none.
+
+    Two drivers of this script raced into one journal during the R6 screen:
+    a background runner and the foreground chunks that replaced it when the
+    background one turned out to stall whenever the container idled. It cost
+    2,888 redundant games and, worse, could have gone unnoticed. It did no
+    damage -- every duplicated (deal, rotation, arm) came back bit-identical,
+    which is a fact worth having checked rather than assumed -- but a
+    measurement harness that can be run twice into the same file is one
+    nondeterminism away from silently mixing two populations.
+
+    O_EXCL is the whole mechanism: it is atomic, and a stale lock from a
+    killed run is removed by hand, deliberately, after checking nothing else
+    is running.
+    """
+    import os
+    lock = journal.with_suffix(journal.suffix + ".lock")
+    try:
+        fd = os.open(str(lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        raise SystemExit(
+            f"{lock} exists: another run of this sweep is writing "
+            f"{journal.name}. If you are sure none is (check `ps`), remove "
+            f"the lock and rerun.")
+    os.write(fd, f"pid {os.getpid()}\n".encode())
+    os.close(fd)
+    import atexit
+    atexit.register(lambda: lock.unlink(missing_ok=True))
+
+
 def run(n_deals: int, seed0: int, agent0: int, arms: list[str],
         journal: Path, out_name: str) -> int:
+    _claim_lock(journal)
     done = set()
     rows = []
     if journal.exists():
@@ -122,9 +154,13 @@ def run(n_deals: int, seed0: int, agent0: int, arms: list[str],
             1, sum(1 for r in by.values() if r["arm"] == arm))
         print(f"  {arm:6s}: {m:+.4f} [{lo:+.4f}, {hi:+.4f}]  n={n}  "
               f"(margin {arm_margin:+.3f} vs base {base_margin:+.3f})")
-        result["arms"][arm] = {"n_pairs": n, "effect": m, "ci95": [lo, hi],
-                               "margin": arm_margin,
-                               "base_margin": base_margin}
+        # Dot-free key: the paper's number manifest addresses nested values
+        # by a dot-separated path, so an arm named "c+3.0" would be read as
+        # two levels. The journal keeps the human names; only this index is
+        # sanitised, so nothing already recorded is orphaned.
+        result["arms"][arm.replace(".", "")] = {
+            "arm": arm, "n_pairs": n, "effect": m, "ci95": [lo, hi],
+            "margin": arm_margin, "base_margin": base_margin}
     (ROOT / "results" / out_name).write_text(json.dumps(result, indent=1))
     print(f"wrote results/{out_name}")
     return 0
