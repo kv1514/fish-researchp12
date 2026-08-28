@@ -178,7 +178,21 @@ def main(path=None, arms=None) -> int:
                     if isinstance(rows[0][k], dict) and k != BASE
                     and "margin" in rows[0][k]]
     out = report(rows, arms)
-    dest = ROOT / "results" / "error_value.json"
+    out["journal"] = p.name
+    # Named after the journal it read.
+    #
+    # It used to write results/error_value.json whatever the input, so running
+    # it on the signalling journal silently replaced the stuck-gate fit -- and
+    # the paper cites that file twice for +1.7898 [+1.5927, +1.9870], a number
+    # the file no longer contained. The drift check did not catch it because
+    # error_value.json was not in the manifest; it is now.
+    #
+    # The default journal keeps the historical filename so nothing that
+    # already points at it breaks.
+    stem = p.stem.replace("_journal", "")
+    dest = ROOT / "results" / (
+        "error_value.json" if p.resolve() == Path(DEFAULT).resolve()
+        else f"error_value_{stem}.json")
     dest.write_text(json.dumps(out, indent=1))
     print("\nwrote", dest.relative_to(ROOT))
     return 0

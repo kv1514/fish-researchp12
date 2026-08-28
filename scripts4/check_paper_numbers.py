@@ -679,6 +679,33 @@ WATCH = [
      "signalling gate replication arm", "A, signalling off"),
     ("forced_exhaustive_v07.json", "margin.effect", "{:+.4f}",
      "forced search margin vs v0.7", "guard 2 and which it passed exactly"),
+    # What an avoided misdeclaration is worth, and what a deferral costs.
+    #
+    # Watched because the paper quotes +1.7898 twice and the file backing it was
+    # silently replaced: error_value.py wrote results/error_value.json whatever
+    # journal it read, so running it on the signalling journal overwrote the
+    # stuck-gate fit with a different population's. Everything still built and
+    # every other check passed, because this figure was not in the manifest.
+    ("error_value.json", "arms.B_defer.value_per_avoided_error.est", "{:+.4f}",
+     "value of one avoided error", "value of one avoided error"),
+    ("error_value.json", "arms.B_defer.value_per_avoided_error.ci95.0",
+     "{:+.4f}", "avoided-error value, CI low", "value of one avoided error"),
+    ("error_value.json", "arms.B_defer.value_per_avoided_error.ci95.1",
+     "{:+.4f}", "avoided-error value, CI high", "value of one avoided error"),
+    ("error_value.json", "arms.B2_mid.value_per_avoided_error.est", "{:+.4f}",
+     "avoided-error value, middle rung", "value of one avoided error"),
+    # Not cost_per_deferral: the paper states that one rounded, as "about 0.36
+    # to 0.43 sets each", and a manifest row that cannot match the prose it
+    # guards is worse than no row. These three are quoted exactly, and they are
+    # the inputs the paragraph's own arithmetic runs on.
+    ("error_value.json", "arms.B_defer.errors_avoided_per_game", "{:.4f}",
+     "errors avoided per game, deferral arm", "errors avoided at"),
+    ("error_value.json", "arms.B_defer.declarations_deferred_per_game",
+     "{:.3f}", "deferrals per game", "less often than average"),
+    ("error_value.json",
+     "arms.B_defer.deferred_per_game_where_no_error_avoided", "{:.3f}",
+     "deferrals per game where nothing was avoided",
+     "defer about"),
     ("foreign_award_check.json", "effect", "{:+.4f}",
      "rule-matched foreign effect", "under the award rule --- no reversal"),
     ("foreign_award_check.json", "ci95.0", "{:+.4f}",
