@@ -30,6 +30,40 @@ verified-equivalent variant may be used only to buy throughput on SCREENS,
 where what matters is the contrast between our own arms and both arms face the
 identical opponent. Any run using it must say so.
 
+WHAT HAPPENED: THE SHORTCUT IS REJECTED. Over 1,400 deals, each played twice:
+
+    our margin vs s1=1 (frozen)   +2.4857 sets/game
+    our margin vs s1=0 (fast)     +2.4057
+    their search is worth         +0.0800  [-0.0550, +0.2150]  to them
+    VERDICT                       INCONCLUSIVE
+    speedup                       1.21x
+
+Three reasons not to take the shortcut, in decreasing order of importance.
+
+First, the interval is not inside the equivalence bound: its upper end, +0.215,
+is above the 0.15 we fixed in advance as the smallest difference worth caring
+about. We cannot say s1=0 is the same opponent.
+
+Second, and more interesting, the POINT ESTIMATE HAS THE OPPOSITE SIGN from
+his arena's. There his search measured -0.047 in mirror play; here it measures
++0.080 against us. That is precisely the failure mode this script existed to
+catch -- a search can be worthless against a copy of itself and still pay
+against a stylistically different opponent, because what a determinized search
+buys is robustness to lines its own blueprint would not have played. It is a
+result worth keeping in its own right: it says the value of test-time search is
+not a property of the engine alone but of the engine and its opposition
+together, and that a mirror-match ablation systematically understates it.
+
+Third, the engineering motive evaporated anyway. The speedup is 1.21x here,
+not the 4.2x his arena measured, because our per-decision cost is dominated by
+process spawn and full-history replay rather than by his search. Buying 1.21x
+by playing a possibly-weaker opponent is a bad trade at any confidence.
+
+Deciding the equivalence would take roughly 2,800 deals. It is not worth the
+compute: even a clean pass buys 1.21x. The frozen spec remains the opponent
+everywhere, and the override stays for anyone who has a better reason to use
+it than this one turned out to be.
+
     py scripts4/v07_s1_equivalence.py [n_deals] [n_jobs]
 """
 
