@@ -21,6 +21,15 @@ whether the edge is uniform across half-suits -- so this script reports
 those rather than just a mean.
 
     py scripts4/mega_match.py [n_deals] [n_jobs]
+    MEGA_MATCH_JOURNAL=/scratch/mm.jsonl py scripts4/mega_match.py 5000 4
+    MEGA_MATCH_JOURNAL=/scratch/mm.jsonl py scripts4/mega_match.py --merge
+
+A run of this size takes hours, and the journal is version-controlled, so a
+plain run holds the working tree dirty the whole time and turns every commit
+made during it into a snapshot of a half-finished measurement. Set
+MEGA_MATCH_JOURNAL to keep the run out of the repository; it still resumes
+from the committed games, and --merge folds the finished ones back in one
+step and rewrites results/mega_match.json.
 
 Each deal is played twice, once with our seats even and once odd, so
 neither engine gets the opening move more often.
@@ -56,7 +65,15 @@ from fish.rules import RuleConfig
 RULES_D = {"wrong_distribution_outcome": "opponent"}
 SEED0 = 900_000
 AGENT0 = 9000
-JOURNAL = ROOT / "results" / "mega_match_journal.jsonl"
+#: Where the run appends as it goes. A run of this size takes hours, and for
+#: all of them the journal is a file under version control being written to a
+#: few times a second -- which leaves the working tree permanently dirty and
+#: makes every commit during the run a snapshot of a half-finished
+#: measurement. Point MEGA_MATCH_JOURNAL at a scratch path to keep the run out
+#: of the repository, then merge it back with --merge when it finishes.
+JOURNAL = Path(os.environ.get(
+    "MEGA_MATCH_JOURNAL", ROOT / "results" / "mega_match_journal.jsonl"))
+CANON = ROOT / "results" / "mega_match_journal.jsonl"
 
 #: Defined in the bridge itself, next to the behaviour it describes, so this
 #: runner cannot disagree with the thing it is measuring. See fish4/dylan_v07.
@@ -183,19 +200,60 @@ def report(rows) -> dict:
             "margin_distribution": {str(k): dist[k] for k in sorted(dist)}}
 
 
+def _read(path: Path, done: set, rows: list) -> int:
+    """Load one journal, skipping games already seen and other revisions."""
+    stale = 0
+    if not path.exists():
+        return stale
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        if r.get("rev") != BRIDGE_REV:
+            stale += 1                # a different bridge; not comparable
+            continue
+        key = (r["deal"], r["kv_even"])
+        if key in done:
+            continue
+        done.add(key)
+        rows.append(r)
+    return stale
+
+
+def merge() -> int:
+    """Fold a scratch journal into the committed one, then report.
+
+    Runs long enough to matter are pointed at a scratch path so the working
+    tree stays clean while they run; this brings the finished games home in
+    one commit-sized step instead of a few thousand.
+    """
+    if JOURNAL == CANON:
+        print("MEGA_MATCH_JOURNAL is unset, so there is nothing to merge")
+        return 1
+    done, rows = set(), []
+    _read(CANON, done, rows)
+    before = len(rows)
+    _read(JOURNAL, done, rows)
+    added = len(rows) - before
+    CANON.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    print(f"merged {added:,} games from {JOURNAL} "
+          f"into {CANON.name} ({len(rows):,} total)")
+    if len(rows) < 100:
+        return 1
+    out = report(rows)
+    (ROOT / "results" / "mega_match.json").write_text(json.dumps(out, indent=1))
+    print("wrote results/mega_match.json")
+    return 0
+
+
 def main(n_deals: int = 2000, n_jobs: int = 0) -> int:
     n_jobs = n_jobs or max(1, (os.cpu_count() or 2))
     done, rows = set(), []
-    stale = 0
-    if JOURNAL.exists():
-        for line in JOURNAL.read_text().splitlines():
-            if line.strip():
-                r = json.loads(line)
-                if r.get("rev") != BRIDGE_REV:
-                    stale += 1        # a different bridge; not comparable
-                    continue
-                done.add((r["deal"], r["kv_even"]))
-                rows.append(r)
+    # The committed journal first, so a scratch run never replays a game the
+    # repository already has, then the scratch one this run appends to.
+    stale = _read(CANON, done, rows)
+    if JOURNAL != CANON:
+        stale += _read(JOURNAL, done, rows)
     if stale:
         print(f"ignoring {stale:,} games from an older bridge revision")
     todo = [(SEED0 + i, ke) for i in range(n_deals) for ke in (True, False)
@@ -226,5 +284,7 @@ def main(n_deals: int = 2000, n_jobs: int = 0) -> int:
 
 if __name__ == "__main__":
     a = sys.argv[1:]
+    if a and a[0] == "--merge":
+        raise SystemExit(merge())
     raise SystemExit(main(int(a[0]) if a else 2000,
                           int(a[1]) if len(a) > 1 else 0))
