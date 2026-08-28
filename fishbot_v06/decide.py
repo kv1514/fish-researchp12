@@ -98,11 +98,22 @@ VERSION = "0.6"
 
 
 def _card_id(x) -> int:
-    """Accept a name ("2C") or a raw index; reject anything else loudly."""
-    if isinstance(x, int):
-        if not 0 <= x < len(CARD_NAMES):
-            raise ValueError(f"card index out of range: {x}")
-        return x
+    """Cards are NAMES ("2C"), never integers. This is deliberate.
+
+    An earlier version of this file also accepted an integer and read it as
+    an index into OUR card ordering. That is a silent catastrophe across a
+    bridge: v0.7 numbers its cards set*6+idx over a DIFFERENT permutation of
+    the sets, so a host passing its own integers would have had this bot
+    play a scrambled hand, legally, badly, and with no error anywhere. It
+    would look exactly like a weak bot rather than a broken integration.
+    Names are unambiguous between any two implementations of a 54-card deck,
+    so names are the contract.
+    """
+    if isinstance(x, bool) or isinstance(x, int):
+        raise ValueError(
+            f"card must be a NAME like '2C' or 'RJ', not the integer {x}: "
+            f"card indices are not portable between engines (ask "
+            f'{{"op":"cards"}} for our ordering if you need it)')
     try:
         return CARD_IDS[str(x).strip().upper()]
     except KeyError:
@@ -180,6 +191,42 @@ def _card_table() -> dict:
                 for h in range(len(HALF_SUIT_NAMES))]}
 
 
+def _offturn(req: dict) -> dict:
+    """Does this seat have a declaration it can make RIGHT NOW, off-turn?
+
+    Hosts whose rules allow declaring at any moment (v0.7's engine does, by
+    default: ``outOfTurnDeclare = true``) must poll every seat, not only the
+    turn holder. Skipping this is not a small omission. Measured over 240
+    games against v0.7 on identical deals
+    (``scripts4/dialect_gap.py``, ``results/dialect_gap.json``): with both
+    sides declaring off-turn our margin is +2.375 sets/game; with only their
+    side allowed to -- which is what a host gets if it never polls us
+    off-turn -- it falls to +1.575. That 0.8-set swing is a rule we were not
+    playing, not a weakness in the bot.
+
+    Only CERTAIN declarations are offered here: the answer is a declaration
+    exactly when the public record alone pins every card of a half-suit to a
+    named teammate. A speculative off-turn declaration would be a gamble
+    with a full set under the award rule, and a seat that is merely
+    confident can wait for its turn and use the full policy.
+
+    Returns {"action": ...} or {"action": null} -- never an error for the
+    ordinary case of having nothing to say.
+    """
+    obs = _observation(req)
+    from fish.beliefs import BeliefState
+    from fish4.match import _deduced_claim
+
+    class _Seat:
+        pass
+
+    seat = _Seat()
+    seat.bel = BeliefState(obs.rules, observer=obs.player)
+    seat.bel.update(obs)
+    claim = _deduced_claim(seat, obs.player, obs)
+    return {"action": _encode(claim) if claim is not None else None}
+
+
 def decide(req: dict) -> dict:
     """One request in, one response out. Never raises: errors are data."""
     try:
@@ -188,7 +235,11 @@ def decide(req: dict) -> dict:
             return _card_table()
         if op in ("version", "hello"):
             return {"bot": f"KV's FishBot v{VERSION}", "spec": SPEC,
-                    "protocol": 1}
+                    "protocol": 2,
+                    "ops": ["decide", "offturn", "cards", "version"],
+                    "declares_off_turn": True}
+        if op in ("offturn", "offturn_declare"):
+            return _offturn(req)
         if op != "decide":
             return {"error": f"unknown op: {op!r}"}
 
@@ -288,7 +339,69 @@ def _self_test() -> int:
     assert decide({"op": "version"})["spec"] == SPEC
     bad = decide({"op": "decide", "seat": 9})
     assert "error" in bad, "a malformed request must return an error"
-    print("card table, version and error handling: ok")
+
+    # Integer card ids must be REFUSED, not silently misread: the whole
+    # failure mode this guards against is a host passing its own ordering.
+    ints = decide({"seat": 0, "turn": 0, "hand": [0, 1],
+                   "hand_counts": [2, 9, 9, 9, 9, 9],
+                   "set_winner": [None] * 9, "history": []})
+    assert "error" in ints and "not portable" in ints["error"], (
+        "integer card ids must be refused loudly")
+
+    # The off-turn channel must actually FIRE somewhere in real play, or a
+    # host polling it gets nothing and the rule stays unplayed. Replay a
+    # game and poll every non-turn seat at every ply.
+    fired = polled = 0
+    st = GameState.deal(rules, seed=771_001)
+    agents = [make_agent(("fishbot4", dict(SPEC))) for _ in range(6)]
+    for p, a in enumerate(agents):
+        a.begin_game(p, rules, 5)
+    for _ in range(600):
+        if st.is_terminal:
+            break
+        for q in range(6):
+            if q == st.turn:
+                continue
+            o = Observation.from_state(st, q)
+            req = {"op": "offturn", "seat": q, "turn": st.turn,
+                   "hand": [card_name(c) for c in range(54) if o.hand >> c & 1],
+                   "hand_counts": list(o.hand_counts),
+                   "set_winner": list(o.set_winner), "history": []}
+            for ev in o.history:
+                if isinstance(ev, AskEvent):
+                    req["history"].append(
+                        {"t": "ask", "asker": ev.asker, "target": ev.target,
+                         "card": card_name(ev.card), "success": ev.success})
+                elif isinstance(ev, ClaimEvent):
+                    req["history"].append(
+                        {"t": "claim", "claimer": ev.claimer,
+                         "half_suit": ev.half_suit,
+                         "declared": list(ev.declared),
+                         "revealed": list(ev.revealed),
+                         "winner": None if ev.winner < 0 else ev.winner})
+                else:
+                    req["history"].append(
+                        {"t": "pass", "player": ev.player,
+                         "teammate": ev.teammate})
+            r = decide(req)
+            assert "action" in r, f"off-turn poll errored: {r}"
+            polled += 1
+            if r["action"] is not None:
+                fired += 1
+                assert r["action"]["type"] == "declare"
+                # and it must be TRUE: an off-turn declaration is offered
+                # only when the public record pins the whole half-suit
+                hs = r["action"]["half_suit"]
+                for i, c in enumerate(half_suit_cards(hs)):
+                    assert st.holder_of(c) == r["action"]["assignment"][i], (
+                        "off-turn declaration offered a WRONG assignment")
+        st.apply(st.turn, agents[st.turn].act(
+            Observation.from_state(st, st.turn)))
+    print(f"off-turn channel: {polled} polls, {fired} declarations offered, "
+          f"all correct")
+    assert fired > 0, ("the off-turn channel never fired in a whole game; "
+                       "a host polling it would get nothing")
+    print("card table, version, strict cards and error handling: ok")
     return 1 if mismatches else 0
 
 

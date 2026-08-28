@@ -52,27 +52,68 @@ shapes, and the seeding rule. Two conveniences worth knowing:
 - `{"seed": N}` makes a decision reproducible; omit it and the seed is
   derived from the history, so a match is still replayable from its log.
 
+## Three things a host MUST get right
+
+These are not style preferences. Each one, gotten wrong, makes this bot
+look weak rather than broken — which is the worst kind of bug, because
+nothing errors and the games just quietly go the other way. We learned all
+three the hard way when our bot was first run inside another engine's
+server and lost games it wins here.
+
+**1. Poll every seat off-turn, if your rules allow off-turn declarations.**
+v0.7's engine sets `outOfTurnDeclare = true` by default: any seat may
+declare the moment it knows a half-suit. If you only ever ask the seat whose
+turn it is, our seats wait their turn while yours race — and whoever
+declares first takes the set. Measured over 240 games on identical deals
+(`scripts4/dialect_gap.py`):
+
+| arbiter | our margin |
+|---|---|
+| nobody declares off-turn | **+2.675** sets/game |
+| both sides may (your dialect, played fairly) | **+2.375** sets/game |
+| only *your* side may (a host that never polls us) | **+1.575** sets/game |
+
+So poll us:
+
+```json
+{"op":"offturn", "seat":3, "turn":0, "hand":[...], "hand_counts":[...],
+ "set_winner":[...], "history":[...]}
+```
+
+You get `{"action": {...declare...}}` or `{"action": null}`. It answers with
+a declaration **only** when the public record alone pins every card of a
+half-suit, so it is always correct and never a gamble — poll it for all six
+seats between moves and drop the ones that answer null.
+
+**2. Cards are NAMES, never integers.** `"2C"`, `"TD"`, `"AH"`, `"BJ"`,
+`"RJ"`. We deliberately **reject** integer card ids with an error. Your
+engine numbers cards `set*6+idx` over a different permutation of the sets
+than ours, so an integer that means one card to you means another to us —
+and a bot playing a scrambled hand plays legally, badly, and silently. If
+you need our ordering for any reason, ask `{"op":"cards"}`.
+
+**3. Never treat an `{"error": ...}` response as a move.** If a request is
+malformed we say so rather than guessing. A host that catches the error and
+substitutes a random legal move will lose every game and show you nothing.
+Log it and fix the request; `--self-test` will tell you if the problem is on
+our side.
+
 ## The rules it assumes
 
 Standard six-player, 54-card Literature: nine half-suits of six, teams by
 seat parity ({0,2,4} vs {1,3,5}), ask only what you can legally ask, and
 **any wrong declaration awards the half-suit to the opposing team** —
-matching v0.7's native rule. Two differences from that engine's dialect,
-both deliberate and both handled by the host rather than by us:
+matching v0.7's native rule. Set it explicitly if you like; the default is
+already this. The legacy void variant (`"wrong_distribution_outcome":
+"null"`, where a right-team wrong-split declaration scores for nobody) is
+still accepted per request because this project's older published results
+were measured under it — do not use it for new games, it is not the game.
 
-- **Declarations are on-turn here.** Our engine does not have v0.7's
-  out-of-turn declaration channel. If your host allows out-of-turn
-  declarations, simply never poll this bot off-turn; it will play the
-  on-turn game correctly and will not attempt to declare when it is not
-  asked to.
-- **The legacy void rule** (`wrong_distribution_outcome: "null"`, where a
-  right-team wrong-split declaration scores for nobody) is still supported
-  per request, because this project's older published results were measured
-  under it. Do not use it for new games; it is not the game.
-
-The bot reads the rule off each request and prices its declarations
-accordingly, so a host that sets it correctly gets correct play with no
-further configuration.
+One rule of yours we do not implement: `cardlessMayDeclare`. A seat of ours
+with no cards will answer the off-turn poll normally (deduction does not
+need cards), but will not be dealt into the on-turn loop. If that matters
+for your arbiter, tell us and we will extend the protocol rather than have
+you paper over it.
 
 ## Verifying the integration, not trusting it
 
