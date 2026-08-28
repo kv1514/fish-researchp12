@@ -633,10 +633,18 @@ WATCH = [
      "standard-scoring headline CI low", "restatement of this ladder's headline"),
     ("award_headline.json", "ci.1", "{:+.3f}",
      "standard-scoring headline CI high", "restatement of this ladder's headline"),
+    # The anchor here used to read "misdeclared-and-awarded sets", and it
+    # stopped matching when that caption was rewritten -- the counter these
+    # two figures come from holds the ALLOCATION class only, and calling it
+    # "misdeclares" is what put the paper's headline decomposition at 9% when
+    # the complete count says 57%. The figures did not move; the sentence
+    # around them did. The anchor now quotes the clause that says which class
+    # is being counted, so a future rewrite that drops the distinction again
+    # breaks this check instead of passing it silently.
     ("award_headline.json", "x_misdeclares", "{:d}",
-     "deployed misdeclares in R1", "misdeclared-and-awarded sets"),
+     "deployed allocation misdeclares in R1", "so awarded to the opponents"),
     ("award_headline.json", "y_misdeclares", "{:d}",
-     "v0.3 misdeclares in R1", "misdeclared-and-awarded sets"),
+     "v0.3 allocation misdeclares in R1", "so awarded to the opponents"),
     ("foreign_award_check.json", "effect", "{:+.4f}",
      "rule-matched foreign effect", "under the award rule --- no reversal"),
     ("foreign_award_check.json", "ci95.0", "{:+.4f}",
