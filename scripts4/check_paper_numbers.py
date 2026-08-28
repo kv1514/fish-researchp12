@@ -843,13 +843,24 @@ WATCH = [
     # the residual and the leak are both pinned: quoting the leak without the
     # residual, or the other way round, would let the section drift into a
     # claim the file does not support.
-    ("margin_decomposition.json", "decomposition.margin.mean", "{:+.4f}",
-     "decomposed margin", "Sixty-one per cent of the margin"),
-    ("margin_decomposition.json", "decomposition.residual.mean", "{:+.4f}",
-     "margin residual after declarations", "Sixty-one per cent of the margin"),
+    # On the headline block now, not the 600-game probe. The probe's own
+    # figures stay watched below, because the section quotes both and says
+    # they agree.
+    ("margin_decomposition.json", "headline_block.margin.mean", "{:+.4f}",
+     "decomposed margin", "Fifty-seven per cent of the margin"),
+    ("margin_decomposition.json", "headline_block.residual.mean", "{:+.4f}",
+     "margin residual after declarations", "Fifty-seven per cent of the margin"),
+    ("margin_decomposition.json", "headline_block.their_ownership_per_game",
+     "{:.4f}", "their ownership-class error rate",
+     "Fifty-seven per cent of the margin"),
+    ("margin_decomposition.json", "headline_block.their_per_game", "{:.3f}",
+     "their wrong declarations per game", "times a game against their"),
+    ("margin_decomposition.json", "decomposition.their_errors.total_per_game",
+     "{:.3f}", "the probe's error rate, quoted as the agreeing figure",
+     "the probe put their error rate at"),
     ("margin_decomposition.json", "decomposition.their_errors.ownership_per_game",
-     "{:.3f}", "their ownership-class error rate",
-     "Sixty-one per cent of the margin"),
+     "{:.3f}", "the probe's ownership-class rate",
+     "obvious hypothesis about the ownership-class leak"),
     ("margin_decomposition.json", "mechanism.dark", "{:d}",
      "their misplaced cards that never moved in public",
      "never publicly moved since the deal"),

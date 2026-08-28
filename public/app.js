@@ -1186,10 +1186,12 @@ function renderLog() {
  * and write is wrapped.
  */
 const RECORD_KEY = "fish.declrecord.v1";
-//: measured between engines over 600 cross-engine games, our seats and theirs
-//: (results/margin_decomposition.json). Shown as the yardstick because "you
-//: got two wrong" means nothing without one.
-const ENGINE_WRONG_PER_GAME = { us: 0.150, them: 0.918 };
+//: measured between engines over the 10,000-game head-to-head, both sides
+//: (results/margin_decomposition.json -> headline_block). Shown as the
+//: yardstick because "you got two wrong" means nothing without one. These
+//: were first taken from a 600-game probe, at 0.150 and 0.918; the figures
+//: below are the same quantity on seventeen times the games.
+const ENGINE_WRONG_PER_GAME = { us: 0.176, them: 0.844 };
 
 function loadRecord() {
   try {

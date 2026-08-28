@@ -12,6 +12,7 @@
   "their_errors": {
    "ownership_per_game": 0.65,
    "allocation_per_game": 0.2683,
+   "total_per_game": 0.9183,
    "sets_credited": 1.8367
   },
   "our_errors": {
@@ -57,5 +58,28 @@
    "we_asked": 45.377,
    "not_asked": 0.675
   }
+ },
+ "headline_block": {
+  "n_games": 10000,
+  "margin": {
+   "mean": 2.3466,
+   "ci95": [
+    2.2928,
+    2.4004
+   ]
+  },
+  "their_per_game": 0.8442,
+  "their_allocation_per_game": 0.2775,
+  "their_ownership_per_game": 0.5667,
+  "our_per_game": 0.1759,
+  "our_allocation_per_game": 0.1676,
+  "residual": {
+   "mean": 1.01,
+   "ci95": [
+    0.9573,
+    1.0627
+   ]
+  },
+  "share_from_declarations": 0.5696
  }
 }

@@ -102,7 +102,7 @@ def _one(args) -> dict:
     dy = sum(1 for w in st.set_winner if w == 1 - kv_team)
     ask = {"kv": [0, 0], "dy": [0, 0]}
     dec = {"kv": [0, 0], "dy": [0, 0]}
-    mis = {"kv": 0, "dy": 0}
+    alloc = {"kv": 0, "dy": 0}
     # Declarations by a seat holding no card of the half-suit it names. Read
     # this asymmetrically, because it is not one phenomenon. Done from a
     # deduced posterior it is a strong play -- a set your teammates hold, seen
@@ -124,11 +124,22 @@ def _one(args) -> dict:
             if ev.winner == team_of(ev.claimer):
                 dec[s][0] += 1
             elif all(team_of(h) == team_of(ev.claimer) for h in ev.revealed):
-                mis[s] += 1
+                # ALLOCATION class only: the claimer's own team held all six
+                # and the split was wrong. An ownership-class error, where an
+                # opponent still held a card, falls through into neither
+                # counter -- it is in dec[s][1] and not in dec[s][0], and the
+                # complete wrong-declaration count is that difference.
+                #
+                # This counter was printed and stored under the name
+                # "misdeclares", which is what it is not. A decomposition of
+                # the head-to-head margin built on it put declarations at 9%
+                # of the margin against a true 57%, because it was silently
+                # missing two thirds of their errors.
+                alloc[s] += 1
     return {"deal": deal_seed, "kv_even": kv_even, "kv": kv, "dylan": dy,
             "margin": kv - dy, "terminal": st.is_terminal, "rev": BRIDGE_REV,
             "fallbacks": sum(getattr(a, "fallbacks", 0) for a in agents),
-            "ask": ask, "dec": dec, "mis": mis, "anchorless": anchorless}
+            "ask": ask, "dec": dec, "mis": alloc, "anchorless": anchorless}
 
 
 def report(rows) -> dict:
@@ -172,8 +183,12 @@ def report(rows) -> dict:
           f"Dylan {100*ad:.2f}% (n={nad:,})")
     print(f"  declare right KV {100*dk:.2f}% (n={ndk:,})   "
           f"Dylan {100*dd:.2f}% (n={ndd:,})")
-    print(f"  misdeclares   KV {sum(x['mis']['kv'] for x in g):,}   "
-          f"Dylan {sum(x['mis']['dy'] for x in g):,}")
+    tw = sum(x["dec"]["kv"][1] - x["dec"]["kv"][0] for x in g)
+    dw = sum(x["dec"]["dy"][1] - x["dec"]["dy"][0] for x in g)
+    print(f"  wrong decls   KV {tw:,}   Dylan {dw:,}")
+    print(f"    of which allocation-class (own team held all six):"
+          f" KV {sum(x['mis']['kv'] for x in g):,}"
+          f"   Dylan {sum(x['mis']['dy'] for x in g):,}")
     ak_ = sum(x.get("anchorless", {}).get("kv", 0) for x in g)
     ad_ = sum(x.get("anchorless", {}).get("dy", 0) for x in g)
     print(f"  anchorless    KV {ak_:,}   Dylan {ad_:,}   (declared a half-suit "
@@ -189,8 +204,14 @@ def report(rows) -> dict:
             "win_rate_ci95": [wr - 1.96 * wse, wr + 1.96 * wse],
             "ask_hit_kv": ak, "ask_hit_dylan": ad,
             "declare_right_kv": dk, "declare_right_dylan": dd,
-            "misdeclares_kv": sum(x["mis"]["kv"] for x in g),
-            "misdeclares_dylan": sum(x["mis"]["dy"] for x in g),
+            # named for what they are: the allocation class alone. The old
+            # keys said "misdeclares" and held a third of them.
+            "allocation_misdeclares_kv": sum(x["mis"]["kv"] for x in g),
+            "allocation_misdeclares_dylan": sum(x["mis"]["dy"] for x in g),
+            "wrong_declarations_kv": sum(
+                x["dec"]["kv"][1] - x["dec"]["kv"][0] for x in g),
+            "wrong_declarations_dylan": sum(
+                x["dec"]["dy"][1] - x["dec"]["dy"][0] for x in g),
             "bridge_rev": BRIDGE_REV,
             "anchorless_kv": sum(x.get("anchorless", {}).get("kv", 0)
                                  for x in g),

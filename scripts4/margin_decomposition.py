@@ -62,6 +62,9 @@ def decompose(rows: list[dict]) -> dict:
         "their_errors": {
             "ownership_per_game": round(sum(own) / g, 4),
             "allocation_per_game": round(sum(alloc) / g, 4),
+            # the sum, because the paper quotes it as the figure that agrees
+            # with the headline block and an unwatched number drifts
+            "total_per_game": round((sum(own) + sum(alloc)) / g, 4),
             "sets_credited": round(SWING * (sum(own) + sum(alloc)) / g, 4),
         },
         "our_errors": {
@@ -131,6 +134,63 @@ def mechanism(rows: list[dict]) -> dict:
     return out
 
 
+def from_mega(path: Path) -> dict:
+    """The same decomposition on the 10,000-game head-to-head journal.
+
+    The paper's headline margin is measured over 10,000 games and the class
+    split -- ownership against allocation -- comes from a 600-game probe that
+    records every declaration. Quoting a ratio from the small block beside a margin
+    from the large one invites the reader to apply it there, so the top-level
+    split is computed here on the SAME games the headline is.
+
+    `mega_match_journal.jsonl` carries per-side misdeclaration totals but not
+    their class, which is why the class split stays with the probe that
+    measures it.
+    """
+    rows = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+    g = len(rows)
+    mar = [r["margin"] for r in rows]
+    # `mis` is NOT the misdeclaration count, despite the name and despite
+    # mega_match printing it under "misdeclares". Its branch only fires when
+    # the claimer's own team held all six -- the ALLOCATION class -- so an
+    # ownership-class error, where an opponent still held a card, falls
+    # through into neither counter. Using it here made their error rate come
+    # out at 0.2775/game against the probe's 0.918 and put the headline share
+    # at 9% instead of 57%. The complete count is total minus right.
+    theirs = [r["dec"]["dy"][1] - r["dec"]["dy"][0] for r in rows]
+    ours = [r["dec"]["kv"][1] - r["dec"]["kv"][0] for r in rows]
+    alloc_t = [r["mis"]["dy"] for r in rows]
+    alloc_o = [r["mis"]["kv"] for r in rows]
+    resid = [m - SWING * t + SWING * o for m, t, o in zip(mar, theirs, ours)]
+    m, lo, hi = _mean_ci(mar)
+    rm, rlo, rhi = _mean_ci(resid)
+    print(f"\n=== the same decomposition, on the {g:,} games the headline "
+          f"margin is measured over ===")
+    print(f"  measured margin              {m:+.4f}  [{lo:+.4f}, {hi:+.4f}]")
+    print(f"  their wrong declarations     {sum(theirs)/g:.4f}/game  "
+          f"-> {SWING*sum(theirs)/g:+.4f}")
+    print(f"    allocation-class           {sum(alloc_t)/g:.4f}"
+          f"   ownership-class {(sum(theirs)-sum(alloc_t))/g:.4f}")
+    print(f"  our wrong declarations       {sum(ours)/g:.4f}/game  "
+          f"-> {-SWING*sum(ours)/g:+.4f}")
+    print(f"    allocation-class           {sum(alloc_o)/g:.4f}"
+          f"   ownership-class {(sum(ours)-sum(alloc_o))/g:.4f}")
+    print(f"  everything else              {rm:+.4f}  "
+          f"[{rlo:+.4f}, {rhi:+.4f}]")
+    print(f"\n  {100*(1 - rm/m):.0f}% of the margin is declaration accounting.")
+    return {"n_games": g,
+            "margin": {"mean": round(m, 4), "ci95": [round(lo, 4), round(hi, 4)]},
+            "their_per_game": round(sum(theirs) / g, 4),
+            "their_allocation_per_game": round(sum(alloc_t) / g, 4),
+            "their_ownership_per_game": round(
+                (sum(theirs) - sum(alloc_t)) / g, 4),
+            "our_per_game": round(sum(ours) / g, 4),
+            "our_allocation_per_game": round(sum(alloc_o) / g, 4),
+            "residual": {"mean": round(rm, 4),
+                         "ci95": [round(rlo, 4), round(rhi, 4)]},
+            "share_from_declarations": round(1 - rm / m, 4) if m else None}
+
+
 def main(path=None) -> int:
     p = Path(path or DEFAULT)
     if not p.exists():
@@ -139,6 +199,9 @@ def main(path=None) -> int:
     rows = [json.loads(l) for l in p.read_text().splitlines() if l.strip()]
     out = {"source": p.name, "decomposition": decompose(rows),
            "mechanism": mechanism(rows)}
+    mega = ROOT / "results" / "mega_match_journal.jsonl"
+    if mega.exists():
+        out["headline_block"] = from_mega(mega)
     dest = ROOT / "results" / "margin_decomposition.json"
     dest.write_text(json.dumps(out, indent=1))
     print("\nwrote", dest.relative_to(ROOT))

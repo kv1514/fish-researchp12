@@ -147,7 +147,7 @@ results labelled by rule era. Under standard scoring the deployed
 configuration beats the v0.3 champion by $\mathbf{+2.412}$
 $[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
 independently developed C++ engine running its own code --- it wins
-$\mathbf{+2.347}$ sets per game, of which $\mathbf{61\%}$ is declaration
+$\mathbf{+2.347}$ sets per game, of which $\mathbf{57\%}$ is declaration
 accounting ($96.5\%$ correct against $78.9\%$), once a bridge defect of ours
 worth $-0.08$ to them is repaired;
 the endgame correction, fitted against void-era targets, re-measures at
@@ -5463,23 +5463,32 @@ scoreboard decomposes exactly. Over $600$ cross-engine games
 \toprule
 component & rate & contribution to margin \\
 \midrule
-measured margin & --- & $+2.5000$ $[+2.2772, +2.7228]$ \\
-their ownership-class errors & $0.650$/game & $+1.3000$ \\
-their allocation-class errors & $0.268$/game & $+0.5367$ \\
-our own wrong declarations & $0.150$/game & $-0.3000$ \\
+measured margin & --- & $+2.3466$ $[+2.2928, +2.4004]$ \\
+their ownership-class errors & $0.5667$/game & $+1.1334$ \\
+their allocation-class errors & $0.2775$/game & $+0.5550$ \\
+our own wrong declarations & $0.1759$/game & $-0.3518$ \\
 \midrule
-everything else & --- & $+0.9633$ $[+0.7375, +1.1892]$ \\
+everything else & --- & $+1.0100$ $[+0.9573, +1.0627]$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Sixty-one per cent of the margin is declaration
-accounting.} The edge is real and it is sixfold --- we declare wrongly $0.150$
-times a game against their $0.918$ --- but it is a \emph{declaration} edge, and
+\noindent \textbf{Fifty-seven per cent of the margin is declaration
+accounting.} The edge is real and it is nearly fivefold --- we declare wrongly
+$0.176$ times a game against their $0.844$ --- but it is a \emph{declaration}
+edge, and
 this project has spent the large majority of its compute on the ask objective.
 The residual, everything the asking and the inference and the lookahead
-between them produce once the declarations are netted out, is $+0.963$ sets
-per game: a real margin, and a little over a third of the headline one.
+between them produce once the declarations are netted out, is $+1.010$ sets
+per game: a real margin, and a little over two fifths of the headline one.
+
+These figures are computed on the same $10{,}000$ games the headline margin
+is, which took a correction. They were first taken from a $600$-game probe
+and quoted beside a margin from the large block, which invites a reader to
+apply a ratio measured on one population to a number measured on another.
+The two agree --- the probe put their error rate at $0.918$ a game against
+$0.844$ here, and the share at $61\%$ against $57\%$ --- but the version on
+the headline's own games is the one to quote.
 
 This is a decomposition of where the sets landed, not a counterfactual. A
 declaration that did not happen changes every ply after it, and no arithmetic
