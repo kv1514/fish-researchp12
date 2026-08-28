@@ -5453,6 +5453,83 @@ after the netting, not the margin a differently-declaring v0.7 would have
 conceded. The distinction is worth insisting on because the temptation is to
 read the last row as ``our true strength'', and it is not that.
 
+\paragraph{And what the other $39\%$ is made of.} The residual --- everything
+asking, inference and search produce once the declarations net out --- has a
+shape that follows from the rules. Every set is won by declaring a half-suit
+your team holds, so once misdeclarations are accounted for what remains is the
+race to \emph{assemble} half-suits, and that race has exactly two factors which
+multiply: how many asks a team gets to make, and how many of them land. This
+paper has reported the second since v0.4 and has never reported the first.
+Over $800$ cross-engine games (\path{scripts4/acquisition.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+per game & ours & v0.7 & difference \\
+\midrule
+turns & $57.250$ & $52.562$ & $\mathbf{+4.688}$ $[+3.962, +5.413]$ \\
+asks & $51.894$ & $48.265$ & $+3.629$ $[+3.102, +4.155]$ \\
+asks that landed & $26.731$ & $23.066$ & $+3.665$ $[+3.129, +4.201]$ \\
+half-suits assembled & $5.008$ & $3.416$ & $+1.591$ $[+1.418, +1.765]$ \\
+plies holding a set unspoken & $78.166$ & $32.440$ & $+45.726$ $[+41.5, +49.9]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Splitting the $3.665$-card gap at the mean gives $+1.802$ to volume
+and $+1.863$ to conversion: \textbf{almost exactly half and half}. We take
+$4.7$ more turns a game than v0.7, and that is worth as much as the
+$3.7$-point edge in ask accuracy this paper has been quoting as the mechanism.
+Tempo is not a term in our objective, is not a knob anywhere in the engine,
+and has never appeared in a results table --- it is a by-product of asking
+well, and it accounts for half of what asking well is worth.
+
+\paragraph{The last row is the one that costs us.} We hold assembled
+half-suits for $78$ plies a game against their $32$, and our own declaration
+accuracy falls monotonically with how long we have held the set:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+plies held assembled & declarations & wrong & error rate \\
+\midrule
+$0$ (never owned it) & $6$ & $6$ & $1.000$ \\
+$1$--$9$ & $2797$ & $46$ & $0.016$ \\
+$10$--$29$ & $517$ & $27$ & $0.052$ \\
+$30$--$79$ & $454$ & $23$ & $0.051$ \\
+$80+$ & $238$ & $28$ & $\mathbf{0.118}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Holding is not the cause and the direction of the arrow matters: a
+set you can place, you declare, so ``held long'' and ``could not place'' are
+nearly the same event. What the table establishes is that being unable to
+place a set is \emph{visible early}. And by \S\ref{sec:claiming}'s channel
+argument, early is when it can still be acted on --- once the half-suit is
+ours no opponent can ask in it, so nothing they do will place it, and the only
+remaining channel costs one of our turns.
+
+There is time. Over the $130$ half-suits we declared wrongly, the median
+number of \emph{our own} turns between assembling the set and the deadline is
+$25.5$, and only $16$ of $130$ were assembled with no turn left to spend. The
+lever is reachable in $88\%$ of the cases that go wrong.
+
+Whether spending those turns pays is a different question and this paper has
+already answered a version of it in the negative: \S\ref{sec:perpetual}'s
+signalling protocol cut nulls by $20\%$ and returned $+0.002$ $[-0.086,
++0.090]$ sets per pair, and it is switched \emph{off} in the deployed
+configuration. What the measurements above add is not a new mechanism but a
+different \emph{trigger}: that protocol fires when the current turn is cheap,
+and the errors are concentrated in half-suits identifiable a median of $25$
+turns before the turn gets cheap. Whether a deadline-priced trigger changes
+the answer needs its own pre-registration, and the error-value result of
+\S\ref{sec:res-pathledger} says what it will be measured against: one avoided
+misdeclaration is worth about $1.8$ sets, and a spent turn has to cost less
+than that times the chance the signal actually places the split.
+
 \paragraph{What their errors are made of, which is not what we guessed.} The
 obvious hypothesis about the ownership-class leak --- the $0.650$ sets a game
 they hand over by declaring a half-suit we still hold a card of --- was that
