@@ -246,7 +246,8 @@ def session_for(doc: dict, seat: int) -> Session:
     definition of what a seat may see. A second implementation here would be a
     second chance to leak a hand.
     """
-    rules = RuleConfig(variant="54", starting_player=int(doc["start_seat"]))
+    rules = RuleConfig(variant="54", starting_player=int(doc["start_seat"]),
+                       wrong_distribution_outcome="opponent")
     s = Session(int(seat), str(doc["nonce"]), rules, CHAMPION_GAMMA)
     log = list(doc.get("log") or [])
     if log:

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build paper/fishbot_v04.pdf.
+# Build paper/fishbot_v06.pdf.
 #
 # Recorded because a clean container could not build this paper, and the
 # failures were not self-explanatory:
@@ -20,11 +20,11 @@ need pdflatex
 
 cd "$(dirname "$0")"
 for i in 1 2 3; do
-  pdflatex -interaction=nonstopmode fishbot_v04.tex > "/tmp/paper_pass$i.log" 2>&1 || true
+  pdflatex -interaction=nonstopmode fishbot_v06.tex > "/tmp/paper_pass$i.log" 2>&1 || true
 done
 
 log=/tmp/paper_pass3.log
-if [ ! -f fishbot_v04.pdf ]; then
+if [ ! -f fishbot_v06.pdf ]; then
   echo "no PDF produced; last errors:"
   grep -E '^! ' "$log" | head
   exit 1
@@ -34,5 +34,5 @@ fi
 # rather than eyeballed.
 bad=$(grep -cE 'Reference .* undefined|Citation .* undefined' "$log" || true)
 pages=$(grep -oE '\([0-9]+ pages' "$log" | tail -1 | tr -d '(' )
-echo "built fishbot_v04.pdf — $pages, $bad undefined reference(s)/citation(s)"
+echo "built fishbot_v06.pdf — $pages, $bad undefined reference(s)/citation(s)"
 [ "$bad" -eq 0 ] || { echo "refusing to call that a clean build"; exit 1; }

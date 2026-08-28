@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PAPER = ROOT / "paper" / "fishbot_v04.tex"
+PAPER = ROOT / "paper" / "kraken.tex"
 
 
 def _get(d, path):
@@ -146,7 +146,7 @@ WATCH = [
      "hsvalue held-out log-loss",
      "half-suit value model is good --- held-out log-loss"),
     ("precision_verdict.json", "pooled.fe", "{:.3f}", "precision pooled",
-     "posterior sampling budget, from 160 draws to 480"),
+     "Six blocks of $1000$ duplicate deal-pairs"),
     ("at_ask_verdict.json", "pooled.fe", "{:.4f}", "at-ask pooled",
      "sized against a minimum interesting effect"),
     ("continuation_compare.json", "v04.slope", "{:.3f}", "v04 slope",
@@ -250,17 +250,17 @@ WATCH = [
     # whole life, so the single most load-bearing number in the paper was the
     # one figure this manifest could not watch. It is quoted in five places.
     ("settle_verdict.json", "pooled.fe", "{:.3f}", "lookahead, pre-registered",
-     "final 6000, is"),
+     "four rounds and $6000$ pre-registered pairs"),
     ("settle_verdict.json", "secondary.pooled.fe", "{:.3f}",
      "lookahead, unselected pool", "secondary --- all ten unselected cells"),
     ("settle_verdict.json", "n_pairs", "{:d}", "pairs in the settling run",
-     "final 6000, is"),
+     "four rounds and $6000$ pre-registered pairs"),
     # The programme total. It was quoted as 15,600 in the abstract and again in
     # the results, and matched nothing: not the table (9,700), not the record
     # with the stacking run added (15,700). Nobody could recompute it, so it
     # drifted unchallenged. It is now computed from the duel record.
     ("settle_verdict.json", "programme_pairs", "{:,d}",
-     "the lookahead programme's cost", "duplicate\ndeal-pairs across four"),
+     "the lookahead programme's cost", "deal-pairs across four rounds"),
     ("settle_verdict.json", "programme_rounds.settling", "{:d}",
      "pairs in the settling round", "6000 in the pre-registered settling"),
     # The basis comparison. Its point is that the winner's margin CONTAINS
@@ -382,14 +382,14 @@ WATCH = [
     # and consumed here as a threshold. It is the figure that was carried for
     # drafts as 82.5% off a null rate that no file held.
     ("stuck_claim_value.json", "bar", "{:.1%}",
-     "declare-beats-wait bar", "would beat\nwaiting wherever the MAP is right"),
+     "declare-beats-wait bar", "beat waiting wherever the MAP is right"),
     ("stuck_claim_value.json", "null_rate", "{:.1%}",
      "null rate the bar comes from", "accepting the measured"),
     # The seventh cell of the adaptive family, and the first in the TRADING
     # direction. Quoted in the advice section and in the results table, so a
     # stale figure here is advice to a human.
     ("retake_bonus_verdict.json", "estimate", "{:.3f}",
-     "rewarding the re-take", "(\\texttt{jobs/PREREGISTRATION\\_retake\\_bonus.md}), and it returns"),
+     "rewarding the re-take", "(\\path{jobs/PREREGISTRATION_retake_bonus.md}), and it returns"),
     ("retake_bonus_verdict.json", "n_pairs", "{:d}",
      "pairs in the bonus run", "It has now been, at"),
     ("retake_bonus_verdict.json", "contrast_vs_gated_penalty.delta", "{:.3f}",
@@ -448,13 +448,16 @@ WATCH = [
     # figure in the paper, outside every drift check, because it lives in a
     # JSONL and everything else lives in JSON.
     ("duel:FINAL: v04 champion vs v03 champion", "diff_mean", "{:.2f}",
-     "margin over the v0.3 champion", "beats the previous champion by"),
+     "margin over the v0.3 champion",
+     "explicit one-parameter model recovers the loss"),
     ("duel:FINAL: v04 champion vs v03 champion", "n_pairs", "{:d}",
-     "pairs behind the headline", "over 500 duplicate deals"),
+     "pairs behind the headline", "champion (\\texttt{tuned})"),
     ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.0", "{:.2f}",
-     "headline interval, low", "beats the previous champion by"),
+     "headline interval, low",
+     "explicit one-parameter model recovers the loss"),
     ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.1", "{:.2f}",
-     "headline interval, high", "beats the previous champion by"),
+     "headline interval, high",
+     "explicit one-parameter model recovers the loss"),
     # The absolute-strength table. Its rates were computed in the LaTeX and
     # stored nowhere, so the table carrying this paper's independent
     # confirmation of the opponent model -- including the contrast the
@@ -530,6 +533,452 @@ WATCH = [
      "total L1 movement", "total $L_1$ movement of"),
     ("fit_prefix_check_v2.json", "blocks_full", "{:d}",
      "positions in the fit", "resolving it to the full"),
+    # The exact imperfect-information endgame. The control is watched first
+    # and deliberately: it is the number that licenses every other figure in
+    # that section, and a solver whose control quietly drifted from 344 while
+    # the paper still said 344 is exactly the failure this manifest exists for.
+    ("ii_endgame.json", "pinned_ok", "{:d}",
+     "exact-II control, pinned positions matching the closed form",
+     "Over $200$ games it does"),
+    ("ii_endgame.json", "n_solved", "{:d}",
+     "exact-II hidden positions solved", "genuinely hidden positions solved"),
+    ("ii_endgame.json", "mean_gain", "{:+.4f}",
+     "exact-II gain from deviating",
+     "genuinely hidden positions solved exactly"),
+    # The control on the BELIEF rather than the search. It is the only one, and
+    # a belief that excluded the truth would invalidate every value in the
+    # section without any of the other controls noticing.
+    ("ii_endgame.json", "truth_in_support_ok", "{:d}",
+     "exact-II control, true deal in the belief's support",
+     "The true deal must be one of the deals the belief admits"),
+    # m = 2. Watched with its NEGATIVE-GAIN count as well as its gain, because
+    # the negatives are what said the solver was broken and a silent return of
+    # them is the regression that matters most.
+    ("ii_endgame_m2.json", "mean_gain", "{:+.4f}",
+     "exact-II m=2 gain from deviating",
+     "tree and rollout, same champion strategy"),
+    ("ii_endgame_m2.json", "n_solved", "{:d}",
+     "exact-II m=2 positions solved", "positions were solved"),
+    # The bounds on the layer. Watched because they are what stops the "lower
+    # bound" reading from being restored by accident: the control count is the
+    # only thing that says the interval is real, and the one-ply means are the
+    # only figures in the paper that span the support cap. A drift in either
+    # would turn a negative result back into the positive one it replaced.
+    ("ii_bound_unsolved.json", "control_ok", "{:d}",
+     "bounds control passed", "lie inside its own bounds. It does, on"),
+    ("ii_bound_unsolved.json", "n_bounded", "{:d}",
+     "positions bounded", "positions in\n$59$ games"),
+    ("ii_bound_unsolved.json", "unsolved_lower_mean", "{:+.4f}",
+     "unsolved lower bound", "bounded into"),
+    ("ii_bound_unsolved.json", "unsolved_upper_mean", "{:+.4f}",
+     "unsolved upper bound", "bounded into"),
+    ("ii_bound_unsolved.json", "headline_solved_mean_matched", "{:+.4f}",
+     "matched solved mean", "solved mean over the same\ngames is"),
+    # The m = 1 layer, and the calibration that retracted the exploratory
+    # reading. The gap slope is watched hardest: it is the number that turned a
+    # negative result about Fish into a negative result about the instrument,
+    # and a drift back would silently restore a conclusion that was withdrawn.
+    # The correction the solver found, fixed and shipped. Watched at every
+    # rung: a drift in the stacking figure would misstate what the site
+    # actually gained, and that is the only one of the four that moved a
+    # default.
+    ("endgame_ask_stack.json", "diff", "{:+.4f}",
+     "endgame ask, on top of what ships", "on top of what ships"),
+    ("endgame_ask_replication.json", "pooled.diff", "{:+.4f}",
+     "endgame ask, pooled vs champion", "vs champion, pooled"),
+    ("endgame_ask_replication.json", "primary.diff", "{:+.4f}",
+     "endgame ask, primary vs champion", "vs champion, registered"),
+    ("endgame_ask_replication.json", "replication.diff", "{:+.4f}",
+     "endgame ask, replication vs champion", "vs champion, replication"),
+    # The negative result beside the positive one. The best-response line is
+    # what says the correction does not reduce exploitability, and it is the
+    # figure most likely to be quietly dropped if it ever drifted.
+    # The deception sweep. The paired-vs-m0 rows are the withdrawal of the
+    # ladder and the bound on what the shipped correction costs against a
+    # foreign opponent; the m9 margin is the number that reverted a ship.
+    ("xplay_sweep.json", "by_m.2.vs_m0", "{:+.3f}",
+     "m<=2 against v0.3, paired vs none", "$m \\le 2$ & $+2.914$"),
+    ("xplay_sweep.json", "by_m.3.vs_m0", "{:+.3f}",
+     "m<=3 against v0.3, paired vs none", "$m \\le 3$ & $+2.568$"),
+    ("xplay_sweep.json", "by_m.9.vs_m0", "{:+.3f}",
+     "always-on against v0.3, paired vs none", "always on & $-2.160$"),
+    ("endgame_m9_verdict.json", "diff", "{:+.4f}",
+     "the sibling rung that was deception", "the amended coarse step to"),
+    # The foreign-opponent check of the shipped correction, against an engine
+    # from outside the project entirely (dylann4500's v0.7 over the process
+    # bridge). Watched because it is the only measurement in the paper whose
+    # opponent shares no code with this engine, and because its interval is
+    # quoted for what it EXCLUDES (+0.1220): if these drifted, the paper
+    # would misstate the one result that answers "against whom".
+    ("foreign_m2_check.json", "effect", "{:+.4f}",
+     "m<=2 effect vs Dylan v0.7", "at a power sized for\ndeception-scale flips"),
+    ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
+     "m<=2 vs v0.7, CI low", "at a power sized for\ndeception-scale flips"),
+    ("foreign_m2_check.json", "ci95.1", "{:+.4f}",
+     "m<=2 vs v0.7, CI high", "at a power sized for\ndeception-scale flips"),
+    ("foreign_m2_check.json", "n_pairs", "{:d}",
+     "foreign-opponent paired games", "rotations --- $500$ games per arm"),
+    ("foreign_m2_check.json", "kv_margin_on", "{:+.3f}",
+     "margin over v0.7, correction on", "beats v0.7 by"),
+    ("foreign_m2_check.json", "kv_margin_off", "{:+.3f}",
+     "margin over v0.7, correction off", "beats v0.7 by"),
+    ("foreign_m2_check.json", "kv_set_share", "{:.1%}",
+     "share of decided sets vs v0.7", "of decided sets across"),
+    # The rule-matched rerun (R2) and the standard-scoring headline (R1) of
+    # prereg/rules_award_baseline.md. These are the numbers the abstract now
+    # asserts, so they are the last figures in the paper that may drift.
+    ("award_headline.json", "estimate", "{:+.3f}",
+     "standard-scoring headline", "restatement of this ladder's headline"),
+    ("award_headline.json", "ci.0", "{:+.3f}",
+     "standard-scoring headline CI low", "restatement of this ladder's headline"),
+    ("award_headline.json", "ci.1", "{:+.3f}",
+     "standard-scoring headline CI high", "restatement of this ladder's headline"),
+    # The anchor here used to read "misdeclared-and-awarded sets", and it
+    # stopped matching when that caption was rewritten -- the counter these
+    # two figures come from holds the ALLOCATION class only, and calling it
+    # "misdeclares" is what put the paper's headline decomposition at 9% when
+    # the complete count says 57%. The figures did not move; the sentence
+    # around them did. The anchor now quotes the clause that says which class
+    # is being counted, so a future rewrite that drops the distinction again
+    # breaks this check instead of passing it silently.
+    ("award_headline.json", "x_misdeclares", "{:d}",
+     "deployed allocation misdeclares in R1", "so awarded to the opponents"),
+    ("award_headline.json", "y_misdeclares", "{:d}",
+     "v0.3 allocation misdeclares in R1", "so awarded to the opponents"),
+    # The deal-luck decomposition and the pairing table. Watched because
+    # sec:dealluck overturns a premise the evaluation section stated for four
+    # versions -- that raw win rates are dominated by the deal -- and a claim
+    # that strong should not be allowed to drift away from the file behind it.
+    ("deal_luck.json", "deal_component.corr_parities", "{:+.4f}",
+     "parity correlation of the margin", "identically $-\\rho$"),
+    ("deal_luck.json", "deal_component.pairing_efficiency", "{:.2f}",
+     "seat-swap pairing efficiency", "the antisymmetric deal"),
+    ("deal_luck.json", "deal_component.var_sum", "{:.3f}",
+     "variance of the paired sum", "The sample variances are"),
+    ("deal_luck.json", "deal_component.var_diff", "{:.3f}",
+     "variance of the paired difference", "The sample variances are"),
+    ("deal_luck.json", "overdispersion.our hit rate.corr_across_parities",
+     "{:+.3f}", "hit-rate correlation across parities",
+     "a symmetric\ntexture is not an advantage"),
+    ("pairing_value.json", "runs.0.pairs.B_none.efficiency", "{:.1f}",
+     "G1 arm pairing efficiency", "identical games"),
+    # The signalling gate and the forced search, both reported in full in
+    # sec:res-perpetual and sec:res-pathledger. Watched because each is quoted
+    # for what its interval EXCLUDES -- the gate for failing to reach +0.15,
+    # the search for clearing zero -- and a drifted bound would invert the
+    # verdict rather than merely blur it.
+    # Anchored on the table's own first row rather than on the prose that
+    # follows it: `+0.1220` also occurs in the foreign-opponent discussion, and
+    # a loose anchor let the effect match there while its own CI bound, three
+    # characters away in the source, fell outside the window.
+    ("signal_gate_confirm.json", "arms.C_measured.effect", "{:+.4f}",
+     "signalling gate at 0.50", "A, signalling off"),
+    ("signal_gate_confirm.json", "arms.C_measured.ci95.0", "{:+.4f}",
+     "signalling gate CI low", "A, signalling off"),
+    ("signal_gate_confirm.json", "arms.B_incumbent.effect", "{:+.4f}",
+     "signalling gate replication arm", "A, signalling off"),
+    ("forced_exhaustive_v07.json", "margin.effect", "{:+.4f}",
+     "forced search margin vs v0.7", "guard 2 and which it passed exactly"),
+    # What an avoided misdeclaration is worth, and what a deferral costs.
+    #
+    # Watched because the paper quotes +1.7898 twice and the file backing it was
+    # silently replaced: error_value.py wrote results/error_value.json whatever
+    # journal it read, so running it on the signalling journal overwrote the
+    # stuck-gate fit with a different population's. Everything still built and
+    # every other check passed, because this figure was not in the manifest.
+    ("error_value.json", "arms.B_defer.value_per_avoided_error.est", "{:+.4f}",
+     "value of one avoided error", "value of one avoided error"),
+    ("error_value.json", "arms.B_defer.value_per_avoided_error.ci95.0",
+     "{:+.4f}", "avoided-error value, CI low", "value of one avoided error"),
+    ("error_value.json", "arms.B_defer.value_per_avoided_error.ci95.1",
+     "{:+.4f}", "avoided-error value, CI high", "value of one avoided error"),
+    ("error_value.json", "arms.B2_mid.value_per_avoided_error.est", "{:+.4f}",
+     "avoided-error value, middle rung", "value of one avoided error"),
+    # Not cost_per_deferral: the paper states that one rounded, as "about 0.36
+    # to 0.43 sets each", and a manifest row that cannot match the prose it
+    # guards is worse than no row. These three are quoted exactly, and they are
+    # the inputs the paragraph's own arithmetic runs on.
+    ("error_value.json", "arms.B_defer.errors_avoided_per_game", "{:.4f}",
+     "errors avoided per game, deferral arm", "errors avoided at"),
+    ("error_value.json", "arms.B_defer.declarations_deferred_per_game",
+     "{:.3f}", "deferrals per game", "less often than average"),
+    ("error_value.json",
+     "arms.B_defer.deferred_per_game_where_no_error_avoided", "{:.3f}",
+     "deferrals per game where nothing was avoided",
+     "defer about"),
+    # The declaration-risk finding: what a declaration risks is how many of the
+    # six have never moved, not how many the declarer holds. Watched because
+    # the paper prints the two curves side by side and the whole argument is
+    # that the right-hand one is steeper.
+    ("declarer_holding_self.json", "n_wholly_held", "{:,d}",
+     "wholly-held declarations", "wholly-held\ndeclarations"),
+    ("declarer_holding_self.json", "declarations_with_a_derived_card", "{:,d}",
+     "declarations with a derived card", "least one derived card"),
+    ("declarer_holding_self.json", "err_by_k.5.err", "{:.3f}",
+     "error rate at five cards held", "declarer's own cards"),
+    ("declarer_holding_self.json", "err_by_unmoved.5.n", "{:,d}",
+     "declarations with five never located", "cards never located"),
+    # The ceiling split. Watched because the paragraph's whole argument rests
+    # on the two partial arms being told nearly the SAME number of cards, so a
+    # drift in either pinned-per-game figure would silently dissolve it.
+    ("ceiling_split.json", "arms.T_team.ceiling", "{:+.4f}",
+     "teammate-knowledge ceiling", "its \\textbf{teammates'} cards"),
+    ("ceiling_split.json", "arms.O_opp.ceiling", "{:+.4f}",
+     "opponent-knowledge ceiling", "its \\textbf{opponents'} cards"),
+    ("ceiling_split.json", "arms.T_team.pinned_by_cheat_per_game", "{:.1f}",
+     "teammate arm, cards pinned per game", "cards pinned/game"),
+    ("ceiling_split.json", "arms.O_opp.pinned_by_cheat_per_game", "{:.1f}",
+     "opponent arm, cards pinned per game", "cards pinned/game"),
+    # The concentration retest's verdict. Watched because tab:nulls retains the
+    # v1 screen row and the dagger beneath it now carries the v2 outcome; a
+    # drift there would leave a retained-as-history row pointing at nothing.
+    ("concent_confirm.json", "arms.C_dose.effect", "{:+.4f}",
+     "concentration at w=1.50", "worse than shipped"),
+    ("concent_confirm.json", "arms.C_dose.ci95.1", "{:+.4f}",
+     "concentration at w=1.50, CI high", "worse than shipped"),
+    ("concent_confirm.json", "mechanism.C_dose.allocation_per_game", "{:.4f}",
+     "allocation errors at w=1.50", "rose\nmonotonically instead"),
+    ("foreign_award_check.json", "effect", "{:+.4f}",
+     "rule-matched foreign effect", "under the award rule --- no reversal"),
+    ("foreign_award_check.json", "ci95.0", "{:+.4f}",
+     "rule-matched foreign CI low", "under the award rule --- no reversal"),
+    ("foreign_award_check.json", "ci95.1", "{:+.4f}",
+     "rule-matched foreign CI high", "under the award rule --- no reversal"),
+    ("foreign_award_check.json", "kv_margin_on", "{:+.3f}",
+     "margin over v0.7, award rule, on", "sets per game with the correction on"),
+    ("foreign_award_check.json", "kv_margin_off", "{:+.3f}",
+     "margin over v0.7, award rule, off", "sets per game with the correction on"),
+    ("foreign_award_check.json", "misdeclares_kv", "{:d}",
+     "misdeclared sets against this engine", "misdeclarations --- wholly-held"),
+    ("foreign_award_check.json", "misdeclares_dylan", "{:d}",
+     "misdeclared sets against v0.7", "misdeclarations --- wholly-held"),
+    # R3/R4: the threshold sanity and the correction's re-pricing. R4 is the
+    # number that withdrew a shipped knob, which makes it the figure whose
+    # silent drift would be most misleading in either direction.
+    ("r4_award_check.json", "estimate", "{:+.4f}",
+     "correction stack under award rule", "against the same"),
+    ("r4_award_check.json", "ci.0", "{:+.4f}",
+     "correction stack CI low", "against the same"),
+    ("r4_award_check.json", "ci.1", "{:+.4f}",
+     "correction stack CI high", "against the same"),
+    ("r4_award_check.json", "x_misdeclares", "{:d}",
+     "correction-arm misdeclares", "misdeclares \\emph{more}"),
+    ("r4_award_check.json", "y_misdeclares", "{:d}",
+     "no-correction-arm misdeclares", "misdeclares \\emph{more}"),
+    ("r3_lo_check.json", "estimate", "{:+.4f}",
+     "threshold 0.97 vs 0.90, award rule", "against $0.90$ the difference"),
+    ("r3_lo_check.json", "ci.0", "{:+.4f}",
+     "threshold sweep CI low", "against $0.90$ the difference"),
+    ("r3_lo_check.json", "ci.1", "{:+.4f}",
+     "threshold sweep CI high", "against $0.90$ the difference"),
+    # R5: the signalling re-measure. Watched because its summary sentence
+    # changed from "buys no wins" to "right sign, unproven at this power" --
+    # a drift in either direction would misstate a stays-off decision.
+    ("r5_signal_check.json", "estimate", "{:+.4f}",
+     "signalling under award rule", "the effect moves to"),
+    ("r5_signal_check.json", "ci.0", "{:+.4f}",
+     "signalling CI low", "the effect moves to"),
+    ("r5_signal_check.json", "ci.1", "{:+.4f}",
+     "signalling CI high", "the effect moves to"),
+    ("r5_signal_check.json", "x_misdeclares", "{:d}",
+     "misdeclares with signalling on", "cuts misdeclarations ---"),
+    ("r5_signal_check.json", "y_misdeclares", "{:d}",
+     "misdeclares with signalling off", "cuts misdeclarations ---"),
+    # R6: the ported contestation term and the silence prior, both measured
+    # against Dylan and both rejected. Watched because a negative result is
+    # exactly the kind of number that rots quietly -- and because the
+    # baseline margin in the same table is what the rejection is relative to.
+    ("r6_screen.json", "arms.c+30.effect", "{:+.4f}",
+     "contestation +3.0 vs baseline", "contestation $+3.0$"),
+    ("r6_screen.json", "arms.c+10.effect", "{:+.4f}",
+     "contestation +1.0 vs baseline", "contestation $+1.0$"),
+    ("r6_screen.json", "arms.c-10.effect", "{:+.4f}",
+     "contestation -1.0 vs baseline", "contestation $-1.0$"),
+    ("r6_screen.json", "arms.d07.effect", "{:+.4f}",
+     "silence 0.7 vs baseline", "silence $\\delta = 0.7$"),
+    ("r6_screen.json", "arms.d09.effect", "{:+.4f}",
+     "silence 0.9 vs baseline", "silence $\\delta = 0.9$"),
+    ("r6_screen.json", "arms.c+30.base_margin", "{:+.3f}",
+     "R6 baseline margin over v0.7", "baseline (neither knob)"),
+    # The bridge defect that had been flattering this engine. Watched harder
+    # than most rows, because a retraction is the one kind of number a project
+    # has an incentive to let rot: every figure the correction turns on is
+    # here, including the two accuracies that form its control.
+    # The foreign choice curve: the opponent model measured against a policy
+    # that is not a copy of ourselves. Watched in full because the whole point
+    # is a sign, and a sign that drifts silently is the worst kind of stale.
+    ("choice_curve_foreign.json", "alpha", "{:+.4f}",
+     "foreign choice-model exponent", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
+    ("choice_curve_foreign.json", "ci95.0", "{:+.4f}",
+     "foreign exponent CI low", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
+    ("choice_curve_foreign.json", "ci95.1", "{:+.4f}",
+     "foreign exponent CI high", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
+    ("choice_curve_foreign.json", "n_records", "{:,d}",
+     "foreign asks in the corpus", "against v0.7 over"),
+    ("choice_curve_foreign.json", "n_games", "{:d}",
+     "foreign cross-engine games", "cross-engine games gives"),
+    ("choice_curve_foreign.json", "curve.1.relative", "{:.3f}",
+     "foreign O/E at depth 1", "observed / expected"),
+    ("choice_curve_foreign.json", "curve.2.relative", "{:.3f}",
+     "foreign O/E at depth 2", "observed / expected"),
+    ("choice_curve_foreign.json", "curve.3.relative", "{:.3f}",
+     "foreign O/E at depth 3", "observed / expected"),
+    ("choice_curve_foreign.json", "curve.4.relative", "{:.3f}",
+     "foreign O/E at depth 4", "observed / expected"),
+    ("bridge_bug_price.json", "paired_difference", "{:+.4f}",
+     "price of the bridge defect", "sets per game: real, and about"),
+    ("bridge_bug_price.json", "ci95.0", "{:+.4f}",
+     "bridge defect interval, low", "sets per game: real, and about"),
+    ("bridge_bug_price.json", "ci95.1", "{:+.4f}",
+     "bridge defect interval, high", "sets per game: real, and about"),
+    ("bridge_bug_price.json", "n_paired_games", "{:,d}",
+     "deals replayed under both bridges", "deals replayed under both bridge"),
+    # The corrected head-to-head itself -- the one figure in this paper taken
+    # through bridge revision 2, and the one the abstract now leads with.
+    ("mega_match.json", "margin", "{:+.4f}",
+     "corrected margin over v0.7", "margin & $\\mathbf{+2.3466}$"),
+    ("mega_match.json", "ci95.0", "{:+.4f}",
+     "corrected margin CI low", "margin & $\\mathbf{+2.3466}$"),
+    ("mega_match.json", "ci95.1", "{:+.4f}",
+     "corrected margin CI high", "margin & $\\mathbf{+2.3466}$"),
+    ("mega_match.json", "n_games", "{:,d}",
+     "games in the corrected head-to-head", "games on the same deals the retracted"),
+    ("mega_match.json", "kv_set_share", "{:.2%}",
+     "corrected set share", "of decided) \\\\"),
+    ("mega_match.json", "declare_right_kv", "{:.2%}",
+     "our declaration accuracy, corrected", "declaration accuracy &"),
+    ("mega_match.json", "declare_right_dylan", "{:.2%}",
+     "their declaration accuracy, corrected", "declaration accuracy &"),
+    ("mega_match.json", "ask_hit_kv", "{:.2%}",
+     "our ask hit rate, corrected", "ask hit rate &"),
+    ("mega_match.json", "ask_hit_dylan", "{:.2%}",
+     "their ask hit rate, corrected", "ask hit rate &"),
+    ("mega_match.json", "bridge_rev", "{:d}",
+     "bridge revision of the head-to-head", "through bridge\nrevision~"),
+    ("bridge_bug_price.json", "their_declare_acc_rev1", "{:.2%}",
+     "their declaration accuracy, defective bridge",
+     "their declaration accuracy rises from"),
+    ("bridge_bug_price.json", "their_declare_acc_rev2", "{:.2%}",
+     "their declaration accuracy, repaired bridge",
+     "their declaration accuracy rises from"),
+    ("bridge_bug_price.json", "our_declare_acc_rev1", "{:.2%}",
+     "our declaration accuracy, defective bridge",
+     "while this engine's moves from"),
+    ("bridge_bug_price.json", "our_declare_acc_rev2", "{:.2%}",
+     "our declaration accuracy, repaired bridge",
+     "while this engine's moves from"),
+    ("ii_exploit_after_split_m1.json", "parts.best response.diff", "{:+.4f}",
+     "best response after the fix", "what a best response takes"),
+    ("ii_exploit_after_split_m1.json", "parts.policy's own value.diff",
+     "{:+.4f}", "policy value after the fix", "the policy's own value &"),
+    ("ii_exploit_after_split_m1.json", "n", "{:d}",
+     "positions paired across policies", "Over $285$"),
+    ("ii_one_move_m1.json", "champ_p_mean", "{:.3f}",
+     "m=1 champion ask hit rate", "$m = 1$ & $p ="),
+    ("ii_one_move_m1.json", "best_p_mean", "{:.3f}",
+     "m=1 better ask hit rate", "$m = 1$ & $p = 0.799$ & $p ="),
+    ("ii_one_move_m1.json", "champion_certain_and_beaten", "{:d}",
+     "m=1 certain asks that were still wrong",
+     "the champion asked a card it was"),
+    ("ii_bound_m1.json", "control_ok", "{:d}",
+     "m=1 bounds control passed", "The control holds on"),
+    ("ii_bound_m1.json", "oneply_already_optimal", "{:d}",
+     "m=1 positions where one move is the whole exploit",
+     "One deviation attains the optimum on"),
+    ("ii_bound_analysis.json", "gap_slope_t_m1", "{:+.2f}",
+     "m=1 gap-vs-support t", "Slope $+0.0236$ per deal, $t ="),
+    ("ii_bound_analysis.json", "oneply_already_optimal", "{:d}",
+     "positions where one move is the whole exploit", "of the $100$"),
+    ("ii_bound_analysis.json", "mean_gap_exact_minus_oneply", "{:+.4f}",
+     "exact minus one-ply gap", "the gap averages"),
+    ("ii_bound_analysis.json", "positions_with_trivial_upper", "{:d}",
+     "positions with a trivial upper bound", "positions\n\\emph{every} deal"),
+    ("ii_bound_analysis.json", "oneply_narrow_mean", "{:+.4f}",
+     "one-ply gain at or below the cap", "At or below the cap it averages"),
+    ("ii_bound_analysis.json", "oneply_wide_mean", "{:+.4f}",
+     "one-ply gain above the cap", "($n = 169$); above it,"),
+    # The analysis's own position count is not watched: it is the same 248 the
+    # collector reports, from the same journal, and the paper quotes it once.
+    # Two entries on one number check the number twice and the paper once.
+    # The exploitability lower bound. Watched because it is the only figure in
+    # the paper that contradicts a sentence the paper used to make -- "we
+    # compute no exploitability bound" -- and a number that overturns a claim
+    # is the one worst served by drifting quietly.
+    ("ii_first_endgame.json", "mean_gain_per_game", "{:+.4f}",
+     "exact deviation gain per game", "exact, \\textbf{one} endgame decision"),
+    ("ii_first_endgame.json", "none_pinned", "{:d}",
+     "games where the belief pinned every card",
+     "the belief has \\emph{pinned every card}"),
+    # The replicated endgame-policy gain. Watched with its heterogeneity
+    # statistic, because the interval alone is what the +0.490 cell also had.
+    ("exact_endgame_team_pooled.json", "pooled_mean", "{:+.4f}",
+     "exact endgame policy, pooled gain", "pooled, $1200$ pairs"),
+    # Cross-play. Watched because it is the figure that decides whether the
+    # gain is better play or an exploit, and those get read differently.
+    ("exact_endgame_team_vsv03_pooled.json", "pooled_mean", "{:+.4f}",
+     "exact endgame policy, vs the v0.3 champion",
+     "which the solver's opponent model is simply"),
+    ("exact_endgame_team_pooled.json", "cochran_q", "{:.3f}",
+     "exact endgame policy, Cochran Q",
+     "degrees of freedom: the three blocks are as"),
+    # The arm that came out of it, with its interval, because the section's
+    # point is that a real effect can sit under the bar.
+    ("claim_feasibility_verdict.json", "estimate", "{:+.3f}",
+     "claim feasibility estimate", "over $6000$\npre-registered pairs"),
+    ("claim_feasibility_verdict.json", "ci.0", "{:+.3f}",
+     "claim feasibility interval, low", "over $6000$\npre-registered pairs"),
+    ("claim_feasibility_verdict.json", "ci.1", "{:+.3f}",
+     "claim feasibility interval, high", "over $6000$\npre-registered pairs"),
+    # G1: what the mis-signed opponent model costs in play. The two arms are
+    # watched separately because the section's argument needs BOTH -- that
+    # removing the model loses, and that adopting the fitted exponent loses
+    # more. Either alone reads as a different result.
+    ("g1_gamma_cost.json", "arms.B_none.effect", "{:+.4f}",
+     "G1 arm B, no opponent model", "respect but one scalar, played on"),
+    ("g1_gamma_cost.json", "arms.C_measured.effect", "{:+.4f}",
+     "G1 arm C, his fitted exponent", "respect but one scalar, played on"),
+    # thousands separator: the paper writes 1{,}600, which main() normalises
+    ("g1_gamma_cost.json", "n_games", "{:,d}",
+     "G1 games", "respect but one scalar, played on"),
+    # The margin decomposition. This is the one that re-prices the headline, so
+    # the residual and the leak are both pinned: quoting the leak without the
+    # residual, or the other way round, would let the section drift into a
+    # claim the file does not support.
+    # On the headline block now, not the 600-game probe. The probe's own
+    # figures stay watched below, because the section quotes both and says
+    # they agree.
+    ("margin_decomposition.json", "headline_block.margin.mean", "{:+.4f}",
+     "decomposed margin", "Fifty-seven per cent of the margin"),
+    ("margin_decomposition.json", "headline_block.residual.mean", "{:+.4f}",
+     "margin residual after declarations", "Fifty-seven per cent of the margin"),
+    ("margin_decomposition.json", "headline_block.their_ownership_per_game",
+     "{:.4f}", "their ownership-class error rate",
+     "Fifty-seven per cent of the margin"),
+    ("margin_decomposition.json", "headline_block.their_per_game", "{:.3f}",
+     "their wrong declarations per game", "times a game against their"),
+    ("margin_decomposition.json", "decomposition.their_errors.total_per_game",
+     "{:.3f}", "the probe's error rate, quoted as the agreeing figure",
+     "the probe put their error rate at"),
+    ("margin_decomposition.json", "decomposition.their_errors.ownership_per_game",
+     "{:.3f}", "the probe's ownership-class rate",
+     "obvious hypothesis about the ownership-class leak"),
+    ("margin_decomposition.json", "mechanism.dark", "{:d}",
+     "their misplaced cards that never moved in public",
+     "never publicly moved since the deal"),
+    ("margin_decomposition.json", "mechanism.publicly_pinned", "{:d}",
+     "their misplaced cards that were publicly ours",
+     "publicly pinned to us by an ask we had won"),
+    # The path ledger, and the gate arm it licensed. The margin and the
+    # mechanism are both watched: this section's whole point is that they
+    # disagree, so quoting either alone would be a different result.
+    ("stuck_gate_confirm.json", "ledger.A_shipped.gate.err", "{:.3f}",
+     "the doomed-ask gate's error rate", "the doomed-ask gate &"),
+    ("stuck_gate_confirm.json", "ledger.A_shipped.forced.err", "{:.3f}",
+     "the forced path's error rate", "forced (no legal ask) &"),
+    ("stuck_gate_confirm.json", "arms.B_defer.effect", "{:+.4f}",
+     "gate deferral, margin", "so the deferral is"),
+    ("stuck_gate_confirm.json", "ledger.B_defer.gate.err", "{:.3f}",
+     "gate error rate once deferred", "falls from $0.281$ to"),
 ]
 
 

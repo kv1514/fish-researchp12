@@ -182,7 +182,11 @@ button:hover:not(:disabled) { border-color: var(--accent); }
 @media (min-width: 900px) {
   .tablegrid { grid-template-columns: 1.35fr 1fr; align-items: start; }
 }
-.col-main, .col-side { display: grid; gap: 1rem; align-content: start; }
+/* `min-width: 0` because a grid item defaults to `min-width: auto`, which
+   means "never narrower than my content" -- one wide child then widens the
+   track, the track widens the page, and the page scrolls sideways. */
+.col-main, .col-side { display: grid; gap: 1rem; align-content: start;
+                       min-width: 0; }
 
 /* hand ------------------------------------------------------------------- */
 
@@ -327,7 +331,13 @@ button:hover:not(:disabled) { border-color: var(--accent); }
 
 /* ---------------------------------------------------- paced table controls */
 
-.pacebar { display: flex; align-items: center; gap: .3rem; }
+/* `flex-wrap` is not decoration here. This row carries Pause, Next, a pace
+   slider, Voice, Think and the auto checkbox, and unwrapped it measures 467px
+   -- so on a 390px phone it pushed the page 233px sideways and every panel
+   with it. Caught in Chromium at 390px, not by the DOM stub, which has no
+   layout to overflow. */
+.pacebar { display: flex; flex-wrap: wrap; align-items: center;
+           gap: .3rem; row-gap: .35rem; }
 .pacebar select {
   font: inherit; font-size: .82rem; padding: .3rem .4rem; border-radius: 8px;
   border: 1px solid var(--line); background: var(--bg); color: var(--ink);
@@ -359,6 +369,14 @@ button.ghost.on {
 .card.xs { width: 26px; flex: 0 0 auto; }
 
 .declverdict { font-size: .85rem; margin: .5rem 0 .2rem; }
+/* The two numbers the check returns are the point of the dialog, so they are
+   read at a glance rather than hunted for in a paragraph. */
+.declverdict .declnum { margin: .25rem 0; font-size: .95rem; }
+.declverdict .declnum b { font-variant-numeric: tabular-nums; }
+.declverdict button { margin-top: .4rem; }
+.declbar { display: flex; gap: .6rem; margin-top: .6rem; }
+.declbar button { flex: 1; }
+.declbar button[disabled] { opacity: .45; cursor: not-allowed; }
 .declrow select { flex: 1; }
 
 @media (max-width: 560px) {
@@ -453,8 +471,14 @@ button.ghost.on {
   /* Slightly taller than 16/9: the ring needs vertical room for the four-line
      seat pods at the top and bottom, and at 16/9 they collided with the rail. */
   aspect-ratio: 15 / 10;
+  /* `min-height` and `aspect-ratio` together imply a MINIMUM WIDTH: at 340px
+     tall and 15/10, this box cannot be narrower than 510px, and as a grid item
+     with the default `min-width: auto` it dragged the whole column out to 510px
+     inside a 390px viewport. The floor is dropped below the breakpoint rather
+     than fought with `max-width`, which cannot beat an implied minimum. */
   min-height: 340px;
   max-height: 460px;
+  max-width: 100%;
   border-radius: 50% / 46%;
   background:
     radial-gradient(120% 120% at 50% 18%,
@@ -467,6 +491,16 @@ button.ghost.on {
     var(--shadow);
   color: var(--felt-ink);
   container-type: inline-size;
+}
+
+/* Below the breakpoint the 340px floor is exactly what forces the 510px
+   minimum width, so it goes and the table simply gets shorter.
+   This block sits AFTER the rule it overrides on purpose: the first attempt
+   put it in the @media at the top of the file, which is earlier in the source
+   than `.felt` itself, and at equal specificity the later rule wins. It
+   changed nothing and looked like it should have. */
+@media (max-width: 560px) {
+  .felt { min-height: 0; }
 }
 
 /* The rail: a second ellipse just inside the edge, so the felt reads as a
@@ -837,4 +871,142 @@ button.sm { padding: 5px 9px; font-size: 13px; }
   font-size: 11px;
   font-weight: 400;
   color: var(--dim);
+}
+
+/* ---------------------------------------------------------------- v0.6 UI */
+
+/* The felt-centre banner. The last move used to render as bare text over
+   whatever else occupied the middle of the table -- at some sizes it sat on
+   the pods and its own card image. A pill with its own ground fixes the
+   collision at every size, and the proof line lives in the log panel where
+   there is room to read it. */
+.feltmid { max-width: 56%; }
+.feltmid .lastmove {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #08321f 68%, transparent);
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  max-width: 100%;
+  text-align: left;
+  color: color-mix(in srgb, var(--felt-ink) 92%, transparent);
+}
+.feltmid .lastmove:empty { display: none; }
+.feltmid .lastmove .lmproved { display: none; }
+.feltmid .lastmove .card { width: 30px; }
+.feltmid .lastmove .lmwhat {
+  font-size: clamp(12px, 1.9cqi, 15px);
+  line-height: 1.25;
+}
+
+/* Ask badges. One under each of the two seats an ask involves: "?" while the
+   ask hangs in the air, then both flip green on a hit or red on a miss. */
+.pod .askchip {
+  position: absolute;
+  top: clamp(20px, 3.6cqi, 32px);
+  left: 68%;
+  transform: translate(0, 0);
+  z-index: 4;
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.45;
+  background: #f5edd8;
+  color: #4a3f22;
+  border: 1.5px solid #c9b97f;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  animation: chipin .18s ease-out;
+  white-space: nowrap;
+}
+.pod .askchip.hit  { background: #1d7a3e; border-color: #9fd7ae; color: #fff; }
+.pod .askchip.miss { background: #a5322b; border-color: #e2a49f; color: #fff; }
+@keyframes chipin {
+  from { transform: translate(0, 4px); opacity: 0; }
+  to   { transform: translate(0, 0);   opacity: 1; }
+}
+
+/* Hit/miss text on the dark pill needs its own lighter shades. */
+.feltmid .lastmove.hit .lmwhat  { color: #a5e8b4; }
+.feltmid .lastmove.miss .lmwhat { color: #ffb0a6; }
+.feltmid .lastmove.claim .lmwhat { color: #ffd98a; }
+
+/* The card sliding from the asked player to the asker on a hit. */
+.flycard {
+  position: absolute;
+  width: clamp(34px, 5.4cqi, 46px);
+  transform: translate(-50%, -50%);
+  z-index: 9;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.4));
+  transition: left .9s cubic-bezier(.35,.1,.3,1), top .9s cubic-bezier(.35,.1,.3,1),
+              opacity .35s ease .75s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flycard { transition: none; display: none; }
+}
+
+#t-voice.on {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Public-record commentary on a move, in the log and the felt banner. */
+.log .annot, .lmannot {
+  font-size: .74rem;
+  font-style: italic;
+  opacity: .78;
+  margin-top: 1px;
+}
+.feltmid .lastmove .lmannot {
+  font-size: clamp(10px, 1.5cqi, 12px);
+  color: color-mix(in srgb, var(--felt-ink) 70%, transparent);
+}
+
+/* Engine reasoning, exhibition only. Deliberately quieter than the move it
+   explains: it is a footnote to the action, not a competing headline. */
+.log .why {
+  font-size: .72rem;
+  opacity: .62;
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.feltmid .lastmove .lmwhy {
+  font-size: clamp(9px, 1.35cqi, 11px);
+  color: color-mix(in srgb, var(--felt-ink) 58%, transparent);
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+
+/* The proof sheet: certainties only, so it reads as a ledger rather than a
+   chart. Quieter than the action, louder than the posterior panel's guesses. */
+.proof { display: flex; flex-direction: column; gap: .28rem; }
+.proofrow { display: flex; gap: .45rem; align-items: center; flex-wrap: wrap;
+            font-size: .82rem; }
+.proofrow.weak { opacity: .68; font-style: italic; }
+.proofrow .pcards { display: flex; gap: .18rem; flex-wrap: wrap; }
+.proofrow .pmaybe { font-size: .76rem; }
+
+/* The declaration ledger at game over. Colour is not the only signal -- every
+   row carries its verdict in words -- so a viewer who cannot separate the two
+   reds loses nothing. */
+.ledger { display: grid; gap: .35rem; margin: .4rem 0 .8rem; }
+.ledgerrow {
+  display: grid; grid-template-columns: 7rem 9rem 1fr; gap: .5rem;
+  align-items: baseline; font-size: .85rem;
+  padding: .35rem .5rem; border-radius: .35rem;
+  border-left: 3px solid transparent;
+}
+.ledgerrow .who { font-weight: 600; }
+.ledgerrow .what { opacity: .8; }
+.ledgerrow .miss { grid-column: 1 / -1; opacity: .75; font-size: .8rem; }
+.ledgerrow.right { border-left-color: #4b8; }
+.ledgerrow.split { border-left-color: #e93; background: rgba(238,153,51,.08); }
+.ledgerrow.ownership { border-left-color: #d55; background: rgba(221,85,85,.08); }
+@media (max-width: 560px) {
+  .ledgerrow { grid-template-columns: 1fr; gap: .15rem; }
 }

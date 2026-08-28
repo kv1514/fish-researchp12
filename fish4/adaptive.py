@@ -76,6 +76,54 @@ def recent_losses(obs, window: int = DEFAULT_WINDOW) -> set:
     return out
 
 
+def contest_bonus(ctx, asks, p) -> np.ndarray:
+    """How contested is the half-suit this ask fights in?
+
+    Per candidate ask ``a`` in half-suit ``h``:
+
+        (1 - p_hit(a)) * (expected opponent-held cards of h / 6)
+                       * (cards of h this seat cannot place / 6)
+
+    The term is unsigned here and SIGNED by the caller's weight, because the
+    two directions are both live hypotheses. Dylan Nguyen's v0.7 carries it
+    with a strongly positive weight -- deliberately spending likely-miss asks
+    in opponent-dominated, still-ambiguous half-suits, the one mechanism his
+    attribution study credits with that engine's whole cycle gain (a tempo
+    effect in the half-suit race, bought with own ask accuracy). The negative
+    direction is the off-limits instinct a viewer of the exhibition proposed
+    independently: treat contested, unresolved half-suits as places NOT to
+    ask into unless the ask is a certain steal (at p_hit = 1 the term
+    vanishes, so certain steals are exempt under either sign). Which sign, if
+    either, actually wins is a pre-registered dose sweep, not an argument.
+
+    Expected opponent mass counts publicly located opponent cards at 1 and
+    unlocated cards at their posterior mass on the opposing team, so the term
+    is exact where the record is and calibrated where it is not.
+    """
+    from fish.cards import half_suit_cards
+    M, bel = ctx.M, ctx.bel
+    my_team = ctx.my_team
+    opp_seats = [q for q in range(NUM_PLAYERS) if team_of(q) != my_team]
+    mass: dict[int, float] = {}
+    unplaced: dict[int, int] = {}
+    out = np.zeros(len(asks), dtype=np.float64)
+    for i, a in enumerate(asks):
+        hs = a.card // 6
+        if hs not in mass:
+            om, up = 0.0, 0
+            for c in half_suit_cards(hs):
+                m = bel.current_holder_mask(c)
+                if m and (m & (m - 1)) == 0:
+                    if team_of(m.bit_length() - 1) != my_team:
+                        om += 1.0
+                else:
+                    up += 1
+                    om += float(M[c, opp_seats].sum())
+            mass[hs], unplaced[hs] = om, up
+        out[i] = (1.0 - float(p[i])) * (mass[hs] / 6.0) * (unplaced[hs] / 6.0)
+    return out
+
+
 def retake_flags(obs, asks, window: int = DEFAULT_WINDOW,
                  min_depth: int = 0) -> np.ndarray:
     """1.0 for each candidate ask that would take back a recently lost card.

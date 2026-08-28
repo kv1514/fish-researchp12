@@ -174,6 +174,16 @@ class Result:
     y_nulls: int = 0
     x_gifts: int = 0        # sets handed to the opponents by X's own claim
     y_gifts: int = 0
+    #: gifts whose half-suit was wholly on the declarer's team but misordered
+    #: -- the case the misdeclaration rule governs. Under the baseline
+    #: (opponent-award) these are a subset of gifts; under the legacy null
+    #: variant they appear as nulls instead and this stays 0.
+    x_misdeclares: int = 0
+    y_misdeclares: int = 0
+    #: the rules the games were actually played under, so an archived record
+    #: is self-describing. Every row in results/v04_duels.jsonl written
+    #: before this field existed was played under the legacy null variant.
+    rules: Optional[dict] = None
     timeouts: int = 0
     dropped_pairs: int = 0
     actions: int = 0
@@ -228,7 +238,10 @@ class Result:
                 "wilson_ci": [lo, hi], "diff_mean": m, "diff_ci": [ml, mh],
                 "nulls": self.nulls, "x_nulls": self.x_nulls,
                 "y_nulls": self.y_nulls, "x_gifts": self.x_gifts,
-                "y_gifts": self.y_gifts, "timeouts": self.timeouts,
+                "y_gifts": self.y_gifts,
+                "x_misdeclares": self.x_misdeclares,
+                "y_misdeclares": self.y_misdeclares,
+                "rules": self.rules, "timeouts": self.timeouts,
                 "dropped_pairs": self.dropped_pairs,
                 "actions": self.actions, "seconds": self.seconds,
                 # The per-pair differentials themselves. Without these a run's
@@ -250,6 +263,7 @@ def _one_deal(args) -> dict:
     rules = RuleConfig(**{**rules_dict, "starting_player": start_seat})
     rec = {"diff": 0, "nulls": 0, "x_nulls": 0, "y_nulls": 0,
            "x_gifts": 0, "y_gifts": 0,
+           "x_misdeclares": 0, "y_misdeclares": 0,
            "timeout": 0, "actions": 0, "complete": True}
     xs_seeds = side_seeds(agent_seed, 0) if independent else None
     ys_seeds = side_seeds(agent_seed, 1) if independent else None
@@ -288,6 +302,15 @@ def _one_deal(args) -> dict:
                 rec["x_nulls" if claimer_is_x else "y_nulls"] += 1
             elif team_of(ev.claimer) != ev.winner:
                 rec["x_gifts" if claimer_is_x else "y_gifts"] += 1
+                # A gift whose cards were all on the declarer's own team is a
+                # misdeclaration: the case the misdeclaration rule governs,
+                # kept separate so the diagnostic keeps meaning what it meant
+                # across the rule change (a plain gift named a card the
+                # opponents actually held).
+                if all(team_of(h) == team_of(ev.claimer)
+                       for h in ev.revealed):
+                    rec["x_misdeclares" if claimer_is_x
+                        else "y_misdeclares"] += 1
     return rec
 
 
@@ -318,6 +341,9 @@ def play_matchup(spec_x, spec_y, n_deals: int, rules: Optional[RuleConfig] = Non
     jobs = [(spec_x, spec_y, rd, base_seed + i, i % 6, seed_rng.getrandbits(64),
              independent_seeds) for i in range(n_deals)]
     res = Result(spec_x, spec_y)
+    # Self-describing archive: starting_player is per-deal (i % 6 above), so
+    # it is stripped rather than stamped with a misleading single value.
+    res.rules = {k: v for k, v in rd.items() if k != "starting_player"}
     t0 = time.time()
     if n_jobs > 1:
         with Pool(n_jobs) as pool:
@@ -341,6 +367,8 @@ def play_matchup(spec_x, spec_y, n_deals: int, rules: Optional[RuleConfig] = Non
         res.y_nulls += r["y_nulls"]
         res.x_gifts += r["x_gifts"]
         res.y_gifts += r["y_gifts"]
+        res.x_misdeclares += r.get("x_misdeclares", 0)
+        res.y_misdeclares += r.get("y_misdeclares", 0)
         res.actions += r["actions"]
         if d > 0:
             res.x_wins += 1

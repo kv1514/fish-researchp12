@@ -22,6 +22,146 @@ const FC = window.FishCards;
 const face = FC.cardFace;
 const pretty = FC.prettyCard;
 
+/* The server narrates in seat numbers; the table knows names. One
+ * substitution function for every renderer AND the announcer, so the log,
+ * the felt banner and the spoken line can never disagree about who did
+ * what. */
+function namedText(t) {
+  return S.names ? t.replace(/\bP([0-5])\b/g, (m, d) => S.names[+d] || m) : t;
+}
+
+/* -- move announcements (speech synthesis) ------------------------------- */
+
+/* cards.js already owns SUIT_WORD/RANK_WORD in this shared namespace, so
+ * the spoken forms get their own names. */
+const SPOKEN_SUIT = { S: "spades", H: "hearts", D: "diamonds", C: "clubs" };
+const SPOKEN_RANK = { T: "ten", J: "jack", Q: "queen", K: "king", A: "ace" };
+
+function speakify(t) {
+  return t
+    .replace(/\bBJ\b/g, "the black joker")
+    .replace(/\bRJ\b/g, "the red joker")
+    .replace(/\b(10|[2-9TJQKA])([SHDC])\b/g,
+      (m, r, s) => `${SPOKEN_RANK[r] || r} of ${SPOKEN_SUIT[s]}`)
+    .replace(/—/g, ",");
+}
+
+function announce(text) {
+  // Built into the browser -- no account, no network, works offline. It is a
+  // garnish: any failure is swallowed rather than allowed to stop the table.
+  if (!S.tts || !("speechSynthesis" in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.06;
+    speechSynthesis.speak(u);
+  } catch (e) { /* voice off is better than a broken table */ }
+}
+
+/* -- per-move seat badges and the flying card ---------------------------- */
+
+/* Called once per repaint from render(). Consumes log entries this client
+ * has not yet presented: sets S.anim (which renderSeats turns into badges
+ * under the two seats involved), schedules the pending->resolved flip and
+ * the card flight, and speaks the move. On a page restore the whole log is
+ * new to us but not to the viewer, so the first call only records the
+ * length. */
+function digestLog() {
+  const log = (S.snap && S.snap.log) || [];
+  if (S.seen === undefined || S.seen === null || S.seen > log.length) {
+    S.seen = log.length;
+    return;
+  }
+  if (S.seen === log.length) return;
+  const fresh = log.slice(S.seen);
+  S.seen = log.length;
+  handleEvent(fresh[fresh.length - 1]);
+}
+
+function handleEvent(e) {
+  if (e.t === "ask" && e.asker !== undefined) {
+    const anim = { kind: "ask", asker: e.asker, target: e.target,
+                   ok: e.ok, card: e.card, phase: "pending" };
+    S.anim = anim;
+    setTimeout(() => {
+      if (S.anim !== anim) return;
+      anim.phase = "resolved";
+      renderSeats();
+      if (anim.ok) flyCard(anim.target, anim.asker, anim.card);
+    }, 700);
+  } else if (e.t === "claim" && e.claimer !== undefined) {
+    S.anim = { kind: "claim", claimer: e.claimer,
+               ok: e.winner === (e.claimer % 2), phase: "resolved" };
+  } else {
+    S.anim = null;
+  }
+  announce(speakify(namedText(e.text)));
+}
+
+/* Spectator commentary derived from the public record alone. Two ask
+ * patterns confuse viewers: asking a player for the very card they just
+ * publicly took (a CERTAIN steal -- the transfer was face up), and asking
+ * for a card the public record already proves the target cannot hold (a
+ * deliberate turn surrender when nothing can land, or plain waste). Both
+ * are recomputed from the log each game, exactly as a careful spectator
+ * could. */
+function annotateLog() {
+  const log = (S.snap && S.snap.log) || [];
+  if (S.annCache && S.annCacheLen === log.length) return S.annCache;
+  const ann = new Array(log.length).fill(null);
+  const absent = new Set();          // "seat:card" proved not held
+  const taker = new Map();           // card -> seat that publicly took it
+  log.forEach((e, i) => {
+    if (e.t === "claim" && e.hs !== undefined && S.snap.half_suits) {
+      const hs = S.snap.half_suits[e.hs];
+      if (hs) for (const c of hs.cards) {
+        taker.delete(c.name);
+        for (let p = 0; p < 6; p++) absent.delete(p + ":" + c.name);
+      }
+      return;
+    }
+    if (e.t !== "ask" || e.asker === undefined) return;
+    if (absent.has(e.target + ":" + e.card)) {
+      ann[i] = "the table had already proved this must miss — a deliberate "
+        + "way to hand the turn over when nothing could land";
+    } else if (taker.get(e.card) === e.target) {
+      ann[i] = "a certain steal — everyone saw that card move, so the asker "
+        + "knew exactly where it was";
+    }
+    absent.add(e.asker + ":" + e.card);      // no-bluff: asker lacks it
+    if (e.ok) {
+      absent.delete(e.asker + ":" + e.card);
+      absent.add(e.target + ":" + e.card);
+      taker.set(e.card, e.asker);
+    } else {
+      absent.add(e.target + ":" + e.card);
+    }
+  });
+  S.annCache = ann;
+  S.annCacheLen = log.length;
+  return ann;
+}
+
+function flyCard(fromP, toP, card) {
+  const felt = $("t-felt");
+  if (!felt || !S.snap) return;
+  const anchor = S.snap.spectate ? 0 : S.snap.seat;
+  const offOf = (p) => (p - anchor + 6) % 6;
+  const a = seatPos(offOf(fromP));
+  const b = seatPos(offOf(toP));
+  const f = el("div", "flycard");
+  f.innerHTML = face(card);
+  f.style.left = a.x.toFixed(2) + "%";
+  f.style.top = a.y.toFixed(2) + "%";
+  felt.appendChild(f);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    f.style.left = b.x.toFixed(2) + "%";
+    f.style.top = b.y.toFixed(2) + "%";
+    f.style.opacity = "0";
+  }));
+  setTimeout(() => f.remove(), 1400);
+}
+
 const S = {
   token: null,
   actions: [],
@@ -43,6 +183,16 @@ const S = {
   roomPoll: null,
   busy: false,
   hint: null,
+  /* Every engine trace seen so far, keyed by ABSOLUTE action index. Cleared
+   * with the game, not with the request, so a move keeps its explanation as it
+   * scrolls down the log. */
+  why: {},
+  /* The proof sheet's cache and its guards, mirroring the hint's. `proofGen`
+   * is the snapshot generation the cached deductions belong to, so a stale
+   * sheet is never shown beside a newer position. */
+  proof: null,
+  proofGen: -1,
+  proofBusy: false,
   // Which position the hint in hand was computed for. `gen` counts snapshots;
   // `hintGen` records the one `hint` belongs to. Two bugs made this necessary
   // rather than defensive. Dealing a new game replaced token, actions and snap
@@ -246,6 +396,7 @@ async function send(path, body) {
     if (/expired/i.test(e.message)) {
       S.token = null;
       S.actions = [];
+      S.why = {};
       setTimeout(() => show("start"), 1200);
     }
     return null;
@@ -314,6 +465,7 @@ async function pace() {
     S.pacing = false;
     renderClock(0, 0);
     render();
+    if (S.watch && S.snap && S.snap.terminal) watchGameOver();
   }
 }
 
@@ -623,9 +775,13 @@ function initStart() {
     try {
       S.actions = [];
       S.token = null;
+      S.seen = 0;
+      S.anim = null;
+      S.annCache = null;
       // No variant and no gamma: the site ships one deck and one engine.
       const j = await api("new", { seat: S.seat });
       S.token = j.token;
+      S.why = {};
       S.actions = j.actions || [];
       S.snap = j;
       S.hint = null;
@@ -672,25 +828,52 @@ function renderSeats() {
   const box = $("t-seats");
   box.innerHTML = "";
   for (let off = 0; off < 6; off++) {
-    // offset 0 is the viewer; going clockwise round the table from them.
-    const p = (s.seat + off) % 6;
-    const mine = (p % 2) === (s.seat % 2);
+    // offset 0 is the viewer; going clockwise round the table from them. A
+    // spectator has no seat, so the table is laid out from seat 0 and the
+    // team tags name the bots instead of a "you".
+    const anchor = s.spectate ? 0 : s.seat;
+    const p = (anchor + off) % 6;
+    const mine = s.spectate ? (p % 2) === 0 : (p % 2) === (s.seat % 2);
     const out = s.hand_counts[p] === 0;
     const d = el("div", "pod" + (mine ? " ours" : " theirs")
-      + (p === s.seat ? " me" : "") + (p === s.turn ? " active" : "")
-      + (out ? " out" : ""));
+      + (!s.spectate && p === s.seat ? " me" : "")
+      + (p === s.turn ? " active" : "") + (out ? " out" : ""));
     const { x, y } = seatPos(off);
     d.style.setProperty("--x", x.toFixed(2) + "%");
     d.style.setProperty("--y", y.toFixed(2) + "%");
 
-    const name = p === s.seat ? (nm(p) || "You") : nm(p);
+    const name = (!s.spectate && p === s.seat) ? (nm(p) || "You") : nm(p);
     d.appendChild(el("div", "puck", FN.initials(name)));
     d.appendChild(el("div", "nm", name));
     d.appendChild(el("div", "cards",
       s.hand_counts[p] + (s.hand_counts[p] === 1 ? " card" : " cards")));
     d.appendChild(el("div", "tag",
-      p === s.seat ? "you" : mine ? "partner" : "opponent"));
-    d.title = `${name} — seat ${p}, ${mine ? "your team" : "the other team"}`;
+      s.spectate ? (mine ? "team Dylan" : "team KRAKEN")
+        : p === s.seat ? "you" : mine ? "partner" : "opponent"));
+    d.title = s.spectate
+      ? `${name} — seat ${p}, ${mine ? "Dylan's" : "KRAKEN's"} team`
+      : `${name} — seat ${p}, ${mine ? "your team" : "the other team"}`;
+    // The per-move badge: "?" under both seats while an ask hangs in the
+    // air, then both flip green (with the card sliding over) or red. A
+    // declaration badges only the declarer.
+    const a = S.anim;
+    if (a) {
+      const GLY = { S: "♠", H: "♥", D: "♦", C: "♣" };
+      const short = (n) => (n === "RJ" || n === "BJ")
+        ? "Joker" : n.slice(0, -1) + (GLY[n.slice(-1)] || "");
+      let chip = null;
+      if (a.kind === "ask" && (p === a.asker || p === a.target)) {
+        chip = a.phase === "pending"
+          ? el("div", "askchip",
+               p === a.asker ? `${short(a.card)}?` : "?")
+          : el("div", "askchip " + (a.ok ? "hit" : "miss"),
+               a.ok ? "✓" : "✕");
+      } else if (a.kind === "claim" && p === a.claimer) {
+        chip = el("div", "askchip " + (a.ok ? "hit" : "miss"),
+                  a.ok ? "✓ set" : "✕ set");
+      }
+      if (chip) d.appendChild(chip);
+    }
     box.appendChild(d);
   }
 }
@@ -740,6 +923,19 @@ function renderSets() {
 
 function renderHand() {
   const s = S.snap;
+  if (s.spectate) {
+    // Nobody's cards are shown to a spectator -- the server never sends them.
+    $("t-handn").textContent = "";
+    const hb = $("t-hand");
+    hb.innerHTML = "";
+    hb.appendChild(el("p", "dim",
+      "You're spectating: Dylan's FishBot v0.7 (seats 0/2/4) vs " +
+      "KRAKEN (seats 1/3/5). Hands stay hidden, as they are " +
+      "from the players themselves."));
+    $("t-handtitle").textContent = "Spectating";
+    return;
+  }
+  $("t-handtitle").textContent = "Your hand";
   $("t-handn").textContent = s.hand.length ? `(${s.hand.length})` : "(empty)";
   const box = $("t-hand");
   box.innerHTML = "";
@@ -761,7 +957,8 @@ function renderHand() {
 function renderLastMove() {
   const box = $("t-last");
   box.innerHTML = "";
-  const e = (S.snap.log || [])[S.snap.log.length - 1];
+  const log = S.snap.log || [];
+  const e = log[log.length - 1];
   if (!e) { box.className = "lastmove"; return; }
   box.className = "lastmove " + e.t
     + (e.ok === true ? " hit" : e.ok === false ? " miss" : "");
@@ -771,17 +968,175 @@ function renderLastMove() {
     box.appendChild(f);
   }
   const txt = el("div", "lmtext");
-  txt.appendChild(el("div", "lmwhat", e.text));
-  if (e.proved) txt.appendChild(el("div", "lmproved", e.proved));
+  txt.appendChild(el("div", "lmwhat", namedText(e.text)));
+  const note = annotateLog()[log.length - 1];
+  if (note) txt.appendChild(el("div", "lmannot", note));
+  const lastWhy = whyAt(log.length - 1);
+  if (lastWhy) txt.appendChild(el("div", "lmwhy", lastWhy));
+  if (e.proved) txt.appendChild(el("div", "lmproved", namedText(e.proved)));
   box.appendChild(txt);
+}
+
+/* ------------------------------------------------------- engine reasoning
+ * The exhibition ships a `why` map from the server: log index -> the trace
+ * the engine captured INSIDE the decision it made. Only our seats carry one,
+ * and only in spectate, because a trace is derived from the moving seat's own
+ * hand and would cross the information boundary in a seated game.
+ *
+ * The tie group is reported rather than hidden. The objective genuinely cannot
+ * separate two cards of one half-suit at one target, and when it cannot, the
+ * engine picks at random -- so presenting the top-scoring row as "its choice"
+ * would invent a preference it does not have. When the group is bigger than
+ * one we say so instead.
+ */
+function pct(x) { return Math.round(x * 100) + "%"; }
+
+/* pct() is right for a bar chart and wrong for a claim panel. Rounding to a
+ * whole percent turns 0.0023 and 0.0003 and a genuine zero into the same "0%",
+ * and those are three different things to tell a player: unlikely, very
+ * unlikely, and refuted by the public record. Driving the real page is what
+ * showed this -- three zeros in a row, which reads as a broken panel. */
+function pctFine(x) {
+  if (!(x > 0)) return "0%";
+  if (x >= 0.1) return Math.round(x * 100) + "%";
+  if (x >= 0.01) return (x * 100).toFixed(1) + "%";
+  if (x >= 0.0001) return (x * 100).toFixed(2) + "%";
+  return "<0.01%";
+}
+
+function whyText(tr) {
+  if (!tr) return null;
+  if (tr.kind === "ask") {
+    const rows = tr.ranked || [];
+    const mine = rows.find(r => r.chosen) || rows[0];
+    if (!mine) return null;
+    const bits = [`${pct(mine.p_hit)} to land`];
+    if (tr.tie_group > 1) {
+      bits.push(`tied with ${tr.tie_group - 1} other`
+        + (tr.tie_group > 2 ? "s" : "") + ", picked at random");
+    } else {
+      const next = rows.find(r => !r.chosen);
+      if (next) bits.push(`next best ${next.card} at ${nm(next.target)}`
+        + ` (${pct(next.p_hit)})`);
+    }
+    bits.push(`${tr.n_legal} legal asks`);
+    return bits.join(" · ");
+  }
+  if (tr.kind === "declare") {
+    const c = tr.confidence == null ? null : pct(tr.confidence);
+    const why = tr.why && tr.why.indexOf("forced") === 0
+      ? "forced to declare" : tr.why === "voluntary" ? "chose to declare"
+        : "declared instead of a doomed ask";
+    return c ? `${why} · ${c} confident in this split` : why;
+  }
+  if (tr.kind === "exact") return "solved exactly, not estimated";
+  if (tr.kind === "signal")
+    return "a deliberately dead ask - it proves to a partner which card this "
+      + "seat does not hold";
+  if (tr.kind === "pass") return `passed to ${nm(tr.teammate)}`;
+  return null;
+}
+
+/* Traces arrive only for moves generated in THIS request -- a replayed move
+ * was not decided again, so the server has nothing honest to say about it.
+ * That is right on the wire and wrong on the screen: without a client-side
+ * store, exactly one row of the log carries an explanation and the rest go
+ * bare as they scroll, which reads like the feature is broken.
+ *
+ * So the client keeps them. The wire index addresses the log SLICE the server
+ * sent, which shifts as the log grows, so it is converted to an absolute
+ * action index once on arrival and stored under that. */
+function absorbWhy() {
+  const w = S.snap && S.snap.why;
+  const log = (S.snap && S.snap.log) || [];
+  if (!w || !log.length) return;
+  const offset = (S.actions ? S.actions.length : log.length) - log.length;
+  for (const k of Object.keys(w)) {
+    const abs = offset + Number(k);
+    if (abs >= 0 && !S.why[abs]) S.why[abs] = w[k];
+  }
+}
+
+function whyAt(idx) {
+  const log = (S.snap && S.snap.log) || [];
+  const offset = (S.actions ? S.actions.length : log.length) - log.length;
+  const tr = S.why[offset + idx];
+  return tr ? whyText(tr) : null;
+}
+
+/* ---------------------------------------------------------- the proof sheet
+ * Deliberately separate from the posterior panel, and deliberately without a
+ * single probability. The posterior panel says where the cards PROBABLY are;
+ * this one says only what is certain. Merging them would teach a reader to
+ * trust an estimate as much as a proof, which is the specific habit that
+ * loses games of Fish.
+ */
+async function refreshProof() {
+  const panel = $("t-proofpanel");
+  if (!S.snap || S.snap.spectate || S.snap.terminal) { panel.hidden = true; return; }
+  // Guarded exactly like the hint, and for the same reason: render() calls
+  // this on every repaint, so without a generation check one position would
+  // fetch its own proof sheet a dozen times. S.gen advances on every new
+  // snapshot, which is precisely when the deductions can have changed.
+  if (S.proofBusy || S.proofGen === S.gen) {
+    if (S.proofGen === S.gen && S.proof) drawProof(S.proof);
+    return;
+  }
+  S.proofBusy = true;
+  const gen = S.gen;
+  let d;
+  try {
+    d = await api("deduce", { token: S.token, actions: S.actions });
+  } catch (e) { panel.hidden = true; return; } finally { S.proofBusy = false; }
+  if (!d || d.error) { panel.hidden = true; return; }
+  if (gen !== S.gen) return;          // the table moved on while we waited
+  S.proofGen = gen;
+  S.proof = d;
+  drawProof(d);
+}
+
+function drawProof(d) {
+  const panel = $("t-proofpanel");
+  const box = $("t-proof");
+  box.innerHTML = "";
+  const rows = (d.proved || []).filter(r => r.cards.length);
+  const ors = d.at_least_one || [];
+  if (!rows.length && !ors.length) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  rows.forEach(r => {
+    const line = el("div", "proofrow");
+    line.appendChild(el("b", null, nm(r.player)));
+    const cards = el("span", "pcards");
+    cards.innerHTML = r.cards.map(c => `<span class="card xs">${face(c)}</span>`).join("");
+    line.appendChild(cards);
+    box.appendChild(line);
+  });
+  ors.forEach(r => {
+    const line = el("div", "proofrow weak");
+    line.appendChild(el("b", null, nm(r.player)));
+    line.appendChild(el("span", "pmaybe",
+      "at least one of " + r.cards.join(", ")));
+    box.appendChild(line);
+  });
+  // Say what is NOT proved, so the list is never mistaken for the whole truth.
+  $("t-proofn").textContent = d.n_unresolved
+    ? `${d.n_proved} certain, ${d.n_unresolved} still open`
+    : `${d.n_proved} certain`;
 }
 
 function renderLog() {
   const box = $("t-log");
   box.innerHTML = "";
-  const items = (S.snap.log || []).slice(-14).reverse();
+  const log = S.snap.log || [];
+  const ann = annotateLog();
+  const start = Math.max(0, log.length - 14);
+  const items = log.slice(start).reverse();
   if (!items.length) box.appendChild(el("p", "dim", "Nothing yet."));
-  for (const e of items) {
+  items.forEach((e, ri) => {
+    const idx = log.length - 1 - ri;
     const d = el("div", "logrow " + e.t + (e.ok === false ? " miss" : "")
       + (e.ok === true ? " hit" : ""));
     if (e.card) {
@@ -790,14 +1145,252 @@ function renderLog() {
       d.appendChild(f);
     }
     const w = el("div", "wrap");
-    w.appendChild(el("div", "what", e.text));
-    if (e.proved) w.appendChild(el("div", "proved", e.proved));
+    w.appendChild(el("div", "what", namedText(e.text)));
+    if (ann[idx]) w.appendChild(el("div", "annot", ann[idx]));
+    const why = whyAt(idx);
+    if (why) w.appendChild(el("div", "why", why));
+    if (e.proved) w.appendChild(el("div", "proved", namedText(e.proved)));
     d.appendChild(w);
     box.appendChild(d);
-  }
+  });
 }
 
 /* -- the move ------------------------------------------------------------ */
+
+/* The declaration ledger.
+ *
+ * Every set in Fish is won by somebody declaring it, so the scoreboard IS a
+ * declaration record -- and until now the only thing a player was told about
+ * their declarations was the running score. This project's own measurement of
+ * where a margin comes from says that is the wrong emphasis: between engines,
+ * 61% of the margin is declaration accounting and only a third is everything
+ * else put together (results/margin_decomposition.json).
+ *
+ * The two ways to be wrong are shown apart, because they are different
+ * mistakes with different cures. An ALLOCATION error means your team held all
+ * six and you misordered them: you read the table right and placed it wrong.
+ * An OWNERSHIP error means an opponent still had one: you read the table
+ * wrong. A ledger that says only "wrong" teaches neither.
+ */
+/* Your declaration record, across games.
+ *
+ * This project measured where its margin against an independently written
+ * engine actually comes from, and 61% of it is declaration accounting -- the
+ * two engines find cards at broadly similar rates and diverge on knowing when
+ * a half-suit is finished. A player who is only ever shown the score is being
+ * shown the half that moves least.
+ *
+ * So the ledger keeps a running record. It lives in localStorage because it is
+ * a per-browser convenience and nothing on the server needs it; a private
+ * window or cleared site data simply starts it over, which is why every read
+ * and write is wrapped.
+ */
+const RECORD_KEY = "fish.declrecord.v1";
+//: measured between engines over the 10,000-game head-to-head, both sides
+//: (results/margin_decomposition.json -> headline_block). Shown as the
+//: yardstick because "you got two wrong" means nothing without one. These
+//: were first taken from a 600-game probe, at 0.150 and 0.918; the figures
+//: below are the same quantity on seventeen times the games.
+const ENGINE_WRONG_PER_GAME = { us: 0.176, them: 0.844 };
+
+function loadRecord() {
+  try {
+    const r = JSON.parse(localStorage.getItem(RECORD_KEY) || "null");
+    if (r && typeof r.games === "number") return r;
+  } catch (e) { /* private mode, or cleared */ }
+  return { games: 0, declared: 0, right: 0, split: 0, ownership: 0,
+           asks: 0, hits: 0 };
+}
+
+function saveRecord(r) {
+  try { localStorage.setItem(RECORD_KEY, JSON.stringify(r)); }
+  catch (e) { /* private mode */ }
+}
+
+/* Absorb one finished game, once.
+ *
+ * Keyed on the GAME rather than the session. The first version used S.token,
+ * which is right for a solo table and wrong in a room -- rooms carry a code
+ * and a secret and never set a token, so every room game would have keyed on
+ * "" and only the first would ever have counted. The declarations themselves
+ * are the identity: the sequence of who declared what, in order, with the
+ * final score, does not repeat between deals.
+ *
+ * The guard is needed at all because every panel on this screen redraws on
+ * every render(), so a finished game is re-absorbed several times a second
+ * without it.
+ */
+function gameKey(s) {
+  return (s.declarations || [])
+    .map((r) => `${r.claimer}.${r.hs}.${r.klass}`).join("|")
+    + `#${s.score.you}-${s.score.them}`;
+}
+
+function absorbRecord(s) {
+  if (s.spectate) return loadRecord();
+  const rows = (s.declarations || []).filter(
+    (r) => new Set([s.seat, ...s.teammates]).has(r.claimer));
+  const tally = (s.ask_tally || [])[s.seat];
+  // A game where you declared nothing still had you asking, and the ask
+  // record is the half of the ledger with any game-level signal in it (see
+  // the note on ENGINE_ASK_HIT). The first version returned early on an empty
+  // declaration list, which silently dropped every such game from BOTH
+  // counters -- and those are exactly the games a struggling player has.
+  if (!rows.length && !tally) return loadRecord();
+  const rec = loadRecord();
+  const id = gameKey(s);
+  if (rec.last === id) return rec;
+  rec.last = id;
+  rec.games += 1;
+  if (tally) { rec.asks += tally[0]; rec.hits += tally[1]; }
+  for (const r of rows) {
+    rec.declared += 1;
+    if (r.klass === "right") rec.right += 1;
+    else if (r.klass === "split") rec.split += 1;
+    else rec.ownership += 1;
+  }
+  saveRecord(rec);
+  return rec;
+}
+
+function drawRecord(box, s) {
+  const rec = absorbRecord(s);
+  if (!rec.games) return;
+  const wrong = rec.split + rec.ownership;
+  const per = wrong / rec.games;
+  box.appendChild(el("h4", null, "Your declaration record"));
+  box.appendChild(el("p", "dim",
+    `Over ${rec.games} game${rec.games === 1 ? "" : "s"} you have declared `
+    + `${rec.declared} set${rec.declared === 1 ? "" : "s"} and got `
+    + `${wrong} wrong — ${rec.split} the right team in the wrong order, `
+    + `${rec.ownership} with a card still on the other side. `
+    + `That is ${per.toFixed(2)} a game, against `
+    + `${ENGINE_WRONG_PER_GAME.us.toFixed(2)} for this engine and `
+    + `${ENGINE_WRONG_PER_GAME.them.toFixed(2)} for the one it plays in the `
+    + `exhibition.`));
+  const reset = el("button", "ghost", "Clear this record");
+  reset.onclick = () => {
+    try { localStorage.removeItem(RECORD_KEY); } catch (e) { /* ignore */ }
+    render();
+  };
+  box.appendChild(reset);
+}
+
+/* The engine's own ask hit rate, and its opponent's, over the 10,000-game
+ * head-to-head (results/deal_luck.json -> overdispersion.*.pooled). Shown as
+ * the yardstick for the same reason the declaration record shows one.
+ *
+ * The interval below it is doing more work than a yardstick, though. That
+ * same file measured how much of the game-to-game spread in this rate is
+ * simply the arithmetic of about fifty independent asks: 58.3% of it, with
+ * only 8.7% attributable to the deal and 33.0% to the position a player
+ * builds. So a single game's hit rate is mostly a coin, and a player who
+ * reads one game's number as a verdict on their play is reading noise. The
+ * honest presentation is the cumulative rate with an interval wide enough to
+ * say so, and an explicit sentence about whether the gap to the engine
+ * survives it.
+ */
+const ENGINE_ASK_HIT = { us: 0.517, them: 0.481 };
+
+/* Wilson score interval, not the textbook p +- 1.96 sqrt(p(1-p)/n).
+ *
+ * A player arrives here with tens of asks, not thousands, and often at a rate
+ * near the edges early on. The normal approximation is badly wrong there --
+ * at 3 hits from 4 asks it runs past 1.0, and a panel whose whole point is to
+ * be honest about noise cannot print an impossible bound. Wilson stays inside
+ * [0,1] by construction and is well behaved at small n.
+ */
+function wilson(k, n) {
+  if (!n) return [0, 1];
+  const z = 1.96;
+  const p = k / n;
+  const d = 1 + (z * z) / n;
+  const centre = p + (z * z) / (2 * n);
+  const half = z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n));
+  return [Math.max(0, (centre - half) / d), Math.min(1, (centre + half) / d)];
+}
+
+function drawAsks(box, s) {
+  const rec = loadRecord();
+  const tally = (s.ask_tally || [])[s.seat];
+  if (!rec.asks && !tally) return;
+  box.appendChild(el("h4", null, "Your asks"));
+  if (tally && tally[0]) {
+    box.appendChild(el("p", "dim",
+      `This game you asked ${tally[0]} time${tally[0] === 1 ? "" : "s"} and `
+      + `got ${tally[1]} — ${pct(tally[1] / tally[0])}.`));
+  }
+  if (!rec.asks) return;
+  const [lo, hi] = wilson(rec.hits, rec.asks);
+  const eng = ENGINE_ASK_HIT.us;
+  const inside = eng >= lo && eng <= hi;
+  box.appendChild(el("p", "dim",
+    `Across ${rec.games} game${rec.games === 1 ? "" : "s"}: `
+    + `${rec.hits} of ${rec.asks}, ${pctFine(rec.hits / rec.asks)} `
+    + `[${pctFine(lo)}, ${pctFine(hi)}].`));
+  box.appendChild(el("p", "dim",
+    `This engine hits ${pctFine(eng)} of its asks against Dylan's FishBot. `
+    + (inside
+      ? `That is inside your interval, so on this much play the two are not `
+        + `distinguishable — a gap this size is what ${rec.asks} coin flips `
+        + `look like on their own.`
+      : `That is outside your interval, so the difference is larger than `
+        + `chance over ${rec.asks} asks can account for.`)));
+  box.appendChild(el("p", "dim",
+    `One game says very little here. Over ten thousand games, 58% of the `
+    + `variation in this rate between games is the arithmetic of about fifty `
+    + `independent asks, and 9% is the deal being clumped or spread. The `
+    + `remaining third is the position a player builds for themselves, and `
+    + `it is the only part worth reading — which takes more than one game to `
+    + `see.`));
+}
+
+function drawLedger(box, s) {
+  const rows = s.declarations;
+  const bad = (rs) => rs.filter((r) => r.klass !== "right").length;
+  // A spectator has no seat, so "your team" is meaningless there and would
+  // have counted every declaration as the opponents'. The exhibition names
+  // its two sides by engine, exactly as the scoreboard above it does.
+  const spec = !!s.spectate;
+  const isA = (r) => (spec ? r.claimer % 2 === 0 : new Set(
+    [s.seat, ...s.teammates]).has(r.claimer));
+  const A = rows.filter(isA);
+  const nameA = spec ? "Dylan's FishBot" : "Your team";
+  const nameB = spec ? "KRAKEN" : "they";
+  box.appendChild(el("h4", null, "Every declaration in this game"));
+  box.appendChild(el("p", "dim",
+    `${nameA} declared ${A.length} and got ${bad(A)} wrong; `
+    + `${nameB} declared ${rows.length - A.length} and got `
+    + `${bad(rows) - bad(A)} wrong. A set is only ever won by someone `
+    + `naming it, so this list is the scoreboard with its reasons attached.`));
+  const t = el("div", "ledger");
+  for (const r of rows) {
+    const hs = s.half_suits[r.hs];
+    const verdict =
+      r.klass === "right" ? "correct"
+        : r.klass === "split"
+          ? "right team, wrong split — the set went to the other side"
+          : "an opponent still held one — the set went to the other side";
+    const row = el("div", "ledgerrow " + r.klass);
+    row.appendChild(el("span", "who", nm(r.claimer)));
+    row.appendChild(el("span", "what", hs ? hs.name : "set " + r.hs));
+    row.appendChild(el("span", "verdict", verdict));
+    if (r.klass !== "right" && hs) {
+      // Name the cards that moved the verdict, not all six: the ones placed
+      // correctly are not what there is to learn from.
+      const miss = [];
+      hs.cards.forEach((c, k) => {
+        if (r.declared[k] !== r.revealed[k]) {
+          miss.push(`${face(c.name)} was ${nm(r.revealed[k])}, `
+            + `not ${nm(r.declared[k])}`);
+        }
+      });
+      if (miss.length) row.appendChild(el("span", "miss", miss.join("; ")));
+    }
+    t.appendChild(row);
+  }
+  box.appendChild(t);
+}
 
 function renderAction() {
   const s = S.snap;
@@ -822,6 +1415,10 @@ function renderAction() {
       // can honestly be shown is where each card sat at the moment it resolved.
       box.appendChild(el("h4", null, "Where the cards were as each set resolved"));
       box.appendChild(r);
+    }
+    if (s.declarations && s.declarations.length) {
+      drawLedger(box, s);
+      if (!s.spectate) { drawRecord(box, s); drawAsks(box, s); }
     }
     const again = el("button", "primary", "Deal again");
     again.onclick = () => show("start");
@@ -915,7 +1512,13 @@ function renderHint(box) {
       + best.verdict.charAt(0).toUpperCase() + best.verdict.slice(1) + "."));
   }
 
-  for (const n of (h.notes || []).slice(0, 3)) {
+  // Four, not three. Measured over 81 real positions the analyser produces 0
+  // notes at 42, one at 35, two at 3 and three at 1 -- so the cap almost never
+  // bites. But the note it would drop is the LAST one appended, which is the
+  // frozen-half-suit warning, and that is the one with the longest lead time:
+  // the others are about the move in front of you and the action panel shows
+  // those options anyway. Cheaper to raise the cap than to re-argue priority.
+  for (const n of (h.notes || []).slice(0, 4)) {
     p.appendChild(el("p", "dim", n));
   }
   box.appendChild(p);
@@ -944,7 +1547,7 @@ const TERM_BLURB = {
   reveal: "what the ask tells the table about your hand",
   deplete: "drawing down a dangerous opponent",
   expose: "how much it exposes your own half-suit",
-  claim: "progress toward a claimable set",
+  claim: "progress toward a declarable set",
   info: "information gained whether or not it lands",
   lookahead: "where the chain of asks after this one could go",
 };
@@ -1114,47 +1717,41 @@ async function openDeclare() {
   const s = S.snap;
   const team = [s.seat, ...s.teammates].sort((a, b) => a - b);
 
-  // THE DEFAULTS ARE THE WHOLE POINT OF THIS DIALOG.
+  // THE DEFAULTS ARE THE WHOLE POINT OF THIS DIALOG, and they have now been
+  // wrong twice in opposite directions.
   //
-  // They used to be whatever the <select> picked first, which is the lowest
-  // team seat - and for seat 0 that is *you*. So every card you did not hold
-  // defaulted to you, which is guaranteed wrong, and declaring without touching
-  // all six dropdowns voided the set. That is not the game being harsh: right
-  // team, wrong split scores for nobody, and the form was steering the player
-  // into it. Engine-vs-engine play voids nothing in 54 declarations; every void
-  // a human saw was this.
+  // Originally they were whatever the <select> picked first, which is the
+  // lowest team seat -- and for seat 0 that is *you*. So every card you did
+  // not hold defaulted to you, which is guaranteed wrong, and declaring
+  // without touching all six threw the set away. That was fixed by opening on
+  // the engine's posterior MAP with the engine's marginal beside every option.
   //
-  // The engine already computes the posterior MAP for exactly this decision, so
-  // the dialog opens on the engine's best guess and shows the probability
-  // behind every option. You can still overrule it - you know things it does
-  // not - but the starting point is now the best available answer.
-  let an = hint();
-  if (!an) {
-    try {
-      an = inRoom() ? await room("analyse", {})
-                    : await api("analyse", { token: S.token,
-                                             actions: S.actions });
-    }
-    catch (e) { an = null; }
-  }
-  const table = {};
-  for (const r of (an && an.card_table) || []) table[r.card] = r.probs;
-  const best = {};
-  for (const c of (an && an.claims) || []) best[c.half_suit] = c;
+  // Which went one step too far the other way. A dialog that opens on the
+  // answer and annotates every alternative with its probability is the site
+  // playing for you: you can score a set having reasoned about nothing, and
+  // learn nothing from having done it. Declaring is where a human loses whole
+  // sets at once, so it is the one place worth making them think.
+  //
+  // So: nothing is pre-filled and no probability is shown until you have built
+  // a split and asked for it. Then you get the price of YOUR split, the
+  // probability your team holds all six however it is divided, and only then
+  // what the engine would have named. The gap between those first two numbers
+  // is the actual skill -- knowing when your team's holding is PLACED and when
+  // it is merely PROBABLE -- and it is a distinction this project found its own
+  // engine failing to draw (prereg/stuck_claim_gate.md).
+  const UNSET = "";
 
   openModal((box) => {
     box.appendChild(el("h3", null, "Declare a set"));
     box.appendChild(el("p", "dim",
-      "Name who on your team holds each of the six cards. Exactly right scores "
-      + "it; right team but wrong split scores for nobody; any card with an "
-      + "opponent hands it over."));
+      "Name who on your team holds each of the six cards. Exactly right "
+      + "scores it; anything wrong — a card with an opponent, or the right "
+      + "team but the wrong split — hands the whole set to the other team."));
 
     const pick = el("select");
     s.half_suits.forEach((hs, i) => {
       if (s.set_winner[i]) return;
-      const c = best[i];
-      const p = c ? ` — engine: ${(100 * c.p_declaration_exact).toFixed(0)}%` : "";
-      const o = el("option", null, hs.name + p);
+      const o = el("option", null, hs.name);
       o.value = String(i);
       pick.appendChild(o);
     });
@@ -1165,59 +1762,193 @@ async function openDeclare() {
     box.appendChild(el("label", null, "Which set"));
     box.appendChild(pick);
 
-    const verdict = el("p", "dim declverdict");
-    box.appendChild(verdict);
     const rows = el("div", "declrows");
     box.appendChild(rows);
+    const verdict = el("div", "declverdict");
+    box.appendChild(verdict);
+
+    const check = el("button", null, "Check this split");
+    const go = el("button", "primary", "Declare");
+
+    const chosen = () => [...rows.querySelectorAll("select")]
+      .map((x) => (x.value === UNSET ? null : +x.value));
+    const complete = () => chosen().every((q) => q !== null);
+    const sync = () => {
+      const ok = complete();
+      go.disabled = !ok;
+      check.disabled = !ok;
+    };
 
     const draw = () => {
-      const idx = +pick.value;
-      const hs = s.half_suits[idx];
-      const c = best[idx];
-      verdict.textContent = c
-        ? `The engine puts your team holding all six at `
-          + `${(100 * c.p_team_holds_all).toFixed(0)}%, and this exact split at `
-          + `${(100 * c.p_declaration_exact).toFixed(0)}%. ${c.verdict}.`
-        : "";
       rows.innerHTML = "";
-      hs.cards.forEach((card, k) => {
+      verdict.innerHTML = "";
+      const hs = s.half_suits[+pick.value];
+      hs.cards.forEach((card) => {
         const r = el("div", "declrow");
         const cell = el("span", "card sm");
         cell.innerHTML = face(card.name);
         r.appendChild(cell);
         const sel = el("select");
         sel.dataset.card = String(card.id);
-        const probs = table[card.id] || [];
-        // The engine's MAP for this half-suit, falling back to the per-card
-        // most likely teammate, falling back to whoever holds it if that is us.
-        let want = c && c.declaration ? c.declaration[k]
-          : (card.mine ? s.seat : null);
-        if (want == null && probs.length) {
-          let bp = -1;
-          for (const q of team) if ((probs[q] || 0) > bp) { bp = probs[q]; want = q; }
-        }
+        const blank = el("option", null, "—");
+        blank.value = UNSET;
+        sel.appendChild(blank);
         for (const q of team) {
-          const pct = probs.length ? ` · ${(100 * (probs[q] || 0)).toFixed(0)}%` : "";
-          const o = el("option", null, (q === s.seat ? "you" : nm(q)) + pct);
+          // No probability on the label. That number IS the answer, and this
+          // dialog is asking the question.
+          const o = el("option", null, q === s.seat ? "you" : nm(q));
           o.value = String(q);
-          if (q === (want != null ? want : team[0])) o.selected = true;
           sel.appendChild(o);
         }
+        // A card in your own hand is not a judgement call -- you can see it.
+        if (card.mine) sel.value = String(s.seat);
+        sel.onchange = sync;
         r.appendChild(sel);
         rows.appendChild(r);
       });
+      sync();
     };
     pick.onchange = draw;
     draw();
 
-    const go = el("button", "primary", "Declare");
+    check.onclick = async () => {
+      const assignment = chosen();
+      if (!assignment.every((q) => q !== null)) return;
+      check.disabled = true;
+      verdict.textContent = "checking…";
+      let r;
+      try {
+        const body = { half_suit: +pick.value, assignment };
+        r = inRoom() ? await room("claimcheck", body)
+                     : await api("claimcheck",
+                                 Object.assign({ token: S.token,
+                                                 actions: S.actions }, body));
+      } catch (e) {
+        verdict.textContent = "could not check that split: " + e.message;
+        check.disabled = false;
+        return;
+      }
+      check.disabled = false;
+      verdict.innerHTML = "";
+      if (r.impossible) {
+        // Not an estimate. The public record already places these cards
+        // elsewhere, so this is the one verdict the panel can PROVE.
+        // Group by reason and cap the list. Naming every card with its own
+        // clause turns a five-card refutation into an unreadable ribbon of
+        // card faces, which the live page showed before this existed.
+        const by = {};
+        for (const x of r.refuted) (by[x.why] = by[x.why] || []).push(x.card);
+        const parts = Object.entries(by).map(([w, cs]) => {
+          const shown = cs.slice(0, 3).map(face).join(" ");
+          const more = cs.length > 3 ? ` and ${cs.length - 3} more` : "";
+          return `${shown}${more} — ${w}`;
+        });
+        const n = r.refuted.length;
+        verdict.appendChild(el("p", "declnum",
+          `<b>This split cannot be right</b>, and that is something you can `
+          + `see rather than estimate. ${n === 1 ? "One card is" : n + " cards are"} `
+          + `not where you put ${n === 1 ? "it" : "them"}: ${parts.join("; ")}.`));
+      } else {
+        verdict.appendChild(el("p", "declnum",
+          `<b>${pctFine(r.p_exact)}</b> — the chance this exact split is `
+          + `right.`));
+      }
+      verdict.appendChild(el("p", "declnum",
+        `<b>${pctFine(r.p_team)}</b> — the chance your team holds all six, `
+        + `however they are divided.`));
+      /* Which of the six you are actually choosing.
+       *
+       * A player looking at six dropdowns cannot tell which of them the public
+       * record has already settled and which are guesses, and the difference is
+       * the entire allocation problem: of the misplaced cards in the engines'
+       * own disclosure probe, 398 of 398 had never moved in public. Once a team
+       * holds all six of a half-suit no opponent may legally ask in it, so
+       * no later ask can NAME the rest -- the split freezes to direct evidence
+       * with exactly the dealt-and-never-asked-for cards still unknown. (Public
+       * hand counts do keep constraining it, so it is not sealed; it is just
+       * cut off from the one channel that names cards.)
+       *
+       * Not a hint. A pinned card is pinned BY THE PUBLIC RECORD, derivable by
+       * anyone at the table from events everybody saw, which is the same
+       * boundary the proof sheet already sits on.
+       */
+      if (Array.isArray(r.free) && Array.isArray(r.pinned)
+          && (r.free.length || r.pinned.length)) {
+        const f = r.free.length;
+        verdict.appendChild(el("p", "dim",
+          f === 0
+            ? "Every card here is pinned by the public record — there is "
+              + "nothing left to guess."
+            : `${r.pinned.length} of the six ${r.pinned.length === 1
+                ? "is" : "are"} pinned by the public record. The `
+              + `${f === 1 ? "other one is a guess" : `other ${f} are guesses`}`
+              + `: ${r.free.slice(0, 4).map(face).join(" ")}`
+              + `${f > 4 ? ` and ${f - 4} more` : ""}. Those are the cards `
+              + `that were dealt and never asked for, and once your team holds `
+              + `all six no opponent may ask in this suit again, so nothing `
+              + `later will name them. Only the counting can: as your `
+              + `teammates spend their other cards, who can still be `
+              + `holding these narrows.`));
+      }
+      if (r.p_team - r.p_exact > 0.15) {
+        verdict.appendChild(el("p", "dim",
+          "Your team probably has it, but you have not placed the split. "
+          + "Declaring now is the expensive kind of wrong: the set goes to "
+          + "them even though every card was on your side."));
+      }
+      if (r.engine) {
+        // The engine's "best candidate" is an argmax over per-card marginals.
+        // Early in a game that can name a split the propagator has already
+        // ruled out -- measured at the opening, 10 of 27 live half-suits.
+        // Which is not a defect, because the engine never DECLARES below its
+        // 97% bar; the candidate is a ranking device. Saying "the engine would
+        // name a different split, at 0%" hides that behind a number that
+        // reads like a mistake, so this says the actual thing.
+        const dead = !(r.engine.p_exact > 0);
+        verdict.appendChild(el("p", "dim",
+          r.engine.same
+            ? `The engine names the same split, and prices it at `
+              + `${pctFine(r.engine.p_exact)}.`
+            : dead
+              ? `The engine's own best guess for this set is one the record `
+                + `already refutes. That is not a mistake it is about to make: `
+                + `the candidate is how it ranks half-suits, and it will not `
+                + `declare below 97%.`
+              : `The engine would name a different split, at `
+                + `${pctFine(r.engine.p_exact)}. Both figures are computed the `
+                + `same way, so they are comparable.`));
+        const best = Math.max(r.p_exact || 0, r.engine.p_exact || 0);
+        if (best > 0 && best < 0.97) {
+          verdict.appendChild(el("p", "dim",
+            `Neither of you can place this set yet: the engine will not `
+            + `declare below 97%, and the best split on the table is at `
+            + `${pctFine(best)}.`));
+        }
+        if (!r.engine.same) {
+          const use = el("button", null, "Use the engine's split");
+          use.onclick = () => {
+            const sels = [...rows.querySelectorAll("select")];
+            r.engine.assignment.forEach((q, k) => {
+              if (sels[k]) sels[k].value = String(q);
+            });
+            sync();
+          };
+          verdict.appendChild(use);
+        }
+      }
+    };
+
     go.onclick = () => {
-      const assignment = [...rows.querySelectorAll("select")].map((x) => +x.value);
+      const assignment = chosen();
+      if (!assignment.every((q) => q !== null)) return;
       closeModal();
       send("act", { action: { type: "claim", half_suit: +pick.value,
                               assignment }, step: 1 }).then(() => pace());
     };
-    box.appendChild(go);
+    const bar = el("div", "declbar");
+    bar.appendChild(check);
+    bar.appendChild(go);
+    box.appendChild(bar);
   });
 }
 
@@ -1228,10 +1959,16 @@ function render() {
   if (!s) return;
   $("t-us").textContent = s.score.you;
   $("t-them").textContent = s.score.them;
+  $("t-us-label").textContent = S.watch ? "Dylan's FishBot" : "your team";
+  $("t-them-label").textContent = S.watch ? "KRAKEN" : "them";
+  $("t-think").hidden = !!s.spectate;
+  $("t-auto").parentElement.hidden = !!s.spectate;
   $("t-void").textContent = s.score.nulled ? `${s.score.nulled} void` : "";
   $("t-turn").textContent = s.terminal ? "Game over"
     : s.your_turn ? "Your turn." : `${nm(s.turn)} to move.`;
   $("t-turn").className = "turnline" + (s.your_turn && !s.terminal ? " you" : "");
+  digestLog();
+  absorbWhy();
   renderLastMove();
   renderSeats();
   renderSets();
@@ -1239,6 +1976,7 @@ function render() {
   renderLog();
   renderAction();
   renderPosterior();
+  refreshProof();
   maybeAutoThink();
 }
 
@@ -1265,6 +2003,15 @@ $("t-pause").addEventListener("click", () => {
   // than at the next tick.
   render();
 });
+S.tts = localStorage.getItem("fish_tts") === "1";
+$("t-voice").classList.toggle("on", S.tts);
+$("t-voice").addEventListener("click", () => {
+  S.tts = !S.tts;
+  try { localStorage.setItem("fish_tts", S.tts ? "1" : "0"); } catch (e) {}
+  $("t-voice").classList.toggle("on", S.tts);
+  if (S.tts) announce("Move announcements on.");
+  else if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); } catch (e) {} }
+});
 $("t-next").addEventListener("click", () => {
   // Cut the current wait short. Together with Pause this is a step-through: a
   // frozen table advances exactly one engine move per click and stays frozen.
@@ -1281,6 +2028,8 @@ $("t-next").addEventListener("click", () => {
 });
 
 $("t-quit").addEventListener("click", () => {
+  S.watch = false;
+  if (S.watchTimer) { clearTimeout(S.watchTimer); S.watchTimer = null; }
   if (inRoom()) leaveRoom();
   else show("start");
 });
@@ -1337,5 +2086,80 @@ function maybeAutoThink() {
   think(true);
 }
 
+/* ------------------------------------------------------------------ watch
+ *
+ * The 3v3 exhibition: Dylan's FishBot v0.7 (github.com/dylann4500/fishbot,
+ * its own C++ engine bridged server-side) on seats 0/2/4 against this site's
+ * engine, "KRAKEN", on 1/3/5. Nobody is dealt in; the client steps the
+ * table one engine move at a time at the normal pace and keeps a running
+ * series tally. When a game ends the next one deals itself: a broadcast, not
+ * a replay -- every move is computed when the table reaches it. */
+
+// One engine per team, three seats each. The seat number is part of the
+// name so the labels cannot read as three different bots: every KRAKEN seat is
+// the same single deployed FishBot, every Dylan seat the same frozen v0.7.
+const WATCH_NAMES = ["Dylan's v0.7 (s0)", "KRAKEN (s1)",
+                     "Dylan's v0.7 (s2)", "KRAKEN (s3)",
+                     "Dylan's v0.7 (s4)", "KRAKEN (s5)"];
+
+function watchTally() {
+  const t = S.series || { d: 0, k: 0, games: 0 };
+  return `series: Dylan ${t.d} sets — KRAKEN ${t.k} sets over ${t.games} game${t.games === 1 ? "" : "s"}`;
+}
+
+async function startWatch() {
+  S.watch = true;
+  S.series = S.series || { d: 0, k: 0, games: 0 };
+  S.names = WATCH_NAMES.slice();
+  S.actions = [];
+  S.why = {};      // a new deal renumbers actions; a kept trace would be
+                   // attributed to somebody else's move
+  S.token = null;
+  S.hint = null;
+  S.seen = 0;      // a fresh deal: present (and speak) moves from the first
+  S.anim = null;
+  S.annCache = null;
+  try {
+    const j = await api("new", { mode: "spectate", step: 1 });
+    S.token = j.token;
+    S.actions = j.actions || [];
+    S.snap = j;
+    S.gen += 1;
+    show("table");
+    render();
+    pace();
+  } catch (e) {
+    S.watch = false;
+    toast(e.message);
+    show("start");
+  }
+}
+
+function watchGameOver() {
+  const s = S.snap;
+  if (!s || !s.terminal) return;
+  S.series.d += s.score.you;
+  S.series.k += s.score.them;
+  S.series.games += 1;
+  $("t-turn").textContent =
+    `Game over — Dylan ${s.score.you}, KRAKEN ${s.score.them}` +
+    (s.score.nulled ? ` (${s.score.nulled} void)` : "") +
+    ` · ${watchTally()} · next deal in a moment…`;
+  announce(`Game over. Dylan's FishBot ${s.score.you}, `
+    + `KRAKEN ${s.score.them}. `
+    + (s.score.you === s.score.them ? "A tie."
+      : s.score.you > s.score.them ? "Dylan takes the game."
+        : "KRAKEN takes the game."));
+  S.watchTimer = setTimeout(() => {
+    if (S.watch) startWatch();
+  }, 6000);
+}
+
+function initWatch() {
+  $("s-watch").addEventListener("click", startWatch);
+  if (new URLSearchParams(location.search).get("watch")) startWatch();
+}
+
 initStart();
 initRoomScreens();
+initWatch();

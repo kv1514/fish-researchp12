@@ -239,7 +239,9 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     form over-counts correlated evidence. ``"sqrt"`` and ``"capped"`` are the
     two obvious hedges, and which is right is an empirical question.
     """
-    if gamma <= 0.0 and opp_lambda <= 0.0:
+    # See the note in posterior.py: a negative gamma is a real setting (tilt
+    # toward shallow), not a synonym for off. Only exactly zero is off.
+    if gamma == 0.0 and opp_lambda <= 0.0:
         return None, None
     counts: dict[tuple[int, int], int] = {}
     #: Sum of per-ask schedule factors per slot, for gamma_schedule. Left equal

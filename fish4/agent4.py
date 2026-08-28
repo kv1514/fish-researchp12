@@ -32,10 +32,14 @@ import random
 from typing import Optional
 
 from fish.agents.base import Agent
+from .endgame_ii import ExactEndgameMixin
 from .tablebase4 import Tablebase4Mixin
+from . import trace as _tr
 from fish.beliefs import BeliefContradiction, BeliefState
 from fish.engine import Action
 from fish.observation import Observation
+
+from dataclasses import replace
 
 from .askfeat import AskWeights, DecisionContext, score_asks
 from .claim4 import ClaimConfig, ClaimEvaluator, choose_pass
@@ -56,7 +60,7 @@ def _load_value(path):
     return m
 
 
-class FishBot4(Tablebase4Mixin, Agent):
+class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
     """The v0.4 policy. Every strategic choice is a constructor argument."""
 
     name = "fishbot4"
@@ -91,15 +95,53 @@ class FishBot4(Tablebase4Mixin, Agent):
                  value_turn: float = 0.0,
                  value_expose: float = 0.0,
                  value_keep: float = 0.0,
+                 #: never make an ask that provably cannot land while one
+                 #: that can is available. See the note at the use site.
+                 avoid_doomed_asks: bool = False,
                  # -- claiming
                  claim_threshold: float = 0.97,
+                 #: refuse declarations no complete consistent deal allows
+                 claim_feasibility: bool = False,
                  claim_exact: bool = True,
                  claim_exact_candidates: int = 3,
+                 #: The bar the doomed-ask claim gate uses (see the long note
+                 #: at its use site). 0.5 is the incumbent, hard-coded since
+                 #: v0.3 and never measured.
+                 claim_stuck_threshold: float = 0.5,
+                 #: ...but the raised bar applies only where p_team is at or
+                 #: above this. At 1.01 the test can never pass, so the gate
+                 #: keeps its single 0.5 bar everywhere and the default is
+                 #: bit-identical -- the same discipline as endgame_m=0 and
+                 #: w_contest=0.0.
+                 stuck_team_certain: float = 1.01,
+                 #: search the FULL team space at the forced declaration when
+                 #: at most this many half-suits are live. See
+                 #: prereg/forced_exhaustive.md. 0 = never; bit-identical.
+                 claim_forced_exhaustive: int = 0,
                  # -- adaptive style
                  w_retake: float = 0.0,
                  retake_window: int = 8,
                  retake_min_depth: int = 0,
                  w_behind: float = 0.0,
+                 #: Scale the tempo term down when the turn it is protecting
+                 #: is worth nothing. See prereg/tempo_regime.md: the paper
+                 #: measured a turn at -0.043 +- 0.169 below p_best 0.25 and
+                 #: +0.004 +- 0.143 in [0.25, 0.50), and the objective charges
+                 #: the same 0.6*(1-p)*turn_risk at every one of them -- which
+                 #: is 57% of all ask decisions. At 0.0 the test can never pass
+                 #: and the champion is bit-identical.
+                 turn_free_below: float = 0.0,
+                 turn_free_scale: float = 0.0,
+                 # -- endgame-only ask weights. The exact solver shows the ask
+                 # objective is wrong in a specific way once few half-suits are
+                 # live, and wrong in a way that is not the same as being wrong
+                 # everywhere -- so the correction is applied there and nowhere
+                 # else. Zero deltas leave the incumbent weights untouched at
+                 # every m, which is what makes the default bit-identical to
+                 # the champion rather than merely close to it.
+                 endgame_m: int = 0,
+                 endgame_d_info: float = 0.0,
+                 endgame_d_certain: float = 0.0,
                  # -- belief-space lookahead
                  w_lookahead: float = 0.0,
                  lookahead_depth: int = 1,
@@ -108,11 +150,31 @@ class FishBot4(Tablebase4Mixin, Agent):
                  # -- endgame
                  use_tablebase: bool = True,
                  tablebase_max_half_suits: int = 2,
+                 #: Play the m = 1 endgame from fish4.exact_ii's exact best
+                 #: response instead of the heuristic. OFF by default: it
+                 #: models every other seat as the champion, which is wrong
+                 #: about a teammate that also runs it, and a best response is
+                 #: not an equilibrium strategy. See fish4/endgame_ii.py.
+                 exact_endgame: bool = False,
+                 exact_endgame_max_support: int = 12,
+                 exact_endgame_max_nodes: int = 50_000,
                  # -- misc
                  stall_window: int = 80,
                  smart_pass: bool = False,
                  signal_mode: str = "off",
-                 signal_max_p: float = 0.15):
+                 signal_max_p: float = 0.15,
+                 #: Signed weight on adaptive.contest_bonus. Positive fights
+                 #: in opponent-dominated ambiguous half-suits (Dylan's v0.7
+                 #: carries the analogous term strongly positive); negative is
+                 #: the off-limits reading (avoid them unless the ask is a
+                 #: certain steal). 0.0 = incumbent, bit-identical.
+                 w_contest: float = 0.0,
+                 trace: bool = False,
+                 #: Silence prior: down-weight sampled worlds in which a live
+                 #: half-suit sits wholly within one team right now, because
+                 #: a team that held it all and could place it would usually
+                 #: have declared. 1.0 = off, bit-identical.
+                 silence_delta: float = 1.0):
         super().__init__()
         self.n_worlds = n_worlds
         self.n_draws = n_draws
@@ -142,25 +204,63 @@ class FishBot4(Tablebase4Mixin, Agent):
             raise ValueError(
                 f"value_keep={value_keep} has no effect with objective="
                 f"{objective!r}; it applies only to objective='value'")
-        self.claim_cfg = ClaimConfig(threshold=claim_threshold,
+        self.avoid_doomed_asks = bool(avoid_doomed_asks)
+        self.claim_cfg = ClaimConfig(feasibility=bool(claim_feasibility),
+                                     threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
-                                     use_exact=claim_exact)
+                                     use_exact=claim_exact,
+                                     forced_exhaustive=int(
+                                         claim_forced_exhaustive))
+        self.claim_stuck_threshold = float(claim_stuck_threshold)
+        self.stuck_team_certain = float(stuck_team_certain)
         self.w_retake = w_retake
         self.retake_window = retake_window
         self.retake_min_depth = retake_min_depth
         self.w_behind = w_behind
+        self.turn_free_below = float(turn_free_below)
+        self.turn_free_scale = float(turn_free_scale)
+        self.endgame_m = endgame_m
+        self.endgame_d_info = endgame_d_info
+        self.endgame_d_certain = endgame_d_certain
         self.w_lookahead = w_lookahead
         self.lookahead_depth = lookahead_depth
         self.lookahead_beam = lookahead_beam
         self.lookahead_couple = lookahead_couple
         self.use_tablebase = use_tablebase
         self.tablebase_max_half_suits = tablebase_max_half_suits
+        self.exact_endgame = bool(exact_endgame)
+        self.exact_endgame_max_support = int(exact_endgame_max_support)
+        self.exact_endgame_max_nodes = int(exact_endgame_max_nodes)
+        #: What the solver models the other five seats as. The champion, and
+        #: named here rather than inlined so it is obvious that changing the
+        #: agent's own configuration does NOT change the opponent model the
+        #: endgame search assumes.
+        self.exact_endgame_spec = ("fishbot4", {"opponent_gamma": 0.35})
         self.stall_window = stall_window
         self.smart_pass = smart_pass
         self.signal_mode = signal_mode
         self.signal_max_p = signal_max_p
+        self.w_contest = float(w_contest)
+        self.silence_delta = float(silence_delta)
         self.stats = PosteriorStats()
+        #: Capture WHY each decision was made, for the site's explanation
+        #: panels. Off by default and free when off: the builders in
+        #: fish4/trace.py read arrays the policy has already computed and
+        #: never touch the RNG, so a traced agent and an untraced one play
+        #: bit-identical games from the same seed (tests4/test_trace.py).
+        self.trace = bool(trace)
+        #: The trace of the most recent act(), or None.
+        self.last_trace = None
         self.bel: Optional[BeliefState] = None
+
+    def _t(self, build, *args, **kw) -> None:
+        """Record a trace, or do nothing at all.
+
+        Deliberately takes the BUILDER rather than a built dict, so that with
+        tracing off none of the formatting work happens either.
+        """
+        if self.trace:
+            self.last_trace = build(*args, **kw)
 
     # -- lifecycle -----------------------------------------------------------
 
@@ -172,12 +272,23 @@ class FishBot4(Tablebase4Mixin, Agent):
 
     def act(self, obs: Observation) -> Action:
         self.bel.update(obs)
+        self.last_trace = None
 
         # Nothing hidden left? Solve the position instead of estimating it.
         # (Leak-free: the reconstruction uses only public events plus our own
         # hand, and refuses unless every live card is already pinned.)
         exact = self.tablebase_action(obs)
         if exact is not None:
+            self._t(_tr.simple_trace, "exact",
+                    solver="tablebase", note="every live card already pinned")
+            return exact
+
+        # Nothing pinned, but one half-suit left and few enough deals to solve
+        # it exactly under imperfect information. Off by default.
+        exact = self.exact_ii_action(obs)
+        if exact is not None:
+            self._t(_tr.simple_trace, "exact", solver="imperfect-information",
+                    note="one half-suit left and few enough deals to solve")
             return exact
 
         post = Posterior(self.bel, self.rng, n_draws=self.n_draws,
@@ -188,6 +299,7 @@ class FishBot4(Tablebase4Mixin, Agent):
                          opp_lambda=self.opp_lambda,
                          gamma_schedule=self.gamma_schedule,
                          sis_tilt=self.sis_tilt,
+                         silence_delta=self.silence_delta,
                          stats=self.stats)
         ctx = DecisionContext(obs, self.bel, post)
 
@@ -196,12 +308,20 @@ class FishBot4(Tablebase4Mixin, Agent):
             if self.smart_pass:
                 pick = choose_pass(ctx, passes)
                 if pick is not None:
+                    self._t(_tr.simple_trace, "pass",
+                            teammate=int(pick.teammate), chosen="scored")
                     return pick
-            return max(passes, key=lambda p: obs.hand_counts[p.teammate])
+            fallback = max(passes, key=lambda q: obs.hand_counts[q.teammate])
+            self._t(_tr.simple_trace, "pass",
+                    teammate=int(fallback.teammate), chosen="largest hand")
+            return fallback
 
         claims = ClaimEvaluator(ctx, self.claim_cfg)
         voluntary = claims.voluntary_claim()
         if voluntary is not None:
+            best = claims.best_candidate()
+            self._t(_tr.claim_trace, voluntary, why="voluntary",
+                    confidence=(best[0] if best else None))
             return voluntary
 
         asks = obs.legal_asks()
@@ -209,6 +329,11 @@ class FishBot4(Tablebase4Mixin, Agent):
         if not asks or (stalled and obs.claimable_half_suits()):
             forced = claims.forced_claim()
             if forced is not None:
+                best = claims.best_candidate()
+                self._t(_tr.claim_trace, forced,
+                        why=("forced: no legal ask" if not asks
+                             else "forced: stalled with a claimable half-suit"),
+                        confidence=(best[0] if best else None))
                 return forced
         if not asks:
             raise BeliefContradiction("no legal ask and no claimable half-suit")
@@ -225,10 +350,29 @@ class FishBot4(Tablebase4Mixin, Agent):
             # is behind weighs its tie-breakers differently from one that is
             # ahead. Zero leaves the incumbent weights untouched.
             wts = self.weights
+            if self.endgame_m:
+                live = sum(1 for x in obs.set_winner if x is None)
+                if live <= self.endgame_m:
+                    wts = replace(
+                        wts, info=wts.info + self.endgame_d_info,
+                        certain=wts.certain + self.endgame_d_certain)
             if self.w_behind:
                 from .adaptive import adjust_weights
                 wts = adjust_weights(wts, obs, self.w_behind)
             scores, p = score_asks(ctx, asks, wts)
+            # Two passes, and the second one only sometimes. p_best is defined
+            # as the success probability of the ask the INCUMBENT objective
+            # would have chosen, because that is exactly the quantity the
+            # paper's tempo section bucketed its price by. Using max(p) would
+            # be cheaper and would not be the same number, so the first pass
+            # stands and the tempo column is re-weighted only when it turns
+            # out to have been charging for a turn worth nothing.
+            if self.turn_free_below > 0.0 and len(p):
+                top = max(range(len(scores)), key=lambda i: scores[i])
+                if float(p[top]) < self.turn_free_below:
+                    scores, p = score_asks(
+                        ctx, asks,
+                        replace(wts, turn=wts.turn * self.turn_free_scale))
             if self.w_value and model is not None:
                 # No keep_value here, deliberately: this branch ADDS the value
                 # objective to the heuristic one, and the heuristic already
@@ -249,6 +393,13 @@ class FishBot4(Tablebase4Mixin, Agent):
             scores = scores - self.w_retake * retake_flags(
                 obs, asks, self.retake_window, self.retake_min_depth)
 
+        # Half-suit contestation, signed: see adaptive.contest_bonus. At the
+        # default 0.0 this branch never runs and the incumbent is reproduced
+        # decision for decision.
+        if self.w_contest:
+            from .adaptive import contest_bonus
+            scores = scores + self.w_contest * contest_bonus(ctx, asks, p)
+
         if self.w_lookahead and self.lookahead_depth > 1:
             from .lookahead import lookahead_bonus
             scores = scores + self.w_lookahead * lookahead_bonus(
@@ -257,10 +408,15 @@ class FishBot4(Tablebase4Mixin, Agent):
         order = sorted(range(len(asks)), key=lambda i: -scores[i])
         top = scores[order[0]]
         # If the ask we are ABOUT TO MAKE cannot land, it hands over the turn
-        # for certain, so a claim is worth considering instead - but only if it
-        # is more likely right than wrong, since otherwise it gifts a set on top
-        # of the lost turn, which is strictly worse than a doomed ask. v0.3 used
-        # the same 0.5 bar.
+        # for certain, so a declaration is worth considering instead - but only
+        # if it is more likely right than wrong, since otherwise it gifts a set
+        # on top of the lost turn, which is strictly worse than a doomed ask.
+        # v0.3 used the same 0.5 bar. Under the opponent-award baseline the
+        # bar is exactly break-even in sets (EV = 2p - 1 = 0 at p = 0.5, where
+        # under the legacy null variant an all-ours candidate at the bar was
+        # worth up to +0.5), so 0.5 remains defensible but is no longer
+        # conservative; whether a higher bar plays better is an open
+        # empirical question, deliberately not settled here by fiat.
         #
         # Note what this is NOT. An earlier version of this comment said "if no
         # ask can possibly land", which is a stricter condition - max(p) <= 0 -
@@ -294,14 +450,60 @@ class FishBot4(Tablebase4Mixin, Agent):
                     obs, self.bel, ctx,
                     require_dead=(self.signal_mode == "dead"))
                 if sig is not None:
+                    self._t(_tr.simple_trace, "signal",
+                            target=int(sig.target),
+                            note="a deliberately dead ask that proves to a "
+                                 "partner which card this seat does not hold")
                     return sig
 
         if p[order[0]] <= 0.0:
             best = claims.best_candidate()
-            if best is not None and best[0] >= 0.5:
+            # One bar or two. `best` is (p_exact, p_team, Claim), and the
+            # incumbent reads only p_exact -- it declares at a coin flip
+            # without asking the question the rest of this module is built
+            # around. claim4's docstring says waiting is nearly free while our
+            # own team holds the set, because an opponent who claims it is
+            # wrong and hands it to us; that is precisely the p_team = 1 case,
+            # and it is precisely where this gate does not look. At the
+            # default stuck_team_certain = 1.01 the test below can never pass
+            # and the single 0.5 bar is reproduced exactly.
+            bar = (self.claim_cfg.threshold
+                   if best is not None and best[1] >= self.stuck_team_certain
+                   else self.claim_stuck_threshold)
+            if best is not None and best[0] >= bar:
+                self._t(_tr.claim_trace, best[2],
+                        why="the best-scoring ask cannot land, so the turn is "
+                            "lost anyway and this claim is better than even",
+                        confidence=best[0])
                 return best[2]
+            # No claim, and the ask we are about to make cannot land -- so it
+            # surrenders the turn for certain. Measured over 15,542 decisions
+            # (results/doomed_ask_diag.json) that happens 269 times in 150
+            # games, and in 229 of them ANOTHER ask could still have landed,
+            # with a median success probability of 0.385. So 1.5% of all
+            # decisions throw the turn away when a better-than-one-in-three
+            # chance of keeping it was on the table.
+            #
+            # This restricts the choice to asks that can land and then ranks
+            # them by the SAME objective, so it ablates exactly one idea: which
+            # ask to make when the best-scoring one is doomed. The claim gate
+            # above still sees the unfiltered order, so the claiming behaviour
+            # is bit-identical and this cannot be two changes wearing one flag.
+            #
+            # Off by default. It is a hypothesis, not a fix: the objective
+            # ranked the doomed ask top for reasons, and under the no-bluff
+            # rule a failed ask publicly proves the asker holds another card of
+            # that set, which is real information for a partner. Whether that
+            # is worth a certain turn is what the duel is for.
+            if self.avoid_doomed_asks:
+                live = [i for i in order if p[i] > 0.0]
+                if live:
+                    order = live
+                    top = scores[order[0]]
         pool = [i for i in order if scores[i] >= top - 1e-9]
-        return asks[self.rng.choice(pool)]
+        pick = int(self.rng.choice(pool))
+        self._t(_tr.ask_trace, obs, asks, scores, p, order, pool, pick)
+        return asks[pick]
 
     # -- out-of-turn claiming --------------------------------------------------
 

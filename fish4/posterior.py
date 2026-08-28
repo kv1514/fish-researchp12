@@ -46,7 +46,7 @@ from typing import Optional
 import numpy as np
 
 from fish.beliefs import RESOLVED, BeliefContradiction, BeliefState
-from fish.cards import NUM_PLAYERS
+from fish.cards import NUM_PLAYERS, half_suit_cards
 
 from .counting import GroupSystem, Infeasible
 from .sis import SISFailure, SISSampler, sample_batch
@@ -89,18 +89,21 @@ class Posterior:
                  "stats", "n", "_sys", "_card_group", "_free", "_marg",
                  "_worlds", "_batch", "_sampler", "_exact_ok", "_idx",
                  "_free_pos", "depth_mode", "count_mode", "opp_lambda",
-                 "gamma_schedule", "sis_tilt")
+                 "gamma_schedule", "sis_tilt", "silence_delta")
 
     def __init__(self, belief: BeliefState, rng: random.Random,
                  n_draws: int = 128, n_worlds: int = 32,
                  mode: str = "auto", obs=None, gamma: float = 0.0,
                  depth_mode: str = "initial", count_mode: str = "linear",
                  opp_lambda: float = 0.0, gamma_schedule: float = 0.0,
-                 sis_tilt: float = 0.0,
+                 sis_tilt: float = 0.0, silence_delta: float = 1.0,
                  stats: Optional[PosteriorStats] = None):
         self.bel = belief
         self.obs = obs
         self.gamma = gamma if obs is not None else 0.0
+        # Like gamma, the silence prior conditions on behaviour, so it needs
+        # the observation; without one it is inert.
+        self.silence_delta = float(silence_delta) if obs is not None else 1.0
         self.depth_mode = depth_mode
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda
@@ -160,7 +163,16 @@ class Posterior:
             self.stats.infeasible += 1
         active = self._active_clauses()
         opp = slot = None
-        if self.gamma > 0.0 or self.opp_lambda > 0.0:
+        # `!= 0`, not `> 0`. The model is a log-linear tilt -- the weight
+        # multiplies log(depth) -- so a NEGATIVE gamma is well defined and
+        # means "this seat asks where it is SHALLOW". That is not academic:
+        # v0.7's measured exponent is -1.0041 (results/choice_curve_foreign).
+        # The old `> 0` guard silently turned a negative gamma into gamma = 0,
+        # which made an experiment arm collapse into another arm and report a
+        # bit-identical result -- a null that looked like a measurement. A
+        # value of exactly 0 still means off, and every gamma > 0 path is
+        # untouched.
+        if self.gamma != 0.0 or self.opp_lambda > 0.0:
             from .oppmodel import build as build_opponent
             opp, slot = build_opponent(bel, self.obs, self.gamma,
                                        depth_mode=self.depth_mode,
@@ -246,7 +258,74 @@ class Posterior:
                         row = self._idx[i]
                         for j, c in enumerate(free):
                             row[j] = deal[c]
+                if self.silence_delta < 1.0:
+                    self._apply_silence_prior()
         return self._batch
+
+    def _apply_silence_prior(self) -> None:
+        """Down-weight draws in which a live half-suit sits wholly within one
+        team right now.
+
+        The behavioural argument, proposed by a viewer of the exhibition and
+        priced here as a knob rather than assumed: a team that holds all six
+        cards of a half-suit and can place them declares (this engine at a
+        $0.97$ bar, most policies similarly), so the table's SILENCE about a
+        live half-suit is evidence against worlds where one team already owns
+        it outright. The evidence is deliberately weak -- a team can hold all
+        six and be genuinely stuck on the split -- which is why the factor is
+        a tunable ``silence_delta`` per concentrated suit and not a hard
+        constraint. At 1.0 nothing runs and the batch is untouched.
+
+        Current holders are exact per draw: any card that ever publicly moved
+        is located by the record, so a free card's current holder IS its
+        drawn initial owner, and located cards are draw-independent.
+        """
+        b, obs, bel = self._batch, self.obs, self.bel
+        if b is None or not len(b) or self._idx is None or obs is None:
+            return
+        factors = np.ones(len(b), dtype=np.float64)
+        touched = False
+        for hs, w in enumerate(obs.set_winner):
+            if w is not None:
+                continue
+            loc_team = -1
+            usable = True
+            cols = []
+            for c in half_suit_cards(hs):
+                m = bel.current_holder_mask(c)
+                if m and (m & (m - 1)) == 0:
+                    t = (m.bit_length() - 1) % 2
+                    if loc_team == -1:
+                        loc_team = t
+                    elif t != loc_team:
+                        usable = False   # located on both teams: never whole
+                        break
+                else:
+                    j = self._free_pos.get(c)
+                    if j is None:
+                        usable = False   # not free, not located: stay out
+                        break
+                    cols.append(j)
+            if not usable or not cols:
+                # A fully located concentrated suit carries no draw
+                # information (the factor would be a constant), so skip it.
+                continue
+            teams = self._idx[:, cols] % 2
+            if loc_team == -1:
+                conc = np.all(teams == teams[:, :1], axis=1)
+            else:
+                conc = np.all(teams == loc_team, axis=1)
+            if conc.any():
+                factors[conc] *= self.silence_delta
+                touched = True
+        if not touched:
+            return
+        w = b.w * factors
+        s = w.sum()
+        if s <= 0:
+            return
+        b.w = w / s
+        b.ess = float(1.0 / np.sum(b.w ** 2))
 
     # -- marginals -----------------------------------------------------------
 
@@ -485,8 +564,11 @@ class Posterior:
         ``claim4.best_for_half_suit`` returns a pair -- the probability that a
         specific split is right, and the probability the half-suit is ours at
         all -- and ``forced_claim`` scores a declaration with both, as
-        ``p_exact - (1 - p_team)``. Under the baseline null rule the two carry
-        EQUAL weight in that ranking. The first came from this posterior; the
+        ``p_exact - (1 - p_team)``. Under the legacy null variant the two
+        carried EQUAL weight in that ranking; under the opponent-award
+        baseline ``p_team`` cancels out of it entirely (every wrong outcome
+        costs the same set), so this joint query now serves diagnostics and
+        the null-variant path rather than the shipped forced ranking. The first came from this posterior; the
         second was ``prod(sum of team marginals per card)``, an independence
         product over cards that compete for the same quota slots. The same
         method's own docstring says three lines earlier that the product of

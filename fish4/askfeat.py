@@ -54,7 +54,7 @@ TERM_NAMES = (
     "claim",       # NEW: progress toward a half-suit we can actually claim
     "info",        # NEW: expected information gained about the half-suit
     "certain",     # NEW: explicit bonus for a provably certain steal
-    "concent",     # NEW: prefer suits our team's holding is concentrated in
+    "concent",     # v2: the CHANGE in team concentration this ask causes
     "signal",      # NEW: the BENEFIT side of revealing a holding to teammates
 )
 
@@ -77,7 +77,9 @@ TERM_VERSIONS = {
     "suit": 1, "turn": 1, "scarce": 1, "reveal": 1, "deplete": 1,
     "expose": 1,
     "claim": 2,        # v2: excludes the asked card from the product
-    "info": 1, "certain": 1, "concent": 1, "signal": 1,
+    "info": 1, "certain": 1,
+    "concent": 2,      # v2: expected change caused, not level observed
+    "signal": 1,
 }
 assert tuple(TERM_VERSIONS) == TERM_NAMES, "TERM_VERSIONS must mirror TERM_NAMES"
 
@@ -137,6 +139,7 @@ class DecisionContext:
     """
 
     __slots__ = ("obs", "bel", "post", "M", "me", "my_team", "n_hs", "per",
+                 "mine", "theirs",
                  "hs_live", "my_depth", "team_exp", "opp_exp", "player_exp",
                  "revealed", "turn_risk", "exposure", "hs_entropy",
                  "team_concentration", "p_team_all", "p_team_card", "avg_live")
@@ -159,6 +162,9 @@ class DecisionContext:
         n_hs, me, my_team = self.n_hs, self.me, self.my_team
         mine = [p for p in range(NUM_PLAYERS) if team_of(p) == my_team]
         theirs = [p for p in range(NUM_PLAYERS) if team_of(p) != my_team]
+        # Kept because the per-ask concentration feature needs the roster and
+        # rebuilding it once per candidate ask is the whole cost of the term.
+        self.mine, self.theirs = mine, theirs
 
         self.hs_live = np.array([w is None for w in obs.set_winner], dtype=bool)
         self.my_depth = np.zeros(n_hs)
@@ -308,7 +314,46 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
         # uncertain half-suit resolves the most.
         F[i, 7] = 4.0 * pi * fail * ctx.hs_entropy[hs]
         F[i, 8] = 1.0 if pi >= 0.999999 else 0.0
-        F[i, 9] = ctx.team_concentration[hs]
+        # Concentration, v2: the change this ask would cause, not the level it
+        # observes.
+        #
+        # v1 was `ctx.team_concentration[hs]` -- one number per half-suit,
+        # identical for every candidate ask in it and independent of the target
+        # and of who would end up holding the card. A term that takes the same
+        # value on every ask in a half-suit cannot express a preference BETWEEN
+        # asks; it can only tilt the choice of half-suit. Worse, its sign is
+        # wrong in the case the term exists for: when the concentration sits
+        # with a TEAMMATE, my taking a card breaks it up, and v1 scored that
+        # ask highest precisely because the half-suit was concentrated.
+        #
+        # This is the same defect `claim` had at v1 -- a formula that cannot
+        # reward what its own comment describes -- and gets the same remedy:
+        # corrected in place, TERM_VERSIONS bumped, every harvest fitted
+        # against the old column marked stale by stale_terms().
+        #
+        # Why it is worth correcting rather than deleting: 0.1676 of our 0.1759
+        # wrong declarations a game are allocation class, our own team holding
+        # all six and naming the wrong split, against 0.0083 ownership errors
+        # (results/margin_decomposition.json). A holding in one hand needs no
+        # split named at all. Concentration is the only term in the basis that
+        # points at the dominant error class.
+        #
+        # On success the card moves from the target to me: my expectation gains
+        # one, every teammate's probability mass on that card is discharged,
+        # and the team total moves by the same amount. Scaled by pi, so the
+        # feature is the EXPECTED change.
+        e = ctx.player_exp[hs]
+        t = float(ctx.team_exp[hs])
+        if t > 1e-9:
+            cur = float(max(e[q] for q in ctx.mine)) / t
+            spent = float(sum(M[a.card, q] for q in ctx.mine))
+            new_t = t + 1.0 - spent
+            if new_t > 1e-9:
+                best = float(e[ctx.me]) + 1.0 - float(M[a.card, ctx.me])
+                for q in ctx.mine:
+                    if q != ctx.me:
+                        best = max(best, float(e[q]) - float(M[a.card, q]))
+                F[i, 9] = pi * (best / new_t - cur)
         # Signalling. An ask publicly certifies that we hold a card of this
         # half-suit - the only legal communication channel in Literature, and
         # one that is simultaneously read by the opponents. v0.3 modelled only

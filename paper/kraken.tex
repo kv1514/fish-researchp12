@@ -1,20 +1,57 @@
 % =====================================================================
-% FishBot v0.4
-% Exact Combinatorial Inference and Opponent Modelling in Six-Player
-% Literature
+% Exact Inference Is Not Enough
+% Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
+% in Six-Player Literature
 % =====================================================================
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[margin=1in]{geometry}
+% Times for text and maths, Helvetica for headings. This is the conventional
+% pairing for a journal-style paper, and it also shrinks the file by an order
+% of magnitude: Computer Modern ships as cm-super Type1 outlines that embed at
+% roughly 900 kB, where these subset to a fraction of that.
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage[margin=1in,top=0.95in,bottom=1.05in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{microtype}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{natbib}
 \usepackage{multirow}
+\usepackage{multicol}
 \usepackage{xcolor}
+\usepackage[font=small,labelfont=bf,skip=6pt]{caption}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{setspace}
+
+% -- Spacing -----------------------------------------------------------
+% The complaint this addresses is white space, and in a document with 48
+% tables set inline the slack collects in three places: around headings,
+% around the display blocks holding those tables, and at the foot of a page
+% whose last paragraph will not fit. The first two are tightened here; the
+% third is left to \raggedbottom, which parks the slack in ONE gap at the
+% bottom rather than stretching every inter-paragraph space on the page to
+% hide it. Stretching is what makes a page look loose all over.
+\titlespacing*{\section}{0pt}{2.1ex plus .6ex minus .2ex}{1.2ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus .5ex minus .2ex}{0.9ex plus .2ex}
+\titlespacing*{\paragraph}{0pt}{1.3ex plus .3ex minus .2ex}{1em}
+\setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
+\setlist[enumerate]{itemsep=2pt,topsep=4pt,parsep=0pt}
+\setlist[itemize]{itemsep=2pt,topsep=4pt,parsep=0pt}
+% Last resort before a line is allowed into the margin. This is only consulted
+% on the final pass for a paragraph TeX could not otherwise set, so it does not
+% loosen anything that already fits -- unlike \sloppy, which loosens the whole
+% document to fix five paragraphs.
+\emergencystretch=2em
+\raggedbottom
+\clubpenalty=9999
+\widowpenalty=9999
+\displaywidowpenalty=9999
 
 \newtheorem{proposition}{Proposition}
 \newtheorem{lemma}{Lemma}
@@ -26,130 +63,137 @@
 \newcommand{\ind}[1]{\ensuremath{\mathbf{1}\!\left[#1\right]}}
 \newcommand{\sets}{\ensuremath{\Delta}}
 
-\title{\textbf{FishBot v0.4}\\[0.4em]
-\large Exact Combinatorial Inference, Opponent Modelling, and the Limits of
-the Uniform Posterior in Six-Player Literature}
+\title{\vspace{-1.6cm}\bfseries Exact Inference Is Not Enough:\\[0.1em]
+\large Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
+in Six-Player Literature\\[0.15em]
+\normalsize\normalfont KRAKEN v1.0\vspace{-0.5em}}
 
-\author{}
-\date{}
+\author{\normalsize Kausthubh Veldanda\\[-0.2em]
+\small\texttt{kveldanda987@gmail.com}}
+\date{\small 28 August 2026\vspace{-0.4em}}
 
 \begin{document}
 \maketitle
+\vspace{-3.2em}
 
 % =====================================================================
+% The abstract is set small and tight on purpose: it has to hold every
+% headline number in the paper and still finish on the first page, which is
+% where a reader decides whether to read the other seventy-two.
 \begin{abstract}
-Literature (also called Fish) is a six-player, two-team,
+\small\setstretch{0.93}\setlength{\parskip}{0pt}\noindent
+Literature --- also called Fish --- is a six-player, two-team,
 imperfect-information card game in which players interrogate opponents for
-specific cards and score by declaring the exact distribution of a six-card
-half-suit among their own team. It is a team game with hidden information and
-no legal communication channel, so neither the two-player zero-sum machinery
-that solved poker nor the fully cooperative machinery developed for Hanabi
-applies directly.
+named cards and score by declaring the exact distribution of a six-card
+half-suit among their own team. Hidden information plus no legal communication
+channel puts it outside both the two-player zero-sum machinery that solved
+poker and the fully cooperative machinery developed for Hanabi. This paper
+covers three iterations of an engine for it, \textbf{KRAKEN} --- v0.4, which
+built the inference; v0.6, which corrected a rule and re-measured everything
+that depended on it; and v1.0, which asked where the remaining errors are and
+found that the answer had almost nothing to do with card-reading --- organised
+throughout around results that contradicted the expectations motivating them.
 
-The previous version of this engine ended by naming its own bottleneck: its
-belief sampler was documented as \emph{not uniform} over the deals consistent
-with the public record, so every probability it reported inherited an
-unquantified bias. This paper removes that bias, and reports what happened.
+We first make the inference exact. Hidden-state inference here reduces to counting assignments in a
+degree-constrained bipartite system, $\#P$-complete in general but small in the
+dimension that matters: real positions carry $25.1$ unlocated cards but only
+$4.1$ \emph{distinct candidate sets}, so cards are exchangeable and the problem
+collapses onto a count matrix with at most nine rows. A dynamic program over it returns the exact partition function, marginals, uniform samples
+and joint probabilities, validated against exhaustive enumeration.
 
-We first show that hidden-state inference in Literature reduces to counting
-assignments in a degree-constrained bipartite system, which is $\#P$-complete
-in general but tiny in the dimension that matters here: real positions have
-$25.1$ unlocated cards on average but only $4.1$ \emph{distinct candidate
-sets}, so cards are exchangeable and the problem collapses onto a count matrix
-with at most $9$ rows across the corpus we measured. A dynamic program over that structure returns the exact partition
-function, exact marginals, exact uniform sampling and exact joint probabilities,
-validated against exhaustive enumeration. The one part it cannot absorb --- the
-disjunctive constraints certifying that an asker held a card of the half-suit
---- we handle by importance sampling with closed-form proposal densities, after
-measuring why the two obvious alternatives fail.
-
-The result is that the inference is now provably correct, and \textbf{it changed
-nothing}: against the previous champion, with the ask objective held fixed, the
-set differential was $-0.22$ per duplicate deal-pair, 95\% CI
-$[-0.96, +0.52]$.
-
-To find out why, we built a benchmark the previous version lacked: because the
-hidden hands exist in simulation, a posterior can be scored directly on how much
-probability it places on where the cards actually are. Over 517 decisions and
-13{,}640 uncertain-card predictions, the \emph{exactly uniform} posterior was
-\emph{worse} at predicting reality than the biased sampler it replaced
-(negative log-likelihood $1.362$ against $1.341$ at a matched budget). The
+Making the posterior exactly correct \textbf{changed nothing} in play
+($-0.22$ sets per duplicate deal-pair, 95\% CI $[-0.96, +0.52]$), and made it
+measurably \emph{worse} at predicting reality: over $13{,}640$ uncertain-card predictions the uniform posterior scored a
+negative log-likelihood of $1.362$ against the biased sampler's $1.341$. The
 uniform posterior is a correct theorem about a false hypothesis --- that
-players' choices carry no information beyond legality --- and the old sampler's
-bias happened to encode a crude opponent model.
+players' choices carry no information beyond legality --- and the sampler it replaced had accidentally encoded an opponent model. Replacing the
+accident with an explicit one-parameter model recovers the loss and is worth
+$\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair}, 95\% CI
+$[+1.54, +2.17]$ (void-era scoring; restated below). Tripling the sampling budget is worth a further $+0.340$, three times what
+belief-space search buys: the leverage sits in the belief rather than in what
+is computed from it.
 
-Replacing the accident with an explicit one --- a single parameter modelling the
-hypothesis that a player asks in a half-suit in proportion to how many cards of
-it they hold --- beats both on posterior accuracy ($1.325$) and is worth
-$\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair} in play, 95\% CI
-$[+1.23, +2.46]$, essentially flat over a threefold range of the parameter. For
-scale, the entire objective improvement separating the previous champion from
-its own baseline was $1.26$ sets per pair.
+We then solve the endgame. Its perfect-information value has a closed form
+verified at every $m$; under
+\emph{imperfect} information we compute exact best responses over information
+sets against the engine's own policy, measuring its exploitability rather than
+bounding it --- $+0.4405$ over $305$ positions at $95\%$ coverage with one
+half-suit live, $+0.3250$ at $35\%$ with two. Because two thirds of the second layer is out of
+reach we bound it rather than extrapolate: a single-deal solve is the perfect-information relaxation and
+upper-bounds any imperfect-information best response, while the best one-ply
+deviation followed by incumbent play lower-bounds it. The exact value lies
+inside its own interval on all $716$ positions where both are computed. The
+bounds do not settle whether the reported figures are lower bounds on their
+layers, and they show that the cheap instrument which appeared to settle it
+cannot: its looseness \emph{grows} with belief support ($t = +6.27$).
 
-The resulting engine beats the previous champion by \textbf{+1.85 sets per
-deal-pair} $[+1.54, +2.17]$ over 500 duplicate deals, wins every pair against
-the two weakest policies in the ladder, and improves agreement with provably
-optimal play in exactly solved positions from $67.6\%$ to $72.5\%$. Nothing else
-we tried helped: an eleven-term ask objective, a learned half-suit value, a
-rollout-regression objective, and a widened exact endgame solver are all
-reported as nulls, and the one screening cell that did resolve failed to
-replicate twice. We also build the one search design the variance diagnosis
-leaves open --- a lookahead over the posterior rather than over sampled
-layouts --- and prove that its natural form is exactly greedy at every depth, so
-that only the quota coupling between candidates can make such a search
-non-trivial. Settling whether the coupled form helps took 9{,}700 duplicate
-deal-pairs across four rounds; the answer, from a pre-registered test over the
-final 6000, is $+0.104$ sets per deal-pair, 95\% CI $[+0.020, +0.189]$. The route
-there is the more useful finding, and the estimate over rounds is the shape of
-it: $+0.570$ at the 200-pair screening cell that started this, $+0.153$ pooled
-over the unselected cells, $+0.104$ pre-registered. Three runs of the
-identical configuration returned $+0.570$, $-0.044$ and $+0.386$ sets per
-deal-pair, disagreeing by more than their own intervals allow ($Q = 7.03$,
-$p = 0.030$), which suggested a between-run variance component that no interval
-in this paper models. We measured that directly --- 24 blocks of an A/A, where
-the true differential is exactly $0$ --- and it does not exist: coverage of the
-nominal 95\% interval is $23/24$, $Q = 18.41$ on 23 df at $p = 0.735$, and the
-estimated between-run standard deviation is $0.0000$. The intervals are honest
-and the three-cell disagreement was the one-in-thirty event. Establishing that
-required giving the harness the ability to observe its own null, which it did not
-have: under seat-based seeding an A/A is bit-identical in both halves of a
-duplicate pair and its differential is exactly zero for every deal. Two later results bear on where the remaining strength is. Tripling the
-posterior sampling budget, from 160 draws to 480, is worth
-$\mathbf{+0.340}$ \textbf{sets per deal-pair}, 95\% CI $[+0.243, +0.436]$ over a
-pre-registered 6000-pair run with all six blocks positive and $I^2 = 0\%$ --- the
-largest effect in this study after the opponent model itself, and more than three
-times the belief-space search. It is affordable because a decision costs
-$3.57$\,ms of fixed work plus $6.3\,\mu$s per draw, so tripling the sampler costs
-$1.38\times$ rather than $3\times$; profiling locates that fixed term in per-card
-dispatch inside a sequential sampler, where there is nothing to hoist. Since the
-objective ranks barely better than $\Prob(\text{success})$ alone and nearly every
-term added beside it is null, we read this as evidence that the leverage in this
-game is in the belief rather than in what is computed from it.
+The solver also does something no duel can: it names the move. Exploitation in
+the endgame is almost always \emph{one} move ($88/100$ at $m = 2$, $543/616$ at
+$m = 1$); it is an ask rather than a declaration; and it is systematically
+riskier than the engine's ($p = 0.218$ against $0.799$, paired $t = -18.88$,
+the engine asking a card it was \emph{certain} to receive on $73$ of $122$
+positions and still being wrong). Fitting the ask objective
+against exact one-ply values overturns the obvious diagnosis --- de-weighting
+success probability changes nothing --- and isolates certainty rather than
+probability as the defect. The resulting one-parameter correction, pre-registered and replicated, gains
+$\mathbf{+0.1220}$ $[+0.0711, +0.1729]$ sets on top of the void-era deployed
+configuration. It does \emph{not} make that policy harder to
+exploit: over $285$ paired positions what a best response extracts moves by
+$-0.0002$, half-width $0.026$ --- as a critic it improves average-case play
+and leaves the worst case where it was. Two solver faults, caught by controls
+needing no ground truth, are reported with it.
 
-The second is a retraction. This paper closed its objective-learning line on the
-claim that the belief tracker \emph{cannot} attach to a determinized mid-game
-position. It can, in a few lines. On identical positions, worlds and root asks,
-finishing rollouts with the full engine instead of a public-information
-heuristic raises the target's slope on $\Prob(\text{success})$ from
-$+0.040 \pm 0.045$ to $+0.681 \pm 0.142$, a paired difference of
-$+0.641 \pm 0.145$; the heuristic needs $181$ plies to finish a position the
-engine finishes in $26$. The diagnosis was right about the mechanism and wrong
-that it was a wall. We report it as the fifth appearance in this study of the
-same error --- reasoning about a quantity instead of measuring it --- and the
-first in which it closed a research direction rather than merely inflating a
-number, because a negative claim generates no experiment.
+Finally we correct the game itself. From v0.1 the engine scored a
+right-team, wrong-split declaration as a \emph{void}; the standard rule
+awards every misdeclared set to the opponents and is now the baseline,
+results labelled by rule era. Under standard scoring the deployed
+configuration beats the v0.3 champion by $\mathbf{+2.412}$
+$[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
+independently developed C++ engine running its own code --- it wins
+$\mathbf{+2.347}$ sets per game, of which $\mathbf{57\%}$ is declaration
+accounting ($96.5\%$ correct against $78.9\%$), once a bridge defect of ours
+worth $-0.08$ to them is repaired;
+the endgame correction, fitted against void-era targets, re-measures at
+$-0.104$ and is withdrawn.
 
-We also report several
-methodological corrections, including a bias in the previous harness's handling
-of timed-out games that we demonstrate can place the true value outside a
-reported 95\% confidence interval; a measurement showing that the previous
-version's 600-pair experiment cells could not resolve effects below about
-$0.44$ sets per pair, so its smaller null results were uninformative rather
-than negative; and the finding that the per-pair standard deviation those
-calculations rest on is not a property of the game at all but of how often the
-two policies being compared diverge, which systematically over-sizes exactly the
-near-identical comparisons that most need care.
+Version 1.0 then asks where the rest of the margin is, and every answer is a
+surprise. Our residual errors are not failures to \emph{find} cards:
+$\mathbf{95.3\%}$ of them are \emph{allocation} errors --- our team held all
+six and we split them wrongly --- at $0.1676$ a game against $0.0083$
+ownership errors. What a declaration risks turns out not to be how many of the
+six the declarer holds, which is the natural lever and is worth nothing, but
+how many have \emph{never been publicly located}; the counting channel alone
+resolves $53.4\%$ of wholly-held sets, which is why the obvious lever has
+nothing left to move. Handing a seat the true deal one side at a time prices
+the two halves of the information ceiling separately: teammates' cards are
+worth $\mathbf{+3.41}$ $[+3.16, +3.66]$ against opponents' $+1.31$
+$[+1.01, +1.61]$ --- $2.6\times$, and we predicted the reverse. Two
+methodological results underwrite the rest: the deal contributes
+\textbf{nothing} to a game's outcome variance ($-1.3\%$ $[-4.0\%, +1.5\%]$
+over $5{,}000$ deals played from both parities), and the value of pairing runs
+from $1.1\times$ to $414\times$ the games, set by \emph{how often a knob
+changes a decision} rather than by effect size --- which is now how runs here
+are sized. One change shipped from this round, an exhaustive search on forced
+declarations worth $+0.0233$ $[+0.0133, +0.0334]$ on $0.9\%$ of games; four
+candidates were withdrawn, each on a condition fixed before its run.
+
+\vspace{1pt}
+\noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
 \end{abstract}
+
+% =====================================================================
+% Contents. Set two-column, small, and without the vertical slack \tableofcontents
+% normally claims: at thirty-four sections the default single column runs to
+% two pages and pushes the introduction onto the third, which is exactly the
+% white space this paper has been trying to get rid of.
+{\small
+\setlength{\columnsep}{2em}
+\begin{multicols}{2}
+\setcounter{tocdepth}{1}
+\vspace{-1.2em}
+\tableofcontents
+\end{multicols}}
+\vspace{-1.4em}
 
 % =====================================================================
 \section{Introduction}
@@ -164,8 +208,28 @@ hidden information and \emph{no legal communication channel}, so neither the
 two-player zero-sum machinery that solved poker nor the fully cooperative
 machinery developed for Hanabi applies directly.
 
-This paper is the fourth iteration of an engine for the game. The previous
-version, v0.3, established three results that frame everything here. First,
+This paper covers three iterations of an engine for the game, which is called
+\textbf{KRAKEN}. The bulk of it is v0.4, which built the inference and the
+evaluation discipline; \S\ref{sec:critic} then reports v0.6, whose first act
+was to discover that this engine had been playing a house variant of the
+misdeclaration rule since v0.1 and whose remaining work was re-measuring, and
+in two cases withdrawing, everything that had depended on it. Version~1.0 is
+v0.6 plus one shipped change (\S\ref{sec:missing}) and a body of work that
+did not change the policy at all: it asked where the remaining errors are, and
+the answers redirected the project away from card-reading entirely.
+
+A note on names, because the identifiers in this paper do not match the title.
+The engine was called \emph{KV's FishBot v0.6} until August 2026 and is called
+KRAKEN now, but the shipped configuration is still named
+\texttt{V06\_DEPLOYED} in the code and \texttt{fishbot4} in the registry.
+Those identifiers are frozen deliberately: they are what the pre-registration
+documents in \path{prereg/} name as their arms, and a registration that fixes
+its arms before the data is worth nothing if the arms can be renamed
+afterwards. The display name moved; the record did not. There is exactly one
+configuration either way.
+
+The previous version, v0.3, established three results that frame everything
+here. First,
 exact belief tracking dominates: an agent that merely chains every logical
 implication of the public record beats a public-information heuristic by
 $11.86$ sets per duplicate deal-pair. Second, and more surprisingly, search
@@ -282,6 +346,31 @@ result about exactly the failure mode this paper attacks from the other side ---
 they identify that action history carries information their determinizations
 ignore; we quantify how much, and put it in.
 
+\paragraph{The concurrent engine.} The one serious exception is
+\citet{dylan2026fishbot}: an independently developed C++ engine for
+six-player, 54-card Literature, with its own seven-version paper series ---
+the engine this paper's exhibition and foreign-opponent checks play against
+(\S\ref{sec:critic}). Read after those checks ran, its documentation turns
+out to contain this paper's central finding, arrived at independently on a
+different architecture: its \emph{exact} rules-posterior is the worst
+predictor of where cards sit (NLL $1.422$ against $1.382$ for its
+behaviour-aware approximation), and substituting the exact object into the
+same policy loses in play --- their phrasing, ``exactness and
+behaviour-awareness are not available in the same object here'', is our
+Section~\ref{sec:res-posterior} in different words. The convergences run
+further: their first-order behaviour prior (an ask-tally over every seat,
+teammates included) is this paper's choice model with two parameters in
+place of one; their unguarded determinized search lost $35.7$ points to its
+own blueprint, our sampled searches all lost to their prior
+(\S\ref{sec:lookahead}); and their deception feature (``feint'') cost
+$-2.2$ replicated where our deception ladder had to be withdrawn wholesale.
+Where the projects genuinely differ --- their deployed belief is an
+approximate Sinkhorn object seeded by the prior where ours is exact
+counting reweighted by the model; their declarations price by a learned
+state value where ours declare at a fixed certainty bar --- the
+disagreements are now measurable across a real engine boundary, which
+neither project could do alone.
+
 \paragraph{Determinization and its pathologies.} Evaluating an
 imperfect-information position by sampling consistent worlds and solving each
 one perfectly is the standard technique, and its two failure modes are named:
@@ -353,20 +442,42 @@ of the four $8$s and two individually identified jokers, a Red Joker and a
 Black Joker. Each player is dealt nine cards. The classic 48-card,
 eight-half-suit variant is also supported.
 
-On turn, a player either \textbf{asks} or \textbf{claims}.
+On turn, a player either \textbf{asks} or \textbf{declares}.
 
 An \textbf{ask} names an opponent and a specific card. It is legal only if the
 asker holds at least one card of that card's half-suit and does not hold the
 card itself. If the opponent has it, the card transfers \emph{face up} and the
 asker keeps the turn; otherwise the turn passes to the opponent who was asked.
 
-A \textbf{claim} names a half-suit and declares which teammate holds each of
-its six cards. If the declaration is exactly right, the claiming team scores
-the half-suit. If any of the six is with an opponent, the opposing team scores
-it. If all six are within the claiming team but the declared distribution is
-wrong, the half-suit is nulled and nobody scores. The requirement to name the
-exact distribution, not merely to assert possession, is what makes Literature
-a game about inference rather than collection.
+A \textbf{declaration} names a half-suit and states which teammate holds each
+of its six cards. (The codebase, and earlier versions of this paper, call
+this move a \emph{claim}; the two words name the same move throughout.) If
+the declaration is exactly right, the declaring team scores the half-suit.
+\emph{Any} wrong declaration --- a card with an opponent, or all six within
+the declaring team but the split misstated --- awards the half-suit to the
+opposing team. The requirement to name the exact distribution, not merely to
+assert possession, is what makes Literature a game about inference rather
+than collection.
+
+\paragraph{The rule this engine got wrong for five versions.} From v0.1
+through the v0.4 measurement campaign, the engine's default scored the
+second kind of miss --- right team, wrong split --- as a \emph{void}: the
+half-suit was discarded and nobody scored it
+(\texttt{wrong\_distribution\_outcome=\char`\"null\char`\"}). That is a house
+variant, not the game: the reference rules, and the one foreign engine we
+test against, award every misdeclared set to the opponents. The default is
+now the award rule; the void variant remains implemented and pinned wherever
+a void-era measurement is reproduced. Every result in this paper is
+therefore labelled with its rule era: analyses proved rule-invariant
+(the closed form, the perfect-information solver and tablebases, whose
+declarations are certain by construction; posterior quality, which scores
+predictions rather than declarations) carry over unchanged, in-play
+measurements from the void era are marked as such, and the numbers the
+abstract and strategy sections assert are re-measured under the award rule
+per the pre-registration \path{prereg/rules_award_baseline.md}. The
+correction is not cosmetic in play: in the exhibition against Dylan's
+FishBot v0.7 the rule touches $466$ sets in $1{,}000$ games --- one set
+every other game whose fate the two rules disagree about.
 
 A player with no cards on move passes the turn to a teammate who has cards. If
 an entire team is out of cards, the other team must claim out the remaining
@@ -400,10 +511,10 @@ An imperfect-information study is worthless if the agents can see the hidden
 state, and the failure mode is usually subtle rather than flagrant. The
 boundary is enforced four ways.
 
-\paragraph{Structural.} The engine's \texttt{GameState} never reaches a
-policy. Policies consume only an \texttt{Observation}: their own hand, the
-public event log, public hand counts, resolved half-suits, whose turn it is,
-and the rules.
+\paragraph{Structural.} The engine's \texttt{GameState} object never reaches a
+policy at all. Policies consume only an \texttt{Observation}: their own hand,
+the public event log, public hand counts, resolved half-suits, whose turn it
+is, and the rules.
 
 \paragraph{Proved by reconstruction.} \texttt{Observation.reconstruct} rebuilds
 a seat's entire view from nothing but (rules, that seat's initial hand, the
@@ -495,7 +606,7 @@ matchings in a degree-constrained bipartite graph, equivalently a restricted
 permanent, which is $\#P$-complete in general \citep{valiant1979complexity}.
 The instances arising here, however, are small in the only dimension that
 matters. Measured over the $360$ decision points of the stored corpus
-(\texttt{results/infer\_position\_stats.json}):
+(\path{results/infer_position_stats.json}):
 
 \begin{center}
 \begin{tabular}{lrrrr}
@@ -551,7 +662,7 @@ $O(\sum_{g \in A_p} \min(n_g,q_p))$ array operations. Second, the state space
 $\prod_g (n_g+1)$ is small in practice, because $G$ is small and not because
 $|F|$ is. An earlier draft put it at ``median $272$, mean $577$ over real
 positions''; those figures back nothing in
-\texttt{results/infer\_position\_stats.json}, which stored the \emph{quota}
+\path{results/infer_position_stats.json}, which stored the \emph{quota}
 lattice $\prod_p (q_p+1)$ under a similar name and never the group product at
 all. The group product is now measured alongside it, and the two are different
 quantities rather than two estimates of one.
@@ -571,8 +682,8 @@ $\Prob(f(c) = p) = \Ex[k_{g(c)p}] / n_{g(c)}$.
 take is drawn from its exact conditional, so a draw is exactly uniform on
 $\Omega_0$.
 \item \textbf{Exact joint probabilities.} Pinning named cards reduces $n_g$ and
-$q_p$ by one each, so $\Prob(\text{a declared claim distribution is exactly
-right})$ is a ratio of two evaluations of \eqref{eq:Z}. Because cards are
+$q_p$ by one each, so the probability that a declared claim distribution is
+exactly right is a ratio of two evaluations of \eqref{eq:Z}. Because cards are
 labelled throughout, no extra combinatorial factor is needed.
 \end{itemize}
 
@@ -657,7 +768,7 @@ known to discriminate. The Kish effective sample size is $\mathrm{ESS}/N = 0.52$
 on real positions (Section~\ref{sec:res-ess}), so the cost of steering the
 proposal is substantial and, more importantly, is reported rather than assumed.
 An earlier draft put it at $0.81$ here while Section~\ref{sec:res-ess} put it at
-$0.52$; the $0.52$ is what \texttt{results/ess\_probe.json} measures over $641$
+$0.52$; the $0.52$ is what \path{results/ess_probe.json} measures over $641$
 real decisions, and the two sentences had disagreed with each other for as long
 as both existed. Drawing the batch one card at a
 time across all draws in lockstep, rather than one draw at a time, makes this
@@ -865,7 +976,7 @@ $\mathbf{43{,}000\times}$ by total CPU time and
 $\mathbf{10{,}900\times}$ by median per position ($990$\,ms against
 $91\,\mu$s). An earlier draft reported ``131 further positions'' at
 $4{,}205\times$; there is no second corpus, and $4{,}205$ is not a ratio
-anything in \texttt{results/exact2\_cross\_check.json} produces.
+anything in \path{results/exact2_cross_check.json} produces.
 
 \subsection{A closed form for the perfect-information value}
 
@@ -875,9 +986,80 @@ V \;=\; \mathrm{sign}(\text{mover's team}) \times (2f - m),
 \label{eq:closedform}
 \end{equation}
 where $m$ is the number of live half-suits and $f$ the number of them in which
-the team on move holds at least one card. The mechanism is that footholds only
-ever shrink and a perfectly-informed asker never misses, so the team on move
-takes every half-suit it can reach and the opponents take the rest.
+the team on move holds at least one card.
+
+This is not only an empirical match at the layers we can enumerate. It holds at
+every $m$, and the reason is that it turns on three properties of the
+\emph{rules} rather than of any position, none of which needs a table:
+
+\begin{description}
+\item[A. Footholds never grow.] \texttt{check\_legal} refuses an ask unless the
+asker already holds a card of that half-suit, so a team holding none of $h$ can
+never receive one. Its foothold set only shrinks, and the mover's team can
+therefore claim at most the $f$ it has \emph{now}.
+\item[B. A team with no foothold in $h$ cannot deny $h$.] All six cards of $h$
+sit with the opponents, so every assignment it could submit reveals an opponent
+holder and \texttt{\_apply\_claim} awards the half-suit to the opponents ---
+under both misdeclaration rules. Under the legacy null variant the further
+point was that no spite-null is available (a certain $-1$ cannot be
+converted into a $0$); under the award baseline nulls do not exist at all,
+which only strengthens the premise. Hence the opponents take all $m - f$
+whatever the mover does.
+\item[C. The mover takes all $f$ without surrendering the turn.] A hit retains
+the turn, a claim never moves it, and a claim that empties the claimant passes
+within the team. With perfect information every ask can be made to hit, so the
+mover drains and claims each of its $f$ half-suits, and only when its team is
+cardless does the turn normalise to an opponent --- who by symmetry takes the
+rest.
+\end{description}
+
+A and B bound $V$ above by $2f - m$; C bounds it below. Each is checked against
+the engine rather than against a reading of it, and the optimal
+perfect-information policy that falls out is one line: \emph{take a hitting ask
+if one exists; otherwise claim a half-suit your team wholly owns; otherwise pass
+to a teammate with cards.} Played from $360$ random positions spanning $m = 1$
+to $m = 9$ it realises $2f - m$ every time, and at $m = 1$ and $m = 2$ it agrees
+with the exact solver on every position tested --- the one step in the argument
+anchored to a solver rather than to internal consistency.
+
+\subsection{The perfect-information game is trivial}
+
+The closed form is worth stating as a value because the value is degenerate. A
+team lacks a foothold in a half-suit only if all six of its cards landed in the
+opponents' twenty-seven, with probability $\binom{27}{6}/\binom{54}{6} =
+1.15\%$, so at a fresh deal
+\begin{equation}
+\mathbb{E}[V] \;=\; 2\left(9 - 9\tbinom{27}{6}\big/\tbinom{54}{6}\right) - 9
+\;=\; +8.794
+\label{eq:opening}
+\end{equation}
+of the nine available: \textbf{whoever moves first takes everything}.
+
+Premise C is the constructive step and the one an adversary could attack, so it
+is worth testing against opponents that are trying to win rather than against
+the greedy rule itself. The premise is stronger than the proof needs: the mover
+never surrenders the turn, so the opponents do not act at all until its team is
+cardless, and only the \emph{mover's} team needs to know the deal. The oracle
+duel reported in \S\ref{sec:limitations} is that experiment. Across $80$ games against
+the champion, in every one of the $40$ where an oracle seat moves first its
+team's realised set count equals its foothold count at the deal --- $40/40$
+exactly, not on average. Mean footholds were $8.94$ of nine against the $8.897$
+that \eqref{eq:opening} implies.
+
+The other forty games are the sharper result. There a \emph{champion} moves
+first, holding the advantage that \eqref{eq:opening} prices at $+8.79$ of nine,
+and converts essentially none of it: the oracle team still finishes with $8.95$
+of its $8.97$ footholds. A first move that is decisive under perfect
+information is worth nothing at all to a player who cannot see the deal.
+
+Two things follow for the project. First, extending the tablebase to larger $m$
+would buy no ground truth about Fish, because the closed form already answers
+every layer and the answer is a different game's answer. Second, the inference
+ceiling reported in \S\ref{sec:limitations} should be read accordingly: its
+$+17.483$ per deal-pair was framed as what perfect card-reading is worth, and it
+is closer
+to \eqref{eq:closedform} being played out --- seven of its ten per-deal
+differentials are exactly $18 = 2 \times 9$.
 
 This has an uncomfortable consequence for the previous version's headline
 absolute result. v0.3 reported that its belief agents choose a provably optimal
@@ -1008,7 +1190,7 @@ success pins the asked card to us, a failure removes the target from that card's
 candidate set.
 
 % =====================================================================
-\section{Claiming}
+\section{Declaring}
 \label{sec:claiming}
 
 v0.3 swept the claim-confidence threshold directly and found two things. First,
@@ -1027,11 +1209,15 @@ teammate holdings. Waiting is close to free, which is exactly what the sweep
 measured and what v0.3's expected-value model missed by treating the resolution
 of a split as a coin flip.
 
-The corollary is that the leverage in claiming is not the threshold. It is
-(i)~getting the declared distribution right, since nulls cost roughly $0.6$ sets
-per deal-pair and a null is a bookkeeping failure rather than an unlucky gamble;
-and (ii)~playing the forced claims well, where no threshold is involved at all.
-v0.4 therefore keeps a high threshold and changes what happens underneath it:
+The corollary is that the leverage in declaring is not the threshold. It is
+(i)~getting the declared distribution right --- misdeclarations cost roughly
+$0.6$ sets per deal-pair at v0.3's strength \emph{under the void-era rule
+these games were played with}, and under the award baseline each one is a
+full-set swing, so the stakes have doubled since that measurement; either
+way a misdeclaration is a bookkeeping failure rather than an unlucky gamble
+--- and (ii)~playing the forced declarations well, where no threshold is
+involved at all. v0.4 therefore keeps a high threshold and changes what
+happens underneath it:
 
 \begin{itemize}
 \item The declared distribution is the posterior MAP, found by shortlisting on
@@ -1042,8 +1228,12 @@ same quota slots, so per-card modes can be jointly impossible.
 the dynamic program of Section~\ref{sec:counting}; where it is not, deduction
 still settles the extremes exactly, because a zero under the OR-free system
 implies a zero under the smaller OR-constrained one, and likewise for one.
-\item Forced claims maximise expected sets, $\Prob(\text{exact}) -
-\Prob(\text{an opponent holds one})$, rather than confidence.
+\item Forced declarations maximise expected sets rather than confidence, and
+the rule sets the objective: under the award baseline every wrong outcome
+costs the same set, so the ranking is $2\Prob(\text{exact}) - 1$ ---
+maximise $\Prob(\text{exact})$ alone --- while under the void-era variant it
+was $\Prob(\text{exact}) - \Prob(\text{an opponent holds one})$. The
+evaluator reads the rule off the observation and prices both.
 \end{itemize}
 
 That second probability was, until recently, an independence product, and the
@@ -1051,11 +1241,15 @@ first bullet is the sentence that condemns it. The claim evaluator returned the
 \emph{joint} for ``this split is right'' and $\prod_c \sum_{p \in
 \text{team}} \Prob(p \text{ holds } c)$ for ``the half-suit is ours at all'', in
 the same tuple, from the same method, three lines below its own docstring
-saying the product of marginals is not the joint. Under the baseline null rule
-the forced-claim ranking is $\Prob(\text{exact}) + \Prob(\text{ours}) - 1$, so
-the two carry equal weight; and their difference is read as ``ours but wrongly
-split'', a quantity subtracted across two different distributions and therefore
-able to come out negative --- which it did, and a clamp hid it.
+saying the product of marginals is not the joint. Under the void-era rule in
+force when this bug lived, the forced ranking was $\Prob(\text{exact}) +
+\Prob(\text{ours}) - 1$, so the two carried equal weight; and their
+difference was read as ``ours but wrongly split'', a quantity subtracted
+across two different distributions and therefore able to come out negative
+--- which it did, and a clamp hid it. (Under the award baseline
+$\Prob(\text{ours})$ cancels out of the forced ranking entirely, which
+shrinks this bug's surface but does not excuse it: the voluntary path and
+the void variant still consume the joint.)
 
 Measured over $29406$ half-suit queries in $60$ games of real play, the two
 disagree on $27902$, and on $86\%$ of those the product \emph{overstates} the
@@ -1088,8 +1282,31 @@ a threshold of $0.97$. The shortcut is sound. What makes it sound is the margin 
 agreement between the two quantities --- the gap reaches $+0.255$ on individual
 half-suits --- so the tier is safe at these settings and would not survive a
 much lower threshold. That is now a stored measurement
-(\texttt{results/claim\_screen\_check.json}) with a test that fails if a
+(\path{results/claim_screen_check.json}) with a test that fails if a
 screened half-suit ever turns out to be claimable, rather than a comment.
+
+\paragraph{``Waiting is close to free'' is true about sets and false about
+information.} The mechanism above is right that an opponent cannot take a
+half-suit our team wholly owns: a claim by a player whose team does not hold
+all six \emph{gives} the set to us. But the same fact that makes waiting safe
+makes it sterile, and the argument as first written did not notice.
+\texttt{GameState.legal\_asks} requires the asker to hold a card of the
+half-suit they are asking in. Once our team holds all six, no opponent holds
+one, so \emph{no opponent can ever ask in it again}. Every public event that
+could still localise the split inside our team has been removed from the game
+by our own success at collecting it.
+
+One channel remains and it is not free: an ask of our own that we know will
+fail. Under the no-bluff rule it certifies that the asker does not hold the
+named card, which is exactly the fact a partner needs, and it costs the turn
+(\texttt{fish4/perpetual.py}). So a half-suit that becomes ours before we can
+place it is a half-suit whose split we will know at the deadline exactly as
+well as we know it now, unless we spend a turn.
+
+This changes what ``waiting'' means at the two ends of the game. It remains
+free in sets at risk. It is not free in information, and the bill arrives at
+the forced declaration, where no legal ask exists and the split must be named
+from whatever was known when the last opponent ran out of cards.
 
 Finally, a hard architectural constraint taken from the literature: a claim must
 never be selected by determinized search. Inside any determinization the
@@ -1211,7 +1428,7 @@ legal asks has mean $45.0$, median $45$, p90 $81$ and maximum $102$, and exceeds
 $8$ in $94.6\%$ of decisions. (An earlier draft of this section said the
 branching factor ``averages 8''. That figure is the mean legal-action count of
 the \emph{exact-solver corpus} in
-\texttt{results/exact\_positions\_v2.json}, which consists of endgame positions
+\path{results/exact_positions_v2.json}, which consists of endgame positions
 with one or two live half-suits --- an endgame statistic read as a general one.)
 
 Continuations are beamed to the best $4$ candidates by immediate $p$. The root
@@ -1234,8 +1451,8 @@ $6.7$\,ms (mean $8.3$, p90 $18.1$, over $40$ positions, minimum of three
 repetitions each) on the contended host of Section~\ref{sec:counting}.
 
 Against the configuration the lookahead runs actually used --- $160$ draws, the
-\texttt{fish4/agent4.py} default, since no lookahead cell in
-\texttt{results/v04\_duels.jsonl} overrides \texttt{n\_draws} --- the relevant
+\path{fish4/agent4.py} default, since no lookahead cell in
+\path{results/v04_duels.jsonl} overrides \texttt{n\_draws} --- the relevant
 posterior cost is the $31.9$\,ms row of Table~\ref{tab:posterior}, not the
 $\sim\!100$\,ms rows, which are all $512$-draw. So the bonus now adds roughly a
 fifth to a decision. An earlier draft of this section claimed $15\%$ by comparing
@@ -1250,12 +1467,103 @@ since the optimisation is exact and postdates them.
 
 \subsection{Duplicate deals}
 
-Raw win rates in a card game are dominated by the deal. Every result here uses
-\textbf{duplicate (paired) deals}: each deal is played twice with the teams
-swapped, on identical cards, an identical rotated starting seat, and identical
-agent randomness. Only the policy assignment differs, so per-pair set
-differentials are i.i.d.\ across deals and confidence intervals mean what they
-say.
+Every result here uses \textbf{duplicate (paired) deals}: each deal is played
+twice with the teams swapped, on identical cards, an identical rotated starting
+seat, and identical agent randomness. Only the policy assignment differs, so
+per-pair set differentials are i.i.d.\ across deals and confidence intervals
+mean what they say.
+
+Earlier versions of this section justified that design by asserting that raw
+win rates in a card game are dominated by the deal. That is the standard
+argument for duplicate play and it is borrowed from bridge. It is false here,
+and the head-to-head corpus was large enough to say so without playing a game.
+
+\subsection{The deal decides nothing}
+\label{sec:dealluck}
+
+The $10{,}000$-game match against v0.7 (\S\ref{sec:headtohead}) played every deal
+from both seat parities, so in the second game our engine holds exactly the
+cards the opponent held in the first. Writing $D_d$ for whatever the deal is
+worth to whoever sits on the even seats and $E$ for play noise,
+%
+\begin{equation}
+m_{\text{even}}(d) = \mu + D_d + E_e,
+\qquad
+m_{\text{odd}}(d) = \mu - D_d + E_o ,
+\end{equation}
+%
+so $\operatorname{var}(m_{\text{even}} + m_{\text{odd}}) = 2\sigma^2$ and
+$\operatorname{var}(m_{\text{even}} - m_{\text{odd}}) = 4\operatorname{var}(D)
++ 2\sigma^2$. The deal's share of one game's variance is then
+$\operatorname{var}(D)/(\operatorname{var}(D)+\sigma^2)$, which under this model
+is identically $-\rho$, the correlation of the two parities' margins.
+
+Measured over $5{,}000$ deals: $\rho = +0.0127$ $[-0.0150, +0.0404]$, so the
+deal's share is $-1.3\%$ $[-4.0\%, +1.5\%]$. The sample variances are
+$15.267$ against $14.884$ for sum and difference, and the implied
+$\operatorname{var}(D)$ is $-0.096$ --- zero, measured with noise.
+\textbf{Which cards you are dealt does not measurably decide a game of
+six-handed Fish} (\texttt{scripts4/deal\_luck.py},
+\texttt{results/deal\_luck.json}).
+
+The mechanism is not mysterious. There are no high cards: every half-suit is
+worth exactly one set, so a hand cannot be strong, only awkwardly or
+conveniently distributed. And cards move continuously, so whatever the deal
+arranged is largely dissolved by the middlegame. The deal does leave a
+\emph{symmetric} trace --- some deals are clumped enough that asks land more
+often for everybody, and our ask hit rate correlates $+0.087$
+$[+0.060, +0.115]$ across the two parities of a deal --- but a symmetric
+texture is not an advantage to either side, which is why it appears in the hit
+rate and not in the margin. A deal can be textured without being unfair.
+
+Two consequences follow, and the second is the useful one.
+
+\paragraph{Swapping seats buys nothing.} Duplicating a deal across seat
+parities is worth $0.99\times$ the games, because the antisymmetric deal
+advantage it exists to remove is not there.
+
+\paragraph{Holding the knob fixed buys between $1.1\times$ and $414\times$, and
+the rate the knob fires sets which.} That is a different pairing and it is the
+one every ship decision in this project rests on: arms $A$ and $B$ play the
+identical deal from the identical seats against the identical opponents and
+differ by one parameter. Table~\ref{tab:pairing} prices it on every multi-arm
+journal the repository holds (\texttt{scripts4/pairing\_value.py}).
+
+\begin{table}[t]
+\centering
+\begin{tabular}{llrrr}
+\toprule
+run & arm & identical games & $\rho$ & efficiency \\
+\midrule
+$\gamma$ policy specificity (G1) & \texttt{B\_none} & $19.9\%$ & $0.089$ & $1.1\times$ \\
+$\gamma$ policy specificity (G1) & \texttt{C\_measured} & $21.2\%$ & $0.088$ & $1.1\times$ \\
+signalling gate & \texttt{C\_measured} & $79.8\%$ & $0.853$ & $6.8\times$ \\
+signalling gate & \texttt{B\_incumbent} & $83.4\%$ & $0.877$ & $8.1\times$ \\
+doomed-ask gate & \texttt{B2\_mid} & $86.1\%$ & $0.889$ & $9.0\times$ \\
+doomed-ask gate & \texttt{B\_defer} & $88.1\%$ & $0.899$ & $9.9\times$ \\
+forced search, self-play & \texttt{B\_full} & $98.4\%$ & $0.996$ & $268\times$ \\
+forced search, vs v0.7 & \texttt{B\_full} & $99.1\%$ & $0.998$ & $414\times$ \\
+\bottomrule
+\end{tabular}
+\caption{How many times the games an unpaired design would need to match the
+precision each paired run achieved. ``Identical games'' is the share of games
+the two arms finished on the same margin, and it orders the table: a knob that
+fires on a rare branch leaves nearly every game bit-identical and pairing
+removes almost all the variance, while $\gamma$ re-weights every posterior
+sample on every decision, the games diverge immediately, and pairing removes
+nothing.}
+\label{tab:pairing}
+\end{table}
+
+The planning consequence is worth stating plainly, because this project has
+sized runs by effect size alone and that is the wrong variable. \textbf{The
+sample size a screen needs is governed by how often its knob changes a
+decision, not by how large the effect is.} The forced-search secondary
+resolved a $+0.0180$ effect to $\pm 0.012$ on $1{,}000$ games; G1, at $1{,}600$
+games and the same design, could resolve nothing finer than $\pm 0.19$. That is
+a sixteen-fold difference in precision from the same number of deals, and it
+is entirely attributable to one knob firing on $0.9\%$ of games and the other
+on $80\%$.
 
 \subsection{How much can an experiment of size \texorpdfstring{$n$}{n} resolve?}
 
@@ -1352,7 +1660,7 @@ of the constant at low share --- the only place the rule is ever \emph{used} ---
 was not established, and the paragraph said so. The gated re-take run has since
 landed two blocks at $s = 0.233$ and $s = 0.236$, and the prediction that the
 flat model over-states low-share noise by roughly $30\%$ was recorded in
-\texttt{jobs/PREREGISTRATION\_retake\_gate.md} \emph{before any pair of that run
+\path{jobs/PREREGISTRATION_retake_gate.md} \emph{before any pair of that run
 was played}. Scoring it out of sample, over the three cells now below $s = 0.5$:
 \begin{center}
 \begin{tabular}{lrrrr}
@@ -1436,8 +1744,30 @@ weight demonstrably changes some decision. Every term in
 Table~\ref{tab:terms} passes both.
 
 % =====================================================================
-\section{Results}
+\section{Results: what the inference is worth}
 \label{sec:results}
+
+Figure~\ref{fig:effects} is this section on one axis: every in-play effect the
+paper settles, each measured by the paired duplicate-deal design of
+\S\ref{sec:eval}, sorted by size. The subsections that follow take the rows in
+turn; the orange row is measured in \S\ref{sec:critic}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/effects.pdf}
+\caption{Every settled in-play effect, on one axis. Blue rows ship in the
+deployed configuration; gray rows were evaluated and not shipped ---
+at-ask-time depth a null at $n = 6000$, the learned whole-game weights
+significantly worse, and the endgame ask correction shipped in the void era
+and \emph{withdrawn} when the award baseline re-priced it below zero
+(\S\ref{sec:critic}). The orange row is that correction against a foreign
+engine, Dylan's FishBot v0.7, under the matched award rule: a tie whose
+interval excludes the sibling-measured void-era $+0.12$ --- the paper's
+recurring finding that gains measured inside an engine family shrink outside
+it. Intervals are 95\% confidence intervals over paired deals; $n$ counts
+pairs.}
+\label{fig:effects}
+\end{figure}
 
 \subsection{Exact inference alone changes nothing}
 \label{sec:res-exact}
@@ -1530,7 +1860,7 @@ batch.
 \paragraph{A control this paragraph used to claim, and did not have.} Earlier
 drafts read ``$83.7$ effective \dots\ against $99.9$ with the opponent model
 disabled'', and reported $14$ exact decisions in $646$ for that arm. No such arm
-was ever run. \texttt{results/ess\_probe.json} holds four rows, all at
+was ever run. \path{results/ess_probe.json} holds four rows, all at
 $\gamma = 0.35$, differing only in the proposal tilt; the $99.9$ is the
 \emph{p90 of the champion row itself} ($99.986$), and the $14$ in $646$ has no
 source at all. A percentile of one arm had been written up as the mean of
@@ -1878,6 +2208,116 @@ the sweep of Table~\ref{tab:gamma}: it is the unique exponent at which this
 likelihood is correctly specified. That sweep never tested it; $0.90$ and $1.50$
 bracket it at 150 pairs each, an MDE of $0.87$, which separates nothing.
 
+\paragraph{Every number above was measured on one population, and against a
+foreign policy the exponent changes sign.} The corpus behind
+Table~\ref{tab:choicecurve} is this engine playing a copy of itself. That is
+the population the opponent model is used in \emph{when the table is all one
+engine}, and it is also the one population in which the assumption cannot
+fail: a policy that asks where it is deep, modelled by a policy that assumes
+opponents ask where they are deep, will confirm itself.
+
+The obvious control had never been run. Repeating the identical design ---
+same alternatives, same covariate, same conditional likelihood, same block
+bootstrap over deals, with only \emph{whose asks are recorded} changed ---
+against v0.7 over $6{,}090$ of its asks in $150$ cross-engine games gives
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+depth on the initial deal & $1$ & $2$ & $3$ & $4$ \\
+\midrule
+observed / expected & $1.258$ & $0.762$ & $0.548$ & $0.656$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent and a fitted $\alpha = \mathbf{-1.0041}$, 95\%
+$[-1.1434, -0.8648]$, against this engine's own $+1.2071$ on the same
+estimator. The signs are opposite and the exponents lie $2.21$ apart. A
+sampler applying $\gamma = +0.35$ to that seat is not merely mis-scaled; it
+re-weights the world set in the wrong direction on every one of that seat's
+asks, and every marginal the ask objective and the declaration gate read is
+drawn from the result.
+
+The mechanism was written down in this project before it was checked, and then
+not checked. Section~\ref{sec:res-choicecurve}'s own premise notes that depth
+and opportunity pull opposite ways --- holding five of six leaves one card to
+ask for, holding one of six leaves five --- so linear-in-depth was never
+obviously right \emph{in sign}. v0.7's objective is dominated by a single
+coefficient on $\Prob(\text{success})$ roughly three times its next largest,
+which is precisely the objective that prefers the shallower half-suit because
+it offers more cards to name. What the self-play corpus measured was not a law
+of the game but a fixed point of one policy against itself.
+
+Two conclusions, and the second is the load-bearing one. The narrow one is
+that the limit on this model is not the curve's shape (worth $110$ nats) or
+even the covariate (worth $4{,}654$): it is that a single global exponent
+cannot describe a mixed table, and both of those bounds were computed inside
+the population where the exponent happens to be constant. The broad one is a
+warning this paper is in a position to give and few others are: \emph{an
+opponent model validated only in self-play has been validated against the
+assumption it encodes}. Nothing in the fit diagnostics of
+\S\ref{sec:res-choicecurve} --- not the $1402$-nat margin over $\alpha = 0$,
+not the saturated-alternative comparison, not the phase split --- could have
+detected this, because all of them are computed on the same self-consistent
+corpus. It took a second engine.
+
+We are deliberately not shipping a per-seat exponent on the strength of this.
+The measurement identifies where our inference is wrong about \emph{one}
+opponent, and \S\ref{sec:critic} records what happened the last time this
+project turned an opponent-model discrepancy into a knob: the gains grew with
+the dose and evaporated against a third engine, because what was being
+measured was deception of a sibling's inference rather than strength. A
+per-seat exponent fitted on v0.7 and validated on v0.7 would reproduce that
+error exactly. It needs its own pre-registration and a foreign opponent that
+is not the one it was fitted on.
+
+\paragraph{It got one, and the answer is that describing his asks well and
+beating him are different problems.} The pre-registration is
+\texttt{prereg/gamma\_policy\_specific.md}, written before a game was played,
+and it fixed two things in advance: that nothing would ship on a run whose
+treatment arm was both fitted on v0.7 and measured against v0.7, and that the
+smallest effect worth adopting was $+0.15$. Three arms, identical in every
+respect but one scalar, played on $1{,}600$ games ($800$ deals in both seat
+parities), each arm seeing the identical deal from the identical seat:
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+arm & $\gamma$ & sets/game & paired difference vs shipped \\
+\midrule
+A, shipped        & $+0.35$ & $+2.3613$ & --- \\
+B, no model       & $\phantom{+}0.00$ & $+1.9563$ & $-0.4050$ $[-0.5911, -0.2189]$ \\
+C, his exponent   & $-1.00$ & $+1.2588$ & $-1.1025$ $[-1.2897, -0.9153]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Both directions lose, and the fitted one loses by more than twice as
+much as switching the model off. The exponent that maximises the likelihood of
+v0.7's asks is, in play against v0.7, worse than an exponent with the wrong
+sign and worse than no opponent model at all.
+
+That is not a paradox once the two objects are named apart. The fit is a
+\emph{marginal} description of which half-suit a policy names, estimated on
+depth in the initial deal. The sampler uses it as a \emph{conditional}
+likelihood, applied to a world set that has already been cut down by the
+no-bluff certifications, the failed asks and the resolved sets --- and it is
+scored not by how well it predicts the next ask but by where it puts posterior
+mass over card locations. A re-weighting can be better calibrated about his
+choices and worse about his cards. Nothing in the estimator we used, which is
+the standard one, has any purchase on that distinction: it was never asked to.
+
+So the honest position is narrower than either the worry or the reassurance.
+The self-play validation of \S\ref{sec:res-choicecurve} really was circular,
+and finding that out took a second engine. But the repair the circularity
+seemed to imply --- adopt the exponent the foreign data want --- is measurably
+worse than the error, and the pre-registration is what stops that from being
+discovered after the fact. Arm C does not clear $+0.15$; G2, against the v0.3
+champion, therefore does not run, and nothing ships.
+
 \paragraph{And in play, it is real and not worth buying.}
 \label{sec:res-atask} Everything above is an
 argument from likelihood and from a normaliser, not from a duel, so the
@@ -1992,6 +2432,10 @@ which is exactly the situation the opponent model is used in throughout this
 paper, and exactly not the situation of a human table. The profile is a fact
 about this policy's behaviour, not about Fish.
 
+% =====================================================================
+\section{Strength, absolute and relative}
+\label{sec:strength}
+
 \subsection{The strength ladder}
 \label{sec:res-ladder}
 
@@ -2010,7 +2454,17 @@ v0.3 \texttt{probabilistic}    & 200 & 0.792 & $+2.785$ & $[+2.274, +3.296]$ \\
 \end{tabular}
 \caption{The v0.4 champion is
 \texttt{fishbot4($\gamma$=0.35)}: exact/unbiased inference, the opponent choice
-model, and v0.3's own ask weights. No new objective term is enabled.}
+model, and v0.3's own ask weights. No new objective term is enabled. Every
+row was played under the void-era misdeclaration rule; the standard-scoring
+restatement of this ladder's headline --- the full deployed configuration
+against the v0.3 champion, both sides pricing misdeclarations correctly ---
+is $+2.412$ $[+2.088, +2.736]$ over $500$ fresh pairs
+(design R1 of \texttt{prereg/rules\_award\_baseline.md},
+\texttt{results/award\_headline.json}; wholly-held half-suits declared with
+the wrong split, and so awarded to the opponents: $125$ against the deployed
+side, $146$ against v0.3. That counter is the allocation class alone --- a
+declaration naming a card the opponents actually held is a gift rather than a
+misdeclaration and is counted separately, \texttt{fish4/match.py}).}
 \label{tab:ladder}
 \end{table}
 
@@ -2066,7 +2520,7 @@ played the shipped configuration against the reference in a single duel}, so
 every ``vs.\ champion'' figure in this document was for a spec that is not the
 one on the website.
 
-\texttt{jobs/PREREGISTRATION\_combined.md} fixes, before any pair: two blocks
+\path{jobs/PREREGISTRATION_combined.md} fixes, before any pair: two blocks
 of $1000$ fresh pairs; the A/A $3.796$ as the per-pair standard deviation
 rather than the divergence model, deliberately conservative because this arm
 differs from the champion by \emph{two} knobs and the model was fitted on arms
@@ -2114,7 +2568,7 @@ actually running.
 \paragraph{And it stops paying: precision's returns diminish.} If tripling the
 sampling budget is worth $+0.340$, the obvious question is whether tripling it
 again is worth as much. Pre-registered in
-\texttt{jobs/PREREGISTRATION\_precision2.md} with a \emph{minimum interesting
+\path{jobs/PREREGISTRATION_precision2.md} with a \emph{minimum interesting
 effect} of $0.150$ fixed before any pair was played --- so that a small positive
 would be reported as a small positive rather than promoted:
 \begin{center}
@@ -2156,7 +2610,7 @@ whatever its sign.
 \paragraph{A demonstrated effect that is deliberately not shipped.} At-ask-time
 depth at $\gamma = 1.0$ measures $+0.102$ over $6000$ pre-registered pairs and
 its interval excludes zero, so the effect is real. It is also below the $0.15$
-that \texttt{jobs/PREREGISTRATION\_at\_ask.md} fixed \emph{in advance} as the
+that \path{jobs/PREREGISTRATION_at_ask.md} fixed \emph{in advance} as the
 smallest effect worth adopting, and the upper end of its interval, $+0.197$,
 barely reaches that. It therefore does not ship, and \texttt{depth\_mode} stays
 \texttt{"initial"} in every named configuration. A real effect below a threshold
@@ -2259,6 +2713,10 @@ demonstrably suffered, not extra strength.
 agrees with optimal play $78.7\%$ of the time. The missing fifth is not in the
 endgame in the sense v0.3 meant --- these positions \emph{are} the endgame --- it
 is in choosing correctly when the hidden information genuinely has not resolved.
+
+% =====================================================================
+\section{Where the strength is missing}
+\label{sec:missing}
 
 \subsection{How much the ask objective leaves on the table}
 \label{sec:res-regret}
@@ -2365,6 +2823,317 @@ of decisions, and one-step improvements do not add. A regret under half a set pe
 decision is compatible with enormous headroom. The argument rests only on the
 three measurements that are in the same units as each other.
 
+\subsection{Where the declarations actually go wrong}
+\label{sec:res-pathledger}
+
+Section~\ref{sec:claiming} predicted where the leverage in declaring would be:
+not the threshold, but getting the distribution right and playing the forced
+declarations well. It never checked. A paired margin cannot check it, because a
+paired margin is blind by construction to anything both arms do equally badly
+--- the difference cancels it. So we built a different instrument.
+
+\paragraph{The path ledger.} Every declaration reaches the board through one
+of four branches of \texttt{fish4/agent4.py}, and the ledger
+(\path{scripts4/path_ledger.py}) attributes each one to its branch and scores
+that branch alone. Because every set is declared, sets are conserved and an
+unattributed declaration is a visible hole rather than a silent omission. Over
+$1{,}000$ games against v0.7, our seats only:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+path & $n$ & per game & wrong & error rate \\
+\midrule
+exact (tablebase) & $778$ & $0.778$ & $0$ & $0.000$ \\
+voluntary (bar $0.97$) & $3704$ & $3.704$ & $1$ & $0.000$ \\
+the doomed-ask gate & $317$ & $0.317$ & $89$ & $\mathbf{0.281}$ \\
+forced (no legal ask) & $178$ & $0.178$ & $103$ & $\mathbf{0.579}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The two paths that carry $90\%$ of all declarations have \emph{one}
+error between them in $4{,}482$ attempts. Every other error --- $192$ of them
+--- lives in $495$ declarations, $9.9\%$ of the total. The prediction was
+right, and the threshold really is not where the money is.
+
+\paragraph{The engine had a second claim policy, and it did not ask the
+question.} The third row is not a tuned decision. \texttt{agent4.py}'s
+doomed-ask branch fires when the ask it was about to make cannot land, and
+declares if $\Prob(\text{exact}) \geq 0.5$ --- bypassing the $0.97$ bar
+entirely. \texttt{best\_candidate} is an argmax over $\Prob(\text{exact})$ that
+never reads the second element of the tuple it returns, and that element is
+$\Prob(\text{our team holds all six})$ --- the number \texttt{forced\_claim}
+prices its own version of the same decision with, seventy lines below in the
+same module. The bar had been $0.5$ since v0.3, appeared in no results file, no
+pre-registration and nowhere in this paper, and the comment above it conceded
+that ``whether a higher bar plays better is an open empirical question,
+deliberately not settled here by fiat''.
+
+A screen said the gate is \emph{least} accurate exactly where
+$\Prob(\text{team}) = 1$ --- which is precisely where
+Section~\ref{sec:claiming} argues waiting is nearly free. So we
+pre-registered deferring it there (\texttt{prereg/stuck\_claim\_gate.md}),
+fixed the ship bar at $+0.15$ and the withdrawal conditions in advance, and
+ran $1{,}000$ games per arm on identical deals.
+
+The mechanism moved decisively and the margin did not:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+per game, paired & defer at $0.97$ & middle rung at $0.70$ \\
+\midrule
+gate declarations & $-0.2240$ $[-0.2558, -0.1922]$ & $-0.2730$ $[-0.3075, -0.2385]$ \\
+forced declarations & $+0.0840$ $[+0.0599, +0.1081]$ & $+0.1000$ $[+0.0728, +0.1272]$ \\
+\textbf{wrong declarations} & $\mathbf{-0.0640}$ $[-0.0847, -0.0433]$ & $\mathbf{-0.0660}$ $[-0.0878, -0.0442]$ \\
+\midrule
+set margin & $+0.0580$ $[-0.0177, +0.1337]$ & $+0.0400$ $[-0.0396, +0.1196]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The gate's own error rate falls from $0.281$ to $0.086$; the
+voluntary path absorbs the deferrals and stays at one error in $3{,}795$; gate
+claims fall by $0.224$ against a rise of $0.084$ in forced, so the deferral is
+not being paid for at the deadline. A third of our remaining wrong
+declarations disappear, with an interval nowhere near zero --- and neither
+margin interval clears zero, so under the pre-registration \textbf{nothing
+ships} and the knob stays at its inert default.
+
+At two sets of differential per avoided error the ledger predicts $+0.128$ and
+the duel measures $+0.058$. The prediction sits inside the interval, so this
+run neither confirms nor refutes the conversion; what it establishes is that
+whatever the conversion is, it does not clear a bar fixed in advance at
+$+0.15$ on a thousand games. The pre-registration's expected-outcome
+paragraph, written before the run, predicted exactly this and added that a
+result above $+0.15$ should have prompted suspicion rather than pleasure.
+
+\paragraph{Two experiments have now produced that shape, and the arithmetic of
+it is measurable.} The gate is the second. The first was the signalling
+protocol of \S\ref{sec:perpetual}, which cut nulls by $20\%$ and returned
+$+0.002$ $[-0.086, +0.090]$ sets per pair. Both were filed as ``a real
+reduction that buys no sets'', which is honest and is not an explanation.
+
+A paired margin is a \emph{net}. An arm that defers declarations avoids some
+errors, worth $+v$ sets each, and leaves half-suits live, which costs
+something per deferral; the duel reports the sum. Regressing the paired margin
+difference on the paired \emph{error} difference separates them, and both
+halves are quantities this paper has assumed rather than measured --- the
+two-sets arithmetic of \S\ref{sec:res-headline} is exactly the assumption $v =
+2$. It costs no games: the journal is already on disk
+(\path{scripts4/error_value.py}).
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& defer at $0.97$ & middle rung at $0.70$ \\
+\midrule
+value of one avoided error & $+1.7898$ $[+1.5927, +1.9870]$ & $+1.8388$ $[+1.6433, +2.0344]$ \\
+cost when it avoids nothing & $-0.0565$ $[-0.1237, +0.0106]$ & $-0.0814$ $[-0.1513, -0.0114]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent And without a model, since the regressor takes four values and a
+line through four levels is close to a two-point comparison anyway --- the
+paired margin by how many errors the arm avoided \emph{on that deal}:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+on deals where the arm & $n$ & paired margin \\
+\midrule
+added an error & $10$ & $\mathbf{-2.0000}$ $[-3.2396, -0.7604]$ \\
+avoided none & $930$ & $-0.0473$ $[-0.1019, +0.0072]$ \\
+avoided one & $48$ & $+1.5000$ $[+0.8216, +2.1784]$ \\
+avoided two or more & $12$ & $+4.1667$ $[+2.1819, +6.1515]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Three things follow. The two-sets arithmetic is right, and now measured
+rather than assumed: an \emph{added} misdeclaration costs exactly $-2.0000$
+sets, which is the award rule's own arithmetic recovered from play rather than
+asserted from the rulebook. Deferring a declaration costs about $0.36$ to
+$0.43$ sets each, and for the heavier arm that cost excludes zero --- a price
+this project did not have, and precisely the quantity the pre-registration
+called out as unattributable from the margin alone. It is attributable, just
+not from the margin alone: $0.0640$ errors avoided at $1.79$ is $0.1146$,
+less $0.0565$ of tempo, is the $+0.0580$ the duel reported.
+
+The third is the weakest and is stated as a direction rather than a figure.
+Avoiding an error returns less than adding one costs, $+1.50$ against $-2.00$,
+which would follow if a misdeclaration you decline to make does not hand you
+the set --- the half-suit stays live and can still be lost. At $n = 48$ and
+$n = 10$ the two intervals overlap comfortably and this is a hypothesis the
+design was not built to settle.
+
+What the intercept is, precisely, because the first draft of this paragraph
+overclaimed it. Both arms play every deal, so the error difference is a
+deterministic function of the deal and conditioning on it selects \emph{deals}
+rather than assignments --- which does make the estimate causal on that
+subpopulation. It is not the cost of deferring in general: the subpopulation is
+selected by an outcome, and deals where no error was avoided defer about
+$30\%$ less often than average ($0.156$ against $0.224$ per game). The
+per-declaration figures above therefore divide by that subpopulation's own
+deferral rate. Dividing by the overall rate, which is what a first pass did,
+understates the price of a deferral by exactly that $30\%$.
+
+\paragraph{The fourth row is a search problem, and it is the one thing this
+section produced that shipped.} A forced declaration --- cards in hand, no legal
+ask anywhere --- is wrong $57.9\%$ of the time. The engine reaches its split
+there the same way it reaches every other one: \texttt{best\_for\_half\_suit}
+shortlists two candidate holders per card and scores three combinations. At the
+last live half-suit that is a shortlist over a space small enough to enumerate
+completely, and enumerating it is not a change of policy but a better search of
+the same objective.
+
+\texttt{claim\_forced\_exhaustive} does exactly that: at or below one live
+half-suit it enumerates the whole team assignment space under the joint, fixes
+any card the propagator has already pinned, and --- the property that makes it a
+search fix rather than a new policy --- never returns a split the joint scores
+below the incumbent's. Registered at \path{prereg/forced_exhaustive.md} with
+the ship bar and the guards fixed first, it cleared in both populations:
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+population & effect & interval \\
+\midrule
+self-play, $2{,}400$ games & $+0.0233$ & $[+0.0133, +0.0334]$ sets/game \\
+vs.\ v0.7, last declaration correct & $28/87 \to 37/87$ & paired $+0.0090$ $[+0.0031, +0.0149]$ \\
+vs.\ v0.7, set margin & $+0.0180$ & $[+0.0063, +0.0297]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent with accuracy in every other live-half-suit bucket unmoved, which was
+guard 2 and which it passed exactly. It is in \texttt{V06\_DEPLOYED}.
+
+Two things about those intervals are worth noticing, because they look too
+tight for $1{,}000$ games and they are not. The knob fires only on forced
+declarations at the last half-suit, so $99.1\%$ of games finish bit-identical
+in both arms and pairing removes almost all the variance --- $414\times$, the
+top row of Table~\ref{tab:pairing}. And the effect is correspondingly small:
+a rare branch played better is a rare improvement, however cleanly measured.
+Both facts are the same fact, and \S\ref{sec:dealluck} is where it is priced in
+general.
+
+\paragraph{What the declaration is actually risking, and a lever that looked
+free and was not.} Of our $0.1759$ wrong declarations a game, $0.1676$ are
+allocation class --- our own team held all six and we named the wrong split ---
+against $0.0083$ ownership errors. That is $95.3\%$, and it is a different
+problem from reading the opposition: every card is held by someone who knows
+they hold it, so the team has the answer and no member of it does.
+
+The obvious lever is that a declaration may be made by any member of the team,
+on their own turn. Someone holding four of the six guesses two; someone holding
+one guesses five. Over $1{,}800$ self-play games and $16{,}156$ wholly-held
+declarations, $30.4\%$ were made by a player a teammate could have
+out-informed, so the opportunity is real. The lever is not:
+
+\begin{center}
+\small
+\begin{tabular}{lrrlrr}
+\toprule
+declarer's own cards & $n$ & error & & $n$ & error \\
+\midrule
+1 & $2{,}640$ & $0.017$ & \emph{cards never located}: 1 & $4{,}980$ & $0.000$ \\
+2 & $2{,}024$ & $0.048$ & \hspace{1em} 2 & $4{,}234$ & $0.006$ \\
+3 & $1{,}282$ & $0.042$ & \hspace{1em} 3 & $2{,}990$ & $0.032$ \\
+4 & $1{,}494$ & $0.063$ & \hspace{1em} 4 & $2{,}344$ & $0.055$ \\
+5 & $1{,}830$ & $\mathbf{0.068}$ & \hspace{1em} 5 & $1{,}266$ & $\mathbf{0.111}$ \\
+6 & $6{,}468$ & $0.000$ & \hspace{1em} 6 & $342$ & $0.088$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The error rate \emph{rises} with the declarer's own holding, so deferring to
+the better-placed teammate would move declarations up that curve. Six is
+trivially perfect --- hold every card and there is nothing to name.
+
+The right variable is on the right, and it is selection that connects them. A
+player holding one card of a half-suit only declares it when the other five are
+already pinned; holding five leaves exactly one card unaccounted for, and if
+that card was dealt and never asked for it is a coin flip between two teammates
+on a set that feels certain. Held at fixed ``never publicly located'' the
+$k$-effect flattens: in the best-populated stratum ($4$ unlocated, $n=2{,}344$)
+the error rate across $k = 0 \ldots 5$ runs $0.050$, $0.068$, $0.057$, $0.057$,
+$0.042$, $0.077$, with no trend. \textbf{What a declaration risks is not how
+many cards you are missing but how many of them have never moved.}
+
+\paragraph{And the split is not frozen, which we asserted before checking.}
+It is natural to say that once a team holds all six no opponent may legally ask
+in the half-suit, so nothing further can inform the split. The first clause is
+right and the conclusion does not follow. Hand counts are public and
+\texttt{fish/beliefs.py::\_propagate} uses them: a player whose quota reaches
+zero is excluded from every unresolved card, and a player whose quota equals
+what they could still be holding has those cards pinned. So the split keeps
+resolving after it freezes --- not through anything happening in that half-suit,
+but through the rest of the game draining hands.
+
+Measured, over the same corpus, as cards pinned to a specific player beyond the
+declarer's own hand and beyond anything a successful ask publicly located:
+$46.6\%$ of wholly-held declarations derive nothing, $33.2\%$ derive one card,
+$15.1\%$ two, $5.1\%$ three or more. $8{,}626$ of $16{,}156$ wholly-held declarations --- $53.4\%$ --- carry at
+least one derived card, and the error rate falls from $0.046$ with none to
+$0.011$ with one and $0.000$ with three. \textbf{Deriving cards after the
+freeze is the common case, not the exception.} It is what makes a declaration safe.
+The doomed-ask gate had already implied as much and we read it the other way:
+it deferred $0.224$ declarations a game while adding only $0.084$ forced ones,
+so about $0.14$ moved into a \emph{confident} declaration, which is only
+possible if waiting supplied something.
+
+\paragraph{Is that where the headroom is, though?} The paragraphs above say
+where our \emph{errors} are. Those are not the same question, and the
+difference is settleable by handing a seat information it should not have and
+seeing what it does with it.
+
+\textbf{Every figure in this paragraph is a bound obtained by cheating.} The
+arms are \path{fish4/oracle.py} handed the true deal; the opposition never
+cheats. They are not strength measurements, they do not belong in a ladder, and
+they must not be read beside an honest margin. Over $600$ games per arm on
+identical deals (\path{prereg/information_ceiling_split.md} $\rightarrow$
+\path{results/ceiling_split.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+told the true location of & cards pinned/game & ceiling over honest & \\
+\midrule
+its \textbf{teammates'} cards & $40.7$ & $+3.4100$ & $[+3.1625, +3.6575]$ \\
+its \textbf{opponents'} cards & $40.4$ & $+1.3067$ & $[+1.0070, +1.6063]$ \\
+everything & $59.8$ & $+6.6067$ & $[+6.4004, +6.8129]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The middle column is the point. The two partial arms are told \emph{almost exactly
+the same number of cards} and one is worth $2.6$ times the other, so this
+controls for how much a seat knows and isolates what it knows about. The
+allocation/ownership split in the error ledger does translate into a split in
+information value, and the answer to the question in this paragraph's title is
+yes.
+
+Two cautions, both of which the pre-registration owes the reader. The teammate
+arm's zero allocation errors are \emph{definitional} --- a seat that knows every
+teammate's cards and its own reads the split off rather than inferring it, so
+that cell could not have come out any other way and confirms nothing. And the
+arms are sub-additive, $+4.7167$ against $+6.6067$ for omniscience, where the
+registration braced for the opposite: knowing where a card is \emph{not} pays
+only if you can also act on it.
+
+% =====================================================================
+\section{What did not work}
+\label{sec:negative}
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 
@@ -2431,7 +3200,7 @@ claim progress & $0.30$ & 160 & $-0.206$ & $[-0.807, +0.395]$ \\
 signalling & $+0.25$ & 160 & $-0.300$ & $[-0.890, +0.290]$ \\
 signalling & $-0.25$ (conceal) & 160 & $+0.056$ & $[-0.530, +0.642]$ \\
 information gain & $0.10$ & 160 & $-0.394$ & $[-0.932, +0.144]$ \\
-concentration & $0.15$ & 160 & $-0.037$ & $[-0.653, +0.578]$ \\
+concentration$^\ddagger$ & $0.15$ & 160 & $-0.037$ & $[-0.653, +0.578]$ \\
 turn-risk retune & $0.35$ (from $0.60$) & 160 & $-0.075$ & $[-0.670, +0.520]$ \\
 scarcity retune & $0.35$ (from $0.20$) & 160 & $+0.125$ & $[-0.381, +0.631]$ \\
 \midrule
@@ -2456,12 +3225,69 @@ not ``shown not to matter''.}
 
 Four of these deserve comment.
 
+$^\ddagger$\,\textbf{This row is retained as history and does not describe the
+code.} Both halves of it were incapable of finding an effect, and the reason is
+worth more than the row.
+
+The \emph{formula} could not express the preference it was written for.
+\texttt{concent} at v1 was \texttt{ctx.team\_concentration[hs]}: one number per
+half-suit, identical for every candidate ask in it and independent of the
+target and of who would end up holding the card. A term taking the same value
+on every ask in a half-suit can tilt the choice of half-suit and nothing else.
+Worse, its sign is backwards in the case it exists for --- when the
+concentration sits with a \emph{teammate}, taking a card breaks it up, and v1
+scored that ask highest precisely because the half-suit was concentrated. This
+is the defect \texttt{claim} carried at v1, and it takes the same remedy:
+corrected in place to the expected \emph{change} the ask would cause, with
+\texttt{TERM\_VERSIONS["concent"]} bumped to $2$ so that
+\texttt{stale\_terms()} flags every stored harvest fitted against the old
+column.
+
+And the \emph{weight} was inert. Measured over $596$ decisions with a real
+choice and $30{,}065$ candidate asks
+(\path{scripts4/concent_scale.py} $\rightarrow$
+\path{results/concent_scale.json}), the corrected feature has median magnitude
+$0.0299$ and a median within-decision spread of $0.0677$. At the screened
+weight of $0.15$ it changes which ask is taken on $1.7\%$ of decisions; it
+takes a weight near $1.0$ to reach $8\%$. A $160$-pair run of a knob acting on
+one decision in sixty, reporting an interval four times the ship bar in each
+direction, is a statement about the harness rather than about the idea.
+
+The retest mattered because this is the only term in the basis that points at
+the error we actually make. Of our $0.1759$ wrong declarations a game, $0.1676$
+are allocation class --- our own team held all six and we named the wrong split
+--- against $0.0083$ ownership errors, and a half-suit held entirely in one
+hand has no split to name. It was registered at
+\path{prereg/concentration_v2.md} at $4{,}000$ games, with arms at $0.60$ and
+$1.50$ and with the mechanism as a \emph{withdrawal condition} rather than a
+secondary: allocation errors had to fall and concentration at declaration time
+had to rise.
+
+\textbf{It ran and it is withdrawn, on condition 1.} At $w = 0.60$ the effect is
+$-0.0430$ $[-0.1369, +0.0509]$ and at $1.50$ it is $-0.1445$ $[-0.2490,
+-0.0400]$, worse than shipped. Allocation errors were required to fall and rose
+monotonically instead: $0.1557$, $0.1772$, $0.1827$. Condition 2 passed ---
+concentration really did rise, $0.8106 \to 0.8168$ --- so the corrected feature
+computes what it claims and the \emph{strategy} is what is wrong, which is a
+more useful outcome than a null.
+
+The reason is the resource the argument for the term ignored.
+\texttt{GameState.legal\_asks} requires the asker to hold a card of the
+half-suit, so concentrating a team's holding into one hand narrows the set of
+half-suits that hand can ask in --- and being unable to ask is the definition of
+being forced. Forced declarations rise monotonically with the weight, $0.167 \to
+0.197 \to 0.218$ a game, and the forced path is $47$--$49\%$ wrong. The term
+buys a marginally better split and pays for it in the one currency that keeps a
+seat able to act. (Stated as consistent-with rather than proven: the run does
+not instrument askable half-suits per seat, and the monotone dose response in
+the harm is the strongest evidence here.)
+
 $^\dagger$\,\textbf{These two rows measured nothing, and we found out
 afterwards.} The no-declaration term was assembled into the importance weights
 and then overwritten: the batch sampler built it first and the opponent-model
 branch that follows did \texttt{logl = } rather than \texttt{logl += }, so
 whenever any non-self player had already asked --- $632$ of $641$ decisions in
-\texttt{results/ess\_probe.json} --- the term was discarded before use. In the
+\path{results/ess_probe.json} --- the term was discarded before use. In the
 handful of decisions where it survived, it addressed the half-suit by column
 indices built against the caller's free-card order and applied to a matrix whose
 columns are in the sampler's own sort; six of eight columns differ on a typical
@@ -2570,7 +3396,7 @@ candidate & screen (200 pairs) & retest (500 pairs) & retest 95\% CI \\
 blended value objective, $0.5$ & $+0.410$ & $-0.208$ & $[-0.534, +0.118]$ \\
 $\sqrt{\cdot}$ counting, $\gamma = 0.70$ & $+0.480$ & $+0.212$ & $[-0.092, +0.516]$ \\
 \textbf{both together} & --- & $\mathbf{+0.490}$ & $\mathbf{[+0.184, +0.796]}$ \\
-\quad replication, fresh seeds & --- & $+0.068$ & $[-0.254, +0.390]$ \
+\quad replication, fresh seeds & --- & $+0.068$ & $[-0.254, +0.390]$ \\
 \quad replication again & --- & $-0.066$ & $[-0.395, +0.263]$ \\
 \bottomrule
 \end{tabular}
@@ -2608,6 +3434,10 @@ independently-motivated changes that stack, exactly as v0.3's two winning terms
 had) and a point estimate twice the sum of its parts --- which should have been
 the tell. Promoting it would have shipped a change worth nothing and, worse,
 would have anchored the next version's baseline on it.
+
+% =====================================================================
+\section{Search over the belief, measured}
+\label{sec:searchres}
 
 \subsection{Belief-space search: four rounds to one answer}
 \label{sec:res-lookahead}
@@ -2804,7 +3634,7 @@ and none was caught by being more careful --- each was caught by measuring the
 thing that had been reasoned about.
 
 \paragraph{The pre-registered run, and the answer.} So we wrote the analysis
-down before running it. \texttt{jobs/PREREGISTRATION\_lookahead.md} fixes, in
+down before running it. \path{jobs/PREREGISTRATION_lookahead.md} fixes, in
 advance: six blocks of 1000 fresh pairs; sizing against the \emph{unbiased}
 $+0.153$ rather than any figure containing the selected cell; a per-pair
 standard deviation of $3.796$ from the A/A rather than the older $3.869$; a
@@ -2863,7 +3693,7 @@ Setting \texttt{couple=False} also does not restore the proposition's hypotheses
 outright --- the transition still zeroes the asked row and decrements the
 target's count. What is demonstrated is narrower and still to the point. Instrumenting the
 search itself over $60{,}277$ multi-branch nodes on champion trajectories
-(\texttt{scripts4/greedy\_shadow.py}), the coupled arm departs from the
+(\path{scripts4/greedy_shadow.py}), the coupled arm departs from the
 highest-probability branch at $452$ of them, $0.750\%$; the uncoupled arm
 departs at $\mathbf{1}$, $0.0017\%$ --- a factor of $452$. Its set differential
 is a null at both 200 and 500 pairs ($+0.070$ and $+0.112$, both intervals
@@ -2890,7 +3720,7 @@ features of this version --- the belief-space search and the larger posterior
 sampling budget --- were each measured against the champion \emph{alone}, so
 neither says anything about the other. They could add, or the sharper belief
 could already be earning what the search was earning. Pre-registered in
-\texttt{jobs/PREREGISTRATION\_stack.md} and written at one of six blocks, which
+\path{jobs/PREREGISTRATION_stack.md} and written at one of six blocks, which
 is the only moment at which writing such a thing proves anything:
 \begin{center}
 \begin{tabular}{lrl}
@@ -2977,7 +3807,16 @@ best-responder is future work.
 
 The engine supports several rule options, and a result that only holds under one
 configuration is a weaker result. Table~\ref{tab:rules} repeats the headline
-comparison under three of them.
+comparison under three of them. One row has since changed status: the games
+of this section were played under the void-era misdeclaration default, so
+``wrong split $\to$ opponents'' was a variant when it was measured --- it is
+now the baseline (\S\ref{sec:game}), and the row is the measurement the rule
+correction's continuity expectation was registered against. Its $+1.690$
+carries one caveat worth stating: both agents' declaration policies at the
+time still priced misses with void-era expected values, so the row shows the
+margin survives the rule, not that either side played it optimally --- the
+restated headline under the award baseline, with both sides pricing it
+correctly, is design R1 of \path{prereg/rules_award_baseline.md}.
 
 \begin{table}[t]
 \centering
@@ -3008,6 +3847,10 @@ therefore never gets a turn of its own while a teammate still has some. v0.4
 polls off-turn seats for a claim they can make \emph{by deduction alone}, which
 costs a belief update rather than a posterior per seat, and offers it identically
 to both generations so that the comparison stays a comparison of one thing.
+
+% =====================================================================
+\section{Learning the objective from data}
+\label{sec:learnres}
 
 \subsection{Learning the ask objective}
 \label{sec:res-learn}
@@ -3217,7 +4060,7 @@ there is not is a way to attribute it to individual terms as they currently
 stand.
 
 \paragraph{The two most-quoted figures in this paper were the two nothing could
-check.} \texttt{check\_paper\_numbers.py} watches over a hundred figures
+check.} \path{check_paper_numbers.py} watches over a hundred figures
 against the results files that produce them. It could not watch the abstract's
 headline --- the $+1.85$ margin over the previous champion --- because that
 lives in the JSONL duel pool while every other watched figure lives in a JSON
@@ -3227,13 +4070,13 @@ the \LaTeX{} from counts the pipeline stored, so the number the paper prints was
 never a number the pipeline held. Both are correct; both sat outside every drift
 check for reasons as dull as a file format and a division done in the wrong
 place. This is the third time the same shape has appeared --- after
-\texttt{settle\_verdict.py} printing the lookahead headline and persisting
+\path{settle_verdict.py} printing the lookahead headline and persisting
 nothing, and the deadlock quartet existing in no file at all --- and each time
 the unwatched figure was among the most load-bearing in the document, for the
 same reason: the numbers a paper repeats most are the ones nobody re-derives.
 
 The manifest cannot find its own gaps, so the check is now inverted as well.
-\texttt{scripts4/unwatched\_claims.py} extracts every number the paper asserts
+\path{scripts4/unwatched_claims.py} extracts every number the paper asserts
 in \textbf{bold} --- its strongest claims, the ones a reader takes as measured
 --- and requires each to be either pinned by the manifest or exempted with a
 \emph{stated reason}; an exemption with no reason is indistinguishable from an
@@ -3248,7 +4091,7 @@ the champion posterior's own NLL and Brier scores.
 
 \paragraph{A supervisor a bystander could switch off.} The rollout pass is
 restarted by a shell supervisor whose liveness check was
-\texttt{pgrep -f "learn\_ask\_objective.py rollout --run v2"}. That matches the
+\path{pgrep -f "learn_ask_objective.py rollout --run v2"}. That matches the
 \emph{full command line of every process}, so a one-line loop written to
 \emph{watch} the pass --- one whose own command line contained that string ---
 was itself a match. The supervisor concluded the job was alive and stopped
@@ -3260,7 +4103,7 @@ This is the mirror image of a failure this paper already records, in which the
 same function returning \texttt{False} on any exception made a guard fail
 \emph{open}. Both come from reading ``this string appears somewhere in the
 process table'' as ``this job is running''. The check now walks
-\texttt{/proc} and counts a process only when it is a Python interpreter whose
+\path{/proc} and counts a process only when it is a Python interpreter whose
 own \texttt{argv} carries every token, excluding the caller and its ancestors;
 its test asserts both directions, including that \texttt{pgrep} really does
 match the bystander it is given.
@@ -3370,7 +4213,7 @@ tested, because testing it required exactly the thing it asserted was
 impossible.
 
 \paragraph{And the weights were played, which settles the line.} Everything
-above is estimation. \texttt{jobs/PREREGISTRATION\_learned\_weights.md} fixes,
+above is estimation. \path{jobs/PREREGISTRATION_learned_weights.md} fixes,
 before the fit was run and before any weight vector had been looked at, that
 the \emph{validation duel is the test}: two blocks of $1000$ fresh pairs, the
 pinned-$p$ vector only, the shipped champion as the baseline rather than the
@@ -3412,7 +4255,7 @@ individual signs are not findings. \texttt{certain} correlates $0.738$ with
 $\Prob(\text{success})$, which carries weight $1.0$ by convention, and the
 within-position feature fit reported earlier in this section gives the same
 term the \emph{opposite} sign on a different population
-(\texttt{results/target\_feature\_fit.json}, $+0.649$ against this
+(\path{results/target_feature_fit.json}, $+0.649$ against this
 $-0.502$). That is the collinearity this
 section already documented for $\Prob(\text{success})$'s own coefficient,
 arriving a second time.
@@ -3480,8 +4323,8 @@ two rows of a table about the \emph{sampler}, for a reason having nothing to do
 with the sampler. How well a stated probability is calibrated is a property of
 the posterior alone, so the bins are now fixed, the bar is reported separately
 where it belongs, and the whole table is stored in
-\texttt{results/stuck\_claim\_value.json} rather than printed --- which is the
-failure \texttt{scripts4/check\_verdicts.py} exists to catch, found here in a
+\path{results/stuck_claim_value.json} rather than printed --- which is the
+failure \path{scripts4/check_verdicts.py} exists to catch, found here in a
 table rather than a verdict.
 
 Two things follow. The distribution is \textbf{bimodal} --- $76\%$ of decisions
@@ -3500,8 +4343,12 @@ where we would look next.
 
 \paragraph{What we did not compute, and why.} The obvious next step is to price
 the change: declaring on splits the engine currently waits on, against waiting
-and accepting the measured $23.4\%$ null rate on stuck half-suits, would beat
-waiting wherever the MAP is right more than $76.6\%$ of the time --- which the
+and accepting the measured $23.4\%$ misdeclaration rate on stuck half-suits,
+would beat waiting wherever the MAP is right more than $76.6\%$ of the time
+under the void-era rule this section's games were played with (a wrong
+declaration cost $0$ there; under the award baseline it costs $-1$, the
+eventual stuck declaration risks the same $-1$, and the break-even lands
+elsewhere --- one more reason the refusal below stands) --- which the
 table says it is, everywhere above $0.5$. Carried through, that arithmetic
 returns a number of the size this paper calls demonstrated.
 
@@ -3519,19 +4366,19 @@ the size of the answer, and went looking for why it was too good. Pricing this
 properly needs the null rate re-measured over this population, and until then
 there is no estimate and no queued run.
 
-\subsection{The claim threshold: the one screen that resolved, re-run}
+\subsection{The declaration threshold: the one screen that resolved, re-run}
 \label{sec:res-claimthreshold}
 
 Section~\ref{sec:res-null} reports a cell that lowers the claim bar from $0.97$
 to $0.90$ and returns $+0.035$ $[+0.007, +0.063]$ over $400$ pairs. It is the
 only small, cheap, unexplained positive in a table the paper describes as mostly
-nulls, and it contradicts a documented conclusion: \texttt{fish4/claim4.py}
+nulls, and it contradicts a documented conclusion: \path{fish4/claim4.py}
 argues that waiting to claim is close to free, and reports that over $150$
 duplicate deals the $0.97$ and $0.999$ policies never once diverged.
 
 That cell was selected out of $103$ for excluding zero, so it is inadmissible as
-evidence and \texttt{jobs/SCREENING\_DISCIPLINE.md} forbids it from sizing its
-own confirmation. \texttt{jobs/PREREGISTRATION\_claim\_threshold.md} fixes, in
+evidence and \path{jobs/SCREENING_DISCIPLINE.md} forbids it from sizing its
+own confirmation. \path{jobs/PREREGISTRATION_claim_threshold.md} fixes, in
 advance: two blocks of $1000$ fresh pairs; a minimum interesting effect of
 $+0.02$, deliberately an order of magnitude below the $+0.15$ used elsewhere,
 because this change is one constant and costs nothing to run; a fixed-effect
@@ -3560,7 +4407,7 @@ before the run, over $998$ decisions carrying a claim candidate, found that
 raising the bar from $0.97$ to $0.90$ admits \emph{one extra claim in 998}. The
 run then diverged on $2.6\%$ of pairs. Two arms that make one different decision
 in a thousand and finish $97\%$ of deals identically are not a null from thin
-data; they are the same policy, and \texttt{claim4.py}'s argument survives its
+data; they are the same policy, and \path{claim4.py}'s argument survives its
 one piece of counter-evidence.
 
 \paragraph{The design missed its own power target, and says so.} The
@@ -3598,8 +4445,15 @@ fix. A model extrapolated an order of magnitude past its data has no business
 being right, and it is not; what is worth recording is that the term added to it
 keeps earning its place where it cannot have been tuned.
 
+% =====================================================================
+\section{The shape of the game}
+\label{sec:shape}
+
 \subsection{Perpetual states, measured}
 \label{sec:res-perpetual}
+
+This is the measurement; \S\ref{sec:perpetual} is the question it answers,
+in three layers of which only the third turns out to be interesting.
 
 Two hundred games per column, with ground truth used for analysis only.
 
@@ -3622,7 +4476,10 @@ dead half-suits at peak & 3.13 & 3.13 & 3.15 \\
 nulls per game & 0.275 & 0.275 & \textbf{0.220} \\
 \bottomrule
 \end{tabular}
-\caption{Repetition and dead positions in 200 games of champion self-play.}
+\caption{Repetition and dead positions in 200 games of champion self-play,
+played under the void-era misdeclaration rule (the ``nulls per game'' row is
+that rule's statistic; under the award baseline the same mistakes are gifts
+and the row would read as misdeclarations per game).}
 \label{tab:perpetual}
 \end{table}
 
@@ -3657,7 +4514,7 @@ half-suits that never get stuck --- a factor of $25$ --- so they account for
 Four figures in this paragraph were wrong in every draft before this one, and
 the way they were wrong is the reason the paragraph now names its denominators.
 They read $17.5\%$, $2.8\%$, a factor of $6.3$, and $27\%$ of all nulls. Those
-numbers appear in no results file: \texttt{perpetual\_study.py} tracked which
+numbers appear in no results file: \path{perpetual_study.py} tracked which
 \emph{teams} were stuck and recorded nothing per half-suit, so nothing in the
 pipeline could have checked them and nothing did. They were carried from draft
 to draft as though measured. The direction survives re-measurement --- it
@@ -3665,8 +4522,8 @@ survives it more strongly, since the true ratio is four times the one claimed
 --- but $27\%$ against a measured $73\%$ is not a rounding difference, and one
 of these numbers had already been used downstream as a threshold
 (Section~\ref{sec:res-splitcal}). Every figure here now comes from
-\texttt{results/perpetual\_study.json} and is checked by
-\texttt{scripts4/check\_paper\_numbers.py} against it.
+\path{results/perpetual_study.json} and is checked by
+\path{scripts4/check_paper_numbers.py} against it.
 
 \paragraph{The free-signalling escape works, and does not pay.} Turning on the
 protocol of Section~\ref{sec:perpetual} cuts nulls from $0.275$ to $0.220$ per
@@ -3684,7 +4541,119 @@ fires more often but is no longer free: it spends a turn to send one bit, and
 the tempo it concedes cancels the sets it saves. So the escape is real theory
 with a null in practice, and the honest summary is that Fish's stalemate is a
 genuine structural feature of the game that a strong engine is already handling
-adequately by other means.
+adequately by other means. One post-script from the rule correction: this
+ledger was priced in the void era, where each avoided misdeclaration was
+worth one point of differential; under the award baseline it is worth two,
+so the duel was re-run rather than re-asserted (design R5 of
+\path{prereg/rules_award_baseline.md}, outcomes fixed before any pair).
+Over $500$ fresh pairs of \texttt{V06\_DEPLOYED} with the protocol on
+against itself with it off, the protocol again cuts misdeclarations ---
+$109$ against $138$ --- and the effect moves to $+0.0680$
+$[-0.0326, +0.1686]$: the sign the re-pricing predicts, at about the size
+the arithmetic suggests, and an interval that still straddles zero. Per
+the registered outcome it stays off; what changed is the honest summary,
+from ``buys no wins'' to ``plausibly worth about a set every fifteen
+games, not yet demonstrated at this power'' --- a properly sized
+extension is registered future work rather than a post-hoc one.
+
+\paragraph{And there is a specific reason to expect that extension to land
+differently, which is not a reason we had at the time.} Both measurements of
+this protocol fired it at the same threshold. The relaxed mode signals only
+when the ask the seat would otherwise make has $p \leq 0.15$
+(\texttt{signal\_max\_p}), a number chosen when there was no scale to choose it
+against. \S\ref{sec:tempo} then supplied one, bucketed by exactly that
+probability, and it says a turn is worth $-0.043 \pm 0.169$ below $p = 0.25$
+and $+0.004 \pm 0.143$ in $[0.25, 0.50)$ --- free, twice over --- and about
+$+0.45$ only above $0.50$. The gate sits at less than a third of the way to
+where this paper's own measured price of a turn crosses zero, and the two
+sections have never been read against each other. The sweep in
+\path{jobs/j14_signalling.json} tried $0.35$ and stopped.
+
+Two other things are now known that were not. What an avoided misdeclaration
+is worth in play is $+1.7898$ $[+1.5927, +1.9870]$ sets
+(\S\ref{sec:res-pathledger}), measured rather than taken from the rulebook, so
+a signal pays whenever its chance of placing a split we would otherwise get
+wrong exceeds the turn's price divided by $1.79$ --- and below $0.50$ that
+numerator is indistinguishable from zero. And the population it would act on
+is reachable: of the $130$ half-suits we declared wrongly over $800$
+cross-engine games, the median number of \emph{our own} turns between
+assembling the set and the deadline is $25.5$, with only $16$ having none
+left.
+
+\texttt{prereg/deadline\_signalling.md} registered exactly that, with the
+incumbent $0.15$ carried as a replication arm --- if it did not reproduce the
+$+0.068$ above, the new rung would mean nothing.
+
+\paragraph{It ran, and the argument was right about the price of a turn and
+wrong about what was limiting the mechanism.} $1{,}000$ games per arm against
+v0.7 on identical deals, both parities, bridge revision 2, zero fallbacks
+(\path{results/signal_gate_confirm.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+arm & margin & vs.\ A \\
+\midrule
+A, signalling off & $+2.4760$ & --- \\
+B, $\texttt{signal\_max\_p} = 0.15$ & $+2.5940$ & $+0.1180$ $[+0.0325, +0.2035]$ \\
+C, $\texttt{signal\_max\_p} = 0.50$ & $+2.5980$ & $+0.1220$ $[+0.0291, +0.2149]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+B replicates: its interval contains the $+0.068$ it was carried to reproduce,
+so C means something. Wrong declarations fell rather than rose, $0.170 \to
+0.152$ a game. No withdrawal condition fired. And C did not ship: the bar was a
+point estimate at or above $+0.15$ with the interval clear of zero, and
+$+0.1220$ clears zero without reaching the bar.
+
+The prediction was that C would beat B, because a threshold three times higher
+should fire three times more often. It did not --- and the path ledger says
+why. Signalling moves about $210$ declarations out of the gated path and into
+the forced path, and \emph{B and C move almost the same ones}: $75$ gated
+declarations against $78$, a difference of three in a thousand games. Widening
+the gate by a factor of $3.3$ changed the engine's behaviour on three
+declarations.
+
+So the gate was never the binding constraint, and the reason is visible once
+stated: the protocol fires when a seat is stuck, and a stuck seat is one whose
+best ask is already bad, so $p_{\text{best}} \leq 0.15$ is very nearly
+\emph{implied} by the situation it fires in. \S\ref{sec:tempo} was right about
+the price of a turn and wrong about which quantity was limiting this mechanism.
+That retires the hypothesis, which is worth more than the $+0.004$ it bought.
+
+What the effect is made of, conditioned rather than fitted
+(\path{scripts4/error_value.py} on this run's own journal, arm C):
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+games & paired margin \\
+\midrule
+avoided no error, $n = 876$ & $+0.0502$ $[-0.0248, +0.1253]$ \\
+avoided one, $n = 66$ & $+1.6061$ $[+0.9819, +2.2302]$ \\
+avoided two or more, $n = 6$ & $+3.6667$ $[+0.9861, +6.3472]$ \\
+\textbf{added} an error, $n = 52$ & $-0.9615$ $[-1.6399, -0.2832]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The whole effect is avoided errors: the $876$ games where nothing was avoided
+contribute $+0.044$ with an interval containing zero, the $72$ where something
+was contribute $+0.128$. And the ceiling on the mechanism is the last row ---
+it \emph{adds} an error almost as often as it avoids one, $52$ games against
+$72$. That, not the gate, is what a future attempt would have to attack.
+
+One methodological note, recorded rather than buried. The regression form of
+the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
+$[+0.0117, +0.1863]$, excluding zero, where the directly conditioned figure is
+$+0.0502$ $[-0.0248, +0.1253]$, which contains it. The line is misspecified:
+avoiding an error is worth $+1.61$ and adding one costs only $-0.96$, so the
+errors this protocol adds are cheaper than the ones it avoids, and a straight
+line through both cannot represent that. The conditional mean is the one to
+believe.
 
 \subsection{Game statistics, and a statistic that stops working}
 \label{sec:res-analytics}
@@ -3703,7 +4672,7 @@ possessions gaining nothing & 44.5\% & 48.8\% \\
 failed-ask share & 40.9\% & 43.2\% \\
 asks per game & 100.3 & 96.5 \\
 ask accuracy, thirds of the game & 54.1 / 59.7 / 64.2\% & 52.2 / 58.0 / 60.8\% \\
-null rate (natural half-suits) & 4.4\% & 3.1\% \\
+misdeclaration rate, natural half-suits (void era) & 4.4\% & 3.1\% \\
 claim delay, median / p90 (actions) & 0 / 58 & 0 / 49 \\
 first-move advantage & $+0.23$ $[-0.27, +0.73]$ & $+0.32$ $[-0.22, +0.86]$ \\
 \bottomrule
@@ -3723,7 +4692,7 @@ Contradicted, and worth stating carefully: v0.3 named cards-per-possession
 ``the single best summary statistic of skill'', on the evidence that it doubled
 from the \texttt{memory} tier to the \texttt{probabilistic} tier. The stronger
 engine here scores \emph{lower} on it. The mechanism is visible in the other
-rows: v0.4 nulls fewer sets ($3.1\%$ against $4.4\%$) and claims sooner (p90 $49$
+rows: v0.4 misdeclares fewer sets ($3.1\%$ against $4.4\%$) and declares sooner (p90 $49$
 against $58$), so half-suits resolve faster and the game contains fewer, harder
 asks --- $96.5$ per game against $100.3$. Cards-per-possession compares two
 tables on how easy their asks were, and how easy the asks are depends on how
@@ -3896,6 +4865,1334 @@ plies.
 \end{remark}
 
 % =====================================================================
+\section{The price of a turn, and why it is conditional}
+\label{sec:tempo}
+
+Every result in this paper is denominated in one unit: the information exchange
+rate of about $0.45$ sets per hidden card revealed. Half the ask objective
+prices \emph{tempo} --- $\mathrm{turn\_risk}$, depth, the retained turn a hit
+buys --- and none of those weights was ever fitted against a measured scale,
+because none existed. This section supplies one, and the answer is not a
+constant.
+
+\subsection{Measuring it}
+
+The design is a duplicate deal with one intervention. Both arms play the
+identical deck with identical agent seeds; at one pre-chosen decision of one
+pre-chosen seat the treatment substitutes an ask that provably cannot land,
+taken from the true state so the donation is certain rather than a modelled
+mistake, and both arms then play on honestly. The difference in the donating
+team's differential is the price of exactly one turn. Substituting the agent's
+\emph{own} action instead gives exactly $0.000$ on every deal, which is the
+control that makes the number mean anything.
+
+Two runs of $1500$ pairs each put the price at $+0.271$, 95\% CI
+$[+0.092, +0.450]$ when the donation falls at decisions $0$--$4$, and $+0.497$,
+95\% CI $[+0.324, +0.671]$ at decisions $14$--$21$. Tempo value rises through a
+game.
+
+\subsection{It depends entirely on whether you have an ask worth making}
+
+Bucketing $1464$ donations by $p_{\text{best}}$, the success probability of the
+ask the seat would otherwise have made:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+$p_{\text{best}}$ & pairs & price & se \\
+\midrule
+$[0.00, 0.25)$ & $374$ & $-0.043$ & $0.169$ \\
+$[0.25, 0.50)$ & $511$ & $+0.004$ & $0.143$ \\
+$[0.50, 0.75)$ & $179$ & $\mathbf{+0.508}$ & $0.258$ \\
+$[0.75, 1.01)$ & $400$ & $\mathbf{+0.415}$ & $0.164$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Below $p_{\text{best}} = 0.5$ a turn is worth nothing; above it, about $+0.45$
+sets. \textbf{A turn is worth nothing unless you have something to do with it.}
+Tempo in Fish is not a resource in itself.
+
+This is not the timing effect in disguise, and the direction rules that out: a
+late turn prices \emph{higher} than an early one, so if low-$p_{\text{best}}$
+positions were merely late positions they would be worth more rather than
+nothing.
+
+\subsection{What it explains, and what it cost to find out}
+
+The measurement began as a critique of the engine. On $1.5\%$ of decisions
+($229$ of $15{,}542$) the champion plays an ask that cannot land while one with
+median success probability $0.385$ was available --- it surrenders the turn for
+certain. That looked like a defect, and \texttt{avoid\_doomed\_asks}, which
+restricts the choice to asks that can land and ranks them by the same
+objective, was pre-registered against it with a predicted $+0.05$ to $+0.15$.
+
+Over $8000$ duplicate deal-pairs it scored $+0.017$, 95\% CI
+$[-0.024, +0.059]$: at most $+0.06$ with 95\% confidence, under a fifth of the
+largest gain this project has demonstrated, and plausibly zero.
+
+Reconciling that with the turn price took four rounds, and three of the four
+found errors in the bridge rather than in the game. Treating the measured price
+as the value of a turn understated tempo by a factor of $1.7$, since the
+donation displaces the agent's normal action, which itself retains the turn
+only with probability $0.583$. Counting firings across all six seats
+double-counted, since the arm changes only the three seats it plays. Neither
+helped. The band table did: the branch fires when $p_{\text{best}} = 0$
+\emph{by definition}, at the floor of the worthless range, and the substitute's
+median $p = 0.385$ sits inside it too. The arm retains turns worth
+approximately nothing, $38.5\%$ of the time, and its predicted effect is
+approximately zero.
+
+So the champion's objective was right and the critique was wrong. Those $1.5\%$
+of decisions throw away a \emph{worthless} turn, which is exactly the
+circumstance in which the objective's other terms should dominate the
+probability term --- and they do. The discrepancy was a selection effect in the
+instrument: turns priced at positions sampled without regard to option quality
+and spent at positions where $p_{\text{best}} = 0$ by construction.
+
+\subsection{A note on public information}
+
+One candidate explanation, tested and set aside, produced a fact about the game
+worth keeping. Forking each firing and playing the champion's doomed ask in one
+branch and the substitute in the other, the substitute sheds $0.344$ more
+card-equivalents of a teammate's uncertainty --- and $0.269$ more of each
+\emph{opponent's}. An ask is public, and it reaches two partners and three
+opponents, so the team-weighted balance is
+\[
+2 \times (-0.344) - 3 \times (-0.269) = +0.120 \text{ card-equivalents per
+firing, favouring the quieter ask.}
+\]
+In six-player Fish a public disclosure is net-negative for the discloser's team
+whatever it says, because the opposition outnumbers the partnership three to
+two. This is the arithmetic behind the no-bluff structure noted in
+Section~\ref{sec:objective}: signal is welded to move, and what you tell your
+partner you tell your opponents more of.
+
+% =====================================================================
+\section{The endgame solved under imperfect information}
+\label{sec:ii}
+
+\begin{quote}
+\textbf{These figures were recomputed.} The solver's transposition table keyed
+nodes on hands, turn, half-suit winners and belief weights, and \emph{not} on
+the history. The opponents in it are the champion, whose action is a function
+of its whole observation, so two nodes identical in every key field but reached
+by different move orders have different continuations and different values.
+Merging them returned one branch's value for the other, and the maximisation
+read those values --- on the position that exposed it, the search reported
+$+0.2500$ for a move a rollout of the same strategy scores at $+0.7500$, and
+visited $154$ nodes where the corrected search visits $12{,}086$. The fault was
+found by an invariant that holds with no ground truth at all: a best response
+may copy the champion at every information set, so it cannot score below it.
+Five $m = 2$ positions did.
+
+On the 304 $m = 1$ positions that both the broken and the corrected run solve,
+the aggregate barely moved --- the gain went $+0.4403$ to $+0.4392$. That is not
+because the bug was harmless. It corrupted 43 of those 304 positions
+individually, and the errors went \emph{both ways}: the fix raised the optimum
+in 24 and lowered it in 19, so they very nearly cancelled in the mean. The
+champion figure is identical position for position, as it must be --- it is a
+rollout that never consulted the table --- and that identity is what licenses
+the comparison at all. Everything below is the corrected run.
+\end{quote}
+
+Every ``exact'' result above is a statement about the perfect-information game,
+and Section~\ref{sec:tempo}'s companion result showed that game is degenerate.
+The v0.3 headline --- belief agents choosing a provably optimal move in 100\%
+of information-resolved positions --- was scored against that same
+perfect-information optimum, and every one of those positions had a single live
+half-suit. This section measures what the champion does at $m = 1$ when it
+genuinely cannot see, which is a different question with a different answer.
+
+\subsection{An exact best response over information sets}
+
+\path{fish4/exact_ii} enumerates the deals consistent with the public record
+and optimises over the deviator's \emph{information sets} --- the same action
+at every deal it cannot tell apart --- by backward induction against champion
+opponents. There is no sampling anywhere in it.
+
+Two assumptions, stated rather than buried. The prior is uniform over
+consistent deals, which is what the constraint system alone licenses; tilting
+it by the champion's own opponent model would make the answer a statement about
+that model. And the opponents are a \emph{deterministic realisation} of the
+champion, seeded from a hash of the observation, because the champion samples
+and a distribution over policies is not a strategy one can best-respond to.
+That second choice rests on a property that was checked rather than assumed:
+over $629$ real decisions a freshly constructed agent given the same
+observation computes a bit-identical belief to one attached from the deal.
+
+Two controls run first and gate the rest. Where the belief pins every card
+there is nothing hidden left, so the exact value must equal the closed form
+$2f - m$. Over $200$ games it does, \textbf{$344/344$}. And where the support
+is small enough to afford it, the champion's value is computed twice --- once
+by rolling each deal forward, once by walking the same tree the best response
+walks and playing the champion at the deviator's nodes. Same strategy, two code
+paths, so they must agree, and they do: $\mathbf{601/601}$. The first control
+cannot see a fault that needs several deals to show, which is exactly the fault
+that was there.
+
+A third control tests the \emph{belief} rather than the search, and is the only
+one here that does. The true deal must be one of the deals the belief admits ---
+if it is not, the belief has excluded the truth and every value computed over
+that support is a value of a different game. Over $665$ positions it is: $\mathbf{665/665}$. It is free, because the
+support is already enumerated to solve the position at all.
+
+\subsection{What the endgame is worth, and what the champion gets}
+
+Across $305$ genuinely hidden positions solved exactly ($13$ skipped for a
+belief support above $24$ deals and $3$ over the $300{,}000$-node budget, so
+$95\%$ coverage):
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+exact optimum in the seat on move & $+0.5084$ \\
+the champion in the same seat & $+0.0679$ \\
+\midrule
+exact gain from deviating & $\mathbf{+0.4405}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+with median gain $+0.3333$, maximum $+1.5556$, and --- as the invariant
+requires, since a best response can always copy the champion --- \emph{no}
+negative entry in $305$ positions. That invariant is now a hard
+failure rather than a printed warning: the run that violated it wrote its
+results file anyway.
+
+Two readings. First, hidden information is expensive: the closed form values
+the last half-suit at $+1$ to the team on move, and played optimally without
+sight of the cards it is worth $+0.51$. Some positions are worth $-0.5$ ---
+won under perfect information, lost under optimal play without it. Second, the
+v0.3 certificate is not wrong but certifies a much easier thing: where the
+champion cannot see, it captures $+0.068$ of the $+0.508$ available.
+
+\paragraph{The caveat, measured.} Best-responding to a realisation one can
+predict is easier than beating the mixture it came from, so this figure likely
+overstates exploitability against the champion as it plays. How much it
+overstates is not settled here, but its relevance is: over $41$ hidden $m = 1$
+information sets at $12$ seeds each, the champion repeats its move every time
+in only $32\%$ of them, averaging $2.41$ distinct actions. It mixes at most of
+these decisions.
+
+\subsection{Two live half-suits, and what it costs to say so}
+\label{sec:iim2}
+
+The same solver at $m = 2$. The layer is where the impossible negative gains
+appeared, and where the second fault lived: a deal the champion has no move in
+was dropped from the belief and the survivors reweighted, instead of being
+scored where it stands. At $m = 2$ that case is routine --- 2,821 deals over
+the run --- and at $m = 1$ it never happens once, which is why the fault was
+invisible in the layer above.
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+pinned positions matching the closed form & $34/34$ \\
+the true deal in the belief's support & $375/375$ \\
+tree and rollout, same champion strategy & $116/116$ \\
+\midrule
+exact optimum in the seat on move & $+0.7734$ \\
+the champion in the same seat & $+0.4484$ \\
+\midrule
+exact gain from deviating & $\mathbf{+0.3250}$ \\
+negative entries & $\mathbf{0/109}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{This number is not comparable with $m = 1$'s, and the reason is
+coverage.} Only 109 of 313 genuinely hidden positions were solved ---
+$35\%$. Of the rest, 141 had a belief support above $24$ deals and 63 exceeded
+the $300{,}000$-node budget, and those are the \emph{wide} positions: the ones
+where the champion knows least. (A further 28 positions over the budget had a
+support of \emph{one}: those are pinned, so they belong to the control above
+rather than to the hidden set, and counting them here --- as an earlier draft
+of this paragraph did --- understates the coverage. The control therefore ran
+on $34$ of the $62$ pinned positions available, not all of them.) Supports of $2$ and $3$ alone account for
+50 of the 109 solved. So $+0.3250$ is the gain on the easier half of a harder
+layer, which is exactly where one should expect the champion to look better
+than it is, and it should not be read beside $m = 1$'s $+0.4405$ as though the
+two were measured on comparable samples.
+
+That is the honest limit of exact play in this project as it stands: $m = 1$ is
+solved at $95\%$ coverage, and $m = 2$ is solved on a third of its positions,
+selected for being easy.
+
+
+\paragraph{Both gains are lower bounds, and the reason is the same coverage
+that limits $m = 2$.} The exact gain \emph{rises} with how much is hidden. Over
+the solved positions, splitting each layer at its median belief support:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& narrow support & wide support & Welch $t$ \\
+\midrule
+$m = 1$ & $+0.3295$ ($n=172$) & $+0.5840$ ($n=133$) & $+5.37$ \\
+$m = 2$ & $+0.2553$ ($n=63$) & $+0.4205$ ($n=46$) & $+2.06$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+At $m = 1$ the trend is solid on its own ($r = +0.190$ against support,
+$t = +3.37$ over $305$ positions; Figure~\ref{fig:support}); at $m = 2$ it is
+suggestive rather than significant ($r = +0.145$, $t = +1.52$), and the two
+agree in sign and rough magnitude. The mechanism is the obvious one: the more
+the belief leaves open, the more an exact answer is worth over a heuristic.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/support.pdf}
+\caption{What an exact deviation is worth, against how much the belief leaves
+open, over the $305$ solved $m = 1$ positions. Gray points are positions
+(jittered for visibility); blue points are means over support bands with 95\%
+confidence intervals. The gain rises with support --- and the unsolved
+positions lie beyond the right edge of this plot, at a median support of $48$
+against a solved median of $3$. That is why the solved-layer means read as
+lower bounds, why \S\ref{sec:iibounds} tries to replace that extrapolation
+with bounds, and why the honest answer is that the plot cannot be read past
+its own right edge.}
+\label{fig:support}
+\end{figure}
+
+The positions the solver cannot reach are precisely the wide ones --- $16$
+unsolved at $m = 1$ with median support $48$, against a solved median of
+$3$; $204$ unsolved at $m = 2$ with median support $60$ against a
+solved median of $4$. The obvious reading is that both reported means are
+therefore \emph{lower} bounds on the gain over the whole layer.
+
+That reading is an extrapolation, and \S\ref{sec:iibounds} tries to replace it
+with bounds that hold on every position rather than a slope read past its data.
+The attempt does not settle it: the bounds are real, they were validated on
+$716$ positions, and they are too loose to decide. It does establish something
+smaller and firmer --- that the cheap proxy which \emph{looked} like it settled
+the question cannot, because the proxy loosens as the belief widens. No
+corrected figure is offered. The honest position is that the direction of this
+bias is unknown, not that it is known and favourable.
+
+\subsection{Bounding the layer instead of solving it}
+\label{sec:iibounds}
+
+Two thirds of $m = 2$ is unsolved, and the previous section leant on a slope
+fitted below the cap to say which way that biases the headline. A slope
+fitted over supports $2$--$24$ and read across a gap running to $60{,}480$
+deals is an argument, not a measurement. Two quantities replace it, and both
+hold by construction on \emph{every} position, reachable or not.
+
+\paragraph{The two bounds.} For a position with belief support $\{d\}$,
+weights $\{w_d\}$ and champion value $C$:
+
+\begin{itemize}
+\item \textbf{Upper.} $U = \sum_d w_d\,V_{\mathrm{PI}}(d)$, where
+  $V_{\mathrm{PI}}(d)$ is the solver run on the single deal $d$. Solving one
+  deal is the perfect-information relaxation --- the deviator is told the deal
+  and may answer differently in each --- and any genuine
+  imperfect-information policy is one the relaxation may also play. Hence
+  $V_{\mathrm{II}} \le U$. No new solver is involved: \texttt{ExactII} on a
+  single state \emph{is} $V_{\mathrm{PI}}(d)$.
+\item \textbf{Lower.} $L = \max_a \sum_d w_d\,\mathrm{champion}(d \mid a)$
+  over root actions legal in every deal: play $a$, then revert to champion
+  play. One policy is attainable, so $V_{\mathrm{II}} \ge L$. The champion's
+  own root action is a candidate, so $L \ge C$ and the bounded gain can never
+  come out negative.
+\end{itemize}
+
+\paragraph{The control.} Positions with support at most $12$ are also solved
+exactly, in the same run and on the same state object, and the exact gain must
+lie inside its own bounds. It does, on \textbf{$100/100$}. The control is
+computed in place rather than joined to the results of \S\ref{sec:iim2}: that
+file keys its rows by game alone, several to a game and only for the positions
+it attempted, so any alignment would have been a guess --- and a control built
+on a guessed join checks nothing.
+
+\paragraph{The pre-registered answer is: not settled.} Over $248$ positions in
+$59$ games, the ones not solved exactly are bounded into
+$[\mathbf{+0.2976}, \mathbf{+1.7455}]$. The study's solved mean over the same
+games is $+0.3214$, which the interval straddles. The bounds are real and they
+are too loose to decide; \path{prereg/ii_bounds.md} fixed that reading
+before the run.
+
+\paragraph{Perfect information is a bad bound for this game.} That is the
+first thing the run establishes, and it is worth stating because the PI
+relaxation is the standard tool reached for here. Where the truth is known it
+overshoots by $+0.3278$, against the one-ply policy's $+0.0585$ undershoot ---
+five times looser, on the same positions. On $36$ of $248$ positions
+\emph{every} deal exceeded its budget and fell back to the trivial figure, so
+those are bounded by arithmetic rather than by any search. Above support
+$150$, $82\%$ of all deals fall back.
+
+\paragraph{Exploiting the champion at $m = 2$ is almost always one move.}
+On \textbf{$88$ of the $100$} positions solved exactly, playing the single best
+deviation and then reverting to champion play attains the exact optimum. Over
+all hundred the gap averages $+0.0585$ ($95\%$ CI $[+0.0197, +0.0974]$). The
+exploitation is a local error and not a sustained plan --- which is what makes
+the cheap bound as tight as it is, and is a fact about the champion worth
+having on its own.
+
+\paragraph{The same bounds at $m = 1$.} Correcting one layer and leaving the
+other resting on the slope would leave a reader unable to tell whether $m = 1$
+was checked and held or simply not checked, so it was checked. Over $200$
+games the layer has $644$ positions, of which $340$ are pinned --- the belief
+admits one deal, the gain is zero by construction, and they are counted
+separately rather than averaged in. Of the $304$ with a real belief, $276$ are
+solved exactly here, at a mean gain of $+0.4116$ against the $+0.4405$ of
+\S\ref{sec:ii} over its $305$; the difference is which positions each run
+reached, not a disagreement. The control holds on \textbf{$616/616$}, which
+with the $m = 2$ layer's $100/100$ is $716$ positions whose exact value lies
+inside its own bounds. One deviation attains the optimum on $543$ of the $616$
+--- $88\%$, the same fraction as at $m = 2$, on six times the sample.
+
+Only $13$ of the $304$ sit above the support cap, so at $m = 1$ there is very
+little to extrapolate across in the first place: $95\%$ coverage means the
+question the previous section worries about is nearly moot here. It is the
+long solvable range, not the unsolved tail, that makes this layer useful --- it
+is what allows the next paragraph to be measured at all.
+
+\paragraph{The cheap instrument loosens as the belief widens, which is why it
+cannot settle this.} Because the one-ply gain is computable everywhere and the
+exact gain is not, it looked like the only \emph{matched} instrument spanning
+the support cap. Whether it is depends entirely on whether its looseness is
+constant in support, and at $m = 2$ that could not be checked: exact values
+exist only up to support $12$ there, over which the gap shows no trend
+($t = -0.04$). Running the same bounds on the $m = 1$ layer --- cheaper, and
+solvable exactly out to support $24$ --- gives the range to check it, and the
+answer is that the gap \textbf{grows}:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+$m = 1$ support & exact minus one-ply & $n$ \\
+\midrule
+$2$--$4$   & $+0.0785$ & $209$ \\
+$5$--$8$   & $+0.2496$ & $31$ \\
+$9$--$16$  & $+0.3920$ & $29$ \\
+$17$--$24$ & $+0.1667$ & $7$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Slope $+0.0236$ per deal, $t = \mathbf{+6.27}$ over $276$ positions. So a
+one-ply figure that flattens or falls above the cap is exactly what a
+loosening instrument produces, whether the true gain is flat or rising. The
+$m = 2$ null is not evidence that the trend stops; it is evidence that this
+instrument stops tracking. Reported here as a measurement of the instrument.
+
+For completeness, what the comparison showed before that was known --- and
+which nothing above licenses reading as a fact about Fish. Splitting at the
+study's $24$:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+support & one-ply gain & $n$ \\
+\midrule
+$1$--$2$      & $+0.1111$ & $54$ \\
+$3$--$8$      & $+0.2618$ & $63$ \\
+$9$--$24$     & $+0.3933$ & $52$ \\
+$25$--$60$    & $+0.3408$ & $33$ \\
+$61$--$150$   & $+0.1155$ & $19$ \\
+$151$ and up  & $+0.1899$ & $27$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+At or below the cap it averages $+0.2541$ ($n = 169$); above it, $+0.2350$
+($n = 79$); Welch $t = -0.42$. Taken at face value that says the rise stops.
+Taken with the calibration above, it says the instrument stops --- and the two
+readings cannot be told apart from this data.
+
+The comparison was \textbf{exploratory} from the start, and the
+pre-registration records it as such: it was added after the upper bound turned
+out not to bind, and its bands were chosen after seeing the support
+distribution. It is left in because the negative result about the instrument is
+worth having, and because a comparison that was run and then quietly dropped
+once it stopped supporting a conclusion is the thing this project is trying not
+to do. The pre-registered verdict is unchanged and stands alone: not settled.
+
+\subsection{Where the disagreements are, and one that is provable}
+\label{sec:iidiff}
+
+Comparing the champion's move to the exact optimum's at each hidden decision,
+$78$ of $263$ agree ($10$ more exceeded the $300{,}000$-node budget and are
+unsolved, not counted either way). Of the $185$ disagreements, $78$ cost
+\emph{exactly} zero --- ties broken differently, not errors --- and the rest cost
+$+0.5609$ on average, or $+0.2005$ spread over every hidden decision. Their shape does not implicate one component: of $93$ costly
+ask-versus-ask disagreements, $47$ share the target only, $11$ the card only,
+and $35$ neither. No repair is proposed from that.
+
+Thirteen could not be priced at all, because the declared split was in no
+candidate the solver enumerates --- and that set contains every assignment true
+in at least one consistent deal. Those claims were true in \emph{no} deal the
+record allows. Checked directly, and the weak version of the check refuted the
+reading it was built to confirm: testing each card's own holder mask gives
+$0/1080$. A declaration can satisfy every card's mask separately and match no
+complete deal, because the hand \emph{counts} do not add up --- the failure
+\texttt{claim4} names as ``per-card modes can be jointly impossible''.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+& claims & jointly impossible \\
+\midrule
+$m = 1$ & $60$ & $\mathbf{7\ (11.7\%)}$ \\
+$m = 2 \dots 9$ & $480$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Only at $m = 1$, and structurally: there the hand counts are tight enough that
+a mis-split is detectably infeasible, while above it there is slack enough that
+almost any team-only declaration fits some deal. Every such declaration was
+wrong by construction: $+0.000$ sets each against $+0.968$ for the rest,
+under the void-era rule these games were played with --- under the award
+baseline each would have scored $-1$, a fact the adoption verdict below now
+carries.
+
+\subsection{The repair, and why it is not adopted}
+
+A max-flow feasibility test over the live cards decides the question exactly at
+any layer, and agrees $40/40$ with brute-force enumeration where enumeration is
+available. Supplying the most likely \emph{feasible} declaration instead ---
+filtering alone changes nothing, because \texttt{forced\_claim} rebuilds a
+declaration from the masks when no candidate survives --- gives, over $6000$
+pre-registered pairs:
+\[
++0.028,\quad 95\%\ \text{CI}\ [+0.024,\, +0.033].
+\]
+Every block positive, every block excluding zero, and $27$ wins against $973$
+ties and $0$ losses in a representative block: the arm alters play about $0.09$
+times a game, so most deals are bit-identical and repairing a claim that could
+not have won cannot cost anything.
+
+The bar fixed before the arm existed was $+0.05$. \textbf{It is not adopted},
+and the champion is unchanged. A provable error, a free repair, and an effect
+smaller than the smallest one this project agreed in advance to care about ---
+all three are the finding. One caveat now attaches: the $+0.028$ was earned
+under the void rule, where a repaired impossible declaration saved one point
+of differential; under the award baseline it saves two, so the arm's value
+plausibly doubles and clears the bar. Re-running this 6000-pair design under
+the award rule is the one adoption decision the rule correction can
+plausibly reverse, and it is queued rather than presumed.
+
+% =====================================================================
+% =====================================================================
+\section{The all-champion profile is not an equilibrium}
+\label{sec:noneq}
+
+Computed with the corrected solver, and therefore not covered by the
+withdrawal in Section~\ref{sec:ii}.
+
+Section~\ref{sec:ii}'s figures average over \emph{positions}, and a game can
+contain several $m = 1$ decisions. That is the right unit for asking how well
+the champion plays the endgame and the wrong one for asking how exploitable it
+is: summing gains across positions in one game double-counts a continuation the
+deviator only gets to play once. So this takes exactly one position per game ---
+the first $m = 1$ decision with genuinely hidden cards --- and lets the deviator
+play champion-identically before it and optimally from it.
+
+The value is already a team differential: $+1$ for a half-suit the deviator's
+team takes and $-1$ for one the opponents take, so a half-suit changing hands
+moves it by $2$, exactly as it moves the set differential
+\path{scripts4/exploitability.py} reports. Over 60 games:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & per game & 95\% CI \\
+\midrule
+sampled rollout best response, whole game & $-0.4875$ & $[-1.2442, +0.2692]$ \\
+exact, \textbf{one} endgame decision only & $\mathbf{+0.1111}$ & $[+0.0460, +0.1761]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The interval excludes zero, so a single seat deviating at a single endgame
+decision takes a positive amount --- and if the all-champion profile were an
+equilibrium, no single seat could gain by deviating at all. The rollout
+responder, deviating for a \emph{whole} game, measured $-0.4875$: it does not
+merely fail to find an exploit, it loses ground, which is what
+\path{fish4/bestresponse.py} warns strategy fusion can do to a PIMC
+responder.
+
+\paragraph{Why the per-game figure is the smaller one, and why it is the right
+one.} Of the 60 games, only 22 contain a first $m = 1$ decision with
+anything hidden. In the other 36 the belief has \emph{pinned every card} by
+the time the endgame arrives --- not a wide support, not a missing position:
+all 36 are pinned --- so the closed form already answers them and the
+restricted deviator gains exactly zero. Conditional on a hidden decision
+existing the gain is $+0.2928$; per game it is $+0.1111$. Quoting the conditional
+figure beside a whole-game bound would compare a mean over a favourable subset
+against a mean over everything. The 2 games whose first hidden decision
+exceeded the node budget are excluded from the denominator rather than scored
+zero: unsolved is not worth nothing.
+
+That split is the better description of the champion. Its inference finishes
+the endgame outright in 60\% of games; where it does not, it leaves about a
+third of a set on the table.
+
+\paragraph{What this does not bound.} The opponents are a \emph{deterministic
+realisation} of the champion, seeded from a hash of the observation, and
+best-responding to a realisation one can predict is easier than beating the
+mixture it came from. The champion mixes at most of these decisions --- over
+$41$ hidden $m = 1$ information sets at $12$ seeds each it repeats its move
+every time in only $32\%$ of them. So this bounds the realisation, not the
+champion as it plays, and the claim is correspondingly narrow: \emph{that}
+profile is not an equilibrium.
+
+% =====================================================================
+\section{Playing the endgame from the solution}
+\label{sec:exactplay}
+
+Section~\ref{sec:iidiff} measures that the champion picks the exact optimum at
+under a third of hidden $m = 1$ decisions. \path{fish4/endgame_ii.py} puts
+the solver in the agent at exactly those decisions. Duplicate-deal paired
+against the identical configuration with the flag off, so everything but the
+policy cancels:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+seed block & set differential & 95\% CI \\
+\midrule
+$0$ (screen) & $+0.0875$ & $[+0.0307, +0.1443]$ \\
+$1$ & $+0.0650$ & $[+0.0033, +0.1267]$ \\
+$2$ & $+0.0750$ & $[+0.0150, +0.1350]$ \\
+\midrule
+pooled, $1200$ pairs & $\mathbf{+0.0765}$ & $\mathbf{[+0.0422, +0.1108]}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cochran's $Q = 0.280$ on $2$ degrees of freedom: the three blocks are as
+consistent as independent estimates of one quantity get. That matters here more
+than the interval does. This project has already had a cell clear the same bar
+at $+0.490$, return $+0.068$ on one fresh block and $-0.066$ on a second, and
+turn out to be noise; the replications are what separate this from that.
+
+\paragraph{The firing rate is part of the result.} The first version of this
+measurement returned $+0.000 \pm 0.000$ over $40$ paired deals in a
+single-seat arm, which reads exactly like a clean null and was nothing of the
+kind --- the policy had fired \emph{twice}. Raising the caps from $12$ deals
+and $50{,}000$ nodes to the study's $24$ and $300{,}000$ changed that count from
+$2$ to $2$. A seat faces about $0.075$ solvable hidden $m = 1$ decisions per
+game, not because the search is too small but because the champion's belief has
+usually pinned the endgame before it arrives --- the same fact
+Section~\ref{sec:noneq} reports from the other side, where $36$ of $60$ games
+have no hidden first endgame decision at all. Every arm now reports how many
+decisions the flagged seats faced and how many the solver answered, and a run
+where it never fires refuses to print a differential.
+
+\paragraph{One mechanism, visible in the raw counts.} Over the $1200$
+void-era games the policy produced $446$ misdeclarations against the
+control's $473$ --- a misdeclaration being a declaration with the right team
+and the wrong split, voided in these games, awarded to the opponents under
+the current baseline. The solver enumerates only declarations true in some
+consistent deal, and each avoided misdeclaration is worth twice as much
+under the award rule as it was here (design R4 of the rule-correction
+pre-registration re-prices this stack).
+
+\paragraph{Cross-play: the gain is not exploitation of one opponent.} The
+obvious objection is that \path{fish4/exact_ii} best-responds to the v0.4
+champion, so a gain against that champion might be exploitation of it rather
+than better endgame play. Against \texttt{V03\_CHAMPION} --- a different agent,
+which the solver's opponent model is simply \emph{wrong} about --- over
+1200 paired deals in three disjoint seed
+blocks, pooled the same way:
+\[
+  +0.0637 \quad 95\%\text{ CI } [+0.0306, +0.0968], \quad Q = 0.729 \text{ on } 2 \text{ df}
+\]
+against $+0.0765$ for the champion it was built to answer. The first
+cross-play block alone cleared zero only barely, at
+$+0.0750$, $[+0.0100, +0.1400]$, and was used here to weaken a caveat before it
+had met the bar the champion arm was held to; it has met it now. The same gain
+against an opponent it was not modelling is what one would expect of a policy
+that plays the endgame better, and not what one would expect of an exploit. The
+null count moves the same way here too: 407 against 443.
+
+The \emph{all} arm cannot settle this and is reported for completeness only:
+with every seat flagged both teams are identical, so its differential is about
+zero by construction, and $-0.050 \pm 0.198$ over $40$ pairs is what that looks
+like.
+
+\paragraph{Not promoted, and why.} The flag is off, and after the cross-play
+result only one of the two original reasons still stands.
+
+The first was that a best response is not an equilibrium strategy, so this
+might measure only that the policy beats \emph{this} champion.
+Section~\ref{sec:noneq} remains a standing reminder that strength against a
+named opponent and unexploitability come apart --- but the cross-play row is
+direct evidence against that reading here, and the objection is much weaker
+than when it was written.
+
+The second stands unchanged: turning the flag on would change the champion, and
+the champion is what \path{fish4/exact_ii} models. Every exact figure in
+Sections~\ref{sec:ii} and~\ref{sec:noneq} is a statement about the current
+champion, and promoting this would invalidate all of them at once. That is a
+decision with a cascade behind it, to be taken deliberately and re-measured
+afterwards, not a consequence of a good table.
+
+\section{The solver as a critic: a defect found, fixed and shipped}
+\label{sec:critic}
+
+\begin{quote}
+\emph{Every improvement in this project until now came from a duel. This one
+came from a proof, and the duel only confirmed it.}
+\end{quote}
+
+The exact solver was built to measure exploitability. It also does something a
+duel cannot: it says \emph{which move} was wrong, in a position, with a number
+attached. \S\ref{sec:iibounds} established that beating the champion in the
+endgame is almost always \emph{one} move --- on $88$ of $100$ exactly solved
+$m = 2$ positions and $543$ of $616$ at $m = 1$, a single deviation followed by
+ordinary champion play attains the exact optimum. A defect that is one move
+wide is a defect that can be looked at.
+
+\paragraph{The move is an ask, and it is riskier than the champion's.} The
+improving move is an ask rather than a claim on $131$ of $154$ improvable
+$m = 1$ positions and $128$ of $138$ at $m = 2$, so the defect is in ask
+selection. Paired within each position --- same belief, same hand, so nothing
+about the position can explain the difference:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+& champion's ask & better ask & paired $t$ & $n$ \\
+\midrule
+$m = 1$ & $p = 0.799$ & $p = 0.218$ & $-18.88$ & $122$ \\
+$m = 2$ & $p = 0.611$ & $p = 0.219$ & $-10.02$ & $91$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The better ask is riskier on $113$ of $122$ at $m = 1$ and safer on
+\emph{none}. On $73$ of those $122$ the champion asked a card it was
+\textbf{certain} to get, and that was still a mistake.
+
+\paragraph{But it is certainty, not probability.} The obvious fix --- weigh
+the success probability less --- does not work, and the data says so before any
+duel. The objective is $\mathrm{score}(a) = p(a) + F(a)\cdot w$, and since the
+argmax is scale-invariant, $p + F\cdot(kw)$ ranks asks exactly as
+$(1/k)p + F\cdot w$: the existing objective already spans every positive weight
+on $p$. Searching that one-parameter family over $388$ endgame positions
+carrying the exact one-ply value of every candidate ask returns $k = 1$. No
+change.
+
+What helps is the information term, which rewards asks the belief cannot call.
+Held out by \emph{game}, so positions from one deal cannot sit on both sides:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+model & train & held out \\
+\midrule
+champion (0 parameters)      & $+0.0805$ & $+0.1498$ \\
+scale $k$ (1 parameter)      & $+0.0805$ & $+0.1498$ \\
+$\mathtt{info} = +2.00$      & $+0.1236$ & $+0.1591$ \\
+$\mathtt{certain} = -0.50$   & $+0.1212$ & $+0.1784$ \\
+full search (11 parameters)  & $+0.1786$ & $[+0.1281, +0.1884]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The eleven-parameter fit gains most on train and its held-out score is an
+\emph{interval}, not a number: run at four search seeds with the budget fixed,
+it lands anywhere from below the champion to above every one-parameter model.
+That is a property of which random restarts came up, not of the model, and one
+run of it would have reported whichever number that happened to be. The
+one-parameter models have no such freedom --- their grid is exhaustive --- which
+is a reason to prefer them beyond their score. $\mathtt{info} = +2.0$ was
+chosen on train and confirmed by leave-one-game-out cross-validation inside the
+training games; $\mathtt{certain}$ scored better on the held-out set and was
+\emph{not} chosen, because picking it would be picking by the check.
+
+\paragraph{Three duels, because an effect measured against a weak base does not
+transfer by assumption.} The correction applies only when at most two
+half-suits are live. Every run was pre-registered with its arm, size, seeds and
+readings fixed first, and on deals the fit never saw:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& diff (sets) & $95\%$ CI & pairs \\
+\midrule
+vs champion, registered   & $+0.0835$ & $[+0.0338, +0.1332]$ & $2000$ \\
+vs champion, replication  & $+0.0980$ & $[+0.0480, +0.1480]$ & $2000$ \\
+vs champion, pooled       & $+0.0907$ & $[+0.0555, +0.1260]$ & $4000$ \\
+\textbf{on top of what ships} & $\mathbf{+0.1220}$ &
+  $\mathbf{[+0.0711, +0.1729]}$ & $2000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The last row is the one that moved a default and the one to quote: the site
+plays a depth-3 belief-space lookahead, which searches exactly the positions
+this correction is about, and it might already have been finding these asks.
+It was not --- the effect is if anything \emph{larger} on the stronger base,
+$15$ of $16$ blocks positive.
+
+\paragraph{What was predicted and was wrong.} The pre-registration said the
+effect would be small and the test might be underpowered to see it: the
+correction moves a handful of decisions a game, and offline it was worth
+$+0.0093$ in half-suit units. It is worth $+0.1220$ sets in play, about what
+running the entire exact solver in the endgame gains ($+0.0765$). The
+prediction that the endgame is too thin a slice of the game to matter was
+wrong, and it is recorded here because it was written down first.
+
+\paragraph{It wins more; it is not harder to exploit.} Winning duels and being
+less exploitable are different claims, and the solver can be asked the second
+one directly: it takes the opponents' policy as an argument, so the same
+positions can be solved twice. Over $285$ $m = 1$ positions from champion
+self-play, each solved against the champion and against the champion plus the
+correction --- same position, same belief, same hand, so nothing about the
+position can explain a difference:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+paired change & estimate & $95\%$ CI \\
+\midrule
+the policy's own value & $+0.0189$ & $[-0.0132, +0.0509]$ \\
+what a best response takes & $-0.0002$ & $[-0.0264, +0.0260]$ \\
+the gap between them & $-0.0190$ & $[-0.0587, +0.0206]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Neither clears zero, and the two nulls are not the same null. The own-value
+change is simply underpowered --- a half-width of $0.032$ around $+0.019$, with
+the sign the in-play result predicts. The best-response change is
+\emph{pinned}: $-0.0002$ with a half-width of $0.026$, an interval that
+excludes any reduction the size of the $+0.1220$ the correction gains in play.
+A best response still takes the same amount.
+
+So the correction does not buy its winnings by closing the hole. That is a
+limit on the method rather than on this particular fix, and it is worth stating
+because the method is the interesting part of this section: an exact best
+responder used as a \emph{critic} improves average-case play, and nothing about
+fixing the moves it flags makes the worst case harder to reach. Exploitability
+and strength are being measured, and they moved independently.
+
+\paragraph{Pushing the correction up the game measured deception, not strength.}
+What happened when the correction was extended past the endgame is reported in
+full because it is the sharpest methodological result in this paper, and
+because half of it is a finding about the game.
+
+The correction applies below a threshold $m$ of live half-suits. A
+pre-registered ladder raised the threshold one rung at a time, each rung
+duelling the incumbent, each shipping only on a CI clear of zero. Every rung
+cleared, and the rungs \emph{grew}: $+0.1220$ to $m \le 2$, $+0.3025$ to
+$m \le 3$, $+0.6995$ to $m \le 4$, $+1.0125$ to $m \le 5$, and $+4.2790$ for
+the amended coarse step to always-on --- a bigger single gain than the whole
+v0.3-to-v0.4 release. Eight of eight blocks positive at every rung, no
+timeouts, engine digests matched.
+
+All of it was an artefact of \emph{who was on the other side of the table}.
+Each rung duelled the sibling configuration, and the sibling's opponent model
+conditions on which half-suit a player chooses to ask. Information-seeking
+asks violate that model systematically, so they poison the sibling's
+inference; the rungs grew with $m$ because a higher threshold spends more of
+the game poisoning. Against the v0.3 champion --- a foreign opponent whose
+inference is built differently --- with every configuration playing the same
+$500$ deals and per-deal differencing against no correction:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+threshold & margin over v0.3 & paired $\Delta$ vs.\ no correction \\
+\midrule
+none      & $+3.006$ & --- \\
+$m \le 2$ & $+2.914$ & $-0.092\ [-0.448, +0.264]$ \\
+$m \le 3$ & $+2.568$ & $-0.438\ [-0.829, -0.047]$ \\
+$m \le 5$ & $+1.526$ & $-1.480\ [-1.888, -1.072]$ \\
+always on & $-2.160$ & $-5.166\ [-5.643, -4.689]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/ladder.pdf}
+\caption{The deception ladder, both measurements of the same knob. Top: each
+pre-registered rung's gain over its sibling incumbent, growing with the
+threshold $m$ --- eight of eight blocks positive at every rung. Bottom: the
+same configurations against the foreign v0.3 champion on $500$ shared deals;
+every rung above the shipped $m \le 2$ is a significant loss, and always-on
+loses to v0.3 outright. The panels share an x-axis, so each column is one
+configuration read against two opponents: the rungs were not measuring
+strength, they were measuring how much of the game was spent poisoning the
+sibling's opponent model.}
+\label{fig:ladder}
+\end{figure}
+
+Monotone, and the mirror image of the sibling ladder
+(Figure~\ref{fig:ladder}): every rung above $2$ is
+a significant \emph{loss} against a foreign opponent, ending at a
+configuration that loses to v0.3 outright. The always-on rung was shipped for
+minutes on the strength of $+4.28$ and reverted when the first cross-play
+block came back; every rung above $2$ is withdrawn, and the shipped threshold
+is back at $m \le 2$ --- whose foreign-relative effect is a paired tie, and
+which alone rests on evidence that is not a sibling duel.
+
+Three readings, stated separately. \emph{About the game}: exploiting an
+opponent model that conditions on action choices is worth several sets per
+game in six-player Literature, which makes deception a first-class strategic
+resource here, found by accident and measured to $\pm 0.24$. \emph{About the
+method}: a pre-registered ladder with a fixed stopping rule, eight-of-eight
+block agreement, matched engine digests and growing effects passed every
+check this paper uses --- and measured the wrong quantity at every rung,
+because no rule asked \emph{against whom} the gain was defined. Robustness
+of the opponent pool now belongs beside pre-registration in the discipline,
+not downstream of it. \emph{About the correction}: the $+0.1220$ of the
+preceding paragraphs is a gain against the engine's own family, bounded
+against v0.3 inside $[-0.448, +0.264]$; the exact solver's diagnosis stands,
+and what its repair bought is play that is better against the family and no
+worse outside it.
+
+\paragraph{The same question against an engine nobody here wrote.} Everything
+above still measures the correction against relatives: the sibling ladder, and
+a v0.3 that shares this project's rules engine and most of its ancestry. What
+the withdrawal actually demands is an opponent with \emph{no} shared code, and
+one exists: \textbf{FishBot v0.7} by dylann4500, an independently written
+C++ engine for the same six-player, 54-card game --- different author,
+different belief representation, different search, its 55-parameter policy
+frozen upstream after self-play tuning. It plays under this engine's arbiter
+through a process bridge that replays the public history to the frozen policy and
+legality-checks every move it proposes, substitutions counted rather than
+hidden; zero were needed across the $2{,}000$ games this section reports.
+Two caveats travel with the comparison: v0.7 was tuned for a rule variant
+with out-of-turn declarations and plays here under this paper's rules, which
+its policy is told; and it is one foreign opponent, not a population. A
+third caveat --- that the first run scored misdeclarations under this
+engine's void-era rule while v0.7's native game awards them --- was removed
+by re-running the whole design under the award baseline, below.
+
+The check was pre-registered before the first scored game
+(\path{prereg/foreign_opponent_m2.md}), outcomes fixed in advance: the
+deployed configuration with the correction on, and the same configuration
+with it off, each played three copies of v0.7 on $250$ deals in both
+rotations --- $500$ games per arm --- the statistic being the on-minus-off
+difference of set margins on the same deal and rotation. The registered
+question was reversal, and the answer is no: $-0.0300$
+$[-0.1081, +0.0481]$ against Dylan's v0.7, at a power sized for
+deception-scale flips. The sharper reading is what the interval
+\emph{excludes}: $+0.1220$, the correction's own sibling-measured size. On a
+third, unrelated opponent the effect is a tie, so the sibling number does not
+transfer at anything like face value --- the section's finding again,
+demonstrated this time on an engine from outside the project entirely, and
+converging with the upstream author's own documentation, which reports of its
+final tuning stage that ``the advantage is a self-play advantage \dots\ it
+does not transfer.''
+
+The context the check ran in: with the correction on, the deployed
+configuration beats v0.7 by $+2.448$ sets per game ($+2.478$ with it off),
+taking 64.3\% of decided sets across the $1{,}000$ games. That margin is a
+statement about this game under this paper's rules against an engine tuned
+under slightly different ones, and it is quoted as context, not as a ranking
+of the two projects; the measurement the design paid for is the paired
+difference, which needs no ranking to be valid.
+
+\paragraph{The same check, rule-matched.} When the misdeclaration baseline
+flipped (\S\ref{sec:game}), the design was re-registered and re-run from
+scratch under the award rule (design R2 of
+\path{prereg/rules_award_baseline.md}: fresh seeds, its own journal, the
+rule pinned in the runner rather than inherited), which makes the two
+engines agree on what every wrong declaration costs --- v0.7's native risk
+model is now exactly the rule in force. Over another $500$ paired games the
+answer does not move: $-0.0440$ $[-0.1344, +0.0464]$ against Dylan's v0.7
+under the award rule --- no reversal, and the sibling-measured size is again
+excluded. The margin context: $+2.544$ sets per game with the correction on,
+$+2.588$ with it off, 64.3\% of decided sets over the $1{,}000$ games ---
+the share to the decimal of the void-era run, on disjoint deals, under a
+different scoring rule.
+
+What the rule-matched run adds is the accounting of the rule itself: $466$
+sets in those $1{,}000$ games were misdeclarations --- wholly-held
+half-suits declared with the wrong split, each now a set for the other side
+--- and they divide $160$ against this engine to $\mathbf{306}$ against
+v0.7. The correction the void rule had been silently granting was worth
+nearly twice as much to the opponent, so scoring misdeclarations properly
+\emph{widened} nothing --- it is the reason the margin held rather than
+shrank when the game switched to the rule v0.7 was built for. This paper
+first attributed that gap to v0.7's forced declarations, which come from a
+sampled best guess where this engine declares the exact posterior MAP
+(\S\ref{sec:claiming}). The next paragraph withdraws that attribution: the
+split is unchanged by a repair that fixes the forced declarations outright,
+so it belongs to their voluntary declaration gate instead.
+
+\paragraph{A defect in the bridge, found from the other side, that had been
+flattering this engine.} Every figure above was taken through this project's
+bridge into v0.7, and an adversarial read of their C++ --- their source, not
+their paper --- found a defect in that bridge rather than in either engine.
+Forced to declare, their own driver picks the first live half-suit the mover
+\emph{holds a card in} (\texttt{engine/src/game.hpp:535}); this bridge passed
+the first live half-suit, full stop. Their \texttt{bestGuess} was therefore
+periodically asked to name all six owners of a half-suit it held nothing of
+--- a question with no anchor in its own hand, which their own driver never
+puts them in a position to be asked, and which under the award rule hands
+the set here.
+
+The defect ran in this engine's favour, which is the direction a project does
+not catch by reading its own results and nodding. Priced paired --- all
+$10{,}000$ deals replayed under both bridge revisions, identical deals and
+identical seating, the same duplicate-deal design every screen in this paper
+uses (\path{scripts4/bridge_bug_price.py}) --- it is worth $\mathbf{-0.0784}$
+$[-0.0881, -0.0687]$ sets per game: real, and about $3\%$ of the margin. It
+is also an order of magnitude smaller than the $0.30$ sets per game the same
+read estimated from $40$ games, which is what the paired instrument is for.
+Under the repair their declaration accuracy rises from $76.18\%$ to
+$78.87\%$, while this engine's moves from $96.65\%$ to $96.49\%$ --- the
+control that confirms the repair touches only their side of the bridge.
+
+What the repair does \emph{not} move is the misdeclaration split, and the
+reason corrects the mechanism the previous paragraph had assumed. The
+anchorless forced declarations were \emph{ownership}-class errors ---
+half-suits the opposing team still held a card of --- whereas the
+$160$-to-$306$ split counts \emph{allocation}-class errors, wholly-held
+half-suits declared with the wrong split. Across the same $10{,}000$ paired
+deals the allocation split is flat: $2{,}784$ against v0.7 before the
+repair, $2{,}775$ after. The finding that this engine misdeclares roughly
+half as often survives intact; the explanation for it does not, and the gap
+is a property of their voluntary declaration gate rather than of a question
+this bridge was mis-posing. The pre-registered R2 contrast is likewise
+undisturbed,
+because the defect is common-mode across its two arms --- both the
+correction-on and correction-off games ran through the same bridge, and a
+paired difference cannot see an error that appears identically in both
+halves of the pair. What is restated is the \emph{context} the R2 file
+reports beside its verdict: the margin and set share, which are absolute
+rather than paired, and which the corrected head-to-head below supersedes.
+
+\paragraph{The head-to-head, re-measured through the repaired bridge.}
+\label{sec:headtohead}
+This
+is the figure the paper stands behind, and the only one taken through bridge
+revision~2: $10{,}000$ games on the same deals the retracted run used, seats
+rotated so neither engine opens more often, both engines on their native
+misdeclaration rule, zero substituted moves and zero unfinished games
+(\path{scripts4/mega_match.py} $\rightarrow$ \path{results/mega_match.json}).
+Matching the withdrawn run deal for deal is deliberate: it makes the
+replacement a like-for-like correction rather than a differently-powered
+second opinion.
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+margin & $\mathbf{+2.3466}$ $[+2.2928, +2.4004]$ sets/game \\
+sets & $56{,}733$ to $33{,}267$ ($63.04\%$ of decided) \\
+games won & $80.41\% \pm 0.78$ ($8{,}041$W / $0$T / $1{,}959$L) \\
+ask hit rate & $51.75\%$ against $48.14\%$ \\
+declaration accuracy & $\mathbf{96.49\%}$ against $\mathbf{78.87\%}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The mechanism of the margin is in the last row and not the one
+above it. A $3.6$-point edge in ask accuracy is worth something, but the two
+engines find cards at broadly comparable rates; where they diverge is in
+knowing when a half-suit is \emph{finished}, and an $18$-point gap there is
+the difference between cashing a set and handing it over. That is the same
+claim \S\ref{sec:claiming} makes from the inference side, arrived at here
+from the scoreboard.
+
+\paragraph{How much of the margin is that, exactly.}
+\label{sec:res-headline} The paragraph above is a
+qualitative reading of two rows, and it had never been priced. It can be:
+every declaration in a game is either right or one of two kinds of wrong, and
+under the award rule each wrong one moves the margin by two sets, so the
+scoreboard decomposes exactly. Over $600$ cross-engine games
+(\path{scripts4/margin_decomposition.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+component & rate & contribution to margin \\
+\midrule
+measured margin & --- & $+2.3466$ $[+2.2928, +2.4004]$ \\
+their ownership-class errors & $0.5667$/game & $+1.1334$ \\
+their allocation-class errors & $0.2775$/game & $+0.5550$ \\
+our own wrong declarations & $0.1759$/game & $-0.3518$ \\
+\midrule
+everything else & --- & $+1.0100$ $[+0.9573, +1.0627]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Fifty-seven per cent of the margin is declaration
+accounting.} The edge is real and it is nearly fivefold --- we declare wrongly
+$0.176$ times a game against their $0.844$ --- but it is a \emph{declaration}
+edge, and
+this project has spent the large majority of its compute on the ask objective.
+The residual, everything the asking and the inference and the lookahead
+between them produce once the declarations are netted out, is $+1.010$ sets
+per game: a real margin, and a little over two fifths of the headline one.
+
+These figures are computed on the same $10{,}000$ games the headline margin
+is, which took a correction. They were first taken from a $600$-game probe
+and quoted beside a margin from the large block, which invites a reader to
+apply a ratio measured on one population to a number measured on another.
+The two agree --- the probe put their error rate at $0.918$ a game against
+$0.844$ here, and the share at $61\%$ against $57\%$ --- but the version on
+the headline's own games is the one to quote.
+
+This is a decomposition of where the sets landed, not a counterfactual. A
+declaration that did not happen changes every ply after it, and no arithmetic
+on a finished game recovers those plies; the residual row is what remains
+after the netting, not the margin a differently-declaring v0.7 would have
+conceded. The distinction is worth insisting on because the temptation is to
+read the last row as ``our true strength'', and it is not that.
+
+\paragraph{And what the other $39\%$ is made of.} The residual --- everything
+asking, inference and search produce once the declarations net out --- has a
+shape that follows from the rules. Every set is won by declaring a half-suit
+your team holds, so once misdeclarations are accounted for what remains is the
+race to \emph{assemble} half-suits, and that race has exactly two factors which
+multiply: how many asks a team gets to make, and how many of them land. This
+paper has reported the second since v0.4 and has never reported the first.
+Over $800$ cross-engine games (\path{scripts4/acquisition.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+per game & ours & v0.7 & difference \\
+\midrule
+turns & $57.250$ & $52.562$ & $\mathbf{+4.688}$ $[+3.962, +5.413]$ \\
+asks & $51.894$ & $48.265$ & $+3.629$ $[+3.102, +4.155]$ \\
+asks that landed & $26.731$ & $23.066$ & $+3.665$ $[+3.129, +4.201]$ \\
+half-suits assembled & $5.008$ & $3.416$ & $+1.591$ $[+1.418, +1.765]$ \\
+plies holding a set unspoken & $78.166$ & $32.440$ & $+45.726$ $[+41.5, +49.9]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Splitting the $3.665$-card gap at the mean gives $+1.802$ to volume
+and $+1.863$ to conversion: \textbf{almost exactly half and half}. We take
+$4.7$ more turns a game than v0.7, and that is worth as much as the
+$3.7$-point edge in ask accuracy this paper has been quoting as the mechanism.
+Tempo is not a term in our objective, is not a knob anywhere in the engine,
+and has never appeared in a results table --- it is a by-product of asking
+well, and it accounts for half of what asking well is worth.
+
+\paragraph{The last row is the one that costs us.} We hold assembled
+half-suits for $78$ plies a game against their $32$, and our own declaration
+accuracy falls monotonically with how long we have held the set:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+plies held assembled & declarations & wrong & error rate \\
+\midrule
+$0$ (never owned it) & $6$ & $6$ & $1.000$ \\
+$1$--$9$ & $2797$ & $46$ & $0.016$ \\
+$10$--$29$ & $517$ & $27$ & $0.052$ \\
+$30$--$79$ & $454$ & $23$ & $0.051$ \\
+$80+$ & $238$ & $28$ & $\mathbf{0.118}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Holding is not the cause and the direction of the arrow matters: a
+set you can place, you declare, so ``held long'' and ``could not place'' are
+nearly the same event. What the table establishes is that being unable to
+place a set is \emph{visible early}. And by \S\ref{sec:claiming}'s channel
+argument, early is when it can still be acted on --- once the half-suit is
+ours no opponent can ask in it, so nothing they do will place it, and the only
+remaining channel costs one of our turns.
+
+There is time. Over the $130$ half-suits we declared wrongly, the median
+number of \emph{our own} turns between assembling the set and the deadline is
+$25.5$, and only $16$ of $130$ were assembled with no turn left to spend. The
+lever is reachable in $88\%$ of the cases that go wrong.
+
+Whether spending those turns pays is a different question and this paper has
+already answered a version of it in the negative: \S\ref{sec:perpetual}'s
+signalling protocol cut nulls by $20\%$ and returned $+0.002$ $[-0.086,
++0.090]$ sets per pair, and it is switched \emph{off} in the deployed
+configuration. What the measurements above add is not a new mechanism but a
+different \emph{trigger}: that protocol fires when the current turn is cheap,
+and the errors are concentrated in half-suits identifiable a median of $25$
+turns before the turn gets cheap. Whether a deadline-priced trigger changes
+the answer needs its own pre-registration, and the error-value result of
+\S\ref{sec:res-pathledger} says what it will be measured against: one avoided
+misdeclaration is worth about $1.8$ sets, and a spent turn has to cost less
+than that times the chance the signal actually places the split.
+
+\paragraph{What their errors are made of, which is not what we guessed.} The
+obvious hypothesis about the ownership-class leak --- the $0.650$ sets a game
+they hand over by declaring a half-suit we still hold a card of --- was that
+our \emph{silence} causes it: under the no-bluff rule an ask certifies a
+holding, so a half-suit we have never asked in is one their posterior has
+little reason to place us in. That is backwards. Over the same games, the $398$
+cards of ours sitting inside their $390$ ownership errors split as
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+publicly pinned to us by an ask we had won & $0$ \\
+never publicly moved since the deal & $398$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Their engine does not misplace a card it has seen move; it only ever
+loses one with no public trace. And the leak concentrates where we have
+spoken, not where we have been quiet. Weighting by exposure --- plies during
+which our team held exactly one card of a live half-suit --- gives $45.4$
+ownership errors per $1{,}000$ plies in half-suits we had asked in against
+$0.675$ where we had not, a rate ratio of $67$ $[42, 107]$. Sorted by what had
+happened in the half-suit before they declared it, $1{,}927$ declarations
+followed both an ask of ours and a later successful ask that took one of that
+half-suit off us, and $19.25\%$ of those were ownership-wrong; $411$ followed
+only the taking, and $3.16\%$ were.
+
+The mechanism this points at is specific, and it is a hypothesis about their
+engine formed from outside it rather than a reading of their source. Our ask
+certifies that we hold at least one \emph{other} card of the half-suit. When an
+opponent later takes one card of it off us, their inference appears to treat
+that certification as discharged --- as though ``at least one'' had been
+``exactly one'' --- and every card it then loses is one that never moved in
+public. We are not building a feature on this. An exploit of one engine's
+inference is exactly the shape of the withdrawn deception ladder of
+\S\ref{sec:critic}, and a term that farmed it would grow with its dose against
+v0.7 and mean nothing anywhere else. It is reported because a margin whose
+majority component has an identified cause is a different object from one whose
+does not, and readers of the head-to-head are entitled to know which they have.
+
+\paragraph{What this measurement is, stated with the other project's own
+scope in view.} Their paper is unusually careful about what it does not
+claim, and the sentence that matters here is theirs: ``Whether FishBot v0.7
+is the strongest Canadian Fish agent anyone has built \dots\ the paper does
+not establish and does not claim. The comparison class contains only agents
+this project wrote.'' Their limitations section names the missing
+ingredient exactly --- ``there are no independently authored six-player Fish
+agents to compare against, which is why \S1.2 confines the paper's
+comparative claim to this project's own lineage'' --- and lists an
+independently authored opponent first among the things a comparative claim
+beyond that lineage would require \citep{dylan2026fishbot}.
+
+That ingredient now exists in both directions, and it is worth being
+precise about what each side may therefore say. We can report a margin
+against an engine nobody here wrote, which is a stronger kind of evidence
+than either project's internal ladders: $+2.347$ $[+2.293, +2.400]$ sets per
+game, $63.0\%$ of decided sets, over $10{,}000$ games under rules both engines
+implement natively, with zero substituted moves and a bridge whose one known
+defect has been found, priced and repaired. What that does \emph{not} establish
+is a global ranking of the two projects, and this paper declines that claim
+for the same reasons theirs does: one opponent is not a population, their
+engine was frozen before ours had the exhibition bridge to test against,
+and neither project has run the other's configuration search against its
+own. What the number does establish is narrower and, for both papers,
+new: the first six-player Literature result measured across an engine
+boundary rather than inside one lineage --- which is precisely the
+instrument their limitations section asks for, and the one this paper
+spent \S\ref{sec:critic} demonstrating that a project cannot build for
+itself.
+
+\paragraph{Under the award rule the correction itself no longer earns its
+place, and is withdrawn.} Designs R3 and R4 of the same pre-registration
+close the loop. R3, the declaration-threshold sanity: against $0.999$ the
+shipped $0.97$ bar produces \emph{bit-identical} games --- $0$ of $200$
+pairs diverge, $+0.0000$ exactly --- and against $0.90$ the difference is
+$+0.0400$ $[-0.0278, +0.1078]$; the void-era finding that any high bar
+plays the same survives the rule change, as its rule-invariant mechanism
+said it should. R4, the correction stack re-priced: the registered
+expectation was that the sign would hold and the size could move. The
+expectation was wrong, and it is reported because it was written first:
+under the award rule the deployed configuration WITH the $m \le 2$
+correction scores $-0.1040$ $[-0.2184, +0.0104]$ against the same
+configuration without it, over $500$ fresh pairs --- and the correction arm
+misdeclares \emph{more} ($123$ against $106$, again wholly-held splits; both
+arms are counted the same way, so the comparison is what it looks like). The mechanism is not
+mysterious: the correction's $d_{\text{info}} = 2.0$ was fitted against
+solver targets whose continuations priced a wrong declaration at zero, and
+the game no longer plays that price. Taken with the foreign tie above
+($-0.0440$ under the matched rule), the correction fails, under the
+baseline rule, the CI-excludes-zero bar every shipped knob in this project
+is held to. It is withdrawn from the deployed configuration ---
+\texttt{V06\_DEPLOYED} in the registry is \texttt{V04\_COMBINED} without it
+--- and the exact-solver diagnosis behind it, which is rule-invariant,
+awaits a refit against award-rule targets: the solver journals now carry
+the rule in their resume fingerprints so that refit cannot silently mix
+eras. The void-era $+0.1220$ stands as what it always was, a measurement
+of the void-era game.
+
+\paragraph{Their one load-bearing mechanism, ported and measured here: it
+does not transfer.} The other project's attribution study credits a single
+coordinate with essentially the whole gain of its v0.7 cycle --- a
+\emph{contestation} term that scores a candidate ask by
+$(1 - p_{\text{hit}}) \times (\text{opponent-held mass of the half-suit}/6)
+\times (\text{cards of it nobody can place}/6)$ and carries a strongly
+positive weight, deliberately spending likely-miss asks in
+opponent-dominated, still-ambiguous half-suits
+\citep{dylan2026fishbot}. Because their engine and ours now play the same
+game under the same rules, that claim is directly testable outside the
+lineage it was measured in, which is the kind of question neither project
+could ask alone.
+
+Design R6 of the pre-registration ports it and sweeps the dose in both
+directions, with two arms of a second idea alongside --- a
+\emph{silence prior} that down-weights sampled worlds in which a live
+half-suit already sits wholly within one team, on the ground that a team
+holding all six and able to place them would usually have declared. Seven
+arms plus an unmodified baseline each played $500$ games against three
+copies of v0.7 on identical deals and rotations, paired against the
+baseline: $4{,}000$ games, zero substituted moves.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+arm & paired $\Delta$ vs.\ baseline & margin over v0.7 \\
+\midrule
+baseline (neither knob)          & ---                       & $+2.732$ \\
+contestation $-1.0$              & $-0.4200\ [-0.7137, -0.1263]$ & $+2.312$ \\
+contestation $-0.3$              & $-0.2400\ [-0.5085, +0.0285]$ & $+2.492$ \\
+contestation $+0.3$              & $-0.3200\ [-0.5790, -0.0610]$ & $+2.412$ \\
+contestation $+1.0$              & $-0.2920\ [-0.6261, +0.0421]$ & $+2.440$ \\
+contestation $+3.0$              & $-1.1240\ [-1.4735, -0.7745]$ & $+1.608$ \\
+silence $\delta = 0.7$           & $-0.1960\ [-0.4775, +0.0855]$ & $+2.536$ \\
+silence $\delta = 0.9$           & $-0.2880\ [-0.4883, -0.0877]$ & $+2.444$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every arm is negative; four are significantly so, and the largest positive
+dose is the worst cell in the table. No arm clears the registered bar, so
+by the outcome fixed in advance neither knob ships, stages 2 and 3 do not
+run, and the negative is reported rather than swept into a footnote. The
+strongest reading the data supports is monotone in the wrong direction:
+the more of their mechanism we add, the more of our margin over them we
+lose.
+
+This is the third time this paper has watched a gain fail to survive a
+change of opponent family, and the first time in the direction that costs
+\emph{us} something to admit. The deception ladder's rungs were real
+against siblings and vanished against v0.3; the endgame correction was
+real under one scoring rule and reversed under another; and their
+contestation term is, by their own careful measurement, worth several
+points inside their engine and is worth nothing but damage inside ours.
+The mechanism is not thereby refuted --- it plainly works where it was
+fitted --- and the honest conclusion is narrower and more useful than
+either ``it works'' or ``it does not'': an ask-scoring coordinate tuned
+against one belief representation is not a portable strategic insight,
+even between two engines playing an identical game. Their belief is a
+Sinkhorn approximation seeded by a behavioural prior; ours is exact
+counting reweighted by a choice model. A term that pays in the first is
+apparently already priced in the second.
+
+\paragraph{What did not change.} FishBot4's own defaults. The champion is the
+reference point for every measurement in this paper, and moving it would
+silently reprice all of them at once; the correction remains in the archival
+\texttt{V04\_COMBINED} spec exactly as measured (its withdrawal from the
+\emph{deployed} configuration under the award rule is the previous
+paragraph's, and the registry's, record). A test requires whole games to
+be \emph{bit-identical} when the knob is off, and requires the first divergence
+to fall at two live half-suits or fewer when it is on --- checked by replaying
+the shared prefix, not by asking the agent where it was.
+
 \section{What this says about playing Fish}
 \label{sec:strategy}
 
@@ -3921,13 +6218,17 @@ misses. The practical corollary is that in a fully-known endgame the only thing
 that matters is \emph{how many live half-suits your team has a foothold in when
 it is your turn} --- not how many cards, not which cards.
 
-\paragraph{Do not agonise over when to declare.} Reproducing v0.3's finding on a
-much better posterior: raising the claim bar from $0.97$ to $0.99$ changes
-essentially no decisions. The reason is structural rather than statistical. If
-your team genuinely holds all six cards of a half-suit, no opponent holds any
-card of it, so no opponent can legally ask in it --- and a claim by a team that
-does not hold all six gives the set to you. Waiting is close to free. Wait until
-you know the split.
+\paragraph{Do not agonise over when to declare --- but never guess.}
+Reproducing v0.3's finding on a much better posterior: raising the
+declaration bar from $0.97$ to $0.99$ changes essentially no decisions. The
+reason is structural rather than statistical. If your team genuinely holds
+all six cards of a half-suit, no opponent holds any card of it, so no
+opponent can legally ask in it --- and a declaration by a team that does not
+hold all six gives the set to you. Waiting is close to free, and that
+mechanism is rule-invariant. What the award rule changes is the price of
+impatience: a guessed split that used to void the set now hands it to the
+other team, a two-set swing in the differential. Wait until you know the
+split; the rule correction doubled the fine for not waiting.
 
 \paragraph{Two tie-breakers really do hold up.} When two asks look about equally
 likely to land, prefer the one that, if it misses, hands the turn to the
@@ -3943,20 +6244,27 @@ were decided and only the declarations were left. Two consequences for a human.
 First, the last few turns are not a contest, so spend your attention earlier.
 Second --- and this is the one people get wrong --- if your team holds a half-suit
 outright, \emph{no opponent can legally ask in it}, so it cannot be taken from
-you. There is never a reason to rush that declaration. In our games, half-suits
-that reached ``ours but we cannot place the split'' were nulled $23.4\%$ of the
-time against $0.92\%$ otherwise, and accounted for $73\%$ of all nulls. Almost every
-one of those is a self-inflicted wound.
+you by any ask or by any opposing declaration. There is never a reason to
+rush that declaration. In our void-era games, half-suits that reached ``ours
+but we cannot place the split'' were misdeclared $23.4\%$ of the time
+against $0.92\%$ otherwise --- a factor of $25$ --- and under the award rule
+each of those is no longer a voided set but a set \emph{donated}. Almost
+every one is a self-inflicted wound, and the wound now costs twice as much.
 
 \paragraph{You can talk, and most players do not realise it.} You may not ask
 for a card you hold. So asking for a card \emph{proves to the table} that you do
 not have it --- and when your team already owns the half-suit, the ask cannot
 lose you anything, because no opponent holds a card of it to give. In that
 situation an ask is a free, legal message to your partners telling them exactly
-where a card is not. Use it when you are stuck on a split. (Our engine gains
-about 20\% fewer nulls doing this; it does not gain games, because the turn it
-spends is worth about as much as the sets it saves. For a human, who is far more
-likely to misplace a split than an engine is, the trade is probably better.)
+where a card is not. Use it when you are stuck on a split. (Our engine cut
+its misdeclarations about 20\% doing this in void-era measurement and it did
+not gain games there; re-measured under the award rule, where each save is
+worth two points of differential instead of one, the cut persists --- $109$
+misdeclarations against $138$ --- and the measured value comes back
+$+0.0680$ $[-0.0326, +0.1686]$ over $500$ pairs: the right sign, about the
+predicted size, still unproven at that power, so the protocol stays off in
+the engine. For a human, who is far more likely to misplace a split than an
+engine is, the trade is almost certainly worth it.)
 
 \paragraph{Spend your effort on card-tracking, not on cleverness about which ask
 to make.} Three measurements in this study point the same way and none of them
@@ -4002,7 +6310,7 @@ That is small enough that the $200$-pair cells this study used for screening
 could not have resolved it either way, which is why no such cell was run.
 
 It has now been run at $2000$ pairs, pre-registered in
-\texttt{jobs/PREREGISTRATION\_retake\_gate.md} with the design, the five prior
+\path{jobs/PREREGISTRATION_retake_gate.md} with the design, the five prior
 failures and the analysis all fixed before a pair was played. The gated penalty
 scores $\mathbf{-0.004}$ sets per deal-pair $[-0.067, +0.059]$ against the
 champion --- indistinguishable from not having it. Against the ungated
@@ -4028,7 +6336,7 @@ not pay. Take the certain ask.
 \emph{withholds}. The opposite policy --- take the card straight back, trade
 hard inside the duel, which is what strong players more often describe doing
 --- had never been measured. It has now been, at $2000$ pre-registered pairs
-(\texttt{jobs/PREREGISTRATION\_retake\_bonus.md}), and it returns
+(\path{jobs/PREREGISTRATION_retake_bonus.md}), and it returns
 $\mathbf{+0.013}$ $[-0.052, +0.079]$: the seventh null in this family. Against
 the gated penalty's $-0.004$ the difference is $+0.017 \pm 0.046$. The two
 policies act on \emph{disjoint} slices of the same decision in opposite
@@ -4256,12 +6564,53 @@ choice assumption is worse than a biased sampler that accidentally encodes a
 choice model. That is a statement about which approximation is closer to the
 truth, not a general licence to prefer biased inference.
 
-\paragraph{Exact solving is still bounded.} Absolute ground truth reaches
-positions with one, and now two, unresolved half-suits. Midgame positions remain
-out of reach, which is exactly where v0.3 localised the remaining gap.
+\paragraph{Exact solving is still bounded, and bounded in a way this section
+previously misstated.} The tables solve the \emph{perfect-information} game.
+Calling them absolute ground truth without that qualifier is an overclaim, and
+two measurements say how large a one.
 
-\paragraph{No equilibrium claim.} We compute no equilibrium and no
-exploitability bound. The appropriate solution concept for a game with pre-play
+First, the coverage. ``Reaches positions with one, and now two, unresolved
+half-suits'' describes the solver's reach over positions handed to it, not the
+game's. A tablebase value is legitimate only where the acting seat's belief pins
+every live card, which \texttt{tablebase4.pinned\_state} enforces. Over $2582$
+decisions from $25$ games that gate opens on $2.59\%$ of decisions: never at
+three or more live half-suits ($0$ of $188$), $12.1\%$ at two, $52.7\%$ at one.
+It first opens at step $100.2$ of $103.5$, with $8.1$ of $54$ cards left, and in
+$5$ of $25$ games it never opens at all.
+
+Second, the gap. Applied by determinizing over a belief, the tables overstate
+the mover's team by $5.294 \pm 0.159$ sets on the positions play actually
+reaches, and by $8.18$ with all nine half-suits still live, where the closed form
+$V = \mathrm{sign} \times (2f - m)$ of \S\ref{sec:exact} predicts the team on
+move takes $8.36$ of the nine sets where play delivers $+0.27$. (That $8.36$ is
+an average over the $m = 9$ positions play reaches, which is not the same as a
+fresh deal: footholds only shrink, so $f$ has already fallen a little by then.
+At the deal itself \eqref{eq:opening} gives $+8.794$ exactly.) The closed form
+is not evidence that the Fish endgame is shallow; its own proof turns on ``every
+ask can be made to hit, and a hit retains the turn'', which is what perfect
+information buys and nothing else does. Measured independently, a team given
+the true deal beats the champion by $17.483$ sets per duplicate deal-pair
+against a maximum of $18$.
+
+So the honest statement is not that midgame positions remain out of reach
+pending a larger solver. It is that exact ground truth covers $2.6\%$ of the
+decisions a player faces, all in the last $3\%$ of the game, and that extending
+the perfect-information solver to three half-suits in full --- the natural next
+computational step --- would move that coverage by approximately zero, because
+the positions it would newly cover essentially never arise with every live card
+pinned. More ground truth requires solving the imperfect-information game, and
+the smallest Fish position carrying any hidden information already needs three
+players holding live cards, hence two on one side: a team-coordination problem
+with no two-player zero-sum reduction beneath it.
+
+\paragraph{No equilibrium claim, and the one exception.} We compute no
+equilibrium. We do now compute an exploitability \emph{lower} bound, in
+Section~\ref{sec:noneq}: a single seat deviating optimally at one endgame
+decision gains $+0.1111$ per game with an
+interval clear of zero, so the all-champion profile is not an equilibrium. That
+is a bound against a deterministic realisation of the champion rather than
+against the champion as it plays, and it is a lower bound only --- it says the
+profile is exploitable, not by how much. The appropriate solution concept for a game with pre-play
 agreement and no in-play communication is TMECor
 \citep{celli2018computational}, and nothing here approximates it. Every strength
 statement is relative to a named opponent or absolute against an exactly solved
@@ -4400,7 +6749,7 @@ result invites replication; ``this cannot be done'' invites moving on, and the
 sentence that closes a direction is exactly the sentence nobody tests.
 
 Having been caught once, we swept the engine for the rest of them.
-\texttt{fish4/NEGATIVE\_CLAIMS.md} registers every load-bearing impossibility
+\path{fish4/NEGATIVE_CLAIMS.md} registers every load-bearing impossibility
 claim in the source with a verdict: one refuted (the above), one true in the
 limit and false where the engine operates (a proposal twist ``cannot change what
 the policy computes'' --- correct asymptotically, and at the shipped 160 draws it
@@ -4505,12 +6854,82 @@ more.
 % =====================================================================
 \appendix
 
+% =====================================================================
+\section{Interoperating with a foreign engine}
+\label{sec:bridges}
+
+Every cross-engine number in this paper --- the $+2.3466$ headline, the
+declaration decomposition, the transfer failures --- exists only because two
+independently written engines can be made to play one game. That is an
+artifact in its own right, and it has a failure mode severe enough to have
+already destroyed one set of results (\S\ref{sec:critic}), so it is documented
+here rather than left in the code.
+
+\paragraph{Two directions, deliberately.} A bridge is asymmetric: whoever owns
+the game loop owns the rules, the RNG, and every tie-break. If only one side
+can host, every published number is measured through that side's arbiter and
+the two claims ``our engine is stronger'' and ``our arbiter favours us'' are not
+separable. This project therefore ships both directions.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+& \emph{their engine inside ours} & \emph{our engine inside theirs} \\
+\midrule
+entry point & \path{external_v07/shim_decide.cpp} & \path{fish4/decide.py} \\
+host owns & our arbiter & their arbiter \\
+transport & one decision per process & one decision per line \\
+cards identified by & integer id & \textbf{card name} \\
+state supplied by caller & hand counts, scores & \textbf{nothing derived} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{The two asymmetries are the lesson.} They are not stylistic. Their
+shim takes card \emph{integers}, and the two engines number the deck over
+different permutations of the half-suits; a host passing its own integers gets
+a bot playing a scrambled hand --- legally, badly, and with no error raised
+anywhere. It does not look like a broken integration. It looks like a weak
+bot. Names are unambiguous between any two implementations of a $54$-card deck,
+so the reverse bridge takes names and refuses anything else.
+
+The second asymmetry is the same argument applied to derived state. Their shim
+accepts hand counts and scores on every event line, so a caller that miscounts
+silently poisons the policy's view of the table. Ours \emph{derives} both by
+replaying the event log, which means the only thing a caller can send is the
+public record: there is no field through which a mistake --- or a hostile host
+--- can reach the policy. An event stream that no deal could have produced is
+rejected by name, with the three ways it usually happens listed, rather than
+raising the contradiction from inside the belief propagator.
+
+\paragraph{A bridge is a measurement instrument and is calibrated as one.}
+Bridge revision~1 substituted a legal move whenever the foreign engine returned
+one our arbiter rejected. That is not a neutral repair --- it plays for them,
+badly --- and it was worth $-0.08$ sets a game \emph{to them}. Revision~2
+removes substitution entirely and every reported match records zero fallbacks;
+the $10{,}000$-deal headline was replayed under both revisions to price the
+difference rather than assert it. The principle this project now works to:
+\emph{an absolute measured through a bridge is a statement about the bridge as
+well as about the engines, whereas a paired contrast whose arms share the
+bridge is not.} Every absolute here is reported with its bridge revision, and
+that is why.
+
+\paragraph{Verification.} The reverse bridge is checked by playing complete
+games in the normal way and, at every decision, serialising the position onto
+the wire and requiring the bridge to answer what a freshly seeded agent
+answers --- freshly seeded rather than the in-game agent, because a stateless
+bridge cannot share an RNG stream with a long-lived one. Over two games this
+compares $150+$ decisions and exercises both the ask and the declaration path.
+The JSON-transport handout runs the same comparison at a larger scale as its
+self-test: $329$ decisions, $0$ mismatches, plus $520$ off-turn polls.
+
 \section{Reproducing this work}
 \label{app:repro}
 
 The engine, agents, experiments and this paper are in one repository. v0.3's
 code is untouched, so its results remain reproducible alongside these; v0.4
-lives in \texttt{fish4/}.
+lives in \path{fish4/}.
 
 \begin{verbatim}
 py -m pytest tests  -q     # v0.3: rules, fuzz, leakage proofs, belief
@@ -4528,11 +6947,22 @@ py scripts4/exact_bench4.py              # agreement with provably optimal play
 py scripts4/fit_hsvalue.py 200 3         # fit the half-suit value model
 py scripts4/analytics4.py 120 3          # strategy statistics
 py scripts4/check_tex.py                 # structural check on this document
+py scripts4/check_paper_numbers.py       # every watched figure vs results/
+
+py -m kraken.decide --self-test          # the drop-in handout, end to end
+py -m pytest tests4/test_decide_bridge.py -q     # the reverse bridge
 \end{verbatim}
 
-Every duel appends to \texttt{results/v04\_duels.jsonl} recording both random
+Two entry points exist for running this engine outside this repository, both
+documented in \S\ref{sec:bridges}: \path{kraken/decide.py} speaks one JSON
+object per line and is the one to use from another language, and
+\path{fish4/decide.py} speaks the line protocol that mirrors the C++ shim.
+\path{kraken/README.md} is a complete integration guide with no research code
+in it.
+
+Every duel appends to \path{results/v04_duels.jsonl} recording both random
 seed streams, the full agent specifications, the rule configuration and the
-result. \texttt{summarise\_duels.py} prints, alongside every interval, the
+result. \path{summarise_duels.py} prints, alongside every interval, the
 smallest effect that run could have detected --- which is the column that stops
 a null being read as a negative.
 
@@ -4579,6 +7009,13 @@ the deal, for a seated player and for an anonymous visitor alike.
 
 % =====================================================================
 \begin{thebibliography}{99}
+
+\bibitem[Nguyen(2026)]{dylan2026fishbot}
+Dylan Nguyen.
+\newblock FishBot: an engine for six-player Literature, versions 0.2--0.7.
+\newblock Software repository and technical reports,
+  \url{https://github.com/dylann4500/fishbot}, 2026. Version 0.7 pinned at
+  commit \texttt{d017fbc} for every game reported here.
 
 \bibitem[Celli and Gatti(2018)]{celli2018computational}
 Andrea Celli and Nicola Gatti.

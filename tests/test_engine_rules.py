@@ -137,20 +137,25 @@ def test_claim_with_opponent_card_goes_to_opponents():
     assert s.set_winner[0] == 1
 
 
-def test_wrong_distribution_within_team_is_null_by_default():
+def test_wrong_distribution_within_team_awards_opponents_by_default():
+    """The baseline: a misdeclared half-suit is the opposing team's set."""
     s = _low_clubs_split_state()
+    nulls_before = s.scores()[2]
+    ev = s.apply(0, Claim(0, (0, 2, 2, 4, 4, 4)))
+    assert ev.winner == 1
+    a, b, n = s.scores()
+    assert (a, b) == (0, 1) and n == nulls_before
+
+
+def test_wrong_distribution_configurable_to_null_variant():
+    """The v0.4-era void rule stays reproducible, as an explicit variant."""
+    rules = RuleConfig(wrong_distribution_outcome="null")
+    s = _low_clubs_split_state(rules=rules)
     nulls_before = s.scores()[2]
     ev = s.apply(0, Claim(0, (0, 2, 2, 4, 4, 4)))
     assert ev.winner == NULL_TEAM
     a, b, n = s.scores()
     assert (a, b) == (0, 0) and n == nulls_before + 1
-
-
-def test_wrong_distribution_configurable_to_opponent():
-    rules = RuleConfig(wrong_distribution_outcome="opponent")
-    s = _low_clubs_split_state(rules=rules)
-    ev = s.apply(0, Claim(0, (0, 2, 2, 4, 4, 4)))
-    assert ev.winner == 1
 
 
 def test_claim_reveals_actual_holders():

@@ -138,6 +138,18 @@ class handler(BaseHTTPRequestHandler):
             if op == "analyse":
                 return self._send(s.analysis())
 
+            if op == "deduce":
+                return self._send(s.deductions())
+
+            if op == "claimcheck":
+                # The player's own split, priced before they commit. See
+                # Session.claim_check for why this is not a leak.
+                try:
+                    return self._send(s.claim_check(
+                        body.get("half_suit"), body.get("assignment") or []))
+                except (ValueError, TypeError) as e:
+                    return self._send({"error": str(e)}, 400)
+
             if op == "act":
                 if not s.snapshot()["your_turn"]:
                     return self._send({"error": "not your turn"}, 400)
@@ -299,6 +311,25 @@ class handler(BaseHTTPRequestHandler):
             if doc["phase"] != "playing":
                 return self._send({"error": "that table has not started"}, 400)
             return self._send(RG.session_for(doc, me).analysis())
+
+        if op == "room_claimcheck":
+            # Same posture as room_analyse: read-only, and it must not tick
+            # the clock. Pricing a split you are considering is not a move.
+            try:
+                _, doc = _rooms.store().read(code)
+            except _rooms.NotFound:
+                return self._send({"error": "no such room"}, 404)
+            me = RG.seat_of(doc, secret)
+            if me is None:
+                return self._send({"error": "you are not seated at that "
+                                            "table"}, 403)
+            if doc["phase"] != "playing":
+                return self._send({"error": "that table has not started"}, 400)
+            try:
+                return self._send(RG.session_for(doc, me).claim_check(
+                    body.get("half_suit"), body.get("assignment") or []))
+            except (ValueError, TypeError) as e:
+                return self._send({"error": str(e)}, 400)
 
         return self._send({"error": "not found"}, 404)
 

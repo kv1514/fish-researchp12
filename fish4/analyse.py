@@ -142,9 +142,16 @@ class Analyser:
                  value_model: Optional[HalfSuitValue] = None,
                  n_draws: int = 320, gamma: float = 0.35, seed: int = 0,
                  w_lookahead: float = 0.0, lookahead_depth: int = 1,
-                 lookahead_beam: int = 4, lookahead_couple: bool = True):
+                 lookahead_beam: int = 4, lookahead_couple: bool = True,
+                 claim_forced_exhaustive: int = 0):
         self.rules = rules
         self.seat = seat
+        #: Threaded through to ClaimConfig so the split this class SUGGESTS is
+        #: the split the engine would actually play. It shipped in
+        #: V06_DEPLOYED on 2026-08-28, and an explanation of a policy the site
+        #: is not playing is the exact failure api/_engine._analyser_spec was
+        #: written to make loud rather than silent.
+        self.claim_forced_exhaustive = int(claim_forced_exhaustive)
         self.weights = weights or AskWeights()
         self.value = value_model
         self.n_draws = n_draws
@@ -237,14 +244,41 @@ class Analyser:
         return out
 
     def _live_eval(self, ctx) -> float:
+        """Expected half-suit differential, read from the CURRENT marginals.
+
+        The caller evaluates a candidate by mutating ``ctx.M`` -- forcing the
+        asked card to us for the success branch, redistributing it away from
+        the target for the failure branch -- and calling this in between. That
+        only works if this function reads M.
+
+        It used to read ``ctx.team_exp`` / ``ctx.opp_exp``, which
+        DecisionContext computes once at construction and never refreshes
+        (fish4/askfeat.py:178-186). So the two branches returned the same
+        number by construction: measured on the live site, 8 of 8 ranked asks
+        had eval_if_success == eval_if_fail == eval_expected, all of them
+        0.000000. Three fields the dataclass documents as "evaluation in sets"
+        were inert, and any caption built on their difference -- "this move
+        costs you X" -- would have printed zero forever.
+
+        The quantity is the same one askfeat computes, just re-derived from the
+        block that was mutated: a column sum over the six cards of the
+        half-suit, split by team.
+        """
         tot = 0.0
+        mine = ctx.my_team
         for hs in range(ctx.n_hs):
             if ctx.obs.set_winner[hs] is not None:
                 continue
             if self.value is not None:
                 tot += float(self.value.value(half_suit_features(ctx, hs)))
             else:
-                tot += float(ctx.team_exp[hs] / 6.0 - ctx.opp_exp[hs] / 6.0)
+                block = ctx.M[hs * 6:hs * 6 + 6]
+                per_player = block.sum(axis=0)
+                team = sum(per_player[p] for p in range(NUM_PLAYERS)
+                           if p % 2 == mine)
+                opp = sum(per_player[p] for p in range(NUM_PLAYERS)
+                          if p % 2 != mine)
+                tot += float(team / 6.0 - opp / 6.0)
         return tot
 
     # -- principal variation ----------------------------------------------------
@@ -306,7 +340,8 @@ class Analyser:
 
     def _claim_table(self, ctx) -> list:
         from .claim4 import ClaimConfig, ClaimEvaluator
-        ev = ClaimEvaluator(ctx, ClaimConfig())
+        ev = ClaimEvaluator(ctx, ClaimConfig(
+            forced_exhaustive=self.claim_forced_exhaustive))
         out = []
         for hs in ctx.obs.claimable_half_suits():
             r = ev.best_for_half_suit(hs)
@@ -359,13 +394,23 @@ class Analyser:
 
     # -- the main entry point ------------------------------------------------------
 
-    def analyse(self, obs: Observation, pv_depth: int = 5) -> Analysis:
-        import time
-        t0 = time.perf_counter()
+    def context(self, obs: Observation) -> DecisionContext:
+        """The belief update and posterior draw behind one decision.
+
+        Factored out so that a caller wanting one number off the posterior --
+        the price of a split the player built themselves, say -- reads it from
+        the same context `analyse` ranks moves with, rather than from a second
+        construction that could drift away from it.
+        """
         self.bel.update(obs)
         post = Posterior(self.bel, self.rng, n_draws=self.n_draws,
                          mode="auto", obs=obs, gamma=self.gamma)
-        ctx = DecisionContext(obs, self.bel, post)
+        return DecisionContext(obs, self.bel, post)
+
+    def analyse(self, obs: Observation, pv_depth: int = 5) -> Analysis:
+        import time
+        t0 = time.perf_counter()
+        ctx = self.context(obs)
         asks = obs.legal_asks()
         a, b, nulls = _scores(obs)
         my_team = team_of(obs.player)
@@ -394,6 +439,13 @@ class Analyser:
                 f"{claims[0].half_suit_name} is ready to declare "
                 f"(P={claims[0].p_declaration_exact:.3f}).")
         if dead and dead.get("is_dead"):
+            notes.append(dead["summary"])
+        elif dead and dead.get("unplaceable"):
+            # Not a dead position, but a frozen half-suit inside a live one:
+            # ours, unplaceable, and beyond reach of anything an opponent can
+            # do. Worth saying while there are still turns to spend on it --
+            # the previous behaviour said nothing until the whole position had
+            # died, by which point the choice has usually been made for you.
             notes.append(dead["summary"])
 
         return Analysis(

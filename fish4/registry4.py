@@ -5,6 +5,14 @@ Evaluation harnesses cross process boundaries, so agents are addressed by
 the v0.4 policies alongside the v0.3 ones; any worker process that imports it
 can therefore construct either generation, which is what makes head-to-head
 duplicate-deal matches between the two possible at all.
+
+RULE ERA. Every effect size quoted in this module's spec comments was
+measured while the engine's default misdeclaration rule was the null
+variant (a within-team misdeclaration voided the set). The baseline is now
+opponent-award, the specs construct identically under it (agents read the
+rule off the observation), and the re-measured baselines live in
+``prereg/rules_award_baseline.md``'s result files -- quote those beside any
+of the numbers below.
 """
 
 from __future__ import annotations
@@ -89,9 +97,92 @@ V04_PRECISE = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480})
 #: This is also what the public table actually plays: api/_engine.py sets
 #: WEB_DRAWS = 480 and WEB_SPEC's lookahead. The site was running an
 #: unnamed configuration while this module declined to name it.
+#: THE ENDGAME ASK CORRECTION, added after the above was written.
+#:
+#: The exact imperfect-information solver made a claim about this objective
+#: that no duel could have: on 51% of unpinned m = 1 positions and 61% at
+#: m = 2 the champion's ask is provably beaten by another ask, the better move
+#: is an ASK rather than a claim (131/154 and 128/138), and it is RISKIER --
+#: p = 0.218 against 0.799 at m = 1, paired t = -18.88, with the champion's ask
+#: a CERTAIN hit on 73 of 122 and still wrong.
+#:
+#: Simply de-weighting the success probability does not fix it: the
+#: one-parameter scale family, which spans every positive weight on p, picks
+#: k = 1. What helps is the information term, fitted against exact one-ply
+#: values on 388 endgame positions and held out by game.
+#:
+#: Then measured three times rather than once, because an effect measured
+#: against a weak base does not transfer by assumption:
+#:
+#:     vs champion, registered      +0.0835  [+0.0338, +0.1332]   2000 pairs
+#:     vs champion, replication     +0.0980  [+0.0480, +0.1480]   2000 pairs
+#:     vs champion, pooled          +0.0907  [+0.0555, +0.1260]   4000 pairs
+#:     ON TOP OF THIS SPEC          +0.1220  [+0.0711, +0.1729]   2000 pairs
+#:     raising m from 2 to 3        +0.3025  [+0.2271, +0.3779]   2000 pairs
+#:     raising m from 3 to 4        +0.6995  [+0.6033, +0.7957]   2000 pairs
+#:     raising m from 4 to 5        +1.0125  [+0.8961, +1.1289]   2000 pairs
+#:     m 5 to 9 (always on)         +4.2790  [+4.1155, +4.4425]   2000 pairs
+#:
+#: THE LAST FOUR ROWS ARE WITHDRAWN AS EVIDENCE OF STRENGTH. All of them
+#: duel the sibling, whose opponent model conditions on ask choices, and
+#: cross-play against v0.3 shows the m = 9 "gain" was deception of that
+#: model: the m = 9 config LOSES to v0.3 by 2.14 sets on seeds where the
+#: m = 5 config wins by 1.35. The rungs grew with m because more of the game
+#: was spent poisoning the sibling's inference, not because play improved.
+#: Only m = 2 keeps non-sibling evidence behind it, and only it ships.
+#:
+#: The third is what licensed the default moving and is what the site gained;
+#: it is slightly LARGER on the stronger base, so the depth-3 lookahead was not
+#: already finding these asks.
+#:
+#: The fourth extends the SAME weight to three live half-suits without
+#: refitting it, which takes the correction from 9.7% of decisions to 17.5%.
+#: That step is worth two and a half times the one before it, and it was only
+#: reachable because a SAMPLED one-ply target stands in for the exact one where
+#: exact solving cannot go -- validated first, at a cost of +0.0033 in the exact
+#: target's own units, and cross-fitted against the selection bias that
+#: maximising a noisy target introduces (49% of the naive figure).
+#:
+#: FishBot4's own defaults are untouched. The champion is the reference point
+#: for every measurement in the paper, and moving it would silently reprice all
+#: of them; tests4/test_endgame_weights.py requires whole games to be
+#: bit-identical when the knob is off.
 V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
-                             "lookahead_beam": 4})
+                             "lookahead_beam": 4,
+                             "endgame_m": 2, "endgame_d_info": 2.0})
+
+#: What the site deploys under the opponent-award baseline. It is
+#: V04_COMBINED minus the endgame ask correction, because the correction was
+#: fitted against void-era solver targets and re-measures under the award
+#: rule at -0.1040 [-0.2184, +0.0104] against its own sibling (design R4,
+#: results/r4_award_check.json) and at a tie against Dylan's v0.7 (design
+#: R2, results/foreign_award_check.json) -- it no longer clears the
+#: CI-excludes-zero bar every shipped knob is held to, so it is withdrawn
+#: pending a refit of scripts4/ii_ask_fit.py against award-rule targets
+#: (the ii journals are rule-fingerprinted for exactly that). V04_COMBINED
+#: keeps its void-era definition and numbers; this name is the live one.
+#: `claim_forced_exhaustive=1` is the one addition, shipped 2026-08-28 under
+#: prereg/forced_exhaustive.md. When a seat is FORCED to declare -- it holds
+#: cards but no legal ask exists -- and at most one half-suit is still live,
+#: the split is chosen by enumerating the whole team space under the joint
+#: rather than by the greedy per-card argmax, with propagator-pinned cards
+#: fixed and a guarantee never to return a split the joint scores below the
+#: incumbent's. It cleared its pre-registered bar in both populations:
+#: self-play +0.0233 [+0.0133, +0.0334] sets/game over 2,400 games, and
+#: against Dylan's v0.7 the last declaration goes from 28/87 correct to 37/87,
+#: paired +0.0090 [+0.0031, +0.0149] with accuracy in every other bucket
+#: unmoved (guard 2 passed exactly). It fires on 0.9% of games, which is why
+#: the paired interval is so tight -- see sec:dealluck of the paper.
+V06_DEPLOYED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
+                             "w_lookahead": 0.25, "lookahead_depth": 3,
+                             "lookahead_beam": 4, "endgame_m": 0,
+                             "claim_forced_exhaustive": 1})
+
+#: The same tuple under the name the engine now carries. V06_DEPLOYED is the
+#: spelling in the pre-registration documents that fixed it as arm A, so it
+#: stays; KRAKEN_V1 is the spelling for anything written after the rename.
+KRAKEN_V1 = V06_DEPLOYED
 
 #: NOT DEFINED, and the omission is still the point: at-ask-time depth at
 #: gamma = 1.0 is DEMONSTRATED (+0.102 over 6000 pre-registered pairs) and is
@@ -103,6 +194,23 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 
 REGISTRY = dict(_V03)
 REGISTRY["fishbot4"] = FishBot4
+
+#: The engine was renamed KRAKEN on 2026-08-28 (see fish4/brand.py for why the
+#: identifiers did not move with it). "kraken" is the name to write in new
+#: code; "fishbot4" is what every recorded journal, job spec and
+#: pre-registration document says, and resolving both to the same class is what
+#: lets those replay unchanged.
+REGISTRY["kraken"] = FishBot4
+
+# Dylan's FishBot v0.7 (github.com/dylann4500/fishbot), bridged through the
+# decide binary. Imported lazily: the binary and its build are optional for
+# everything except the exhibition, and an import error here would take the
+# whole registry down with it.
+def _dylan_v07(**kw):
+    from .dylan_v07 import DylanV07
+    return DylanV07(**kw)
+
+REGISTRY["dylan_v07"] = _dylan_v07
 
 # Register into the v0.3 registry too, so tools that only know about that one
 # keep working. Mutating the dict is deliberate: it avoids forking v0.3 code.

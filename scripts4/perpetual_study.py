@@ -125,7 +125,10 @@ def unplaceable_from_seat(state, bel, seat, hs) -> bool:
 def one_game(args) -> dict:
     seed, agent_seed, stall_window, cap, use_signalling = args
     from fish.beliefs import BeliefState
-    rules = RuleConfig()
+    # Pinned to the era's rule: this study's statistics are about
+    # nulls/void outcomes, which the opponent-award baseline cannot
+    # produce. A bare default here would silently measure nothing.
+    rules = RuleConfig(wrong_distribution_outcome="null")
     kw = dict(CHAMPION[1])
     kw["stall_window"] = stall_window
     kw["signal_mode"] = "stuck" if use_signalling else "off"

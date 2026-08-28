@@ -133,5 +133,5 @@ def check(path: Path) -> int:
 
 if __name__ == "__main__":
     paths = [Path(a) for a in sys.argv[1:]] or [
-        Path(__file__).resolve().parents[1] / "paper" / "fishbot_v04.tex"]
+        Path(__file__).resolve().parents[1] / "paper" / "kraken.tex"]
     sys.exit(max(check(p) for p in paths))

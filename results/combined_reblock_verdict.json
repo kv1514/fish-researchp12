@@ -1,0 +1,33 @@
+{
+ "name": "combined_reblock",
+ "complete": true,
+ "question": "the shipped configuration, both blocks on one engine",
+ "prereg": "jobs/PREREGISTRATION_combined_reblock.md",
+ "blocks": [
+  {
+   "label": "REPLAY COMBINED 480+lookahead vs champion block 0",
+   "est": 0.477,
+   "se": 0.11951466334619679,
+   "n": 1000
+  },
+  {
+   "label": "REPLAY COMBINED 480+lookahead vs champion block 1",
+   "est": 0.235,
+   "se": 0.12083201304031715,
+   "n": 1000
+  }
+ ],
+ "n_pairs": 2000,
+ "estimate": 0.3573263717800222,
+ "se": 0.08497155320159136,
+ "ci": [
+  0.19078518648081838,
+  0.5238675570792259
+ ],
+ "q": 2.0275493752505174,
+ "df": 1,
+ "i2": 0.5067937618651367,
+ "rule": "measure",
+ "bar": null,
+ "decision": "measured"
+}

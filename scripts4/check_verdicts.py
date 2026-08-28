@@ -48,6 +48,20 @@ RUNS = [
      "retake_bonus_verdict.json", "scripts4/retake_bonus_verdict.py"),
     ("COMBINED 480+lookahead vs champion block", 2,
      "combined_verdict.json", "scripts4/combined_verdict.py"),
+    ("REPLAY COMBINED 480+lookahead vs champion block", 2,
+     "combined_reblock_verdict.json", "scripts4/pool_verdict.py combined_reblock"),
+    ("GAMMA_SCHEDULE s1.0 vs champion block", 6,
+     "gamma_schedule_verdict.json", "scripts4/pool_verdict.py gamma_schedule"),
+    ("SETTLE value_keep 0.30 vs champion block", 2,
+     "value_keep_verdict.json", "scripts4/pool_verdict.py value_keep"),
+    ("BASELINE value pure vs champion block", 2,
+     "value_baseline_verdict.json", "scripts4/pool_verdict.py value_baseline"),
+    ("CLAIMFEAS feasibility filter vs champion block", 6,
+     "claim_feasibility_verdict.json",
+     "scripts4/pool_verdict.py claim_feasibility"),
+    ("DOOMED avoid_doomed_asks vs champion block", 8,
+     "avoid_doomed_asks_verdict.json",
+     "scripts4/pool_verdict.py avoid_doomed_asks"),
 ]
 
 #: Pools that are NOT runs in their own right, because another run's verdict

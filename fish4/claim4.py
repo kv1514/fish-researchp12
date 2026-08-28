@@ -18,17 +18,23 @@ localises teammate holdings. Waiting is close to free, which is exactly what the
 sweep measured and what the EV model missed by treating the resolution of a
 split as a coin flip.
 
-The corollary is that the leverage in claiming is NOT the threshold. It is:
+The corollary is that the leverage in declaring is NOT the threshold. It is:
 
-  1. **Getting the declared distribution right.** Nulls cost roughly 0.6 sets
-     per deal-pair at v0.3's strength, and a null is a bookkeeping failure, not
-     an unlucky gamble. v0.3 chose the modal distribution over 32 sampled
-     worlds, which is a noisy estimator of the mode. v0.4 computes the exact
-     posterior probability of a candidate distribution, so the declared split
-     is the true MAP rather than a sample mode.
-  2. **Playing the forced claims well.** When no legal ask exists the agent
-     must claim something, and which half-suit it picks and how it declares it
-     is pure expected value, with no threshold involved at all.
+  1. **Getting the declared distribution right.** Misdeclarations cost roughly
+     0.6 sets per deal-pair at v0.3's strength under the old null variant, and
+     under the baseline rule (a misdeclared set is AWARDED to the opponents)
+     each one costs a full set swing, so the stakes doubled and the point
+     sharpened: a misdeclaration is a bookkeeping failure, not an unlucky
+     gamble. v0.3 chose the modal distribution over 32 sampled worlds, which
+     is a noisy estimator of the mode. v0.4 computes the exact posterior
+     probability of a candidate distribution, so the declared split is the
+     true MAP rather than a sample mode.
+  2. **Playing the forced declarations well.** When no legal ask exists the
+     agent must declare something, and which half-suit it picks and how it
+     declares it is pure expected value, with no threshold involved at all.
+     Under the baseline rule every wrong outcome costs the same set, so the
+     forced ranking reduces to maximising P(exact) alone; the ev() below
+     reads the rule off the observation and prices both variants correctly.
 
 STRATEGY FUSION WARNING (from the literature survey): a claim must never be
 selected by determinized search. Inside any determinization the searcher knows
@@ -56,6 +62,28 @@ class ClaimConfig:
     exact_candidates: int = 3
     #: cap on the enumeration of team assignments for unpinned cards
     max_enumerate: int = 4096
+    #: The most live half-suits at which `forced_claim` searches the FULL team
+    #: space instead of the marginal shortlist. See prereg/forced_exhaustive.md:
+    #: the shortlist keeps two holders per card and scores three combinations,
+    #: which is a speed heuristic that costs nothing at a decision made every
+    #: ply and costs accuracy at the one where the game ends. 0 = never, and
+    #: the shipped champion is bit-identical.
+    forced_exhaustive: int = 0
+    #: refuse to enumerate above this many assignments, so the knob above can
+    #: never turn into a stall on the web table
+    forced_exhaustive_cap: int = 1024
+    #: refuse a declaration that no complete consistent deal contains. See
+    #: jobs/PREREGISTRATION_claim_feasibility.md. Off by default; the shipped
+    #: champion is unchanged.
+    feasibility: bool = False
+    #: half-suits this evaluator refuses to claim, for counterfactual studies
+    #: only. ``scripts4/null_recoverability.py`` needs to replay a game with ONE
+    #: claim deleted; suppressing claims wholesale (by lifting ``threshold``)
+    #: does not do that -- it stops the team claiming anything, which starves it
+    #: of asks and forces it onto the deferred half-suit almost immediately, so
+    #: the counterfactual measures the wrong intervention. Empty on every
+    #: shipped path.
+    banned: frozenset = frozenset()
     #: use exact joint probabilities at all (ablation handle).
     #:
     #: Read the ablation carefully. With this False every half-suit takes the
@@ -181,11 +209,43 @@ class ClaimEvaluator:
         if self._cands is None:
             out = []
             for hs in self.obs.claimable_half_suits():
+                if hs in self.cfg.banned:
+                    continue
                 r = self.best_for_half_suit(hs)
-                if r is not None:
-                    out.append(r)
+                if r is None:
+                    continue
+                if self.cfg.feasibility and not self._feasible(r[2]):
+                    # The declaration matches no complete deal the public
+                    # record allows, so it cannot be right. REPAIR it rather
+                    # than drop it: dropping alone changed nothing, because
+                    # forced_claim rebuilds a declaration from the masks when
+                    # no candidate survives.
+                    r = self._repair(hs, r)
+                    if r is None:
+                        continue
+                out.append(r)
             self._cands = out
         return self._cands
+
+    def _repair(self, hs, r):
+        """Swap in the most likely FEASIBLE declaration for this half-suit."""
+        from .feasible import best_feasible
+        try:
+            asg = best_feasible(self.obs, self.bel, hs, self.team, self.ctx.M)
+        except Exception:
+            return r        # a repair must never make things worse on error
+        if asg is None:
+            return None
+        p_exact, p_team, _ = r
+        return (p_exact, p_team, Claim(hs, asg))
+
+    def _feasible(self, claim) -> bool:
+        from .feasible import declaration_feasible
+        try:
+            return declaration_feasible(self.obs, self.bel, claim.half_suit,
+                                        claim.assignment)
+        except Exception:
+            return True     # a filter must never reject on its own failure
 
     # -- decisions -------------------------------------------------------------
 
@@ -209,12 +269,15 @@ class ClaimEvaluator:
         return None
 
     def forced_claim(self):
-        """The best claim available when we have no legal ask.
+        """The best declaration available when we have no legal ask.
 
-        Pure expected value in sets: an exactly-right declaration scores +1, a
-        declaration where any card sits with the opponents scores -1 for us, and
-        an all-ours-but-wrongly-split declaration nulls at 0 under the baseline
-        rule. So maximise ``p_exact - p_opponent_holds_one``.
+        Pure expected value in sets: an exactly-right declaration scores +1
+        and any wrong declaration scores -1 under the baseline rule (the set
+        goes to the opponents whether the miss names an opponent's card or
+        merely misorders our own), so the ranking is ``2*p_exact - 1`` --
+        maximise ``p_exact``. Under the legacy null variant an
+        all-ours-but-wrongly-split declaration costs 0 instead, and the rule
+        is read off the observation so both variants are priced correctly.
         """
         cands = self.candidates()
         if not cands:
@@ -222,7 +285,8 @@ class ClaimEvaluator:
             # probability, so whatever we declare loses the set. Pick the one we
             # know most about and declare every card we can actually place,
             # which at least avoids compounding the loss with a nonsense split.
-            live = self.obs.claimable_half_suits()
+            live = [hs for hs in self.obs.claimable_half_suits()
+                    if hs not in self.cfg.banned]
             if not live:
                 return None
             best = None
@@ -250,7 +314,57 @@ class ClaimEvaluator:
             loss_split = -1.0 if wrong_gives_opponent else 0.0
             return p_exact - p_opp + p_split * loss_split
 
-        return max(cands, key=ev)[2]
+        best = max(cands, key=ev)[2]
+        if self.cfg.forced_exhaustive:
+            better = self._exhaustive_split(best)
+            if better is not None:
+                best = better
+        return best
+
+    def _exhaustive_split(self, claim):
+        """The true argmax over team assignments, when it is cheap and right.
+
+        Only at or below `cfg.forced_exhaustive` live half-suits. At one live
+        half-suit the declaration ends the game, so there is no downstream
+        position to trade against and the objective is exactly 2*p_exact - 1 --
+        monotone in p_exact, so the argmax is simply correct. Cards the
+        propagator has already pinned are fixed rather than enumerated, which
+        is what usually keeps the space far under 3**6.
+
+        Returns None when it declines, and never returns something the joint
+        scores LOWER than what it was handed: the guarantee this makes is that
+        it is a better SEARCH of the same objective, not a different objective.
+        """
+        live = sum(1 for w in self.obs.set_winner if w is None)
+        if live > self.cfg.forced_exhaustive:
+            return None
+        cards = list(half_suit_cards(claim.half_suit))
+        fixed, free = {}, []
+        for i, c in enumerate(cards):
+            m = self.bel.current_holder_mask(c)
+            if m and m & (m - 1) == 0:
+                holder = m.bit_length() - 1
+                if team_of(holder) != self.my_team:
+                    return None      # not ours to place; leave it alone
+                fixed[i] = holder
+            else:
+                free.append(i)
+        if len(self.team) ** len(free) > self.cfg.forced_exhaustive_cap:
+            return None
+        base = float(self.post.prob_assignment(cards, list(claim.assignment)))
+        best_p, best_a = base, list(claim.assignment)
+        for combo in iproduct(self.team, repeat=len(free)):
+            asg = [None] * len(cards)
+            for i, h in fixed.items():
+                asg[i] = h
+            for k, i in enumerate(free):
+                asg[i] = combo[k]
+            pr = float(self.post.prob_assignment(cards, asg))
+            if pr > best_p:
+                best_p, best_a = pr, asg
+        if best_a == list(claim.assignment):
+            return None
+        return Claim(claim.half_suit, tuple(best_a))
 
 
 def choose_pass(ctx, passes):

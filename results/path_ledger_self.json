@@ -1,0 +1,45 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "vs": "self",
+ "arm": {},
+ "n_deals": 6,
+ "ledger": {
+  "exact": {
+   "n": 6,
+   "per_game": 0.5,
+   "wrong": 0,
+   "err": 0.0,
+   "alloc": 0
+  },
+  "voluntary": {
+   "n": 41,
+   "per_game": 3.4167,
+   "wrong": 0,
+   "err": 0.0,
+   "alloc": 0
+  },
+  "gate": {
+   "n": 4,
+   "per_game": 0.3333,
+   "wrong": 2,
+   "err": 0.5,
+   "alloc": 0
+  },
+  "forced": {
+   "n": 3,
+   "per_game": 0.25,
+   "wrong": 2,
+   "err": 0.6667,
+   "alloc": 2
+  },
+  "_total": {
+   "games": 12,
+   "n": 54,
+   "wrong": 4,
+   "wrong_per_game": 0.3333
+  }
+ },
+ "margin": 0.0
+}

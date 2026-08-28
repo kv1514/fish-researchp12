@@ -9,22 +9,48 @@ const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
-function el() {
+function el(tag) {
   const e = {
+    _tag: tag || "div",
     _l: {}, style: {}, dataset: {}, children: [],
-    textContent: "", innerHTML: "", value: "", checked: false, disabled: false,
+    textContent: "", value: "", checked: false, disabled: false,
     classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     addEventListener(k, f) { (this._l[k] = this._l[k] || []).push(f); },
     removeEventListener() {},
     appendChild(c) { this.children.push(c); return c; },
-    querySelectorAll: () => [],
-    querySelector: () => null,
+    // A real walk, not a stub returning []. The declare dialog reads the
+    // player's split back out of the DOM with querySelectorAll("select"), so
+    // a stub that answers [] makes "every card is assigned" vacuously true
+    // and the test passes on a dialog that is broken.
+    querySelectorAll(sel) {
+      const out = [];
+      const want = String(sel).toLowerCase();
+      const walk = (n) => {
+        for (const c of n.children) {
+          if ((c._tag || "").toLowerCase() === want) out.push(c);
+          walk(c);
+        }
+      };
+      walk(this);
+      return out;
+    },
+    querySelector(sel) { return this.querySelectorAll(sel)[0] || null; },
     getAttribute: () => null,
     setAttribute() {},
     remove() {},
     focus() {},
     click() { (this._l.click || []).forEach((f) => f({ target: this })); },
   };
+  // The real DOM drops every child when innerHTML is assigned, and app.js
+  // relies on that to rebuild a panel in place (openModal does it on every
+  // open). A stub that keeps the old children makes a re-opened dialog look
+  // like it has twice as many controls as it does.
+  let html = "";
+  Object.defineProperty(e, "innerHTML", {
+    get: () => html,
+    set(v) { html = String(v); if (html === "") e.children.length = 0; },
+    enumerable: true, configurable: true,
+  });
   return e;
 }
 
@@ -36,7 +62,7 @@ function load() {
   };
   const document = {
     getElementById: get,
-    createElement: el,
+    createElement: (tag) => el(tag),
     body: el(),
     addEventListener() {},
     querySelectorAll: () => [],
@@ -89,7 +115,16 @@ function load() {
   // app.js is a top-level script, so its consts are not reachable from
   // outside. Evaluate it inside a function that hands the bindings back.
   vm.runInContext(src + "\n;globalThis.__S = S; globalThis.__hint = hint;"
-    + "\nglobalThis.__think = think;", ctx);
+    + "\nglobalThis.__think = think;"
+    + "\nglobalThis.__whyAt = whyAt; globalThis.__whyText = whyText;"
+    + "\nglobalThis.__absorbWhy = absorbWhy;"
+    + "\nglobalThis.__openDeclare = openDeclare;"
+    + "\nglobalThis.__openModal = openModal;"
+    + "\nglobalThis.__pctFine = pctFine;"
+    + "\nglobalThis.__renderAction = renderAction;"
+    + "\nglobalThis.__loadRecord = loadRecord;"
+    + "\nglobalThis.__wilson = wilson;"
+    + "\nglobalThis.__ENGINE_ASK_HIT = ENGINE_ASK_HIT;", ctx);
   return { ctx, els, get, calls, replies };
 }
 
