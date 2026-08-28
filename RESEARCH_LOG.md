@@ -532,6 +532,67 @@ about whether what you are missing has ever moved in public.** Five in hand and
 one dealt-and-never-asked-for is worse than one in hand and five that have all
 been seen, and it does not feel that way.
 
+
+### The counting channel is not a footnote: it is half of every declaration
+
+Registered as a caveat, then measured. 1,800 self-play games, 16,156
+declarations of half-suits the declaring team wholly held
+(`scripts4/declarer_holding.py` -> `results/declarer_holding_self.json`).
+
+**The mediator holds.** Error rate by how many of the six have never been
+publicly LOCATED -- never taken by a successful ask:
+
+| never located | n | error rate |
+|---|---|---|
+| 1 | 4,980 | 0.000 |
+| 2 | 4,234 | 0.006 |
+| 3 | 2,990 | 0.032 |
+| 4 | 2,344 | 0.055 |
+| 5 | 1,266 | **0.111** |
+| 6 | 342 | 0.088 |
+
+That spans 0.000 to 0.111 where the declarer's own holding spanned only 0.005
+to 0.068, so it is the stronger predictor by a distance -- and held at fixed
+`unmoved` the k-effect flattens. In the best-populated stratum (`unmoved` = 4,
+n = 2,344) the error rate across k = 0..5 runs 0.050, 0.068, 0.057, 0.057,
+0.042, 0.077: no trend at all. The monotone k-curve was selection on this
+variable, exactly as the refutation predicted.
+
+**And the k-curve reproduced to the digit** across a rerun that added
+`trace=True` to the opposing seats -- 0.0048, 0.0174, 0.0484, 0.0421, 0.0629,
+0.0678, 0.0000 -- which is what confirms tracing is inert rather than assuming
+it. The path table is now complete too: the 8,078 declarations that landed in
+"other" were the untraced opposing team, and they are gone.
+
+**The counting channel, measured.** Cards the propagator pinned to a specific
+player over and above the declarer's own hand and the public record:
+
+| derived | n | share | error rate |
+|---|---|---|---|
+| 0 | 7,530 | 46.6% | 0.046 |
+| 1 | 5,364 | 33.2% | 0.011 |
+| 2 | 2,438 | 15.1% | 0.006 |
+| 3+ | 824 | 5.1% | 0.000 |
+
+**53.4% of wholly-held declarations carry at least one card the propagator
+derived**, and the error rate falls by a factor of four from zero derived to
+one. So the claim I made and retracted -- that once a team holds all six
+nothing further can inform the split -- was not slightly overstated. Deriving
+cards after the freeze is what makes a declaration safe, and it happens in the
+majority of them.
+
+**A calibration table that is NOT a calibration finding.** The run also
+captured what `best_for_half_suit` priced each declared split at, and every
+gap is positive: claimed 0.777 to 0.920 against observed 0.932 to 1.000, so
++0.08 to +0.155 at every k. That reads as systematic under-confidence and it
+is very likely an artefact instead. `best_for_half_suit` has two tiers, and
+above its enumeration cap it returns a PRODUCT of per-card marginals rather
+than a joint -- the same defect `api/_engine.py::claim_check` documents and
+re-prices around. The table is a statement about the cheap estimator, not
+about the engine's confidence, and it is recorded here so that nobody
+(including me) later quotes it as the latter. The gap does not trend with k,
+so it gives no reason to think `forced_claim`'s argmax is distorted.
+
 ### Shipped
 
 `claim_forced_exhaustive=1` into `V06_DEPLOYED`, per

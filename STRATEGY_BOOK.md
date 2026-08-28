@@ -376,8 +376,28 @@ so about 0.14 a game moved out of a gated guess and into a confident voluntary
 declaration -- which is only possible if waiting supplied something. Wrong
 declarations fell by 0.064 [-0.085, -0.043] as a result.
 
-What is not measured is how much of that is the counting channel as against
-simply declining a bad bet, and this file does not claim to know.
+**Now measured.** Over 16,156 wholly-held declarations, **53.4% carry at least
+one card the propagator pinned beyond the declarer's own hand and the public
+record** -- located by counting rather than by any ask. And the error rate
+falls fourfold from 0.046 with nothing derived to 0.011 with one card derived,
+to 0.000 with three. Deriving cards after the freeze is not a curiosity; it is
+what makes a declaration safe, and it happens in the majority of them.
+
+Which also settles what the risk really tracks. Error rate by how many of the
+six have never been publicly located:
+
+| never located | n | error rate |
+|---|---|---|
+| 1 | 4,980 | 0.000 |
+| 2 | 4,234 | 0.006 |
+| 3 | 2,990 | 0.032 |
+| 4 | 2,344 | 0.055 |
+| 5 | 1,266 | **0.111** |
+
+**Count the cards nobody has ever asked for.** That number, not how many you
+hold, is what your declaration is risking -- and holding the k-curve at fixed
+"never located" flattens it completely, which is why "let the teammate holding
+more of it declare" was the wrong lever.
 
 **It is a communication problem, not a deduction problem.** Every card is held
 by someone who knows they hold it. The team collectively has the answer and no
