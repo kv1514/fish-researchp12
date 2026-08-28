@@ -67,6 +67,35 @@ assert.ok(!/miss[\s\S]*2S was/.test(txt),
 assert.ok(/Your team declared 2/.test(txt), "our count is wrong: " + txt.slice(0, 400));
 assert.ok(/they declared 1/.test(txt), "their count is wrong");
 
+/* --- the running record counts each game once, and only your own team --- */
+{
+  const r1 = ctx.__loadRecord();
+  assert.strictEqual(r1.games, 1, "the first game was not absorbed");
+  // seat 0 with teammates 2 and 4 declared two of the three rows
+  assert.strictEqual(r1.declared, 2, "the opponents' declaration was counted");
+  assert.strictEqual(r1.right, 1);
+  assert.strictEqual(r1.split, 1);
+  assert.strictEqual(r1.ownership, 0,
+    "the opponents' ownership error was charged to the player");
+
+  // Re-rendering the same finished game must not count it again. Every panel
+  // on this screen redraws on every render(), so this is the live case.
+  ctx.__renderAction();
+  ctx.__renderAction();
+  const r2 = ctx.__loadRecord();
+  assert.strictEqual(r2.games, 1,
+    `a redraw of the same game counted it again (games=${r2.games})`);
+  assert.strictEqual(r2.declared, 2);
+
+  // a different game does count. Changing the SCORE is enough: the key is
+  // the declarations and the result, not the session.
+  S.snap.score = { you: 6, them: 3, nulled: 0 };
+  ctx.__renderAction();
+  const r3 = ctx.__loadRecord();
+  assert.strictEqual(r3.games, 2, "a second game was not absorbed");
+  assert.strictEqual(r3.declared, 4);
+}
+
 /* --- a spectator has no seat, so the tally must name the two engines --- */
 S.snap.spectate = true;
 S.snap.seat = -1;

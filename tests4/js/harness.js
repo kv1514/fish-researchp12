@@ -121,7 +121,8 @@ function load() {
     + "\nglobalThis.__openDeclare = openDeclare;"
     + "\nglobalThis.__openModal = openModal;"
     + "\nglobalThis.__pctFine = pctFine;"
-    + "\nglobalThis.__renderAction = renderAction;", ctx);
+    + "\nglobalThis.__renderAction = renderAction;"
+    + "\nglobalThis.__loadRecord = loadRecord;", ctx);
   return { ctx, els, get, calls, replies };
 }
 

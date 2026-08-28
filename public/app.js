@@ -1172,6 +1172,99 @@ function renderLog() {
  * An OWNERSHIP error means an opponent still had one: you read the table
  * wrong. A ledger that says only "wrong" teaches neither.
  */
+/* Your declaration record, across games.
+ *
+ * This project measured where its margin against an independently written
+ * engine actually comes from, and 61% of it is declaration accounting -- the
+ * two engines find cards at broadly similar rates and diverge on knowing when
+ * a half-suit is finished. A player who is only ever shown the score is being
+ * shown the half that moves least.
+ *
+ * So the ledger keeps a running record. It lives in localStorage because it is
+ * a per-browser convenience and nothing on the server needs it; a private
+ * window or cleared site data simply starts it over, which is why every read
+ * and write is wrapped.
+ */
+const RECORD_KEY = "fish.declrecord.v1";
+//: measured between engines over 600 cross-engine games, our seats and theirs
+//: (results/margin_decomposition.json). Shown as the yardstick because "you
+//: got two wrong" means nothing without one.
+const ENGINE_WRONG_PER_GAME = { us: 0.150, them: 0.918 };
+
+function loadRecord() {
+  try {
+    const r = JSON.parse(localStorage.getItem(RECORD_KEY) || "null");
+    if (r && typeof r.games === "number") return r;
+  } catch (e) { /* private mode, or cleared */ }
+  return { games: 0, declared: 0, right: 0, split: 0, ownership: 0 };
+}
+
+function saveRecord(r) {
+  try { localStorage.setItem(RECORD_KEY, JSON.stringify(r)); }
+  catch (e) { /* private mode */ }
+}
+
+/* Absorb one finished game, once.
+ *
+ * Keyed on the GAME rather than the session. The first version used S.token,
+ * which is right for a solo table and wrong in a room -- rooms carry a code
+ * and a secret and never set a token, so every room game would have keyed on
+ * "" and only the first would ever have counted. The declarations themselves
+ * are the identity: the sequence of who declared what, in order, with the
+ * final score, does not repeat between deals.
+ *
+ * The guard is needed at all because every panel on this screen redraws on
+ * every render(), so a finished game is re-absorbed several times a second
+ * without it.
+ */
+function gameKey(s) {
+  return (s.declarations || [])
+    .map((r) => `${r.claimer}.${r.hs}.${r.klass}`).join("|")
+    + `#${s.score.you}-${s.score.them}`;
+}
+
+function absorbRecord(s) {
+  const rows = (s.declarations || []).filter(
+    (r) => !s.spectate && new Set([s.seat, ...s.teammates]).has(r.claimer));
+  if (!rows.length) return loadRecord();
+  const rec = loadRecord();
+  const id = gameKey(s);
+  if (rec.last === id) return rec;
+  rec.last = id;
+  rec.games += 1;
+  for (const r of rows) {
+    rec.declared += 1;
+    if (r.klass === "right") rec.right += 1;
+    else if (r.klass === "split") rec.split += 1;
+    else rec.ownership += 1;
+  }
+  saveRecord(rec);
+  return rec;
+}
+
+function drawRecord(box, s) {
+  const rec = absorbRecord(s);
+  if (!rec.games) return;
+  const wrong = rec.split + rec.ownership;
+  const per = wrong / rec.games;
+  box.appendChild(el("h4", null, "Your declaration record"));
+  box.appendChild(el("p", "dim",
+    `Over ${rec.games} game${rec.games === 1 ? "" : "s"} you have declared `
+    + `${rec.declared} set${rec.declared === 1 ? "" : "s"} and got `
+    + `${wrong} wrong — ${rec.split} the right team in the wrong order, `
+    + `${rec.ownership} with a card still on the other side. `
+    + `That is ${per.toFixed(2)} a game, against `
+    + `${ENGINE_WRONG_PER_GAME.us.toFixed(2)} for this engine and `
+    + `${ENGINE_WRONG_PER_GAME.them.toFixed(2)} for the one it plays in the `
+    + `exhibition.`));
+  const reset = el("button", "ghost", "Clear this record");
+  reset.onclick = () => {
+    try { localStorage.removeItem(RECORD_KEY); } catch (e) { /* ignore */ }
+    render();
+  };
+  box.appendChild(reset);
+}
+
 function drawLedger(box, s) {
   const rows = s.declarations;
   const bad = (rs) => rs.filter((r) => r.klass !== "right").length;
@@ -1243,7 +1336,10 @@ function renderAction() {
       box.appendChild(el("h4", null, "Where the cards were as each set resolved"));
       box.appendChild(r);
     }
-    if (s.declarations && s.declarations.length) drawLedger(box, s);
+    if (s.declarations && s.declarations.length) {
+      drawLedger(box, s);
+      if (!s.spectate) drawRecord(box, s);
+    }
     const again = el("button", "primary", "Deal again");
     again.onclick = () => show("start");
     box.appendChild(again);
