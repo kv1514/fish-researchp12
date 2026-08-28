@@ -187,6 +187,26 @@ consistent with `results/declarer_holding_self.json` and it is **not measured
 here** — the ceiling runner does not record the unlocated count, and this
 paragraph is a hypothesis rather than a result.
 
+## Secondary 3, which turns out to be the sharpest form of the result
+
+Registered as "`pinned_by_cheat` per arm, so the size of each cheat is
+reported rather than implied". It is more than bookkeeping:
+
+| arm | cards pinned by the cheat, per game | ceiling |
+|---|---|---|
+| T teammates | $40.7$ | $+3.4100$ |
+| O opponents | $40.4$ | $+1.3067$ |
+| F everything | $59.8$ | $+6.6067$ |
+
+**T and O are told almost exactly the same number of cards** — $40.7$ against
+$40.4$ — **and one is worth 2.6 times the other.** That controls for the
+quantity of information and isolates its kind, which the raw ceilings do not.
+Whatever is limiting this engine, it is not how much it knows; it is what the
+knowledge is about.
+
+(The runner now prints this. It was stored and not shown, and I nearly reported
+the run without the one table that makes its point cleanly.)
+
 ## Sub-additive, which is the opposite of what the registration braced for
 
 $T + O = +4.7167$ against $F = +6.6067$. The registration included the

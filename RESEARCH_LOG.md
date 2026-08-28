@@ -612,6 +612,13 @@ measures where our mistakes are rather than where our headroom is. That was
 wrong. **The error ledger's 95/5 split does translate into an information-value
 split**, and the rank-1 entry in the table above is ranked correctly.
 
+And the sharpest form of it, which was a registered secondary I nearly failed
+to report: the two arms are told **almost exactly the same number of cards** --
+40.7 against 40.4 pinned by the cheat per game -- and one is worth 2.6 times
+the other. That controls for the quantity of information and isolates its kind.
+What limits this engine is not how much it knows but what its knowledge is
+about.
+
 Two things about the mechanism table are worth separating.
 
 **The teammate arm's zero allocation errors are definitional, not evidence.** A

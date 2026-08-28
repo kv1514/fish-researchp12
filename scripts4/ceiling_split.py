@@ -166,6 +166,18 @@ def report(rows) -> dict:
     print("  with opponents. Two bounds on two questions. Do not add them.")
     out["sum_is_not_the_whole"] = {"T_plus_O": t + o, "F": f}
 
+    print(f"\n  --- how big each cheat is, and what it bought ---")
+    print(f"  {'arm':<12}{'cards pinned/game':>19}{'ceiling':>11}"
+          f"{'per pinned card':>18}")
+    for arm in list(ARMS)[1:]:
+        v = out["arms"][arm]
+        pc = v["pinned_by_cheat_per_game"]
+        print(f"  {arm:<12}{pc:>19.1f}{v['ceiling']:>+11.4f}"
+              f"{(v['ceiling'] / pc if pc else 0):>18.4f}")
+    print("  This is secondary 3, and it is the sharpest form of the result:")
+    print("  two arms told a nearly identical NUMBER of cards are not worth")
+    print("  the same, because what they are told differs in KIND.")
+
     print(f"\n  --- the mechanism: wrong declarations by class, per game ---")
     print(f"  {'arm':<12}{'allocation':>12}{'ownership':>11}{'total':>8}")
     for arm in ARMS:
