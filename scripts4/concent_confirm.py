@@ -42,7 +42,7 @@ from fish.engine import AskEvent, ClaimEvent, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.dylan_v07 import BRIDGE_REV
-from scripts4.journal import finish, in_flight, to_read
+from scripts4.journal import finish, in_flight, result_for, to_read
 from scripts4.path_ledger import PATHS, _path_of
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
@@ -387,20 +387,9 @@ def main(n_deals: int = 500, n_jobs: int = 0) -> int:
         print(f"{len(rows)} games; too few to report")
         return 1
     out = report(rows)
-    # Named after the journal so two runs cannot silently overwrite each
-    # other's result, and written NEXT TO the journal when that journal lives
-    # outside results/. A smoke test pointed at a scratch journal otherwise
-    # dropped `cj_confirm.json` into the repository, where the results indexer
-    # duly listed it as an orphan -- a throwaway run leaving a permanent file
-    # that looks like a finding.
-    stem = JOURNAL.stem.replace("_journal", "")
-    home = ROOT / "results"
-    try:
-        JOURNAL.resolve().relative_to(home.resolve())
-        out_dir = home
-    except ValueError:
-        out_dir = JOURNAL.parent
-    dest = out_dir / f"{stem}_confirm.json"
+    dest = result_for(
+        JOURNAL, canonical_journal=ROOT / "results" / "concent_journal.jsonl",
+        canonical_name="concent_confirm.json")
     dest.write_text(json.dumps(out, indent=1))
     finish(JOURNAL)
     print("wrote", dest.relative_to(ROOT))

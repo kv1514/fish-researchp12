@@ -46,6 +46,15 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# This module reads only results files, so it never needed the repository on
+# sys.path -- until it started importing a sibling. Run as a script,
+# `python3 scripts4/error_value.py` puts scripts4/ on the path and not the root
+# above it, so `import scripts4.journal` fails. The unit test did not catch it
+# because pytest already has the root on the path: a module that imports
+# cleanly under test can still be a broken script.
+sys.path.insert(0, str(ROOT))
+
+from scripts4.journal import result_for  # noqa: E402
 DEFAULT = ROOT / "results" / "stuck_gate_journal.jsonl"
 BASE = "A_shipped"
 #: the value the rest of the project assumes, from the award rule
@@ -179,20 +188,8 @@ def main(path=None, arms=None) -> int:
                     and "margin" in rows[0][k]]
     out = report(rows, arms)
     out["journal"] = p.name
-    # Named after the journal it read.
-    #
-    # It used to write results/error_value.json whatever the input, so running
-    # it on the signalling journal silently replaced the stuck-gate fit -- and
-    # the paper cites that file twice for +1.7898 [+1.5927, +1.9870], a number
-    # the file no longer contained. The drift check did not catch it because
-    # error_value.json was not in the manifest; it is now.
-    #
-    # The default journal keeps the historical filename so nothing that
-    # already points at it breaks.
-    stem = p.stem.replace("_journal", "")
-    dest = ROOT / "results" / (
-        "error_value.json" if p.resolve() == Path(DEFAULT).resolve()
-        else f"error_value_{stem}.json")
+    dest = result_for(p, canonical_journal=Path(DEFAULT),
+                      canonical_name="error_value.json")
     dest.write_text(json.dumps(out, indent=1))
     print("\nwrote", dest.relative_to(ROOT))
     return 0

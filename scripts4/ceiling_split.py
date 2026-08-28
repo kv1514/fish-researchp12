@@ -42,7 +42,7 @@ from fish.engine import ClaimEvent, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.dylan_v07 import BRIDGE_REV
-from scripts4.journal import finish, in_flight, to_read
+from scripts4.journal import finish, in_flight, result_for, to_read
 from scripts4.path_ledger import _path_of
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
@@ -233,14 +233,10 @@ def main(n_deals: int = 300, n_jobs: int = 0) -> int:
         print(f"{len(rows)} games; too few to report")
         return 1
     out = report(rows)
-    stem = JOURNAL.stem.replace("_journal", "")
-    home = ROOT / "results"
-    try:
-        JOURNAL.resolve().relative_to(home.resolve())
-        out_dir = home
-    except ValueError:
-        out_dir = JOURNAL.parent
-    dest = out_dir / f"{stem}.json"
+    dest = result_for(
+        JOURNAL,
+        canonical_journal=ROOT / "results" / "ceiling_split_journal.jsonl",
+        canonical_name="ceiling_split.json")
     dest.write_text(json.dumps(out, indent=1))
     finish(JOURNAL)
     print("wrote", dest)

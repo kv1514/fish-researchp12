@@ -42,7 +42,7 @@ from fish.engine import AskEvent, ClaimEvent, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.dylan_v07 import BRIDGE_REV
-from scripts4.journal import finish, in_flight, to_read
+from scripts4.journal import finish, in_flight, result_for, to_read
 from scripts4.path_ledger import PATHS, _path_of
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
@@ -334,18 +334,9 @@ def main(n_deals: int = 500, n_jobs: int = 0) -> int:
     # against two different champions must not share a filename; the older
     # figure would vanish and the prereg would point at a file describing
     # something else.
-    stem = JOURNAL.stem.replace("_journal", "")
-    # Written next to the journal when that journal lives outside results/,
-    # so a scratch run cannot leave a permanent file in the repository. See
-    # the same note in scripts4/concent_confirm.py.
-    home = ROOT / "results"
-    try:
-        JOURNAL.resolve().relative_to(home.resolve())
-        out_dir = home
-    except ValueError:
-        out_dir = JOURNAL.parent
-    dest = out_dir / (
-        "tempo_confirm.json" if stem == "tempo" else f"{stem}_confirm.json")
+    dest = result_for(JOURNAL,
+                      canonical_journal=ROOT / "results" / "tempo_journal.jsonl",
+                      canonical_name="tempo_confirm.json")
     dest.write_text(json.dumps(out, indent=1))
     finish(JOURNAL)
     print("wrote", dest.relative_to(ROOT))
