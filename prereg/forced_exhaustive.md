@@ -114,3 +114,53 @@ screen already enumerated on real positions. The margin comes back
 indistinguishable from zero with an interval comfortably containing +0.028. If
 the margin comes back *large*, something is wrong with the seating and I should
 go looking for it rather than celebrate.
+
+---
+
+## OUTCOME, part 1: the primary passes, and the secondary was not run
+
+### The primary, which is the ship criterion
+
+2,400 games, self-play, our seats' forced declarations at one live half-suit:
+
+| arm | right | of | accuracy | 95% CI |
+|---|---|---|---|---|
+| A_shipped | $77$ | $258$ | $0.2984$ | $[0.2459, 0.3569]$ |
+| B_full | $105$ | $258$ | $\mathbf{0.4070}$ | $[0.3488, 0.4679]$ |
+
+Paired at the game level: $+0.0117$ more correct last declarations per game,
+95\% $[+0.0067, +0.0167]$ --- clear of zero. Accuracy rises by $10.9$ points,
+$28$ more correct declarations in $258$. The screen predicted $17.3\% \to
+30.8\%$ on 104 positions; the confirm measures $29.8\% \to 40.7\%$ on 258. The
+levels differ because the screen's block was a different seed set; the
+**gain**, $13.5$ points against $10.9$, replicates.
+
+**Guard 2 (accuracy must not fall in any other bucket): passed, and exactly.**
+Every other live-count bucket is identical between arms --- $114/140$ at
+live=2, $22/24$ at live=3, and so on down --- because `forced_exhaustive=1`
+gates on at most one live half-suit and nothing else is reached.
+
+**Guard 3 (never a lower-scoring split): passed**, enforced in
+`_exhaustive_split` and checked in `tests4/test_forced_exhaustive.py` by
+spying on every substitution rather than trusting the code.
+
+### The secondary was not run, and the figure it produced is not a null
+
+The pre-registration fixed the secondary as "the paired margin **against
+v0.7**". It was run in self-play, and in that runner's first version *all six
+seats* received the arm's parameters. Both teams therefore improved by the
+same amount, and $(\text{ours} - \text{theirs})$ cannot move. It reported
+
+\[ +0.0000, \quad 95\%\ [-0.0142, +0.0142] \]
+
+which is not a null. It is an arithmetic identity wearing a confidence
+interval, and its interval is tight precisely because there is nothing in it
+to vary. Read as a null it would have been the most misleading number in this
+study: it excludes the $+0.028$ the pre-registration predicted, so it would
+have looked like a *refutation* of an effect it never measured.
+
+The runner now gives the opponent the untreated baseline in self-play, and the
+pre-registered v0.7 arm is queued. **Nothing ships until that is reported**,
+even though the ship criterion is the primary and the primary passed: a
+registration that names a secondary and then does not run it is not a
+registration that was honoured.

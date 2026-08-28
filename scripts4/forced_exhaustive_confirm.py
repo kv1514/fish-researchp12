@@ -60,7 +60,14 @@ def _play(deal_seed: int, kv_even: bool, arm: dict, vs: str) -> dict:
         elif vs == "v07":
             agents.append(make_agent(("dylan_v07", {})))
         else:
-            agents.append(make_agent(("fishbot4", params)))
+            # The OPPONENT is the untreated baseline even in self-play. The
+            # first version of this handed `params` to all six seats, which
+            # makes the margin structurally zero -- both teams improve by the
+            # same amount and (ours - theirs) cannot move. The run reported
+            # +0.0000 [-0.0142, +0.0142] and it was not a null, it was an
+            # arithmetic identity wearing a confidence interval.
+            agents.append(make_agent(("fishbot4",
+                                      dict(V06_DEPLOYED[1], trace=True))))
     st = GameState.deal(rules, seed=deal_seed)
     for p, a in enumerate(agents):
         a.begin_game(p, rules, AGENT0 + deal_seed * 13 + p)
