@@ -1,0 +1,100 @@
+{"deal": 8800000, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800000, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800002, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800002, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800001, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[2, 1]]}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[2, 1]]}}
+{"deal": 8800001, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800004, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800004, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}}
+{"deal": 8800005, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800005, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800003, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800003, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800006, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800006, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}}
+{"deal": 8800007, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[1, 1]]}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}}
+{"deal": 8800007, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800008, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800008, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800009, "kv_even": true, "A_shipped": {"margin": 9, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 9, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800009, "kv_even": false, "A_shipped": {"margin": -9, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -9, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800010, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800010, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}}
+{"deal": 8800011, "kv_even": true, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800011, "kv_even": false, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800012, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800012, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800014, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800014, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800013, "kv_even": true, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800013, "kv_even": false, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800016, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800016, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800018, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800018, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800015, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800015, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800017, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800017, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800020, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800020, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800019, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800019, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800021, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800021, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800023, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800023, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800022, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800022, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800024, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800024, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800025, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800025, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800027, "kv_even": true, "A_shipped": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800027, "kv_even": false, "A_shipped": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": [[3, 1], [2, 1]]}, "B_full": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": [[3, 1], [2, 1]]}}
+{"deal": 8800026, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800026, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[1, 1]]}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[1, 1]]}}
+{"deal": 8800029, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[2, 0]]}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[2, 0]]}}
+{"deal": 8800029, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800028, "kv_even": true, "A_shipped": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800028, "kv_even": false, "A_shipped": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800030, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800030, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800032, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800032, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800031, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800031, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800033, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800033, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800034, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800034, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800036, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800036, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800035, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800035, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800037, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[2, 0], [1, 1]]}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[2, 0], [1, 1]]}}
+{"deal": 8800037, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800039, "kv_even": true, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800039, "kv_even": false, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800038, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800038, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800040, "kv_even": true, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800040, "kv_even": false, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": [[2, 1]]}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": [[2, 1]]}}
+{"deal": 8800042, "kv_even": true, "A_shipped": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800042, "kv_even": false, "A_shipped": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": [[2, 0]]}, "B_full": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": [[2, 0]]}}
+{"deal": 8800041, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800041, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800043, "kv_even": true, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 1]]}}
+{"deal": 8800043, "kv_even": false, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800044, "kv_even": true, "A_shipped": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -5, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800044, "kv_even": false, "A_shipped": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 5, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800045, "kv_even": true, "A_shipped": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800045, "kv_even": false, "A_shipped": {"margin": -3, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": [[1, 1]]}}
+{"deal": 8800046, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800046, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800047, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800047, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800048, "kv_even": true, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800048, "kv_even": false, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": [[1, 0]]}, "B_full": {"margin": 3, "terminal": true, "fallbacks": 0, "forced": [[1, 1]]}}
+{"deal": 8800049, "kv_even": true, "A_shipped": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": 1, "terminal": true, "fallbacks": 0, "forced": []}}
+{"deal": 8800049, "kv_even": false, "A_shipped": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}, "B_full": {"margin": -1, "terminal": true, "fallbacks": 0, "forced": []}}

@@ -2760,6 +2760,72 @@ $+0.15$ on a thousand games. The pre-registration's expected-outcome
 paragraph, written before the run, predicted exactly this and added that a
 result above $+0.15$ should have prompted suspicion rather than pleasure.
 
+\paragraph{Two experiments have now produced that shape, and the arithmetic of
+it is measurable.} The gate is the second. The first was the signalling
+protocol of \S\ref{sec:perpetual}, which cut nulls by $20\%$ and returned
+$+0.002$ $[-0.086, +0.090]$ sets per pair. Both were filed as ``a real
+reduction that buys no sets'', which is honest and is not an explanation.
+
+A paired margin is a \emph{net}. An arm that defers declarations avoids some
+errors, worth $+v$ sets each, and leaves half-suits live, which costs
+something per deferral; the duel reports the sum. Regressing the paired margin
+difference on the paired \emph{error} difference separates them, and both
+halves are quantities this paper has assumed rather than measured --- the
+two-sets arithmetic of \S\ref{sec:res-headline} is exactly the assumption $v =
+2$. It costs no games: the journal is already on disk
+(\path{scripts4/error_value.py}).
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& defer at $0.97$ & middle rung at $0.70$ \\
+\midrule
+value of one avoided error & $+1.7898$ $[+1.5927, +1.9870]$ & $+1.8388$ $[+1.6433, +2.0344]$ \\
+cost when it avoids nothing & $-0.0565$ $[-0.1237, +0.0106]$ & $-0.0814$ $[-0.1513, -0.0114]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent And without a model, since the regressor takes four values and a
+line through four levels is close to a two-point comparison anyway --- the
+paired margin by how many errors the arm avoided \emph{on that deal}:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+on deals where the arm & $n$ & paired margin \\
+\midrule
+added an error & $10$ & $\mathbf{-2.0000}$ $[-3.2396, -0.7604]$ \\
+avoided none & $930$ & $-0.0473$ $[-0.1019, +0.0072]$ \\
+avoided one & $48$ & $+1.5000$ $[+0.8216, +2.1784]$ \\
+avoided two or more & $12$ & $+4.1667$ $[+2.1819, +6.1515]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Three things follow. The two-sets arithmetic is right, and now measured
+rather than assumed: an \emph{added} misdeclaration costs exactly $-2.0000$
+sets, which is the award rule's own arithmetic recovered from play rather than
+asserted from the rulebook. Deferring a declaration costs about $0.25$ to
+$0.30$ sets each, and for the heavier arm that cost excludes zero --- a price
+this project did not have, and precisely the quantity the pre-registration
+called out as unattributable from the margin alone. It is attributable, just
+not from the margin alone: $0.0640$ errors avoided at $1.79$ is $0.1146$,
+less $0.0565$ of tempo, is the $+0.0580$ the duel reported.
+
+The third is the weakest and is stated as a direction rather than a figure.
+Avoiding an error returns less than adding one costs, $+1.50$ against $-2.00$,
+which would follow if a misdeclaration you decline to make does not hand you
+the set --- the half-suit stays live and can still be lost. At $n = 48$ and
+$n = 10$ the two intervals overlap comfortably and this is a hypothesis the
+design was not built to settle.
+
+What makes the intercept causal rather than a selection artefact is the
+pairing: both arms play the identical deal, so ``deals on which the error
+count did not change'' is a property of the deal and not of an assignment.
+
 \subsection{Everything else we tried}
 \label{sec:res-null}
 
@@ -5348,7 +5414,8 @@ the difference between cashing a set and handing it over. That is the same
 claim \S\ref{sec:claiming} makes from the inference side, arrived at here
 from the scoreboard.
 
-\paragraph{How much of the margin is that, exactly.} The paragraph above is a
+\paragraph{How much of the margin is that, exactly.}
+\label{sec:res-headline} The paragraph above is a
 qualitative reading of two rows, and it had never been priced. It can be:
 every declaration in a game is either right or one of two kinds of wrong, and
 under the award rule each wrong one moves the margin by two sets, so the
