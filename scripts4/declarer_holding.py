@@ -134,7 +134,14 @@ def _rate(n, wrong):
 
 
 def report(games, vs) -> dict:
-    claims = [c for g in games for c in g["claims"] if c["ours"]]
+    # In self-play BOTH teams are our engine, so both sides' declarations are
+    # evidence about our own declaration machinery and halving the corpus
+    # would be throwing away data for a distinction that does not exist there.
+    # Against v0.7 only our seats count -- the bridged engine's declarations
+    # are not what this is measuring, and its holdings are not ours to reason
+    # about.
+    claims = [c for g in games for c in g["claims"]
+              if vs == "self" or c["ours"]]
     whole = [c for c in claims if c["k_team"] == 6]
     print(f"\n=== who declares, and what it is worth ({len(games):,} games "
           f"vs {vs}) ===")

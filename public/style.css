@@ -182,7 +182,11 @@ button:hover:not(:disabled) { border-color: var(--accent); }
 @media (min-width: 900px) {
   .tablegrid { grid-template-columns: 1.35fr 1fr; align-items: start; }
 }
-.col-main, .col-side { display: grid; gap: 1rem; align-content: start; }
+/* `min-width: 0` because a grid item defaults to `min-width: auto`, which
+   means "never narrower than my content" -- one wide child then widens the
+   track, the track widens the page, and the page scrolls sideways. */
+.col-main, .col-side { display: grid; gap: 1rem; align-content: start;
+                       min-width: 0; }
 
 /* hand ------------------------------------------------------------------- */
 
@@ -327,7 +331,13 @@ button:hover:not(:disabled) { border-color: var(--accent); }
 
 /* ---------------------------------------------------- paced table controls */
 
-.pacebar { display: flex; align-items: center; gap: .3rem; }
+/* `flex-wrap` is not decoration here. This row carries Pause, Next, a pace
+   slider, Voice, Think and the auto checkbox, and unwrapped it measures 467px
+   -- so on a 390px phone it pushed the page 233px sideways and every panel
+   with it. Caught in Chromium at 390px, not by the DOM stub, which has no
+   layout to overflow. */
+.pacebar { display: flex; flex-wrap: wrap; align-items: center;
+           gap: .3rem; row-gap: .35rem; }
 .pacebar select {
   font: inherit; font-size: .82rem; padding: .3rem .4rem; border-radius: 8px;
   border: 1px solid var(--line); background: var(--bg); color: var(--ink);
@@ -461,8 +471,14 @@ button.ghost.on {
   /* Slightly taller than 16/9: the ring needs vertical room for the four-line
      seat pods at the top and bottom, and at 16/9 they collided with the rail. */
   aspect-ratio: 15 / 10;
+  /* `min-height` and `aspect-ratio` together imply a MINIMUM WIDTH: at 340px
+     tall and 15/10, this box cannot be narrower than 510px, and as a grid item
+     with the default `min-width: auto` it dragged the whole column out to 510px
+     inside a 390px viewport. The floor is dropped below the breakpoint rather
+     than fought with `max-width`, which cannot beat an implied minimum. */
   min-height: 340px;
   max-height: 460px;
+  max-width: 100%;
   border-radius: 50% / 46%;
   background:
     radial-gradient(120% 120% at 50% 18%,
@@ -475,6 +491,16 @@ button.ghost.on {
     var(--shadow);
   color: var(--felt-ink);
   container-type: inline-size;
+}
+
+/* Below the breakpoint the 340px floor is exactly what forces the 510px
+   minimum width, so it goes and the table simply gets shorter.
+   This block sits AFTER the rule it overrides on purpose: the first attempt
+   put it in the @media at the top of the file, which is earlier in the source
+   than `.felt` itself, and at equal specificity the later rule wins. It
+   changed nothing and looked like it should have. */
+@media (max-width: 560px) {
+  .felt { min-height: 0; }
 }
 
 /* The rail: a second ellipse just inside the edge, so the felt reads as a
