@@ -959,8 +959,63 @@ function renderLastMove() {
   txt.appendChild(el("div", "lmwhat", namedText(e.text)));
   const note = annotateLog()[log.length - 1];
   if (note) txt.appendChild(el("div", "lmannot", note));
+  const lastWhy = whyAt(log.length - 1);
+  if (lastWhy) txt.appendChild(el("div", "lmwhy", lastWhy));
   if (e.proved) txt.appendChild(el("div", "lmproved", namedText(e.proved)));
   box.appendChild(txt);
+}
+
+/* ------------------------------------------------------- engine reasoning
+ * The exhibition ships a `why` map from the server: log index -> the trace
+ * the engine captured INSIDE the decision it made. Only our seats carry one,
+ * and only in spectate, because a trace is derived from the moving seat's own
+ * hand and would cross the information boundary in a seated game.
+ *
+ * The tie group is reported rather than hidden. The objective genuinely cannot
+ * separate two cards of one half-suit at one target, and when it cannot, the
+ * engine picks at random -- so presenting the top-scoring row as "its choice"
+ * would invent a preference it does not have. When the group is bigger than
+ * one we say so instead.
+ */
+function pct(x) { return Math.round(x * 100) + "%"; }
+
+function whyText(tr) {
+  if (!tr) return null;
+  if (tr.kind === "ask") {
+    const rows = tr.ranked || [];
+    const mine = rows.find(r => r.chosen) || rows[0];
+    if (!mine) return null;
+    const bits = [`${pct(mine.p_hit)} to land`];
+    if (tr.tie_group > 1) {
+      bits.push(`tied with ${tr.tie_group - 1} other`
+        + (tr.tie_group > 2 ? "s" : "") + ", picked at random");
+    } else {
+      const next = rows.find(r => !r.chosen);
+      if (next) bits.push(`next best ${next.card} at ${nm(next.target)}`
+        + ` (${pct(next.p_hit)})`);
+    }
+    bits.push(`${tr.n_legal} legal asks`);
+    return bits.join(" · ");
+  }
+  if (tr.kind === "declare") {
+    const c = tr.confidence == null ? null : pct(tr.confidence);
+    const why = tr.why && tr.why.indexOf("forced") === 0
+      ? "forced to declare" : tr.why === "voluntary" ? "chose to declare"
+        : "declared instead of a doomed ask";
+    return c ? `${why} · ${c} confident in this split` : why;
+  }
+  if (tr.kind === "exact") return "solved exactly, not estimated";
+  if (tr.kind === "signal")
+    return "a deliberately dead ask - it proves to a partner which card this "
+      + "seat does not hold";
+  if (tr.kind === "pass") return `passed to ${nm(tr.teammate)}`;
+  return null;
+}
+
+function whyAt(idx) {
+  const w = S.snap && S.snap.why;
+  if (!w) return null;
+  return whyText(w[String(idx)]);
 }
 
 function renderLog() {
@@ -983,6 +1038,8 @@ function renderLog() {
     const w = el("div", "wrap");
     w.appendChild(el("div", "what", namedText(e.text)));
     if (ann[idx]) w.appendChild(el("div", "annot", ann[idx]));
+    const why = whyAt(idx);
+    if (why) w.appendChild(el("div", "why", why));
     if (e.proved) w.appendChild(el("div", "proved", namedText(e.proved)));
     d.appendChild(w);
     box.appendChild(d);

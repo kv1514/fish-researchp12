@@ -89,7 +89,8 @@ function load() {
   // app.js is a top-level script, so its consts are not reachable from
   // outside. Evaluate it inside a function that hands the bindings back.
   vm.runInContext(src + "\n;globalThis.__S = S; globalThis.__hint = hint;"
-    + "\nglobalThis.__think = think;", ctx);
+    + "\nglobalThis.__think = think;"
+    + "\nglobalThis.__whyAt = whyAt; globalThis.__whyText = whyText;", ctx);
   return { ctx, els, get, calls, replies };
 }
 

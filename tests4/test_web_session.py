@@ -204,3 +204,69 @@ def test_a_restored_session_remembers_where_the_cards_were():
         f"half-suits; the review panel reads this map")
     for holder in final.revealed.values():
         assert 0 <= holder < NUM_PLAYERS
+
+
+def test_both_modes_reveal_the_same_shape_at_game_over():
+    """`{}` is truthy in JS, so a dict here threw at every exhibition game over.
+
+    The client does `if (s.reveal) s.reveal.forEach(...)`. Spectate used to
+    send an empty dict, which passes the guard and fails the walk -- and the
+    throw escaped the caller's catch, so watchGameOver() never ran, the series
+    tally froze and the next deal never started.
+    """
+    shapes = {}
+    for mode, body in (("spectate", {"mode": "spectate", "step": 1}),
+                       ("play", {"seat": 0})):
+        s = new_session(body)
+        tok, log = s.token(), list(s.wire_log)
+        for _ in range(250):
+            cur = Session.restore(tok, log)
+            if cur.state.is_terminal:
+                break
+            if mode == "play" and cur.state.turn == cur.seat:
+                # suggest() is the engine's own move, so it is legal in every
+                # state including the forced-declaration one where there is no
+                # legal ask AND no legal pass. Picking legal_asks()[0] broke
+                # there and made this test flaky rather than wrong -- worse.
+                cur.play(cur.suggest())
+            else:
+                cur.advance(6)
+            tok, log = cur.token(), list(cur.wire_log)
+        assert cur.state.is_terminal, f"{mode} fixture never finished"
+        rev = cur.snapshot()["reveal"]
+        assert isinstance(rev, list), f"{mode} reveal is {type(rev).__name__}"
+        assert len(rev) == NUM_PLAYERS
+        shapes[mode] = sum(len(h) for h in rev)
+    assert shapes["spectate"] == shapes["play"] == 54, shapes
+
+
+def test_trace_keys_index_the_log_that_was_actually_sent():
+    """Absolute action indices go out of range once the log is trimmed.
+
+    The snapshot ships only the last LOG_TAIL entries. Traces are stored
+    against absolute action indices, so past that point the two numberings
+    drift apart and every explanation silently renders nothing -- the exact
+    failure the trace feature exists to avoid. Measured before the rebase: at
+    63 actions the keys were 60, 61, 62 against a 60-entry list.
+    """
+    from api._engine import LOG_TAIL
+
+    s = new_session({"mode": "spectate", "step": 1})
+    tok, log = s.token(), list(s.wire_log)
+    checked_past_the_tail = False
+    for _ in range(80):
+        cur = Session.restore(tok, log)
+        if cur.state.is_terminal:
+            break
+        cur.advance(3)
+        snap = cur.snapshot()
+        sent = len(snap["log"])
+        for key in snap["why"]:
+            assert 0 <= int(key) < sent, (
+                f"trace key {key} against a {sent}-entry log "
+                f"({len(cur.wire_log)} actions played)")
+        if len(cur.wire_log) > LOG_TAIL + 2 and snap["why"]:
+            checked_past_the_tail = True
+        tok, log = cur.token(), list(cur.wire_log)
+    assert checked_past_the_tail, (
+        "fixture never got past the log tail, so the regression is untested")

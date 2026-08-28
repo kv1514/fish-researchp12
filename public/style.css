@@ -932,3 +932,18 @@ button.sm { padding: 5px 9px; font-size: 13px; }
   font-size: clamp(10px, 1.5cqi, 12px);
   color: color-mix(in srgb, var(--felt-ink) 70%, transparent);
 }
+
+/* Engine reasoning, exhibition only. Deliberately quieter than the move it
+   explains: it is a footnote to the action, not a competing headline. */
+.log .why {
+  font-size: .72rem;
+  opacity: .62;
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.feltmid .lastmove .lmwhy {
+  font-size: clamp(9px, 1.35cqi, 11px);
+  color: color-mix(in srgb, var(--felt-ink) 58%, transparent);
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}

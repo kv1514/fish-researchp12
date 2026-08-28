@@ -77,6 +77,11 @@ from fish4.registry4 import make_agent
 #: serverless request budget.
 WEB_DRAWS = 480
 
+#: How many narrated log entries the snapshot carries. Named because the trace
+#: rebase in _why_for_log must use the SAME number; when it was an inline 60 in
+#: two places, the explanations went silent past action 60 and nothing failed.
+LOG_TAIL = 60
+
 #: The table plays the strongest configuration this project can assemble from
 #: separately demonstrated parts, which is not the same as the strongest
 #: measured one and should not be described as it. The belief-space lookahead is
@@ -299,8 +304,46 @@ def log_hash(actions) -> str:
     discards the reply and plays the same deal on with perfect information.
 
     Binding the log costs one hash and no storage, because the token already
-    round-trips on every response. It also closes the take-back: a truncated
-    log no longer verifies, so a bad move cannot be replayed away.
+    round-trips on every response.
+
+    WHAT THIS DOES **NOT** CLOSE, STATED PLAINLY
+    -------------------------------------------
+    An earlier version of this docstring said binding the log "also closes the
+    take-back: a truncated log no longer verifies, so a bad move cannot be
+    replayed away". That is true only of a FORGED log, and it is the more
+    comfortable half of the truth.
+
+    Every response hands the client a freshly signed token for the position it
+    describes. A client that KEEPS an old token together with the honest log
+    that matched it holds a legitimately signed earlier position, and no
+    stateless check can refuse it -- the pair verifies because it really was
+    issued. Rolling back is therefore not prevented, and the same reasoning
+    reopens the peeking oracle through the front door: a declaration is legal
+    on any unresolved half-suit whether or not the declarer holds a card in it
+    (fish/engine.py has no holding requirement for Claim, unlike Ask), and
+    resolving one reveals the true holders, correctly, because a resolved
+    declaration is public. Nine restores of one saved pair, each declaring a
+    different half-suit and each discarded, read off all 54 card locations
+    while the real game stays at ply 0. Reproduced at this layer; see
+    tests4/test_web_security.py.
+
+    TWO CONSEQUENCES, NEITHER OF THEM A PATCH
+    -----------------------------------------
+    For the game: this is a single player against five bots, so the only
+    person cheated is the one doing it. That is why it is documented rather
+    than treated as an emergency.
+
+    For the RESEARCH, which matters more: transcripts collected from the
+    public site are not evidence of honest play and must not be used as
+    human-play data. This bears directly on refitting the choice model on the
+    deployed population -- a population that can rewind is not the population
+    the model would be claiming to describe.
+
+    The real fix needs memory the deployment does not have: one
+    nonce -> highest-log-length-seen row, rejecting any token whose log is
+    shorter than the longest already observed. That is a single column in the
+    same store multiplayer rooms are already blocked on, and it should be
+    built when that store exists rather than approximated now.
     """
     raw = json.dumps(actions or [], separators=(",", ":"), sort_keys=True)
     return hashlib.sha256(raw.encode()).hexdigest()[:24]
@@ -405,7 +448,17 @@ class Session:
             if mode == "spectate" and p % 2 == 0:
                 self.bots[p] = make_agent(("dylan_v07", {}))
             else:
-                self.bots[p] = make_agent(("fishbot4", dict(spec)))
+                # Decision traces are captured ONLY in the exhibition. They
+                # carry the bot's ranked candidates and its confidence, which
+                # is derived from public events plus THAT SEAT'S OWN HAND -- so
+                # handing one to a seated human would leak across the
+                # information boundary the whole engine is built to respect.
+                # In spectate every seat is a bot and nobody has a hand to
+                # protect, which is exactly why the exhibition is the place to
+                # show reasoning. tests4/test_web_security.py pins this.
+                self.bots[p] = make_agent(
+                    ("fishbot4", dict(spec, **({"trace": True}
+                                               if mode == "spectate" else {}))))
             self.bots[p].begin_game(p, rules, rng.getrandbits(64))
         self._helper_seed = rng.getrandbits(64)
         self._helper = None
@@ -416,6 +469,13 @@ class Session:
         #: every hand, so at terminal the hands are all empty by construction
         #: and a reveal built from them is six empty lists.
         self.revealed: dict[int, int] = {}
+        #: wire_log index -> why the bot at that index moved as it did.
+        #: Spectate only, and rebuilt per request rather than sealed into the
+        #: token: a trace is an explanation of a decision, and a decision that
+        #: is being REPLAYED was not made again, so there is nothing honest to
+        #: say about it. Only moves generated inside the current request carry
+        #: one, which is also why the token stays exactly as it was.
+        self.traces: dict[int, dict] = {}
         #: The wire form of every action so far, in order. What the token
         #: commits to, and what the client is expected to send back verbatim.
         self.wire_log: list = []
@@ -505,6 +565,12 @@ class Session:
             w = wire_action(ev)
             played.append(w)
             self.wire_log.append(w)
+            # Keyed by position in wire_log so the client can line a trace up
+            # with the move it explains without the two lists having to stay
+            # the same length -- only some seats are traced.
+            tr = getattr(self.bots[p], "last_trace", None)
+            if tr is not None:
+                self.traces[len(self.wire_log) - 1] = dict(tr, seat=p)
             n += 1
         return played
 
@@ -535,6 +601,38 @@ class Session:
             for c, holder in zip(half_suit_cards(ev.half_suit), ev.revealed):
                 self.revealed[c] = holder
 
+    def _reveal_rows(self) -> list:
+        """Where each card sat as its half-suit resolved, one list per seat.
+
+        One builder for both modes. They used to differ -- spectate sent an
+        empty dict -- and since `{}` is truthy in JS the client walked it as an
+        array and threw at every game over.
+        """
+        return [[card_name(c) for c in sorted(self.revealed)
+                 if self.revealed[c] == p] for p in range(NUM_PLAYERS)]
+
+    def _why_for_log(self) -> dict:
+        """Traces rebased onto the log slice the client is actually sent.
+
+        ``self.traces`` is keyed by ABSOLUTE action index, which is the only
+        stable key on the server. The snapshot ships ``self.log[-LOG_TAIL:]``,
+        so past LOG_TAIL actions the two numberings drift apart by exactly the
+        amount trimmed -- and a trace keyed past the end of the list silently
+        renders nothing, in the one feature whose whole argument is that a
+        misattributed explanation is worse than none. Measured before the fix:
+        at 63 actions the keys were 60, 61, 62 against a 60-entry list.
+
+        Rebasing here rather than on the client keeps the wire format honest:
+        an index in the payload indexes the payload.
+        """
+        offset = max(0, len(self.log) - LOG_TAIL)
+        out = {}
+        for k, v in self.traces.items():
+            i = k - offset
+            if 0 <= i < LOG_TAIL:
+                out[str(i)] = v
+        return out
+
     def obs(self) -> Observation:
         return Observation.from_state(self.state, self.seat)
 
@@ -553,6 +651,11 @@ class Session:
                 "score": {"you": a, "them": b, "nulled": nulls},
                 "hand_counts": list(st.hand_counts()),
                 "teammates": [],
+                # Why our seats moved as they did, keyed by position in the
+                # log AS SENT. Present only in the exhibition, and only for
+                # moves generated in THIS request: a replayed move was not
+                # decided again, so there is nothing honest to say about it.
+                "why": self._why_for_log(),
                 "set_winner": [
                     None if w is None else
                     ("ours" if w == 0 else "theirs" if w == 1 else "null")
@@ -565,11 +668,19 @@ class Session:
                     for i, n in enumerate(
                         HALF_SUIT_NAMES[:len(st.set_winner)])],
                 "hand": [],
-                "log": self.log[-60:],
+                "log": self.log[-LOG_TAIL:],
                 "must_pass": False,
             }
             if st.is_terminal:
-                snap["reveal"] = {}
+                # The SAME shape play mode sends: six lists, one per seat.
+                # This was an empty dict, and `{}` is truthy in JS, so the
+                # client's `if (s.reveal) s.reveal.forEach(...)` threw at every
+                # game over -- which broke the exhibition loop, because the
+                # throw escaped pace()'s catch and watchGameOver() never ran.
+                # The series tally froze and the next deal never started.
+                # It can carry the real thing now that restore() rebuilds the
+                # reveal map, so the exhibition gets the panel too.
+                snap["reveal"] = self._reveal_rows()
             return snap
         mine = team_of(self.seat)
         hand = st.hands[self.seat]
@@ -594,15 +705,13 @@ class Session:
                 for i, n in enumerate(HALF_SUIT_NAMES[:len(st.set_winner)])],
             "hand": [{"id": c, "name": card_name(c), "red": is_red(c),
                       "hs": c // 6} for c in mask_to_cards(hand)],
-            "log": self.log[-60:],
+            "log": self.log[-LOG_TAIL:],
             "must_pass": bool(st.turn == self.seat and hand == 0
                               and not st.is_terminal),
             # Revealed only once every card is public anyway. Before that the
             # server has the layout and the client does not, which is the whole
             # point of sealing the seed.
-            "reveal": ([[card_name(c) for c in sorted(self.revealed)
-                         if self.revealed[c] == p] for p in range(NUM_PLAYERS)]
-                       if st.is_terminal else None),
+            "reveal": self._reveal_rows() if st.is_terminal else None,
         }
 
     def analysis(self) -> dict:

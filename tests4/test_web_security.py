@@ -13,6 +13,7 @@ answer to it.
 
 from __future__ import annotations
 
+import json
 import math
 import os
 import sys
@@ -57,8 +58,13 @@ def test_a_fabricated_claim_log_cannot_be_replayed():
         Session.restore(tok, fabricated)
 
 
-def test_the_log_cannot_be_truncated_to_take_a_move_back():
-    """The same hole in its cheating-rather-than-peeking form."""
+def test_a_truncated_log_fails_against_a_CURRENT_token():
+    """The same hole in its cheating-rather-than-peeking form.
+
+    Renamed. The old name -- "the log cannot be truncated to take a move back"
+    -- asserted a property this system does not have: it holds only while the
+    token is the current one. See the honest sibling below.
+    """
     s, _, acts = _fresh()
     while not s.snapshot()["your_turn"] and not s.snapshot()["terminal"]:
         break
@@ -175,3 +181,141 @@ def test_a_snapshot_never_carries_another_seat_hand_before_the_end():
             if n in mine:
                 continue
             assert f'"{n}"' not in blob, f"{n} (P{p}'s) appeared in the payload"
+
+
+# -- decision traces are exhibition-only -------------------------------------
+#
+# A trace carries a bot's ranked candidates and its confidence. Those are
+# derived from the public record plus THAT SEAT'S OWN HAND, so handing one to
+# a seated human would push information across the boundary this whole module
+# exists to defend. In spectate every seat is a bot and there is no hand to
+# protect, which is the one place reasoning can be shown.
+
+def test_a_seated_game_never_carries_a_decision_trace():
+    s = new_session({"seat": 0})
+    s.advance(8)
+    snap = s.snapshot()
+    assert "why" not in snap, "a seated player was handed engine reasoning"
+    assert not s.traces
+    blob = json.dumps(snap)
+    for marker in ('"ranked"', '"p_hit"', '"tie_group"', '"confidence"'):
+        assert marker not in blob, f"{marker} leaked into a seated payload"
+
+
+def test_the_bots_in_a_seated_game_are_not_even_tracing():
+    """Belt and braces: the flag is off at the source, not filtered at the door."""
+    s = new_session({"seat": 0})
+    s.advance(8)
+    for p, bot in s.bots.items():
+        assert getattr(bot, "trace", False) is False, f"seat {p} is tracing"
+        assert getattr(bot, "last_trace", None) is None
+
+
+def test_the_exhibition_does_carry_traces_and_only_for_our_seats():
+    s = new_session({"mode": "spectate", "step": 1})
+    s.advance(10)
+    why = s.snapshot()["why"]
+    assert why, "the exhibition explained nothing"
+    for key, tr in why.items():
+        assert int(key) >= 0
+        # Odd seats are ours; the even seats run Dylan's engine, which has no
+        # trace to give and must not be presented as if it had one.
+        assert tr["seat"] % 2 == 1, "a trace was attributed to their engine"
+        assert tr["kind"] in {"ask", "declare", "pass", "exact", "signal"}
+
+
+def test_a_trace_carries_beliefs_and_never_ground_truth():
+    """The distinction that makes the exhibition safe to explain.
+
+    An ask trace names cards the asker wants. That is not a leak: an ask is a
+    public act, the alternatives it ranks are ones the asker provably does not
+    hold (ask legality), and the numbers beside them are the engine's BELIEF,
+    not the deal. What would be a leak is a field asserting where a card
+    actually is. Only a declaration carries holders, and a declaration is a
+    public claim the moment it is made -- so the invariant is that ask traces
+    carry no holder field at all, and declare traces carry only the split the
+    engine is about to announce anyway.
+
+    (An earlier version of this test compared ranked cards against the seat's
+    CURRENT hand and failed, correctly: a seat that asks for 2H and gets it
+    holds it moments later. The hand at inspection time is not the hand at
+    decision time, and the property worth pinning was never about hands.)
+    """
+    s = new_session({"mode": "spectate", "step": 1})
+    s.advance(12)
+    seen_kinds = set()
+    for tr in s.snapshot()["why"].values():
+        seen_kinds.add(tr["kind"])
+        for row in tr.get("ranked", []):
+            assert "holder" not in row, "an ask trace asserted a card's location"
+            assert set(row) <= {"rank", "target", "card", "half_suit",
+                                "score", "p_hit", "chosen"}
+        for row in tr.get("split", []):
+            # The engine's own declaration, which the table is about to hear.
+            assert set(row) == {"card", "holder"}
+            assert 0 <= row["holder"] < 6
+    assert "ask" in seen_kinds, "fixture never produced an ask trace"
+
+
+def test_an_old_token_with_its_own_log_still_restores_and_that_is_by_design():
+    """The honest sibling of the truncation test.
+
+    A response hands the client a signed token for the position it describes.
+    Keeping an old one together with the log that matched it yields a pair
+    that verifies, because it really was issued. No stateless check can refuse
+    it, so this test asserts the property the system HAS rather than the one
+    the old test name wished for.
+    """
+    s = new_session({"seat": 0})
+    early_tok, early_log = s.token(), list(s.wire_log)
+    # The human starts, so advance() alone is a no-op; make a move first.
+    s.play(s.suggest())
+    later_tok, later_log = s.token(), list(s.wire_log)
+    assert len(later_log) > len(early_log), "fixture did not advance"
+
+    # Both pairs verify. The early one is a rollback and it is accepted.
+    back = Session.restore(early_tok, early_log)
+    assert len(back.wire_log) == len(early_log)
+    assert len(Session.restore(later_tok, later_log).wire_log) == len(later_log)
+    # Crossing them does not: the token commits to ITS OWN log.
+    with pytest.raises(ValueError):
+        Session.restore(early_tok, later_log)
+
+
+def test_the_rollback_oracle_is_real_and_is_documented_as_such():
+    """Pin the consequence, so nobody re-derives it as a surprise.
+
+    Nine restores of ONE saved token+log pair, each declaring a different
+    half-suit and each thrown away, read off every card location while the
+    real game stays where it was. A declaration is legal on any unresolved
+    half-suit whether or not the declarer holds a card in it, and resolving
+    one reveals the true holders -- correctly, since a resolved declaration is
+    public.
+
+    This is asserted rather than fixed because there is no stateless fix, and
+    it is worth a test because the RESEARCH consequence is easy to forget:
+    site transcripts are not evidence of honest play.
+    """
+    from fish.engine import Claim
+
+    s = new_session({"seat": 0})
+    tok, log = s.token(), list(s.wire_log)
+    learned = {}
+    for hs in range(9):
+        branch = Session.restore(tok, log)      # the same signed pair, reused
+        if branch.state.set_winner[hs] is not None:
+            continue
+        ev = branch.state.apply(branch.seat, Claim(hs, tuple([branch.seat] * 6)))
+        learned[hs] = ev.revealed
+
+    assert len(learned) == 9, "the oracle should reach every half-suit"
+    assert all(len(v) == 6 for v in learned.values())
+    real = Session.restore(tok, log)
+    assert len(real.wire_log) == len(log), "the real game must be untouched"
+    assert not any(w is not None for w in real.state.set_winner)
+
+    # And the docstring must say so, so the code and the claim cannot drift.
+    import api._engine as eng
+    doc = eng.log_hash.__doc__
+    assert "does **not** close" in doc.lower() or "NOT** CLOSE" in doc
+    assert "not evidence of honest play" in doc
