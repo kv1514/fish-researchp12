@@ -156,3 +156,68 @@ in the conditional band and below the unconditional bar. The honest prediction
 is therefore: a real, small, mechanism-confirmed effect that does not clear
 0.15 on its own. If it comes in above +0.15 I should be suspicious of the
 seating, not pleased.
+
+---
+
+## OUTCOME, written after the run and against the conditions above
+
+Run: 1,000 games (500 deals in both seat parities) per arm, fresh seed block
+2,400,000, bridge revision 2, zero fallbacks, zero unfinished. That is the
+pre-registered n and it delivered the predicted precision: the interval
+half-width came out at 0.076 against the 0.071 the power note projected.
+
+**Primary outcome.**
+
+| arm | sets/game | vs shipped |
+|---|---|---|
+| A_shipped | $+2.3020$ | --- |
+| B_defer | $+2.3600$ | $+0.0580$ $[-0.0177, +0.1337]$ |
+| B2_mid | $+2.3420$ | $+0.0400$ $[-0.0396, +0.1196]$ |
+
+Neither interval is clear of zero, so neither the unconditional bar
+($\geq +0.15$) nor the conditional band ($[+0.05, +0.15)$ **with the interval
+clear of zero**) is met. **Nothing ships. The knob stays at its inert
+default.**
+
+**Secondary outcome, the mechanism, which moved decisively.** Per game,
+paired, clustered over games:
+
+| contrast | B_defer $-$ A | B2_mid $-$ A |
+|---|---|---|
+| gate declarations | $-0.2240$ $[-0.2558, -0.1922]$ | $-0.2730$ $[-0.3075, -0.2385]$ |
+| forced declarations | $+0.0840$ $[+0.0599, +0.1081]$ | $+0.1000$ $[+0.0728, +0.1272]$ |
+| **wrong declarations** | $\mathbf{-0.0640}$ $[-0.0847, -0.0433]$ | $\mathbf{-0.0660}$ $[-0.0878, -0.0442]$ |
+
+The gate's own error rate falls from $0.281$ to $0.086$ (B) and $0.068$ (B2).
+The voluntary path absorbs the deferrals and stays at one error in 3,795. Gate
+claims fall by $0.224$ while forced claims rise by $0.084$, so withdrawal
+condition 2 is not triggered: the deferral is not being paid for at the
+deadline, it is mostly being cashed by the path that has never been wrong.
+
+**So: withdrawal condition 1, exactly as written.** A real, large,
+mechanism-confirmed reduction in wrong declarations --- a third of them, with
+an interval nowhere near zero --- that does not resolve as a margin. At two
+sets of differential per avoided error the ledger predicts $+0.128$ and the
+duel measures $+0.058$ $[-0.018, +0.134]$. The prediction sits inside the
+interval, so the run neither confirms nor refutes the conversion; it does
+establish that whatever the conversion rate is, it is not large enough to
+clear a bar fixed at $+0.15$ on this many games.
+
+**What was predicted in advance, for the record.** The expected-outcome
+paragraph above said "a real, small, mechanism-confirmed effect that does not
+clear 0.15 on its own", and added "if it comes in above +0.15 I should be
+suspicious of the seating, not pleased". That is what happened, which is the
+only thing that makes the prediction worth having written down.
+
+**Why the margin is smaller than the ledger implies, stated as a question and
+not an answer.** A deferred declaration is not a free one: it leaves a
+half-suit live, which changes every subsequent ask on both sides. The two-sets
+arithmetic prices the error and ignores the tempo, and the gap between $+0.128$
+and $+0.058$ is where that difference would live. Measuring it needs a
+different instrument than this one --- the paired margin cannot see it, because
+both arms are paying it.
+
+**Not run, and why.** The v0.3 champion guard was specified for "the winning
+rung, if any". There is no winning rung, so it is not run: a guard against
+opponent-specificity is a check on something that is shipping, and running it
+now would be looking for a reason to revisit a decision already made.
