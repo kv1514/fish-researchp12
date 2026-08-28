@@ -1,5 +1,6 @@
 {
  "journal": "mega_match_journal.jsonl",
+ "arm": null,
  "n_games": 10000,
  "deal_component": {
   "n_deals": 5000,

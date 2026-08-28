@@ -120,6 +120,58 @@ def test_pinned_rows_are_labelled(capsys):
         k for k, v in kinds.items() if v != "pinned"}
 
 
+def test_symmetric_self_play_is_refused_not_reported(capsys):
+    """The failure that looks like the strongest possible finding.
+
+    When both teams run the identical policy and the agent seeds key on the
+    seat, the two parities of a deal are the SAME GAME with the labels
+    swapped: margin_odd is exactly -margin_even, var(sum) is 0, and the
+    correlation is exactly -1. Reported rather than refused, that reads as
+    "the deal decides 100% of the outcome, [100%, 100%]" -- an arithmetic
+    identity wearing a confidence interval, which is precisely the mistake
+    this project has made before with symmetric arms.
+    """
+    rng = random.Random(29)
+    rows = []
+    for d in range(300):
+        m = rng.choice([-5, -3, -1, 1, 3, 5])
+        rows.append(_row(d, True, m))
+        rows.append(_row(d, False, -m))
+    with pytest.raises(SystemExit) as e:
+        dl.deal_component(rows)
+    assert "SAME GAME" in str(e.value)
+
+
+def test_one_unflipped_deal_is_enough_to_proceed(capsys):
+    """The guard must key on the degeneracy, not merely on a strong result.
+
+    A corpus that is genuinely dominated by the deal still has play noise, so
+    some deal somewhere breaks the exact -1 relation. Refusing that would
+    silence the very finding the estimator exists to report.
+    """
+    rng = random.Random(31)
+    rows = []
+    for d in range(300):
+        m = rng.choice([-5, -3, -1, 1, 3, 5])
+        rows.append(_row(d, True, m))
+        rows.append(_row(d, False, -m if d else -m + 2))
+    out = dl.deal_component(rows)
+    assert out["deal_share_of_variance"] > 0.9, out
+
+
+def test_loader_can_lift_an_arm_to_the_top_level(tmp_path):
+    f = tmp_path / "j.jsonl"
+    r = _row(1, True, 0)
+    r.pop("margin")
+    r["A_shipped"] = {"margin": 3}
+    r["B_full"] = {"margin": 4}
+    f.write_text(json.dumps(r) + "\n")
+    assert dl._load(f, "A_shipped")[0]["margin"] == 3
+    assert dl._load(f, "B_full")[0]["margin"] == 4
+    with pytest.raises(SystemExit):
+        dl._load(f, "C_missing")
+
+
 def test_loader_refuses_a_foreign_journal(tmp_path):
     f = tmp_path / "j.jsonl"
     f.write_text(json.dumps({"deal": 1, "kv_even": True}) + "\n")

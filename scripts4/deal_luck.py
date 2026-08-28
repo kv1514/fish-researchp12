@@ -47,12 +47,27 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
-def _load(path: Path) -> list[dict]:
+def _load(path: Path, arm: str | None = None) -> list[dict]:
+    """Rows with `deal`, `kv_even` and a top-level `margin`.
+
+    `arm` lifts an arm's margin to the top level, so a multi-arm journal can be
+    read as a single-policy corpus. That is what makes the self-play robustness
+    check possible without a new run: `forced_exhaustive_journal.jsonl` carries
+    2,400 games of the champion against itself, both parities, and its
+    `A_shipped` arm is exactly the untreated engine.
+    """
     rows = []
     for n, line in enumerate(path.read_text().splitlines(), 1):
         if not line.strip():
             continue
         r = json.loads(line)
+        if arm:
+            a = r.get(arm)
+            if not isinstance(a, dict) or "margin" not in a:
+                raise SystemExit(
+                    f"{path}:{n} has no arm {arm!r} carrying a margin "
+                    f"(keys: {sorted(r)})")
+            r = dict(r, margin=a["margin"])
         if {"deal", "kv_even", "margin"} - r.keys():
             raise SystemExit(f"{path}:{n} is not a mega-match row: {sorted(r)}")
         rows.append(r)
@@ -136,6 +151,42 @@ def deal_component(rows) -> dict:
     sigma2 = v_sum / 2.0
     var_deal = (v_dif - v_sum) / 4.0
     deal_share = -r
+
+    # SYMMETRIC SELF-PLAY IS NOT A CORPUS FOR THIS QUESTION, and it does not
+    # look like a failure -- it looks like the strongest possible finding.
+    #
+    # When both teams run the identical policy and the agent seeds depend on
+    # the SEAT rather than on the parity, the game played at kv_even=True and
+    # the game played at kv_even=False are the same game: every seat behaves
+    # identically and only the label "ours" moves. So margin_odd is exactly
+    # -margin_even on every deal, var(sum) is 0, the correlation is exactly
+    # -1, and this function would report "the deal decides 100% of the
+    # outcome, [100%, 100%]".
+    #
+    # That is an arithmetic identity wearing a confidence interval, which is a
+    # mistake this project has made before. Refusing is the only honest
+    # output: there is no second observation to decompose.
+    #
+    # It does NOT mean a self-play arm-versus-arm contrast is compromised. That
+    # was checked rather than assumed on results/forced_exhaustive_journal.jsonl:
+    # arm A's parities are the same game relabelled on 1200/1200 deals, but the
+    # treatment effects d = B - A correlate -0.0085 across parities, because the
+    # treated arm's two games genuinely differ (the treatment sits on different
+    # seats). Treating each deal as the unit gives se 0.00509 against 0.00512
+    # treating each game as independent -- a ratio of 0.996. The published
+    # interval stands.
+    flipped = sum(1 for a, b in pairs if a == -b)
+    if flipped == len(pairs):
+        raise SystemExit(
+            f"every one of {len(pairs):,} deals has margin_odd == "
+            f"-margin_even exactly.\n"
+            f"The two parities are the SAME GAME with the teams relabelled, "
+            f"which is what\nsymmetric self-play produces when the agent "
+            f"seeds key on the seat. There is\nno second observation of the "
+            f"deal to decompose, and reporting a correlation of\n-1 as "
+            f"'the deal decides everything' would be an arithmetic identity "
+            f"wearing a\nconfidence interval. Use a corpus whose two "
+            f"parities are different games.")
 
     print("=== Q1: how much of the result is the deal? ===")
     print(f"{len(pairs):,} deals, each played from both seat parities "
@@ -418,21 +469,29 @@ def synthesis(od) -> dict:
     return out
 
 
-def main(path: str = "results/mega_match_journal.jsonl") -> int:
+def main(path: str = "results/mega_match_journal.jsonl",
+         arm: str | None = None) -> int:
     p = ROOT / path if not Path(path).is_absolute() else Path(path)
-    rows = _load(p)
-    print(f"{len(rows):,} games from {p.name}\n")
-    out = {"journal": p.name, "n_games": len(rows),
+    rows = _load(p, arm)
+    print(f"{len(rows):,} games from {p.name}"
+          + (f", arm {arm}" if arm else "") + "\n")
+    out = {"journal": p.name, "arm": arm, "n_games": len(rows),
            "deal_component": deal_component(rows),
            "loss_modes": loss_modes(rows),
            "overdispersion": overdispersion(rows)}
     out["synthesis"] = synthesis(out["overdispersion"])
-    dest = ROOT / "results" / "deal_luck.json"
+    dest = ROOT / "results" / (
+        "deal_luck.json" if not arm else f"deal_luck_{p.stem}_{arm}.json")
     dest.write_text(json.dumps(out, indent=1))
     print(f"\nwrote results/{dest.name}")
     return 0
 
 
 if __name__ == "__main__":
-    a = sys.argv[1:]
-    raise SystemExit(main(a[0] if a else "results/mega_match_journal.jsonl"))
+    pos = [x for x in sys.argv[1:] if not x.startswith("--")]
+    arm = None
+    for x in sys.argv[1:]:
+        if x.startswith("--arm="):
+            arm = x.split("=", 1)[1]
+    raise SystemExit(main(pos[0] if pos else "results/mega_match_journal.jsonl",
+                          arm))
