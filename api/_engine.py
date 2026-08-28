@@ -838,8 +838,36 @@ class Session:
                           float(ctx.post.prob_assignment(cards, theirs)), 4),
                       "assignment": theirs,
                       "same": theirs == owners}
+        # `prob_assignment` returns exactly 0.0 whenever some card cannot be
+        # where the split puts it. That is a PROOF, not a small estimate, and
+        # it is the most useful thing this route can say. Reporting it here
+        # rather than letting the client infer it from a rounded float is the
+        # difference between "unlikely" and "you can see that it is wrong".
+        #
+        # `public_loc` alone is not enough and the live page proved it: at the
+        # opening nothing has moved in public, so every card's `public_loc` is
+        # None while the candidate masks already rule most splits out -- most
+        # obviously a card in the player's OWN hand assigned to a teammate.
+        # `current_holder_mask` is the propagator's full answer and is the
+        # same one the proof sheet reads.
+        refuted = []
+        for c, want in zip(cards, owners):
+            try:
+                m = ctx.bel.current_holder_mask(c)
+            except Exception:
+                m = None
+            if m and not (m >> want & 1):
+                mine = bool(obs.hand >> c & 1)
+                if mine:
+                    why = "you are holding it yourself"
+                elif want == self.seat:
+                    why = "it is not in your hand"
+                else:
+                    why = "the public record places it elsewhere"
+                refuted.append({"card": card_name(c), "why": why})
         return {"half_suit": hs, "assignment": owners,
-                "p_exact": round(yours, 4), "p_team": round(team_all, 4),
+                "p_exact": round(yours, 6), "p_team": round(team_all, 6),
+                "impossible": bool(refuted), "refuted": refuted,
                 "engine": engine}
 
     def analysis(self) -> dict:

@@ -991,6 +991,19 @@ function renderLastMove() {
  */
 function pct(x) { return Math.round(x * 100) + "%"; }
 
+/* pct() is right for a bar chart and wrong for a claim panel. Rounding to a
+ * whole percent turns 0.0023 and 0.0003 and a genuine zero into the same "0%",
+ * and those are three different things to tell a player: unlikely, very
+ * unlikely, and refuted by the public record. Driving the real page is what
+ * showed this -- three zeros in a row, which reads as a broken panel. */
+function pctFine(x) {
+  if (!(x > 0)) return "0%";
+  if (x >= 0.1) return Math.round(x * 100) + "%";
+  if (x >= 0.01) return (x * 100).toFixed(1) + "%";
+  if (x >= 0.0001) return (x * 100).toFixed(2) + "%";
+  return "<0.01%";
+}
+
 function whyText(tr) {
   if (!tr) return null;
   if (tr.kind === "ask") {
@@ -1572,10 +1585,31 @@ async function openDeclare() {
       }
       check.disabled = false;
       verdict.innerHTML = "";
+      if (r.impossible) {
+        // Not an estimate. The public record already places these cards
+        // elsewhere, so this is the one verdict the panel can PROVE.
+        // Group by reason and cap the list. Naming every card with its own
+        // clause turns a five-card refutation into an unreadable ribbon of
+        // card faces, which the live page showed before this existed.
+        const by = {};
+        for (const x of r.refuted) (by[x.why] = by[x.why] || []).push(x.card);
+        const parts = Object.entries(by).map(([w, cs]) => {
+          const shown = cs.slice(0, 3).map(face).join(" ");
+          const more = cs.length > 3 ? ` and ${cs.length - 3} more` : "";
+          return `${shown}${more} — ${w}`;
+        });
+        const n = r.refuted.length;
+        verdict.appendChild(el("p", "declnum",
+          `<b>This split cannot be right</b>, and that is something you can `
+          + `see rather than estimate. ${n === 1 ? "One card is" : n + " cards are"} `
+          + `not where you put ${n === 1 ? "it" : "them"}: ${parts.join("; ")}.`));
+      } else {
+        verdict.appendChild(el("p", "declnum",
+          `<b>${pctFine(r.p_exact)}</b> — the chance this exact split is `
+          + `right.`));
+      }
       verdict.appendChild(el("p", "declnum",
-        `<b>${pct(r.p_exact)}</b> — the chance this exact split is right.`));
-      verdict.appendChild(el("p", "declnum",
-        `<b>${pct(r.p_team)}</b> — the chance your team holds all six, `
+        `<b>${pctFine(r.p_team)}</b> — the chance your team holds all six, `
         + `however they are divided.`));
       if (r.p_team - r.p_exact > 0.15) {
         verdict.appendChild(el("p", "dim",
@@ -1584,13 +1618,33 @@ async function openDeclare() {
           + "them even though every card was on your side."));
       }
       if (r.engine) {
+        // The engine's "best candidate" is an argmax over per-card marginals.
+        // Early in a game that can name a split the propagator has already
+        // ruled out -- measured at the opening, 10 of 27 live half-suits.
+        // Which is not a defect, because the engine never DECLARES below its
+        // 97% bar; the candidate is a ranking device. Saying "the engine would
+        // name a different split, at 0%" hides that behind a number that
+        // reads like a mistake, so this says the actual thing.
+        const dead = !(r.engine.p_exact > 0);
         verdict.appendChild(el("p", "dim",
           r.engine.same
             ? `The engine names the same split, and prices it at `
-              + `${pct(r.engine.p_exact)}.`
-            : `The engine would name a different split, at `
-              + `${pct(r.engine.p_exact)}. Both figures are computed the same `
-              + `way, so they are comparable.`));
+              + `${pctFine(r.engine.p_exact)}.`
+            : dead
+              ? `The engine's own best guess for this set is one the record `
+                + `already refutes. That is not a mistake it is about to make: `
+                + `the candidate is how it ranks half-suits, and it will not `
+                + `declare below 97%.`
+              : `The engine would name a different split, at `
+                + `${pctFine(r.engine.p_exact)}. Both figures are computed the `
+                + `same way, so they are comparable.`));
+        const best = Math.max(r.p_exact || 0, r.engine.p_exact || 0);
+        if (best > 0 && best < 0.97) {
+          verdict.appendChild(el("p", "dim",
+            `Neither of you can place this set yet: the engine will not `
+            + `declare below 97%, and the best split on the table is at `
+            + `${pctFine(best)}.`));
+        }
         if (!r.engine.same) {
           const use = el("button", null, "Use the engine's split");
           use.onclick = () => {

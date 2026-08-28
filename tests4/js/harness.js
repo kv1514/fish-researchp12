@@ -119,7 +119,8 @@ function load() {
     + "\nglobalThis.__whyAt = whyAt; globalThis.__whyText = whyText;"
     + "\nglobalThis.__absorbWhy = absorbWhy;"
     + "\nglobalThis.__openDeclare = openDeclare;"
-    + "\nglobalThis.__openModal = openModal;", ctx);
+    + "\nglobalThis.__openModal = openModal;"
+    + "\nglobalThis.__pctFine = pctFine;", ctx);
   return { ctx, els, get, calls, replies };
 }
 

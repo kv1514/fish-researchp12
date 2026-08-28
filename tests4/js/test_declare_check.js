@@ -98,5 +98,31 @@ async function open() {
   assert.ok(/12%/.test(after), "the player's own split was not priced");
   assert.ok(/44%/.test(after), "the engine's figure was not revealed");
 
-  console.log("ok - declare dialog asks before it answers");
+  /* --- 6. a small probability must not round to the same thing as zero --- *
+   * Driving the real page showed three "0%" in a row, because pct() rounds to
+   * a whole percent and every opening split is well under one. Unlikely, very
+   * unlikely and refuted are three different things to tell a player. */
+  const fine = ctx.__pctFine;
+  assert.strictEqual(fine(0), "0%");
+  assert.strictEqual(fine(0.83), "83%");
+  assert.notStrictEqual(fine(0.0023), fine(0.0003),
+    "two different small probabilities formatted identically");
+  assert.notStrictEqual(fine(0.0023), "0%",
+    "a real probability was rounded away to zero");
+  assert.strictEqual(fine(1e-9), "<0.01%");
+
+  /* --- 7. a refuted split is stated as a proof, not priced as a long shot --- */
+  replies.push({ half_suit: 0, assignment: want, p_exact: 0.0, p_team: 0.004,
+                 impossible: true,
+                 refuted: [{ card: "2S", why: "you are holding it yourself" }],
+                 engine: null });
+  await check.onclick();
+  const ref = deep(b);
+  assert.ok(/cannot be right/.test(ref),
+    "a split the public record refutes was not called impossible");
+  assert.ok(!/chance this exact split/.test(ref),
+    "a refuted split was still given a probability, which invites the reader "
+    + "to treat a proof as an estimate");
+
+  console.log("ok - declare dialog asks before it answers, and says how sure");
 })().catch((e) => { console.error(e); process.exit(1); });
