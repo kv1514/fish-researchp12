@@ -104,6 +104,16 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  claim_feasibility: bool = False,
                  claim_exact: bool = True,
                  claim_exact_candidates: int = 3,
+                 #: The bar the doomed-ask claim gate uses (see the long note
+                 #: at its use site). 0.5 is the incumbent, hard-coded since
+                 #: v0.3 and never measured.
+                 claim_stuck_threshold: float = 0.5,
+                 #: ...but the raised bar applies only where p_team is at or
+                 #: above this. At 1.01 the test can never pass, so the gate
+                 #: keeps its single 0.5 bar everywhere and the default is
+                 #: bit-identical -- the same discipline as endgame_m=0 and
+                 #: w_contest=0.0.
+                 stuck_team_certain: float = 1.01,
                  # -- adaptive style
                  w_retake: float = 0.0,
                  retake_window: int = 8,
@@ -186,6 +196,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                                      threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
                                      use_exact=claim_exact)
+        self.claim_stuck_threshold = float(claim_stuck_threshold)
+        self.stuck_team_certain = float(stuck_team_certain)
         self.w_retake = w_retake
         self.retake_window = retake_window
         self.retake_min_depth = retake_min_depth
@@ -416,7 +428,19 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
 
         if p[order[0]] <= 0.0:
             best = claims.best_candidate()
-            if best is not None and best[0] >= 0.5:
+            # One bar or two. `best` is (p_exact, p_team, Claim), and the
+            # incumbent reads only p_exact -- it declares at a coin flip
+            # without asking the question the rest of this module is built
+            # around. claim4's docstring says waiting is nearly free while our
+            # own team holds the set, because an opponent who claims it is
+            # wrong and hands it to us; that is precisely the p_team = 1 case,
+            # and it is precisely where this gate does not look. At the
+            # default stuck_team_certain = 1.01 the test below can never pass
+            # and the single 0.5 bar is reproduced exactly.
+            bar = (self.claim_cfg.threshold
+                   if best is not None and best[1] >= self.stuck_team_certain
+                   else self.claim_stuck_threshold)
+            if best is not None and best[0] >= bar:
                 self._t(_tr.claim_trace, best[2],
                         why="the best-scoring ask cannot land, so the turn is "
                             "lost anyway and this claim is better than even",
