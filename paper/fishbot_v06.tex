@@ -151,8 +151,8 @@ results labelled by rule era. Under standard scoring the deployed
 configuration beats the v0.3 champion by $\mathbf{+2.412}$
 $[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
 independently developed C++ engine running its own code --- it wins
-$\mathbf{+2.375}$ sets per game, declaring correctly $96.7\%$ against
-$78.9\%$, once a bridge defect of ours worth $-0.09$ to them is repaired;
+$\mathbf{+2.347}$ sets per game, declaring correctly $96.5\%$ against
+$78.9\%$, once a bridge defect of ours worth $-0.08$ to them is repaired;
 the endgame correction, fitted against void-era targets, re-measures at
 $-0.104$ and is withdrawn.
 
@@ -5070,15 +5070,15 @@ puts them in a position to be asked, and which under the award rule hands
 the set here.
 
 The defect ran in this engine's favour, which is the direction a project does
-not catch by reading its own results and nodding. Priced paired --- $4{,}000$
-deals replayed under both bridge revisions, identical deals and identical
-seating, the same duplicate-deal design every screen in this paper uses
-(\path{scripts4/bridge_bug_price.py}) --- it is worth $\mathbf{-0.0915}$
-$[-0.1076, -0.0754]$ sets per game: real, and about $4\%$ of the margin. It
+not catch by reading its own results and nodding. Priced paired --- all
+$10{,}000$ deals replayed under both bridge revisions, identical deals and
+identical seating, the same duplicate-deal design every screen in this paper
+uses (\path{scripts4/bridge_bug_price.py}) --- it is worth $\mathbf{-0.0784}$
+$[-0.0881, -0.0687]$ sets per game: real, and about $3\%$ of the margin. It
 is also an order of magnitude smaller than the $0.30$ sets per game the same
 read estimated from $40$ games, which is what the paired instrument is for.
-Under the repair their declaration accuracy rises from $76.04\%$ to
-$78.85\%$, while this engine's moves from $96.88\%$ to $96.69\%$ --- the
+Under the repair their declaration accuracy rises from $76.18\%$ to
+$78.87\%$, while this engine's moves from $96.65\%$ to $96.49\%$ --- the
 control that confirms the repair touches only their side of the bridge.
 
 What the repair does \emph{not} move is the misdeclaration split, and the
@@ -5086,9 +5086,9 @@ reason corrects the mechanism the previous paragraph had assumed. The
 anchorless forced declarations were \emph{ownership}-class errors ---
 half-suits the opposing team still held a card of --- whereas the
 $160$-to-$306$ split counts \emph{allocation}-class errors, wholly-held
-half-suits declared with the wrong split. Across the same $4{,}000$ paired
-deals the allocation split is flat: $1{,}078$ against v0.7 before the
-repair, $1{,}070$ after. The finding that this engine misdeclares roughly
+half-suits declared with the wrong split. Across the same $10{,}000$ paired
+deals the allocation split is flat: $2{,}784$ against v0.7 before the
+repair, $2{,}775$ after. The finding that this engine misdeclares roughly
 half as often survives intact; the explanation for it does not, and the gap
 is a property of their voluntary declaration gate rather than of a question
 this bridge was mis-posing. The pre-registered R2 contrast is likewise
@@ -5102,19 +5102,22 @@ rather than paired, and which the corrected head-to-head below supersedes.
 
 \paragraph{The head-to-head, re-measured through the repaired bridge.} This
 is the figure the paper stands behind, and the only one taken through bridge
-revision~2: $4{,}000$ fresh games, seats rotated so neither engine opens more
-often, both engines on their native misdeclaration rule, zero substituted
-moves and zero unfinished games (\path{scripts4/mega_match.py} $\rightarrow$
-\path{results/mega_match.json}).
+revision~2: $10{,}000$ games on the same deals the retracted run used, seats
+rotated so neither engine opens more often, both engines on their native
+misdeclaration rule, zero substituted moves and zero unfinished games
+(\path{scripts4/mega_match.py} $\rightarrow$ \path{results/mega_match.json}).
+Matching the withdrawn run deal for deal is deliberate: it makes the
+replacement a like-for-like correction rather than a differently-powered
+second opinion.
 
 \begin{center}
 \begin{tabular}{lr}
 \toprule
-margin & $\mathbf{+2.3750}$ $[+2.2896, +2.4604]$ sets/game \\
-sets & $22{,}750$ to $13{,}250$ ($63.19\%$ of decided) \\
-games won & $80.70\% \pm 1.22$ ($3{,}228$W / $0$T / $772$L) \\
-ask hit rate & $51.82\%$ against $48.18\%$ \\
-declaration accuracy & $\mathbf{96.69\%}$ against $\mathbf{78.85\%}$ \\
+margin & $\mathbf{+2.3466}$ $[+2.2928, +2.4004]$ sets/game \\
+sets & $56{,}733$ to $33{,}267$ ($63.04\%$ of decided) \\
+games won & $80.41\% \pm 0.78$ ($8{,}041$W / $0$T / $1{,}959$L) \\
+ask hit rate & $51.75\%$ against $48.14\%$ \\
+declaration accuracy & $\mathbf{96.49\%}$ against $\mathbf{78.87\%}$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -5142,8 +5145,8 @@ beyond that lineage would require \citep{dylan2026fishbot}.
 That ingredient now exists in both directions, and it is worth being
 precise about what each side may therefore say. We can report a margin
 against an engine nobody here wrote, which is a stronger kind of evidence
-than either project's internal ladders: $+2.375$ $[+2.290, +2.460]$ sets per
-game, $63.2\%$ of decided sets, over $4{,}000$ games under rules both engines
+than either project's internal ladders: $+2.347$ $[+2.293, +2.400]$ sets per
+game, $63.0\%$ of decided sets, over $10{,}000$ games under rules both engines
 implement natively, with zero substituted moves and a bridge whose one known
 defect has been found, priced and repaired. What that does \emph{not} establish
 is a global ranking of the two projects, and this paper declines that claim

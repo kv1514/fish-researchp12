@@ -714,13 +714,13 @@ WATCH = [
     # The corrected head-to-head itself -- the one figure in this paper taken
     # through bridge revision 2, and the one the abstract now leads with.
     ("mega_match.json", "margin", "{:+.4f}",
-     "corrected margin over v0.7", "margin & $\\mathbf{+2.3750}$"),
+     "corrected margin over v0.7", "margin & $\\mathbf{+2.3466}$"),
     ("mega_match.json", "ci95.0", "{:+.4f}",
-     "corrected margin CI low", "margin & $\\mathbf{+2.3750}$"),
+     "corrected margin CI low", "margin & $\\mathbf{+2.3466}$"),
     ("mega_match.json", "ci95.1", "{:+.4f}",
-     "corrected margin CI high", "margin & $\\mathbf{+2.3750}$"),
+     "corrected margin CI high", "margin & $\\mathbf{+2.3466}$"),
     ("mega_match.json", "n_games", "{:,d}",
-     "games in the corrected head-to-head", "fresh games, seats rotated"),
+     "games in the corrected head-to-head", "games on the same deals the retracted"),
     ("mega_match.json", "kv_set_share", "{:.2%}",
      "corrected set share", "of decided) \\\\"),
     ("mega_match.json", "declare_right_kv", "{:.2%}",

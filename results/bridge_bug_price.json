@@ -1,18 +1,18 @@
 {
- "n_paired_games": 4000,
- "margin_rev1": 2.4665,
- "margin_rev2": 2.375,
- "paired_difference": -0.0915,
+ "n_paired_games": 10000,
+ "margin_rev1": 2.425,
+ "margin_rev2": 2.3466,
+ "paired_difference": -0.0784,
  "ci95": [
-  -0.10762376770706095,
-  -0.07537623229293905
+  -0.08810304820274778,
+  -0.06869695179725221
  ],
  "their_anchorless_rev1": null,
- "their_anchorless_rev2": 435,
+ "their_anchorless_rev2": 1213,
  "our_anchorless_rev1": null,
- "our_anchorless_rev2": 883,
- "their_declare_acc_rev1": 0.7603785103785103,
- "their_declare_acc_rev2": 0.7884976819947375,
- "our_declare_acc_rev1": 0.9688073394495413,
- "our_declare_acc_rev2": 0.966862960375287
+ "our_anchorless_rev2": 2238,
+ "their_declare_acc_rev1": 0.7617746774311569,
+ "their_declare_acc_rev2": 0.7886858573216521,
+ "our_declare_acc_rev1": 0.9664700720393461,
+ "our_declare_acc_rev2": 0.9648551448551449
 }

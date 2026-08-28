@@ -29,36 +29,36 @@ the opponent-award rule hands the set to us. Rev 2 mirrors his rule
 
 ## What it was worth
 
-Priced paired, on 4,000 deals replayed under both revisions with identical
+Priced paired, on all 10,000 deals replayed under both revisions with identical
 deals and identical seating (`scripts4/bridge_bug_price.py` →
-`results/bridge_bug_price.json`): **−0.0915 sets/game against us**, 95% CI
-[−0.1076, −0.0754]. Real, and about 4% of the margin — and an order of
+`results/bridge_bug_price.json`): **−0.0784 sets/game against us**, 95% CI
+[−0.0881, −0.0687]. Real, and about 3% of the margin — and an order of
 magnitude smaller than the 0.30 sets/game first estimated off 40 games,
 which is what the paired instrument is for.
 
 Two supporting figures, both from the same paired set. His declaration
-accuracy rises under the repair (76.04% → 78.85%); ours barely moves (96.88%
-→ 96.69%), which is the control — the repair touches only his side of the
+accuracy rises under the repair (76.18% → 78.87%); ours barely moves (96.65%
+→ 96.49%), which is the control — the repair touches only his side of the
 bridge, and if our number had moved much, something else would be wrong.
 
 Note the shape of the error. The anchorless forced declarations were
 **ownership**-class mistakes: half-suits the opposing team still held a card
 of. They are *not* the allocation-class misdeclarations the paper's
-160-to-306 split counts, and that split is flat across the repair (1,078 →
-1,070 against v0.7 over the same 4,000 paired deals). So the finding that we
+160-to-306 split counts, and that split is flat across the repair (2,784 →
+2,775 against v0.7 over the same 10,000 paired deals). So the finding that we
 misdeclare roughly half as often survives; the explanation that credited it
 to his forced declarations does not.
 
 The repaired head-to-head, which is what the paper and the package README now
-quote: **+2.3750** [+2.2896, +2.4604] sets/game over 4,000 games, 63.19% of
-decided sets, 80.70% of games won, zero substituted moves.
+quote: **+2.3466** [+2.2928, +2.4004] sets/game over 10,000 games, 63.04% of
+decided sets, 80.41% of games won, zero substituted moves.
 
 ## The ledger
 
 | journal | rev | status |
 |---|---|---|
 | `mega_match_journal.jsonl` | **2** | current; every row carries `"rev": 2` |
-| `mega_match_journal_prefix_bridgebug.jsonl` | 1 | retained, retracted. The 10,000-game run that reported +2.4250 sets/game (+2.4665 on the 4,000 deals the rev-2 run also covers). Kept rather than deleted so the retracted numbers stay readable, and used as the paired baseline that prices the defect. |
+| `mega_match_journal_prefix_bridgebug.jsonl` | 1 | retained, retracted. The 10,000-game run that reported +2.4250 sets/game, on exactly the deals the rev-2 run now re-plays. Kept rather than deleted so the retracted numbers stay readable, and used as the paired baseline that prices the defect. |
 | `foreign_award_journal.jsonl` | 1 | R2 of `prereg/rules_award_baseline.md`. Its **pre-registered verdict is unaffected** — the defect is common-mode across the correction-on and correction-off arms, and a paired difference cannot see an error identical in both halves of the pair. The *context* figures it reports beside that verdict (margin +2.544, set share 64.3%) are rev-1 absolutes and are superseded by the rev-2 head-to-head. |
 | `r6_screen_journal.jsonl` | 1 | R6, the contestation and silence screens. Same reasoning: every arm ran through the same bridge, so the arm-vs-baseline contrasts that carry the rejection stand. The baseline's absolute margin is a rev-1 number. |
 | `foreign_m2_journal.jsonl` | 1 | Same common-mode argument as R2. |

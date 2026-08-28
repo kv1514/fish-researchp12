@@ -73,6 +73,13 @@ declares first takes the set. Measured over 240 games on identical deals
 | both sides may (your dialect, played fairly) | **+2.375** sets/game |
 | only *your* side may (a host that never polls us) | **+1.575** sets/game |
 
+Those three absolutes were measured through bridge revision 1 (see *One number
+we took back* below), so read them as ±0.08. What the table rests on is the
+**gaps** between the arms, and those are unaffected — all three ran through
+the same bridge, so a defect common to all three cancels out of the
+comparison. The point stands at full strength: a host that never polls us
+costs us about 0.8 sets a game.
+
 So poll us:
 
 ```json
@@ -135,7 +142,7 @@ by both sides, seats rotated — under the standard misdeclaration rule.
 
 | against | result |
 |---|---|
-| **FishBot v0.7** (frozen `v07:r12=25…`, its own C++ engine, 4,000 games) | **+2.375** [+2.290, +2.460] sets/game, **63.2% of decided sets**, 80.7% of games won, zero substituted moves |
+| **FishBot v0.7** (frozen `v07:r12=25…`, its own C++ engine, 10,000 games) | **+2.347** [+2.293, +2.400] sets/game, **63.0% of decided sets**, 80.4% of games won, zero substituted moves |
 | this project's own v0.3 champion, 500 pairs | **+2.412** [+2.088, +2.736] sets/pair |
 
 The full method, the pre-registrations, and the results files behind these
@@ -143,8 +150,8 @@ are in `paper/fishbot_v06.pdf` and `prereg/`.
 
 Where the margin comes from is worth knowing before you run it, because it
 is not where people expect. The two engines find cards at similar rates —
-51.8% of asks hit against 48.2%. They differ on knowing when a half-suit is
-**finished**: this bot declares correctly 96.7% of the time against 78.9%.
+51.8% of asks hit against 48.1%. They differ on knowing when a half-suit is
+**finished**: this bot declares correctly 96.5% of the time against 78.9%.
 Card-reading is the visible skill; knowing when to stop reading is the one
 that scores.
 
@@ -152,7 +159,10 @@ that scores.
 
 An earlier version of this table said **+2.54 sets/game, 64.3%**, from a
 1,000-game run, and a 10,000-game run here reported +2.425. Those are
-withdrawn. Reading v0.7's C++ adversarially turned up a defect not in either
+withdrawn — the replacement re-plays the same 10,000 deals, so it is a
+like-for-like correction rather than a differently-powered second opinion.
+
+Reading v0.7's C++ adversarially turned up a defect not in either
 engine but in **our** bridge into his, and it ran in our favour: forced to
 declare, his own driver picks the first live half-suit the mover holds a card
 in (`engine/src/game.hpp:535`), and our bridge passed the first live
@@ -161,11 +171,11 @@ all six owners of a half-suit it held nothing of — a question his own driver
 never asks him, which he gets wrong nearly every time, and which under the
 opponent-award rule hands us the set.
 
-Priced paired on 4,000 deals replayed under both bridge revisions: worth
-**−0.0915** [−0.1076, −0.0754] sets/game to us. Real, about 4% of the margin,
+Priced paired on all 10,000 deals replayed under both bridge revisions: worth
+**−0.0784** [−0.0881, −0.0687] sets/game to us. Real, about 3% of the margin,
 and an order of magnitude smaller than the first estimate off 40 games. His
-declaration accuracy rises 76.0% → 78.9% under the repair; ours moves 96.9%
-→ 96.7%, which is the control. The table above is the repaired number, and
+declaration accuracy rises 76.2% → 78.9% under the repair; ours moves 96.7%
+→ 96.5%, which is the control. The table above is the repaired number, and
 `results/BRIDGE_REVISIONS.md` says which stored journal is which.
 
 We mention it because you are being asked to run this bot against your own,
