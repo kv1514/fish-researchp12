@@ -83,7 +83,10 @@ class OracleBot(FishBot4):
     that means neither thing.
     """
 
-    def __init__(self, reveal: float = 1.0, **kwargs):
+    #: Which side's cards `reveal` is drawn from. See __init__.
+    SIDES = ("all", "team", "opp")
+
+    def __init__(self, reveal: float = 1.0, side: str = "all", **kwargs):
         """``reveal`` is the fraction of the cards it cannot see that it is told.
 
         1.0 is omniscience, which turns out to be nearly the maximum possible
@@ -101,11 +104,31 @@ class OracleBot(FishBot4):
 
         Drawn per seat from that seat's own randomness, so two oracles on the
         same team do not share a lucky subset.
+
+        ``side`` restricts the pool the fraction is drawn from: "team" tells it
+        only where its TEAMMATES' cards are, "opp" only the opponents', "all"
+        (the default, and the historical behaviour) both. It exists because the
+        two are different problems and the project's error ledger says so:
+        0.1676 of our 0.1759 wrong declarations a game are allocation class --
+        our team held all six and named the wrong split -- against 0.0083
+        ownership errors. Knowing where teammates' cards are is the fix for the
+        first; knowing where opponents' are is the fix for the second, and
+        nothing had ever priced them apart.
+
+        NOT A CLEAN DECOMPOSITION, and saying so is the point. Telling a seat
+        every one of its teammates' cards also tells it, by elimination, that
+        the remaining cards are with opponents -- it just does not say which
+        opponent. So "team" and "opp" are two BOUNDS on two different
+        questions, not two halves that sum to omniscience, and any report of
+        them has to say that rather than let a reader add them up.
         """
         super().__init__(**kwargs)
         if not 0.0 <= reveal <= 1.0:
             raise ValueError(f"reveal must be in [0, 1], got {reveal}")
+        if side not in self.SIDES:
+            raise ValueError(f"side must be one of {self.SIDES}, got {side!r}")
         self.reveal = reveal
+        self.side = side
         self._owners: Optional[list[int]] = None
         self._revealed: Optional[set] = None
         #: Cards pinned by this agent rather than deduced. Reported so the
@@ -132,6 +155,12 @@ class OracleBot(FishBot4):
         """
         hidden = [c for c in range(len(self._owners))
                   if not self.bel.is_pinned(c)]
+        if self.side != "all":
+            from fish.cards import team_of
+            mine = team_of(self.player)
+            want = (self.side == "team")
+            hidden = [c for c in hidden
+                      if (team_of(self._owners[c]) == mine) == want]
         if self.reveal >= 1.0:
             self._revealed = set(hidden)
             return
