@@ -1532,6 +1532,20 @@ identical deal from the identical seats against the identical opponents and
 differ by one parameter. Table~\ref{tab:pairing} prices it on every multi-arm
 journal the repository holds (\texttt{scripts4/pairing\_value.py}).
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/pairing.pdf}
+\caption{What actually sizes a duplicate-deal run. \emph{Left:} the
+variance-reduction factor from pairing against the share of deals on which both
+arms produced an identical margin --- that is, on which the knob under test
+never changed a decision. The relationship is tight over more than two orders
+of magnitude. \emph{Right:} the same factor against the size of the effect
+being measured, which is the quantity everyone reaches for when planning a run
+and which does not determine the answer: effects below $0.15$ sets per pair
+span the entire range on their own. Same runs as Table~\ref{tab:pairing}.}
+\label{fig:pairing}
+\end{figure}
+
 \begin{table}[t]
 \centering
 \begin{tabular}{llrrr}

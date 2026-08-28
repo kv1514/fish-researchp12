@@ -388,6 +388,46 @@ def fig_gamma_split():
     plt.close(fig)
 
 
+def fig_pairing():
+    """Pairing's value is set by how often a knob fires, not by its size.
+
+    Left: variance-reduction factor against the share of deals on which the two
+    arms produced an identical margin -- i.e. the knob never changed a decision.
+    Right: the same factor against the size of the effect being measured, which
+    is what people reach for when sizing a run, and which carries nothing.
+    """
+    d = _load("pairing_value.json")
+    pts = []
+    for run in d["runs"]:
+        for name, r in run["pairs"].items():
+            pts.append((r["same_margin_share"], abs(r["effect"]),
+                        r["efficiency"]))
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.3, 2.4), sharey=True)
+    a1.plot([x for x, _, _ in pts], [e for _, _, e in pts], "o", ms=5,
+            color=BLUE, mec="none")
+    a1.set_xlabel("share of deals with an identical margin\n"
+                  "(the knob never fired)")
+    a1.set_ylabel("variance reduction\nfrom pairing", fontsize=8)
+    a1.set_yscale("log")
+    a1.set_yticks([1, 10, 100])
+    a1.set_yticklabels(["1x", "10x", "100x"])
+    top = max(pts, key=lambda q: q[2])
+    a1.annotate(f"{top[2]:.0f}x", (top[0], top[2]), textcoords="offset points",
+                xytext=(-6, -2), ha="right", fontsize=7.5, color=BLUE)
+
+    a2.plot([y for _, y, _ in pts], [e for _, _, e in pts], "o", ms=5,
+            color=LGRAY, mec="none")
+    a2.set_xlabel("size of the effect being measured\n(sets per pair)")
+    small = [e for _, y, e in pts if y < 0.15]
+    a2.annotate(f"effects under 0.15 span\n{min(small):.0f}x to {max(small):.0f}x "
+                "on their own:\neffect size does not size the run",
+                (0.95, 0.92), xycoords="axes fraction", ha="right", va="top",
+                fontsize=7, color=GRAY)
+    fig.tight_layout()
+    fig.savefig(FIGS / "pairing.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     fig_effects()
     fig_ladder()
@@ -395,6 +435,7 @@ if __name__ == "__main__":
     fig_mediator()
     fig_paths()
     fig_ceiling()
+    fig_pairing()
     fig_gamma_split()
     for f in sorted(FIGS.glob("*.pdf")):
         print(f"{f.relative_to(ROOT)}  {f.stat().st_size:,} bytes")
