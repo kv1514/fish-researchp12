@@ -90,3 +90,29 @@ convention direction: if reading the coincidence is worth nothing, then buying
 a stronger signal has to pay for itself entirely out of the difference between
 40.1% and 35.3%, and `prereg/convention_duel.md` has already measured what
 buying more than that costs.
+
+---
+
+# INTERIM, recorded 2026-08-29: straddle, extending as registered
+
+1,200 duplicate-deal pairs. Y minus X, positive = the free-read side is
+stronger:
+
+**+0.055 sets/game [-0.140, +0.250]** (457W / 270T / 473L)
+
+The point estimate just clears the +0.05 bar and the interval straddles it, in
+both directions: it contains zero and it contains effects twice the bar. The
+registration anticipated exactly this and fixed what to do:
+
+> **n_pairs:** 1,200 to start. If the interval straddles the bar, extend to
+> 3,000 rather than reading a straddle as a result.
+
+Extending to 3,000, same base seed --- so the 1,200 is a prefix of the larger
+run and is superseded by it rather than pooled with it. **This interim is not a
+result and licenses nothing.** It is recorded only so that the extension cannot
+later look like a decision made after seeing which way the numbers went.
+
+The one thing it does establish, and the reason it was worth running before the
+belief measurement: at `beta = 0.23` with the encoder deleted, the free-read
+configuration is **not harmful**. The upper bound on the champion's side is
++0.140 sets, against the +1.467 that the mis-priced encoder cost.
