@@ -85,7 +85,7 @@ class Posterior:
     share the same DP tables and the same batch of weighted draws.
     """
 
-    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma", "gamma_team", "convention_beta", "convention_q", "convention_aim",
+    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma", "gamma_team", "convention_beta", "convention_q", "convention_aim", "convention_book",
                  "stats", "n", "_sys", "_card_group", "_free", "_marg",
                  "_worlds", "_batch", "_sampler", "_exact_ok", "_idx",
                  "_free_pos", "depth_mode", "count_mode", "opp_lambda",
@@ -101,6 +101,7 @@ class Posterior:
                  convention_beta: float = 0.0,
                  convention_q: float = 0.0,
                  convention_aim: bool = False,
+                 convention_book: str = "depth",
                  stats: Optional[PosteriorStats] = None):
         self.bel = belief
         self.obs = obs
@@ -112,6 +113,7 @@ class Posterior:
         self.convention_beta = convention_beta if obs is not None else 0.0
         self.convention_q = convention_q if obs is not None else 0.0
         self.convention_aim = bool(convention_aim)
+        self.convention_book = convention_book
         # Like gamma, the silence prior conditions on behaviour, so it needs
         # the observation; without one it is inert.
         self.silence_delta = float(silence_delta) if obs is not None else 1.0
@@ -201,6 +203,7 @@ class Posterior:
                                        convention_beta=self.convention_beta,
                                        convention_q=self.convention_q,
                                        convention_aim=self.convention_aim,
+                                       convention_book=self.convention_book,
                                        order=free)
         # The exact DP answers the uniform-target question only. An opponent
         # model changes the target, so it forces the sampling path even when no

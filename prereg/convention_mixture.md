@@ -110,3 +110,75 @@ at modelling `u` with the objective rather than with a constant.
 Nothing. Both decoders are scored off-policy, with the decoder off during play,
 so this measures whether the message decodes and not whether a team running both
 sides plays better. A pass licenses a duel, registered separately.
+
+---
+
+# OUTCOME, recorded 2026-08-29
+
+**Refuted on its own withdrawal condition.** Same instrument, same transcripts,
+same decisions as the flat arms beside it.
+
+> If the mixture's NLL is worse than the flat weight's at every `q`, the extra
+> structure is not earning its inner-loop cost and the flat weight stands.
+
+Teammate-pool paired NLL against the shared baseline:
+
+| q | gate 0.02 | gate 0.05 | gate 0.10 |
+|---|---|---|---|
+| 0.4 | +0.0065 | -0.0128 | -0.0147 |
+| 0.5 | +0.0227 | -0.0009 | -0.0020 |
+| 0.6 | +0.0439 | +0.0158 | +0.0155 |
+| 0.7 | +0.0725 | +0.0391 | +0.0397 |
+| 0.8 | +0.1141 | +0.0739 | +0.0756 |
+
+Best flat arm at the same gates: **-0.0113, -0.0183, -0.0317**. The mixture is
+beaten everywhere, and its top-1 is significantly negative at **every** `q` at
+**every** gate, so no arm clears gate 2 either. Both conditions fail.
+
+Note also that the optimum sits at the **bottom** of the grid at all three
+gates, which trips the third withdrawal condition: `q` is not behaving as the
+probability it is defined to be.
+
+## The registration named the reason in advance
+
+> If the mixture's top-1 also decays monotonically, the `1/k` explanation is
+> wrong and the damage is coming from somewhere else --- most plausibly that `u`
+> is not uniform, because the unencoded choice is made by an expected-value
+> objective that prefers particular cards.
+
+It does decay monotonically, and that is the live explanation. The mixture's
+`(1-q)/k` term applies to **every** ask, matched or not. It is larger for
+smaller `k`, so it pushes every teammate who has ever asked towards deeper
+holdings --- a large, systematic bias that is only justified if the unencoded
+card choice really is uniform over the legal cards. It is not. It is the ask
+objective's choice, and that objective prefers particular cards for reasons the
+receiver could in principle model and does not.
+
+**So the flat weight is not "wrong and lucky". It is wrong in a way that
+matters less than the mixture's own modelling error.** Dropping the normaliser
+throws away information about `k`; supplying it under a false `u` injects a
+bias into every ask instead of only the encoded ones, and the second is worse.
+
+## The mechanistic prediction: 2 of 3
+
+The registered criterion was that the mixture's top-1 spread be less than half
+the flat weight's over `beta <= 1.2`.
+
+| gate | flat spread | mixture spread | half of flat | |
+|---|---|---|---|---|
+| 0.02 | 0.0095 | 0.0085 | 0.0048 | FAILS |
+| 0.05 | 0.0171 | 0.0043 | 0.0086 | holds |
+| 0.10 | 0.0077 | 0.0033 | 0.0039 | holds |
+
+Directionally right at all three --- the mixture's top-1 is always flatter in its
+parameter, which is what having no strength parameter to grow should look like.
+It clears the pre-registered threshold at two gates of three. Reported as
+partial, not as confirmation.
+
+## What is kept
+
+The code, behind `convention_q = 0`, inert and tested, and the finding: **the
+correct likelihood under a wrong model of the sender is worse than a heuristic
+that models the sender not at all.** The next version of this idea would have to
+model `u` with the ask objective itself, which is the expensive route this
+project has repeatedly declined --- a nested evaluation per candidate world.

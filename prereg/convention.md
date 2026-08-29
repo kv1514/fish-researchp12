@@ -276,3 +276,62 @@ a window to remove, so no parameter is added.
 All three were found by mechanical checks run *before* any outcome was read.
 None would have been visible in the primary outcome: each one produces a
 smaller, quieter, entirely plausible number.
+
+---
+
+# OUTCOME, recorded 2026-08-29
+
+**The channel is real and the depth code book clears both gates at every sender
+gate tested.** `results/convention_posterior.json`, 40 games and ~1,040 scored
+decisions per sender setting, paired by decision against a shared inert
+baseline, teammate pool.
+
+## The validity conditions
+
+| | 0.02 | 0.05 | 0.10 | floor | |
+|---|---|---|---|---|---|
+| V1 message on the wire | 52.9% | 62.9% | 67.2% | 25% | PASS |
+| V2 **as registered** | 8.3% | 8.0% | 9.1% | 20% | **FAIL** |
+| V2' as amended | 31.5% | 29.8% | 32.3% | 20% | PASS |
+| V3 the term is live | 92.2% | 91.8% | 91.4% | 50% | PASS |
+
+V2 fails as written and passes as amended; the amendment, its justification and
+the fact that it was made after watching the original fail are recorded above in
+full. Every number below therefore rests on an amended validity condition, and
+is labelled as such wherever it is cited.
+
+## The result
+
+| sender gate | best licensing arm | teammate NLL | teammate top-1 |
+|---|---|---|---|
+| 0.02 | flat 0.5 | **-0.0113** [-0.0149, -0.0077] | -0.0029 [-0.0096, +0.0039] |
+| 0.05 | flat 0.5 | **-0.0183** [-0.0221, -0.0145] | -0.0026 [-0.0092, +0.0039] |
+| 0.10 | flat 0.8 | **-0.0317** [-0.0383, -0.0251] | -0.0049 [-0.0110, +0.0012] |
+
+Three arms clear both gates at every setting. For scale, the split-gamma study's
+best *passing* cell was -0.0121 and was a known result about `gamma`
+rediscovered on a new pool; this is a channel that did not previously exist.
+
+**The effect is monotone in how much the sender will pay to speak** --- 0.0040,
+0.0090, 0.0175 mean probability per encoded ask, for -0.0113, -0.0183, -0.0317
+nats. That is the shape the mechanism predicts and it was not fitted.
+
+## The prediction about where beta would land was wrong
+
+Registered: "a correctly specified decoder should optimise near **beta ~= 0.8**"
+from the log-odds of the carry rate against the 1/3.57 chance rate. Measured,
+the NLL optimum sits at 0.5 at the two cheaper gates and at 0.8 only at the
+dearest, and top-1 degrades monotonically in `beta` throughout. The decoder
+should be believed *less* than the carry rate implies, because the weight is
+applied to every recorded ask while the carry rate is measured only over asks.
+
+## What this does not say
+
+It is scored **off-policy**: the decoder is off during play, so every arm sees
+the same positions. It measures whether the message decodes into a better
+belief, not whether a team running both sides plays better --- and the sender is
+paying real probability, up to 0.0175 an ask at the best gate, which a belief
+instrument cannot see. A duel is registered separately. Nothing ships.
+
+The engine as deployed is unchanged: `V06_DEPLOYED` carries neither parameter,
+and `tests4/test_convention.py` asserts bit-identity at every default.

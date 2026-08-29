@@ -70,7 +70,8 @@ class OpponentModel:
 
     __slots__ = ("weight", "base", "n_slots", "set_cards", "opp_lambda",
                  "my_team", "tilt", "depth_table", "convention",
-                 "convention_beta", "convention_q", "convention_aim")
+                 "convention_beta", "convention_q", "convention_aim",
+                 "convention_book")
 
     #: Cap on a single step's twist factor. The depth-0 term of the likelihood
     #: is ``log(1e-9)``, so the 0 -> 1 ratio is ``1e9 ** w`` and would otherwise
@@ -88,7 +89,8 @@ class OpponentModel:
                  depth_table=None, convention=None,
                  convention_beta: float = 0.0,
                  convention_q: float = 0.0,
-                 convention_aim: bool = False):
+                 convention_aim: bool = False,
+                 convention_book: str = "depth"):
         self.weight = list(weight)
         self.base = list(base)
         #: (asker, half_suit, card_asked, const_mask, free_cards) per ask by
@@ -107,6 +109,9 @@ class OpponentModel:
         #: rather than at the one asked in. See
         #: fish4/convention.py: 4.03x the entropy, same cost.
         self.convention_aim = convention_aim
+        #: 'depth' | 'locate'. See fish4/convention.py: a count
+        #: constrains the joint, only a location pins a card.
+        self.convention_book = convention_book
         self.n_slots = len(self.weight)
         #: Per-slot, per-sampled-depth log terms, already scaled. Present only
         #: for the at-ask-time model, where each ask carries its own public
@@ -187,15 +192,29 @@ class OpponentModel:
         if not conv or not (self.convention_beta or q):
             return 0.0
         from .convention import (depth_in, encoded_position, is_encoded,
-                                 legal_cards, mixture_logp)
+                                 legal_cards, locate_payload,
+                                 mixture_logp)
         total = 0.0
         for (asker, hs, card, const_mask, free_cards,
-             g_hs, g_const, g_free) in conv:
+             g_hs, g_const, g_free, targets) in conv:
             hand = const_mask
             for c in free_cards:
                 if deal.get(c) == asker:
                     hand |= 1 << c
-            if self.convention_aim and g_hs is not None:
+            if self.convention_book == "locate" and targets:
+                free = legal_cards(hand, hs)
+                hand_all = const_mask
+                for c in free_cards:
+                    if deal.get(c) == asker:
+                        hand_all |= 1 << c
+                gh = g_const
+                for c in g_free:
+                    if deal.get(c) == asker:
+                        gh |= 1 << c
+                tg = targets[:len(free)]
+                match = bool(free) and card == free[
+                    locate_payload(hand_all | gh, tg) % len(free)]
+            elif self.convention_aim and g_hs is not None:
                 gh = g_const
                 for c in g_free:
                     if deal.get(c) == asker:

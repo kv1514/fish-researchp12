@@ -52,7 +52,12 @@ RULES = RuleConfig(wrong_distribution_outcome="opponent")
 #: book before play; a mismatched pair is not a configuration anyone would run,
 #: and measured directly it is simply harmful in both directions (+0.094 and
 #: +0.132 nats), which is what a code book being a shared agreement means.
-SENDERS = [(0.02, False), (0.05, False), (0.10, False), (0.05, True)]
+#: (cost gate, code book). "depth" is the shipped book, "aimed" carries the
+#: same count about a half-suit chosen for entropy, "locate" carries the index
+#: of the first target card held -- j negatives and a positive, j + 1 cards
+#: pinned rather than counted. prereg/convention_locate.md.
+SENDERS = [(0.02, "depth"), (0.05, "depth"), (0.10, "depth"),
+           (0.05, "aimed"), (0.02, "locate"), (0.05, "locate")]
 
 #: Receiver arms, all paired against the shared inert baseline inside each
 #: sender setting. Two decoders are scored on the SAME positions in the same
@@ -66,13 +71,19 @@ SENDERS = [(0.02, False), (0.05, False), (0.10, False), (0.05, True)]
 #:         prereg/convention_mixture.md, and the reason it exists, is that the
 #:         flat weight's missing 1/k over-credits matches in low-k -- deep --
 #:         worlds, which predicts its monotone top-1 decay.
-def arms_for(aim: bool) -> list[tuple[str, dict]]:
-    extra = {"convention_aim": True} if aim else {}
-    return ([("base", {})]
+def arms_for(book: str) -> list[tuple[str, dict]]:
+    extra = ({"convention_aim": True} if book == "aimed"
+             else {"convention_book": "locate"} if book == "locate" else {})
+    arms = ([("base", {})]
             + [(f"flat {b}", dict(convention_beta=b, **extra))
-               for b in (0.25, 0.5, 0.8, 1.2, 2.0)]
-            + [(f"mix {q}", dict(convention_q=q, **extra))
-               for q in (0.4, 0.5, 0.6, 0.7, 0.8)])
+               for b in (0.25, 0.5, 0.8, 1.2, 2.0)])
+    # The mixture is not carried on the locating book. It was refuted on its
+    # own withdrawal condition -- worse NLL at every q -- and re-running a
+    # refuted parameterisation on a new code book would be fishing.
+    if book != "locate":
+        arms += [(f"mix {q}", dict(convention_q=q, **extra))
+                 for q in (0.4, 0.5, 0.6, 0.7, 0.8)]
+    return arms
 
 
 BASE = "base"
@@ -80,12 +91,29 @@ BASE = "base"
 MIN_GAMES_TO_WRITE = 20
 
 
-def main(n_games: int = 30, stride: int = 4, out: str | None = None) -> int:
+def main(n_games: int = 30, stride: int = 4, out: str | None = None,
+         only: str | None = None, seed_base: int = 560_000) -> int:
+    """``only`` selects a subset of SENDERS by code book, comma separated.
+
+    Each sender setting needs its own transcripts and they are independent, so
+    a book added later can be measured without regenerating the ones already
+    scored. `merge_into` folds the result back into one file.
+    """
+    if only:
+        want = set(only.split(","))
+        senders = [s for s in SENDERS
+                   if s[1] in want or f"{s[0]}:{s[1]}" in want]
+        if not senders:
+            raise SystemExit(f"no sender setting matches {only!r}; "
+                             f"have {[f'{a}:{b}' for a, b in SENDERS]}")
+    else:
+        senders = SENDERS
     results = {}
     t0 = time.perf_counter()
 
-    for mc, aim in SENDERS:
-        ARMS = arms_for(aim)
+    for mc, book in senders:
+        ARMS = arms_for(book)
+        aim = book == "aimed"
         team = {k: Pool() for k, _ in ARMS}
         opp = {k: Pool() for k, _ in ARMS}
         decisions = 0
@@ -98,6 +126,8 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None) -> int:
         spec = dict(V06_DEPLOYED[1])
         spec["convention_max_cost"] = mc
         spec["convention_aim"] = aim
+        spec["convention_book"] = ("locate" if book == "locate"
+                                   else "depth")
         # The decoder is OFF while the games are played. That is what makes the
         # receiver arms comparable: they all score the same positions.
         spec["convention_beta"] = 0.0
@@ -105,9 +135,9 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None) -> int:
         for g in range(n_games):
             agents = [make_agent(("kraken", dict(spec)))
                       for _ in range(NUM_PLAYERS)]
-            st = GameState.deal(RULES, seed=560_000 + g)
+            st = GameState.deal(RULES, seed=seed_base + g)
             for p, a in enumerate(agents):
-                a.begin_game(p, RULES, 570_000 + g * 13 + p)
+                a.begin_game(p, RULES, seed_base + 10_000 + g * 13 + p)
             bels = [BeliefState(RULES, observer=p) for p in range(NUM_PLAYERS)]
             step = 0
             while not st.is_terminal and step < 400:
@@ -159,7 +189,7 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None) -> int:
                     # using -- scoring an aimed sender against the unaimed book
                     # would report a carry rate for a message nobody sent.
                     our_asks += 1
-                    if _carried(st, bels[mover], obs, mover, act, aim):
+                    if _carried(st, bels[mover], obs, mover, act, book):
                         carried += 1
                 st.apply(mover, act)
                 step += 1
@@ -178,7 +208,7 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None) -> int:
                 r["paired_opp"] = paired(opp[label], opp[BASE])
             rows.append(r)
 
-        results[f"{mc}{' aimed' if aim else ''}"] = {
+        results[f"{mc} {book}"] = {
             "rows": rows, "decisions": decisions,
             "validity": {
                 "v1_our_asks": our_asks, "v1_carried": carried,
@@ -194,11 +224,11 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None) -> int:
                 "v3_rate": v3_moved / v3_scored if v3_scored else 0.0,
             },
         }
-        key = f"{mc}{' aimed' if aim else ''}"
+        key = f"{mc} {book}"
         _report(key, results[key])
 
     payload = {"results": results, "n_games": n_games, "stride": stride,
-               "n_draws": N_DRAWS, "senders": SENDERS,
+               "n_draws": N_DRAWS, "senders": senders, "seed_base": seed_base,
                "spec": V06_DEPLOYED[1]}
     if out:
         path = Path(out)
@@ -213,14 +243,18 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None) -> int:
     return 0
 
 
-def _carried(st, bel, obs, mover, act, aim: bool) -> bool:
-    """Did this ask name the card the sender's own code book calls for?"""
+def _carried(st, bel, obs, mover, act, book: str) -> bool:
+    """Did this ask name the card the sender's OWN code book calls for?
+
+    Scoring an aimed or locating sender against the depth book would report a
+    carry rate for a message nobody sent.
+    """
     from fish.cards import half_suit_cards
-    from fish4.convention import encoded_position, is_encoded
+    from fish4.convention import (encoded_position, is_encoded, locate_payload)
 
     hs = half_suit_of(act.card)
     hand = st.hands[mover]
-    if not aim:
+    if book == "depth":
         return is_encoded(hand, hs, act.card)
     free = [c for c in half_suit_cards(hs) if not (hand >> c & 1)]
     if not free:
@@ -230,6 +264,10 @@ def _carried(st, bel, obs, mover, act, aim: bool) -> bool:
         u = sum(1 for c in half_suit_cards(h) if bel.public_loc[c] is None)
         if u > best_u:
             best_u, g_hs = u, h
+    if book == "locate":
+        tg = [c for c in half_suit_cards(g_hs)
+              if bel.public_loc[c] is None][:len(free)]
+        return act.card == free[locate_payload(hand, tg) % len(free)]
     payload = sum(1 for c in half_suit_cards(g_hs) if hand >> c & 1)
     return act.card == free[encoded_position(payload, len(free))]
 
@@ -265,6 +303,8 @@ def _v2(bel, obs, spec, decisions, acc):
     om, _ = build_opponent(bel, obs, spec["opponent_gamma"],
                            convention_beta=1.0,
                            convention_aim=spec.get("convention_aim", False),
+                           convention_book=spec.get("convention_book",
+                                                    "depth"),
                            order=free)
     if om is None or not om.convention:
         return
@@ -278,7 +318,7 @@ def _v2(bel, obs, spec, decisions, acc):
     acc["decisions"] += 1
     any_live = False
     for (asker, hs, card, const_mask, free_cards,
-         g_hs, g_const, g_free) in om.convention:
+         g_hs, g_const, g_free, _targets) in om.convention:
         lo = hs * 6
         by_depth: dict[int, set] = {}
         holds = set()
@@ -360,8 +400,35 @@ def _report(mc, res):
               f"{'PREDICTION HOLDS' if sm < sf / 2 else 'PREDICTION FAILS'}")
 
 
+def merge_into(base: str, extra: str) -> None:
+    """Fold a partial run's sender settings into a full results file.
+
+    Sender settings are independent -- each has its own transcripts and its own
+    baseline -- so merging them is concatenation, not pooling. The guard is
+    that n_games, stride and n_draws must match, since a setting scored at a
+    different size is not comparable to the ones beside it.
+    """
+    b = json.loads(Path(base).read_text())
+    e = json.loads(Path(extra).read_text())
+    for k in ("n_games", "stride", "n_draws", "seed_base"):
+        if b.get(k) != e.get(k):
+            raise SystemExit(f"refusing to merge: {k} differs "
+                             f"({b[k]} vs {e[k]})")
+    b["results"].update(e["results"])
+    b["senders"] = [list(x) for x in b["senders"]] + \
+        [list(x) for x in e["senders"] if list(x) not in
+         [list(y) for y in b["senders"]]]
+    Path(base).write_text(json.dumps(b, indent=2))
+    print(f"merged {sorted(e['results'])} into {base}")
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
+    if a and a[0] == "merge":
+        merge_into(a[1], a[2])
+        raise SystemExit(0)
     raise SystemExit(main(int(a[0]) if a else 30,
                           int(a[1]) if len(a) > 1 else 4,
-                          a[2] if len(a) > 2 else None))
+                          a[2] if len(a) > 2 else None,
+                          a[3] if len(a) > 3 else None,
+                          int(a[4]) if len(a) > 4 else 560_000))

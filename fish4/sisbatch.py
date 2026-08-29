@@ -256,8 +256,9 @@ def draw_batch(sampler, rng, n: int):
         if col_of is None:
             col_of = {c: j for j, c in enumerate(sampler.order)}
         q = getattr(om, "convention_q", 0.0) or 0.0
+        book = getattr(om, "convention_book", "depth")
         for (asker, hs, card, const_mask, free_cards,
-             g_hs, g_const, g_free) in conv:
+             g_hs, g_const, g_free, targets) in conv:
             lo = hs * 6
             # Cards publicly known to have been with this asker AT THIS ASK
             # are the same in every world; see the `where` ledger in
@@ -270,7 +271,22 @@ def draw_batch(sampler, rng, n: int):
                     continue          # not free in this decision; contributes
                 held |= ((picks[:, j] == asker).astype(np.int64)
                          << (c - lo))
-            if aim and g_hs is not None:
+            if book == "locate" and targets:
+                # The locating book: j is the index in U of the first target
+                # card this world gives the asker. One pass over at most six
+                # columns -- the same shape of work as a depth, except that it
+                # names cards instead of counting them.
+                k = 6 - _POPCOUNT6[held]
+                tg = list(targets)[:6]
+                j = np.full(n, max(len(tg) - 1, 0), dtype=np.int64)
+                found = np.zeros(n, dtype=bool)
+                for idx, c in enumerate(tg):
+                    w = _holds(picks, col_of, c, asker, const_mask, g_const)
+                    j = np.where((~found) & w, idx, j)
+                    found |= w
+                pos = np.where(k > 0, j % np.maximum(k, 1), 0)
+                match = _pos_match(held, pos, card - lo)
+            elif aim and g_hs is not None:
                 # The payload is the asker's depth in the TARGET half-suit,
                 # reconstructed the same way and in the same space.
                 glo = g_hs * 6
@@ -295,6 +311,35 @@ def draw_batch(sampler, rng, n: int):
             else:
                 logl += om.convention_beta * match
     return picks, logq, logl, alive
+
+
+def _holds(picks, col_of, c, asker, const_mask, g_const):
+    """Does the asker hold card ``c``, per drawn world?
+
+    Constant when the card was fixed at snapshot time -- publicly placed, or
+    pinned by the propagator -- and read off the draw otherwise. The two
+    const masks cover the two half-suits an ask can talk about.
+    """
+    if (const_mask >> c) & 1 or (g_const is not None and (g_const >> c) & 1):
+        return np.ones(picks.shape[0], dtype=bool)
+    j = col_of.get(c)
+    if j is None:
+        return np.zeros(picks.shape[0], dtype=bool)
+    return picks[:, j] == asker
+
+
+#: ``_FREE_AT[mask][p]`` = position of the p-th card this holding does NOT
+#: have, so a payload becomes a card with one gather, exactly as the depth
+#: books do.
+_FREE_AT = np.array(
+    [[[i for i in range(6) if not (m >> i & 1)][p]
+      if p < 6 - bin(m).count("1") else -1
+      for p in range(6)] for m in range(64)], dtype=np.int64)
+
+
+def _pos_match(held, pos, want):
+    """Is the ``pos``-th free card of ``held`` the one at index ``want``?"""
+    return _FREE_AT[held, np.clip(pos, 0, 5)] == want
 
 
 #: Population count of every six-bit holding. A table rather than SWAR

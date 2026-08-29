@@ -234,7 +234,7 @@ def test_the_two_implementations_agree_world_by_world():
             # the vectorised form, one holding mask per ask
             fast = 0.0
             for (asker, hs, card, const_mask, free_cards,
-                 _g, _gc, _gf) in om.convention:
+                 _g, _gc, _gf, _t) in om.convention:
                 lo = hs * 6
                 held = (const_mask >> lo) & 0x3F
                 for c in free_cards:
@@ -344,7 +344,7 @@ def test_the_mixture_batch_and_scalar_paths_agree():
             slow = om.log_convention(deal)
             fast = 0.0
             for (asker, hs, card, const_mask, free_cards,
-                 _g, _gc, _gf) in om.convention:
+                 _g, _gc, _gf, _t) in om.convention:
                 lo = hs * 6
                 held = (const_mask >> lo) & 0x3F
                 for c in free_cards:
@@ -447,7 +447,7 @@ def test_the_aimed_batch_and_scalar_paths_agree():
             slow = om.log_convention(deal)
             fast = 0.0
             for (asker, hs, card, const_mask, free_cards,
-                 g_hs, g_const, g_free) in om.convention:
+                 g_hs, g_const, g_free, _t) in om.convention:
                 lo, glo = hs * 6, (g_hs or 0) * 6
                 held = (const_mask >> lo) & 0x3F
                 for c in free_cards:

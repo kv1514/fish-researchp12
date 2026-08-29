@@ -125,3 +125,113 @@ a method that is *missing*.
 * **A per-seat opponent exponent.** Fitted on v0.7 and validated on v0.7 is
   circular, and this project already has one case where a gain measured that way
   evaporated against a third engine.
+
+---
+
+# UPDATE, 2026-08-29: the channel is real, and three code books have been run
+
+The channel direction is no longer speculative. It is built, tested, and
+measured, and the results split cleanly into one thing that works, one thing
+that was refuted by its own prediction, and one negative that taught more than
+either.
+
+## What is now in the engine, all inert by default
+
+`fish4/convention.py` and a term in `sisbatch.draw_batch`: an encoder that
+names the agreed card when a cost gate allows, and a decoder that reweights
+sampled worlds by whether they would have named it. The half-suit stays
+whatever the objective chose, so only the one degree of freedom the engine was
+never using moves.
+
+## The depth book works
+
+At sender gate 0.02, 40 games, 1,037 scored decisions, paired by decision:
+
+| beta | teammate NLL | teammate top-1 |
+|---|---|---|
+| 0.25 | **-0.0074** [-0.0092, -0.0057] | -0.0017 [-0.0070, +0.0036] |
+| 0.50 | **-0.0113** [-0.0149, -0.0077] | -0.0029 [-0.0096, +0.0039] |
+| 0.80 | **-0.0105** [-0.0165, -0.0045] | -0.0048 [-0.0124, +0.0028] |
+
+Three arms clear both pre-registered gates. For scale, the split-gamma study's
+best *passing* cell was -0.0121 on NLL and that was a known result about gamma
+rediscovered; this is a new channel.
+
+## The mixture was refuted by its own pre-registered alternative
+
+`prereg/convention_mixture.md` argued the flat weight is mis-specified: it
+ignores `k`, the number of cards the asker could legally have named, so it
+over-credits matches in low-`k` (deep) worlds. The correct likelihood is
+`q*1[match] + (1-q)/k` with `q` the measured carry rate. It is worse at every
+`q` (+0.0065 to +0.1141 nats) with top-1 significantly negative throughout.
+
+The registration named this outcome in advance:
+
+> If the mixture's top-1 also decays monotonically, the `1/k` explanation is
+> wrong ... most plausibly that `u` is not uniform, because the unencoded
+> choice is made by an expected-value objective that prefers particular cards.
+
+That is the live explanation. The `(1-q)/k` term applies to **every** ask,
+matched or not, and pushes every teammate who has ever asked towards deep
+holdings — a large systematic bias, justified only if the unencoded choice
+really were uniform. It is not; it is the objective's.
+
+## RETRACTED: "aiming failed"
+
+**An earlier version of this section said aiming was neutral and built a theory
+on it. That reading was wrong and is retracted here rather than quietly
+edited.** It came from a 70-decision probe using the mixture at `q = 0.6` --- an
+arm that was itself later refuted --- with an interval of +-0.0652, which covers
+every effect since measured. A null from an interval that wide is not a null.
+
+The theory built on it, that the aimed book trades a locating signal for a
+counting one, was a rationalisation of an underpowered zero. It is not
+supported.
+
+## Aiming is the largest result in this direction
+
+Sender and receiver both aimed, 40 games, 1,076 scored decisions, paired:
+
+| arm | teammate NLL | teammate top-1 |
+|---|---|---|
+| flat 0.5 | -0.0628 [-0.0701, -0.0555] | **+0.0320** [+0.0236, +0.0403] |
+| flat 0.8 | **-0.0712** [-0.0803, -0.0621] | **+0.0351** [+0.0258, +0.0444] |
+| flat 1.2 | -0.0676 [-0.0789, -0.0564] | **+0.0375** [+0.0274, +0.0476] |
+
+Every arm clears both gates, including the mixture arms that fail everywhere
+else. And **top-1 improves significantly** --- which nothing in this project has
+managed before. The split gamma, the at-ask covariate, the flat unaimed book:
+every previous belief improvement bought calibration and paid for it in the
+argmax. This one buys both.
+
+The prediction that motivated it was therefore right: the channel had been
+pointed at the half-suit the receiver already knew most about (0.2124 nats of
+entropy, already certain 72.2% of the time), and pointing it at the
+most-unlocated one (0.8556 nats, certain 9.7%) is worth 4.03x the entropy at
+identical cost.
+
+### Two things this is not
+
+**It is not pre-registered.** The aimed arm was added to the instrument
+mid-stream; `prereg/convention.md` registers the depth book only. This is an
+**exploratory** result and needs a pre-registered replication on fresh seeds
+before it licenses anything. `prereg/convention_aimed.md`.
+
+**Its magnitude is not directly comparable to the unaimed arms.** The aimed
+sender produces different transcripts, and their baseline is worse (NLL 1.3995
+against 1.3706), so there is more room to improve. The paired deltas are valid
+within their own transcripts; the ratio between books is not a clean 2.2x.
+
+## Four defects, and the pattern in them
+
+1. the decoder was wired into a sampler path no decision takes
+2. the encoder could name an out-of-cards target — `IllegalAction`
+3. the decoder read the initial-deal hand, not the hand held at the ask
+4. cards the propagator had *deduced* were dropped from the reconstruction
+
+Every one produces a smaller, quieter, entirely plausible number rather than a
+crash, and #1 in particular reported *bit-identical to the incumbent on every
+seed* — a dead term wearing the exact costume of a measured null, for the second
+time in this project. The lesson is not "test more". It is that **a null is only
+believable from an instrument that has been shown to be capable of a non-null**,
+which is why V3 exists and why it is checked inside the run rather than trusted.

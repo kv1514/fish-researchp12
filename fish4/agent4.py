@@ -75,6 +75,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  convention_beta: float = 0.0,
                  convention_q: float = 0.0,
                  convention_aim: bool = False,
+                 convention_book: str = "depth",
                  convention_max_cost: float = 0.0,
                  depth_mode: str = "initial",
                  count_mode: str = "linear",
@@ -193,6 +194,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.convention_beta = convention_beta
         self.convention_q = convention_q
         self.convention_aim = bool(convention_aim)
+        self.convention_book = convention_book
         #: Encoder gate: the most probability of success this seat
         #: will give up to send one. At 0 it never encodes, so the
         #: two halves are independently ablatable and the pair can
@@ -317,6 +319,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                          convention_beta=self.convention_beta,
                          convention_q=self.convention_q,
                          convention_aim=self.convention_aim,
+                         convention_book=self.convention_book,
                          depth_mode=self.depth_mode,
                          count_mode=self.count_mode,
                          opp_lambda=self.opp_lambda,
@@ -547,7 +550,25 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             # seat would price the channel against a best-case ask that is not
             # available, understating the cost of speaking.
             opps = sorted({a.target for a in asks})
-            if self.convention_aim:
+            if self.convention_book == "locate":
+                # The locating book: name the card whose position tells a
+                # partner the index of the first unlocated target card we hold.
+                # They learn j negatives and one positive -- j + 1 cards
+                # located -- from an ask that was happening anyway.
+                from .convention import (half_suit_cards, legal_cards,
+                                         locate_payload)
+                best_u, g_hs = -1, 0
+                for h in range(len(obs.set_winner)):
+                    u = sum(1 for c in half_suit_cards(h)
+                            if self.bel.public_loc[c] is None)
+                    if u > best_u:
+                        best_u, g_hs = u, h
+                cards = legal_cards(hand, hs)
+                tg = [c for c in half_suit_cards(g_hs)
+                      if self.bel.public_loc[c] is None][:len(cards)]
+                enc = (cards[locate_payload(hand, tg) % len(cards)]
+                       if cards else None)
+            elif self.convention_aim:
                 # Aim at the most-unlocated half-suit rather than at the one
                 # being asked in. The receiver reconstructs the same target
                 # from the same public record, snapshotted at this ask -- see

@@ -214,7 +214,8 @@ def build(bel, obs, gamma: float, include_self: bool = False,
           opp_lambda: float = 0.0, order=None,
           gamma_schedule: float = 0.0, sis_tilt: float = 0.0,
           gamma_team: float | None = None, convention_beta: float = 0.0,
-          convention_q: float = 0.0, convention_aim: bool = False):
+          convention_q: float = 0.0, convention_aim: bool = False,
+          convention_book: str = "depth"):
     """Build an ``(OpponentModel, card_slot)`` pair, or ``(None, None)``.
 
     ``card_slot`` maps ``(player, card)`` to the model slot for that player and
@@ -367,7 +368,8 @@ def build(bel, obs, gamma: float, include_self: bool = False,
             # the end. See fish4/convention.py.
             g_hs = g_const = None
             g_free: tuple = ()
-            if convention_aim:
+            targets: tuple = ()
+            if convention_aim or convention_book == "locate":
                 best, g_hs = -1, 0
                 for h in range(n_hs):
                     u = sum(1 for c in range(h * 6, h * 6 + 6)
@@ -375,6 +377,12 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                     if u > best:
                         best, g_hs = u, h
                 g_const, g_free = _snapshot(bel, where, ev.asker, g_hs * 6)
+                if convention_book == "locate":
+                    # U: the unlocated cards of the target half-suit, in index
+                    # order, AS OF THIS ASK. Public on both sides, so no part
+                    # of the message has to carry it.
+                    targets = tuple(c for c in range(g_hs * 6, g_hs * 6 + 6)
+                                    if c not in located)
             # Snapshot the asked half-suit as of THIS ask, before its own
             # transfer is applied. Three cases per card, and only the third is
             # world-dependent:
@@ -384,7 +392,8 @@ def build(bel, obs, gamma: float, include_self: bool = False,
             lo = hs * 6
             const_mask, free_cards = _snapshot(bel, where, ev.asker, lo)
             conv_asks.append((ev.asker, hs, ev.card, const_mask,
-                              tuple(free_cards), g_hs, g_const, g_free))
+                              tuple(free_cards), g_hs, g_const, g_free,
+                              targets))
         if ev.success:
             where[ev.card] = ev.asker
             located.add(ev.card)
@@ -529,7 +538,8 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                           tilt_strength=sis_tilt, depth_table=table,
                           convention=conv, convention_beta=convention_beta,
                           convention_q=convention_q,
-                          convention_aim=convention_aim),
+                          convention_aim=convention_aim,
+                          convention_book=convention_book),
             card_slot)
 
 

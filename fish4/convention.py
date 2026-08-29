@@ -244,3 +244,56 @@ def aimed_position_table():
             out.append([free[encoded_position(pl, len(free))]
                         for pl in range(7)])
     return out
+
+
+# ---------------------------------------------------------------------------
+# Carrying a location instead of a count
+# ---------------------------------------------------------------------------
+#
+# WHY THE AIMED BOOK CAME OUT NEUTRAL, WHICH IS THE USEFUL PART. Aiming at the
+# most-unlocated half-suit targets 4.03x the entropy, the round trip confirms
+# sender and receiver agree (74.7% decode-under-truth against 74.9% unaimed),
+# and it discriminates more worlds (V2 48.8% against 30%). It still moved the
+# belief by nothing.
+#
+# The reason is an asymmetry that entropy does not see. The unaimed book's
+# forward test is a function of the asker's EXACT HOLDING in the half-suit
+# asked in -- two holdings of the same depth have different free sets and so
+# name different cards. The aimed book's payload is `depth in G`, a pure COUNT:
+# two worlds that give the asker the same number of G's cards are not separated
+# at all, however differently they place them. So aiming did not ADD a signal,
+# it TRADED a locating one for a counting one.
+#
+# Cards are scored one at a time. A count constrains the joint; only a location
+# pins a card.
+#
+# THE LOCATING BOOK. Both sides take U, the unlocated cards of G in index order
+# -- public, and snapshotted at the ask like every other target -- truncated to
+# the k cards the ask has to choose between. The message is
+#
+#     j = the index in U of the FIRST card the asker holds, or k - 1 if none
+#
+# and it is sent by naming the j-th legal card. A partner who reads it learns
+# that the asker does NOT hold U[0..j-1] and DOES hold U[j]: j negatives and a
+# positive, j + 1 cards located, from one ask that was happening anyway. At the
+# measured mean of 3.57 legal cards that is typically two to three cards, where
+# a depth is none.
+#
+# This is the same channel, the same cost, the same single gather. Only the
+# code book changes.
+
+
+def locate_payload(hand: int, targets) -> int:
+    """``j``: the index in ``targets`` of the first card this hand holds.
+
+    ``len(targets) - 1`` when it holds none of them, so the message is always
+    inside the channel's width and the fallback is the value a partner can
+    least act on -- which is the right place to put it, because a seat holding
+    none of the target cards is the case the team learns least from.
+    """
+    if not targets:
+        return 0
+    for j, c in enumerate(targets):
+        if hand >> c & 1:
+            return j
+    return len(targets) - 1
