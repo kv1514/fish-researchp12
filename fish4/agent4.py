@@ -541,15 +541,11 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         # That is exactly why the receiver's side is a soft weight rather than
         # a decode -- see fish4/convention.py.
         if self.convention_max_cost > 0.0:
-            from .convention import encode_cost, encoded_card
+            from .convention import encoded_card
             from fish.cards import half_suit_of
             chosen = asks[pick]
             hs = half_suit_of(chosen.card)
             hand = obs.hand
-            # Only opponents who can actually be asked. Including an empty
-            # seat would price the channel against a best-case ask that is not
-            # available, understating the cost of speaking.
-            opps = sorted({a.target for a in asks})
             if self.convention_book == "locate":
                 # The locating book: name the card whose position tells a
                 # partner the index of the first unlocated target card we hold.
@@ -598,14 +594,24 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             # empty and still be the best guess for where a card went. The
             # objective's own candidate list has already excluded those, so ask
             # it rather than re-deriving the rule.
-            enc_targets = [a.target for a in asks if a.card == enc]
-            if enc is not None and enc != chosen.card and enc_targets:
-                marg = post.marginals()
-                cost = encode_cost(marg, hand, hs, opps)
+            # THE GATE IS PRICED IN THE OBJECTIVE'S OWN CURRENCY, and an
+            # earlier version was not. It compared the drop in P(SUCCESS)
+            # between the best legal card and the agreed one, and let anything
+            # under `convention_max_cost` through. But `scores` is not P(success)
+            # -- it carries lookahead, tempo, concentration and the information
+            # the ask leaks -- so a swap that looked like it cost 0.009
+            # probability could be discarding a large amount of what the
+            # objective was actually ranking on. Measured over 120 duplicate-deal
+            # pairs with the DECODER OFF, that mis-priced gate cost
+            # -1.467 [-2.116, -0.818] sets a game: speaking, not listening, was
+            # the expensive half. The gate now reads the same scores the pick
+            # itself was made from.
+            enc_idx = [i for i, a in enumerate(asks) if a.card == enc]
+            if enc is not None and enc != chosen.card and enc_idx:
+                best_enc = max(enc_idx, key=lambda i: scores[i])
+                cost = scores[pick] - scores[best_enc]
                 if cost <= self.convention_max_cost:
-                    # Name the agreed card, at the opponent most likely to hold
-                    # it -- the target is still chosen for value.
-                    tgt = max(enc_targets, key=lambda q: marg[enc][q])
+                    tgt = asks[best_enc].target
                     from fish.engine import Ask as _Ask
                     self._t(_tr.simple_trace, "convention",
                             card=int(enc), target=int(tgt),

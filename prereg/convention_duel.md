@@ -86,3 +86,93 @@ a clean and publishable negative: it would put the ceiling on pre-play
 agreement in this game at the *cost of the channel* rather than at the receiver's
 inference, and it would say the remaining slack is in the ask objective's
 willingness to pay rather than in what an ask can be made to say.
+
+---
+
+# OUTCOME, recorded 2026-08-29: the duel found a defect, not a result
+
+**The convention as registered LOSES, heavily, and the reason is a
+mis-specified gate rather than the idea.** Recorded here in full because the
+belief instrument had cleared it three times and would never have caught this.
+
+## What the duel said
+
+Duplicate deals, X = KRAKEN v1.0, Y = the licensed arm (gate 0.05, aimed,
+`beta = 0.8`). Positive means **the champion is stronger**.
+
+| n | diff |
+|---|---|
+| 40 pairs | +1.750 [+0.645, +2.855] |
+
+An order of magnitude larger than anything the sender's measured cost --- 0.0090
+probability per encoded ask --- could account for. So the ablation, same deals
+and same agent seeds:
+
+| arm | diff |
+|---|---|
+| **encoder only** --- speak, do not listen | **+1.467** [+0.818, +2.116] |
+| **decoder only** --- listen, nothing sent | +0.033 [-0.646, +0.712] |
+
+**All of the loss is speaking.** Listening at `beta = 0.8` with no message on
+the wire is a clean null, which is the design intent of a soft weight vindicated:
+a constraint can be fatally wrong, a likelihood can only be mildly wrong.
+
+## The defect: the gate was priced in the wrong currency
+
+`encode_cost` compared the drop in **probability of success** between the best
+legal card and the agreed one, and `convention_max_cost = 0.05` read as "give up
+at most five points of success probability".
+
+But the agent does not rank asks by probability of success. `scores` carries
+lookahead, tempo, concentration, and the information the ask leaks. Re-pricing
+the gate in the objective's own units and measuring the gap the swap actually
+costs, over 877 swaps in six games:
+
+| | objective-score gap |
+|---|---|
+| median | **+0.3596** |
+| p75 | +0.6865 |
+| p90 | +1.2503 |
+| max | +1.5000 |
+
+The objective's own range here is about 1.5. **The old gate was routinely paying
+a third of the objective for a message it believed cost 0.009.** That is the
+-1.467 sets/game, and it is a specification error of exactly the kind this
+project keeps finding: a number that looks bounded because it is bounded in some
+quantity, just not the one that matters.
+
+## What it costs the earlier results
+
+Not the decoder. The belief measurements are paired within their own
+transcripts, and the decode genuinely improves the posterior on those
+positions; the aimed replication stands as a statement about **inference**.
+
+What it costs is the **carry rate**, and with it the claim that the channel was
+cheap. Re-priced, over 1,088 asks:
+
+| | share of asks |
+|---|---|
+| objective already picks the agreed card | 19% |
+| agreed card ties the chosen one | 5% |
+| **free total** | **24%** |
+| gap <= 0.05 objective units | 12% |
+| gap <= 0.10 objective units | 18% |
+
+against the **63-74%** the mis-priced gate reported. So the free channel is
+about a third as wide as `results/convention_cost.json` implied, because that
+analysis also measured cost in probability (0.131 for a random card) and
+understates it the same way.
+
+The 1.72 bits an ask is still a true fact about the rules. What is not true is
+that most of it was free.
+
+## Next, and re-registered rather than assumed
+
+The gate now reads the same `scores` the pick was made from
+(`fish4/agent4.py`). Re-running the same ablation at
+`convention_max_cost = 1e-9` --- the **free-message gate**, swap only when the
+agreed ask ties the chosen one, so the message costs literally nothing and no
+calibration is needed --- and at 0.05 objective units, 200 pairs each.
+
+**The bar is unchanged at +0.15 sets/game.** A re-priced gate does not get a
+softer bar for having been wrong once.
