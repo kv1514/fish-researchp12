@@ -56,8 +56,19 @@ RULES = RuleConfig(wrong_distribution_outcome="opponent")
 #: same count about a half-suit chosen for entropy, "locate" carries the index
 #: of the first target card held -- j negatives and a positive, j + 1 cards
 #: pinned rather than counted. prereg/convention_locate.md.
+#: NOTE ON UNITS. Before 2026-08-29 these gates were a drop in PROBABILITY OF
+#: SUCCESS. They are now a drop in the ask objective's own score, because the
+#: probability gate let through swaps costing a median +0.36 of an objective
+#: whose range is about 1.5 and cost -1.467 sets a game in a duel
+#: (prereg/convention_duel.md). The two scales are unrelated; the old numbers
+#: below are kept only to reproduce the archived runs.
+#:
+#: 1e-9 is the FREE-MESSAGE gate: swap only when the agreed ask ties the chosen
+#: one on the objective, so the message costs literally nothing and no
+#: calibration is needed. It carries 24% of asks.
 SENDERS = [(0.02, "depth"), (0.05, "depth"), (0.10, "depth"),
-           (0.05, "aimed"), (0.02, "locate"), (0.05, "locate")]
+           (0.05, "aimed"), (0.02, "locate"), (0.05, "locate"),
+           (1e-09, "aimed"), (0.05, "aimed_obj"), (1e-09, "locate")]
 
 #: Receiver arms, all paired against the shared inert baseline inside each
 #: sender setting. Two decoders are scored on the SAME positions in the same
@@ -72,7 +83,7 @@ SENDERS = [(0.02, "depth"), (0.05, "depth"), (0.10, "depth"),
 #:         flat weight's missing 1/k over-credits matches in low-k -- deep --
 #:         worlds, which predicts its monotone top-1 decay.
 def arms_for(book: str) -> list[tuple[str, dict]]:
-    extra = ({"convention_aim": True} if book == "aimed"
+    extra = ({"convention_aim": True} if book.startswith("aimed")
              else {"convention_book": "locate"} if book == "locate" else {})
     arms = ([("base", {})]
             + [(f"flat {b}", dict(convention_beta=b, **extra))
@@ -80,7 +91,7 @@ def arms_for(book: str) -> list[tuple[str, dict]]:
     # The mixture is not carried on the locating book. It was refuted on its
     # own withdrawal condition -- worse NLL at every q -- and re-running a
     # refuted parameterisation on a new code book would be fishing.
-    if book != "locate":
+    if book not in ("locate",):
         arms += [(f"mix {q}", dict(convention_q=q, **extra))
                  for q in (0.4, 0.5, 0.6, 0.7, 0.8)]
     return arms
@@ -113,7 +124,7 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None,
 
     for mc, book in senders:
         ARMS = arms_for(book)
-        aim = book == "aimed"
+        aim = book.startswith("aimed")
         team = {k: Pool() for k, _ in ARMS}
         opp = {k: Pool() for k, _ in ARMS}
         decisions = 0

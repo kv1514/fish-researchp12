@@ -311,3 +311,34 @@ A belief-side instrument can refute (the split gamma, correctly). It can never
 license. The gate between them is a duel, and this is the second time this
 project has measured a posterior improvement worth nothing or less in play ---
 the at-ask-time covariate was the first.
+
+## CORRECTION to the carry-rate figures above, same day
+
+**The "19% / 5% / 24% free" table is wrong and is superseded by this one.** It
+was computed from a run with the gate wide open (`1e9`), where the agent swaps
+on every ask and plays badly --- games stretch from 108 moves to 122 --- so it
+describes a degraded population and not normal play. Measuring each gate on the
+games it actually produces, 8 games and ~800 of our asks per gate:
+
+| gate (objective units) | our asks naming the agreed card | moves/game |
+|---|---|---|
+| **0.0 --- no encoder at all** | **35.3%** | 108.6 |
+| 1e-9 --- free-message | 40.1% | 103.2 |
+| 0.01 | 43.5% | 103.0 |
+| 0.05 | 57.5% | 108.2 |
+| 0.15 | 75.6% | 118.0 |
+| 0.4 | 86.4% | 122.4 |
+
+Moves per game is the tell: the champion plays about 108, and every gate above
+0.05 stretches the game out, which is what paying for a message looks like from
+the outside.
+
+**The corrected finding is stronger than the one it replaces.** The incumbent
+engine --- no encoder, no agreement, nothing changed --- already names the agreed
+card on **35.3%** of its asks, purely because the ask objective and the code
+book happen to coincide. Against a chance rate of `1/3.57 = 28%` that is a real
+if weak signal sitting on the wire today, unread, at zero cost and zero risk.
+
+It also reframes what the encoder buys: from 35.3% to 40.1% at the
+free-message gate, i.e. **about five points**, not the sixty-plus the
+mis-priced gate appeared to deliver.
