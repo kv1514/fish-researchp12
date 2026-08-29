@@ -235,3 +235,79 @@ seed* — a dead term wearing the exact costume of a measured null, for the seco
 time in this project. The lesson is not "test more". It is that **a null is only
 believable from an instrument that has been shown to be capable of a non-null**,
 which is why V3 exists and why it is checked inside the run rather than trusted.
+
+---
+
+# UPDATE: the duel, and what it says about the instrument
+
+**The convention as measured loses to the champion by +1.750 [+0.645, +2.855]
+sets a game.** The belief instrument had cleared it three times, on
+pre-registered criteria, with a replication on fresh seeds.
+
+Ablation, same deals, same agent seeds, positive = champion stronger:
+
+| arm | diff |
+|---|---|
+| encoder only --- speak, do not listen | **+1.467** [+0.818, +2.116] |
+| decoder only --- listen, nothing sent | +0.033 [-0.646, +0.712] |
+| both | +1.267 [+0.526, +2.008] |
+
+**Speaking is the entire cost.** Listening with nothing on the wire is a clean
+null, which vindicates the one design decision the module argued hardest for:
+the decode ships as a soft weight in the sampler rather than a constraint in the
+propagator, because *a constraint can be fatally wrong and a likelihood can only
+be mildly wrong*. That is now measured rather than argued.
+
+## The defect, and why no belief instrument could have found it
+
+`encode_cost` priced the swap in **probability of success**. The agent does not
+rank asks by probability of success --- `scores` carries lookahead, tempo,
+concentration and the information an ask leaks. Measured in the objective's own
+units over 877 swaps: median gap **+0.3596**, p90 **+1.2503**, on an objective
+whose range is about 1.5.
+
+So `convention_max_cost = 0.05` was not buying a message for five points of
+probability. It was routinely paying a **third of the objective**.
+
+The posterior instrument scores arms **off-policy**: the decoder is off while
+the games are played, every arm sees identical positions, and the transcripts
+are held fixed. That is what makes it a clean paired comparison, and it is
+exactly what makes it blind here. **It measures what a message is worth and
+never what it cost to send.** Three pre-registered passes and a seed
+replication cannot detect a defect that lives entirely in the production of the
+transcripts they all share.
+
+## What survives and what does not
+
+**Survives.** The decoder. The belief results are paired within their own
+transcripts and the decode genuinely improves the posterior there. The aimed
+replication stands as a statement about **inference**: aiming at the
+most-unlocated half-suit improves both calibration and the argmax, and the
+argmax result is still the only one of its kind in this project.
+
+**Does not survive.** That the channel is *cheap*. Re-priced over 1,088 asks:
+
+| | share of asks |
+|---|---|
+| objective already picks the agreed card | 19% |
+| agreed card ties the chosen one | 5% |
+| **free total** | **24%** |
+
+against the **63-74%** the mis-priced gate reported.
+`results/convention_cost.json` understates cost the same way and for the same
+reason --- it also measured in probability, where a random legal card costs
+0.131. The **1.72 bits an ask** remains a true fact about the rules of Fish.
+That most of it was free does not.
+
+## The methodological finding, which outlives the convention
+
+This project has leaned on the off-policy posterior instrument for several
+studies --- the split gamma, the choice basis, the normaliser spread --- on the
+grounds that it is cheap and paired and says no before a duel has to be played.
+It is all of those things. It is also **structurally incapable of pricing any
+change that alters the transcripts**, and every change to a *policy* does that.
+
+A belief-side instrument can refute (the split gamma, correctly). It can never
+license. The gate between them is a duel, and this is the second time this
+project has measured a posterior improvement worth nothing or less in play ---
+the at-ask-time covariate was the first.
