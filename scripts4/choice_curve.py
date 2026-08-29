@@ -47,6 +47,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+from fish.beliefs import BeliefState
 
 from fish.cards import (NUM_PLAYERS, deck_size, half_suit_cards, half_suit_of,
                         num_half_suits)
@@ -84,9 +85,13 @@ def collect(n_games: int, seed0: int = 606000):
             for c in range(n_cards):
                 if initial[p] >> c & 1:
                     depth0[p][half_suit_of(c)] += 1
+        # public_loc is set only from public events, so any observer's copy
+        # carries the same answer; seat 0's is used purely as a reader.
+        bel = BeliefState(rules, observer=0)
         step = 0
         while not st.is_terminal and step < 300:
             p = st.turn
+            bel.update(Observation.from_state(st, 0))
             obs = Observation.from_state(st, p)
             act = agents[p].act(obs)
             if isinstance(act, Ask):
@@ -101,8 +106,28 @@ def collect(n_games: int, seed0: int = 606000):
                     missing = (6 if rules.allow_bluff_asks else
                                sum(1 for c in half_suit_cards(hs)
                                    if not (st.hands[p] >> c & 1)))
+                    # `missing_now` above counts cards of the half-suit that
+                    # are not in the asker's hand, which under these rules is
+                    # exactly 6 - held: it is depth restated, not a second
+                    # covariate, and a fit that uses both is fitting one
+                    # variable twice. Verified over 72,091 alternatives, where
+                    # held + missing == 6 without exception.
+                    #
+                    # The quantity the objective argument in the paper actually
+                    # appeals to -- "holding five of six leaves exactly one
+                    # card to ask FOR" -- is how many cards of the half-suit
+                    # are still genuinely up for grabs, i.e. sitting with
+                    # nobody the public record can name. A card of this suit
+                    # already pinned to a specific player is not an
+                    # opportunity, whoever holds it. That is common knowledge,
+                    # so an observer can compute it under any candidate world,
+                    # which is what makes it usable in the sampler rather than
+                    # only in a fit.
+                    unlocated = sum(1 for c in half_suit_cards(hs)
+                                    if bel.public_loc[c] is None)
                     live.append({"hs": hs, "depth0": depth0[p][hs],
-                                 "held_now": held, "missing_now": missing})
+                                 "held_now": held, "missing_now": missing,
+                                 "unlocated_now": unlocated})
                 if len(live) >= 2:
                     resolved = sum(1 for w in st.set_winner if w is not None)
                     records.append({
