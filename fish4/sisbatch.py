@@ -220,6 +220,7 @@ def draw_batch(sampler, rng, n: int):
     # in which any non-self player had already asked -- which is almost all of
     # them, 632 of 641 in results/ess_probe.json -- silently threw the
     # no-declaration term away before it could be used.
+    col_of = None
     if om is not None and om.opp_lambda and getattr(om, "set_cards", None):
         # "If the opponents held this whole half-suit, one of them would very
         # likely have declared it by now." Not a constraint - they may hold it
@@ -232,16 +233,72 @@ def draw_batch(sampler, rng, n: int):
             idxc = np.asarray(idx, dtype=np.int64)
             all_opp = ((picks[:, idxc] & 1) != om.my_team).all(axis=1)
             logl -= om.opp_lambda * all_opp
+    # ---- the pre-play naming convention --------------------------------
+    # THIS BLOCK MUST LIVE HERE, not in SISSampler._attempt. The scalar
+    # sampler is no longer the path any decision takes: sample_batch calls
+    # draw_batch, which never materialises the per-draw `deal` dict the
+    # scalar likelihood reads. A first version of the convention was wired
+    # into _attempt only, and the inertness check duly reported the decoder
+    # as bit-identical to the incumbent on every seed -- a dead term reading
+    # exactly like a measured null, which is the second time this project
+    # has produced that artefact.
+    #
+    # Unlike the depth term, this one needs the ASSIGNMENT and not the
+    # counts: which card the convention names depends on WHICH cards of the
+    # half-suit the asker holds, not how many. It is still one gather, since
+    # the encoding is a function of the six-bit holding alone.
+    conv = getattr(om, "convention", None) if om is not None else None
+    if conv and (om.convention_beta or getattr(om, "convention_q", 0.0)):
+        from .convention import aimed_position_table, encoded_position_table
+        aim = bool(getattr(om, "convention_aim", False))
+        table = np.asarray(aimed_position_table() if aim
+                           else encoded_position_table(), dtype=np.int64)
+        if col_of is None:
+            col_of = {c: j for j, c in enumerate(sampler.order)}
+        q = getattr(om, "convention_q", 0.0) or 0.0
+        for (asker, hs, card, const_mask, free_cards,
+             g_hs, g_const, g_free) in conv:
+            lo = hs * 6
+            # Cards publicly known to have been with this asker AT THIS ASK
+            # are the same in every world; see the `where` ledger in
+            # oppmodel.build for why the snapshot is taken at the ask and not
+            # at the end of the log.
+            held = np.full(n, (const_mask >> lo) & 0x3F, dtype=np.int64)
+            for c in free_cards:
+                j = col_of.get(c)
+                if j is None:
+                    continue          # not free in this decision; contributes
+                held |= ((picks[:, j] == asker).astype(np.int64)
+                         << (c - lo))
+            if aim and g_hs is not None:
+                # The payload is the asker's depth in the TARGET half-suit,
+                # reconstructed the same way and in the same space.
+                glo = g_hs * 6
+                gheld = np.full(n, (g_const >> glo) & 0x3F, dtype=np.int64)
+                for c in g_free:
+                    j = col_of.get(c)
+                    if j is None:
+                        continue
+                    gheld |= ((picks[:, j] == asker).astype(np.int64)
+                              << (c - glo))
+                match = table[held, _POPCOUNT6[gheld]] == (card - lo)
+            else:
+                match = table[held] == (card - lo)
+            if q > 0.0:
+                # The mixture (see fish4/convention.py). k varies BY WORLD,
+                # which is the whole point: the flat weight below scores every
+                # match alike and so over-credits matches in low-k -- deep --
+                # worlds.
+                k = 6 - _POPCOUNT6[held]
+                pr = np.where(match, q, 0.0) + (1.0 - q) / np.maximum(k, 1)
+                logl += np.where(k > 0, np.log(np.maximum(pr, 1e-13)), 0.0)
+            else:
+                logl += om.convention_beta * match
     return picks, logq, logl, alive
 
 
-def batch_to_deals(sampler, picks, alive):
-    """Turn the ``(n, n_free)`` owner matrix into the dict form callers expect."""
-    order = sampler.order
-    out = []
-    for i in range(picks.shape[0]):
-        if not alive[i]:
-            continue
-        row = picks[i]
-        out.append({c: int(row[j]) for j, c in enumerate(order)})
-    return out
+#: Population count of every six-bit holding. A table rather than SWAR
+#: arithmetic: the first version of this used the wrong magic constants
+#: (0x15/0x13 instead of 0x55/0x33) and a 64-entry lookup cannot be wrong in
+#: that way. It is also the same shape as the encoding table beside it.
+_POPCOUNT6 = np.array([bin(i).count("1") for i in range(64)], dtype=np.int64)

@@ -85,7 +85,7 @@ class Posterior:
     share the same DP tables and the same batch of weighted draws.
     """
 
-    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma", "gamma_team",
+    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma", "gamma_team", "convention_beta", "convention_q", "convention_aim",
                  "stats", "n", "_sys", "_card_group", "_free", "_marg",
                  "_worlds", "_batch", "_sampler", "_exact_ok", "_idx",
                  "_free_pos", "depth_mode", "count_mode", "opp_lambda",
@@ -98,6 +98,9 @@ class Posterior:
                  opp_lambda: float = 0.0, gamma_schedule: float = 0.0,
                  sis_tilt: float = 0.0, silence_delta: float = 1.0,
                  gamma_team: Optional[float] = None,
+                 convention_beta: float = 0.0,
+                 convention_q: float = 0.0,
+                 convention_aim: bool = False,
                  stats: Optional[PosteriorStats] = None):
         self.bel = belief
         self.obs = obs
@@ -105,6 +108,10 @@ class Posterior:
         # A separate sharpness for our own side's asks. None means one number
         # for both sides, which is the incumbent and is bit-identical to it.
         self.gamma_team = gamma_team if obs is not None else None
+        #: Weight on the pre-play naming agreement. Inert at 0.
+        self.convention_beta = convention_beta if obs is not None else 0.0
+        self.convention_q = convention_q if obs is not None else 0.0
+        self.convention_aim = bool(convention_aim)
         # Like gamma, the silence prior conditions on behaviour, so it needs
         # the observation; without one it is inert.
         self.silence_delta = float(silence_delta) if obs is not None else 1.0
@@ -180,7 +187,9 @@ class Posterior:
         # "believe nothing about opponents, something about teammates" is a
         # coherent configuration and one the sweep visits.
         if (self.gamma != 0.0 or self.opp_lambda > 0.0
-                or (self.gamma_team is not None and self.gamma_team != 0.0)):
+                or (self.gamma_team is not None and self.gamma_team != 0.0)
+                or self.convention_beta != 0.0
+                or self.convention_q != 0.0):
             from .oppmodel import build as build_opponent
             opp, slot = build_opponent(bel, self.obs, self.gamma,
                                        depth_mode=self.depth_mode,
@@ -189,6 +198,9 @@ class Posterior:
                                        gamma_schedule=self.gamma_schedule,
                                        sis_tilt=self.sis_tilt,
                                        gamma_team=self.gamma_team,
+                                       convention_beta=self.convention_beta,
+                                       convention_q=self.convention_q,
+                                       convention_aim=self.convention_aim,
                                        order=free)
         # The exact DP answers the uniform-target question only. An opponent
         # model changes the target, so it forces the sampling path even when no

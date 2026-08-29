@@ -72,6 +72,10 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  infer_mode: str = "auto",
                  opponent_gamma: float = 0.0,
                  gamma_team: float | None = None,
+                 convention_beta: float = 0.0,
+                 convention_q: float = 0.0,
+                 convention_aim: bool = False,
+                 convention_max_cost: float = 0.0,
                  depth_mode: str = "initial",
                  count_mode: str = "linear",
                  opp_lambda: float = 0.0,
@@ -184,6 +188,17 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         #: Sharpness for our OWN side's asks. None -> one gamma for both
         #: sides, which is the incumbent and bit-identical to it.
         self.gamma_team = gamma_team
+        #: Decoder weight: how sharply a partner's ask is read as
+        #: carrying the agreed message. Inert at 0.
+        self.convention_beta = convention_beta
+        self.convention_q = convention_q
+        self.convention_aim = bool(convention_aim)
+        #: Encoder gate: the most probability of success this seat
+        #: will give up to send one. At 0 it never encodes, so the
+        #: two halves are independently ablatable and the pair can
+        #: be measured apart -- a decoder with no encoder is the
+        #: control that says whether the DECODER alone is harmful.
+        self.convention_max_cost = convention_max_cost
         self.depth_mode = depth_mode
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda
@@ -299,6 +314,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                          n_worlds=self.n_worlds, mode=self.infer_mode,
                          obs=obs, gamma=self.opponent_gamma,
                          gamma_team=self.gamma_team,
+                         convention_beta=self.convention_beta,
+                         convention_q=self.convention_q,
+                         convention_aim=self.convention_aim,
                          depth_mode=self.depth_mode,
                          count_mode=self.count_mode,
                          opp_lambda=self.opp_lambda,
@@ -507,6 +525,75 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                     top = scores[order[0]]
         pool = [i for i in order if scores[i] >= top - 1e-9]
         pick = int(self.rng.choice(pool))
+
+        # ---- the convention, sender side -----------------------------------
+        # The half-suit is already decided by the objective above and is NOT
+        # touched here: only WHICH CARD of it we name. That keeps the change to
+        # the one degree of freedom the objective was never using, and means a
+        # measured effect cannot be a half-suit choice wearing a convention's
+        # name.
+        #
+        # The cost gate is computed from our own posterior, so a partner cannot
+        # reproduce it and cannot know whether any given ask carried a message.
+        # That is exactly why the receiver's side is a soft weight rather than
+        # a decode -- see fish4/convention.py.
+        if self.convention_max_cost > 0.0:
+            from .convention import encode_cost, encoded_card
+            from fish.cards import half_suit_of
+            chosen = asks[pick]
+            hs = half_suit_of(chosen.card)
+            hand = obs.hand
+            # Only opponents who can actually be asked. Including an empty
+            # seat would price the channel against a best-case ask that is not
+            # available, understating the cost of speaking.
+            opps = sorted({a.target for a in asks})
+            if self.convention_aim:
+                # Aim at the most-unlocated half-suit rather than at the one
+                # being asked in. The receiver reconstructs the same target
+                # from the same public record, snapshotted at this ask -- see
+                # the `located` ledger in oppmodel.build. We know our own hand
+                # exactly, so the payload is exact; only the receiver has to
+                # entertain worlds about it.
+                from .convention import (encoded_position, half_suit_cards,
+                                         legal_cards)
+                n_hs = len(obs.set_winner)
+                best_u, g_hs = -1, 0
+                for h in range(n_hs):
+                    u = sum(1 for c in half_suit_cards(h)
+                            if self.bel.public_loc[c] is None)
+                    if u > best_u:
+                        best_u, g_hs = u, h
+                payload = sum(1 for c in half_suit_cards(g_hs)
+                              if hand >> c & 1)
+                cards = legal_cards(hand, hs)
+                enc = (cards[encoded_position(payload, len(cards))]
+                       if cards else None)
+            else:
+                enc = encoded_card(hand, hs)
+            # Legality is taken from the engine's own list, not recomputed. An
+            # earlier version picked the target as the likeliest holder over
+            # ALL opponents and raised IllegalAction("target has no cards") the
+            # first time the likeliest holder was out of cards -- a seat can be
+            # empty and still be the best guess for where a card went. The
+            # objective's own candidate list has already excluded those, so ask
+            # it rather than re-deriving the rule.
+            enc_targets = [a.target for a in asks if a.card == enc]
+            if enc is not None and enc != chosen.card and enc_targets:
+                marg = post.marginals()
+                cost = encode_cost(marg, hand, hs, opps)
+                if cost <= self.convention_max_cost:
+                    # Name the agreed card, at the opponent most likely to hold
+                    # it -- the target is still chosen for value.
+                    tgt = max(enc_targets, key=lambda q: marg[enc][q])
+                    from fish.engine import Ask as _Ask
+                    self._t(_tr.simple_trace, "convention",
+                            card=int(enc), target=int(tgt),
+                            cost=float(cost),
+                            note="named the agreed card instead of the "
+                                 "best-scoring one, to tell a partner how "
+                                 "deep this seat is in the half-suit")
+                    return _Ask(target=tgt, card=enc)
+
         self._t(_tr.ask_trace, obs, asks, scores, p, order, pool, pick)
         return asks[pick]
 
