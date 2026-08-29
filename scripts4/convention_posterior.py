@@ -68,7 +68,8 @@ RULES = RuleConfig(wrong_distribution_outcome="opponent")
 #: calibration is needed. It carries 24% of asks.
 SENDERS = [(0.02, "depth"), (0.05, "depth"), (0.10, "depth"),
            (0.05, "aimed"), (0.02, "locate"), (0.05, "locate"),
-           (1e-09, "aimed"), (0.05, "aimed_obj"), (1e-09, "locate")]
+           (1e-09, "aimed"), (0.05, "aimed_obj"), (1e-09, "locate"),
+           (0.0, "aimed")]
 
 #: Receiver arms, all paired against the shared inert baseline inside each
 #: sender setting. Two decoders are scored on the SAME positions in the same
@@ -135,6 +136,12 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None,
         v3_scored = v3_moved = 0      # V3: is the term live at all?
 
         spec = dict(V06_DEPLOYED[1])
+        # A gate of exactly 0 leaves the encoder OFF, which is the
+        # free-read configuration: the policy is the champion's byte for byte
+        # and only the belief differs. For that one arm the off-policy
+        # instrument is not blind -- its blindness comes from scoring shared
+        # transcripts whose production cost it cannot see, and here there is
+        # no production cost because the transcripts ARE the incumbent's.
         spec["convention_max_cost"] = mc
         spec["convention_aim"] = aim
         spec["convention_book"] = ("locate" if book == "locate"

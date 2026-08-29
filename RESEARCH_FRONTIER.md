@@ -342,3 +342,23 @@ if weak signal sitting on the wire today, unread, at zero cost and zero risk.
 It also reframes what the encoder buys: from 35.3% to 40.1% at the
 free-message gate, i.e. **about five points**, not the sixty-plus the
 mis-priced gate appeared to deliver.
+
+## A necessary qualification to "can refute, never license"
+
+That claim is right about *policy* changes and wrong if stated more broadly, so
+state it precisely: **the off-policy instrument is blind exactly when the change
+alters the transcripts.** Its blindness is not a property of belief-scoring; it
+is a property of scoring arms on shared transcripts whose *production cost* is
+outside the comparison.
+
+For the free-read configuration --- decoder on, encoder deleted --- there is no
+production cost. The policy is the champion's byte for byte and the transcripts
+**are** the incumbent's. Nothing about the games differs between arms because
+nothing about the games can differ. There the instrument measures the whole of
+what changes, and a positive result there really does mean the belief is better
+on the positions the engine actually reaches.
+
+It still does not follow that a better belief wins games --- that is a separate
+inference and this project has twice measured it failing --- but the specific
+trap that caught the convention (a cost invisible to the instrument) cannot
+occur when the cost is zero by construction.
