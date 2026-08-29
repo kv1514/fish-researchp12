@@ -178,3 +178,70 @@ the lever is the declaration policy --- which
 `results/declarer_holding_self.json` argues is already calibrated on every
 voluntary and exact path, leaving only the compelled ones, where 42.7% of
 forced declarations are wrong because there is nothing better to do.
+
+---
+
+# The belief measurement, and it refutes this document's own framing
+
+Run on the **incumbent's own transcripts** --- encoder off, gate 0.0 --- which is
+the one configuration where the off-policy instrument is not blind, because
+there is no production cost for it to miss. 40 games, 1,057 scored decisions.
+Carry rate 33.9%, inside the +-5 point withdrawal band around 35.3%.
+
+| arm | teammate NLL | teammate top-1 |
+|---|---|---|
+| flat 0.25 | +0.0013 [-0.0016, +0.0041] | -0.0001 [-0.0051, +0.0049] |
+| flat 0.5 | **+0.0110** [+0.0044, +0.0176] | -0.0042 [-0.0108, +0.0025] |
+| flat 0.8 | +0.0319 [+0.0197, +0.0440] | -0.0054 [-0.0130, +0.0022] |
+| flat 1.2 | +0.0705 [+0.0501, +0.0909] | -0.0113 [-0.0199, -0.0027] |
+
+**Nothing at the smallest weight, then monotonically worse.** Positive NLL is
+worse. There is no weight at which reading the coincidence helps the belief,
+and the play null of -0.002 is exactly what that predicts.
+
+## What this refutes, and it is a claim made in this document
+
+This registration says:
+
+> That configuration is **not a pre-play convention** and should stop being
+> described as one. It is a better model of a teammate's card choice.
+
+**That is wrong.** It is not a better model of anything. The 33.9%-against-28%
+excess agreement is not exploitable: whatever structure produces it is already
+captured by the depth model the sampler runs, so conditioning on it a second
+time adds noise rather than information. The claim was plausible, was written
+before the measurement as it should have been, and is refuted by it.
+
+## The finding that replaces it
+
+Put the two belief measurements side by side. Same decoder, same code book,
+same weight; the only difference is whether an encoder put a message on the
+wire.
+
+| transcripts | teammate NLL | teammate top-1 |
+|---|---|---|
+| encoder ON (aimed, gate 0.05) | **-0.0535** [-0.0683, -0.0387] | **+0.0392** [+0.0301, +0.0484] |
+| encoder OFF (the incumbent's own) | +0.0013 [-0.0016, +0.0041] | -0.0001 [-0.0051, +0.0049] |
+
+**The entire belief gain came from the message being deliberately sent.** The
+decoder is not a better teammate model; it is a receiver, and a receiver with
+no transmitter reads nothing. That is obvious in hindsight and was not obvious
+in advance --- it is why the free-read arm was worth a duel and a belief run
+rather than an assumption.
+
+## The direction, closed, with all three legs measured
+
+1. **The channel is real.** 3.57 legal cards an ask, 1.72 bits, a fact about
+   the rules of Fish and not about this engine.
+2. **A deliberate message on it decodes into a substantially better belief** ---
+   -0.0535 nats and +0.0392 top-1 on the teammate pool, replicated on fresh
+   seeds against a pre-registered magnitude floor. The top-1 result is the only
+   one of its kind in this project.
+3. **Sending it costs more than it is worth.** -1.467 sets/game at the
+   mis-priced gate; at a gate that spends nothing there is nothing to read.
+
+So: **pre-play agreement in Fish is real and unaffordable in this engine.** Both
+the value of the channel and the price of using it are now measured, and the
+price is larger. That is a complete negative rather than an inconclusive one,
+and it is complete because the duel was run rather than inferred from three
+belief passes that all said yes.
