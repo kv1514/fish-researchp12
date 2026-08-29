@@ -6473,6 +6473,60 @@ everything else is a tie-break.
 Recorded deliberately, because in this project the negative results have
 repeatedly been the informative ones.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/gammasplit.pdf}
+\caption{Why the teammate-side model was withdrawn. Both panels are paired
+against the incumbent cell by \emph{decision} --- cards inside one decision
+share a belief, so the card is not the independent unit --- with
+$\gamma_{\mathrm{opp}}$ held at the shipped $0.35$. Sharpening the model on our
+own side buys a small improvement in the proper score around
+$\gamma_{\mathrm{team}} = 0.7$ and pays for it by naming the true holder less
+often at every setting. The allocation decision reads the argmax, so that is a
+worse belief for the job it has to do.}
+\label{fig:gammasplit}
+\end{figure}
+
+\paragraph{One $\gamma$ per side of the table, refuted before it was played.}
+Two v1.0 results point hard at the teammate side of the belief. $95.3\%$ of our
+residual errors are allocation errors, and a seat handed its teammates' cards
+gains $2.6\times$ what a seat handed its opponents' cards gains
+(Figure~\ref{fig:ceiling}). The choice model weights every seat's asks by one
+exponent $\gamma = 0.35$, and that one number does two different jobs: on the
+opponents' side it sharpens the read that picks the next ask, on our own side it
+sharpens the read that places a split. The obvious move is to price them
+separately, with $\gamma_{\mathrm{team}} > \gamma_{\mathrm{opp}}$.
+
+It does not work, and the reason it does not is worth more than the knob would
+have been. Registered at \path{prereg/gamma_split.md} with two conditions fixed
+before the numbers were read --- the paired NLL interval must clear zero
+\emph{and} the paired top-1 interval must not fall below it --- and run over
+$1{,}557$ decisions at positions the incumbent reaches, scoring every cell on
+the same positions.
+
+The predicted cell $(0.35, 0.70)$ improves NLL by $-0.0119$
+$[-0.0150, -0.0088]$ and worsens top-1 by $-0.0093$ $[-0.0128, -0.0057]$.
+Condition 2 fails. Figure~\ref{fig:gammasplit} is the whole result: the proper
+score and the hit rate move in opposite directions, so the NLL gain is
+probability mass being spread rather than the read improving.
+
+Two cells do pass both conditions, and the best of them is
+$(\gamma_{\mathrm{opp}}, \gamma_{\mathrm{team}}) = (0.70, 0.70)$ --- on the
+diagonal, and so not a split at all. It beats the one off-diagonal cell that
+passes by more than $3\times$. What the run found is that the incumbent $\gamma$
+is too low on this pool, which Table~\ref{tab:posterior} already reported for
+the posterior in general and which the engine declined to act on because the
+belief improving did not carry into play. The single off-diagonal survivor has
+$\gamma_{\mathrm{team}} < \gamma_{\mathrm{opp}}$: believe our own side
+\emph{less}, the reverse of the hypothesis.
+
+Withdrawn, with no duel played. The teammate value the ceiling split measured
+is real and remains unclaimed; what this says is that reweighting the existing
+depth heuristic is not the route to it. The route that remains is a genuinely
+different teammate model --- conditioning on our own policy's likelihood rather
+than on a depth heuristic, which is the only formulation that uses the fact that
+our teammates run \emph{our} policy and we possess it.
+
 \paragraph{An exact posterior, by enumerating the disjunctions.} Since the
 largest measured effect in this study comes from making the posterior more
 accurate, an \emph{exact} posterior is the obvious thing to want, and there is a

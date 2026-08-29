@@ -398,24 +398,47 @@ def test_the_declaration_ledger_survives_the_log_tail():
     """
     from api._engine import LOG_TAIL
 
-    s = new_session({"seat": 0})
-    s.advance(600)
-    while not s.state.is_terminal:
-        s.play(s.suggest())
-    snap = s.snapshot()
-    assert snap["terminal"]
-    led = snap["declarations"]
+    # new_session IGNORES any seed on purpose -- letting a client choose the
+    # deal is exactly what the nonce prevents -- so this test cannot pin the
+    # game and has to search for one that can actually discriminate. A game
+    # whose declarations all happen to land inside the last LOG_TAIL actions
+    # proves nothing about where the ledger was built from, and roughly one
+    # game in forty is like that. Hoping is not a test design: play until a
+    # game with a declaration OUTSIDE the tail turns up, and assert on that.
+    discriminating = None
+    for _ in range(40):
+        s = new_session({"seat": 0})
+        s.advance(600)
+        while not s.state.is_terminal:
+            s.play(s.suggest())
+        snap = s.snapshot()
+        assert snap["terminal"]
+        led = snap["declarations"]
 
-    # every set that resolved has exactly one declaration behind it
-    resolved = sum(1 for w in s.state.set_winner if w is not None)
-    assert len(led) == resolved, (
-        f"{len(led)} ledger rows for {resolved} resolved sets")
-    assert len(s.log) > LOG_TAIL, (
-        "this game was short enough that the tail could not have trimmed "
-        "anything, so the test proves nothing -- pick a longer one")
-    in_tail = [r for r in snap["log"] if r.get("t") == "claim"]
-    assert len(led) >= len(in_tail)
-    assert len(led) > len(in_tail) or len(s.log) - LOG_TAIL < 1
+        # This one holds for EVERY game and is the property that matters:
+        # every set that resolved has exactly one declaration behind it.
+        resolved = sum(1 for w in s.state.set_winner if w is not None)
+        assert len(led) == resolved, (
+            f"{len(led)} ledger rows for {resolved} resolved sets")
+
+        in_tail = [r for r in snap["log"] if r.get("t") == "claim"]
+        assert len(led) >= len(in_tail), (
+            "the ledger has fewer rows than the tail alone shows, which means "
+            "it is not built from the whole history")
+        if len(s.log) > LOG_TAIL and len(led) > len(in_tail):
+            discriminating = (len(led), len(in_tail), len(s.log))
+            break
+
+    assert discriminating is not None, (
+        "40 games and not one had a declaration outside the last "
+        f"{LOG_TAIL} actions, so the tail-trimming case was never exercised. "
+        "That is a real signal, not a flake: either games got much shorter or "
+        "declarations moved much later.")
+    n_led, n_tail, n_log = discriminating
+    assert n_led > n_tail, (
+        f"ledger {n_led} rows against {n_tail} claims visible in the "
+        f"{LOG_TAIL}-action tail of a {n_log}-action game -- a ledger filtered "
+        f"from the slice would have lost the earlier half-suits")
 
 
 def test_every_declaration_is_classified_and_the_classes_are_exclusive():

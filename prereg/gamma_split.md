@@ -108,3 +108,86 @@ it would say the route to that value is not "believe the same model harder on
 one side". The remaining routes are a genuinely different teammate model
 (conditioning on our own policy's likelihood rather than a depth heuristic,
 task #53) or a change to the declaration policy rather than to the belief.
+
+---
+
+# OUTCOME, recorded 2026-08-29
+
+**The split is REFUTED on its own pre-registered rule, and refuted in the
+direction opposite to the one predicted.**
+
+`results/gamma_split.json`, 60 games, 1,557 decisions, 16,342 teammate-pool
+cards and 24,565 opponent-pool cards. Paired by decision against the incumbent
+cell (0.35, 0.35).
+
+## The hypothesised direction fails
+
+The prediction was `gamma_team > gamma_opp`: teammate reads are worth 2.6x
+opponent reads, so believe the teammate model harder. That cell is (0.35, 0.70):
+
+| | paired difference vs incumbent |
+|---|---|
+| teammate NLL | **-0.0119** [-0.0150, -0.0088] |
+| teammate top-1 | **-0.0093** [-0.0128, -0.0057] |
+
+Condition 1 passes and **condition 2 fails**: the top-1 interval lies entirely
+below zero, so the posterior names the true holder *less* often. This is exactly
+the failure the co-primary was written to catch, and it is why it was written
+before the numbers were read. The NLL gain is mass being spread, not the read
+improving, and the allocation decision reads the argmax.
+
+## Two cells pass both conditions, and neither is the hypothesis
+
+| cell | dNLL (team) | dtop1 (team) | |
+|---|---|---|---|
+| (0.70, 0.35) | -0.0036 [-0.0070, -0.0003] | +0.0070 [+0.0025, +0.0115] | off-diagonal |
+| (0.70, 0.70) | **-0.0121** [-0.0173, -0.0069] | +0.0004 [-0.0047, +0.0055] | **diagonal** |
+
+The best passing cell is **on the diagonal**. `gamma = 0.70` on both sides beats
+every split in the grid, including the off-diagonal cell that passes, by more
+than 3x. So what this run found is that the incumbent `gamma` is too low --- not
+that the two sides deserve different numbers.
+
+The one off-diagonal cell that does pass has `gamma_team < gamma_opp`: believe
+the teammate model *less*. That is the reverse of the hypothesis, its effect is
+a third the size of the diagonal cell's, and its interval very nearly touches
+zero. It is not evidence for a split in any useful sense.
+
+## This is not even a new result about gamma
+
+Table~\ref{tab:posterior} in the paper already reports the posterior sweep that
+found `gamma = 0.45`-`0.60` beating `0.35` on NLL. The engine ships `0.35`
+anyway, because the belief improving did not carry into play. So the diagonal
+cell here **replicates a known belief-side result on a new pool** and licenses
+nothing: that road was already walked.
+
+## Verdict
+
+**Withdrawn. No play experiment is run.** The direction is closed as specified
+under "What a null would mean":
+
+> That the two jobs are not separable by a scalar. That would not refute the
+> underlying ceiling-split finding --- teammates would still be worth 2.6x ---
+> but it would say the route to that value is not "believe the same model
+> harder on one side".
+
+That is precisely what happened. The teammate value measured by the ceiling
+split is real and remains unclaimed; reweighting the existing depth heuristic is
+not the way to it. The remaining routes are unchanged:
+
+* a genuinely different teammate model --- conditioning on our own policy's
+  likelihood rather than on a depth heuristic (task #53), which is the only
+  route that uses the fact that our teammates run *our* policy and we possess
+  it; or
+* a change to the declaration policy rather than to the belief, which
+  `results/declarer_holding_self.json` argues against: every voluntary and
+  exact-path declaration is already correct, so there is no calibration left to
+  win there.
+
+## What the instrument cost, and what it bought
+
+Two runs of about twenty minutes each. It bought the refutation of a direction
+that had two strong published results pointing at it, before a single duel was
+played. The first run, unpaired, would have licensed the play experiment: its
+grid showed the best team NLL off the diagonal and said so. Pairing by decision
+and adding the top-1 co-primary is what turned a licence into a withdrawal.

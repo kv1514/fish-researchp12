@@ -312,12 +312,38 @@ def main(n_games: int = 40, stride: int = 4, out: str | None = None) -> int:
                 wins.append(r)
         print("\nVERDICT")
         if wins:
-            w = min(wins, key=lambda r: r["paired_team"]["nll"][0])
-            print(f"  {len(wins)} cell(s) improve teammate-side NLL with an "
-                  f"interval clear of zero AND do not significantly worsen "
-                  f"top-1. Best: g_opp={w['gamma_opp']:.2f}, "
-                  f"g_team={w['gamma_team']:.2f}. A play experiment is "
-                  f"licensed; pre-register it before running.")
+            # The question is not "does some cell beat the incumbent" -- a
+            # uniform gamma raise can do that, and the posterior sweep in
+            # tab:posterior already showed gamma 0.45-0.60 beating 0.35 on NLL
+            # years before this. The question is whether pricing the two sides
+            # APART beats pricing them together, so an off-diagonal cell has to
+            # beat the best DIAGONAL cell, not merely the incumbent.
+            diag = [r for r in wins if r["gamma_opp"] == r["gamma_team"]]
+            off = [r for r in wins if r["gamma_opp"] != r["gamma_team"]]
+            best = min(wins, key=lambda r: r["paired_team"]["nll"][0])
+            print(f"  {len(wins)} cell(s) pass both pre-registered conditions "
+                  f"({len(off)} off-diagonal, {len(diag)} diagonal).")
+            if diag and off:
+                bd = min(diag, key=lambda r: r["paired_team"]["nll"][0])
+                bo = min(off, key=lambda r: r["paired_team"]["nll"][0])
+                print(f"  best diagonal     "
+                      f"({bd['gamma_opp']:.2f}, {bd['gamma_team']:.2f}): "
+                      f"dNLL {bd['paired_team']['nll'][0]:+.4f}")
+                print(f"  best off-diagonal "
+                      f"({bo['gamma_opp']:.2f}, {bo['gamma_team']:.2f}): "
+                      f"dNLL {bo['paired_team']['nll'][0]:+.4f}")
+            if best["gamma_opp"] == best["gamma_team"]:
+                print(f"  The best passing cell is DIAGONAL "
+                      f"(gamma={best['gamma_opp']:.2f} on both sides), so what "
+                      f"this run found is that the incumbent gamma is too LOW, "
+                      f"not that the sides deserve different numbers.")
+                print("  THE SPLIT IS REFUTED. No play experiment on it.")
+            else:
+                print(f"  Best passing cell is OFF-DIAGONAL: "
+                      f"g_opp={best['gamma_opp']:.2f}, "
+                      f"g_team={best['gamma_team']:.2f}. The split beats every "
+                      f"uniform gamma in the grid; a play experiment is "
+                      f"licensed. Pre-register it before running.")
         else:
             print("  NO cell improves teammate-side NLL on a paired interval "
                   "clear of zero while also not worsening top-1.")

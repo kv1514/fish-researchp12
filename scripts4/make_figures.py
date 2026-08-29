@@ -348,54 +348,54 @@ def fig_ceiling():
 
 
 def fig_gamma_split():
-    """Posterior accuracy when the two sides of the table are priced apart."""
+    """Why the split was withdrawn: the two scores move opposite ways.
+
+    Paired against the incumbent cell, by decision. Sharpening the model on our
+    own side improves the proper score and makes the posterior name the true
+    holder LESS often -- mass spreading, not the read improving. The allocation
+    decision reads the argmax, so that is a worse belief for the job it has.
+    """
     path = ROOT / "results" / "gamma_split.json"
     if not path.exists():
         print("  (skipping gammasplit: results/gamma_split.json not present)")
         return
     d = json.loads(path.read_text())
-    rows = d["rows"]
-    fig, ax = plt.subplots(figsize=(6.3, 2.4))
-    opps = sorted({r["gamma_opp"] for r in rows})
-    for i, go in enumerate(opps):
-        sel = sorted((r for r in rows if r["gamma_opp"] == go),
-                     key=lambda r: r["gamma_team"])
-        col = BLUE if go == 0.35 else LGRAY
-        lw = 1.6 if go == 0.35 else 1.0
-        ax.plot([r["gamma_team"] for r in sel], [r["team_nll"] for r in sel],
-                "-o", ms=3.5, lw=lw, color=col, mec="none",
-                zorder=4 if go == 0.35 else 2)
-        ax.annotate(rf"$\gamma_{{\mathrm{{opp}}}}={go:g}$",
-                    (sel[-1]["gamma_team"] + 0.06, sel[-1]["team_nll"]),
-                    fontsize=7, color=col, va="center")
-    base = next((r for r in rows if r["gamma_opp"] == 0.35
-                 and r["gamma_team"] == 0.35), None)
-    if base:
-        ax.plot([0.35], [base["team_nll"]], "o", ms=7, mfc="none",
-                mec=ORANGE, mew=1.4, zorder=5)
-        ax.annotate("incumbent\n(one $\\gamma$ for both sides)",
-                    (0.35, base["team_nll"]), textcoords="offset points",
-                    xytext=(8, 12), fontsize=7, color=ORANGE)
-    ax.set_xlabel(r"$\gamma_{\mathrm{team}}$ "
-                  "(sharpness applied to our own side's asks)")
-    ax.set_ylabel("teammate-side\nposterior NLL", fontsize=8)
-    ax.annotate(f"{d['decisions']:,} decisions over {d['n_games']} games; "
-                "lower is better",
-                (0.98, 0.94), xycoords="axes fraction", ha="right",
+    sel = sorted((r for r in d["rows"]
+                  if r["gamma_opp"] == 0.35 and r.get("paired_team")),
+                 key=lambda r: r["gamma_team"])
+    xs = [r["gamma_team"] for r in sel]
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.3, 2.3), sharex=True)
+    for ax, key, lab, col in ((a1, "nll", "paired $\\Delta$ NLL", BLUE),
+                              (a2, "top1", "paired $\\Delta$ top-1", ORANGE)):
+        m = [r["paired_team"][key][0] for r in sel]
+        lo = [r["paired_team"][key][1] for r in sel]
+        hi = [r["paired_team"][key][2] for r in sel]
+        ax.axhline(0.0, color=GRAY, lw=0.8, zorder=1)
+        for x, a, b in zip(xs, lo, hi):
+            ax.plot([x, x], [a, b], color=col, lw=1.2, zorder=2)
+        ax.plot(xs, m, "-o", ms=4, lw=1.3, color=col, mec="none", zorder=3)
+        ax.set_xlabel(r"$\gamma_{\mathrm{team}}$")
+        ax.set_ylabel(lab, fontsize=8)
+        ax.set_xticks([0, 0.35, 0.7, 1.0, 1.5, 2.0, 3.0])
+        ax.set_xticklabels(["0", ".35", ".7", "1", "1.5", "2", "3"])
+    a1.annotate("better", (0.02, 0.06), xycoords="axes fraction",
                 fontsize=7, color=GRAY)
-    fig.tight_layout()
+    a2.annotate("worse", (0.02, 0.06), xycoords="axes fraction",
+                fontsize=7, color=GRAY)
+    a1.annotate("NLL improves\naround 0.7", (0.30, 0.30),
+                xycoords="axes fraction", fontsize=7, color=BLUE)
+    a2.annotate("and top-1 falls\nthe whole way", (0.42, 0.62),
+                xycoords="axes fraction", fontsize=7, color=ORANGE)
+    fig.suptitle(rf"$\gamma_{{\mathrm{{opp}}}}$ held at the incumbent 0.35; "
+                 rf"{d['decisions']:,} decisions, paired by decision",
+                 fontsize=8, color=GRAY, y=0.99)
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
     fig.savefig(FIGS / "gammasplit.pdf")
     plt.close(fig)
 
 
 def fig_pairing():
-    """Pairing's value is set by how often a knob fires, not by its size.
-
-    Left: variance-reduction factor against the share of deals on which the two
-    arms produced an identical margin -- i.e. the knob never changed a decision.
-    Right: the same factor against the size of the effect being measured, which
-    is what people reach for when sizing a run, and which carries nothing.
-    """
+    """Pairing's value is set by how often a knob fires, not by its size."""
     d = _load("pairing_value.json")
     pts = []
     for run in d["runs"]:
@@ -414,7 +414,6 @@ def fig_pairing():
     top = max(pts, key=lambda q: q[2])
     a1.annotate(f"{top[2]:.0f}x", (top[0], top[2]), textcoords="offset points",
                 xytext=(-6, -2), ha="right", fontsize=7.5, color=BLUE)
-
     a2.plot([y for _, y, _ in pts], [e for _, _, e in pts], "o", ms=5,
             color=LGRAY, mec="none")
     a2.set_xlabel("size of the effect being measured\n(sets per pair)")
