@@ -140,3 +140,47 @@ back to the turn-spending signalling channel, which is measured at
 Nothing. Scored off-policy with the decoder off during play, so it measures
 whether the message decodes into a better belief, not whether a team running
 both sides plays better. A pass licenses a duel, registered separately.
+
+---
+
+# OUTCOME, recorded 2026-08-29
+
+**The locating book clears its gate**, at both sender settings, with the
+strongest top-1 of any book measured.
+
+| gate | arm | teammate NLL | teammate top-1 |
+|---|---|---|---|
+| 0.02 | flat 0.25 | -0.0258 [-0.0313, -0.0204] | +0.0232 [+0.0150, +0.0314] |
+| 0.02 | flat 0.5 | **-0.0302** [-0.0396, -0.0208] | +0.0254 [+0.0155, +0.0353] |
+| 0.05 | flat 0.25 | -0.0282 [-0.0365, -0.0198] | +0.0289 [+0.0199, +0.0378] |
+| 0.05 | flat 0.5 | **-0.0315** [-0.0469, -0.0162] | **+0.0408** [+0.0303, +0.0512] |
+
+Against the amended condition 2 --- top-1 at least as good as the **aimed** depth
+book's +0.0351 --- the best passing arm gives **+0.0408**, which clears it. Both
+gates pass. Validity: V1 62.4%/69.6%, V2' 29.5%/26.5%, V3 91.9%/94.5%.
+
+It is worth being precise about what did and did not happen, given this
+document's history. The *reason* it was built --- that aiming had failed and a
+location was needed to rescue it --- **was wrong**, and is retracted at the top.
+The book itself works anyway, on its own registered criteria.
+
+Its NLL (-0.0315) is smaller than the aimed depth book's (-0.0535); its top-1
+(+0.0408) is larger (+0.0392). Its arms also degrade faster: at `beta = 1.2` its
+NLL is already significantly *positive* (+0.0339) where the aimed depth book is
+still negative, which is what a wider, more aliased payload should look like.
+
+## The pattern across all four books, which is the finding
+
+| book | teammate NLL | teammate top-1 |
+|---|---|---|
+| depth, unaimed, gate 0.10 | -0.0317 | **-0.0049** |
+| depth, aimed | **-0.0535** | +0.0392 |
+| locate (aimed by construction), 0.02 | -0.0302 | +0.0254 |
+| locate (aimed by construction), 0.05 | -0.0315 | +0.0408 |
+
+**Every book that aims at the most-unlocated half-suit improves top-1; the one
+that does not, does not.** Whether the payload is a depth or a location barely
+matters beside that. The variable that buys the argmax is *where the message
+points*, not *what it says* --- which is the opposite of the hypothesis this
+document was written to test, and is only visible because the book was built
+and measured anyway.

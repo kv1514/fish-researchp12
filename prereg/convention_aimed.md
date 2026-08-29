@@ -95,3 +95,59 @@ is still scored off-policy with the decoder off during play, and the sender is
 still paying real probability (0.0090 per encoded ask at this gate) that a
 belief instrument cannot see. This project has already measured one case where a
 better belief bought nothing in play.
+
+---
+
+# OUTCOME, recorded 2026-08-29
+
+**Replicated on all three conditions.** Fresh seed base 880,000 --- new deals,
+new agent RNG streams, new scoring RNG --- 40 games, 1,169 scored decisions.
+
+| | measured | condition | |
+|---|---|---|---|
+| **primary** NLL at `beta = 0.8` | **-0.0535** [-0.0683, -0.0387] | interval entirely below zero | PASS |
+| **co-primary** top-1 at `beta = 0.8` | **+0.0392** [+0.0301, +0.0484] | interval entirely **above** zero | PASS |
+| magnitude, NLL | -0.0535 | at most -0.0356 | PASS |
+| magnitude, top-1 | +0.0392 | at least +0.0176 | PASS |
+
+Every arm from 0.25 to 1.2 clears both gates, and **top-1 is significantly
+positive at all five**, 2.0 included.
+
+## The withdrawal conditions
+
+**The within-run unaimed control reproduces almost exactly**, which is the
+condition that would have voided everything:
+
+| arm | original (seed 560,000) | replication (880,000) | ratio |
+|---|---|---|---|
+| flat 0.25 | -0.0117 | -0.0111 | 0.95 |
+| flat 0.5 | -0.0183 | -0.0175 | 0.96 |
+
+V1 73.7% (floor 25%), V3 93.9% (floor 50%). The NLL optimum is still at
+`beta = 0.8`, so the location condition holds --- though 0.5 (-0.0533) and 0.8
+(-0.0535) are indistinguishable, and the honest statement is that the optimum
+lies somewhere in 0.5-0.8 rather than at either.
+
+## Where it regressed and where it did not
+
+| | exploratory | replication |
+|---|---|---|
+| NLL at 0.8 | -0.0712 | **-0.0535** |
+| top-1 at 0.8 | +0.0351 | **+0.0392** |
+
+NLL came down by a quarter, which is what reading ten arms and reporting the
+best one costs, and is exactly why condition 3 was written. **Top-1 did not
+regress; it went up.** The claim this document was written to protect --- that
+this is the first belief change in the project to improve the argmax --- is the
+part that held.
+
+## What this licenses
+
+A duel, and only a duel: `prereg/convention_duel.md`, registered before this
+outcome was read, 3,000 duplicate-deal pairs at a **+0.15 sets/game** ship bar.
+The instrument still cannot see what the sender pays (0.0090 probability per
+encoded ask, on 74% of our asks here) or what happens when the encoder and
+decoder are both live and the belief that picks the ask is itself shifted.
+
+Nothing ships on a belief result. This project has already measured one case
+where a better posterior was worth nothing in play.
