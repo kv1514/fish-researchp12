@@ -106,3 +106,76 @@ per ask and is out of reach of the sampler's inner loop by orders of magnitude.
 In that case the honest conclusion is that the teammate value measured by the
 ceiling split is **not reachable through the choice model at all**, and the
 remaining lever is the declaration policy rather than the belief.
+
+---
+
+# OUTCOME, recorded 2026-08-29
+
+**The bar is cleared, and the finding is larger than the one predicted.**
+
+`results/choice_basis.json`, 17,005 choices over 200 games, held out at the game
+level in five folds.
+
+| model | held-out nats over uniform | |
+|---|---|---|
+| M1 `depth0^a` (shipped) | **+1,400** | replicates the paper's 1,403 |
+| M2 `held^a` | **+6,055** | replicates the paper's 6,057 |
+| M3 `held^a missing^b` | +6,122 | control: +68 over M2, curvature |
+| M4 `unlocated^a` | **+6,736** | *alone, it beats depth alone* |
+| M5 `held^a unlocated^b` | **+9,198** | |
+| M6 `+ depth0^c` | +9,197 | initial-deal depth is redundant |
+
+**Primary outcome: D = M5 − M2 = +3,143 nats**, against a bar of 1,000.
+
+Every withdrawal condition passes. The replication is exact to a tenth of a nat
+on both reference models. `unlocated_now` is not a deterministic function of any
+other recorded feature. M5 beats M4. The coefficient on `unlocated` is negative
+in all five folds and tightly clustered, −3.91 to −4.02.
+
+**The sign is the interesting part, and it is the opposite of "opportunity".**
+The coefficient is strongly *negative*: a player is markedly **less** likely to
+ask in a half-suit where many cards are still unplaced. They work the suits they
+have already pinned down. The paper's framing — that a shallow suit is
+attractive because it "offers more cards to ask for" — has the mechanism
+backwards. What is attractive is a suit you can already read.
+
+And **`unlocated` alone (+6,736) out-predicts depth alone (+6,055)**. The
+shipped model conditions on the weaker of the two variables.
+
+## A structural caveat, stated BEFORE building rather than after
+
+Clearing this bar licenses a build, but there is a reason to expect the build to
+underdeliver, and it needs to be on the record now.
+
+`unlocated_now` is computed from the public record. It is therefore **identical
+in every candidate world**. Write the choice probability as
+
+    pi(H* | w) = f(held_w(H*), u(H*)) / sum over H' legal in w of f(held_w(H'), u(H'))
+
+and take the likelihood ratio between two candidate worlds. With
+`f = held^a * u^b`, the factor `u^b` in the numerator **cancels exactly**,
+because `u` does not depend on `w`. The feature's entire contribution to
+world discrimination is through the *denominator*: which half-suits are legal
+under `w`, and how `u` reweights them relative to one another.
+
+Two consequences:
+
+1. The +3,143 nats measures how well the feature predicts a **choice given a
+   known hand**. That is not the same quantity as how well it **inverts a choice
+   into a hand**, and this analysis says the second is strictly smaller.
+2. The current sampler does not compute a per-world denominator at all — it is
+   correct to drop it for the depth-only model, since that model's normaliser is
+   the public hand size. Adding `unlocated` requires computing the normaliser
+   per world: a sum over the asker's legal half-suits, inside the inner loop.
+
+So the build is licensed, the cost is real, and the expected benefit is bounded
+by a channel narrower than the fit suggests. That prediction is recorded here so
+that the posterior measurement can confirm or refute it rather than be explained
+by it afterwards.
+
+## Next gate
+
+Per the rule above: build into `oppmodel.py` behind an inert default, then
+measure with the posterior-accuracy instrument under its own pre-registration,
+with **both** an NLL and a top-1 criterion — the pair that refuted the split
+gamma. Nothing ships on a fit.
