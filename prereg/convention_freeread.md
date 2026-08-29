@@ -116,3 +116,65 @@ The one thing it does establish, and the reason it was worth running before the
 belief measurement: at `beta = 0.23` with the encoder deleted, the free-read
 configuration is **not harmful**. The upper bound on the champion's side is
 +0.140 sets, against the +1.467 that the mis-priced encoder cost.
+
+---
+
+# OUTCOME, recorded 2026-08-29: null
+
+**3,000 duplicate-deal pairs. Y minus X: -0.002 [-0.127, +0.123].**
+
+1158 W / 683 T / 1159 L. One game apart in three thousand.
+
+The pre-registered rule fires unambiguously:
+
+> interval contains 0 --> the free signal is too weak to matter in play.
+> Recorded, and the decoder stays at zero.
+
+**The decoder stays at zero. Nothing ships.**
+
+The 1,200-pair interim read +0.055 [-0.140, +0.250] and its point estimate
+cleared the bar. It was noise, and the extension is the only reason that is
+known. Requiring it *before* the number existed is what stopped a
+straddle from becoming a result.
+
+## One overstatement in this document, corrected
+
+It says Y's policy is "byte-for-byte the champion's apart from the belief it
+reads". The *code* is identical; the *behaviour* is not, because the objective
+reads the posterior and a different posterior picks different asks. The
+qualification was there but the framing was too strong, and the withdrawal
+condition on moves/game assumed near-identical play rather than merely
+near-identical code. It does not affect the outcome --- W and L differ by one
+game and gifts by 18 in 3,000 --- but the sentence was looser than the design.
+
+## What this closes, and it is larger than this document
+
+Put beside the belief results, this settles the whole channel direction:
+
+| | |
+|---|---|
+| the channel exists | 3.57 legal cards an ask, **1.72 bits**, a fact about the rules |
+| the message decodes | teammate NLL **-0.0535** [-0.0683, -0.0387], replicated on fresh seeds |
+| it sharpens the argmax | top-1 **+0.0392** [+0.0301, +0.0484] --- the only such result in this project |
+| sending it costs | **-1.467** sets/game at the mis-priced gate; ~0 at the free gate |
+| reading the free part is worth | **-0.002** [-0.127, +0.123] |
+
+So: **a measurably, replicably better model of a teammate's card choice is
+worth zero sets in play.**
+
+That speaks directly to the information ceiling. Handing a seat its teammates'
+true cards is worth **+3.41** sets/game
+(`prereg/information_ceiling_split.md`). The gap between that and zero is not
+bridged by improving the *inference*, and this is now the third measurement
+saying so --- after the split gamma and the at-ask covariate. What the ceiling
+measures is the value of *knowing*, and what these three measure is the value
+of *knowing slightly better*, which turns out to be nothing.
+
+The remaining hypothesis worth stating: the ceiling's +3.41 may be almost
+entirely a **declaration-timing** effect rather than a card-reading one. A seat
+handed the true deal does not read better; it declares at moments it would
+otherwise never dare to. If so, no amount of belief accuracy reaches it, and
+the lever is the declaration policy --- which
+`results/declarer_holding_self.json` argues is already calibrated on every
+voluntary and exact path, leaving only the compelled ones, where 42.7% of
+forced declarations are wrong because there is nothing better to do.
