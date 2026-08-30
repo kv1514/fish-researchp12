@@ -1048,9 +1048,29 @@ decision**.
 
 That is a real answer to one third of the headroom question, and it is the
 first time it has been answered with enough power to matter. **For the ask
-channel, one-step improvement is exhausted.** It bounds neither the declaration
-channel nor multi-step improvement, and it is measured against a 24-world
-rollout rather than against truth.
+channel, one-step improvement is exhausted.**
+
+## A CORRECTION TO WHAT THAT SENTENCE COVERS
+
+`scripts4/ask_regret.py` sets `SPEC = {"opponent_gamma": 0.35}` and uses it in
+three places -- the agents that harvest positions, the agents that roll a
+position out, and the agent whose choice is the incumbent. **That is not the
+champion.** `V06_DEPLOYED` carries `w_lookahead = 0.25` at depth 3 beam 4 and
+480 draws; the measured policy has no belief-space lookahead and 160.
+
+So the result above bounds the headroom of **the ask objective in isolation**,
+which is a cleaner thing to have measured in one way -- it is the hand-designed
+objective on its own, unassisted -- and is **not** a bound on the champion's.
+The distinction was not stated when the figure was first written here, and this
+paragraph is the correction. `ASK_REGRET_SPEC=champion` now switches the
+instrument, and the run prints which policy it measured.
+
+It bounds neither the declaration channel nor multi-step improvement, and it is
+measured against a 24-world rollout rather than against truth. And the
+declaration channel is excluded **by construction**, not by omission:
+`ask_regret` discards every position where the policy chose to declare, with the
+line `if not isinstance(chosen, Ask): continue  # a claim: decided from the
+posterior, not searched`.
 
 ## A prediction of mine, stated in advance and refuted
 

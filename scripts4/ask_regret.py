@@ -86,7 +86,28 @@ from fish4.askfeat import AskWeights, DecisionContext, score_asks
 from fish4.posterior import Posterior
 from fish4.registry4 import make_agent
 
-SPEC = {"opponent_gamma": 0.35}
+#: WHICH POLICY IS BEING MEASURED, and it is not the champion by default.
+#:
+#: This is the ask objective in ISOLATION -- no belief-space lookahead, 160
+#: draws -- and it is used in three places: the agents that harvest positions,
+#: the agents that roll a position out, and the agent whose choice is the
+#: incumbent. So a regret measured here bounds the headroom of THAT policy.
+#: V06_DEPLOYED carries w_lookahead 0.25 at depth 3 beam 4 and 480 draws, and
+#: is therefore a different policy making different choices.
+#:
+#: Set ASK_REGRET_SPEC=champion to measure V06_DEPLOYED instead. It is much
+#: slower -- the lookahead runs at every step of every rollout -- which is why
+#: the isolated objective is the default and why the distinction has to be
+#: stated rather than assumed.
+def _spec():
+    import os
+    if os.environ.get("ASK_REGRET_SPEC", "").lower() == "champion":
+        from fish4.registry4 import V06_DEPLOYED
+        return dict(V06_DEPLOYED[1])
+    return {"opponent_gamma": 0.35}
+
+
+SPEC = _spec()
 GAMMA = 0.35
 MAX_ACTIONS = 400
 
@@ -418,8 +439,13 @@ def main(argv):   # noqa: C901
     min_resolved = int(argv[2]) if len(argv) > 2 else 5
     dest = Path(argv[3]) if len(argv) > 3 else ROOT / "results" / "ask_regret.json"
 
+    import os
+    which = ("V06_DEPLOYED (champion)"
+             if os.environ.get("ASK_REGRET_SPEC", "").lower() == "champion"
+             else "the ask objective in isolation, no lookahead, 160 draws")
     print(f"one-step policy-improvement regret | {n_positions} positions "
-          f"| {n_worlds} worlds/action | >= {min_resolved} half-suits resolved\n")
+          f"| {n_worlds} worlds/action | >= {min_resolved} half-suits resolved")
+    print(f"POLICY MEASURED: {which}\n  {SPEC}\n")
     rows = measure(n_positions, n_worlds, min_resolved,
                    n_games=int(argv[4]) if len(argv) > 4 else 0)
     if not rows:
