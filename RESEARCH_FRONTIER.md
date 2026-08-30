@@ -951,7 +951,33 @@ value; they are the price of resolving half-suits that had to be resolved by
 somebody.
 
 Six directions gave the engine a better *belief* and none paid. This one gave it
-a better *position*, measured and achieved, and it did not pay either. Together
-they say something the ledger alone never could: **what is left in this engine
-is not a defect to be fixed.** Any further gain has to come from a different
-policy class, not from a correction to this one.
+a better *position*, measured and achieved, and it did not pay either.
+
+## A CORRECTION TO THE PARAGRAPH THAT WAS HERE
+
+The first version of this section closed with: *"what is left in this engine is
+not a defect to be fixed. Any further gain has to come from a different policy
+class, not from a correction to this one."*
+
+**That is a stronger claim than anything measured supports, and it was mine.**
+Seven nulls in one family establish that the seven interventions tried did not
+pay. They do not establish that no correction can. The two instruments that
+would test it are both under-powered and one says so in its own docstring:
+
+* `results/exploitability.json` — a single seat deviating to a rollout best
+  response gains **−0.4875 [−1.244, +0.269]** over 80 pairs. `scripts4/
+  exploitability.py` states the asymmetry outright: *"gain <= 0 — weak evidence
+  only. PIMC's strategy fusion can make the responder play badly, so a failure
+  to find an exploit is not evidence that none exists."* The responder ran at
+  beam 3 and 3 worlds.
+* `results/ask_regret.json` — the ask objective's chosen ask against the best
+  available by rollout, **−0.0968 [−0.302, +0.109]** over **37 positions**. The
+  interval contains zero and is wider than the +0.15 ship bar. Its own
+  `mean_corr_objective_vs_rollout` is **+0.164 ± 0.072**: the objective barely
+  tracks the rollout value it is being compared against.
+
+So the honest statement is the weaker one: **seven pre-registered attempts to
+correct this policy have failed, and the headroom left in it has never been
+measured with enough power to say whether an eighth could succeed.** Which of
+those two sentences is true is a measurement, not a conclusion, and it is the
+next thing to run rather than the last thing to assert.

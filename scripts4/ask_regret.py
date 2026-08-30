@@ -274,8 +274,17 @@ def attenuation(n_actions: int, n_worlds: int, noise: float,
 
 
 def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
-            seed0: int = 4242):
-    positions = harvest(60, min_resolved, n_positions)
+            seed0: int = 4242, n_games: int = 0):
+    # The harvest game count used to be hardcoded at 60, which silently capped
+    # this instrument: asking for 400 positions returned the ~37 that 60 games
+    # happen to contain, and the run reported 37 as though that were the
+    # requested sample. The published mean_regret of -0.0968 [-0.302, +0.109]
+    # was measured on exactly that cap. Default now scales with the request.
+    positions = harvest(n_games or max(60, n_positions // 2), min_resolved,
+                        n_positions)
+    if len(positions) < n_positions:
+        print(f"  harvest returned {len(positions)} of {n_positions} asked "
+              f"for; raise n_games if that is the binding constraint")
     rows = []
     missed = [0]
     t0 = time.time()
@@ -411,7 +420,8 @@ def main(argv):   # noqa: C901
 
     print(f"one-step policy-improvement regret | {n_positions} positions "
           f"| {n_worlds} worlds/action | >= {min_resolved} half-suits resolved\n")
-    rows = measure(n_positions, n_worlds, min_resolved)
+    rows = measure(n_positions, n_worlds, min_resolved,
+                   n_games=int(argv[4]) if len(argv) > 4 else 0)
     if not rows:
         print("no usable positions")
         return
