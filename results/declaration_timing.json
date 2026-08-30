@@ -3,96 +3,96 @@
     "wrong_distribution_outcome": "opponent"
   },
   "bridge_rev": 2,
-  "n_games": 8,
+  "n_games": 600,
   "is_a_ceiling_study": true,
   "arms": {
     "D_declare": {
       "mode": "declare",
-      "ceiling": 1.5,
+      "ceiling": 1.0766666666666667,
       "ci95": [
-        -1.0393700006103876,
-        4.039370000610388
+        0.7979335084238989,
+        1.3553998249094343
       ],
-      "margin": 4.75
+      "margin": 3.38
     },
     "K_ask": {
       "mode": "ask",
-      "ceiling": -1.25,
+      "ceiling": 0.76,
       "ci95": [
-        -3.2012303810672895,
-        0.7012303810672895
+        0.47308516566905545,
+        1.0469148343309445
       ],
-      "margin": 2.0
+      "margin": 3.0633333333333335
     },
     "T_both": {
       "mode": "both",
-      "ceiling": 1.75,
+      "ceiling": 3.41,
       "ci95": [
-        -0.5258075489812399,
-        4.0258075489812395
+        3.1624929671999693,
+        3.657507032800031
       ],
-      "margin": 5.0
+      "margin": 5.713333333333333
     }
   },
   "prereg": "prereg/declaration_timing.md",
-  "margin_A": 3.25,
+  "margin_A": 2.3033333333333332,
   "shares": {
-    "S_D": 0.8571428571428571,
-    "S_K": -0.7142857142857143,
-    "D_plus_K": 0.25,
-    "T": 1.75
+    "S_D": 0.31573802541544477,
+    "S_K": 0.22287390029325513,
+    "D_plus_K": 1.8366666666666667,
+    "T": 3.41
   },
   "verdict": "SPLIT",
   "validity": {
     "A_honest": {
-      "declarations": 45,
-      "wrong": 0,
-      "wrong_rate": 0.0,
+      "declarations": 2997,
+      "wrong": 97,
+      "wrong_rate": 0.0323656990323657,
       "pinned_per_game": 0.0,
       "pinned_first_decision": 0.0,
-      "mean_move_index": 70.33333333333333
+      "mean_move_index": 77.82716049382717
     },
     "D_declare": {
-      "declarations": 47,
-      "wrong": 0,
-      "wrong_rate": 0.0,
-      "pinned_per_game": 44.0,
+      "declarations": 3261,
+      "wrong": 2,
+      "wrong_rate": 0.0006133088009812941,
+      "pinned_per_game": 42.67,
       "pinned_first_decision": 18.0,
-      "mean_move_index": 56.87234042553192
+      "mean_move_index": 61.75559644280895
     },
     "K_ask": {
-      "declarations": 50,
-      "wrong": 8,
-      "wrong_rate": 0.16,
-      "pinned_per_game": 49.375,
+      "declarations": 3978,
+      "wrong": 617,
+      "wrong_rate": 0.15510306686777275,
+      "pinned_per_game": 50.663333333333334,
       "pinned_first_decision": 18.0,
-      "mean_move_index": 62.8
+      "mean_move_index": 66.49974861739568
     },
     "T_both": {
-      "declarations": 51,
+      "declarations": 4078,
       "wrong": 0,
       "wrong_rate": 0.0,
-      "pinned_per_game": 42.375,
+      "pinned_per_game": 40.69833333333333,
       "pinned_first_decision": 18.0,
-      "mean_move_index": 36.568627450980394
+      "mean_move_index": 39.191025012260916
     }
   },
   "validity_ok": {
-    "V1 D never misdeclares": true,
+    "V1 D never misdeclares": false,
     "V2 K misdeclares near the honest rate": false,
-    "V3 the anchor T-A excludes zero": false,
+    "V3 the anchor T-A excludes zero": true,
     "V4 the cheat is the same size at the first decision": true
   },
   "bridge_fallbacks": 0,
   "replication": {
     "A_honest": {
-      "got": 3.25,
+      "got": 2.3033333333333332,
       "published": 2.3033
     },
     "T_both": {
-      "got": 5.0,
+      "got": 5.713333333333333,
       "published": 5.7133
     }
   },
-  "seconds": 9.11039300899995
+  "seconds": 444.9345531150001
 }

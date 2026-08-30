@@ -60,6 +60,12 @@ AGENT0 = 55_000
 #: side="team": this decomposes the TEAMMATE ceiling, not omniscience.
 ARMS = {"A_honest": None, "D_declare": "declare",
         "K_ask": "ask", "T_both": "both"}
+
+#: A smoke run must not overwrite a real one. On 2026-08-28 an eight-game check
+#: replaced an 1,800-game result in this repository and nothing downstream could
+#: tell; this file was written without the guard and did it again on its own
+#: first smoke run, so the guard is here now.
+MIN_GAMES_TO_WRITE = 200
 PUBLISHED = {"A_honest": 2.3033, "T_both": 5.7133}
 
 
@@ -222,6 +228,39 @@ def report(rows) -> dict:
               f"({100 * w / d if d else 0:>5.1f}%)  "
               f"pinned 1st {pf:>5.1f} /game {pc:>6.1f}  "
               f"mean move {mv:>6.1f}")
+    # WHY a wrong declaration was wrong, and by WHICH path it was reached.
+    # Both are needed to read V1 and V2, and neither was aggregated in the
+    # first run of this script -- so the two VOID conditions could be seen but
+    # not diagnosed.
+    #
+    # ALLOCATION: our team held all six and we named the wrong split. A
+    #   declare-mode oracle holds every teammate card, so this one is genuinely
+    #   impossible for it.
+    # OWNERSHIP: an opponent still held one of the six. side="team" does not
+    #   reveal opponents' cards, so NO amount of teammate knowledge prevents
+    #   this, and a declare-mode oracle can make it like anyone else.
+    print(f"\n  --- why the wrong declarations were wrong ---")
+    print(f"  {'arm':<12}{'allocation':>12}{'ownership':>11}")
+    for arm in ARMS:
+        al = sum(r[arm]["klass"][0] for r in rows)
+        ow = sum(r[arm]["klass"][1] for r in rows)
+        v[arm]["klass"] = {"allocation": al, "ownership": ow}
+        print(f"  {arm:<12}{al:>12}{ow:>11}")
+
+    print(f"\n  --- which path each declaration was reached by ---")
+    allp = sorted({k for r in rows for a in ARMS for k in r[a]["paths"]})
+    print(f"  {'arm':<12}" + "".join(f"{k:>18}" for k in allp))
+    for arm in ARMS:
+        cells, tot = [], {}
+        for k in allp:
+            n_ = sum(r[arm]["paths"].get(k, [0, 0])[0] for r in rows)
+            w_ = sum(r[arm]["paths"].get(k, [0, 0])[1] for r in rows)
+            tot[k] = {"n": n_, "wrong": w_}
+            cells.append(f"{n_:>10}/{w_:<7}")
+        v[arm]["paths"] = tot
+        print(f"  {arm:<12}" + "".join(cells))
+    print("  (declarations / of which wrong)")
+
     out["validity"] = v
     ok = []
     ok.append(("V1 D never misdeclares", v["D_declare"]["wrong"] == 0))
@@ -269,6 +308,10 @@ def main(n_deals: int = 300, n_jobs: int = 4) -> int:
                       file=sys.stderr, flush=True)
     out = report(rows)
     out["seconds"] = time.perf_counter() - t0
+    if len(rows) < MIN_GAMES_TO_WRITE:
+        print(f"\nNOT WRITING: {len(rows)} games is below "
+              f"MIN_GAMES_TO_WRITE={MIN_GAMES_TO_WRITE}.", file=sys.stderr)
+        return 0
     path = ROOT / "results" / "declaration_timing.json"
     path.write_text(json.dumps(out, indent=2))
     print(f"\nwrote {path}")
