@@ -670,3 +670,72 @@ edge: it declares at move **39.2** against our **77.8**.
   regime the ledger has not measured.
 
 Nothing here licenses a change. It licenses a pre-registration.
+
+---
+
+# UPDATE: the mechanism is the action model, and it names a new intervention
+
+`scripts4/split_why.py`, 1,619 frozen (decision, half-suit) pairs, every arm
+re-scored on the **same belief at the same decisions** through
+`FishBot4.build_posterior`, so nothing but the named argument differs.
+
+| arm | predicted | names it right | bias | top-1 vs deployed |
+|---|---|---|---|---|
+| deployed, 480 draws | 0.506 | 0.725 | −0.219 | +0.000 |
+| 1920 draws | 0.494 | 0.738 | −0.244 | +0.013 |
+| 5760 draws | 0.493 | 0.730 | −0.237 | +0.005 |
+| γ = 0.0 | 0.399 | 0.736 | −0.337 | +0.011 |
+| γ = 0.7 | 0.578 | 0.721 | −0.143 | −0.004 |
+| γ = 1.4 | 0.670 | 0.695 | **−0.025** | −0.030 |
+
+**Flat in draws, monotone in γ.** Twelve times the sampling changes the bias by
+0.02; four times the action-model weight nearly eliminates it. The
+under-confidence is not the sampler — it is that `opponent_gamma = 0.35`
+under-weights how much an ask reveals about the asker's hand, and the effect
+concentrates in frozen half-suits because there the record of who asked what is
+the *only* remaining evidence about the split.
+
+Silence was ruled out before running rather than measured: `silence_delta` is
+1.0 on the shipped path so the mechanism never fires, and it re-weights worlds
+by TEAM OWNERSHIP, which is the exact event this measurement conditions on.
+
+## But γ is not free, and the operating point is what decides
+
+`ClaimEvaluator` compares against 0.97, so an average accuracy is the wrong
+number. How often does each arm clear the bar, and how often is it right when
+it does?
+
+| arm | clears 0.97 | right when it does | clears 0.90 | right |
+|---|---|---|---|---|
+| deployed | 277 (17.1%) | **0.996** | 295 (18.2%) | 0.973 |
+| 1920 draws | 263 (16.2%) | 1.000 | 270 (16.7%) | 1.000 |
+| γ = 0.0 | 264 (16.3%) | 0.992 | 265 (16.4%) | 0.992 |
+| **γ = 0.7** | **312 (19.3%)** | **0.974** | 413 (25.5%) | 0.966 |
+| γ = 1.4 | 549 (33.9%) | 0.918 | 750 (46.3%) | 0.881 |
+
+γ = 1.4 doubles the declarations and is **wrong 8.2%** of the time. Under
+`wrong_distribution_outcome="opponent"` a wrong declaration hands the set over,
+so that is not a trade — it is the misdeclaration v1.0 spent its whole error
+ledger measuring. γ = 0.7 is the only arm that buys volume at near-equal
+precision: **+13% more declarations clearing the gate, precision 0.996 → 0.974.**
+
+## The intervention this names, which is new
+
+`opponent_gamma` is global: raising it changes the belief the ASK objective
+ranks on too, and `prereg/gamma_split.md` already refuted a uniform raise on
+teammate top-1 pooled over all cards. So a global raise is not the move.
+
+**The two decisions have different loss functions.** An ask wants the argmax and
+is scored on top-1; a declaration wants a calibrated joint and is scored against
+a 0.97 threshold. Nothing in this engine has ever priced them apart — the claim
+evaluator reads the same posterior the ask ranking does, built with the same γ.
+
+A **claim-specific γ** — the ask objective keeps 0.35, the declaration reads a
+posterior built at a higher one — is the smallest intervention consistent with
+every measurement above. It is not a new objective, not a new search, and not a
+belief the ask channel ever sees.
+
+Unmeasured and needed before anything ships: whether the extra correct
+declarations are ones we would otherwise have won anyway later, which the
+per-opportunity table cannot say and only a duel can; and the cost of a second
+posterior per decision.
