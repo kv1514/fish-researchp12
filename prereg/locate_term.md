@@ -112,3 +112,64 @@ is 1.57 sets a game and says which coupling holds it.
 
 **And a null here would NOT re-open the four closed directions.** They were each
 refuted on their own terms.
+
+---
+
+# SCREEN OUTCOME and AMENDMENT, recorded 2026-08-30
+
+## The screen
+
+400 pairs per arm, identical deals and agent seeds. **Y − X**, positive means
+the `locate` term is stronger:
+
+| w | Y − X | 95% interval |
+|---|---|---|
+| 0.15 | +0.065 | [−0.150, +0.280] |
+| 0.30 | −0.060 | [−0.407, +0.287] |
+| 0.60 | +0.130 | [−0.180, +0.440] |
+
+All three contain zero. The sequence is +0.065, −0.060, +0.130 — up, down, up.
+
+## The withdrawal condition fires, and it fires on my design, not on the term
+
+> If the screen's three arms are not monotone or single-peaked in `w`, the term
+> is behaving unpredictably and the confirmation is not run.
+
+A zigzag is neither, so the condition is met and **the confirmation as
+registered is not run**.
+
+**But the condition was untestable at this sample size, and that is my error.**
+The screen's interval half-widths are 0.215, 0.347 and 0.310 — a mean of
+**0.29, roughly twice the 0.15 ship bar**. Three arms whose true effects all
+sit near zero will order themselves at random under that much noise. "Monotone
+or single-peaked" was a condition this screen could not evaluate *whatever the
+term does*, so its firing carries no information about the term.
+
+That is the third condition in two days that the design could not support. The
+earlier three assumed the arms were comparable in ways the experiment breaks;
+this one assumed a precision the sample size does not provide. Same family:
+**a condition has to be answerable by the run that is meant to answer it.**
+
+## The amendment, and why it is not cherry-picking
+
+The screen cannot select a weight — that is the whole point of the paragraph
+above. So the weight is taken from the **registration itself**, which named one
+a priori before any number existed:
+
+> the weights are in units of probability of success, the convention this basis
+> already uses, and **0.3 is roughly the scale of the shipped `scarce` term**.
+
+**The confirmation runs at `w = 0.3`, 3,000 pairs, fresh seeds** — half-width
+~0.106, which resolves the bar.
+
+`w = 0.3` is the arm with the **worst** point estimate of the three (−0.060).
+Choosing it is the strongest available evidence that the weight was not picked
+off the screen. Had I taken the screen's best (0.60, +0.130) I would have been
+reporting the maximum of three noisy draws as though it were an effect, which
+is precisely what the registration forbade in advance:
+
+> The screen's own number is never the result: picking a maximum out of three
+> and reporting its interval is exactly how a null becomes a finding.
+
+Everything else — the +0.15 ship bar, the four-way decision rule, the secondary
+outcomes, the remaining withdrawal conditions — is unchanged.
