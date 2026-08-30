@@ -1231,3 +1231,41 @@ the same ask contribute an exact zero rather than false precision.
 Until it lands, the honest statement is: **the champion has measurable one-step
 ask headroom (+0.164, excluding zero), and whether the lookahead is the cause is
 unmeasured.**
+
+## RESOLVED: the lookahead is not the cause. It changes 36% of asks and none of the one-step value
+
+`results/actor_compare.json`. 129 positions, both incumbents scored on
+**identical rollouts** — same positions, same worlds, same continuation policy,
+so all three confounds above are held fixed by construction.
+
+| incumbent | regret | ± |
+|---|---|---|
+| the objective in isolation | −0.0136 | 0.0861 |
+| **the champion** | **−0.0142** | 0.0859 |
+| **paired difference** (champion − objective) | **−0.0006** | **0.0393** |
+| on the 47 positions where they disagreed | −0.0018 | 0.1087 |
+
+**Zero, to a half-width of 0.039.** The two policies are equally good at one-ply
+ask selection, and the `+0.1641` against `−0.0188` was an artefact of the
+population and the continuation policy — exactly as flagged before it was read.
+The claim that would have been easy to publish is false.
+
+### What the same run says about the lookahead, which is worth more
+
+**The two actors chose a different ask in 36.4% of positions and that changed
+one-step value by 0.0006 sets.** The lookahead is not a tie-break: it re-ranks
+better than one ask in three. Whatever it earns — and it earned +0.104
+[+0.020, +0.189] in a 6,000-pair duel — it earns **beyond one ply**, which is
+precisely what a possession-chain search is built to do and the first direct
+evidence that it does it.
+
+### What remains open, stated narrowly
+
+On the champion's own population with a champion continuation, the regret is
+**+0.1641 [+0.0797, +0.2484]**. This run shows the *choice* is not what leaves
+it there, so either those positions offer more one-step value to anyone, or the
+champion continuation changes what the estimator measures. Separating them needs
+`ASK_REGRET_SPEC=champion` on this same two-incumbent design. If both actors
+leave +0.16 on champion turf, the headroom is real and belongs to neither
+objective — a better ask selector would capture it, and that is a live lead
+rather than a closed one.
