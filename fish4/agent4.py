@@ -289,6 +289,28 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         super().begin_game(player, rules, seed)
         self.bel = BeliefState(rules, observer=player)
 
+    # -- which belief each channel reads --------------------------------------
+    #
+    # Both hooks are the IDENTITY for the champion and every shipped
+    # configuration, so nothing here changes any measured number. They exist so
+    # one experiment can feed the DECLARATION channel and the ASK channel
+    # different beliefs, which is the only way to ask whether the value of
+    # knowing a teammate's cards is in what you ask or in when you dare to
+    # declare. See fish4/oracle_gated.py and prereg/declaration_timing.md.
+    #
+    # The cut is: ClaimEvaluator, certain_claim and the tablebase are the
+    # declaration channel -- they decide whether to name a split and which one.
+    # Everything else is the ask channel. The tablebase sits on the declaration
+    # side because when it fires it usually ends the half-suit by claiming.
+
+    def _claim_ctx(self, ctx: DecisionContext) -> DecisionContext:
+        """The context the claim machinery scores splits with."""
+        return ctx
+
+    def _claim_bel(self):
+        """The belief the purely deductive claim paths read."""
+        return self.bel
+
     # -- policy --------------------------------------------------------------
 
     def act(self, obs: Observation) -> Action:
@@ -342,7 +364,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                     teammate=int(fallback.teammate), chosen="largest hand")
             return fallback
 
-        claims = ClaimEvaluator(ctx, self.claim_cfg)
+        claims = ClaimEvaluator(self._claim_ctx(ctx), self.claim_cfg)
         voluntary = claims.voluntary_claim()
         if voluntary is not None:
             best = claims.best_candidate()
@@ -639,13 +661,14 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         from fish.cards import half_suit_cards, team_of
         from fish.engine import Claim
         self.bel.update(obs)
+        bel = self._claim_bel()
         my_team = team_of(self.player)
         for hs in range(len(obs.set_winner)):
             if obs.set_winner[hs] is not None:
                 continue
             assignment = []
             for c in half_suit_cards(hs):
-                m = self.bel.current_holder_mask(c)
+                m = bel.current_holder_mask(c)
                 if m == 0 or m & (m - 1):
                     break
                 holder = m.bit_length() - 1

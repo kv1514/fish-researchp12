@@ -212,6 +212,16 @@ def _dylan_v07(**kw):
 
 REGISTRY["dylan_v07"] = _dylan_v07
 
+
+# The CHEATING agents. Lazy for the same reason as above, and separated here so
+# that reading the registry makes plain which entries are not policies. Neither
+# will act until see_deal has been called; see fish4/oracle.py.
+def _oracle_gated(**kw):
+    from .oracle_gated import GatedOracleBot
+    return GatedOracleBot(**kw)
+
+REGISTRY["oracle_gated"] = _oracle_gated
+
 # Register into the v0.3 registry too, so tools that only know about that one
 # keep working. Mutating the dict is deliberate: it avoids forking v0.3 code.
 _V03.setdefault("fishbot4", FishBot4)
