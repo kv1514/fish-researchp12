@@ -873,3 +873,85 @@ declaration is not "no error" — the half-suit still has to be resolved, and if
 we do not declare it someone else does, possibly correctly. Only a duel can
 price that, and it is the most likely way this direction comes back smaller than
 the bound.
+
+---
+
+# UPDATE: the position IS steerable, and steering it is worth nothing
+
+`prereg/reach_term.md`. The first intervention in six that is not about knowing
+more: a thirteenth basis term charging an ask for the entry point it spends,
+
+    reach = -pi * prod over the other five cards of (1 - P(an opponent holds it))
+
+the probability that landing the ask closes the half-suit as somewhere we can
+ever ask again. Nothing in the basis prices it — `deplete` drains an *opponent*,
+`scarce` and `concent` reward team share and concentration, both of which
+*consume* entry points and neither of which is charged for them.
+
+`scripts4/term_bite.py` is now a standing futility screen for **any** basis
+term, so the next one is screened for free. The v1 shape divided by the number
+of askable half-suits and could not reach the decision — 1.6% bite at w = 0.3,
+7.6% at w = 1.2, which is `locate`'s `1/u` again. v2 drops the divisor and
+clears at **w = 0.80, bite 15.2%**, the smallest weight inside the registered
+[15%, 60%] window. Correlation with the objective **−0.473**, against `locate`'s
++0.42: it points *against* the score rather than restating it.
+
+## Both screen rules fired
+
+480 games, identical deals:
+
+| | baseline | w_reach = 0.8 |
+|---|---|---|
+| voluntary | 3.548 | **2.392** |
+| gate | 0.221 | **0.585** |
+| gate + forced | 0.427 | **0.800** |
+| total per game | 4.500 | **3.767** |
+| wrong per game | 0.1313 | **0.2167** |
+| margin | 0.0 | **−1.671** |
+
+The registration named this exact failure as the term's risk: `keep` is largest
+when our team already holds the rest of the half-suit, so a positive weight
+penalises **the ask that completes a set**. The engine stopped finishing, and
+the declarations it withheld reappeared on the `gate` path — up 165%, at a 22.4%
+error rate, displaced out of a path with a 0.06% one. **No duel was run.**
+
+## The sign is backwards, and reversing it works — mechanically
+
+Post-hoc, and labelled as such: the diagnostic showed stuck seats holding *more*
+cards with *fewer* live asks, and the term assumed completing half-suits caused
+it. The opposite sign says otherwise.
+
+| arm | gate+forced /game | wrong /game | margin |
+|---|---|---|---|
+| baseline | 0.427 | 0.1313 | 0.0 |
+| w_reach = +0.8 | 0.800 | 0.2167 | −1.671 |
+| **w_reach = −0.4** | **0.348** | **0.1000** | **−0.075** |
+| w_reach = −0.8 | 0.330 | 0.1042 | −0.100 |
+
+**A quarter of the wrong declarations, gone.** Stuck declarations down 19–23%,
+voluntary holding at 3.49–3.59. The clog is caused by **not finishing**
+half-suits, not by finishing them — the causality in `forced_locus` ran the
+other way.
+
+**And the margin does not follow.** Nothing here approaches +0.15, and no
+confirmation is registered: flipping a sign after reading a screen and then
+duelling it is the forking path this project forbids.
+
+## What that closes
+
+The registration's own caveat came true:
+
+> The counterfactual for a forced declaration is not "no error" — the half-suit
+> still has to be resolved, and if we do not declare it someone else does,
+> possibly correctly.
+
+**Removing a quarter of the errors bought nothing.** The 0.258 sets-a-game bound
+was loose in exactly that way. The 62 errors in the ledger are not recoverable
+value; they are the price of resolving half-suits that had to be resolved by
+somebody.
+
+Six directions gave the engine a better *belief* and none paid. This one gave it
+a better *position*, measured and achieved, and it did not pay either. Together
+they say something the ledger alone never could: **what is left in this engine
+is not a defect to be fixed.** Any further gain has to come from a different
+policy class, not from a correction to this one.

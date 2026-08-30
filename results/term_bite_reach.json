@@ -1,0 +1,57 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "term": "reach",
+ "n_decisions": 3780,
+ "arms": {
+  "0.3": {
+   "median_abs_delta": 0.024206216150213046,
+   "p90_abs_delta": 0.10400517906691203,
+   "median_delta_over_spread": 0.03695707092027698,
+   "mean_corr_with_score": -0.4734868427081393,
+   "fires": 0.9743386243386244,
+   "bite": 0.051322751322751325
+  },
+  "0.6": {
+   "median_abs_delta": 0.04841243230042609,
+   "p90_abs_delta": 0.20801035813382407,
+   "median_delta_over_spread": 0.07391414184055396,
+   "mean_corr_with_score": -0.4734868427081393,
+   "fires": 0.9743386243386244,
+   "bite": 0.11507936507936507
+  },
+  "0.8": {
+   "median_abs_delta": 0.06454990973390146,
+   "p90_abs_delta": 0.2773471441784321,
+   "median_delta_over_spread": 0.09855218912073863,
+   "mean_corr_with_score": -0.47348684270813923,
+   "fires": 0.9743386243386244,
+   "bite": 0.15185185185185185
+  },
+  "1.0": {
+   "median_abs_delta": 0.0806873871673768,
+   "p90_abs_delta": 0.3466839302230401,
+   "median_delta_over_spread": 0.12319023640092328,
+   "mean_corr_with_score": -0.4734868427081393,
+   "fires": 0.9743386243386244,
+   "bite": 0.19894179894179895
+  },
+  "1.2": {
+   "median_abs_delta": 0.09682486460085218,
+   "p90_abs_delta": 0.41602071626764814,
+   "median_delta_over_spread": 0.14782828368110792,
+   "mean_corr_with_score": -0.4734868427081393,
+   "fires": 0.9743386243386244,
+   "bite": 0.23412698412698413
+  },
+  "1.6": {
+   "median_abs_delta": 0.1290998194678029,
+   "p90_abs_delta": 0.5546942883568642,
+   "median_delta_over_spread": 0.19710437824147725,
+   "mean_corr_with_score": -0.47348684270813923,
+   "fires": 0.9743386243386244,
+   "bite": 0.2851851851851852
+  }
+ }
+}

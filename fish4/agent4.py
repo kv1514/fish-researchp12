@@ -111,6 +111,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  w_concent: float = 0.0,
                  w_signal: float = 0.0,
                  w_locate: float = 0.0,
+                 #: Charge an ask for the entry point it spends. See
+                 #: fish4/askfeat.py and results/forced_locus.json.
+                 w_reach: float = 0.0,
                  # -- learned half-suit value objective
                  objective: str = "linear",
                  hsvalue_path: str = None,
@@ -243,7 +246,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             suit=w_suit, turn=w_turn, scarce=w_scarce, reveal=w_reveal,
             deplete=w_deplete, expose=w_expose, claim=w_claim, info=w_info,
             certain=w_certain, concent=w_concent, signal=w_signal,
-            locate=w_locate)
+            locate=w_locate, reach=w_reach)
         self.objective = objective
         self.hsvalue_path = hsvalue_path
         self.w_value = w_value

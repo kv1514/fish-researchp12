@@ -58,6 +58,8 @@ TERM_NAMES = (
     "signal",      # NEW: the BENEFIT side of revealing a holding to teammates
     "locate",      # NEW: location-uncertainty this ask removes from a half-suit
                    #      our team is on course to declare
+    "reach",       # NEW: the entry point this ask spends -- P(the half-suit
+                   #      stops being askable by us once we take this card)
 )
 
 #: Definition version of each term, bumped whenever a term's FORMULA changes
@@ -83,6 +85,8 @@ TERM_VERSIONS = {
     "concent": 2,      # v2: expected change caused, not level observed
     "signal": 1,
     "locate": 1,
+    "reach": 2,       # v2: no 1/n_askable divisor; see the comment in the
+                      #     feature block and results/term_bite_reach.json
 }
 assert tuple(TERM_VERSIONS) == TERM_NAMES, "TERM_VERSIONS must mirror TERM_NAMES"
 
@@ -120,6 +124,7 @@ class AskWeights:
     concent: float = 0.0
     signal: float = 0.0
     locate: float = 0.0
+    reach: float = 0.0
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -283,6 +288,27 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
     M = ctx.M
     per = ctx.per
     counts = ctx.obs.hand_counts
+    # -- `reach`: the entry point an ask spends ------------------------------
+    #
+    # results/forced_locus.json, 15,929 decisions with the game stage
+    # controlled for: a seat five of its own decisions away from a `gate` or
+    # `forced` declaration has 6.9 FEWER live asks than a seat at the same
+    # cards-left, and 4.0 fewer at eight decisions. Those two paths carry 62 of
+    # 63 wrong declarations. And the seat about to be stuck holds 0.6 to 0.9
+    # MORE cards than the control: it is not short of cards, it is short of
+    # places to reach.
+    #
+    # Every successful ask takes a card from an OPPONENT, so every success
+    # spends a little of the asker's own future askability. Taking cards is how
+    # the game is won and how a seat strands itself, and the basis prices only
+    # the first half of that -- `concent` rewards concentrating the team's
+    # holding and `scarce` rewards team share, both of which consume entry
+    # points, while nothing charges for them.
+    #
+    # opp_mass[c] is P(an opponent currently holds c), which is 0 for a card in
+    # our own hand and for a resolved one, so a product over it needs no
+    # special cases for either.
+    opp_mass = M[:, ctx.theirs].sum(axis=1)
     for i, a in enumerate(asks):
         hs = a.card // 6
         t = a.target
@@ -420,6 +446,50 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
                     u += 1
             if u:
                 F[i, 11] = pi * (rest ** (1.0 / 5.0)) / u
+        # `reach`, and it is a COST: negative, so a positive weight penalises.
+        #
+        #     -pi * P(no other card of this half-suit is with an opponent)
+        #
+        #   pi        it spends nothing if it does not land.
+        #   the product  P(h stops being askable by us). Taking the last card
+        #             an opponent held closes the half-suit as an entry point;
+        #             taking one of four leaves it wide open. The asked card is
+        #             excluded because we are about to hold it either way --
+        #             including it would zero the term exactly on a certain
+        #             steal, the bug `claim`, `concent` and `locate` all had.
+        #
+        # v1 DIVIDED BY the number of half-suits we could still ask in, and
+        # results/term_bite_reach.json says that shape cannot reach the
+        # decision at all: a top-ask change in 1.6% of positions at w = 0.3 and
+        # only 7.6% at w = 1.2. That is `locate`'s 1/u again, and `locate` is a
+        # measured null. v2 drops it; the weight sets the exchange rate instead
+        # of a divisor chosen by me.
+        #
+        # READ THIS BEFORE RAISING THE WEIGHT. The term is REFUTED at a
+        # positive weight and the screen is in prereg/reach_term.md. `keep` is
+        # largest exactly when our team already holds the rest of the
+        # half-suit, so a positive weight penalises the ask that COMPLETES a
+        # set -- the ask that banks one. Measured over 480 games at w = 0.8:
+        # voluntary declarations fall 33%, the displaced ones reappear on the
+        # `gate` path (up 165%, 22.4% wrong), total declarations fall 16.3%,
+        # wrong declarations per game rise from 0.1313 to 0.2167, and the
+        # margin is -1.67 sets a game. Both pre-registered screen rules fired
+        # and no duel was run.
+        #
+        # The NEGATIVE weight is the one that works mechanically -- at -0.4 it
+        # cuts gate+forced declarations 19% and wrong declarations 24% while
+        # voluntary holds -- and it still does not pay: margin -0.075. That
+        # sign was chosen after reading the screen, so it is a diagnostic and
+        # not a registered arm, and nothing was confirmed on it. The finding is
+        # that the trajectory is steerable and steering it is not worth
+        # anything, which is why this ships at 0.0 and stays there.
+        #
+        keep = 1.0
+        for k in range(6):
+            d = hs * 6 + k
+            if d != a.card:
+                keep *= 1.0 - float(opp_mass[d])
+        F[i, 12] = -pi * keep
     return p, F
 
 
