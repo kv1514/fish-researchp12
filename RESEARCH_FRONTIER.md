@@ -981,3 +981,41 @@ correct this policy have failed, and the headroom left in it has never been
 measured with enough power to say whether an eighth could succeed.** Which of
 those two sentences is true is a measurement, not a conclusion, and it is the
 next thing to run rather than the last thing to assert.
+
+## What the two headroom runs can and cannot answer, stated before they land
+
+Both are in flight as this is written and neither number is known. Fixing the
+interpretation now, because a power calculation read *after* a result is not a
+power calculation.
+
+**Exploitability**, 240 deals, responder raised from beam 3 / 3 worlds to
+**beam 5 / 6 worlds**. The per-deal sd is 3.453, so:
+
+| half-width | deals needed | wall-clock at 62 s/deal |
+|---|---|---|
+| 0.60 | 127 | 2.2 h |
+| **0.44** | **237** | **4.1 h** |
+| 0.30 | 509 | 8.8 h |
+| 0.15 | 2,036 | 35.1 h |
+
+**n = 240 buys a half-width of 0.437.** So this run can rule out a *large*
+single-seat exploit and **cannot resolve the +0.15 ship bar** — nothing it
+returns should be read as "there is no headroom", and an interval containing
+zero here is compatible with a real gain of a third of a set. Resolving the bar
+on this instrument costs 35 hours, which is a fact about the instrument rather
+than about the engine.
+
+The asymmetry in `scripts4/exploitability.py`'s docstring still applies and is
+the sharper limit: a rollout responder that fails to find an exploit may simply
+be playing badly, so **only a positive result is informative**. A negative one
+bounds nothing.
+
+**Ask regret**, 240 positions × 24 worlds, harvested from 400 games — against
+the 37 positions × 12 worlds the published figure rests on. The previous run's
+`attenuation` table says the estimator recovers 21% of a true effect of 0.5,
+57% of 1.0 and 97% of 2.0, so the quantity it measures is biased toward zero at
+exactly the scale that matters and the wider run reduces that without removing
+it. Its early rows already show the regret is **not uniform**: +0.42 to +0.58 in
+positions offering 50-odd legal asks, 0.000 in positions offering three. If that
+holds up, "how much does the objective leave on the table" has no single answer
+and the honest version is a curve against the size of the action set.
