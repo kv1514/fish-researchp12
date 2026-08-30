@@ -60,6 +60,22 @@ def _load_value(path):
     return m
 
 
+#: Optional instrumentation hook, ``None`` in every shipped path. Called as
+#: ``(bot, ctx, asks, scores)`` with the ask ranking complete and not yet
+#: sorted, so a diagnostic can see the objective exactly as the policy does.
+#:
+#: It exists because the most useful thing to come out of the `locate` null was
+#: its size / overlap / bite diagnosis -- how big the new term is against the
+#: objective's own scale, how much it merely re-states, and how often it
+#: actually changes the top-ranked ask. That was measured against a hand-copied
+#: fragment of act(), which is a duplicate that rots the first time this
+#: function changes. Any weight fitted or refuted against a stale copy of the
+#: objective is measuring the copy.
+#:
+#: The cost when unset is one identity comparison per decision.
+_SCORE_RECORDER = None
+
+
 class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
     """The v0.4 policy. Every strategic choice is a constructor argument."""
 
@@ -154,6 +170,14 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  lookahead_depth: int = 1,
                  lookahead_beam: int = 4,
                  lookahead_couple: bool = True,
+                 #: Price each edge of the possession chain by the
+                 #: DECLARABILITY it creates, in banked-cards per half-suit
+                 #: made nameable. 0.0 is the champion, exactly: the tree keeps
+                 #: its inert-last-ply short-circuit and every number it has
+                 #: ever produced. See fish4/lookahead.py, and
+                 #: prereg/declarability_leaf.md for why the search rather than
+                 #: another ask feature.
+                 lookahead_declare: float = 0.0,
                  # -- endgame
                  use_tablebase: bool = True,
                  tablebase_max_half_suits: int = 2,
@@ -249,6 +273,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.lookahead_depth = lookahead_depth
         self.lookahead_beam = lookahead_beam
         self.lookahead_couple = lookahead_couple
+        self.lookahead_declare = lookahead_declare
         self.use_tablebase = use_tablebase
         self.tablebase_max_half_suits = tablebase_max_half_suits
         self.exact_endgame = bool(exact_endgame)
@@ -454,7 +479,10 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             from .lookahead import lookahead_bonus
             scores = scores + self.w_lookahead * lookahead_bonus(
                 ctx, asks, depth=self.lookahead_depth,
-                beam=self.lookahead_beam, couple=self.lookahead_couple)
+                beam=self.lookahead_beam, couple=self.lookahead_couple,
+                w_declare=self.lookahead_declare)
+        if _SCORE_RECORDER is not None:
+            _SCORE_RECORDER(self, ctx, asks, scores)
         order = sorted(range(len(asks)), key=lambda i: -scores[i])
         top = scores[order[0]]
         # If the ask we are ABOUT TO MAKE cannot land, it hands over the turn

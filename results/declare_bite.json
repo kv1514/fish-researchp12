@@ -1,0 +1,32 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "n_decisions": 3786,
+ "w_lookahead": 0.25,
+ "depth": 3,
+ "beam": 4,
+ "arms": {
+  "0.25": {
+   "median_abs_delta": 0.003923603346332592,
+   "p90_abs_delta": 0.025429397647438155,
+   "median_delta_over_spread": 0.006320866084386302,
+   "mean_corr_with_score": 0.5999610765896459,
+   "bite": 0.005282620179609086
+  },
+  "1.0": {
+   "median_abs_delta": 0.016217860329163294,
+   "p90_abs_delta": 0.10344402854680304,
+   "median_delta_over_spread": 0.025790997472864154,
+   "mean_corr_with_score": 0.6034325768024869,
+   "bite": 0.02033808769149498
+  },
+  "2.0": {
+   "median_abs_delta": 0.03305307694491735,
+   "p90_abs_delta": 0.20825819540761276,
+   "median_delta_over_spread": 0.052485504869256946,
+   "mean_corr_with_score": 0.6061076370706792,
+   "bite": 0.03671421024828315
+  }
+ }
+}

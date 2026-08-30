@@ -46,6 +46,35 @@ convention, it is the ablation discipline this project enforces by test: a
 weight of zero must reduce to the baseline exactly, or the cell is measuring two
 changes at once.
 
+THE SECOND CURRENCY: DECLARABILITY AT THE LEAF (``w_declare``)
+--------------------------------------------------------------
+``W`` above counts CARDS. Cards are not what the game pays for -- half-suits
+are -- and the project's error ledger says where the loss is: 0.1676 of our
+0.1759 wrong declarations a game are ALLOCATION class, our team holding all six
+and naming the wrong split, against 0.0083 ownership errors.
+
+`prereg/declaration_timing.md` then priced that. Routing a teammate-oracle to
+one decision at a time: the declaration channel alone is worth +1.08 sets a
+game, the ask channel alone +0.76, and BOTH together +3.41. D + K = 1.84
+against T = 3.41 -- **46% of the prize, 1.57 sets a game, is in neither channel
+alone.** It is interaction, and only an intervention that COUPLES asking to
+declaring can reach it.
+
+`prereg/locate_term.md` tried the cheap coupling: an additive one-ply ask
+feature priced by the declaration it enables. Null at 3,000 pairs, +0.047
+[-0.075, +0.168], and diagnosed rather than shrugged at -- it re-ranked 3.9% of
+asks by 1% of the objective's scale, because a small additive bonus cannot
+out-argue a P(success) term at weight 1.0.
+
+This is the same coupling moved to where it can compound. ``w_declare`` prices
+each edge of the possession chain by the DECLARABILITY it creates (see
+:func:`declarability`), so a chain that ends with a half-suit our team can name
+the split of is worth more than a chain that banks the same number of cards
+scattered across five. The search multiplies, where a feature could only add.
+
+Zero by default, and at zero the tree is the same shape, the same cost, and the
+same numbers it has always been -- including the inert-last-ply short-circuit.
+
 A CAUTION, STATED UP FRONT
 --------------------------
 There is a scheduling argument that predicts this will do nothing. If the
@@ -112,6 +141,46 @@ DEFAULT_BEAM = 4
 # is what the two optimisations above address.
 
 
+def declarability(M, team, live, n_hs: int) -> float:
+    """Expected number of half-suits our team could name the SPLIT of, now.
+
+    THE QUANTITY, AND WHY IT IS NOT ``p_team_all``
+    ----------------------------------------------
+    ``prod_c sum_{p in team} M[c, p]`` is the probability our team OWNS a
+    half-suit -- the quantity the `claim` term prices and the one the claim
+    evaluator gates ownership on. This is instead::
+
+        prod_c max_{p in team} M[c, p]
+
+    the probability that, naming for each card the teammate most likely to hold
+    it, we get all six right. It is at most the ownership product, and the two
+    are equal exactly when every card's team mass sits on a single teammate.
+
+    THAT GAP IS THE PROJECT'S ERROR LEDGER, WRITTEN IN BELIEF TERMS. 0.1676 of
+    our 0.1759 wrong declarations a game are ALLOCATION class -- our team held
+    all six and we named the wrong split -- against 0.0083 ownership errors. A
+    quantity built on team ownership is blind to 95% of what actually goes
+    wrong; the difference between the two products above is precisely the part
+    it cannot see.
+
+    WHY A MAX AND NOT AN ENTROPY
+    ----------------------------
+    The declaration is a single all-or-nothing guess at one assignment, so what
+    matters is the probability of the modal assignment, not the spread around
+    it. An entropy would score a half-suit split 0.5/0.5 between two teammates
+    the same as one split 0.5/0.25/0.25, and the first is strictly the better
+    position to declare from.
+
+    Resolved half-suits contribute nothing: they cannot be declared again.
+    """
+    best = M[:, team].max(axis=1)
+    tot = 0.0
+    for hs in range(n_hs):
+        if live[hs]:
+            tot += float(best[hs * 6:hs * 6 + 6].prod())
+    return tot
+
+
 class ChainState:
     """A hypothetical continuation of our own possession, held as a belief.
 
@@ -120,7 +189,8 @@ class ChainState:
     rather than copied per node.
     """
 
-    __slots__ = ("M", "hand", "counts", "me", "live", "n_hs", "couple", "_undo")
+    __slots__ = ("M", "hand", "counts", "me", "live", "n_hs", "couple",
+                 "team", "_undo")
 
     def __init__(self, M: np.ndarray, hand: int, counts, me: int, live,
                  n_hs: int, couple: bool = True):
@@ -131,7 +201,15 @@ class ChainState:
         self.live = list(live)
         self.n_hs = n_hs
         self.couple = couple
+        #: Our own three seats, held once so the declarability evaluation is
+        #: not recomputing a parity test at every node of the tree.
+        self.team = [p for p in range(NUM_PLAYERS)
+                     if team_of(p) == team_of(me)]
         self._undo: list = []
+
+    def declarability(self) -> float:
+        """This state's declarability. See the module function of that name."""
+        return declarability(self.M, self.team, self.live, self.n_hs)
 
     # -- candidate generation -------------------------------------------------
 
@@ -260,12 +338,41 @@ _RECORDER = None
 
 
 def possession_value(state: ChainState, depth: int, beam: int,
-                     allow_bluff: bool = False) -> float:
+                     allow_bluff: bool = False,
+                     w_declare: float = 0.0) -> float:
     """Expected cards banked in the remainder of this possession.
 
     Zero at ``depth <= 0`` and at a position with no legal ask, which is what
     makes the depth-1 policy identical to the incumbent: the bonus term it
     multiplies is this function at depth 0.
+
+    ``w_declare`` ADDS A SECOND CURRENCY, AND ONE PER EDGE, NOT PER LEAF
+    -------------------------------------------------------------------
+    With ``w_declare > 0`` the recursion becomes::
+
+        V(B, d) = max_a  p_a * [ 1 + w * (D(B|a) - D(B)) + V(B|a, d-1) ]
+
+    where ``D`` is :func:`declarability`. ``w`` is an exchange rate: how many
+    banked cards one half-suit made declarable is worth.
+
+    The delta is attached to the EDGE that causes it, not evaluated once at the
+    leaf, and the difference is not cosmetic. A leaf evaluation
+    ``D(leaf) - D(root)`` would discount the first ask's own gain by the
+    probability of every ask after it -- so an ask that single-handedly
+    completes a declarable half-suit but leaves no follow-up would be scored
+    near zero, which is backwards. Per edge, each gain is discounted by exactly
+    the chain that must land to reach it, and the terms still telescope to
+    ``D(leaf) - D(root)`` when every ask succeeds.
+
+    It is also the `concent` v1 -> v2 lesson, which this project has now paid
+    for twice: score the CHANGE a move causes, never the LEVEL it leaves
+    behind. A level would make ``V`` a rescaling of ``p_a`` -- the objective
+    already carries P(success) at weight 1.0 and does not need it twice.
+
+    ``D`` is non-decreasing along a successful chain, so ``V`` stays >= 0: a
+    taken card's row becomes a point mass on us, and the quota rebalance
+    divides every row by a total below one, which can only raise a teammate's
+    entry. ``tests4/test_declare_leaf.py`` asserts it rather than trusting it.
     """
     if depth <= 0:
         return 0.0
@@ -274,7 +381,7 @@ def possession_value(state: ChainState, depth: int, beam: int,
         return 0.0
 
     M = state.M
-    if depth == 1:
+    if depth == 1 and not w_declare:
         # The last ply is inert. Its continuation is possession_value(.., 0),
         # which is 0 unconditionally, so q = p * (1 + 0) = p and the maximum
         # over the beam is just the largest probability - which the sort key
@@ -283,6 +390,19 @@ def possession_value(state: ChainState, depth: int, beam: int,
         # 54-row renormalise, to rediscover a number already in hand. With
         # depth 3 and beam 4 roughly three quarters of all expansions sit here.
         return max([0.0] + [float(M[c, t]) for t, c in asks])
+    # The last ply stops being inert the moment declarability is priced: its
+    # continuation is 0 but its EDGES still create declarability, so the
+    # short-circuit above is gated on `w_declare` rather than removed. At
+    # w_declare == 0 the champion's tree is the same shape and the same cost it
+    # has always been, which is what keeps this weight a true ablation.
+    d_here = state.declarability() if w_declare else 0.0
+    # Sorted by descending p, which is the exact ordering when w_declare == 0
+    # and a heuristic one above it: a branch with modest p and a large
+    # declarability gain can fall outside the beam. Not corrected, because
+    # correcting it means evaluating D for all ~45 candidates at every node to
+    # choose 4. The cost is bounded by where it applies -- lookahead_bonus does
+    # NOT beam the root ply, so every candidate the policy ranks gets its own
+    # exact edge gain; the beam only prunes how the continuation is valued.
     scored = sorted(asks, key=lambda a: -float(M[a[1], a[0]]))
     best = 0.0
     best_i = -1
@@ -298,12 +418,14 @@ def possession_value(state: ChainState, depth: int, beam: int,
             continue
         state.apply_success(target, card)
         try:
-            cont = possession_value(state, depth - 1, beam, allow_bluff)
+            gain = (state.declarability() - d_here) if w_declare else 0.0
+            cont = possession_value(state, depth - 1, beam, allow_bluff,
+                                    w_declare)
         finally:
             state.undo()
         # A miss ends the possession, so it contributes no cards. What it costs
         # positionally is priced by the incumbent objective, not here.
-        q = p * (1.0 + cont)
+        q = p * (1.0 + w_declare * gain + cont)
         if qs is not None:
             qs.append(q)
         if q > best:
@@ -320,12 +442,27 @@ def possession_value(state: ChainState, depth: int, beam: int,
 
 
 def lookahead_bonus(ctx, asks, depth: int = DEFAULT_DEPTH,
-                    beam: int = DEFAULT_BEAM, couple: bool = True) -> np.ndarray:
+                    beam: int = DEFAULT_BEAM, couple: bool = True,
+                    w_declare: float = 0.0) -> np.ndarray:
     """Per-ask lookahead bonus, in units of expected extra cards banked.
 
     ``ctx`` is an :class:`~fish4.askfeat.DecisionContext`. The returned vector
     is all zeros whenever ``depth <= 1``, so a caller that adds it to the
     incumbent score is guaranteed to reproduce the incumbent at depth 1.
+
+    THAT ZERO HOLDS AT ``depth <= 1`` EVEN WITH ``w_declare > 0``, and it is a
+    deliberate refusal rather than an oversight. A depth-1 declarability bonus
+    would be an additively weighted ONE-PLY feature, and
+    `prereg/locate_term.md` measured that family and closed it: 3,000 pairs,
+    +0.047 [-0.075, +0.168], re-ranking 3.9% of asks by 1% of the objective's
+    scale. Whatever this term is worth, it is not worth anything at one ply,
+    and a knob that let it be run there would invite exactly the run that has
+    already been done. Depth 2 is the shallowest live setting; the depth ladder
+    at fixed ``w_declare`` is what separates "the quantity" from "the search".
+
+    The root ply is NOT beamed -- every candidate the policy ranks gets its own
+    exact edge gain -- so the beam's p-ordering (see possession_value) prunes
+    only the continuation.
     """
     n = len(asks)
     out = np.zeros(n)
@@ -337,6 +474,7 @@ def lookahead_bonus(ctx, asks, depth: int = DEFAULT_DEPTH,
     allow_bluff = bool(obs.rules.allow_bluff_asks)
     state = ChainState(ctx.M, obs.hand, obs.hand_counts, obs.player,
                        live, ctx.n_hs, couple=couple)
+    d_root = state.declarability() if w_declare else 0.0
 
     for i, a in enumerate(asks):
         p = float(ctx.M[a.card, a.target])
@@ -344,8 +482,16 @@ def lookahead_bonus(ctx, asks, depth: int = DEFAULT_DEPTH,
             continue
         state.apply_success(a.target, a.card)
         try:
-            cont = possession_value(state, depth - 1, beam, allow_bluff)
+            gain = (state.declarability() - d_root) if w_declare else 0.0
+            cont = possession_value(state, depth - 1, beam, allow_bluff,
+                                    w_declare)
         finally:
             state.undo()
-        out[i] = p * cont
+        # No `1 +` here, and the declarability gain is treated the same way:
+        # the incumbent objective already prices this ask's own P(success), so
+        # crediting the card again would double-count it. The gain the ROOT ask
+        # itself creates is NOT double-counted by anything, though, which is
+        # why it is added -- `locate` was the only term that ever priced it and
+        # it is not in the shipped basis.
+        out[i] = p * (w_declare * gain + cont)
     return out
