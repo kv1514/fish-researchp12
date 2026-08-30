@@ -56,6 +56,8 @@ TERM_NAMES = (
     "certain",     # NEW: explicit bonus for a provably certain steal
     "concent",     # v2: the CHANGE in team concentration this ask causes
     "signal",      # NEW: the BENEFIT side of revealing a holding to teammates
+    "locate",      # NEW: location-uncertainty this ask removes from a half-suit
+                   #      our team is on course to declare
 )
 
 #: Definition version of each term, bumped whenever a term's FORMULA changes
@@ -80,6 +82,7 @@ TERM_VERSIONS = {
     "info": 1, "certain": 1,
     "concent": 2,      # v2: expected change caused, not level observed
     "signal": 1,
+    "locate": 1,
 }
 assert tuple(TERM_VERSIONS) == TERM_NAMES, "TERM_VERSIONS must mirror TERM_NAMES"
 
@@ -116,6 +119,7 @@ class AskWeights:
     certain: float = 0.0
     concent: float = 0.0
     signal: float = 0.0
+    locate: float = 0.0
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -366,6 +370,56 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
         # story, decides.
         if not ctx.revealed[hs]:
             F[i, 10] = (ctx.team_exp[hs] / 6.0 - 0.5) * 2.0
+        # Location. THE ONE TERM THAT PRICES AN ASK BY THE DECLARATION IT
+        # ENABLES, which is why it exists.
+        #
+        # results/declaration_timing.json decomposed the +3.41 sets a game that
+        # perfect knowledge of a teammate's cards is worth, by routing the same
+        # cheat to one decision at a time. Neither channel carries it: the
+        # declaration channel alone is worth +1.08, the ask channel alone
+        # +0.76, and 46% of the ceiling -- 1.57 sets a game -- lives in NEITHER
+        # ALONE. It is interaction. Four separate attempts had each improved
+        # one channel and returned nothing, which is what reaching for a third
+        # of a prize looks like.
+        #
+        # The only intervention that can reach an interaction term is one that
+        # couples the two decisions, and this is the cheapest such coupling:
+        # score an ask by what it will let the team DECLARE later.
+        #
+        # The quantity is fixed by the mediator finding, not chosen: what a
+        # declaration risks is how many of the half-suit's six cards have never
+        # been publicly LOCATED, not how many the declarer holds. A successful
+        # ask locates exactly one card, permanently, for the whole table --
+        # including our partners. So the value of an ask, to a future
+        # declaration, is the share of that half-suit's remaining location
+        # uncertainty it removes.
+        #
+        #     pi          it only locates anything if it lands
+        #     1 / u       the fraction of the remaining uncertainty removed:
+        #                 going from two unlocated to one is worth more than
+        #                 six to five, which is the shape "risk tracks
+        #                 unlocated count" implies
+        #     rest^(1/5)  weighted by our team owning the REST of the suit,
+        #                 because locating a card of a half-suit we will never
+        #                 declare buys nothing. Same per-card geometric mean
+        #                 the `claim` term uses, and excluding the asked card
+        #                 for the same reason: on a provably certain steal its
+        #                 own factor is 0, and a term that scores zero exactly
+        #                 where it should score highest is the bug `claim` and
+        #                 `concent` both already had.
+        #
+        # Zero when the asked card is ALREADY publicly located: the ask then
+        # adds no location and the term must not pay for one. That is the case
+        # this feature would otherwise reward twice, since a located card
+        # sitting with the target is a certain steal and `certain` already
+        # prices it.
+        if ctx.bel.public_loc[a.card] is None:
+            u = 0
+            for k in range(6):
+                if ctx.bel.public_loc[hs * 6 + k] is None:
+                    u += 1
+            if u:
+                F[i, 11] = pi * (rest ** (1.0 / 5.0)) / u
     return p, F
 
 

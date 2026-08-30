@@ -94,6 +94,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  w_certain: float = 0.0,
                  w_concent: float = 0.0,
                  w_signal: float = 0.0,
+                 w_locate: float = 0.0,
                  # -- learned half-suit value objective
                  objective: str = "linear",
                  hsvalue_path: str = None,
@@ -209,7 +210,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.weights = AskWeights(
             suit=w_suit, turn=w_turn, scarce=w_scarce, reveal=w_reveal,
             deplete=w_deplete, expose=w_expose, claim=w_claim, info=w_info,
-            certain=w_certain, concent=w_concent, signal=w_signal)
+            certain=w_certain, concent=w_concent, signal=w_signal,
+            locate=w_locate)
         self.objective = objective
         self.hsvalue_path = hsvalue_path
         self.w_value = w_value
