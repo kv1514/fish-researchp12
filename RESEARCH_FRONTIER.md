@@ -1310,3 +1310,58 @@ Resolving +0.15 on this instrument needs 2,036 deals at the old sd and **2,815**
 at the observed one — 48 hours. That is a fact about the instrument, and it means
 **single-seat exploitability cannot answer the headroom question at the
 precision this project ships on.** The two regret instruments can, and did.
+
+## ANSWERED: the champion's regret belongs to the turf, and both actors face it equally
+
+`results/actor_compare_champion.json`. The same two-incumbent design run with
+`ASK_REGRET_SPEC=champion`, so positions and continuation are both the
+champion's. 103 positions, identical rollouts.
+
+| incumbent | regret | ± |
+|---|---|---|
+| the objective in isolation | +0.0728 | 0.1043 |
+| the champion | +0.0930 | 0.1061 |
+| **paired difference** | **+0.0202** | **0.0736** |
+| on the 35 positions where they disagreed | +0.0595 | 0.2182 |
+
+Set beside the same design on objective-only turf:
+
+| turf | objective only | champion | paired difference |
+|---|---|---|---|
+| objective-only | −0.0136 ± 0.0861 | −0.0142 ± 0.0859 | **−0.0006 ± 0.0393** |
+| **champion** | **+0.0728 ± 0.1043** | **+0.0930 ± 0.1061** | **+0.0202 ± 0.0736** |
+
+**The rows move together and the actors do not separate.** Whatever raises the
+regret on champion turf raises it for *both* policies by the same amount, and
+the paired difference is zero on both turfs — measured twice now, at ±0.039 and
+±0.074. **The lookahead does not change one-step ask quality**, and that is as
+settled as anything here gets.
+
+## What that leaves, stated as a lead and not a finding
+
+The champion's own regret is **+0.1641 [+0.0797, +0.2484]** in the 162-position
+run and **+0.0930 ± 0.1061** here. Both positive; the first excludes zero and
+the second does not, and their intervals overlap heavily, so they are one
+quantity measured twice with the smaller run noisier. The honest summary is
+**weak evidence of a positive one-step regret of roughly +0.09 to +0.16 a
+decision for the deployed policy, not caused by its ask choice.**
+
+And "turf" still bundles two things this design cannot separate, because the
+champion arm uses champion positions *and* a champion continuation. Splitting
+them needs a cross: champion positions with an objective-only continuation. That
+is the next measurement if this lead is followed, and it is diagnostic rather
+than actionable — no change to the engine follows from either answer without a
+duel.
+
+## Where the headroom question ends up
+
+| channel | verdict |
+|---|---|
+| ask, one ply, objective in isolation | no headroom: −0.0188 [−0.0808, +0.0431], 208 positions |
+| ask, one ply, the deployed champion | **weak positive, +0.09 to +0.16, not from the choice** |
+| declaration | correct in both directions; declining to declare is right by 1.18 sets |
+| single-seat deviation | −0.608 [−1.122, −0.095], and a negative result here is uninformative by construction |
+
+Seven pre-registered attempts to correct this policy have failed and one search
+class is closed by proof. The one thread still live is the weak positive above,
+and it is weak: two runs, one significant, and no mechanism.
