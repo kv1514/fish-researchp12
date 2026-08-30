@@ -471,3 +471,106 @@ Extend the existing lookahead -- `w_lookahead`, depth 3, beam 4 -- so its
 **leaf evaluation scores declarability** rather than sets and tempo. Same
 coupling, applied where it compounds over several moves instead of being
 averaged into one ask's score. Bigger build; it is the one left standing.
+
+---
+
+# UPDATE: the search cannot reach it either, and this time there is a proof
+
+`prereg/declarability_leaf.md`. The `locate` null said the interaction was not
+reachable by an additively weighted one-ply feature and pointed at the search.
+So the search got the quantity: `fish4.lookahead.declarability`, the expected
+number of half-suits whose **split** we could name,
+
+    D(B) = sum over live half-suits of  prod_c max_{p in team} M[c, p]
+
+priced per edge of the possession chain rather than at its leaf, so each gain is
+discounted by exactly the chain that must land to reach it:
+
+    V(B, d) = max_a  p_a * [ 1 + w * (D(B|a) - D(B)) + V(B|a, d-1) ]
+
+It does what it was built to do. On a constructed position the cards-only chain
+scores two asks **exactly** equally and the declare-weighted one separates them
+by 0.5, because securing a nameable half-suit first is worth `w*G*p*(1-p)` —
+a preference in *order* that a card count provably cannot hold.
+
+## It was never duelled, and that is the point
+
+`scripts4/declare_bite.py` screens for futility through the real objective
+(`_SCORE_RECORDER`, not a copy of it) before any pairs are spent. 3,786 real
+champion decisions:
+
+| w_declare | / score spread | r score | r cards | r rest | bite |
+|---|---|---|---|---|---|
+| 0.25 | 0.006 | +0.600 | — | — | 0.5% |
+| 1.00 | 0.026 | +0.603 | — | — | 2.0% |
+| 2.00 | 0.052 | +0.606 | +0.617 | +0.570 | 3.7% |
+| 4.00 | 0.107 | +0.609 | +0.622 | +0.572 | 6.7% |
+| 6.00 | 0.162 | +0.611 | +0.625 | +0.573 | **8.7%** |
+
+The 15% floor and the [15%, 60%] window were fixed before the first number was
+read. Nothing clears it, at any weight up to the a-priori ceiling of 6 — a
+half-suit is six cards, and above that the search prefers positions it can
+*name* to positions it can *win*. **The 3,000-pair confirmation was not run.**
+
+## The theorem
+
+`ChainState.apply_success` scales the **target's** column by a constant and
+divides each row by its total. Both preserve ratios among non-target entries,
+and the target is always an opponent. So for any two teammates `t1, t2` and any
+card the chain does not itself take:
+
+> `M[c, t1] / M[c, t2]` is **invariant** under the entire search tree — at every
+> depth, every beam width, and **every leaf evaluation, including a perfect
+> one**.
+
+Asserted to 5e-16 over random chains. A possession chain resolves allocation
+uncertainty on exactly the ≤ `depth` cards it takes, and on nothing else.
+
+`scripts4/allocation_locus.py` prices it. Allocation uncertainty per card in
+nats is `log(sum_team M) - log(max_team M)`, which summed over a half-suit is
+exactly `log(ownership) - log(declarability)`. A chain can take card `c` only
+from an opponent, so at most `1 - team_mass_c` of its deficit is reachable.
+20,472 (decision, live half-suit) pairs, deficit-weighted, **no ground truth**:
+
+| half-suits with P(our team owns it) | pairs | unreachable by ANY possession chain |
+|---|---|---|
+| any | 20,472 | 40.7% |
+| ≥ 0.05 | 3,605 | 58.2% |
+| ≥ 0.5 | 609 | 84.5% |
+| **≥ 0.9** | **91** | **100.0%** |
+
+The bottom row is the allocation case itself — 0.1676 of our 0.1759 wrong
+declarations a game — and every card in it is on our own side. **A search that
+takes cards from opponents cannot touch any of it.**
+
+## What is now closed, and it is a lot
+
+Two whole families, on their own terms rather than by exhaustion:
+
+* **the ask basis** — an additively weighted one-ply feature cannot reach an
+  interaction term (`locate`, 3,000 pairs, diagnosed);
+* **the possession search** — no leaf evaluation whatsoever can reach the
+  allocation half of it (proved, then priced at 100% in the cases that matter).
+
+## What the theorem leaves
+
+The teammate/teammate ratio on a card neither side can ask for moves only on
+**public events**: a teammate asking (proving they lack that card and hold one
+of the half-suit), or being asked and answering. Those are inputs to the belief
+tracker, not to any search. Two levers follow.
+
+1. **Our own MISS is priced at zero and it is the most informative outcome in
+   the game.** `possession_value` says it outright — "a miss ends the
+   possession, so it contributes no cards" — true in cards and false in
+   information. Nothing in the twelve-term basis
+   (`suit turn scarce reveal deplete expose claim info certain concent signal
+   locate`) prices what our miss teaches our *partners* about our hand.
+2. **How much of the teammate split does the public record even contain, and
+   how much does the tracker already recover?** An off-policy fit question, no
+   duel needed, and it bounds every future attempt the way this theorem just
+   bounded the search.
+
+(2) gates (1) and is far cheaper. If the tracker already extracts nearly
+everything the record holds, then the teammate ceiling's 1.57 sets a game is
+not an inference problem at all, and the search should move to what the oracle
+**does** rather than what it **knows**.
