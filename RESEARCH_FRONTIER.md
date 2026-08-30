@@ -739,3 +739,69 @@ Unmeasured and needed before anything ships: whether the extra correct
 declarations are ones we would otherwise have won anyway later, which the
 per-opportunity table cannot say and only a duel can; and the cost of a second
 posterior per decision.
+
+---
+
+# UPDATE: the calibration gap is real and correcting it changes nothing
+
+`prereg/claim_gamma.md`. Built the intervention the mechanism named: the ask
+objective keeps γ = 0.35 and the DECLARATION reads a posterior built at a higher
+one, through the existing `_claim_ctx` hook, gated on `p_team_all` clearing
+`ClaimEvaluator`'s own screen so the second posterior is paid for on ~40% of
+decisions rather than all of them. Inert at 0.0 and the champion bit-identical
+there, asserted by `tests4/test_claim_gamma.py`.
+
+The screen's rules were fixed before it ran. 480 games, identical deals:
+
+| | deployed | γ = 0.7 |
+|---|---|---|
+| declarations per game | 4.500 | **4.413** |
+| wrong per game | 0.1313 | 0.1208 |
+
+> If declarations per game do not rise by at least 5%, the parameter is not
+> reaching the decision, and no duel is run.
+
+They **fell** by 1.9%. **The rule fires; no duel was run.** And the mechanism
+check the registration named — mean move index of our declarations, which the
+teammate oracle drags from 70.6 to 39.2 — moves **1.0** at γ = 0.7 and **4.1**
+at γ = 1.4, while misdeclarations per game rise 19% and 69%.
+
+## Why, and this is the finding
+
+The path ledger says it in one line: **the voluntary path is already 1 wrong in
+1,703.** The 0.97 gate is not what holds declarations back. A sharper joint
+gives the engine almost nothing new it dares to declare, because it already
+declares nearly everything it safely can.
+
+| path | per game | error rate |
+|---|---|---|
+| voluntary | 3.548 | **0.06%** |
+| gate | 0.221 | **19.8%** |
+| forced | 0.206 | **41.4%** |
+
+**62 of 63 errors come from `gate` and `forced`** — 0.427 declarations a game.
+Those are not decisions made while under-confident. They are decisions with **no
+alternative**: `gate` fires when the ask we were about to make cannot land,
+`forced` when no legal ask exists at all. Calibration cannot help a choice with
+one option.
+
+## The direction this opens
+
+Arriving in a forced position is an **ask-side outcome**, and it is the one
+place the error ledger has never been attacked from. `prereg/forced_exhaustive.md`
+already ships the best available play once stuck; nothing anywhere plays to
+avoid getting stuck.
+
+Nothing in the twelve-term basis prices it. `deplete` rewards draining an
+*opponent*, `scarce` is our team's share of a half-suit. Neither prices **our
+own remaining ability to ask** — how many half-suits we still hold a card in and
+an opponent still plausibly holds one. It is computable from the belief already
+on the context, it is a property of the position we choose to move into, and it
+has never been measured.
+
+That is the sixth measured case of a better belief buying nothing in play
+(split gamma, at-ask covariate, the convention's decoder, `locate`,
+declarability, and now the claim gamma). Six is enough to state the pattern
+plainly: **this engine's remaining loss is not an inference problem.** Every
+attempt to make it know more has failed, and the ledger has been pointing at
+positions rather than beliefs the whole time.

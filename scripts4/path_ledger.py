@@ -204,7 +204,14 @@ def main(n_deals=120, n_jobs=0, vs="self", arm=None) -> int:
            "ledger": report(rows),
            "margin": round(sum(r["margin"] for r in rows) / len(rows), 4)}
     print(f"  margin {out['margin']:+.4f} sets/game")
-    dest = ROOT / "results" / f"path_ledger_{vs}.json"
+    # The arm goes in the FILENAME. Two arms of the same `vs` used to write to
+    # one path, so running a treatment beside its baseline silently kept
+    # whichever finished last and threw the other away -- an instrument that
+    # destroys the comparison it exists to make. The default arm keeps its
+    # historical name so no existing result is orphaned.
+    tag = "_".join(f"{k}{v:g}" for k, v in sorted(arm.items()))
+    dest = ROOT / "results" / (f"path_ledger_{vs}.json" if not tag
+                               else f"path_ledger_{vs}_{tag}.json")
     dest.write_text(json.dumps(out, indent=1))
     print("wrote", dest.relative_to(ROOT))
     return 0
@@ -215,7 +222,16 @@ if __name__ == "__main__":
     a = [x for x in argv if not x.startswith("--")]
     kw = {}
     for flag in (x for x in argv if x.startswith("--")):
-        k, _, v = flag[2:].partition("=")
+        k, eq, v = flag[2:].partition("=")
+        # `--arm claim_gamma=0.7` (space, no `=`) used to parse as an EMPTY arm
+        # and run the default silently, so a treatment and its baseline came
+        # back bit-identical and looked like a null. That happened, and the
+        # only reason it was caught is that both runs wrote a file whose name
+        # said the arm was empty. A flag with no value is now an error.
+        if not eq or not v:
+            raise SystemExit(
+                f"--{k} needs a value joined by '=' (--{k}=...); a flag with "
+                f"no value would silently run the default arm")
         if k == "vs":
             kw["vs"] = v
         elif k == "arm":

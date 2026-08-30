@@ -170,6 +170,14 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  lookahead_depth: int = 1,
                  lookahead_beam: int = 4,
                  lookahead_couple: bool = True,
+                 #: Build the DECLARATION's posterior at a different
+                 #: action-model weight than the ask objective's. An ask is
+                 #: scored on the argmax and a declaration against a 0.97
+                 #: threshold, so the two want different things from the same
+                 #: model, and nothing in this engine had ever priced them
+                 #: apart. 0.0 is off and the champion is bit-identical.
+                 #: See prereg/claim_gamma.md and results/split_why.json.
+                 claim_gamma: float = 0.0,
                  #: Price each edge of the possession chain by the
                  #: DECLARABILITY it creates, in banked-cards per half-suit
                  #: made nameable. 0.0 is the champion, exactly: the tree keeps
@@ -274,6 +282,10 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.lookahead_beam = lookahead_beam
         self.lookahead_couple = lookahead_couple
         self.lookahead_declare = lookahead_declare
+        self.claim_gamma = claim_gamma
+        #: How many extra posteriors the claim gamma has paid for. Reported so
+        #: the cost of the gate is visible rather than assumed.
+        self.claim_posteriors = 0
         self.use_tablebase = use_tablebase
         self.tablebase_max_half_suits = tablebase_max_half_suits
         self.exact_endgame = bool(exact_endgame)
@@ -331,8 +343,45 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
     # side because when it fires it usually ends the half-suit by claiming.
 
     def _claim_ctx(self, ctx: DecisionContext) -> DecisionContext:
-        """The context the claim machinery scores splits with."""
-        return ctx
+        """The context the claim machinery scores splits with.
+
+        Identity unless ``claim_gamma`` is set, in which case the declaration
+        reads a posterior built at that action-model weight while the ask
+        objective keeps the configured one.
+
+        WHY THE TWO DECISIONS DESERVE DIFFERENT MODELS
+        ----------------------------------------------
+        results/split_why.json, 1,619 frozen (decision, half-suit) pairs
+        re-scored on the same belief: the engine's P(split right | ours) is
+        under-confident by 0.219 in the half-suits our team owns outright, and
+        that bias is FLAT in the draw count (0.219 / 0.244 / 0.237 at 480 /
+        1920 / 5760) and MONOTONE in gamma (0.337 / 0.219 / 0.143 / 0.025 at
+        0.0 / 0.35 / 0.7 / 1.4). It is the action model, not the sampler.
+
+        Raising gamma globally is refuted -- prereg/gamma_split.md killed a
+        uniform raise on teammate top-1 -- and the reason is that the two
+        decisions are scored differently. An ask reads the argmax; a
+        declaration is compared against 0.97. At that gate, gamma 0.7 clears it
+        on 19.3% of these positions against the deployed 17.1%, at precision
+        0.974 against 0.996.
+
+        THE COST GATE. Building a second posterior at every decision would
+        roughly double inference for a quantity only the declaration reads, so
+        it is built only when something is near claimable -- `p_team_all` is
+        already computed on this context, and the bar is ClaimEvaluator's own
+        screen. Below it, tier 3 would never run and the extra posterior would
+        be discarded unread.
+        """
+        if not self.claim_gamma:
+            return ctx
+        live = [hs for hs in range(ctx.n_hs) if ctx.hs_live[hs]]
+        if not live or max(float(ctx.p_team_all[hs])
+                           for hs in live) < self.claim_cfg.screen:
+            return ctx
+        self.claim_posteriors += 1
+        return DecisionContext(
+            ctx.obs, ctx.bel,
+            self.build_posterior(ctx.obs, gamma=self.claim_gamma))
 
     def _claim_bel(self):
         """The belief the purely deductive claim paths read."""
@@ -340,7 +389,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
 
     # -- policy --------------------------------------------------------------
 
-    def build_posterior(self, obs, n_draws: int = 0):
+    def build_posterior(self, obs, n_draws: int = 0, gamma=None):
         """The posterior this seat would form at this decision.
 
         Extracted from ``act`` so an instrument wanting the SAME posterior
@@ -352,11 +401,18 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
 
         ``n_draws`` overrides the configured count and changes nothing else, so
         the difference between two calls is sampling and only sampling. Zero
-        means the configured count, which is what ``act`` passes.
+        means the configured count, which is what ``act`` passes. ``gamma``
+        overrides the action-model weight the same way; None means the
+        configured one. Both exist so the difference between two posteriors is
+        exactly the named argument -- see scripts4/split_why.py, which used
+        them to establish that the split joint's under-confidence is flat in
+        draws and monotone in gamma.
         """
         return Posterior(self.bel, self.rng, n_draws=n_draws or self.n_draws,
                          n_worlds=self.n_worlds, mode=self.infer_mode,
-                         obs=obs, gamma=self.opponent_gamma,
+                         obs=obs,
+                         gamma=(self.opponent_gamma if gamma is None
+                                else float(gamma)),
                          gamma_team=self.gamma_team,
                          convention_beta=self.convention_beta,
                          convention_q=self.convention_q,
