@@ -1182,3 +1182,52 @@ pre-registered, and the action set here carries many hopeless claims whose noise
 biases the cross-fitted challenger selection *downward*, so if anything +0.16 is
 conservative. It needs its own measurement on its own population before it is
 worth a term.
+
+---
+
+# The champion-spec regret is POSITIVE, and the obvious comparison is invalid
+
+`results/ask_regret_champion_wide.json`, 162 positions × 24 worlds against
+V06_DEPLOYED:
+
+| | champion | the objective in isolation |
+|---|---|---|
+| cross-fitted regret | **+0.1641 [+0.0797, +0.2484]** | −0.0188 [−0.0808, +0.0431] |
+| captures of what one-step lookahead finds | **52.0%** | 107.4% |
+| vs a random ask | +0.3416 ± 0.0518 | +0.2548 ± 0.0506 |
+| legal asks per position | 19.0 | 22.1 |
+| best–worst spread | 1.5576 | 1.4295 |
+| positions | 162 | 208 |
+
+**The champion's regret excludes zero.** That is the first positive headroom
+finding of the session, and it stands on its own terms: against a 160-draw world
+measure and a champion continuation, the champion's chosen ask leaves +0.164
+sets a decision on the table.
+
+**But the side-by-side reading — "the lookahead makes ask selection worse" — is
+not supported by these two runs, and it would be the easy thing to publish.**
+Three things break the comparison:
+
+1. **Different populations.** Each run harvests from self-play by its own
+   policy. 19.0 legal asks a position against 22.1, and a wider best-worst
+   spread: the champion reaches sharper positions, where the same quality of
+   choice costs more in absolute sets.
+2. **Different value functions.** `_rollout` plays the continuation with the
+   same SPEC, so the two runs score their actions under different games.
+3. **An actor/evaluator mismatch in one arm only.** The world-sampling posterior
+   is hardcoded at `n_draws=160`. The isolated agent also acts at 160, so its
+   actor and evaluator agree; the champion acts at 480 and is scored on worlds
+   drawn at 160.
+
+## The clean experiment, and it costs one run
+
+`scripts4/actor_compare.py`. The per-world rollout values **do not depend on the
+actor** — only the incumbent does. So one set of positions, one set of worlds
+and one set of rollouts score BOTH actors, and all three confounds are held
+fixed by construction. Paired on the position, so the deal variance that
+dominates everything here cancels, and the positions where the two actors pick
+the same ask contribute an exact zero rather than false precision.
+
+Until it lands, the honest statement is: **the champion has measurable one-step
+ask headroom (+0.164, excluding zero), and whether the lookahead is the cause is
+unmeasured.**
