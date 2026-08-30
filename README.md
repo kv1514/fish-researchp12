@@ -269,13 +269,24 @@ Every one of these was written after the failure it now catches.
 ```bash
 py scripts4/check_seeds.py             # two experiments sharing deals they should not
 py scripts4/check_paper_numbers.py     # a figure the paper quotes that its file no longer holds
-py scripts4/check_tex.py               # structure, and doubled backslashes from an editing script
+py scripts4/check_tex.py               # structure, fragile commands in captions, doubled backslashes
+bash paper/build.sh                    # THE one that actually decides: three passes, 0 undefined refs
 py scripts4/recheck_mdes.py            # does per-cell noise revise any published verdict?
 py scripts4/heterogeneity_across_runs.py  # is block disagreement the harness or one effect?
 py scripts4/rollout_target_robust.py   # is a headline slope carried by a few positions?
 py scripts4/pair_sd_model.py           # what actually sets a paired experiment's noise
 py scripts4/index_results.py           # regenerate results/README.md, and find orphans
 ```
+
+`check_tex.py` is cheap and worth running first, but it is **not** a substitute
+for `paper/build.sh`. On 2026-08-30 it reported "no structural problems found"
+on a `kraken.tex` that `pdflatex` then refused to compile — a rewritten caption
+used `\path`, which expands to `\url` and is fragile in the moving argument a
+caption becomes. It now catches that specific case, and the general point
+stands: the build is the check, and this machine has `pdflatex`. The same run
+found `build.sh` still naming `fishbot_v06.tex` from before the KRAKEN rename,
+and `kraken.pdf` committed a day stale — neither would have survived one
+invocation of the script.
 
 Two of them exist because a natural way to measure something here is wrong:
 
