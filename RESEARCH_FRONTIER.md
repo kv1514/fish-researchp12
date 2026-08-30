@@ -1125,3 +1125,60 @@ noise off a streaming log, which is the same mistake the `locate` screen made at
 The prediction is recorded as refuted rather than removed. Its value was in
 being falsifiable before the data arrived, and one number, not a curve, is the
 honest summary.
+
+---
+
+# RESULT: the declaration is taken at the right moment, in both directions
+
+`results/declare_regret.json`. The new instrument runs the same cross-fitted
+estimator with **claim actions in the action set**, filling the hole
+`ask_regret` names in its own code. 109 positions where a declaration was
+actually available, 16 worlds, the ask objective in isolation.
+
+| what the policy did | n | regret | ± |
+|---|---|---|---|
+| all positions | 109 | +0.1101 | 0.1173 |
+| **it ASKED** — was declaring better? | 98 | +0.1607 | 0.1241 |
+| **it DECLARED** — was asking better? | 11 | **−0.3409** | 0.2338 |
+
+**When it declares, it is right to**: regret −0.34, interval excluding zero, so
+the alternatives were worse. Small sample (11), and it points the opposite way
+from "too eager".
+
+**When it asks, declaring would have been much worse.** The estimator-free
+number off the same rollouts:
+
+> where the policy asked, **best claim minus best ask = −1.1849 ± 0.1266**
+> over 98 positions
+
+and the best available claim beat the best available ask in **3 of 98
+positions, 3.1%**. Splitting the regret by that: **+0.1474 on the 95 positions
+where no claim would have won**, so the +0.16 is about choosing a better *ask*,
+not about a missed declaration.
+
+## This refutes the hypothesis that has been implicit all session
+
+The teammate oracle declares at move **39.2** against our **70.6**, and every
+direction from `prereg/declaration_timing.md` onward has treated that gap as
+something to close. It is not closeable, and this says why: **at the moments we
+ask, the declarations available to us are worth 1.18 sets less.** The oracle
+does not declare early because early declaration is better. It declares early
+because it is *certain*, and certainty is what it was handed. An honest engine
+cannot copy the timing without the knowledge, and `results/teammate_split.json`
+already showed the knowledge is not available — the record holds 92.1% and the
+tracker already has it.
+
+Two of the three channels are now measured and both are clean.
+
+## One lead, and it is a subgroup finding
+
+Ask regret is **−0.0188 [−0.0808, +0.0431]** over all positions and **+0.1474**
+on this population — positions late enough that a declaration is available.
+Different populations, so not a contradiction, but the suggestion is that the
+objective is weaker late.
+
+Recorded as a lead and nothing more: it is a subgroup that was not
+pre-registered, and the action set here carries many hopeless claims whose noise
+biases the cross-fitted challenger selection *downward*, so if anything +0.16 is
+conservative. It needs its own measurement on its own population before it is
+worth a term.
