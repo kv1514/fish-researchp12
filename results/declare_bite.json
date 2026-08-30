@@ -26,7 +26,27 @@
    "p90_abs_delta": 0.20825819540761276,
    "median_delta_over_spread": 0.052485504869256946,
    "mean_corr_with_score": 0.6061076370706792,
+   "mean_corr_with_cards_chain": 0.6165480050200332,
+   "mean_corr_with_score_less_chain": 0.5696964823734623,
    "bite": 0.03671421024828315
+  },
+  "4.0": {
+   "median_abs_delta": 0.06672219982482104,
+   "p90_abs_delta": 0.4201353228226455,
+   "median_delta_over_spread": 0.10672304974342915,
+   "mean_corr_with_score": 0.6092634540678838,
+   "mean_corr_with_cards_chain": 0.6219683532194217,
+   "mean_corr_with_score_less_chain": 0.572160754647251,
+   "bite": 0.06682514527205494
+  },
+  "6.0": {
+   "median_abs_delta": 0.10042558471671556,
+   "p90_abs_delta": 0.6319461379504376,
+   "median_delta_over_spread": 0.1615673122542627,
+   "mean_corr_with_score": 0.6106981003298361,
+   "mean_corr_with_cards_chain": 0.6247215803061096,
+   "mean_corr_with_score_less_chain": 0.5732508913186838,
+   "bite": 0.08716323296354993
   }
  }
 }

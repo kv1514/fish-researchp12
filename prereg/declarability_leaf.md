@@ -172,3 +172,172 @@ can already answer by arm.
 
 A null would **not** re-open the closed directions. Each was refuted on its own
 terms.
+
+---
+
+# SCREEN OUTCOME and AMENDMENT, recorded 2026-08-30
+
+## The screen fires the no-duel rule as registered
+
+3,786 real champion ask decisions, 40 games, through the real objective:
+
+| w_declare | median \|delta\| | p90 | / score spread | corr | bite |
+|---|---|---|---|---|---|
+| 0.25 | 0.0039 | 0.0254 | 0.006 | +0.600 | 0.5% |
+| 1.00 | 0.0162 | 0.1034 | 0.026 | +0.603 | 2.0% |
+| 2.00 | 0.0331 | 0.2083 | 0.052 | +0.606 | 3.7% |
+
+**Nothing reaches the 15% floor.** The registered rule is unambiguous:
+
+> If no `w` lands in that window, no duel is run.
+
+**No duel is run at these weights.** The screen cost seven minutes and it
+replaced a 3,000-pair confirmation, which is exactly what it was built for.
+
+## The number that makes this more than a null
+
+At `w = 2.0` the term is **five times the size** of `locate` — 0.052 of the
+score spread against `locate`'s ~0.01 — and it bites **less**: 3.7% against
+3.9%. Being bigger did not make it more decisive. The correlation says why:
+**+0.60 here against `locate`'s +0.42.** It points where the objective already
+points, harder than the term it replaced.
+
+That is a hypothesis, not yet a finding: **declarability along a possession
+chain may be largely a restatement of the cards banked along it.** Taking cards
+is what makes half-suits nameable, so the two currencies may not be separable
+inside a possession at all — in which case the search cannot use the second one
+however heavily it is weighted.
+
+## The amendment: extend the grid, with an a-priori ceiling and a prediction
+
+The registered grid stopped at 2.0 and was chosen before the term's scale was
+known. Extending it is an amendment and is recorded as one. It is legitimate
+for the reason the registration already gave for selecting on bite at all:
+
+> Bite is a mechanism quantity measured on the champion's own transcripts. It
+> cannot be traded for a margin.
+
+**The extension is `w` in {2, 4, 6}, and 6 is a ceiling fixed by argument, not
+by trying.** A half-suit is six cards. At `w > 6`, making a half-suit nameable
+is worth more to the search than taking every card in it, so the search would
+prefer positions it can *name* to positions it can *win*. That is a replacement
+objective, and this project has already measured what those cost: a learned
+half-suit value with correct units and a calibrated model lost 7.4 sets a pair.
+**If `w = 6` does not clear 15%, the registration closes with no duel.**
+
+`w = 2.0` is re-run on the identical seeds as a replication check on the screen
+itself.
+
+## The prediction, stated before the extended grid is run
+
+If the collinearity hypothesis is right:
+
+* **(a)** bite stays below 15% even at `w = 6`, and
+* **(b)** the correlation of the term against the **cards chain alone** — a new
+  column, since the old one was against a score that already contains the chain
+  and so could not say which part was being restated — is high and roughly
+  flat across weights, while the correlation against the score with the chain
+  removed is much lower.
+
+**The falsifier:** bite clearing 15% at `w = 4` or `w = 6` while the cards
+correlation stays moderate. That would mean the hypothesis is wrong and the
+grid was simply mis-scaled, and a duel would then be run at the smallest
+clearing weight exactly as originally registered.
+
+---
+
+# OUTCOME, recorded 2026-08-30: closed structurally, and no duel was run
+
+## The extended grid confirms the prediction
+
+Same 3,786 champion decisions, `w = 2.0` replicated exactly on the earlier
+seeds:
+
+| w_declare | median \|delta\| | / spread | r score | r cards | r rest | bite |
+|---|---|---|---|---|---|---|
+| 2.00 | 0.0331 | 0.052 | +0.606 | +0.617 | +0.570 | 3.7% |
+| 4.00 | 0.0667 | 0.107 | +0.609 | +0.622 | +0.572 | 6.7% |
+| 6.00 | 0.1004 | 0.162 | +0.611 | +0.625 | +0.573 | **8.7%** |
+
+**Prediction (a) holds.** Bite does not reach 15% even at `w = 6`, the a-priori
+ceiling. **The falsifier did not fire, so no duel is run** and the registration
+closes as written. At `w = 6` the term is 16% of the score spread — sixteen
+times `locate`'s size — and still re-ranks fewer than one ask in eleven.
+
+**Prediction (b) is half right, and the half that fails matters.** The
+correlation is high and flat, as predicted, but it is *not* specific to the
+cards chain: +0.62 against the chain and +0.57 against the score with the chain
+removed. So declarability along a possession is not merely a restatement of
+cards banked — it is a restatement of the objective as a whole, P(success)
+included, which is what one should expect of a quantity built as `p` times a
+gain. That is the same diagnosis `locate` earned, reached by a different route.
+
+## The real result is a theorem, and it closes more than this term
+
+`ChainState.apply_success` collapses the taken card's row to a point mass on us
+and runs one proportional-fitting sweep: scale the **target's** column by a
+constant, then divide each row by its total. Both operations preserve ratios
+among the non-target entries of a row, and the target is always an opponent.
+Therefore, for any two teammates `t1, t2` and any card the chain does not take:
+
+    M[c, t1] / M[c, t2]  is INVARIANT under the entire search tree
+
+at every depth, every beam width, and **every leaf evaluation, a perfect one
+included**. `tests4/test_declare_leaf.py` asserts it to 5e-16 over random
+chains. A possession chain resolves allocation uncertainty on exactly the cards
+it takes — at most `depth` of them — and on nothing else in the deal.
+
+`scripts4/allocation_locus.py` prices what that costs. Allocation uncertainty
+per card, in nats, is `log(sum_team M[c,p]) - log(max_team M[c,p])`; summed over
+a half-suit it is exactly `log(ownership) - log(declarability)`. A chain can
+take card `c` only from an opponent, so at most a `1 - team_mass_c` share of
+that card's deficit is even in principle reachable. Over 20,472
+(decision, live half-suit) pairs from real champion play, deficit-weighted:
+
+| half-suits with P(our team owns it) | pairs | unreachable by ANY possession chain |
+|---|---|---|
+| any | 20,472 | 40.7% |
+| ≥ 0.05 | 3,605 | 58.2% |
+| ≥ 0.5 | 609 | 84.5% |
+| **≥ 0.9** | **91** | **100.0%** |
+
+**Read the bottom row.** The half-suits our team almost certainly owns are
+exactly the allocation case — 0.1676 of our 0.1759 wrong declarations a game —
+and every card in them is on our own side, so a search that can only take cards
+from opponents cannot touch **any** of that uncertainty. Not at 100 plies, not
+with a perfect leaf.
+
+This is not a null. It is a proof that the direction the `locate` null pointed
+at was the wrong one, and it says so before the 3,000-pair duel rather than
+after.
+
+## What ships
+
+Nothing. `lookahead_declare` stays 0.0, `V06_DEPLOYED` is untouched, and the
+champion is bit-identical at the default — asserted by test, not by inspection.
+The term, the theorem test, and both instruments stay in the tree because the
+next attempt on the interaction has to clear the bar this one just established.
+
+## Where the 1.57 actually has to be attacked
+
+The theorem says which lever is left. The teammate/teammate ratio on a card
+neither side can ask for moves only on **public events** — a teammate asking
+(proving they lack that card and hold one of the half-suit), or being asked and
+answering. Those are inputs to the belief tracker, not to any search.
+
+Two consequences, and neither is a repeat of a closed direction:
+
+1. **The miss is priced at zero and it is the most informative outcome in the
+   game.** `possession_value` says so explicitly: "a miss ends the possession,
+   so it contributes no cards." True in cards, and false in information — a
+   miss publicly proves where a card is *not*. Nothing in the twelve-term basis
+   prices what our own miss teaches our partners about our hand.
+2. **How much of the teammate split is recoverable from the public record at
+   all, and how much does the tracker already recover?** That is an off-policy
+   fit question, answerable without a duel, and it bounds every future attempt
+   the way this theorem just bounded the search.
+
+The second is the cheaper and it gates the first: if the tracker already
+extracts nearly everything the record contains, the ceiling's 1.57 is not
+inference at all and the search should move to what the oracle *does* rather
+than what it *knows*.

@@ -285,6 +285,68 @@ def test_possession_value_stays_non_negative():
         assert possession_value(st, 3, 4, False, w) >= 0.0
 
 
+def test_a_chain_cannot_disambiguate_two_teammates():
+    """THE STRUCTURAL LIMIT, and it is a property of the search space itself.
+
+    ``apply_success`` collapses the taken card's row to a point mass on us and
+    then runs one proportional-fitting sweep: scale the TARGET's column by a
+    constant, divide each row by its total. Both operations preserve ratios
+    among the non-target entries of a row, and the target is always an
+    opponent. So for any two teammates t1, t2 and any card the chain does not
+    itself take::
+
+        M[c, t1] / M[c, t2]  is invariant under the entire tree
+
+    at every depth and every beam width. A possession chain therefore resolves
+    allocation uncertainty on exactly the cards it takes -- at most `depth` of
+    them -- and on nothing else in the deal.
+
+    That holds for ANY leaf evaluation, a perfect one included, which is why it
+    is the honest bound on what `w_declare` could ever have been worth: 0.1676
+    of our 0.1759 wrong declarations a game are allocation class, and the
+    search cannot see most of that however it scores its leaves.
+    """
+    rng = random.Random(11)
+    mates = [p for p in range(NUM_PLAYERS)
+             if team_of(p) == team_of(0) and p != 0]
+    worst = 0.0
+    for _ in range(30):
+        M = np.array([[rng.random() for _ in range(NUM_PLAYERS)]
+                      for _ in range(54)])
+        M /= M.sum(axis=1)[:, None]
+        st = ChainState(M, _mask(range(0, 54, 5)), [9] * NUM_PLAYERS, 0,
+                        [True] * 9, 9)
+        before = st.M.copy()
+        taken = []
+        for _ in range(3):
+            asks = st.legal_asks()
+            if not asks:
+                break
+            t, c = asks[rng.randrange(len(asks))]
+            st.apply_success(t, c)
+            taken.append(c)
+        assert taken, "the position must offer the chain something to take"
+        for c in range(54):
+            if c in taken:
+                continue
+            r0 = before[c, mates[0]] / max(before[c, mates[1]], 1e-300)
+            r1 = st.M[c, mates[0]] / max(st.M[c, mates[1]], 1e-300)
+            worst = max(worst, abs(r1 - r0) / max(r0, 1e-12))
+    assert worst < 1e-12, (
+        f"a chain moved a teammate/teammate ratio by {worst:.3e}; if this ever "
+        f"becomes false the closure argument in prereg/declarability_leaf.md "
+        f"no longer holds and the direction reopens")
+
+
+def test_the_chain_does_resolve_the_card_it_takes():
+    """The other half of the theorem, so it is a limit and not a no-op."""
+    M = _uniform_M()
+    st = ChainState(M, _mask([0, 1]), [9] * NUM_PLAYERS, 0, [True] * 9, 9)
+    assert st.M[2].max() < 0.9
+    st.apply_success(1, 2)
+    assert st.M[2, 0] == pytest.approx(1.0)
+
+
 # -- the ablation ------------------------------------------------------------
 
 def test_the_champion_is_bit_identical_at_zero():

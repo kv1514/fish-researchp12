@@ -41,6 +41,13 @@ RULES_D = {"wrong_distribution_outcome": "opponent"}
 SEED0 = 8_300_000
 
 
+def _corr(a, b) -> float:
+    a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
+    if a.std() <= 1e-12 or b.std() <= 1e-12:
+        return 0.0
+    return float(np.corrcoef(a, b)[0, 1])
+
+
 def main(n_games: int = 60, weights=(0.25, 0.5, 1.0, 2.0)) -> int:
     import fish4.agent4 as A
     from fish4.lookahead import lookahead_bonus
@@ -66,11 +73,19 @@ def main(n_games: int = 60, weights=(0.25, 0.5, 1.0, 2.0)) -> int:
             # w_look * bw would double the cards component.
             delta = w_look * (bw - b0)
             alt = base + delta
-            r = 0.0
-            if base.std() > 1e-12 and delta.std() > 1e-12:
-                r = float(np.corrcoef(base, delta)[0, 1])
+            r = _corr(base, delta)
+            # THE COLLINEARITY QUESTION, and the reason this column exists.
+            # `base` already carries w_look * b0, so a correlation against it
+            # cannot say WHICH part of the objective the new term restates.
+            # This one is against the cards chain alone, and against the score
+            # with the chain removed. If declarability along a possession is
+            # mostly a restatement of cards banked along it -- which is the
+            # obvious worry, since taking cards is what makes half-suits
+            # nameable -- it shows up here and nowhere else.
             rows[w].append((float(np.abs(delta).max()), spread, r,
-                            int(int(np.argmax(alt)) != top0)))
+                            int(int(np.argmax(alt)) != top0),
+                            _corr(w_look * b0, delta),
+                            _corr(base - w_look * b0, delta)))
 
     rules = RuleConfig(**RULES_D)
     A._SCORE_RECORDER = recorder
@@ -98,7 +113,8 @@ def main(n_games: int = 60, weights=(0.25, 0.5, 1.0, 2.0)) -> int:
     print(f"  (w_lookahead = {w_look}, depth {depth}, beam {beam})")
     print("=" * 72)
     print(f"\n  {'w_declare':>10}{'median |delta|':>16}{'p90':>9}"
-          f"{'/ score spread':>16}{'corr':>8}{'bite':>8}")
+          f"{'/ spread':>10}{'r score':>9}{'r cards':>9}{'r rest':>8}"
+          f"{'bite':>8}")
     out = {"rules": RULES_D, "n_decisions": n, "w_lookahead": w_look,
            "depth": depth, "beam": beam, "arms": {}}
     for w in weights:
@@ -107,20 +123,42 @@ def main(n_games: int = 60, weights=(0.25, 0.5, 1.0, 2.0)) -> int:
         rr = np.array([r[2] for r in rows[w]])
         bite = float(np.mean([r[3] for r in rows[w]]))
         frac = float(np.median(d[sp > 1e-9] / sp[sp > 1e-9]))
+        rc = np.array([r[4] for r in rows[w]])
+        ro = np.array([r[5] for r in rows[w]])
         print(f"  {w:>10.2f}{float(np.median(d)):>16.4f}"
-              f"{float(np.percentile(d, 90)):>9.4f}{frac:>16.3f}"
-              f"{float(np.mean(rr)):>8.3f}{bite:>8.1%}")
+              f"{float(np.percentile(d, 90)):>9.4f}{frac:>10.3f}"
+              f"{float(np.mean(rr)):>9.3f}{float(np.mean(rc)):>9.3f}"
+              f"{float(np.mean(ro)):>8.3f}{bite:>8.1%}")
         out["arms"][str(w)] = {
             "median_abs_delta": float(np.median(d)),
             "p90_abs_delta": float(np.percentile(d, 90)),
             "median_delta_over_spread": frac,
             "mean_corr_with_score": float(np.mean(rr)),
+            "mean_corr_with_cards_chain": float(np.mean(rc)),
+            "mean_corr_with_score_less_chain": float(np.mean(ro)),
             "bite": bite}
     print("\n  For scale, the `locate` term measured median 0.0444 / p90 0.1136")
     print("  at its shipped-scale weight, correlation +0.42, and bite 3.9% --")
     print("  and came back +0.047 [-0.075, +0.168] over 3,000 pairs. A term")
     print("  that does not clear those by a wide margin is not worth a duel.")
     dest = ROOT / "results" / "declare_bite.json"
+    if dest.exists():
+        # Arms from an earlier grid are kept only when the run they came from
+        # saw the SAME decisions -- same games, same champion, same decision
+        # count. Bite is a fraction of a specific position distribution, so
+        # merging arms measured on different positions would make a column
+        # that is not comparable down its own length.
+        prev = json.loads(dest.read_text())
+        same = all(prev.get(k) == out[k] for k in
+                   ("n_decisions", "w_lookahead", "depth", "beam", "rules"))
+        if same:
+            merged = dict(prev.get("arms", {}))
+            merged.update(out["arms"])
+            out["arms"] = merged
+            print(f"  merged {len(prev.get('arms', {}))} arm(s) from the "
+                  f"earlier grid: same {out['n_decisions']:,} decisions")
+        else:
+            print("  earlier arms DISCARDED: a different position set")
     dest.write_text(json.dumps(out, indent=1))
     print("\nwrote", dest)
     return 0
