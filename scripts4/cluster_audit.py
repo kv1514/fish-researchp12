@@ -99,6 +99,10 @@ def main() -> int:
         report("it ASKED (declare instead?)", [r["regret"] for r, _ in ask],
                [gg for _, gg in ask],
                d["arms"]["it ASKED (declare instead?)"]["half_width"])
+        dec = [(r, gg) for r, gg in zip(rows, g) if r["chose_claim"]]
+        report("it DECLARED (ask instead?)", [r["regret"] for r, _ in dec],
+               [gg for _, gg in dec],
+               d["arms"]["it DECLARED (ask instead?)"]["half_width"])
         report("best claim - best ask, when asked",
                [r["best_claim"] - r["best_ask"] for r, _ in ask],
                [gg for _, gg in ask],

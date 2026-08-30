@@ -1135,20 +1135,27 @@ estimator with **claim actions in the action set**, filling the hole
 `ask_regret` names in its own code. 109 positions where a declaration was
 actually available, 16 worlds, the ask objective in isolation.
 
-| what the policy did | n | regret | ± |
-|---|---|---|---|
-| all positions | 109 | +0.1101 | 0.1173 |
-| **it ASKED** — was declaring better? | 98 | +0.1607 | 0.1241 |
-| **it DECLARED** — was asking better? | 11 | **−0.3409** | 0.2338 |
+| what the policy did | n | regret | ± as first published | ± clustered by deal |
+|---|---|---|---|---|
+| all positions | 109 | +0.1101 | 0.1173 | 0.1339 |
+| **it ASKED** — was declaring better? | 98 | +0.1607 | 0.1241 | 0.1433 |
+| **it DECLARED** — was asking better? | 11 | **−0.3409** | 0.2338 | **0.4402** |
 
-**When it declares, it is right to**: regret −0.34, interval excluding zero, so
-the alternatives were worse. Small sample (11), and it points the opposite way
-from "too eager".
+The ± columns are the correction of 2026-08-30 (#83): these 109 positions come
+from **four deals**, so the published half-widths divided by 109 and paired a
+4-cluster standard error with 1.96 instead of *t* at 3 df.
 
-**When it asks, declaring would have been much worse.** The estimator-free
-number off the same rollouts:
+**The declared arm no longer excludes zero.** It reads −0.3409 [−0.7811,
++0.0993] once clustered, against [−0.5747, −0.1071] as published. The earlier
+sentence here — "regret −0.34, interval excluding zero, so the alternatives were
+worse" — is **withdrawn**. Eleven positions from four deals cannot carry it. The
+point estimate still points away from "too eager", and that is all it says.
 
-> where the policy asked, **best claim minus best ask = −1.1849 ± 0.1266**
+**When it asks, declaring would have been much worse**, and this half is
+unaffected — it *tightens*, being a within-position contrast whose deal effect
+cancels in the difference:
+
+> where the policy asked, **best claim minus best ask = −1.1849 ± 0.1051**
 > over 98 positions
 
 and the best available claim beat the best available ask in **3 of 98
@@ -1763,9 +1770,14 @@ three files while every count still looked plausible.
 |---|---|---|
 | regret, all positions | +0.1101 ± 0.1173 | +0.1101 ± 0.1339 |
 | regret where it asked | +0.1607 ± 0.1241 | +0.1607 ± 0.1433 |
+| regret where it **declared** (n=11) | −0.3409 ± 0.2338 | **−0.3409 ± 0.4402** — now straddles zero |
 | best claim − best ask, when it asked | −1.1849 ± 0.1266 | **−1.1849 ± 0.1051** |
 
-The load-bearing one is the third — it is what refuted the "too slow to
+**The one reversal in this whole audit is the declared arm**: 11 positions from
+4 deals, and it no longer excludes zero. The claim it supported — "when it
+declares, it is right to" — is withdrawn above.
+
+The load-bearing figure is the last one — it is what refuted the "too slow to
 declare" story behind four earlier directions — and it *tightens*, because it
 is a within-position contrast whose deal effect cancels. The same pattern as
 the paired actor cells: pairing survives clustering, levels do not.
