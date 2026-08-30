@@ -132,3 +132,83 @@ above asked for and did not get. It changed nothing — no block was added,
 dropped or reseeded on the strength of it, and the arm was fixed before any
 pair ran — but the rule was broken rather than kept and it is recorded here
 rather than left out.
+
+## Amendment 2 — the refit under the award rule, and what it says about the pick
+
+Written 2026-08-30, after task #49 recollected the one-ply targets under
+`wrong_distribution_outcome="opponent"`. The 388 positions this document rests
+on are **void-era**: the fit landed `956e132` on 2026-08-27 at 09:41 and the
+rule flipped in `ddf196a` at 21:50 the same day.
+
+`scripts4/ii_ask_targets.py` now journals under a rule fingerprint, so the two
+eras sit side by side in one file and can be fitted separately. Three runs of
+the same code over three row sets, each rung now carrying a **held-out paired
+interval clustered by game** — which the original ladder did not have:
+
+| rows | rule | games | grid's `info` | held-out gain over champion |
+|---|---|---|---|---|
+| 388 | void | 79 | **+2.00** | +0.0092 [−0.0270, +0.0455] |
+| 457 | award, held to the same 79 games | 79 | **−1.00** | +0.0142 [−0.0110, +0.0394] |
+| 764 | award, all | 156 | **+0.10** | −0.0011 [−0.0033, +0.0011] |
+
+Three things follow, and only the first is good news.
+
+**1. The scale family replicates.** `k = 1.0` in all three. De-weighting the
+success probability does not help under either rule. That half of the original
+diagnosis stands exactly as written.
+
+**2. The `info` direction does not survive the rule change.** Held to the same
+79 games — so the deal population is fixed and only the rule moves — the grid's
+pick goes from +2.00 to **−1.00**. That is a sign reversal, not an attenuation.
+Over all 156 award-rule games it lands at +0.10 with a held-out interval of
+[−0.0033, +0.0011], tight enough to exclude any gain worth having. The
+correction is not merely unproven under the award rule; at the weight the same
+procedure now selects, it points the other way.
+
+**3. The void-era pick was never significant, and this document hid that.**
+`info = +2.0` was nominated on a held-out gain of **+0.0092 [−0.0270,
++0.0455]**. The interval covers zero and is four times the estimate. What this
+document wrote instead was "it improved the selected ask's exact value by
++0.0093 in half-suit units" — a point estimate, no interval — and that number
+is what sent 4,000 duplicate-deal pairs after this arm.
+
+The duel is not retracted. It was pre-registered, it was run as written, and
+**+0.0835 [+0.0338, +0.1332]** remains a true fact about the void rule. What
+was wrong was the screen that chose where to spend the pairs: it was reading
+noise, and the arm happened to win an honest play test anyway.
+
+And the fix required no sophistication. Clustering by game is correct and the
+analytic interval matches a 20,000-draw cluster bootstrap to three decimals,
+but the naive interval over all 206 held-out positions as if independent is
+[−0.0222, +0.0407] and straddles zero as well. The defect was not the wrong
+interval. It was no interval.
+
+### Decision
+
+**The correction is withdrawn permanently, and no successor arm is nominated.**
+`fish4/registry4.py` already dropped `endgame_d_info` from the deployed config
+pending this refit; the refit does not bring it back. `V04_COMBINED` keeps its
+void-era definition and its void-era numbers, which are correct for that rule.
+
+The runner-up is not promoted either. `certain = −0.50` scores +0.0286 [−0.0123,
++0.0695] void, +0.0078 [−0.0286, +0.0441] matched, +0.0072 [−0.0215, +0.0358]
+over all award games — three straddles, with the award estimates a quarter of
+the void one. It is the arm this document once refused to test because it had
+been chosen by the held-out set; it is now refused for a better reason.
+
+### Standing rule this episode establishes
+
+An offline screen nominates an arm for a duel **only if its held-out gain has an
+interval excluding zero**, clustered by whatever unit shares a deal. A point
+estimate is not a nomination. `scripts4/ii_ask_fit.py` prints the interval on
+every rung so this cannot be skipped again by omission.
+
+### One bookkeeping note
+
+`askfeat` has gained two terms since the void-era fit (`locate`, then `reach`),
+so those rows carry 11 columns and the new ones 13. Every model on the ladder
+except the full search is unaffected: the champion carries weight 0 on both
+added terms, so cutting them off leaves rung 0 and each one-parameter rung
+bit-identical. The fit asserts that before cutting. Only the full search changes
+width, from 11 free parameters to 13, and its held-out score was already
+established to be a property of which restarts came up rather than of the model.

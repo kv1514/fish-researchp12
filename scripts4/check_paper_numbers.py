@@ -307,27 +307,45 @@ WATCH = [
     # none did. One of them was then consumed downstream as a decision bar in
     # scripts4/stuck_claim_value.py. Re-measured, the ratio is four times what
     # was claimed and the share of nulls is 73% against a quoted 27%.
-    ("perpetual_study.json", "normal.half_suits", "{:d}",
+    ("perpetual_study_void.json", "normal.half_suits", "{:d}",
      "half-suits measured", "Over the $1800$ half-suits of"),
-    ("perpetual_study.json", "normal.stuck_half_suits", "{:d}",
+    ("perpetual_study_void.json", "normal.stuck_half_suits", "{:d}",
      "half-suits that get stuck", "Over the $1800$ half-suits of"),
-    ("perpetual_study.json", "normal.share_of_half_suits_stuck", "{:.1%}",
+    ("perpetual_study_void.json", "normal.share_of_half_suits_stuck", "{:.1%}",
      "share of half-suits stuck", "Over the $1800$ half-suits of"),
-    ("perpetual_study.json", "normal.null_rate_when_stuck", "{:.1%}",
+    ("perpetual_study_void.json", "normal.misdeclare_rate_when_stuck", "{:.1%}",
      "null rate when stuck", "and they are nulled"),
-    ("perpetual_study.json", "normal.null_rate_when_not_stuck", "{:.2%}",
+    ("perpetual_study_void.json", "normal.misdeclare_rate_when_not_stuck", "{:.2%}",
      "null rate when not stuck", "half-suits that never get stuck"),
-    ("perpetual_study.json", "normal.null_rate_ratio", "{:.0f}",
+    ("perpetual_study_void.json", "normal.misdeclare_rate_ratio", "{:.0f}",
      "ratio between the two", "half-suits that never get stuck"),
-    ("perpetual_study.json", "normal.stuck_share_of_all_nulls", "{:.0%}",
+    ("perpetual_study_void.json", "normal.stuck_share_of_all_misdeclares", "{:.0%}",
      "stuck share of all nulls", "so they account for"),
-    # The signalling contrast is the one place a null rate is quoted as a
+    # The signalling contrast is the one place this rate is quoted as a
     # BEFORE and an AFTER, so the two have to move together or the 20%
     # reduction stops being one.
-    ("perpetual_study.json", "normal.nulls_per_game", "{:.3f}",
+    #
+    # The file is now ``perpetual_study_void.json`` and the keys say
+    # "misdeclare" rather than "null": the study was pinned to the void rule
+    # and counted NULL_TEAM outcomes, which read zero under the opponent-award
+    # baseline. It counts the EVENT now -- a team held all six and named the
+    # wrong split -- which means the same thing under both rules. The fresh
+    # void run reproduces the archived file on every field, so these figures
+    # are unchanged; only their label is.
+    ("perpetual_study_void.json", "normal.misdeclares_per_game", "{:.3f}",
      "nulls per game", "cuts nulls from"),
-    ("perpetual_study.json", "signalling.nulls_per_game", "{:.3f}",
+    ("perpetual_study_void.json", "signalling.misdeclares_per_game", "{:.3f}",
      "nulls per game, signalling on", "cuts nulls from"),
+    # The same three rows under the baseline rule. #50 item (3) asked whether
+    # the award flip re-prices this table; measured on the same 200 seeds it
+    # does not move at all, so these must equal their void twins above. If
+    # they ever diverge, one of the two runs has gone stale.
+    ("perpetual_study_award.json", "normal.misdeclares_per_game", "{:.3f}",
+     "misdeclarations per game, award rule", "cuts nulls from"),
+    ("perpetual_study_award.json", "signalling.misdeclares_per_game", "{:.3f}",
+     "misdeclarations per game, award rule, signalling on", "cuts nulls from"),
+    ("perpetual_study_award.json", "normal.misdeclare_rate_when_stuck", "{:.1%}",
+     "misdeclaration rate when stuck, award rule", "and they are nulled"),
     # The claim-threshold confirmation. Its point is that the SCREEN and the
     # confirmatory run disagree, so both have to be quoted and both have to
     # stay true -- writing one without the other is how the screen got counted
@@ -497,7 +515,7 @@ WATCH = [
      "median distinct candidate sets", "\\textbf{distinct candidate sets}"),
     ("infer_position_stats.json", "mask_groups.p90", "{:d}",
      "p90 distinct candidate sets", "\\textbf{distinct candidate sets}"),
-    ("perpetual_study.json", "normal.games", "{:d}",
+    ("perpetual_study_void.json", "normal.games", "{:d}",
      "games in the perpetual study", "games in which a position repeated"),
     # The A/A per-pair standard deviation. Every MDE and every power statement
     # in this paper divides by it, so it is the most reused number in the

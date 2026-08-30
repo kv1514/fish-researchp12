@@ -23,7 +23,10 @@ for ANALYSIS only; nothing measured here is fed to an acting policy.
    Turning it off and counting how many games hit the action cap measures how
    much of "Fish games end" is the rules and how much is the convention.
 
-Usage:  py scripts4/perpetual_study.py [n_games] [n_jobs]
+Usage:  py scripts4/perpetual_study.py [n_games] [n_jobs] [rule]
+
+``rule`` is ``opponent`` (the baseline, default) or ``null`` (the void
+era). Output goes to ``results/perpetual_study_{award,void}.json``.
 """
 
 from __future__ import annotations
@@ -40,7 +43,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from fish.cards import NUM_PLAYERS, half_suit_cards, team_of
-from fish.engine import NULL_TEAM, GameState
+from fish.engine import NULL_TEAM, ClaimEvent, GameState
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.registry4 import make_agent
@@ -123,12 +126,14 @@ def unplaceable_from_seat(state, bel, seat, hs) -> bool:
 # ---------------------------------------------------------------------------
 
 def one_game(args) -> dict:
-    seed, agent_seed, stall_window, cap, use_signalling = args
+    seed, agent_seed, stall_window, cap, use_signalling, rule = args
     from fish.beliefs import BeliefState
-    # Pinned to the era's rule: this study's statistics are about
-    # nulls/void outcomes, which the opponent-award baseline cannot
-    # produce. A bare default here would silently measure nothing.
-    rules = RuleConfig(wrong_distribution_outcome="null")
+    # The rule is a PARAMETER, not a pin. It used to be hardcoded to
+    # ``"null"`` because this study's headline row counted nulls, which the
+    # opponent-award baseline cannot produce -- but the fix for that is to
+    # count the EVENT rather than the outcome (see ``misdeclares`` below), not
+    # to freeze the study in a rule the engine no longer plays under.
+    rules = RuleConfig(wrong_distribution_outcome=rule)
     kw = dict(CHAMPION[1])
     kw["stall_window"] = stall_window
     kw["signal_mode"] = "stuck" if use_signalling else "off"
@@ -152,7 +157,7 @@ def one_game(args) -> dict:
            # identities so the comparison is possible.
            "stuck_hs": set(),
            "repeat_states": 0, "max_repeat": 0,
-           "dead_hs_seen": 0, "nulls": 0, "diff": 0}
+           "dead_hs_seen": 0, "nulls": 0, "misdeclares": 0, "diff": 0}
     n = 0
     while not st.is_terminal and n < cap:
         key = (tuple(st.hands), st.turn, tuple(st.set_winner))
@@ -199,20 +204,34 @@ def one_game(args) -> dict:
     a, b, nulls = st.scores()
     rec["nulls"] = nulls
     rec["diff"] = a - b
-    # Which half-suits actually nulled, so the rate can be split by whether the
-    # holding team was ever stuck on that half-suit.
-    nulled = {h for h, w in enumerate(st.set_winner) if w == NULL_TEAM}
+    # The EVENT this study is about is "a team held all six and named the wrong
+    # split". Under the void rule that voids the half-suit; under the award
+    # rule it hands it to the opponents. Counting ``NULL_TEAM`` counts the
+    # outcome, so it silently reads zero under the award baseline -- which is
+    # why the rule was pinned in the first place. This classification is the
+    # one fish4/match.py already uses for x_misdeclares and it means the same
+    # thing under both rules: the claim lost the half-suit for its own team,
+    # and every card it revealed was on that team.
+    bad = set()
+    for ev in st.history:
+        if not isinstance(ev, ClaimEvent):
+            continue
+        if ev.winner == team_of(ev.claimer):
+            continue
+        if all(team_of(h) == team_of(ev.claimer) for h in ev.revealed):
+            bad.add(ev.half_suit)
+    rec["misdeclares"] = len(bad)
     stuck = rec.pop("stuck_hs")
     rec["n_half_suits"] = len(st.set_winner)
     rec["n_stuck_hs"] = len(stuck)
-    rec["n_nulled"] = len(nulled)
-    rec["n_stuck_and_nulled"] = len(stuck & nulled)
-    rec["n_unstuck_and_nulled"] = len(nulled - stuck)
+    rec["n_nulled"] = len(bad)
+    rec["n_stuck_and_nulled"] = len(stuck & bad)
+    rec["n_unstuck_and_nulled"] = len(bad - stuck)
     return rec
 
 
-def _run(n_games, n_jobs, stall_window, cap, signalling, base=700_000):
-    jobs = [(base + i, 800_000 + i, stall_window, cap, signalling)
+def _run(n_games, n_jobs, stall_window, cap, signalling, rule, base=700_000):
+    jobs = [(base + i, 800_000 + i, stall_window, cap, signalling, rule)
             for i in range(n_games)]
     if n_jobs > 1:
         with Pool(n_jobs) as pool:
@@ -222,21 +241,25 @@ def _run(n_games, n_jobs, stall_window, cap, signalling, base=700_000):
 
 # ---------------------------------------------------------------------------
 
-def main(n_games: int = 200, n_jobs: int = 4) -> int:
+def main(n_games: int = 200, n_jobs: int = 4, rule: str = "opponent") -> int:
+    if rule not in ("opponent", "null"):
+        raise SystemExit(f"rule must be 'opponent' or 'null', not {rule!r}")
     t0 = time.time()
     out = {}
+    tag = "award" if rule == "opponent" else "void"
+    print(f"misdeclaration rule: {rule} ({tag})", file=sys.stderr, flush=True)
 
     print(f"\n[1/3] {n_games} games with the normal progress rule ...",
           file=sys.stderr, flush=True)
-    normal = _run(n_games, n_jobs, 80, 4000, False)
+    normal = _run(n_games, n_jobs, 80, 4000, False, rule)
 
     print(f"[2/3] {n_games} games with the progress rule DISABLED ...",
           file=sys.stderr, flush=True)
-    nostall = _run(n_games, n_jobs, 10 ** 9, 4000, False)
+    nostall = _run(n_games, n_jobs, 10 ** 9, 4000, False, rule)
 
     print(f"[3/3] {n_games} games with the signalling protocol ON ...",
           file=sys.stderr, flush=True)
-    signal = _run(n_games, n_jobs, 80, 4000, True)
+    signal = _run(n_games, n_jobs, 80, 4000, True, rule)
 
     def summarise(rows, label):
         g = len(rows)
@@ -259,7 +282,12 @@ def main(n_games: int = 200, n_jobs: int = 4) -> int:
                 / max(1, sum(1 for r in rows if r["ever_dead"]))),
             "mean_dead_half_suits_at_peak": sum(r["dead_hs_seen"]
                                                 for r in rows) / g,
-            "nulls_per_game": sum(r["nulls"] for r in rows) / g,
+            "misdeclares_per_game": sum(r["misdeclares"] for r in rows) / g,
+            # The void rule's own outcome counter, kept as a cross-check:
+            # under "null" it must equal misdeclares_per_game, and under
+            # "opponent" it must be 0. Either violation means the event
+            # classification and the engine disagree.
+            "voided_per_game": sum(r["nulls"] for r in rows) / g,
         }
         # The deadlock quartet, computed rather than asserted. The paper quotes
         # a null rate for stuck half-suits against unstuck ones, their share of
@@ -273,12 +301,22 @@ def main(n_games: int = 200, n_jobs: int = 4) -> int:
         d["half_suits"] = hs_tot
         d["stuck_half_suits"] = stuck_tot
         d["share_of_half_suits_stuck"] = stuck_tot / max(1, hs_tot)
-        d["null_rate_when_stuck"] = sn / max(1, stuck_tot)
-        d["null_rate_when_not_stuck"] = un / max(1, hs_tot - stuck_tot)
-        d["stuck_share_of_all_nulls"] = sn / max(1, sn + un)
-        d["null_rate_ratio"] = (
-            d["null_rate_when_stuck"] / d["null_rate_when_not_stuck"]
-            if d["null_rate_when_not_stuck"] else None)
+        d["misdeclare_rate_when_stuck"] = sn / max(1, stuck_tot)
+        d["misdeclare_rate_when_not_stuck"] = un / max(1, hs_tot - stuck_tot)
+        d["stuck_share_of_all_misdeclares"] = sn / max(1, sn + un)
+        d["misdeclare_rate_ratio"] = (
+            d["misdeclare_rate_when_stuck"] / d["misdeclare_rate_when_not_stuck"]
+            if d["misdeclare_rate_when_not_stuck"] else None)
+        d["rule"] = rule
+        voided = sum(r["nulls"] for r in rows)
+        bad = sum(r["misdeclares"] for r in rows)
+        if rule == "null" and voided != bad:
+            raise SystemExit(f"{label}: {voided} voided half-suits but {bad} "
+                             "classified misdeclarations -- under the void rule "
+                             "these are the same event and must agree")
+        if rule == "opponent" and voided:
+            raise SystemExit(f"{label}: {voided} voided half-suits under the "
+                             "award rule, which cannot void anything")
         out[label] = d
         return d
 
@@ -298,14 +336,16 @@ def main(n_games: int = 200, n_jobs: int = 4) -> int:
         ("mean_actions_after_first_dead_position", "actions after going dead", "{:.1f}"),
         ("games_with_a_stuck_team", "games where a team held an unplaceable set", "{:d}"),
         ("mean_dead_half_suits_at_peak", "dead half-suits at peak", "{:.2f}"),
-        ("nulls_per_game", "nulls per game", "{:.3f}"),
+        ("misdeclares_per_game", "misdeclarations per game", "{:.3f}"),
     ]
     for k, label, fmt in keys:
         print(f"  {label:42s}" + "".join(
             fmt.format(d[k]).rjust(12 if i == 0 else (15 if i == 1 else 13))
             for i, d in enumerate((a, b, c))))
 
-    path = ROOT / "results" / "perpetual_study.json"
+    # The rule is in the FILENAME. Both eras are reported in the paper and a
+    # fixed name means one run silently overwrites the other.
+    path = ROOT / "results" / f"perpetual_study_{tag}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, indent=2))
     print(f"\n({time.time()-t0:.0f}s)  Saved {path}")
@@ -314,4 +354,5 @@ def main(n_games: int = 200, n_jobs: int = 4) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(int(sys.argv[1]) if len(sys.argv) > 1 else 200,
-                          int(sys.argv[2]) if len(sys.argv) > 2 else 4))
+                          int(sys.argv[2]) if len(sys.argv) > 2 else 4,
+                          sys.argv[3] if len(sys.argv) > 3 else "opponent"))

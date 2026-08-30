@@ -1487,3 +1487,82 @@ on its own it cuts forced-path errors from 48 to 41 per 480 games.
 
 Items (1) the free-signalling duel and (3) the perpetual/analytics misdeclare
 rates remain open under #50.
+
+# #49 — the endgame ask correction does not come back, and the screen that shipped it was noise
+
+`fish4/registry4.py` withdrew `endgame_d_info = +2.0` from the deployed config
+on the award-rule flip, "pending a refit of `scripts4/ii_ask_fit.py` against
+award-rule targets". The targets are recollected and the refit is run. It does
+not bring the knob back — and it turns up something worse about how the knob was
+chosen.
+
+## The three fits
+
+Same code, one journal, three row sets. `scripts4/ii_ask_targets.py` fingerprints
+rows by rule, so the void era and the award era can be fitted separately rather
+than pooled by accident.
+
+| rows | rule | games | grid's `info` | held-out gain over champion |
+|---|---|---|---|---|
+| 388 | void | 79 | **+2.00** | +0.0092 [−0.0270, +0.0455] |
+| 457 | award, held to the same 79 games | 79 | **−1.00** | +0.0142 [−0.0110, +0.0394] |
+| 764 | award, all | 156 | **+0.10** | −0.0011 [−0.0033, +0.0011] |
+
+The void row reproduces the archived fit to the digit under current code, so the
+change between rows 1 and 2 is the rule and not code drift.
+
+**The sign reverses.** Holding the deal population to the same 79 games, the
+grid's pick moves from +2.00 to −1.00. Over all 156 award games it collapses to
++0.10 with an interval that excludes any gain worth having.
+
+**The scale family replicates**: `k = 1.0` under both rules. De-weighting the
+success probability does not help. That half of the original diagnosis stands.
+
+## The part that is not about this knob
+
+`info = +2.0` was nominated for a 4,000-pair duel on a held-out gain of
+**+0.0092 [−0.0270, +0.0455]**. The prereg quoted the estimate — "+0.0093 in
+half-suit units" — and no interval, because the ladder did not compute one.
+
+The duel stands. It was pre-registered, run as written, and +0.0835 [+0.0338,
++0.1332] is a true fact about the void rule. What was wrong is upstream: the
+screen that decided where to spend the pairs could not tell its winner from
+zero, and the arm won an honest play test anyway.
+
+`scripts4/ii_ask_fit.py` now prints a game-clustered paired interval on every
+rung. Under that instrument **every rung of every fit straddles zero**,
+including the one that shipped.
+
+This was not a subtle statistical error. Clustering by game is the right thing
+— positions inside a game share a deal, and the analytic interval agrees with a
+20,000-draw cluster bootstrap ([−0.0270, +0.0455] against [−0.0257, +0.0449])
+— but it was not what would have saved this. The naive interval that treats all
+206 held-out positions as independent is [−0.0222, +0.0407], and it straddles
+zero too. **Any** error bar would have caught it. There was none.
+`tests4/test_paired_gap.py` pins the instrument.
+
+## Standing rule
+
+An offline screen nominates an arm for a duel only if its held-out gain has an
+interval excluding zero, clustered by whatever unit shares a deal. A point
+estimate is not a nomination.
+
+By that rule the runner-up is refused too: `certain = −0.50` scores +0.0286
+[−0.0123, +0.0695] void, +0.0078 [−0.0286, +0.0441] matched, +0.0072 [−0.0215,
++0.0358] over all award games. #49 closes with the correction withdrawn
+permanently and **no successor arm**.
+
+## Three instrument fixes this needed
+
+* `ii_ask_fit.py` chose its rule era by **majority vote** over the journal and
+  said nothing about it. It now prints the full inventory, takes
+  `II_ASK_FIT_FP` to name an era, and `II_ASK_FIT_GAMES_FROM` to hold the deal
+  population fixed across eras.
+* It wrote `results/ii_ask_fit.json` under a fixed name, so the second era's fit
+  silently overwrote the first's — the same failure `path_ledger` had with two
+  arms and one filename. The fingerprint is in the filename now.
+* Void-era rows carry 11 feature columns and award-era rows 13. The fit cuts
+  every model to the rows' own width and **asserts** that each dropped term
+  carries zero champion weight, so rung 0 is provably the same policy either
+  way. Without that it raised a `matmul` dimension error, which is the good
+  outcome; silently broadcasting would have been the bad one.

@@ -41,6 +41,7 @@ inferred.
 from __future__ import annotations
 
 import json
+import math
 import random
 import sys
 from pathlib import Path
@@ -56,14 +57,50 @@ JOURNAL = ROOT / "results" / "ii_ask_targets.jsonl"
 CHAMPION = AskWeights()          # the shipped defaults
 
 
-def _load():
+def _load(want: str = ""):
+    """Rows for ONE rule fingerprint, never a mixture.
+
+    ``want`` (or ``$II_ASK_FIT_FP``) names it explicitly. With neither, the
+    majority fingerprint is used -- which is a heuristic, not a guarantee, so
+    the full inventory is printed either way. The 2026-08-27 rule flip left
+    void-era rows in this journal beside award-rule ones; a fit that silently
+    took whichever era happened to be larger would be reporting the wrong
+    world without saying so.
+    """
+    import os
     rows = [json.loads(x) for x in JOURNAL.read_text().splitlines()
             if x.strip()]
-    keep = max(set(r["solver"] for r in rows),
-               key=lambda f: sum(1 for r in rows if r["solver"] == f))
+    tally = {}
+    for r in rows:
+        tally[r["solver"]] = tally.get(r["solver"], 0) + 1
+    want = want or os.environ.get("II_ASK_FIT_FP", "")
+    only = os.environ.get("II_ASK_FIT_GAMES_FROM", "")
+    if want:
+        if want not in tally:
+            raise SystemExit(f"fingerprint {want} not in journal; "
+                             f"have {sorted(tally)}")
+        keep = want
+    else:
+        keep = max(tally, key=tally.get)
+    print("journal inventory: "
+          + ", ".join(f"{f} n={n}" + ("  <- fitting" if f == keep else "")
+                      for f, n in sorted(tally.items(), key=lambda kv: -kv[1])))
+    # Holding the deal population fixed across two rule eras: keep only the
+    # games the named fingerprint also covers. The positions inside a game
+    # still differ -- a rule change alters play, so the same seed yields a
+    # different history -- so this removes the sample-size half of the
+    # confound, not all of it, and the write-up has to say so.
+    gate = None
+    if only:
+        if only not in tally:
+            raise SystemExit(f"games-from fingerprint {only} not in journal")
+        gate = set(r["game"] for r in rows if r["solver"] == only)
+        print(f"restricted to the {len(gate)} games {only} covers")
     out = []
     for r in rows:
         if r["solver"] != keep:
+            continue
+        if gate is not None and r["game"] not in gate:
             continue
         vals = r["values"]
         idx = [i for i, v in enumerate(vals) if v is not None]
@@ -74,7 +111,11 @@ def _load():
             "p": np.array([r["p"][i] for i in idx]),
             "F": np.array([r["features"][i] for i in idx]),
             "v": np.array([vals[i] for i in idx])})
-    return out, keep
+    widths = set(int(r["F"].shape[1]) for r in out)
+    if len(widths) != 1:
+        raise SystemExit(f"fingerprint {keep} mixes feature widths {widths}; "
+                         "these are not one design matrix")
+    return out, keep, widths.pop(), only
 
 
 def policy_value(rows, w):
@@ -87,6 +128,39 @@ def policy_value(rows, w):
     for r in rows:
         tot += r["v"][int(np.argmax(r["p"] + r["F"] @ w))]
     return tot / len(rows)
+
+
+def paired_gap(rows, w, w0):
+    """Mean per-position value of policy ``w`` minus policy ``w0``, with a 95%
+    interval clustered by GAME.
+
+    Both policies are evaluated on the same positions, so the comparison is
+    paired and the pairing is free -- most positions are ties (the two weight
+    vectors pick the same ask) and pairing removes every one of them from the
+    variance. Clustering is by game because positions inside one game share a
+    deal and a history: treating them as independent would shrink the interval
+    by the square root of a number that is not the sample size.
+
+    This function exists because the void-era version of this script reported
+    the ladder as bare point estimates, and a +0.0093 held-out gain read off
+    two such numbers is what put ``endgame_d_info = +2.0`` into a duel.
+    """
+    per = {}
+    for r in rows:
+        d = (r["v"][int(np.argmax(r["p"] + r["F"] @ w))]
+             - r["v"][int(np.argmax(r["p"] + r["F"] @ w0))])
+        per.setdefault(r["game"], []).append(float(d))
+    n = sum(len(v) for v in per.values())
+    mu = sum(sum(v) for v in per.values()) / n
+    # cluster-robust: each game contributes its own summed deviation
+    g = len(per)
+    if g < 2:
+        return mu, float("nan")
+    acc = 0.0
+    for v in per.values():
+        acc += (sum(v) - mu * len(v)) ** 2
+    se = math.sqrt(acc * g / (g - 1.0)) / n
+    return mu, 1.96 * se
 
 
 def oracle_value(rows):
@@ -154,17 +228,35 @@ def one_extra(rows, w0, term, grid):
 
 
 def main(restarts: int = 12) -> int:
-    rows, fp = _load()
+    rows, fp, k, only = _load()
     if len(rows) < 40:
         print(f"only {len(rows)} usable positions; collect more first")
         return 1
+    # Rows record the feature row as it stood WHEN THEY WERE COLLECTED, and
+    # askfeat has gained terms since (locate, then reach). A weight vector is
+    # only meaningful against the design matrix it was built for, so every
+    # model here is cut to the width the rows actually have. The champion
+    # carries weight 0 on each of the added terms, so cutting them off leaves
+    # the champion's policy -- and every one-parameter rung that moves a term
+    # inside the first k -- bit-identical to the full-width version. What it
+    # does change is the full search, which then has k free parameters.
+    global TERM_NAMES
+    if k != len(TERM_NAMES):
+        dropped = list(TERM_NAMES[k:])
+        assert all(abs(x) < 1e-12 for x in CHAMPION.as_vector()[k:]), \
+            "a dropped term carries nonzero champion weight; cutting it " \
+            "would silently change the reference policy"
+        print(f"rows carry {k} of {len(TERM_NAMES)} terms; "
+              f"fitting without {', '.join(dropped)} "
+              f"(champion weight 0 on each, so rung 0 is unchanged)")
+        TERM_NAMES = TERM_NAMES[:k]
     games = sorted(set(r["game"] for r in rows))
     train = [r for r in rows if r["game"] % 2 == 0]
     test = [r for r in rows if r["game"] % 2 == 1]
     print(f"fingerprint {fp}; {len(rows)} positions over {len(games)} games")
     print(f"  train {len(train)} (even games), test {len(test)} (odd)")
 
-    w0 = CHAMPION.as_vector()
+    w0 = CHAMPION.as_vector()[:k]
     for name, sel in (("train", train), ("test", test)):
         print(f"\n{name}: champion {policy_value(sel, w0):+.4f}, "
               f"oracle {oracle_value(sel):+.4f}, "
@@ -196,12 +288,18 @@ def main(restarts: int = 12) -> int:
     ladder.append(("2: scale + info", best2[1], best2[0]))
 
     print("\nladder (train -> test), champion is the zero-parameter model")
-    print(f"   {'model':<22} {'train':>9} {'test':>9}")
+    print(f"   {'model':<22} {'train':>9} {'test':>9}   "
+          f"{'held-out gain over champion (95% CI, by game)':<44}")
     print(f"   {'0: champion':<22} {policy_value(train, w0):>+9.4f} "
           f"{policy_value(test, w0):>+9.4f}")
+    gaps = {}
     for name, wv, vtr_ in ladder:
+        mu, hw = paired_gap(test, wv, w0)
+        gaps[name] = (mu, hw)
+        flag = "" if (mu - hw) * (mu + hw) > 0 else "   (straddles 0)"
         print(f"   {name:<22} {vtr_:>+9.4f} "
-              f"{policy_value(test, wv):>+9.4f}")
+              f"{policy_value(test, wv):>+9.4f}   "
+              f"{mu:+.4f} [{mu-hw:+.4f}, {mu+hw:+.4f}]{flag}")
 
     # Which one-parameter model to carry into a play test, chosen by
     # leave-one-game-out CV INSIDE the training games. The train margin
@@ -275,7 +373,15 @@ def main(restarts: int = 12) -> int:
                   f"{policy_value(te, w):+.4f} "
                   f"(oracle {oracle_value(te):+.4f}, n={len(te)})")
 
-    out = ROOT / "results" / "ii_ask_fit.json"
+    # The fingerprint is in the FILENAME. Two rule eras live in one journal
+    # and a fixed name means the second fit silently overwrites the first --
+    # the same way path_ledger once wrote two arms to one file.
+    # Fingerprint AND row restriction in the FILENAME. Two rule eras live in
+    # one journal, and inside one era a matched-games cut is a different fit
+    # again -- a fixed name means the later run silently overwrites the
+    # earlier, the way path_ledger once wrote two arms to one file.
+    tag = fp + (f"_on_{only}" if only else "")
+    out = ROOT / "results" / f"ii_ask_fit_{tag}.json"
     out.write_text(json.dumps({
         "fingerprint": fp, "n": len(rows), "n_games": len(games),
         "n_train": len(train), "n_test": len(test),
