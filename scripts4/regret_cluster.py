@@ -24,13 +24,12 @@ def segment(rows):
         prev = h
     return out
 
+from fish4.clustered import cluster_ci
+
+
 def cl(vals, groups):
-    by = {}
-    for v, g in zip(vals, groups):
-        by.setdefault(g, []).append(v)
-    n = len(vals); k = len(by); mu = sum(vals) / n
-    acc = sum((sum(v) - mu * len(v)) ** 2 for v in by.values())
-    return mu, 1.96 * math.sqrt(acc * k / (k - 1.0)) / n, k
+    return cluster_ci(vals, groups)
+
 
 for name in ("ask_regret_wide", "ask_regret_champion_wide", "ask_regret_champion"):
     d = json.load(open(ROOT / "results" / f"{name}.json"))

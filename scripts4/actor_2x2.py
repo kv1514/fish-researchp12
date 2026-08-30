@@ -32,12 +32,17 @@ def gmap(spec):
 
 G = {s: gmap(s) for s in ("objective", "champion")}
 
+from fish4.clustered import cluster_ci
+
+
 def cl(by):
-    n = sum(len(v) for v in by.values()); k = len(by)
-    mu = sum(sum(v) for v in by.values()) / n
-    if k < 2: return mu, float("nan"), n, k
-    acc = sum((sum(v) - mu*len(v))**2 for v in by.values())
-    return mu, 1.96*math.sqrt(acc*k/(k-1.0))/n, n, k
+    """``by`` is already grouped: {cluster: [values]}."""
+    vals, grps = [], []
+    for g, v in by.items():
+        vals += list(v); grps += [g] * len(v)
+    mu, hw, k = cluster_ci(vals, grps)
+    return mu, (float("nan") if hw is None else hw), len(vals), k
+
 
 def iid(x):
     return 1.96*statistics.stdev(x)/math.sqrt(len(x))

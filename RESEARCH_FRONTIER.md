@@ -1192,7 +1192,7 @@ V06_DEPLOYED:
 
 | | champion | the objective in isolation |
 |---|---|---|
-| cross-fitted regret | **+0.1641 [+0.0319, +0.2963]** | −0.0188 [−0.0821, +0.0444] |
+| cross-fitted regret | **+0.1641 [+0.0046, +0.3236]** | −0.0188 [−0.0951, +0.0575] |
 | captures of what one-step lookahead finds | **52.0%** | 107.4% |
 | vs a random ask | +0.3416 ± 0.0518 | +0.2548 ± 0.0506 |
 | legal asks per position | 19.0 | 22.1 |
@@ -1262,7 +1262,7 @@ evidence that it does it.
 ### What remains open, stated narrowly
 
 On the champion's own population with a champion continuation, the regret is
-**+0.1641 [+0.0319, +0.2963]**. This run shows the *choice* is not what leaves
+**+0.1641 [+0.0046, +0.3236]**. This run shows the *choice* is not what leaves
 it there, so either those positions offer more one-step value to anyone, or the
 champion continuation changes what the estimator measures. Separating them needs
 `ASK_REGRET_SPEC=champion` on this same two-incumbent design. If both actors
@@ -1339,7 +1339,7 @@ settled as anything here gets.
 
 ## What that leaves, stated as a lead and not a finding
 
-The champion's own regret is **+0.1641 [+0.0319, +0.2963]** in the 162-position
+The champion's own regret is **+0.1641 [+0.0046, +0.3236]** in the 162-position
 run and **+0.0930 ± 0.1061** here. Both positive; the first excludes zero and
 the second does not, and their intervals overlap heavily, so they are one
 quantity measured twice with the smaller run noisier. The honest summary is
@@ -1504,8 +1504,8 @@ than pooled by accident.
 
 | rows | rule | games | grid's `info` | held-out gain over champion |
 |---|---|---|---|---|
-| 388 | void | 79 | **+2.00** | +0.0092 [−0.0270, +0.0455] |
-| 457 | award, held to the same 79 games | 79 | **−1.00** | +0.0142 [−0.0110, +0.0394] |
+| 388 | void | 79 | **+2.00** | +0.0092 [−0.0282, +0.0467] |
+| 457 | award, held to the same 79 games | 79 | **−1.00** | +0.0142 [−0.0118, +0.0403] |
 | 764 | award, all | 156 | **+0.10** | −0.0011 [−0.0033, +0.0011] |
 
 The void row reproduces the archived fit to the digit under current code, so the
@@ -1521,7 +1521,7 @@ success probability does not help. That half of the original diagnosis stands.
 ## The part that is not about this knob
 
 `info = +2.0` was nominated for a 4,000-pair duel on a held-out gain of
-**+0.0092 [−0.0270, +0.0455]**. The prereg quoted the estimate — "+0.0093 in
+**+0.0092 [−0.0282, +0.0467]**. The prereg quoted the estimate — "+0.0093 in
 half-suit units" — and no interval, because the ladder did not compute one.
 
 The duel stands. It was pre-registered, run as written, and +0.0835 [+0.0338,
@@ -1535,7 +1535,7 @@ including the one that shipped.
 
 This was not a subtle statistical error. Clustering by game is the right thing
 — positions inside a game share a deal, and the analytic interval agrees with a
-20,000-draw cluster bootstrap ([−0.0270, +0.0455] against [−0.0257, +0.0449])
+20,000-draw cluster bootstrap ([−0.0282, +0.0467] against [−0.0257, +0.0449])
 — but it was not what would have saved this. The naive interval that treats all
 206 held-out positions as independent is [−0.0222, +0.0407], and it straddles
 zero too. **Any** error bar would have caught it. There was none.
@@ -1548,8 +1548,8 @@ interval excluding zero, clustered by whatever unit shares a deal. A point
 estimate is not a nomination.
 
 By that rule the runner-up is refused too: `certain = −0.50` scores +0.0286
-[−0.0123, +0.0695] void, +0.0078 [−0.0286, +0.0441] matched, +0.0072 [−0.0215,
-+0.0358] over all award games. #49 closes with the correction withdrawn
+[−0.0137, +0.0709] void, +0.0078 [−0.0299, +0.0454] matched, +0.0072 [−0.0219,
++0.0363] over all award games. #49 closes with the correction withdrawn
 permanently and **no successor arm**.
 
 ## Three instrument fixes this needed
@@ -1582,26 +1582,38 @@ against the harvest's own game index on 260 positions under both harvest
 policies and recovers **every** boundary exactly, so the correction below is a
 computation on the existing files, not an estimate.
 
-| run | as published | clustered by deal | deals |
-|---|---|---|---|
-| `ask_regret_wide` (objective) | −0.0188 [−0.0808, +0.0431] | −0.0188 [−0.0821, +0.0444] | 8 |
-| `ask_regret_champion_wide` | **+0.1641 [+0.0797, +0.2484]** | **+0.1641 [+0.0319, +0.2963]** | 8 |
-| `ask_regret_champion` | −0.0893 [−0.2535, +0.0749] | −0.0893 [−0.3814, +0.2028] | 3 |
+## Two mistakes, not one
 
-**No conclusion reverses.** The champion's positive one-step regret still
-excludes zero — but its interval is **1.57× wider** than published, its lower
-bound moves from +0.080 to +0.032, and the 70-position run is really 3 deals
-with an interval three times what was quoted. Those are the numbers from here
-on.
+Fixing the count alone would have replaced one too-narrow interval with
+another. Cluster-robust variance is asymptotic in the **number of clusters**,
+and these runs have three to ten deals — so the standard error has to be paired
+with a *t* critical value at `k − 1` degrees of freedom, not 1.96. At six
+clusters that is a 31% difference, at four 62%, at three 61% again on top of a
+much larger standard error. `fish4/clustered.py` does both together, and every
+instrument now routes through it.
+
+| run | as published | clustered by deal, t at k−1 df | deals |
+|---|---|---|---|
+| `ask_regret_wide` (objective) | −0.0188 [−0.0808, +0.0431] | −0.0188 [−0.0951, +0.0575] | 8 |
+| `ask_regret_champion_wide` | **+0.1641 [+0.0797, +0.2484]** | **+0.1641 [+0.0046, +0.3236]** | 8 |
+| `ask_regret_champion` | −0.0893 [−0.2535, +0.0749] | −0.0893 [−0.7109, +0.5323] | 3 |
+
+**No conclusion reverses, but one comes very close.** The champion's positive
+one-step regret still excludes zero — by **+0.0046**, against a published lower
+bound of +0.0797. Its interval is **1.89×** wider than published. The
+70-position run is really 3 deals and its interval is **3.78×** what was
+quoted. Those are the numbers from here on.
 
 `ask_regret.py` now records the deal on every row and reports both intervals,
-the clustered one labelled as the honest one. `harvest` gained a `games_out`
-out-parameter rather than a wider return tuple, so no existing caller changed.
+the clustered one labelled as the honest one and annotated with its degrees of
+freedom. `harvest` gained a `games_out` out-parameter rather than a wider return
+tuple, so no existing caller changed.
 
 **What is not affected:** duplicate-deal duels. `duel.py` pairs on the deal and
-treats the pair as the independent unit — that discipline was right from the
-start, and it is why the duel results, including the ones this project ships
-on, do not move.
+treats the pair as the independent unit, and `fish4/match.py` already used a *t*
+critical value for the pair count — that discipline was right from the start,
+and it is why the duel results, including the ones this project ships on, do not
+move.
 
 # #82 — the one-step regret is the turf, and the turf is the positions
 
@@ -1612,25 +1624,25 @@ once — the positions harvested, the continuation that scores them, and whether
 the acting and evaluating posteriors agree. It scores **both actors on one set
 of positions, one set of worlds and one set of rollouts**.
 
-Run as a 2×2 over the two remaining confounds, with every interval clustered by
-deal:
+Run as a 2×2 over the two remaining confounds, every interval clustered by deal
+with the *t* correction:
 
 | harvest | continuation | pos | deals | champion − objective | champion-actor level |
 |---|---|---|---|---|---|
-| objective | objective | 129 | 5 | −0.0006 [−0.0291, +0.0278] | −0.0142 [−0.1342, +0.1058] |
-| objective | champion  | 110 | 4 | +0.0417 [−0.0114, +0.0948] | +0.0220 [−0.0764, +0.1204] |
-| champion  | objective | 125 | 6 | −0.0087 [−0.0664, +0.0490] | +0.0753 [−0.0380, +0.1886] |
-| champion  | champion  | 103 | 5 | +0.0202 [−0.0270, +0.0675] | +0.0930 [−0.0192, +0.2053] |
+| objective | objective | 129 | 5 | −0.0006 [−0.0409, +0.0396] | −0.0142 [−0.1837, +0.1553] |
+| objective | champion  | 110 | 4 | +0.0417 [−0.0439, +0.1273] | +0.0220 [−0.1366, +0.1806] |
+| champion  | objective | 125 | 6 | −0.0087 [−0.0843, +0.0669] | +0.0753 [−0.0731, +0.2238] |
+| champion  | champion  | 103 | 5 | +0.0202 [−0.0465, +0.0870] | +0.0930 [−0.0655, +0.2516] |
 
 ## The actors do not separate, in any cell
 
-Four paired differences, all straddling zero, the tightest at **±0.029**.
-Pairing is what makes this the sharp end of the design: both actors see the
-same position and the same worlds, so the deal effect cancels inside the pair
-and clustering makes these intervals *narrower* than the naive ones (±0.029
-against ±0.039), while it makes the unpaired levels beside them much wider.
-**The lookahead does not change one-step ask quality** — its +0.104 duel win is
-earned beyond one ply, not at it.
+Four paired differences, all straddling zero, the tightest at **±0.041**.
+Pairing is the sharp end of the design: both actors see the same position and
+the same worlds, so the deal effect cancels inside the pair, and the paired
+intervals stay close to their naive versions (±0.041 against ±0.039) while the
+unpaired levels beside them widen by half again. **The lookahead does not change
+one-step ask quality** — its +0.104 duel win is earned beyond one ply, not at
+it.
 
 ## The continuation is measured and null
 
@@ -1638,9 +1650,9 @@ The two cells sharing a harvest draw the *same positions* — 110 and 103 matche
 indices, every one with the same legal-ask count, checked rather than assumed —
 so the continuation effect is paired:
 
-* objective harvest, 110 positions over 4 deals: **+0.0545 [−0.1265, +0.2356]**
-* champion harvest, 103 positions over 5 deals: **−0.0218 [−0.1234, +0.0797]**
-* pooled, 213 positions over 9 deals: **+0.0176 [−0.0832, +0.1184]**
+* objective harvest, 110 positions over 4 deals: **+0.0545 [−0.2373, +0.3464]**
+* champion harvest, 103 positions over 5 deals: **−0.0218 [−0.1654, +0.1217]**
+* pooled, 213 positions over 9 deals: **+0.0176 [−0.1010, +0.1362]**
 
 Which policy plays the continuation does not move one-step regret.
 
@@ -1648,19 +1660,19 @@ Which policy plays the continuation does not move one-step regret.
 
 The position distribution cannot be paired — it *is* the factor:
 
-* at the objective continuation: **+0.0895 [−0.0755, +0.2546]**
-* at the champion continuation: **+0.0711 [−0.0782, +0.2203]**
-* pooled main effect: **+0.0803 [−0.0309, +0.1916]**
+* at the objective continuation: **+0.0895 [−0.1358, +0.3149]**
+* at the champion continuation: **+0.0711 [−0.1532, +0.2953]**
+* pooled main effect: **+0.0803 [−0.0786, +0.2393]**
 
-Positive under both continuations, and straddling zero under both. The two
-main effects are not on the same footing and the ratio between their point
-estimates is not worth quoting: the continuation effect is paired and measured
-at ±0.101, the positions effect is unpaired and measured at ±0.111 around a
-larger centre. What the 2×2 supports is an **elimination** — not the ask choice
-(four paired nulls, tightest ±0.029), not the continuation (a paired null over
-9 deals) — leaving the position distribution as the only factor with a positive
-estimate under both conditions. Its size is a lead, not a finding, and by the
-standing rule recorded under #49 it does not get quoted as one.
+Positive under both continuations, and straddling zero under both. The two main
+effects are not on the same footing and the ratio between their point estimates
+is not worth quoting: the continuation effect is paired and measured at ±0.118,
+the positions effect is unpaired and measured at ±0.159 around a larger centre.
+What the 2×2 supports is an **elimination** — not the ask choice (four paired
+nulls, tightest ±0.041), not the continuation (a paired null over 9 deals) —
+leaving the position distribution as the only factor with a positive estimate
+under both conditions. Its size is a lead, not a finding, and by the standing
+rule recorded under #49 it does not get quoted as one.
 
 ## Why it was not settled by spending more
 
@@ -1668,10 +1680,11 @@ Priced before deciding, from the measured per-position sd on each turf (0.498
 and 0.613) at 54 s a position: **±0.09 needs 296 positions a turf (8.9
 CPU-hours), ±0.07 needs 489 (14.7 hours), ±0.05 needs 959 (28.8 hours)** — and
 ±0.07 still touches an effect of +0.080. Deal clustering makes it worse than
-that, because the binding count is deals and not positions. A run was started
-at 320 a turf and stopped once the arithmetic was done: no engine change
-follows from either answer without a duel, so this is a diagnostic, and 15–30
-CPU-hours is the wrong price for one.
+that, because the binding count is deals and not positions, and 320 positions a
+turf would still be about a dozen deals. A run was started at that size and
+stopped once the arithmetic was done: no engine change follows from either
+answer without a duel, so this is a diagnostic, and 15–30 CPU-hours is the wrong
+price for one.
 
 `actor_compare` now records the deal on every row, so the next turf comparison
 can pair by deal instead of paying for the variance.
@@ -1723,3 +1736,71 @@ misdeclarations against 138, which is the registered "CI straddles zero: it
 stays off, reported with its interval and the misdeclare split". Item (2) closed
 earlier: the feasibility repair is exactly inert against the current champion,
 so no rule can re-price it.
+
+# #83 — the audit: which other intervals divided by positions?
+
+`scripts4/cluster_audit.py` recovers the deal index for the archived files — by
+replaying the harvest, which reproduces them exactly — and reprints each
+headline beside its published version. `min_resolved` is part of a harvest's
+identity: `rollout_target` uses 4 and `ask_regret` uses 5, and the first version
+of this audit passed 5 to both, which silently recovered the wrong deals for
+three files while every count still looked plausible.
+
+| instrument | clustering unit as published | deals behind it | verdict |
+|---|---|---|---|
+| `ask_regret*` | positions | 3–8 | **fixed**; champion regret 1.89× wider, still excludes 0 at +0.0046 |
+| `actor_compare*` | positions | 4–6 | **fixed**; all four paired cells straddle either way |
+| `declare_regret` | positions | 4 | **restated**; see below |
+| `rollout_target*` | positions (110 of them) | **4** | **restated**; slope 2.33× wider, still excludes 0 |
+| `ii_ask_fit` | games | 38–79 | already right; the *t* correction moves it by ~1% |
+| `duel_depth_base_rate`, `retake_bonus_base_rate` | duel pairs | n/a | **not affected** — the interval is over pairs, the correct unit. Only the conditional sd they feed on is estimated from clustered positions |
+| `duel.py` / `fish4/match.py` | duplicate-deal pairs | n/a | **not affected**, and already used a *t* critical value at the pair count |
+| `learn_ask_objective` | positions (CR1) | not recovered | one level short, same as `rollout_target`. Its verdict was a **2,000-pair duel** (`results/learned_weights_verdict.json`), so no published conclusion rests on its offline standard errors — but a future fit should cluster on the deal |
+
+## declare_regret, restated
+
+| figure | published | clustered by deal (4) |
+|---|---|---|
+| regret, all positions | +0.1101 ± 0.1173 | +0.1101 ± 0.1339 |
+| regret where it asked | +0.1607 ± 0.1241 | +0.1607 ± 0.1433 |
+| best claim − best ask, when it asked | −1.1849 ± 0.1266 | **−1.1849 ± 0.1051** |
+
+The load-bearing one is the third — it is what refuted the "too slow to
+declare" story behind four earlier directions — and it *tightens*, because it
+is a within-position contrast whose deal effect cancels. The same pattern as
+the paired actor cells: pairing survives clustering, levels do not.
+
+## rollout_target, restated
+
+The slope of rollout value on `p_success` is **+0.681**, published as
+[+0.4005, +0.9615] over "110 positions". Those 110 positions are **4 deals**,
+and the interval is [+0.0269, +1.3352] — **2.33× wider**, still excluding zero.
+Its two public-continuation siblings straddled zero before and after.
+
+The paper quoted four slopes from this run with position-clustered standard
+errors, and all four are restated. **None reverses.**
+
+| slope | published | deal-clustered | ratio |
+|---|---|---|---|
+| `expose` | +1.807 ± 0.359 | +1.807 ± 0.536 | 1.48× |
+| `deplete` | +1.387 ± 0.224 | +1.387 ± 0.249 | 1.10× |
+| `certain` | +0.919 ± 0.169 | +0.919 ± 0.223 | 1.30× |
+| `P(success)` | +0.681 ± 0.142 | +0.681 ± 0.207 | 1.45× |
+
+The joint-fit column (`P(success)` at −0.329 ± 0.264, VIF 13.5) is left as
+published, because the sentence after it in the paper says that column should
+not be read at all — restating a standard error nobody may use would be
+decoration.
+
+`centred_slope` now clusters on the deal where the rows carry one and prints a
+warning to stderr when they do not, instead of silently reporting the tighter
+number. `rollout_target.gather` records the deal on every row.
+
+## What the two mistakes have in common
+
+Both are the same error at different depths: **counting rows as if they were
+independent draws**. Dividing by 162 positions instead of 8 deals, and pairing
+a 4-cluster standard error with 1.96 instead of *t* at 3 df, are the outer and
+inner versions of it. `fish4/clustered.py` does both at once precisely so that
+fixing one without the other cannot happen again, and
+`tests4/test_clustered.py` pins each.

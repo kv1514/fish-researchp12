@@ -144,23 +144,20 @@ def paired_gap(rows, w, w0):
     This function exists because the void-era version of this script reported
     the ladder as bare point estimates, and a +0.0093 held-out gain read off
     two such numbers is what put ``endgame_d_info = +2.0`` into a duel.
+
+    Routed through ``fish4.clustered.cluster_ci`` so the critical value is a
+    *t* at one fewer than the number of games, not 1.96. Here that is a 1%
+    correction -- the test set has 38 games -- but the same helper serves runs
+    with four clusters, where it is a 62% one.
     """
-    per = {}
+    from fish4.clustered import cluster_ci
+    vals, games = [], []
     for r in rows:
-        d = (r["v"][int(np.argmax(r["p"] + r["F"] @ w))]
-             - r["v"][int(np.argmax(r["p"] + r["F"] @ w0))])
-        per.setdefault(r["game"], []).append(float(d))
-    n = sum(len(v) for v in per.values())
-    mu = sum(sum(v) for v in per.values()) / n
-    # cluster-robust: each game contributes its own summed deviation
-    g = len(per)
-    if g < 2:
-        return mu, float("nan")
-    acc = 0.0
-    for v in per.values():
-        acc += (sum(v) - mu * len(v)) ** 2
-    se = math.sqrt(acc * g / (g - 1.0)) / n
-    return mu, 1.96 * se
+        vals.append(float(r["v"][int(np.argmax(r["p"] + r["F"] @ w))]
+                          - r["v"][int(np.argmax(r["p"] + r["F"] @ w0))]))
+        games.append(r["game"])
+    mu, hw, _ = cluster_ci(vals, games)
+    return mu, (float("nan") if hw is None else hw)
 
 
 def oracle_value(rows):

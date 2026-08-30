@@ -4,13 +4,14 @@ incumbents.
 WHY THIS EXISTS
 ---------------
 `results/ask_regret_wide.json` (the ask objective in isolation, 208 positions)
-gives cross-fitted regret **-0.0188 [-0.0821, +0.0444]** and "captures 107.4% of
+gives cross-fitted regret **-0.0188 [-0.0951, +0.0575]** and "captures 107.4% of
 what one-step lookahead can find". `results/ask_regret_champion_wide.json`
-(V06_DEPLOYED, 162 positions) gives **+0.1641 [+0.0319, +0.2963]** and 52.0%.
+(V06_DEPLOYED, 162 positions) gives **+0.1641 [+0.0046, +0.3236]** and 52.0%.
 (That interval is the deal-clustered one. Both files were first published with
 positions treated as independent, at [+0.0797, +0.2484] and [-0.0808, +0.0431];
-the 162 positions are 162 consecutive plies from EIGHT deals, so the published
-half-widths were 1.57x and 1.02x too narrow. Nothing reverses; see
+the 162 positions are 162 consecutive plies from EIGHT deals, and pairing a
+clustered standard error with 1.96 rather than t at 7 df compounds it, so the
+published half-widths were 1.89x and 1.23x too narrow. Nothing reverses; see
 `scripts4/ask_regret.py`, which reports both.)
 
 Read side by side that says the lookahead makes one-step ask selection worse.

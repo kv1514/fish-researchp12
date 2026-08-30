@@ -5,24 +5,24 @@
    "continuation": "objective",
    "n": 129,
    "deals": 5,
-   "champion_level": -0.014211886304909554,
-   "champion_level_half_width": 0.11997786904952659
+   "champion_level": -0.014211886304909556,
+   "champion_level_half_width": 0.16952218569480482
   },
   {
    "harvest": "objective",
    "continuation": "champion",
    "n": 110,
    "deals": 4,
-   "champion_level": 0.021969696969696972,
-   "champion_level_half_width": 0.09839680485087428
+   "champion_level": 0.021969696969696965,
+   "champion_level_half_width": 0.15858919864413543
   },
   {
    "harvest": "champion",
    "continuation": "objective",
    "n": 125,
    "deals": 6,
-   "champion_level": 0.07533333333333335,
-   "champion_level_half_width": 0.11330851655255197
+   "champion_level": 0.07533333333333334,
+   "champion_level_half_width": 0.14844369383077657
   },
   {
    "harvest": "champion",
@@ -30,12 +30,12 @@
    "n": 103,
    "deals": 5,
    "champion_level": 0.093042071197411,
-   "champion_level_half_width": 0.1122304941477468
+   "champion_level_half_width": 0.1585755674797019
   }
  ],
  "continuation_effect": {
-  "mean": 0.017605633802816895,
-  "half_width": 0.10079656867941648,
+  "mean": 0.017605633802816913,
+  "half_width": 0.11856923170708067,
   "n": 213,
   "deals": 9,
   "paired": true,
@@ -43,7 +43,7 @@
  },
  "positions_effect": {
   "mean": 0.08030879693297846,
-  "half_width": 0.11125547627702845,
+  "half_width": 0.15895757783837153,
   "paired": false,
   "clustered_by": "deal"
  }

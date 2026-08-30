@@ -83,6 +83,7 @@ from fish.cards import NUM_PLAYERS, team_of
 from fish.engine import Ask, GameState, IllegalAction, NULL_TEAM
 from fish.observation import Observation
 from fish4.askfeat import AskWeights, DecisionContext, score_asks
+from fish4.match import _t_critical
 from fish4.posterior import Posterior
 from fish4.registry4 import make_agent
 
@@ -349,9 +350,9 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
     # deals sampled 20-40 plies deep -- 8 deals, in the case of
     # results/ask_regret_champion_wide.json. Treating those plies as
     # independent understates every interval this instrument reports; the
-    # champion's own +0.1641 [+0.0797, +0.2484] is [+0.0319, +0.2963] once
-    # clustered, 1.57x wider. The deal index makes that correction possible
-    # rather than approximate.
+    # champion's own +0.1641 [+0.0797, +0.2484] is [+0.0046, +0.3236] once
+    # clustered on 8 deals with t at 7 df, 1.89x wider. The deal index makes
+    # that correction exact rather than approximate.
     deals: list[int] = []
     positions = harvest(n_games or max(60, n_positions // 2), min_resolved,
                         n_positions, games_out=deals)
@@ -516,26 +517,20 @@ def main(argv):   # noqa: C901
     # divides by a count that is not the sample size. It is kept and reported
     # beside the clustered one rather than replaced, so the two are visible
     # together and the older files stay comparable.
-    by_deal: dict[int, list[float]] = {}
-    for r in rows:
-        by_deal.setdefault(r.get("deal", r["position"]), []).append(r["regret"])
-    k = len(by_deal)
-    mu = float(reg.mean())
-    if k >= 2:
-        acc = sum((sum(v) - mu * len(v)) ** 2 for v in by_deal.values())
-        se_d = float(np.sqrt(acc * k / (k - 1.0)) / len(rows))
-    else:
-        # One deal is not a sample of deals. Refuse to print a number rather
-        # than print a plausible-looking one -- a single-cluster interval is
-        # exactly the failure this whole correction is about.
-        se_d = None
+    from fish4.clustered import cluster_ci
+    mu, hw_d, k = cluster_ci([r["regret"] for r in rows],
+                             [r.get("deal", r["position"]) for r in rows])
+    # `cluster_ci` pairs the clustered standard error with a t critical value
+    # at k-1 degrees of freedom, not 1.96. With four to ten deals that is the
+    # difference between a 31% and a 62% understatement and the right number.
+    se_d = None if hw_d is None else hw_d / _t_critical(k - 1, 0.95)
     summary = {
         "positions": len(rows), "n_deals": k, "n_worlds": n_worlds,
         "mean_regret": mu, "se_regret": se,
         "ci95": [float(reg.mean() - 1.96 * se), float(reg.mean() + 1.96 * se)],
         "se_regret_by_deal": se_d,
-        "ci95_by_deal": (None if se_d is None
-                         else [mu - 1.96 * se_d, mu + 1.96 * se_d]),
+        "ci95_by_deal": (None if hw_d is None
+                         else [mu - hw_d, mu + hw_d]),
         "median_regret": float(np.median(reg)),
         "mean_naive_regret": float(naive.mean()),
         "selection_bias": float(naive.mean() - reg.mean()),
@@ -550,13 +545,14 @@ def main(argv):   # noqa: C901
     print(f"CROSS-FITTED regret      {summary['mean_regret']:+.4f} "
           f"+/- {se:.4f}  95% [{summary['ci95'][0]:+.4f}, "
           f"{summary['ci95'][1]:+.4f}] sets   (positions as iid)")
-    if se_d is None:
+    if hw_d is None:
         print(f"  clustered by deal      all {summary['positions']} positions "
               f"came from ONE deal; no interval is available at this design")
     else:
         print(f"  clustered by deal      {summary['mean_regret']:+.4f} "
-              f"+/- {se_d:.4f}  95% [{summary['ci95_by_deal'][0]:+.4f}, "
-              f"{summary['ci95_by_deal'][1]:+.4f}] sets   <- the honest one")
+              f"+/- {hw_d:.4f}  95% [{summary['ci95_by_deal'][0]:+.4f}, "
+              f"{summary['ci95_by_deal'][1]:+.4f}] sets   <- the honest one "
+              f"(t at {k - 1} df)")
     print(f"naive max-over-actions   {summary['mean_naive_regret']:+.4f}"
           f"   <- inflated by selection")
     print(f"selection bias measured  {summary['selection_bias']:+.4f} sets")

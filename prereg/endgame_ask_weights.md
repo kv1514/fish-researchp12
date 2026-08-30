@@ -147,8 +147,8 @@ interval clustered by game** — which the original ladder did not have:
 
 | rows | rule | games | grid's `info` | held-out gain over champion |
 |---|---|---|---|---|
-| 388 | void | 79 | **+2.00** | +0.0092 [−0.0270, +0.0455] |
-| 457 | award, held to the same 79 games | 79 | **−1.00** | +0.0142 [−0.0110, +0.0394] |
+| 388 | void | 79 | **+2.00** | +0.0092 [−0.0282, +0.0467] |
+| 457 | award, held to the same 79 games | 79 | **−1.00** | +0.0142 [−0.0118, +0.0403] |
 | 764 | award, all | 156 | **+0.10** | −0.0011 [−0.0033, +0.0011] |
 
 Three things follow, and only the first is good news.
@@ -166,8 +166,8 @@ correction is not merely unproven under the award rule; at the weight the same
 procedure now selects, it points the other way.
 
 **3. The void-era pick was never significant, and this document hid that.**
-`info = +2.0` was nominated on a held-out gain of **+0.0092 [−0.0270,
-+0.0455]**. The interval covers zero and is four times the estimate. What this
+`info = +2.0` was nominated on a held-out gain of **+0.0092 [−0.0282,
++0.0467]**. The interval covers zero and is four times the estimate. What this
 document wrote instead was "it improved the selected ask's exact value by
 +0.0093 in half-suit units" — a point estimate, no interval — and that number
 is what sent 4,000 duplicate-deal pairs after this arm.
@@ -190,8 +190,8 @@ interval. It was no interval.
 pending this refit; the refit does not bring it back. `V04_COMBINED` keeps its
 void-era definition and its void-era numbers, which are correct for that rule.
 
-The runner-up is not promoted either. `certain = −0.50` scores +0.0286 [−0.0123,
-+0.0695] void, +0.0078 [−0.0286, +0.0441] matched, +0.0072 [−0.0215, +0.0358]
+The runner-up is not promoted either. `certain = −0.50` scores +0.0286 [−0.0137,
++0.0709] void, +0.0078 [−0.0299, +0.0454] matched, +0.0072 [−0.0219, +0.0363]
 over all award games — three straddles, with the award estimates a quarter of
 the void one. It is the arm this document once refused to test because it had
 been chosen by the held-out set; it is now refused for a better reason.

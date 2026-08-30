@@ -3976,8 +3976,15 @@ of the engine.
 
 Repeating the paper's own measurement with the full v0.4 policy finishing every
 rollout, over $110$ positions and $3056$ scored candidate asks: position-centred
-rollout value rises by $+0.681 \pm 0.142$ across the range of
-$\Prob(\text{success})$, against the $+0.101$ above.
+rollout value rises by $+0.681 \pm 0.207$ across the range of
+$\Prob(\text{success})$, against the $+0.101$ above.\footnote{That standard
+error is clustered on the \emph{deal}, not the position. The harvest emits
+consecutive plies, so these $110$ positions come from \textbf{four} deals;
+clustering on the position gave $\pm 0.142$, and with a $t$ critical value at
+three degrees of freedom the interval is $[+0.027, +1.335]$ rather than
+$[+0.401, +0.962]$ --- $2.33\times$ wider, and still excluding zero. Every
+standard error in this section carries the same correction
+(\path{scripts4/cluster_audit.py}).}
 
 Those two numbers must not be quoted against each other, and we nearly did. The
 $+0.101$ was measured over the LEARNING harvest, whose positions span the whole
@@ -4100,10 +4107,12 @@ Fitted one at a time over the $3076$ rows of that run --- twenty more than the
 $3056$ the slope above uses, because a slope needs two scored asks at a position
 and twenty rows sit alone at theirs --- several features look
 more informative than $\Prob(\text{success})$ itself: \texttt{expose}
-$+1.807 \pm 0.359$, \texttt{deplete} $+1.387 \pm 0.224$, \texttt{certain}
-$+0.919 \pm 0.169$, against $\Prob(\text{success})$'s $+0.681 \pm 0.142$. Fitted
+$+1.807 \pm 0.536$, \texttt{deplete} $+1.387 \pm 0.249$, \texttt{certain}
+$+0.919 \pm 0.223$, against $\Prob(\text{success})$'s $+0.681 \pm 0.207$ ---
+all four deal-clustered, and all four still excluding zero. Fitted
 together, $\Prob(\text{success})$ turns \emph{negative}, at
-$-0.329 \pm 0.264$. Neither column should be read, and the diagnostic that says
+$-0.329 \pm 0.264$ (that one is quoted as first computed, position-clustered,
+because the sentence after it says the column should not be read at all). Neither column should be read, and the diagnostic that says
 so belongs beside them: $\Prob(\text{success})$ carries a variance inflation
 factor of $\mathbf{13.5}$ here, meaning $92.6\%$ of its within-position variation
 is reproduced by the other ten terms. It is not an independent regressor; it is
