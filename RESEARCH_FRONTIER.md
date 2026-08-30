@@ -805,3 +805,71 @@ declarability, and now the claim gamma). Six is enough to state the pattern
 plainly: **this engine's remaining loss is not an inference problem.** Every
 attempt to make it know more has failed, and the ledger has been pointing at
 positions rather than beliefs the whole time.
+
+---
+
+# UPDATE: being forced is visible eight decisions ahead, and it is not about running out of cards
+
+`scripts4/forced_locus.py`, 15,929 decisions by our seats over 150 games. Every
+figure is a **residual against control decisions with the same number of cards
+still in play**, because `live_asks` decays with the game and every stuck
+decision is by construction late — an uncontrolled version of this table shows a
+gradient for any feature that merely decays with time, and showed one.
+
+Lead is counted in the **seat's own decisions**, since a seat can only steer on
+its own turns.
+
+| lead | n | cards left | hand | ask_hs | live_asks | best_p |
+|---|---|---|---|---|---|---|
+| 0 | 114 | 18.8 | **+0.595** | −0.692 | **−10.158** | −0.415 |
+| 1 | 103 | 25.5 | +0.892 | −0.305 | −10.441 | −0.195 |
+| 2 | 103 | 27.7 | +0.825 | −0.253 | −9.795 | −0.062 |
+| 3 | 103 | 30.0 | +0.734 | −0.183 | −8.846 | −0.018 |
+| 5 | 103 | 33.7 | +0.577 | −0.156 | **−6.850** | −0.022 |
+| 8 | 95 | 37.8 | +0.722 | −0.057 | **−3.986** | −0.056 |
+| 12 | 82 | 44.0 | +0.565 | +0.200 | +0.638 | +0.075 |
+
+Two things, and both are new.
+
+**It is steerable.** `live_asks` is 6.9 below control five of the seat's own
+decisions before it gets stuck and 4.0 below at eight — roughly thirty to fifty
+table moves. It reaches zero only at lead 12. Being forced is not an accident of
+the last move; it is the end of a trajectory that is visible for most of a game.
+
+**It is not a shortage of cards.** `hand` is **positive at every lead** — a seat
+about to be stuck holds about 0.7 MORE cards than the control at the same stage,
+while having ten fewer live asks. You do not get forced by running out of cards.
+You get forced by holding cards in half-suits where everything else is **on your
+own side**: more hand, fewer places to reach. `best_p` stays at control until
+lead 1, so the *quality* of the asks available never degrades — only the
+**count** collapses.
+
+## Why the closed search does not close this one
+
+The theorem in `prereg/declarability_leaf.md` says a possession chain cannot
+change `M[c, t1] / M[c, t2]` for two teammates, because `apply_success` only
+ever moves a card from an **opponent** to us. That is precisely why it cannot
+reach declarability.
+
+**Askability is made of exactly what the chain does edit.** `live_asks` counts
+legal asks whose target plausibly holds the card — a function of *opponents'*
+holdings, which `apply_success` rewrites on every edge. The same search that
+provably could not see the allocation problem has full purchase on this one.
+
+And the tension is real rather than assumed: every successful ask takes a card
+*from* an opponent, so **each success shrinks the asker's own future
+askability**. Taking cards is how the game is won and how a seat strands itself,
+and nothing in the engine has ever priced the second half of that.
+
+## What is at stake, stated as a bound and not a promise
+
+`gate` and `forced` produce 62 of 63 wrong declarations, 0.129 a game. Under
+`wrong_distribution_outcome="opponent"` each hands the set over, so each avoided
+error is a two-set swing: **≤ 0.258 sets a game**, which clears the +0.15 bar
+with room.
+
+It is an upper bound and a loose one. The counterfactual for a forced
+declaration is not "no error" — the half-suit still has to be resolved, and if
+we do not declare it someone else does, possibly correctly. Only a duel can
+price that, and it is the most likely way this direction comes back smaller than
+the bound.
