@@ -146,7 +146,7 @@ MAX_ACTIONS = 400
 
 
 def harvest(n_games: int, min_resolved: int, max_positions: int,
-            seed0: int = 31337):
+            seed0: int = 31337, games_out: list | None = None):
     """On-policy decision points from the second half of real games.
 
     Two reasons this does not reuse ``collect_positions``. It harvests every
@@ -181,6 +181,15 @@ def harvest(n_games: int, min_resolved: int, max_positions: int,
                 out.append((rules, [h for h in st.hands],
                             list(st.set_winner), st.turn,
                             tuple(st.history), p))
+                # Which DEAL this position came from. The deal is
+                # ``seed0 + 977*g``, identical across harvest policies, so two
+                # turfs walk the same deals and differ only in the positions
+                # their policies reach inside them. Recording g is what lets a
+                # turf comparison be paired by deal instead of unpaired -- and
+                # it is an out-parameter rather than a wider return tuple so
+                # every existing caller is untouched.
+                if games_out is not None:
+                    games_out.append(g)
                 if len(out) >= max_positions:
                     return out
             st.apply(p, agents[p].act(Observation.from_state(st, p)))
@@ -335,8 +344,17 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
     # happen to contain, and the run reported 37 as though that were the
     # requested sample. The published mean_regret of -0.0968 [-0.302, +0.109]
     # was measured on exactly that cap. Default now scales with the request.
+    # WHICH DEAL each position came from. `harvest` walks games in order and
+    # emits every qualifying ply, so a run of "162 positions" is a handful of
+    # deals sampled 20-40 plies deep -- 8 deals, in the case of
+    # results/ask_regret_champion_wide.json. Treating those plies as
+    # independent understates every interval this instrument reports; the
+    # champion's own +0.1641 [+0.0797, +0.2484] is [+0.0319, +0.2963] once
+    # clustered, 1.57x wider. The deal index makes that correction possible
+    # rather than approximate.
+    deals: list[int] = []
     positions = harvest(n_games or max(60, n_positions // 2), min_resolved,
-                        n_positions)
+                        n_positions, games_out=deals)
     if len(positions) < n_positions:
         print(f"  harvest returned {len(positions)} of {n_positions} asked "
               f"for; raise n_games if that is the binding constraint")
@@ -447,7 +465,8 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
             "world_sd": float(np.mean(within)) if within else float("nan"),
             "paired_sd": paired_sd,
             "random_regret": rnd_regret,
-            "position": pi, "seat": seat, "history": len(hist),
+            "position": pi, "deal": deals[pi], "seat": seat,
+            "history": len(hist),
             "n_asks": len(per), "n_worlds": nw,
             "q_chosen": q_all[chosen], "q_best": naive_best,
             "naive_regret": naive_regret,
@@ -491,10 +510,32 @@ def main(argv):   # noqa: C901
     rank = np.array([r["rank"] for r in rows], dtype=float)
     nask = np.array([r["n_asks"] for r in rows], dtype=float)
     se = float(reg.std(ddof=1) / np.sqrt(reg.size))
+    # Clustered by DEAL, which is the independent unit here. Positions inside
+    # one deal are consecutive plies of one game -- they share the hands, the
+    # history and every earlier decision -- so the iid standard error above
+    # divides by a count that is not the sample size. It is kept and reported
+    # beside the clustered one rather than replaced, so the two are visible
+    # together and the older files stay comparable.
+    by_deal: dict[int, list[float]] = {}
+    for r in rows:
+        by_deal.setdefault(r.get("deal", r["position"]), []).append(r["regret"])
+    k = len(by_deal)
+    mu = float(reg.mean())
+    if k >= 2:
+        acc = sum((sum(v) - mu * len(v)) ** 2 for v in by_deal.values())
+        se_d = float(np.sqrt(acc * k / (k - 1.0)) / len(rows))
+    else:
+        # One deal is not a sample of deals. Refuse to print a number rather
+        # than print a plausible-looking one -- a single-cluster interval is
+        # exactly the failure this whole correction is about.
+        se_d = None
     summary = {
-        "positions": len(rows), "n_worlds": n_worlds,
-        "mean_regret": float(reg.mean()), "se_regret": se,
+        "positions": len(rows), "n_deals": k, "n_worlds": n_worlds,
+        "mean_regret": mu, "se_regret": se,
         "ci95": [float(reg.mean() - 1.96 * se), float(reg.mean() + 1.96 * se)],
+        "se_regret_by_deal": se_d,
+        "ci95_by_deal": (None if se_d is None
+                         else [mu - 1.96 * se_d, mu + 1.96 * se_d]),
         "median_regret": float(np.median(reg)),
         "mean_naive_regret": float(naive.mean()),
         "selection_bias": float(naive.mean() - reg.mean()),
@@ -505,9 +546,17 @@ def main(argv):   # noqa: C901
     }
     print(f"\npositions                {summary['positions']}")
     print(f"legal asks per position  {summary['mean_asks']:.1f}")
+    print(f"deals they came from     {summary['n_deals']}")
     print(f"CROSS-FITTED regret      {summary['mean_regret']:+.4f} "
           f"+/- {se:.4f}  95% [{summary['ci95'][0]:+.4f}, "
-          f"{summary['ci95'][1]:+.4f}] sets")
+          f"{summary['ci95'][1]:+.4f}] sets   (positions as iid)")
+    if se_d is None:
+        print(f"  clustered by deal      all {summary['positions']} positions "
+              f"came from ONE deal; no interval is available at this design")
+    else:
+        print(f"  clustered by deal      {summary['mean_regret']:+.4f} "
+              f"+/- {se_d:.4f}  95% [{summary['ci95_by_deal'][0]:+.4f}, "
+              f"{summary['ci95_by_deal'][1]:+.4f}] sets   <- the honest one")
     print(f"naive max-over-actions   {summary['mean_naive_regret']:+.4f}"
           f"   <- inflated by selection")
     print(f"selection bias measured  {summary['selection_bias']:+.4f} sets")

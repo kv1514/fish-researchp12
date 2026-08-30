@@ -1192,7 +1192,7 @@ V06_DEPLOYED:
 
 | | champion | the objective in isolation |
 |---|---|---|
-| cross-fitted regret | **+0.1641 [+0.0797, +0.2484]** | −0.0188 [−0.0808, +0.0431] |
+| cross-fitted regret | **+0.1641 [+0.0319, +0.2963]** | −0.0188 [−0.0821, +0.0444] |
 | captures of what one-step lookahead finds | **52.0%** | 107.4% |
 | vs a random ask | +0.3416 ± 0.0518 | +0.2548 ± 0.0506 |
 | legal asks per position | 19.0 | 22.1 |
@@ -1262,7 +1262,7 @@ evidence that it does it.
 ### What remains open, stated narrowly
 
 On the champion's own population with a champion continuation, the regret is
-**+0.1641 [+0.0797, +0.2484]**. This run shows the *choice* is not what leaves
+**+0.1641 [+0.0319, +0.2963]**. This run shows the *choice* is not what leaves
 it there, so either those positions offer more one-step value to anyone, or the
 champion continuation changes what the estimator measures. Separating them needs
 `ASK_REGRET_SPEC=champion` on this same two-incumbent design. If both actors
@@ -1339,7 +1339,7 @@ settled as anything here gets.
 
 ## What that leaves, stated as a lead and not a finding
 
-The champion's own regret is **+0.1641 [+0.0797, +0.2484]** in the 162-position
+The champion's own regret is **+0.1641 [+0.0319, +0.2963]** in the 162-position
 run and **+0.0930 ± 0.1061** here. Both positive; the first excludes zero and
 the second does not, and their intervals overlap heavily, so they are one
 quantity measured twice with the smaller run noisier. The honest summary is
@@ -1566,3 +1566,160 @@ permanently and **no successor arm**.
   carries zero champion weight, so rung 0 is provably the same policy either
   way. Without that it raised a `matmul` dimension error, which is the good
   outcome; silently broadcasting would have been the bad one.
+
+# "162 positions" is 8 deals — every one-step regret interval was too narrow
+
+Found while pairing the #82 turf comparison. `scripts4/ask_regret.harvest`
+walks games in order and emits **every** qualifying ply, returning as soon as it
+has enough. So a run reported as *162 positions* is 162 consecutive plies drawn
+from **8 deals**, sampled 20–40 deep. The positions inside one deal share the
+hands, the history and every earlier decision. Every interval this instrument
+has published divided by 162 rather than by 8.
+
+The deal boundaries are recoverable without re-running anything: `history` (the
+event count) rises within a deal and drops at the next. That rule was checked
+against the harvest's own game index on 260 positions under both harvest
+policies and recovers **every** boundary exactly, so the correction below is a
+computation on the existing files, not an estimate.
+
+| run | as published | clustered by deal | deals |
+|---|---|---|---|
+| `ask_regret_wide` (objective) | −0.0188 [−0.0808, +0.0431] | −0.0188 [−0.0821, +0.0444] | 8 |
+| `ask_regret_champion_wide` | **+0.1641 [+0.0797, +0.2484]** | **+0.1641 [+0.0319, +0.2963]** | 8 |
+| `ask_regret_champion` | −0.0893 [−0.2535, +0.0749] | −0.0893 [−0.3814, +0.2028] | 3 |
+
+**No conclusion reverses.** The champion's positive one-step regret still
+excludes zero — but its interval is **1.57× wider** than published, its lower
+bound moves from +0.080 to +0.032, and the 70-position run is really 3 deals
+with an interval three times what was quoted. Those are the numbers from here
+on.
+
+`ask_regret.py` now records the deal on every row and reports both intervals,
+the clustered one labelled as the honest one. `harvest` gained a `games_out`
+out-parameter rather than a wider return tuple, so no existing caller changed.
+
+**What is not affected:** duplicate-deal duels. `duel.py` pairs on the deal and
+treats the pair as the independent unit — that discipline was right from the
+start, and it is why the duel results, including the ones this project ships
+on, do not move.
+
+# #82 — the one-step regret is the turf, and the turf is the positions
+
+Two runs read side by side once said the lookahead makes one-step ask selection
+worse: the ask objective alone at −0.0188 and the deployed champion at +0.1641.
+`scripts4/actor_compare.py` exists because those runs differ in three ways at
+once — the positions harvested, the continuation that scores them, and whether
+the acting and evaluating posteriors agree. It scores **both actors on one set
+of positions, one set of worlds and one set of rollouts**.
+
+Run as a 2×2 over the two remaining confounds, with every interval clustered by
+deal:
+
+| harvest | continuation | pos | deals | champion − objective | champion-actor level |
+|---|---|---|---|---|---|
+| objective | objective | 129 | 5 | −0.0006 [−0.0291, +0.0278] | −0.0142 [−0.1342, +0.1058] |
+| objective | champion  | 110 | 4 | +0.0417 [−0.0114, +0.0948] | +0.0220 [−0.0764, +0.1204] |
+| champion  | objective | 125 | 6 | −0.0087 [−0.0664, +0.0490] | +0.0753 [−0.0380, +0.1886] |
+| champion  | champion  | 103 | 5 | +0.0202 [−0.0270, +0.0675] | +0.0930 [−0.0192, +0.2053] |
+
+## The actors do not separate, in any cell
+
+Four paired differences, all straddling zero, the tightest at **±0.029**.
+Pairing is what makes this the sharp end of the design: both actors see the
+same position and the same worlds, so the deal effect cancels inside the pair
+and clustering makes these intervals *narrower* than the naive ones (±0.029
+against ±0.039), while it makes the unpaired levels beside them much wider.
+**The lookahead does not change one-step ask quality** — its +0.104 duel win is
+earned beyond one ply, not at it.
+
+## The continuation is measured and null
+
+The two cells sharing a harvest draw the *same positions* — 110 and 103 matched
+indices, every one with the same legal-ask count, checked rather than assumed —
+so the continuation effect is paired:
+
+* objective harvest, 110 positions over 4 deals: **+0.0545 [−0.1265, +0.2356]**
+* champion harvest, 103 positions over 5 deals: **−0.0218 [−0.1234, +0.0797]**
+* pooled, 213 positions over 9 deals: **+0.0176 [−0.0832, +0.1184]**
+
+Which policy plays the continuation does not move one-step regret.
+
+## The positions are what is left, and they are not settled
+
+The position distribution cannot be paired — it *is* the factor:
+
+* at the objective continuation: **+0.0895 [−0.0755, +0.2546]**
+* at the champion continuation: **+0.0711 [−0.0782, +0.2203]**
+* pooled main effect: **+0.0803 [−0.0309, +0.1916]**
+
+Positive under both continuations, and straddling zero under both. The two
+main effects are not on the same footing and the ratio between their point
+estimates is not worth quoting: the continuation effect is paired and measured
+at ±0.101, the positions effect is unpaired and measured at ±0.111 around a
+larger centre. What the 2×2 supports is an **elimination** — not the ask choice
+(four paired nulls, tightest ±0.029), not the continuation (a paired null over
+9 deals) — leaving the position distribution as the only factor with a positive
+estimate under both conditions. Its size is a lead, not a finding, and by the
+standing rule recorded under #49 it does not get quoted as one.
+
+## Why it was not settled by spending more
+
+Priced before deciding, from the measured per-position sd on each turf (0.498
+and 0.613) at 54 s a position: **±0.09 needs 296 positions a turf (8.9
+CPU-hours), ±0.07 needs 489 (14.7 hours), ±0.05 needs 959 (28.8 hours)** — and
+±0.07 still touches an effect of +0.080. Deal clustering makes it worse than
+that, because the binding count is deals and not positions. A run was started
+at 320 a turf and stopped once the arithmetic was done: no engine change
+follows from either answer without a duel, so this is a diagnostic, and 15–30
+CPU-hours is the wrong price for one.
+
+`actor_compare` now records the deal on every row, so the next turf comparison
+can pair by deal instead of paying for the variance.
+
+# #50 item (3) — the perpetual/analytics table does not move under the award rule
+
+`scripts4/perpetual_study.py` was **pinned** to `wrong_distribution_outcome="null"`
+with a comment saying its statistics "are about nulls/void outcomes, which the
+opponent-award baseline cannot produce". That is true of the *outcome* and false
+of the *event*: a team holding all six and naming the wrong split happens under
+both rules, and only its consequence differs.
+
+Fixed the right way round — the rule is a parameter, and the counter classifies
+the event (`ClaimEvent` whose winner is not the claimer's team, with every
+revealed card on that team) exactly as `fish4/match.py` already did for
+`x_misdeclares`. Each run cross-checks itself: under `"null"` the voided count
+must equal the classified count, and under `"opponent"` nothing may void. Both
+assertions hold.
+
+**Replayed on the same 200 seeds, the two rules agree on every field of the
+table**, `mean_plies` to the decimal included — 0.275 / 0.275 / 0.220 events per
+game across the three arms, 200/200/200 games with a repeated position, 4.24% of
+plies fully dead, 110 games with an unplaceable set, the 23.4%-vs-0.92% stuck
+split. The only divergence is the void-only cross-check counter, which reads
+0.275 under the void rule and 0 under the award rule, exactly as it must.
+
+## Not assumed — the knob was instrumented
+
+Play being identical under two rules is the shape of a knob that does nothing,
+and `fish4/claim4.py` genuinely reads this one: `forced_claim` sets
+`loss_split = -1.0` under the award rule and `0.0` under the void rule, which
+turns the split ranking from `p_exact` into `p_exact + p_team`. So it was
+counted rather than reasoned about (`scripts4/rule_bite.py`, 800 games of
+champion self-play):
+
+> `forced_claim` called **284** times; all 284 had a candidate with
+> `p_split > 0`, so the term is live. The two rules **ranked differently 0
+> times** and **returned a different claim 0 times**. 166 of the 284 offered
+> only one candidate split at all.
+
+The rule reaches exactly one decision in this engine, it is arithmetically live
+at every one of them, and it changes none. The paper's caption said the row
+"would read as misdeclarations per game" under the award baseline; it now says
+so as a measurement.
+
+That closes #50. Item (1), the free-signalling duel, was re-priced under the
+award rule as design R5 — **+0.068 [−0.033, +0.169]** over 500 pairs, 109
+misdeclarations against 138, which is the registered "CI straddles zero: it
+stays off, reported with its interval and the misdeclare split". Item (2) closed
+earlier: the feasibility repair is exactly inert against the current champion,
+so no rule can re-price it.

@@ -1,0 +1,50 @@
+{
+ "cells": [
+  {
+   "harvest": "objective",
+   "continuation": "objective",
+   "n": 129,
+   "deals": 5,
+   "champion_level": -0.014211886304909554,
+   "champion_level_half_width": 0.11997786904952659
+  },
+  {
+   "harvest": "objective",
+   "continuation": "champion",
+   "n": 110,
+   "deals": 4,
+   "champion_level": 0.021969696969696972,
+   "champion_level_half_width": 0.09839680485087428
+  },
+  {
+   "harvest": "champion",
+   "continuation": "objective",
+   "n": 125,
+   "deals": 6,
+   "champion_level": 0.07533333333333335,
+   "champion_level_half_width": 0.11330851655255197
+  },
+  {
+   "harvest": "champion",
+   "continuation": "champion",
+   "n": 103,
+   "deals": 5,
+   "champion_level": 0.093042071197411,
+   "champion_level_half_width": 0.1122304941477468
+  }
+ ],
+ "continuation_effect": {
+  "mean": 0.017605633802816895,
+  "half_width": 0.10079656867941648,
+  "n": 213,
+  "deals": 9,
+  "paired": true,
+  "clustered_by": "deal"
+ },
+ "positions_effect": {
+  "mean": 0.08030879693297846,
+  "half_width": 0.11125547627702845,
+  "paired": false,
+  "clustered_by": "deal"
+ }
+}

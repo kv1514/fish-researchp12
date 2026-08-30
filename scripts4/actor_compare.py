@@ -4,9 +4,14 @@ incumbents.
 WHY THIS EXISTS
 ---------------
 `results/ask_regret_wide.json` (the ask objective in isolation, 208 positions)
-gives cross-fitted regret **-0.0188 [-0.0808, +0.0431]** and "captures 107.4% of
+gives cross-fitted regret **-0.0188 [-0.0821, +0.0444]** and "captures 107.4% of
 what one-step lookahead can find". `results/ask_regret_champion_wide.json`
-(V06_DEPLOYED, 162 positions) gives **+0.1641 [+0.0797, +0.2484]** and 52.0%.
+(V06_DEPLOYED, 162 positions) gives **+0.1641 [+0.0319, +0.2963]** and 52.0%.
+(That interval is the deal-clustered one. Both files were first published with
+positions treated as independent, at [+0.0797, +0.2484] and [-0.0808, +0.0431];
+the 162 positions are 162 consecutive plies from EIGHT deals, so the published
+half-widths were 1.57x and 1.02x too narrow. Nothing reverses; see
+`scripts4/ask_regret.py`, which reports both.)
 
 Read side by side that says the lookahead makes one-step ask selection worse.
 **Those two runs cannot support that claim** and three things break the
@@ -73,7 +78,9 @@ def main(argv):
     print(f"  {spec_banner()}   (the incumbent role is unused here:\n    the two ACTORS below are the incumbents)")
     print(f"incumbents compared on IDENTICAL rollouts: {list(ACTORS)}\n")
 
-    positions = harvest(n_games or max(60, n_positions // 2), 5, n_positions)
+    games: list[int] = []
+    positions = harvest(n_games or max(60, n_positions // 2), 5, n_positions,
+                        games_out=games)
     rows, t0 = [], time.time()
     for pi, (rules, hands, sw, turn, hist, seat) in enumerate(positions):
         obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
@@ -117,7 +124,7 @@ def main(argv):
         if len(per) < 2 or any(p not in per for p in picks.values()):
             continue
 
-        row = {"position": pi, "n_asks": len(per),
+        row = {"position": pi, "game": games[pi], "n_asks": len(per),
                "same_pick": int(len(set(picks.values())) == 1)}
         ok = True
         for name, act in picks.items():
