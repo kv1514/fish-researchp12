@@ -1423,3 +1423,67 @@ defect was real, the exposure was real, and the damage was nil.
 `CHOICE_CURVE_SPEC=champion` now switches the population, every run prints which
 it used, the spec is written into the results file, and the docstring no longer
 claims something the code does not do.
+
+---
+
+# RESULT: the feasibility repair is inert against the current champion
+
+`prereg`/task #50 flagged three void-era verdicts the award rule re-prices, and
+named one as *"the one adoption decision the flip can plausibly reverse"*: the
+feasibility filter, which refuses a declaration no complete deal allows and
+repairs it. Its verdict is **+0.0284 [+0.0242, +0.0326]** over 6,000 pairs
+against a **+0.05** bar — `do_not_adopt`, and `ClaimConfig.feasibility` is
+`False` today.
+
+The reasoning for re-running it is sound on its face: a misdeclaration costs 1
+under the void rule and 2 under the award rule, so an intervention that prevents
+one should be worth about twice as much, and 0.028 × 2 clears 0.05.
+
+**It does not need re-running, because against the current champion the
+intervention does nothing at all.**
+
+`scripts4/path_ledger.py --vs=self --arm=claim_feasibility=1`, 480 games under
+the award rule, is **bit-identical** to the baseline — 252 / 1703 / 106 / 99 by
+path, 63 wrong, margin +0.0000.
+
+## Not a dead knob — checked, because this project has been burned by exactly that
+
+A bit-identical arm is the shape of a silent no-op, and `fish4/posterior.py`
+carries a comment about a `> 0` guard that "made an experiment arm collapse into
+another arm and report a bit-identical result — a null that looked like a
+measurement". So the knob was instrumented directly rather than trusted:
+
+> `claim_feasibility=True` → `_feasible` called **10,407** times over 20 games,
+> returning False **632** times (6.1%). At `False` it is never called.
+
+The filter fires about 32 times a game and changes no action.
+
+## Why: `claim_forced_exhaustive` subsumes it
+
+Both act on the forced path. Turning the exhaustive search off makes the filter
+live again:
+
+| arm | forced n | forced wrong | total wrong | margin |
+|---|---|---|---|---|
+| champion (exhaustive on) | 99 | 41 | 63 | 0.0000 |
+| exhaustive **off** | 99 | **48** | 70 | −0.0292 |
+| exhaustive off **+ feasibility** | 99 | **40** | 62 | +0.0042 |
+
+Without the exhaustive search the filter removes **8 wrong declarations per 480
+games** and recovers **+0.033** — about what the exhaustive search itself is
+worth. With it, nothing. They are substitutes, and `claim_forced_exhaustive`
+shipped *after* the feasibility verdict was measured.
+
+## What that settles
+
+An intervention that is exactly inert has a margin of exactly zero under **any**
+misdeclaration rule, so the award-rule flip cannot reverse this adoption
+decision. #50's item (2) is closed without spending 6,000 pairs, and the reason
+is not that the doubling argument was wrong — it is that a later change made the
+intervention a no-op before the argument could apply.
+
+It also independently confirms `claim_forced_exhaustive` does what #64 claimed:
+on its own it cuts forced-path errors from 48 to 41 per 480 games.
+
+Items (1) the free-signalling duel and (3) the perpetual/analytics misdeclare
+rates remain open under #50.
