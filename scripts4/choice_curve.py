@@ -22,8 +22,11 @@ what comes out is the empirical
 
     P(ask in H | H legal, depth_H = d)
 
-for the champion, against a copy of itself -- which is precisely the situation
-the opponent model is used in. No fixpoint iteration and no per-draw policy
+for whichever policy CHOICE_CURVE_SPEC names, against a copy of itself. That
+default is the ask objective in isolation and NOT the champion -- this sentence
+used to say "for the champion, against a copy of itself, which is precisely the
+situation the opponent model is used in", and with the spec as written that was
+false. See the note on SPEC below and results/choice_curve_champion.json. No fixpoint iteration and no per-draw policy
 evaluation: one pass over the log of ordinary games.
 
 The same data answers the gamma_schedule question without a duel. If an ask

@@ -1365,3 +1365,61 @@ duel.
 Seven pre-registered attempts to correct this policy have failed and one search
 class is closed by proof. The one thread still live is the weak positive above,
 and it is weak: two runs, one significant, and no mechanism.
+
+---
+
+# RESULT: the choice model was fitted on the wrong population, and it did not matter
+
+`scripts4/choice_curve.py` measures the propensity exponent behind the opponent
+model — the largest single effect in this engine, about 1.9 sets a deal-pair.
+Its docstring claimed the curve was measured "for the champion, against a copy
+of itself — which is precisely the situation the opponent model is used in".
+
+**That was false.** `SPEC = {"opponent_gamma": 0.35}` is the ask objective in
+isolation: no belief-space lookahead, 160 draws. `results/actor_compare.json`
+measured those two policies choosing a **different ask in 34–36% of positions**,
+so the exponent was fitted to one policy and applied to another. The results
+file recorded no spec at all, which is how the figure could be read as the
+champion's for as long as it has been.
+
+`fish4/oppmodel.py`'s shipped `ALPHA_*` profile is a quadratic through seven
+bands of that same fit, so the defect reached the engine.
+
+## Re-measured on the deployed champion: 300 games, 25,304 decisions
+
+| half-suits resolved | shipped (objective-only) | champion | diff | 95% half-width |
+|---|---|---|---|---|
+| 0 | 2.000 | 1.883 | −0.117 | 0.206 |
+| 1 | 1.280 | 1.201 | −0.079 | 0.227 |
+| 2 | 1.200 | 0.968 | −0.232 | 0.292 |
+| 3 | 0.680 | 0.703 | +0.023 | 0.314 |
+| 4 | 0.300 | 0.513 | +0.213 | 0.331 |
+| 5 | 0.410 | 0.519 | +0.109 | 0.431 |
+| 6–8 | −0.020 | −0.368 | −0.348 | 0.399 |
+
+**No band differs.** The largest discrepancy is the 6–8 tail at 1.7σ, and every
+one sits inside its interval. The decay from ~1.9 to below zero — late asks
+carrying no depth signal, then anti-signal — replicates on the correct
+population.
+
+Pooled, the exponent moves **1.207 → 1.083, a shift of −0.124 [−0.241,
+−0.007]**: marginal, and *toward* the shipped conceptual model of α = 1. On the
+champion, α = 1 is only 2.2σ away and worth **9.9 nats over 25,304 records** —
+"proportional to depth" is very nearly exactly right on the population the model
+is actually applied to.
+
+## What this changes: nothing, and that is the finding
+
+`ALPHA_*` stands. And `gamma_schedule`, which replaces the constant with this
+profile, was already duelled at **6,000 pairs: −0.064 [−0.158, +0.029],
+`do_not_adopt`** — a null. That duel used this profile, the profile is now
+confirmed on the right population, so the refutation stands rather than needing
+a re-run against corrected constants.
+
+A wrong-population fit that turns out not to distort its own result is worth
+recording precisely because the alternative was assumed rather than checked. The
+defect was real, the exposure was real, and the damage was nil.
+
+`CHOICE_CURVE_SPEC=champion` now switches the population, every run prints which
+it used, the spec is written into the results file, and the docstring no longer
+claims something the code does not do.
