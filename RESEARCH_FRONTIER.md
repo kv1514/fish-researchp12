@@ -1816,3 +1816,48 @@ a 4-cluster standard error with 1.96 instead of *t* at 3 df, are the outer and
 inner versions of it. `fish4/clustered.py` does both at once precisely so that
 fixing one without the other cannot happen again, and
 `tests4/test_clustered.py` pins each.
+
+# The paper did not compile, and the script that builds it named the wrong file
+
+Found by running `pdflatex` after editing `paper/kraken.tex`, which
+`scripts4/check_tex.py` had just declared clean.
+
+## Three defects, each of which looked fine
+
+**1. `check_tex` passed a file that does not build.** The caption rewritten for
+#50 item (3) used `\path{}` four times. `\path` expands to `\url`, which is
+**fragile in a moving argument**, and `\caption` writes its argument to the list
+of tables. The build died with `! Undefined control sequence. \Url Error ->\url
+used in a moving argument` — reported at the caption's *closing brace*, five
+lines after the last offending command.
+
+The repository's own convention is `\texttt{...}` with escaped underscores in
+captions and `\path{}` in body text, and every other caption already followed
+it. `check_tex` now scans each `\caption{...}` by brace-matching and flags
+`\path`, `\url` or `\verb` inside one; `tests4/test_check_tex_fragile.py` (6
+tests) checks that it fires on the real regression, stays quiet on `\texttt` and
+on `\path` in body text, and does not run past a caption containing nested
+groups.
+
+The checker's docstring now says what it is: **not a substitute for a build.**
+It was written when the machine had no TeX. The machine has `pdflatex`.
+
+**2. `paper/build.sh` still named `fishbot_v06.tex`** — stale since the KRAKEN
+rename. The script that produces a *committed deliverable* pointed at a file
+that does not exist, and nothing noticed because nobody had run it since.
+
+**3. The committed PDF was a day stale.** `paper/kraken.pdf` last changed at
+`fe1a85b` (2026-08-29); `kraken.tex` has changed repeatedly since, including
+today. 773,452 bytes committed against 802,704 rebuilt.
+
+Rebuilt through the repaired script — three passes, as its own comment
+requires: **91 pages, 0 undefined references or citations.**
+
+## The pattern
+
+A structural checker that reports "no structural problems found" is the same
+shape as a knob that produces a bit-identical result: it is what a *silent
+no-op* looks like from the outside. This project has a rule for that case —
+instrument the thing directly rather than trusting the summary — and it applies
+to its own tooling. `check_tex` is cheap and worth keeping, but the load-bearing
+check is `bash paper/build.sh`, and it now works.
