@@ -1019,3 +1019,60 @@ it. Its early rows already show the regret is **not uniform**: +0.42 to +0.58 in
 positions offering 50-odd legal asks, 0.000 in positions offering three. If that
 holds up, "how much does the objective leave on the table" has no single answer
 and the honest version is a curve against the size of the action set.
+
+---
+
+# RESULT: the ask objective has no measurable one-step headroom
+
+`results/ask_regret_wide.json`. **208 positions × 24 worlds**, harvested from 400
+games, against the **37 × 12** the published figure rested on — and the harvest
+cap that silently produced that 37 is fixed.
+
+| | |
+|---|---|
+| **cross-fitted regret** | **−0.0188 ± 0.0316, 95% [−0.0808, +0.0431] sets** |
+| naive max-over-actions | +0.4667 (inflated: selection bias +0.4856) |
+| the same test against a RANDOM ask | **+0.2548 ± 0.0506** — the scale |
+| **the objective captures** | **107.4% of what one-step lookahead can find** |
+| corr(rollout value, full objective) | **+0.2640 ± 0.0265** (was +0.164 ± 0.072) |
+| mean rank of the chosen ask | 34.6% through the action list |
+| best–worst spread | 1.4295 sets |
+
+**The interval is ±0.062 — for the first time tighter than the +0.15 ship bar.**
+The hand-designed objective's chosen ask is, if anything, *better* than the
+rollout-best, and it beats a random ask by +0.25. Against the estimator's own
+attenuation table (26.6% of a true +0.5, 67.3% of +1.0, 99.1% of +2.0), a true
+edge of +0.5 would surface at +0.13 and is excluded by the upper bound; the run
+rules out one-step ask improvements worth more than roughly **+0.2 per
+decision**.
+
+That is a real answer to one third of the headroom question, and it is the
+first time it has been answered with enough power to matter. **For the ask
+channel, one-step improvement is exhausted.** It bounds neither the declaration
+channel nor multi-step improvement, and it is measured against a 24-world
+rollout rather than against truth.
+
+## A prediction of mine, stated in advance and refuted
+
+The section above this one predicted, before the run landed, that regret would
+prove to be *a curve against the size of the action set* rather than one number
+— because the early streaming rows showed +0.42 to +0.58 where 50-odd asks were
+legal and 0.000 where three were.
+
+| legal asks | n | mean regret | 95% half-width |
+|---|---|---|---|
+| 2–5 | 10 | +0.0500 | 0.1382 |
+| 5–15 | 54 | +0.0478 | 0.1036 |
+| 15–30 | 85 | +0.0039 | 0.0953 |
+| 30–45 | 51 | −0.1601 | 0.1368 |
+| 45–54 | 8 | +0.1042 | **0.5098** |
+
+**corr(n_asks, regret) = −0.058 ± 0.136.** No relationship, and the sign is if
+anything the opposite of the one predicted. The rows I read the pattern off sit
+in a band of **eight positions with a half-width of ±0.51** — I was reading
+noise off a streaming log, which is the same mistake the `locate` screen made at
+400 pairs and the reason that screen's withdrawal condition was unevaluable.
+
+The prediction is recorded as refuted rather than removed. Its value was in
+being falsifiable before the data arrived, and one number, not a curve, is the
+honest summary.
