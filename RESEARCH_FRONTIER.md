@@ -362,3 +362,67 @@ It still does not follow that a better belief wins games --- that is a separate
 inference and this project has twice measured it failing --- but the specific
 trap that caught the convention (a cost invisible to the instrument) cannot
 occur when the cost is zero by construction.
+
+
+---
+
+# UPDATE, 2026-08-30: the teammate ceiling is mostly INTERACTION
+
+The +3.41 sets/game for perfect knowledge of a teammate's cards has now been
+decomposed by routing the same cheat to one decision at a time
+(`prereg/declaration_timing.md`, 600 games, anchor replicated to **0.0000** on
+both A and T).
+
+| the cheat reaches | ceiling over honest | share |
+|---|---|---|
+| the declaration channel only | **+1.0767** [+0.7979, +1.3554] | 0.316 |
+| the ask channel only | **+0.7600** [+0.4731, +1.0469] | 0.223 |
+| both (the published arm) | **+3.4100** [+3.1625, +3.6575] | 1.000 |
+
+    D + K = 1.84     T = 3.41     interaction = 1.57, i.e. 46%
+
+**Neither channel alone carries the ceiling, and the largest single component
+belongs to neither.** Knowing your teammates' cards is worth far more when it
+informs the asks *and* the declarations than the sum of what it is worth to
+either.
+
+## This is the explanation for four nulls, and it is better than the one I had
+
+| attempt | channel it targeted | result |
+|---|---|---|
+| split gamma | ask (via the belief) | refuted |
+| at-ask covariate | ask (via the belief) | better posterior, nothing in play |
+| the communication channel | what the team knows, delivered through the belief | belief improved and replicated; duel −0.002 |
+| declaration-timing hypothesis | declaration | **not supported**: 0.316, not the ≥0.50 it needed |
+
+Every one of them was reaching for at most a third of the prize while the
+interaction term — the biggest piece — sat untouched. My own hypothesis, that
+the ceiling is a declaration-timing effect, is among the things this refutes.
+
+## The mechanism was right; the magnitude was not
+
+Handed its teammates' cards, a seat declares at mean move **39.2** against the
+honest **77.8** — half as deep into the game — and makes **zero** compelled
+declarations in 600 games, against 272 honestly of which 97 were wrong.
+Eliminating every compelled declaration is real, and it is worth +1.08 sets a
+game, not +3.41.
+
+## What to build next, and it is not what any of the four tried
+
+Not a better belief, and not a braver declaration rule. A policy whose **asks
+are chosen for what they will let the team declare later** — a lookahead over
+the declaration rather than over the next ask. That is the only shape of
+intervention that can reach an interaction term, and this project has not
+tried it.
+
+## A rule about validity conditions, learned three times in two days
+
+V1, V2 and V4 of that registration all failed as written, for one reason:
+**they assumed the arms are comparable in ways the experiment is specifically
+designed to break.** The arms play different games on purpose, so their pin
+totals, their declaration path mixes, and even the error classes available to
+them all differ *because the manipulation works*.
+
+The conditions that held are the ones stated over a quantity the treatment
+cannot touch. **A validity condition has to be about something the treatment
+does not change.**

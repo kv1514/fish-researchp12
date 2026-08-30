@@ -191,3 +191,121 @@ Per-game pin totals are still reported, as a diagnostic and not as a gate.
 and was counting each one, reporting 85.7 cards a game against T's true 42.8. No
 outcome depended on it, but every per-pinned-card figure derived from it would
 have been wrong by a factor of two. Now counted once.
+
+---
+
+# OUTCOME, recorded 2026-08-30: SPLIT. The hypothesis is not supported.
+
+600 games, 300 deals × 2 parities, opposition `dylan_v07` rev 2, identical
+deals across arms. **Every arm but A cheats; these are ceilings, not strength.**
+
+**The anchor replicates exactly.** A_honest +2.3033 against a published
++2.3033, T_both +5.7133 against +5.7133 — delta **0.0000** on both. The
+decomposition is anchored to precisely the number it decomposes.
+
+| arm | margin | ceiling over honest |
+|---|---|---|
+| A_honest | +2.3033 | — |
+| **D_declare** | +3.3800 | **+1.0767** [+0.7979, +1.3554] |
+| **K_ask** | +3.0633 | **+0.7600** [+0.4731, +1.0469] |
+| T_both | +5.7133 | **+3.4100** [+3.1625, +3.6575] |
+
+`S_D = 0.316`, `S_K = 0.223`. The registered rule needed `S_D ≥ 0.50` to
+confirm and `S_K ≥ 0.50` to refute. Neither. **SPLIT**, which licenses neither
+conclusion, and the hypothesis this document was written to test **is not
+supported**: the declaration channel is the larger of the two and is nowhere
+near carrying the ceiling.
+
+## The finding that replaces it, and it is bigger
+
+    D + K = +1.8367     against     T = +3.4100
+
+**46% of the teammate ceiling — 1.57 sets a game — lives in neither channel
+alone.** It is interaction: knowing your teammates' cards is worth far more
+when it informs the asks *and* the declarations than the sum of what it is
+worth to either. The document warned that `D + K = T` was a question rather
+than an assumption. The answer is that it is emphatically not.
+
+**This explains the three nulls better than the hypothesis did.** Any
+intervention that improves one channel in isolation is reaching for at most a
+third of the ceiling, and the single largest component is unreachable by
+improving either channel alone. The split gamma and the at-ask covariate
+targeted the ask channel; the communication channel targeted what the team
+knows but delivered it only through the belief. All three were competing for a
+third of the prize while the interaction term sat untouched.
+
+## The mechanism is real even though the magnitude is not
+
+| arm | mean move index of our declarations | voluntary | gate | forced |
+|---|---|---|---|---|
+| A_honest | 77.8 | 2272 / 0 wrong | 160 / 44 | 112 / 53 |
+| D_declare | 61.8 | 2801 / 0 | 0 / 0 | **2 / 2** |
+| K_ask | 66.5 | 2098 / 7 | 874 / 219 | 757 / 391 |
+| T_both | **39.2** | 3692 / 0 | **0 / 0** | **0 / 0** |
+
+Knowing your teammates' cards does exactly what the hypothesis said it would:
+T declares at move **39.2** against the honest **77.8**, half as deep into the
+game, and **eliminates the compelled paths entirely** — 0 gate and 0 forced
+declarations in 600 games, against 272 compelled declarations honestly, of
+which 97 were wrong. D nearly does the same on its own.
+
+So the *mechanism* is confirmed and the *magnitude* is not. Removing every
+compelled declaration is worth +1.08 sets a game, not +3.41.
+
+## Both VOID conditions were my mis-specifications, and the data says so
+
+**V1 — "D never misdeclares" — VOID as written, and it should never have been
+written that way.** D made 2 wrong declarations in 3,261. Both are
+**ownership** class: an opponent still held one of the six.
+
+| arm | allocation errors | ownership errors |
+|---|---|---|
+| A_honest | 92 | 5 |
+| **D_declare** | **0** | 2 |
+| K_ask | 563 | 54 |
+| T_both | 0 | 0 |
+
+`side="team"` reveals teammates' cards **only**, so no amount of teammate
+knowledge prevents an ownership error. What the gate actually guarantees is
+that D never makes an **allocation** error, and it made **zero in 3,261
+declarations**. The condition should have said allocation; that is a fact
+about what the cheat reveals, knowable before the run, and I wrote it wrong.
+
+**V2 — "K misdeclares near the honest rate" — VOID as written, and refuted as
+a concern.** K's 15.5% against A's 3.2% is not a leak. Per path:
+
+| path | A n | A wrong | K n | K wrong | K/A frequency |
+|---|---|---|---|---|---|
+| exact | 453 | 0.0% | 249 | 0.0% | 0.5× |
+| voluntary | 2272 | 0.0% | 2098 | 0.3% | 0.9× |
+| gate | 160 | 27.5% | 874 | 25.1% | **5.5×** |
+| forced | 112 | 47.3% | 757 | 51.7% | **6.8×** |
+
+**Per path K is not worse than honest** — it is slightly better on the gate
+path. Its aggregate rate is higher purely because its cheating ask policy
+drives it onto the compelled paths five to seven times more often, and those
+are the paths where declarations go wrong. That is a consequence of the cheat,
+which is what the arm is for, and the opposite of the leak V2 was written to
+catch.
+
+## The mistake underneath all three amended conditions
+
+V1, V2 and V4 failed for one reason: **I wrote validity conditions that assume
+the arms are comparable in ways the experiment is specifically designed to
+break.** The arms play different games on purpose. Their running pin totals
+(V4), their declaration path mixes (V2), and the error classes available to
+them (V1) all differ *because the manipulation works*.
+
+The conditions that survived — V3, and V4 in its amended first-decision form —
+are the ones stated over a quantity the manipulation cannot touch. That is the
+rule to carry forward: **a validity condition has to be about something the
+treatment does not change.**
+
+## What this licenses
+
+Not the declaration policy alone, which is what a confirmation would have
+bought. The finding points somewhere harder and more interesting: the
+teammate ceiling is mostly a **joint** effect, so the thing to build is not a
+better belief or a braver declaration rule but a policy whose asks are chosen
+*for what they will let the team declare later*. That is a lookahead over the
+declaration, not over the next ask, and this project has not tried it.

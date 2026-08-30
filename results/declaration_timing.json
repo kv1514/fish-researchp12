@@ -50,7 +50,29 @@
       "wrong_rate": 0.0323656990323657,
       "pinned_per_game": 0.0,
       "pinned_first_decision": 0.0,
-      "mean_move_index": 77.82716049382717
+      "mean_move_index": 77.82716049382717,
+      "klass": {
+        "allocation": 92,
+        "ownership": 5
+      },
+      "paths": {
+        "exact": {
+          "n": 453,
+          "wrong": 0
+        },
+        "forced": {
+          "n": 112,
+          "wrong": 53
+        },
+        "gate": {
+          "n": 160,
+          "wrong": 44
+        },
+        "voluntary": {
+          "n": 2272,
+          "wrong": 0
+        }
+      }
     },
     "D_declare": {
       "declarations": 3261,
@@ -58,7 +80,29 @@
       "wrong_rate": 0.0006133088009812941,
       "pinned_per_game": 42.67,
       "pinned_first_decision": 18.0,
-      "mean_move_index": 61.75559644280895
+      "mean_move_index": 61.75559644280895,
+      "klass": {
+        "allocation": 0,
+        "ownership": 2
+      },
+      "paths": {
+        "exact": {
+          "n": 458,
+          "wrong": 0
+        },
+        "forced": {
+          "n": 2,
+          "wrong": 2
+        },
+        "gate": {
+          "n": 0,
+          "wrong": 0
+        },
+        "voluntary": {
+          "n": 2801,
+          "wrong": 0
+        }
+      }
     },
     "K_ask": {
       "declarations": 3978,
@@ -66,7 +110,29 @@
       "wrong_rate": 0.15510306686777275,
       "pinned_per_game": 50.663333333333334,
       "pinned_first_decision": 18.0,
-      "mean_move_index": 66.49974861739568
+      "mean_move_index": 66.49974861739568,
+      "klass": {
+        "allocation": 563,
+        "ownership": 54
+      },
+      "paths": {
+        "exact": {
+          "n": 249,
+          "wrong": 0
+        },
+        "forced": {
+          "n": 757,
+          "wrong": 391
+        },
+        "gate": {
+          "n": 874,
+          "wrong": 219
+        },
+        "voluntary": {
+          "n": 2098,
+          "wrong": 7
+        }
+      }
     },
     "T_both": {
       "declarations": 4078,
@@ -74,7 +140,29 @@
       "wrong_rate": 0.0,
       "pinned_per_game": 40.69833333333333,
       "pinned_first_decision": 18.0,
-      "mean_move_index": 39.191025012260916
+      "mean_move_index": 39.191025012260916,
+      "klass": {
+        "allocation": 0,
+        "ownership": 0
+      },
+      "paths": {
+        "exact": {
+          "n": 386,
+          "wrong": 0
+        },
+        "forced": {
+          "n": 0,
+          "wrong": 0
+        },
+        "gate": {
+          "n": 0,
+          "wrong": 0
+        },
+        "voluntary": {
+          "n": 3692,
+          "wrong": 0
+        }
+      }
     }
   },
   "validity_ok": {
@@ -94,5 +182,5 @@
       "published": 5.7133
     }
   },
-  "seconds": 444.9345531150001
+  "seconds": 424.7879415760001
 }
