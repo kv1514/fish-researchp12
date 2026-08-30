@@ -1072,6 +1072,35 @@ declaration channel is excluded **by construction**, not by omission:
 line `if not isinstance(chosen, Ask): continue  # a claim: decided from the
 posterior, not searched`.
 
+## And the champion-spec run has NO RESOLUTION, which is the honest reading
+
+`results/ask_regret_champion.json`, `ASK_REGRET_SPEC=champion`, 70 positions ×
+16 worlds against V06_DEPLOYED — lookahead on, 480 draws:
+
+| | |
+|---|---|
+| cross-fitted regret | −0.0893 ± 0.0838, 95% **[−0.2535, +0.0749]** |
+| the same test vs a RANDOM ask | **+0.1857 ± 0.0966** |
+| corr(rollout value, objective) | +0.2933 ± 0.0370 |
+| mean rank of the chosen ask | 30.2% (against 34.6% for the isolated objective) |
+
+**The scale reference is itself indistinguishable from zero.** The instrument
+prints the consequence rather than letting a reader miss it: *"there is no scale
+to express the regret as a fraction of — the test has no resolution here, which
+is a fact about the design and not about the objective."* The interval is also
+wider than the +0.15 bar.
+
+So this run establishes **nothing** about the champion, and the point estimate
+must not be quoted. What stands is the isolated-objective result at 208 × 24;
+what the champion leaves on the table at one ply is still unmeasured, and needs
+roughly the same 208 × 24 design at ~85 s a position — five to eight hours,
+which is a cost rather than an obstacle.
+
+The two numbers that *are* suggestive and are recorded as no more than that: the
+champion picks asks ranked 30.2% through the list against the isolated
+objective's 34.6%, and its objective correlates +0.2933 with the rollout value
+against +0.2640. Both point the same way at a sample that cannot resolve either.
+
 ## A prediction of mine, stated in advance and refuted
 
 The section above this one predicted, before the run landed, that regret would
