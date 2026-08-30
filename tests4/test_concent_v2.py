@@ -84,6 +84,20 @@ class FakeCtx:
             hand_counts = [9] * NUM_PLAYERS
         self.obs = _O()
 
+        # The `locate` term reads the belief's public location table, so the
+        # fake has to carry one -- the docstring above says this class is the
+        # minimum surface ask_feature_matrix touches, and that surface grew.
+        #
+        # All-None is the right value here, not a convenience: it means nothing
+        # has been publicly located yet, which is the state these controlled
+        # marginals describe, and it leaves `locate` LIVE rather than short-
+        # circuiting to zero. A fake that silently switched the new term off
+        # would let it rot untested in exactly the file that exercises the
+        # feature matrix most directly.
+        class _B:
+            public_loc = [None] * 54
+        self.bel = _B()
+
 
 def _M(holdings):
     """holdings: {card: {player: prob}} over half-suit 0, rest spread."""

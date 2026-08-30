@@ -426,3 +426,48 @@ them all differ *because the manipulation works*.
 The conditions that held are the ones stated over a quantity the treatment
 cannot touch. **A validity condition has to be about something the treatment
 does not change.**
+
+
+---
+
+# UPDATE: the first attempt on the interaction is a null, and it locates the next one
+
+`prereg/locate_term.md`. The decomposition said 46% of the teammate ceiling --
+1.57 sets a game -- is interaction between the ask and declaration channels, so
+the first intervention built to reach it was a twelfth term in the ask
+objective: price an ask by the share of a half-suit's remaining *location*
+uncertainty it removes, weighted by our team owning the rest.
+
+**3,000 duplicate-deal pairs at the a-priori weight: +0.047 [-0.075, +0.168].**
+The interval contains zero. Not shipped.
+
+## Diagnosed rather than shrugged at
+
+| | |
+|---|---|
+| size | median max\|locate\| per position **0.0444** -- at w=0.3, ≤0.013 on a score whose P(success) term spans ~1.0 |
+| overlap | correlation with the existing score **+0.42** |
+| bite | re-ranks the top ask **3.9%** of positions at w=0.3; **11.3%** even at w=2.0 |
+| mechanism | mean declaration move **68.0 -> 67.7**, against the ceiling arm's **39.2** |
+
+A term that re-ranks one ask in twenty-five by one percent of the objective's
+scale cannot move 1.57 sets a game, and raising the weight does not rescue it.
+
+## The general lesson, which is worth more than the term
+
+**An additively weighted one-ply feature cannot reach an interaction term** --
+whatever it measures. Such a feature can only nudge a ranking that the
+P(success) term dominates. The teammate oracle does not win by re-ranking asks
+with a small bonus; it plays a *different game*, arriving at positions where
+every declaration is voluntary (its path mix is all-voluntary, against
+218/17/13 honestly).
+
+That rules out the whole family the ask basis belongs to, which is eleven of
+its twelve terms.
+
+## What the evidence now points at
+
+Extend the existing lookahead -- `w_lookahead`, depth 3, beam 4 -- so its
+**leaf evaluation scores declarability** rather than sets and tempo. Same
+coupling, applied where it compounds over several moves instead of being
+averaged into one ask's score. Bigger build; it is the one left standing.

@@ -173,3 +173,87 @@ is precisely what the registration forbade in advance:
 
 Everything else — the +0.15 ship bar, the four-way decision rule, the secondary
 outcomes, the remaining withdrawal conditions — is unchanged.
+
+---
+
+# OUTCOME, recorded 2026-08-30: null, and fully diagnosed
+
+## The confirmation
+
+3,000 duplicate-deal pairs at `w = 0.3`, fresh seed base 1,250,000.
+**Y − X = +0.047 [−0.075, +0.168]**, 997W / 956T / 1047L, half-width 0.121.
+
+The pre-registered rule fires on the third branch:
+
+> interval contains 0 → the coupling does not pay at this weight. Recorded.
+
+**The term does not ship.** `w_locate` stays at 0.0 and `V06_DEPLOYED` is
+untouched.
+
+## The remaining withdrawal conditions
+
+* No `IllegalAction`; 0 nulls on either side.
+* **Moves per game: 104.5 against 105.0** — 0.5 apart against a threshold of 8.
+  The condition passes, so the null is about outcomes and not about game
+  length. `scripts4/duel.py` does not report this, so it was measured
+  separately rather than left unevaluated.
+
+## The secondary outcomes say the term barely moves play at all
+
+60 games, our three seats at `w = 0.3` against the champion:
+
+| | w = 0.0 | w = 0.3 | the ceiling arm |
+|---|---|---|---|
+| mean move index of our declarations | 68.0 | **67.7** | **39.2** |
+| declarations per game | 4.63 | 4.57 | 6.80 |
+| voluntary / gate / forced | 218 / 17 / 13 | 222 / 13 / 15 | all voluntary |
+| wrong (allocation / ownership) | 11 / 0 | 10 / 0 | 0 / 0 |
+
+The mechanism check the registration named was: *if this term is doing what it
+claims, the declaration move index should fall.* It moved by **0.3 moves**,
+against the **38.6** the teammate-oracle achieves. It does not.
+
+## Why, and this is the part worth keeping
+
+Three candidate explanations, measured over 257 real positions:
+
+| | |
+|---|---|
+| **size** | median max\|locate\| per position **0.0444**, p90 0.1136. At `w = 0.3` that adds at most **0.013** to a score whose P(success) term alone spans ~1.0 |
+| **overlap** | correlation with the current score **+0.42** — where it fires it partly points where the objective already points |
+| **bite** | it changes which ask is top-ranked in **3.9%** of positions at `w = 0.3`, and in only **11.3%** at `w = 2.0`, a weight three times the shipped `turn` term |
+
+So the null is not mysterious: **a term that re-ranks 4% of asks by 1% of the
+objective's scale cannot move 1.57 sets a game**, and raising the weight does
+not rescue it — at `w = 2.0` it still touches only one ask in nine, and the
+screen's `w = 0.6` arm was null too.
+
+The `1/u` divisor is what makes it small, and it is not a scaling mistake: it
+is the shape the mediator finding implies, since what a declaration risks is
+the *share* of the half-suit still unlocated. A variant that preserved the
+ordering without dividing would be larger, but that is a different term and
+would need its own registration; the diagnosis below says the shape of the
+intervention is wrong, not its scale.
+
+## This is the null the registration predicted, and it named the next step
+
+> That the interaction is real but not reachable by a one-ply proxy for it —
+> that pricing an ask by the location it creates is too shallow, and what is
+> actually needed is a search that evaluates the declaration itself at the
+> leaf.
+
+Confirmed. The interaction worth 1.57 sets a game is not reachable by an
+**additively weighted one-ply feature**, whatever that feature measures,
+because such a feature can only nudge a ranking that the P(success) term
+dominates. The teammate oracle does not re-rank asks by a small bonus — it
+plays a *different game*, reaching positions where every declaration is
+voluntary.
+
+**What that leaves:** extend the existing lookahead (`w_lookahead`, depth 3,
+beam 4) so its **leaf evaluation scores declarability** rather than sets and
+tempo. That is the same coupling, applied where it can compound over several
+moves instead of being averaged into one ask's score. It is a bigger build and
+it is the one the evidence now points at.
+
+**And this null does not re-open the four closed directions.** Each was refuted
+on its own terms.
