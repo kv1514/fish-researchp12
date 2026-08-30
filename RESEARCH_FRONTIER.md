@@ -1269,3 +1269,44 @@ champion continuation changes what the estimator measures. Separating them needs
 leave +0.16 on champion turf, the headroom is real and belongs to neither
 objective — a better ask selector would capture it, and that is a live lead
 rather than a closed one.
+
+---
+
+# RESULT: exploitability is negative, and a negative result here says nothing
+
+`results/exploitability.json`. Seat 0 deviates to a rollout best response at
+**beam 5 / 6 worlds** against five champions, 240 paired deals, control verified
+at exactly 0.000 on every deal:
+
+> **DEVIATION GAIN −0.608 sets per deal, 95% CI [−1.122, −0.095]**, sd 4.06.
+
+The interval now excludes zero — where the earlier beam-3 run gave −0.4875
+[−1.244, +0.269] — but **it excludes it on the wrong side**, and the
+interpretation was fixed before the run and by the script itself:
+
+> gain ≤ 0 — weak evidence only. PIMC's strategy fusion can make the responder
+> play badly, so a failure to find an exploit is not evidence that none exists.
+
+So this establishes **nothing about the champion's safety**. What it does show is
+that a perfect-information rollout responder is a *worse* player than the
+champion by 0.6 sets a deal, which is a fact about PIMC and consistent with the
+v0.3 diagnosis that a search ranking candidates against different sampled worlds
+is ranking noise.
+
+**It is not evidence that more search made the responder worse.** The beam-3 and
+beam-5 runs used different base seeds and are not paired, and their intervals
+overlap heavily. Two unpaired numbers that overlap are one number.
+
+## A note on my own power calculation
+
+I fixed the power before the run and predicted a half-width of **0.437**. The
+actual is **0.514**, because I used the per-deal sd of 3.453 from the *beam-3*
+run and the beam-5 responder came in at **4.06**, 18% higher. The prediction was
+optimistic in exactly the way a power calculation borrowed from a different arm
+usually is, and the conclusion is unaffected only because the result landed
+nowhere near the bar either way.
+
+Resolving +0.15 on this instrument needs 2,036 deals at the old sd and **2,815**
+at the observed one — 48 hours. That is a fact about the instrument, and it means
+**single-seat exploitability cannot answer the headroom question at the
+precision this project ships on.** The two regret instruments can, and did.
