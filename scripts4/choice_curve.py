@@ -56,7 +56,36 @@ from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.registry4 import make_agent
 
-SPEC = {"opponent_gamma": 0.35}
+#: WHICH POPULATION THE PROPENSITY IS MEASURED ON, and it was not the champion.
+#:
+#: The docstring above says this measures the curve "for the champion, against a
+#: copy of itself -- which is precisely the situation the opponent model is used
+#: in". With SPEC as it stood that sentence was FALSE: this is the ask objective
+#: in isolation, with no belief-space lookahead and 160 draws, while
+#: V06_DEPLOYED carries w_lookahead 0.25 at depth 3 beam 4 and 480 draws.
+#:
+#: That is not a small distinction here. results/actor_compare.json measured the
+#: two policies choosing a DIFFERENT ask in 34-36% of positions. A propensity
+#: exponent fitted to one and applied to the other is fitted to the wrong
+#: policy, and this is the opponent model -- the largest single effect in the
+#: engine, worth about 1.9 sets a deal-pair.
+#:
+#: CHOICE_CURVE_SPEC=champion measures V06_DEPLOYED instead, and every run
+#: prints which it used.
+def _spec():
+    import os
+    if os.environ.get("CHOICE_CURVE_SPEC", "").lower() == "champion":
+        from fish4.registry4 import V06_DEPLOYED
+        return dict(V06_DEPLOYED[1])
+    return {"opponent_gamma": 0.35}
+
+
+SPEC = _spec()
+
+
+def spec_name() -> str:
+    return "V06_DEPLOYED (champion)" if SPEC.get("w_lookahead") else (
+        "the ask objective in isolation, no lookahead, 160 draws")
 MAX_DEPTH = 6
 
 
@@ -398,6 +427,7 @@ def main(argv):
           "impossible")
 
     clean = [r for r in recs if all(a["depth0"] >= 1 for a in r["alts"])]
+    print(f"\nPOPULATION MEASURED: {spec_name()}\n  {SPEC}")
     print(f"\nFITTING  P(ask in H) proportional to depth_H ** alpha")
     print(f"  alpha = 1 is the shipped model; alpha = 0 is "
           f"legality-only, depth ignored")
@@ -448,6 +478,11 @@ def main(argv):
 
     print("\ngamma_schedule assumes the early alpha exceeds the late one.")
 
+    # The population goes IN the results file. The previous one recorded no
+    # spec at all, which is why its figures could be read for years as the
+    # champion's when they were the bare objective's.
+    out["spec"] = SPEC
+    out["spec_name"] = spec_name()
     dest.write_text(json.dumps(out, indent=1))
     # The records themselves, so a different model can be fitted to the same
     # decisions without replaying 200 games. They are the measurement; the fits
