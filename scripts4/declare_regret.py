@@ -63,7 +63,7 @@ from fish4.claim4 import ClaimConfig, ClaimEvaluator
 from fish4.posterior import Posterior
 from fish4.registry4 import make_agent
 from scripts4.ask_regret import (GAMMA, SPEC, _legal_asks, _rollout,
-                                 crossfit_regret, harvest)
+                                 crossfit_regret, harvest, spec_banner)
 
 
 def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
@@ -159,7 +159,7 @@ def main(argv):
              if os.environ.get("ASK_REGRET_SPEC", "").lower() == "champion"
              else "the ask objective in isolation, no lookahead, 160 draws")
     print(f"declaration regret | {n_positions} positions | {n_worlds} worlds\n"
-          f"POLICY MEASURED: {which}\n  {SPEC}\n")
+          f"POLICY MEASURED: {which}\n  {spec_banner()}\n")
     rows = measure(n_positions, n_worlds, n_games=n_games)
     if not rows:
         print("no usable positions")

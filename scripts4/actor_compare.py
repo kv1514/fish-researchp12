@@ -52,8 +52,9 @@ from fish.observation import Observation
 from fish.beliefs import BeliefState
 from fish4.posterior import Posterior
 from fish4.registry4 import V06_DEPLOYED, make_agent
-from scripts4.ask_regret import (GAMMA, SPEC, _legal_asks, _rollout,
-                                 crossfit_regret, harvest)
+from scripts4.ask_regret import (GAMMA, HARVEST_SPEC, ROLLOUT_SPEC,
+                                 _legal_asks, _rollout,
+                                 crossfit_regret, harvest, spec_banner)
 
 #: The two incumbents. Everything else is shared.
 ACTORS = {"objective only": {"opponent_gamma": 0.35},
@@ -69,7 +70,7 @@ def main(argv):
     seed0 = 7373
 
     print(f"actor comparison | {n_positions} positions | {n_worlds} worlds")
-    print(f"positions and rollouts both use SPEC = {SPEC}")
+    print(f"  {spec_banner()}   (the incumbent role is unused here:\n    the two ACTORS below are the incumbents)")
     print(f"incumbents compared on IDENTICAL rollouts: {list(ACTORS)}\n")
 
     positions = harvest(n_games or max(60, n_positions // 2), 5, n_positions)
@@ -138,7 +139,8 @@ def main(argv):
     print("\n" + "=" * 74)
     print(f"  ACTOR COMPARISON, {len(rows)} positions, IDENTICAL rollouts")
     print("=" * 74)
-    out = {"n": len(rows), "n_worlds": n_worlds, "rollout_spec": SPEC,
+    out = {"n": len(rows), "n_worlds": n_worlds,
+           "harvest_spec": HARVEST_SPEC, "rollout_spec": ROLLOUT_SPEC,
            "actors": {}}
     same = np.array([r["same_pick"] for r in rows], dtype=float)
     print(f"\n  the two actors chose the same ask in {same.mean():.1%} "

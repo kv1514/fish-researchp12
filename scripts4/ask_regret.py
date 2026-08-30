@@ -88,26 +88,59 @@ from fish4.registry4 import make_agent
 
 #: WHICH POLICY IS BEING MEASURED, and it is not the champion by default.
 #:
-#: This is the ask objective in ISOLATION -- no belief-space lookahead, 160
-#: draws -- and it is used in three places: the agents that harvest positions,
-#: the agents that roll a position out, and the agent whose choice is the
-#: incumbent. So a regret measured here bounds the headroom of THAT policy.
-#: V06_DEPLOYED carries w_lookahead 0.25 at depth 3 beam 4 and 480 draws, and
-#: is therefore a different policy making different choices.
+#: `SPEC` fills THREE distinct roles and they were one knob until the 2x2 below
+#: needed them apart:
 #:
-#: Set ASK_REGRET_SPEC=champion to measure V06_DEPLOYED instead. It is much
-#: slower -- the lookahead runs at every step of every rollout -- which is why
-#: the isolated objective is the default and why the distinction has to be
-#: stated rather than assumed.
-def _spec():
+#:   harvest    the agents whose self-play produces the positions
+#:   rollout    the agents who play each candidate action out
+#:   incumbent  the agent whose choice the regret is measured against
+#:
+#: The default is the ask objective in ISOLATION -- no belief-space lookahead,
+#: 160 draws. V06_DEPLOYED carries w_lookahead 0.25 at depth 3 beam 4 and 480
+#: draws, so it is a different policy making different choices, and a regret
+#: measured under one does not bound the other.
+#:
+#: WHY THE ROLES HAD TO SPLIT. The champion measured on champion turf gives
+#: +0.1365 [+0.0705, +0.2026] pooled, and scripts4/actor_compare.py has twice
+#: shown the ask CHOICE is not the cause. So the regret belongs to the "turf" --
+#: but "turf" bundled the POSITION DISTRIBUTION with the CONTINUATION POLICY,
+#: because one SPEC drove both. Crossing them separates the two:
+#:
+#:            rollout=objective   rollout=champion
+#:   harvest=objective   -0.014         ?
+#:   harvest=champion      ?          +0.137
+#:
+#: Set ASK_REGRET_SPEC=champion for all three roles, or override one at a time
+#: with ASK_REGRET_HARVEST_SPEC / ASK_REGRET_ROLLOUT_SPEC /
+#: ASK_REGRET_INCUMBENT_SPEC. Values are "champion" or "objective".
+#:
+#: tests4/test_regret_specs.py asserts the three resolve independently, because
+#: a knob that silently does nothing is how this project has lost results
+#: before -- three instruments in one session merged experimental arms by
+#: keying on less than the experiment varied.
+def _spec(role: str = ""):
     import os
-    if os.environ.get("ASK_REGRET_SPEC", "").lower() == "champion":
+    want = os.environ.get(f"ASK_REGRET_{role.upper()}_SPEC", "") if role else ""
+    if not want:
+        want = os.environ.get("ASK_REGRET_SPEC", "")
+    if want.lower() == "champion":
         from fish4.registry4 import V06_DEPLOYED
         return dict(V06_DEPLOYED[1])
     return {"opponent_gamma": 0.35}
 
 
-SPEC = _spec()
+#: Kept as the incumbent's spec so existing importers keep their meaning.
+SPEC = _spec("incumbent")
+HARVEST_SPEC = _spec("harvest")
+ROLLOUT_SPEC = _spec("rollout")
+
+
+def spec_banner() -> str:
+    """One line naming every role, printed by every run that uses these."""
+    def _n(d):
+        return "champion" if d.get("w_lookahead") else "objective-only"
+    return (f"harvest={_n(HARVEST_SPEC)}  rollout={_n(ROLLOUT_SPEC)}  "
+            f"incumbent={_n(SPEC)}")
 GAMMA = 0.35
 MAX_ACTIONS = 400
 
@@ -134,7 +167,8 @@ def harvest(n_games: int, min_resolved: int, max_positions: int,
     rules = RuleConfig()
     out = []
     for g in range(n_games):
-        agents = [make_agent(("fishbot4", SPEC)) for _ in range(NUM_PLAYERS)]
+        agents = [make_agent(("fishbot4", HARVEST_SPEC))
+                  for _ in range(NUM_PLAYERS)]
         ar = random.Random(seed0 + g)
         st = GameState.deal(rules, seed=seed0 + 977 * g)
         for p, a in enumerate(agents):
@@ -170,7 +204,7 @@ def _rollout(rules, world, turn, set_winner, history, root_action, root_seat,
     state.history = list(history)
     agents = []
     for p in range(NUM_PLAYERS):
-        a = make_agent(("fishbot4", SPEC))
+        a = make_agent(("fishbot4", ROLLOUT_SPEC))
         a.begin_game(p, rules, seat_seeds[p])
         agents.append(a)
     try:
@@ -445,7 +479,7 @@ def main(argv):   # noqa: C901
              else "the ask objective in isolation, no lookahead, 160 draws")
     print(f"one-step policy-improvement regret | {n_positions} positions "
           f"| {n_worlds} worlds/action | >= {min_resolved} half-suits resolved")
-    print(f"POLICY MEASURED: {which}\n  {SPEC}\n")
+    print(f"POLICY MEASURED: {which}\n  {spec_banner()}\n")
     rows = measure(n_positions, n_worlds, min_resolved,
                    n_games=int(argv[4]) if len(argv) > 4 else 0)
     if not rows:
