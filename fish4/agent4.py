@@ -340,6 +340,36 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
 
     # -- policy --------------------------------------------------------------
 
+    def build_posterior(self, obs, n_draws: int = 0):
+        """The posterior this seat would form at this decision.
+
+        Extracted from ``act`` so an instrument wanting the SAME posterior
+        under a different draw count gets it from the same seventeen arguments
+        the policy uses. The alternative -- a script that re-lists them -- is
+        the duplication that has already cost this project two results: a
+        decoder wired into a sampler path no decision takes, and a size/bite
+        diagnosis run against a hand-copied fragment of this function.
+
+        ``n_draws`` overrides the configured count and changes nothing else, so
+        the difference between two calls is sampling and only sampling. Zero
+        means the configured count, which is what ``act`` passes.
+        """
+        return Posterior(self.bel, self.rng, n_draws=n_draws or self.n_draws,
+                         n_worlds=self.n_worlds, mode=self.infer_mode,
+                         obs=obs, gamma=self.opponent_gamma,
+                         gamma_team=self.gamma_team,
+                         convention_beta=self.convention_beta,
+                         convention_q=self.convention_q,
+                         convention_aim=self.convention_aim,
+                         convention_book=self.convention_book,
+                         depth_mode=self.depth_mode,
+                         count_mode=self.count_mode,
+                         opp_lambda=self.opp_lambda,
+                         gamma_schedule=self.gamma_schedule,
+                         sis_tilt=self.sis_tilt,
+                         silence_delta=self.silence_delta,
+                         stats=self.stats)
+
     def act(self, obs: Observation) -> Action:
         self.bel.update(obs)
         self.last_trace = None
@@ -361,21 +391,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                     note="one half-suit left and few enough deals to solve")
             return exact
 
-        post = Posterior(self.bel, self.rng, n_draws=self.n_draws,
-                         n_worlds=self.n_worlds, mode=self.infer_mode,
-                         obs=obs, gamma=self.opponent_gamma,
-                         gamma_team=self.gamma_team,
-                         convention_beta=self.convention_beta,
-                         convention_q=self.convention_q,
-                         convention_aim=self.convention_aim,
-                         convention_book=self.convention_book,
-                         depth_mode=self.depth_mode,
-                         count_mode=self.count_mode,
-                         opp_lambda=self.opp_lambda,
-                         gamma_schedule=self.gamma_schedule,
-                         sis_tilt=self.sis_tilt,
-                         silence_delta=self.silence_delta,
-                         stats=self.stats)
+        post = self.build_posterior(obs)
         ctx = DecisionContext(obs, self.bel, post)
 
         if obs.must_pass():

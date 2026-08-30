@@ -574,3 +574,99 @@ tracker, not to any search. Two levers follow.
 everything the record holds, then the teammate ceiling's 1.57 sets a game is
 not an inference problem at all, and the search should move to what the oracle
 **does** rather than what it **knows**.
+
+---
+
+# UPDATE: the record is not the problem. The engine's confidence in it is.
+
+The theorem above said the teammate/teammate ratio moves only on public events,
+so the next question was the bound: **how much does the record contain, and how
+much does the tracker already get?** `scripts4/teammate_split.py`, 25 games,
+28,707 (decision, teammate-held card) observations, ground truth used as a
+label only.
+
+The rule was fixed before the run: top-1 within two points of 50% in the frozen
+population — half-suits our team holds all six of, where no opponent may legally
+ask and no future public event can ever locate the cards — would mean the record
+says nothing.
+
+| unlocated teammate-held cards | nats over 0.5 | top-1 |
+|---|---|---|
+| all live half-suits | +0.1615 [+0.1574, +0.1656] | 67.8% |
+| **frozen: our team holds all six** | **+0.4617** [+0.4518, +0.4715] | **92.1%** [91.2%, 92.9%] |
+| the rest | +0.1055 | 63.2% |
+
+**92.1%, not 50%.** The rule did not fire and the inference story is refuted:
+the record contains a great deal about which partner holds a card, and the
+tracker already has nearly all of it — 1920 draws instead of the deployed 480
+moves top-1 by **0.2 points**, consistent with precision having stopped paying
+past 480 four results ago.
+
+## So the gap is not accuracy. It is knowing which 92%.
+
+`scripts4/split_calibration.py` asks whether the engine's confidence in its own
+split is calibrated — against `post.prob_assignment` conditioned by
+`post.prob_all_with`, which is what `ClaimEvaluator` tier 3 actually reads and
+compares to its 0.97 threshold.
+
+| population | predicted (exact) | actual | bias |
+|---|---|---|---|
+| all live half-suits | 0.428 | 0.453 | **−0.024** |
+| **frozen: our team holds all six** | **0.453** | **0.650** | **−0.197** |
+
+Everywhere else the engine is calibrated. In exactly the half-suits it declares
+from, it is **under-confident by 20 points**, and the reliability table is
+monotone: when it says 0.508 it is right 0.798 of the time, when it says 0.688
+it is right 0.858.
+
+### Not the arithmetic — the population
+
+A joint over more cards is smaller, and frozen half-suits carry 3.21 unlocated
+partner cards against 2.17 elsewhere. Held at fixed `k`:
+
+| unlocated cards k | frozen n | frozen bias | other n | other bias |
+|---|---|---|---|---|
+| 1 | 60 | −0.126 | 2,012 | −0.009 |
+| 2 | 229 | −0.137 | 2,716 | +0.029 |
+| 3 | 327 | −0.184 | 1,320 | −0.002 |
+| 4 | 193 | −0.326 | 325 | −0.131 |
+| 5 | 153 | −0.134 | 30 | +0.009 |
+
+Non-frozen is calibrated at every `k`. Frozen is under-confident at every `k`.
+
+### And the engine can see the population it is biased in
+
+`p_team_joint` — `prob_all_with` over all six, already computed on the shipped
+path at the decision a correction would live in:
+
+| engine's P(we own all six) | n | actually frozen | predicted | actual | bias |
+|---|---|---|---|---|---|
+| [0.000, 0.500) | 7,137 | 10.5% | 0.421 | 0.442 | −0.021 |
+| [0.500, 0.800) | 184 | 92.9% | 0.669 | 0.788 | **−0.119** |
+| [0.999, 1.010) | 44 | 100.0% | 0.460 | 0.614 | **−0.154** |
+
+The bias is absent where the engine is unsure and largest where it is certain.
+**A correction is targetable from inside the engine**, which is what separates
+this from every direction closed above.
+
+## Why this is a different kind of lead
+
+The four closed directions all tried to *change what the engine believes*. This
+one says the belief is right and the **confidence attached to it is wrong, in a
+detectable place, in a known direction**. Under-confidence at a 0.97 gate means
+declarations held that we would win — and lateness is exactly the ceiling arm's
+edge: it declares at move **39.2** against our **77.8**.
+
+## What is not yet known, and must be before anything ships
+
+* **The mechanism.** There is a *what* and no *why*. A correction fitted without
+  one is a lookup table that will not transfer.
+* **The sample.** 184 and 44 observations in the two decisive bands. The
+  k-breakdown carries 60–327 per cell and agrees, so the direction does not rest
+  on the 44 — but a fitted correction needs an order of magnitude more.
+* **Whether earlier declaring pays at all.** Under-confidence is only a loss if
+  the held declarations were winnable, and `scripts4/path_ledger.py` says
+  voluntary declarations are already 0 wrong. Declaring earlier trades into a
+  regime the ledger has not measured.
+
+Nothing here licenses a change. It licenses a pre-registration.
