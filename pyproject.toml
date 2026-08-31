@@ -13,6 +13,11 @@ requires-python = ">=3.11"
 # the engine.
 dependencies = ["numpy>=1.26"]
 
+# OPTIONAL. Only the learned-model fits need this; see requirements-learn.txt.
+# The engine and every strength figure run on numpy alone.
+[project.optional-dependencies]
+learn = ["torch>=2"]
+
 [tool.pytest.ini_options]
 # tests4/ MUST be here. This said ["tests"] from the first rebuild commit,
 # written before tests4/ existed, and nobody moved it afterwards -- so a bare
