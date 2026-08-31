@@ -211,6 +211,7 @@ def _snapshot(bel, where, asker, lo):
 
 def build(bel, obs, gamma: float, include_self: bool = False,
           depth_mode: str = "initial", count_mode: str = "linear",
+          w_unlocated: float = 0.0,
           opp_lambda: float = 0.0, order=None,
           gamma_schedule: float = 0.0, sis_tilt: float = 0.0,
           gamma_team: float | None = None, convention_beta: float = 0.0,
@@ -415,6 +416,35 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     slots = {key: i for i, key in enumerate(counts)}
     weight = [0.0] * len(slots)
     base = [0] * len(slots)
+
+    # ---- opportunity, per prereg/unlocated_belief.md -----------------------
+    # How many cards of the half-suit still sit with nobody the PUBLIC record
+    # can name. `public_loc` and not `candidates`: candidates is narrowed by
+    # the observing seat's own hand, so it is this seat's private view, while
+    # the choice model is a claim about what the ASKER was looking at. The fit
+    # in scripts4/choice_curve.py recorded `bel.public_loc[c] is None` for
+    # exactly that reason -- it is common knowledge, identical for every
+    # observer and under every candidate world. Scoring the belief against a
+    # differently-defined covariate would be the transfer error that closed
+    # the w_expose direction without a single game being played.
+    #
+    # max(u, 1): the fitted exponent is NEGATIVE, u = 0 is legal (hold a card,
+    # know where all six are), and 0 ** -3.96 is unbounded. The fit clamps at
+    # 1e-12, which is harmless in a log-likelihood and would hand one half-suit
+    # a weight near 1e47 here. Fixed in the pre-registration, not after.
+    #
+    # At the default this loop does not run and `weight[i]` keeps its exact
+    # incumbent value -- bit-identical, like w_contest=0.0 and endgame_m=0,
+    # and tests4/test_unlocated_inert.py asserts it rather than trusting it.
+    unloc_factor: dict[int, float] = {}
+    if w_unlocated:
+        for _key in slots:
+            hs_ = _key[1]
+            if hs_ not in unloc_factor:
+                lo_ = hs_ * 6
+                u = sum(1 for c_ in range(lo_, lo_ + 6)
+                        if bel.public_loc[c_] is None)
+                unloc_factor[hs_] = float(max(u, 1)) ** w_unlocated
     for key, i in slots.items():
         n = counts[key]
         # The schedule enters as the MEAN factor over that slot's asks, so it
@@ -438,7 +468,10 @@ def build(bel, obs, gamma: float, include_self: bool = False,
         g = gamma
         if gamma_team is not None and (key[0] % 2) == (me % 2):
             g = gamma_team
-        weight[i] = g * n * mean_f
+        w = g * n * mean_f
+        if w_unlocated:
+            w *= unloc_factor[key[1]]
+        weight[i] = w
     # base[i] = cards of that half-suit already pinned to that player by the
     # propagator, i.e. depth contributed by cards the sampler will not re-draw
     if depth_mode == "attime":

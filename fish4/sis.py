@@ -62,7 +62,7 @@ class SISFailure(Exception):
 class OpponentModel:
     """Likelihood of the observed asks under a depth-proportional choice model.
 
-    ``pair_index`` maps ``(player, half_suit)`` to a slot; ``weight[slot]`` is
+    ``weight[slot]`` is
     ``gamma`` times the number of times that player asked in that half-suit, and
     ``base[slot]`` is the number of cards of the half-suit already pinned to that
     player (so only the free cards need counting per draw).
