@@ -3058,3 +3058,70 @@ last measured before `claim_forced_exhaustive`, its interval covered zero at
 the four arms (0.09 a game against A's 0.1375) while spending **zero**
 signalling turns where `B_signal` spends 7.76. If the postponement can be had
 for nothing, that is the arm that has it.
+
+
+---
+
+## UPDATE 2026-08-31 — the deferred gate is REAL, free, and it breaks the story
+
+`prereg/defer_gate_at_power.md` ran at seed base 10,900,000.
+
+    C_defer - A_shipped   +0.0455 [+0.0134, +0.0776]   2,000 deal clusters
+    REAL: clear of zero and positive
+
+A powered replication of `prereg/stuck_claim_gate.md`'s +0.0580 [-0.0177,
++0.1337]: the point estimates agree and the original was simply underpowered
+for its own number. Half-width 0.0321 against the 0.038 projected. **The
+effect exists on the current engine and costs zero signalling turns.**
+
+The registered secondary confirms the mechanism — gated declarations 0.296 ->
+0.095, their error rate 27.1% -> 9.2%, and wrong declarations a game 0.1585 ->
+0.1005, down 37%.
+
+### It contradicts what the signalling line concluded
+
+| | gate drained | wrong declarations cut | margin gained |
+|---|---|---|---|
+| signalling | 0.224 | 0.0252 | **+0.1435** [+0.0971, +0.1899] |
+| deferral | 0.201 | **0.0580** | +0.0455 [+0.0134, +0.0776] |
+
+Deferral drains nearly the same gated volume, cuts **more than twice** as many
+wrong declarations, and gains **less than a third** of the margin. The
+intervals do not overlap.
+
+**The error ledger does not explain the margin.** "The value is the
+postponement", written up from the no-repeat refutation, is at best a third of
+the story: postponement is what `C_defer` does and it is worth +0.0455.
+Whatever the other +0.098 of signalling is, it is not fewer wrong
+declarations. `C_norepeat` sharpens it — the LOWEST error rate of any arm
+measured, 0.1333 a game, for +0.0360.
+
+I do not know what the remainder is. It is recorded as open rather than
+resolved by a story that fits.
+
+### The caveat is my own doing
+
+The signalling and deferral arms were never played on the same deals.
+`prereg/signal_vs_defer_additivity.md` would have paired them and I dropped
+`B_signal` from this run on the grounds that it would re-measure what was
+already on disk. That was right about the number and wrong about the
+comparison. The intervals do not overlap so the difference stands unpaired,
+but it would be tighter and free of any cross-run baseline question had I kept
+the arm.
+
+### Where this line ends, for now
+
+| claim | status |
+|---|---|
+| signalling is real | +0.1435 [+0.0971, +0.1899], replicating the published +0.1220 |
+| the deferred gate is real | +0.0455 [+0.0134, +0.0776], replicating +0.0580 at power, and free |
+| they do not stack | signalling pre-empts deferral; 0 of 400 games changed |
+| removing signalling's repeats costs | -0.1075 [-0.1429, -0.0721], twice replicated |
+| neither ships | +0.1435 and +0.0455 against a bar of +0.15 set before either was seen |
+| **what the extra +0.098 of signalling buys** | **open. it is not fewer wrong declarations** |
+
+The next thing worth doing is the paired A/B/C run that would have settled the
+comparison, and an instrument that can see what signalling changes BESIDES the
+declaration ledger — turns conceded, who receives them, and what the opponents
+learn from a doomed ask. The declaration ledger has been the lens for this
+whole line and it has now been shown not to contain the answer.

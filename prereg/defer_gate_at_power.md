@@ -72,3 +72,73 @@ is reported and not filed.
 the interval does. What is at stake is whether the effect exists on the current
 engine, not whether it is worth the champion's complexity — a question already
 answered no, twice, at a bar written down before either number was seen.
+
+
+---
+
+# OUTCOME, 2026-08-31: REAL
+
+Seed base 10,900,000, 4,000 games x 2 arms, 68 minutes.
+`results/signal_vs_defer.json`.
+
+    PRIMARY  D = margin(C_defer) - margin(A_shipped)
+             +0.0455 [+0.0134, +0.0776]   2,000 deal clusters
+
+Clear of zero and positive: **REAL**. The half-width came in at 0.0321 against
+the 0.038 projected, so the run delivered its registered precision.
+
+It is a textbook powered replication of `prereg/stuck_claim_gate.md`: +0.0580
+[-0.0177, +0.1337] on 500 deals there, +0.0455 [+0.0134, +0.0776] on 2,000
+here. The point estimates agree and the original was simply underpowered for
+its own number. **The effect exists on the current engine and it costs nothing
+— zero signalling turns a game.**
+
+## The registered secondary confirms the mechanism
+
+| arm | gate decls | wrong | forced decls | wrong | wrong/game |
+|---|---|---|---|---|---|
+| A_shipped | 0.296 | 27.1% | 0.183 | 42.3% | 0.1585 |
+| C_defer | **0.095** | **9.2%** | 0.259 | 34.9% | **0.1005** |
+
+The knob does exactly what it is named for: declarations move out of the gated
+path, and wrong declarations fall by 37%.
+
+## And it contradicts the conclusion the signalling line reached
+
+Set beside `results/signal_no_repeat.json` (seed 10,100,000):
+
+| | gate drained | wrong declarations cut | margin gained |
+|---|---|---|---|
+| signalling | 0.224 | 0.0252 | **+0.1435** [+0.0971, +0.1899] |
+| deferral | 0.201 | **0.0580** | +0.0455 [+0.0134, +0.0776] |
+
+Deferral drains nearly the same gated volume and cuts **more than twice** as
+many wrong declarations, and gains **less than a third** of the margin. The
+intervals do not overlap.
+
+**So the error ledger does not explain the margin**, and "the value is the
+postponement" — written up from the no-repeat refutation — is at best a third
+of the story. Postponement is what `C_defer` does, and it is worth +0.0455.
+Whatever the other +0.098 of signalling is, it is not fewer wrong
+declarations. `C_norepeat` sharpens the point: it posts the LOWEST error rate
+of every arm measured, 0.1333 a game, and gains +0.0360.
+
+I do not know what the remainder is, and this registration does not license a
+guess. It is recorded as an open question rather than resolved by a story that
+happens to fit.
+
+## One caveat that is my own doing
+
+The signalling and deferral arms were never played on the same deals.
+`prereg/signal_vs_defer_additivity.md` would have paired them, and I dropped
+`B_signal` from this run on the grounds that it would "re-measure what is
+already on disk". That was right about the number and wrong about the
+comparison: B against C paired is exactly the contrast that now matters. The
+two intervals do not overlap, so the difference stands unpaired — but it would
+be tighter, and free of any cross-run baseline question, had I kept the arm.
+
+## It does not ship
+
++0.0455 against a bar of +0.15, set before +0.0580 and before +0.1220 and not
+amended for any of them. `V06_DEPLOYED` is unchanged and
+`claim_stuck_threshold` stays at its inert default.
