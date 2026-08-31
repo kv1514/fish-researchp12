@@ -93,12 +93,27 @@ Two routes.
 **In-process.** Add an entry to `ROSTER` in `arena/roster.py` mapping a name to
 any spec `fish4.registry4.make_agent` understands.
 
-**Out-of-process, any language.** `kraken/decide.py` is a JSON-lines decision
-service: one request object per line on stdin, one action per line on stdout,
-holding no state between calls because every request carries the whole public
-record. Point it the other way and the arena can duel anything that speaks the
-same protocol — which is how KRAKEN was matched against an independently
-developed C++ engine over 10,000 duplicate deals.
+**Out-of-process, any language.** There is no generic loader for this, and the
+distinction is worth being exact about because the two directions are easy to
+confuse.
+
+`kraken/decide.py` points *outward*: it serves KRAKEN to somebody else's
+harness, one request object per line on stdin and one action per line on
+stdout, stateless because every request carries the whole public record. That
+is how another project runs KRAKEN. It is not what the arena consumes, and
+pointing it "the other way" is not a thing you can switch on.
+
+What the arena consumes is an agent, and the worked example of a foreign one is
+`fish4/dylan_v07.py`. It spawns a compiled C++ binary, replays the entire
+public history into it and reads back a single decision, every `act`, holding
+no state of its own. That adapter — not `decide.py` — is what produced the
+10,000 duplicate deals against an independently developed engine. It is
+specific to that binary's protocol and card ordering, so bringing a different
+engine means writing a sibling of it: the card bijection is the part to get
+right, and that file builds one keyed by name and asserts it really is a
+bijection, for the reason the FishLab package documents at length.
+
+Its binary is gitignored; `external_v07/build.sh` compiles it from the shim.
 
 ## Sample sizes, and what a small run can and cannot say
 

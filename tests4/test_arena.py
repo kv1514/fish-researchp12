@@ -112,3 +112,33 @@ def test_tournament_declares_its_two_design_choices():
     src = Path(T.__file__).read_text()
     assert "independent_seeds=True" in src
     assert "base_seed + 1000 * i" in src, "cells must not share deals"
+
+
+def test_a_small_run_does_not_take_the_canonical_result_name(tmp_path):
+    """A four-deal smoke run overwrote the committed 40-deal matrix.
+
+    It kept the same name, shape and field -- only n_deals_per_cell changed --
+    so nothing looked wrong. scripts4.journal.result_for ended this class of
+    defect for journal-driven runners after it happened three times in one day;
+    the arena reads no journal, so it needs the same rule keyed on run size.
+    """
+    import json as _json
+
+    from arena.__main__ import canonical_dest
+
+    canon = tmp_path / "arena.json"
+
+    # No prior result: the name is free.
+    assert canonical_dest(canon, 4) == canon
+
+    canon.write_text(_json.dumps({"n_deals_per_cell": 40}))
+    # Smaller must stand aside, and say what it is.
+    assert canonical_dest(canon, 4) == tmp_path / "arena_4deal.json"
+    # Equal or larger has earned it: same size is the same population, and
+    # more deals is strictly better evidence than what it replaces.
+    assert canonical_dest(canon, 40) == canon
+    assert canonical_dest(canon, 200) == canon
+
+    # A prior file that is unreadable or malformed must not block a real run.
+    canon.write_text("{not json")
+    assert canonical_dest(canon, 4) == canon
