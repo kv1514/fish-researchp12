@@ -4905,14 +4905,74 @@ $92.7\%$ of all fires --- $33{,}248$ fires over $2{,}473$ distinct cards in
 the largest --- so the asks that carry no new information are almost all of
 them, and they are what buys the delay.
 
-What that does \emph{not} establish is where the value goes. The two arms are
-level on our own declaration errors, so the cost is not paid in our mistakes,
-and this instrument cannot see the rest of the board: it counts what our three
-seats declare and discards what the opposing three do. An earlier draft closed
-here by calling the mechanism ``a stall that happens to communicate''. That
-reads a ledger of one team's declarations as though it were the whole
-scoreboard, and it is withdrawn pending the measurement that counts both
-sides.
+What that does \emph{not} establish is where the value goes, and an earlier
+draft closed here by calling the mechanism ``a stall that happens to
+communicate''. That reads a ledger of one team's declarations as though it were
+the whole scoreboard. This instrument counts what our three seats declare and
+discards what the opposing three do, and the answer was in the half it
+discarded.
+
+\paragraph{The margin is an identity, and this line was reading a third of
+it.} Under the award rule the \texttt{NULL\_TEAM} branch of the engine's claim
+resolution is unreachable, so each of the nine half-suits is awarded to exactly
+one team by exactly one declaration and by nothing else. Writing $D$ for
+declarations a side makes and $W$ for the ones it loses,
+\[
+  \text{margin} \;=\; 2\,(D_{\text{us}} - W_{\text{us}} + W_{\text{them}}) - 9 .
+\]
+Three channels, each worth two sets a declaration: how many of the nine we get
+to declare at all, how many of ours we get wrong, and how many of theirs
+\emph{they} get wrong. Every instrument in this section reported the middle one
+and neither of the others. \path{scripts4/margin_identity.py} computes all
+three; the residual is zero to fifteen places on every run this project has
+stored, which it must be, because the relation is arithmetic and not a model.
+
+Re-reading the arms through it, on a run that counted both sides over $2{,}000$
+paired deals (\path{results/where_the_margin_lives.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+arm & effect & race & ours & theirs \\
+\midrule
+signalling & $+0.1190$ & $-0.1655$ & $+0.0445$ & $\mathbf{+0.2400}$ \\
+deferred gate & $+0.0540$ & $-0.0645$ & $\mathbf{+0.1040}$ & $+0.0145$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Signalling's own-error saving is a fifth of its effect. It buys a
+quarter of a set a game of the \emph{opponents'} mistakes and hands two thirds
+of that back in half-suits it never gets to declare, because each signal is a
+deliberately doomed ask and a doomed ask loses the turn. The deferred gate is
+the opposite: its whole margin is our own errors, and it moves the opponents'
+by $+0.0145$. They are two mechanisms, not two doses of one, which is why they
+do not stack.
+
+Some of that opponent gain is arithmetic --- signalling hands them $0.083$
+declarations a game and they are wrong on about a fifth of anything they
+declare. Splitting $w_{\text{them}} = d_{\text{them}} \, e_{\text{them}}$ at
+the mean assigns $+0.0362$ to that handover and $\mathbf{+0.1997}$ to a change
+in the rate itself, which rises from $21.87\%$ to $24.37\%$. Deferral moves the
+same rate by $+0.0001$. So $83\%$ of what signalling buys is that the opponents
+declare \emph{worse}, not merely more often.
+
+The repeats are the mechanism rather than its waste: suppressing them keeps the
+own-error saving and returns the opponents' rate to baseline. Read that way the
+$92.7\%$ of asks carrying no new information are not a cost the protocol pays,
+they are what it is for.
+
+\paragraph{Two limits, stated with it.} The three channels are an
+\emph{accounting} and they co-move --- a half-suit we stop declaring leaves
+\textsc{race} and arrives in \textsc{theirs} carrying their error rate with it
+--- so no channel is what the arm would gain if only that counter moved. And
+the rate this rests on is one opponent's: a screen over every honest policy in
+the registry (\path{results/opponent_error_screen.json}) puts \texttt{dylan\_v07}
+at $21.8\%$, the next at $10.8\%$, and the rest between $3\%$ and $7\%$. The
+effect is real and replicates across five arms and two engine revisions. Whether
+it is a property of the convention or an exploit of one policy is not something
+this opponent pool can currently answer.
 
 One methodological note, recorded rather than buried. The regression form of
 the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
