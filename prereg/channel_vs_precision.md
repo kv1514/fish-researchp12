@@ -8,6 +8,14 @@ the two-point engine-drift comparison recorded the same day in
 
 ## Why this exists: I asserted a mechanism from two confounded points
 
+> **NOTE added 2026-08-31, after this run closed.** The gap described below
+> was later bisected to a single commit that **re-priced the sender's gate**,
+> so the two figures were never measurements of one configuration --- see
+> `results/convention_drift_bisect.json` and the amendment in
+> `prereg/convention_aimed.md`. That removes the motivation for this
+> registration but not its result: everything below runs on **one** set of
+> transcripts at one gate, and what it measures about the instrument stands.
+
 Re-running the aimed code book today produced a smaller effect than the one
 recorded two days earlier on identical seeds --- paired NLL at `beta = 0.8`
 went from -0.0712 to -0.0403 --- while the *baseline* teammate NLL improved

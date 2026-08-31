@@ -268,14 +268,21 @@ def aimed_position_table():
 # argmax instead of paying in it. prereg/convention_aimed.md fixed the
 # magnitude conditions before the replication ran, and it clears all three.
 #
-# AND THE EFFECT MOVES UNDER THE ENGINE, which is the part worth carrying
-# forward. Re-run on the same seeds two days later, the paired NLL gain at
-# beta = 0.8 is about 40% smaller than when it was first measured, and the
-# baseline belief it is scored against is roughly 0.043 nats better. Arms that
-# were merely weak then are harmful now: flat 2.0 has crossed from -0.0342 to
-# +0.0252. So every number in this direction is measured against a moving
-# target and dates quickly. results/convention_replication.json is the current
-# run; the reproduction that established the drift is beside it.
+# AND THE 0.05 GATE MEANS TWO DIFFERENT THINGS, which is the part worth
+# carrying forward and is not what it looked like. Re-run on the same seeds
+# two days later the paired gain at beta = 0.8 was about 40% smaller, and it
+# was tempting to call that drift. It is not drift. Bisected commit by commit
+# (results/convention_drift_bisect.json), the whole change is 6d75ec4, which
+# re-priced this gate: `convention_max_cost = 0.05` meant 0.05 of SUCCESS
+# PROBABILITY before it and 0.05 in the ASK OBJECTIVE'S OWN UNITS after.
+#
+#     1a96689   V1 carry 72.0%   1074 decisions   base 1.3995   -0.0712
+#     6d75ec4   V1 carry 57.8%   1023 decisions   base 1.3567   -0.0403
+#     ...and ten further engine commits move it by nothing at all.
+#
+# So the two numbers were never measurements of one configuration. Fewer asks
+# carry the message, the sender picks different cards, the transcripts differ,
+# and the baseline is not "better" -- it is a different set of positions.
 #
 # WHY THE OBVIOUS EXPLANATION IS NOT GIVEN HERE. An earlier version of this
 # block said the gain shrank *because* the belief improved -- "a channel is
@@ -301,11 +308,18 @@ def aimed_position_table():
 # effect against 20%. That is a lead and is deliberately not written up as a
 # third mechanism.
 #
-# That is a different axis from the engine drift, which was a model change, so
-# it does not explain the drift either. What it leaves is: the drift is
-# measured and unexplained, two tidy explanations for it have now been
-# registered and refuted on the same day, and the useful part of this block is
-# the numbers rather than any story about them.
+# Both of those were attempts to explain a change in the WORLD when the change
+# was in the LABEL, which the bisect above settles. They are still worth
+# keeping: each is a real measurement about the instrument, and the second one
+# is why the numbers here carry their draw budget. But neither was ever needed
+# to explain what prompted them.
+#
+# THE CHECK THAT COULD NOT CATCH IT is worth naming. Before running either, the
+# two runs' stored `spec` was compared and is byte-identical on all seven keys.
+# It would be: `convention_max_cost` is not in that spec -- the instrument sets
+# it -- and what changed was not its value but its UNITS. A configuration
+# fingerprint compares values. It cannot see a field's meaning move underneath
+# it.
 #
 # It also prices every belief number in this direction. The engine ships at
 # n_draws = 480 and all of them were scored at 720. Measured rather than

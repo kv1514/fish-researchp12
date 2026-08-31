@@ -2263,3 +2263,90 @@ range anyone would run. A null on such an instrument is therefore a statement
 about a budget as much as about a hypothesis --- and the only reason that is not
 a problem for anything recorded here is that the budget happened to sit above
 the steep part of the curve.
+
+---
+
+# UPDATE, 2026-08-31: the drift was never drift. The gate was re-priced.
+
+Three explanations were offered today for why the aimed code book measured
+-0.0712 two days ago and -0.0403 on a re-run at identical seeds. Two were
+registered and refuted. The third was written down as untested.
+
+All three were wrong in the same way: **they explained a change in the world
+when the change was in the label.**
+
+## Bisected, because "unexplained" is a fact you can go and get
+
+A git worktree per candidate commit, with **today's** instrument copied in so
+the engine is the only variable, running the configuration that produced the
+original file: 40 games, stride 4, sender `0.05 aimed`, seed base 560,000.
+`results/convention_drift_bisect.json`.
+
+The gate that makes it worth reading: **the probe at `1a96689` reproduces
+`results/convention_posterior.json` exactly** --- 1,074 decisions, base 1.3995,
+flat 0.8 **-0.0712**. Without that the bisect would be measuring something else.
+
+| commit | | V1 carry | decisions | baseline | flat 0.8 |
+|---|---|---|---|---|---|
+| `1a96689` | origin | **72.0%** | 1,074 | 1.3995 | **-0.0712** |
+| `6d75ec4` | **sender gate re-priced** | **57.8%** | 1,023 | 1.3567 | **-0.0403** |
+| `5c0b4c1` | teammate ceiling | 57.8% | 1,023 | 1.3567 | -0.0403 |
+| `5936bf6` | the `locate` term | 57.8% | 1,023 | 1.3567 | -0.0403 |
+| `f383516` | the calibration gap | 57.8% | 1,023 | 1.3567 | -0.0403 |
+| `9cf986d` | one version | 57.8% | 1,023 | 1.3567 | -0.0403 |
+
+**One commit. Ten others move it by nothing at all.**
+
+## What that commit did
+
+`6d75ec4` replaced
+
+    cost = encode_cost(marg, hand, hs, opps)      # a drop in P(success)
+
+with
+
+    cost = scores[pick] - scores[best_enc]        # the ask objective's units
+
+against the same threshold, `convention_max_cost`. It was the right fix --- the
+old gate was paying a third of the objective for a message it believed cost
+0.009, and the duel found it. But it means **`gate 0.05` denotes two different
+senders**, and -0.0712 and -0.0403 were never two measurements of one thing.
+The carry rate is the signature: 72.0% of our asks carried the message before,
+57.8% after. Fewer messages on the wire, different cards named, different
+transcripts, and a baseline that is not *better* --- it is a **different set of
+positions**.
+
+## The check that could not catch it, which is the part to remember
+
+Before running either sweep I compared the two runs' stored `spec` and found it
+**byte-identical on all seven keys**, and said so in three places as evidence
+that nothing about the configuration had changed.
+
+It was true and it was useless. `convention_max_cost` is not in that spec ---
+the instrument sets it --- and what moved was not its **value** but its
+**units**. A configuration fingerprint compares values. It cannot see a field's
+meaning move underneath it, and a byte-identical spec is exactly what a
+redefinition looks like from the outside.
+
+That is the same shape as everything else this branch has found: a check whose
+form does not match the claim it is being used to support.
+
+## What survives
+
+Both registered sweeps stand entirely, on their own terms and their own
+transcripts:
+
+* **`prereg/channel_vs_precision.md`** --- a paired belief effect grows with the
+  draw budget and does not converge by 2,880 draws. REFUTED as registered.
+* **`prereg/precision_generality.md`** --- an unrelated, opposite-signed arm
+  grows too, so that is a property of the instrument. INSTRUMENT PROPERTY as
+  registered.
+
+Neither was ever a test *of* the gap; each was a test of a story told *about*
+it. The stories are gone and the measurements remain, which is the right way
+round.
+
+What is withdrawn is the premise underneath them: that something had changed
+about the world between the two runs. Nothing had. Four explanations were
+offered for a phenomenon that did not exist, and the one action that settled it
+in twenty minutes was to stop explaining and bisect.

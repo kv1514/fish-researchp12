@@ -204,8 +204,34 @@ re-run as a control, so the drift could be attributed rather than guessed at.
 | paired top-1 at `beta = 0.8` | +0.0351 | **+0.0226** |
 
 Identical seeds, identical `n_games`, identical stride, and the stored spec is
-byte-for-byte the same seven keys. What changed is the eleven engine commits in
-between: the baseline belief is **0.043 nats better** than it was.
+byte-for-byte the same seven keys.
+
+> **RESOLVED 2026-08-31, and it is not what this section assumed.** Bisected
+> commit by commit --- `results/convention_drift_bisect.json`, a worktree per
+> candidate with today's instrument copied in so the engine is the only
+> variable --- the entire change is **one commit, `6d75ec4`**, and it is a
+> **redefinition, not a drift**:
+>
+> | | V1 carry | decisions | baseline | flat 0.8 |
+> |---|---|---|---|---|
+> | `1a96689` | 72.0% | 1,074 | 1.3995 | **-0.0712** |
+> | `6d75ec4` | 57.8% | 1,023 | 1.3567 | **-0.0403** |
+> | ten further engine commits | 57.8% | 1,023 | 1.3567 | -0.0403 |
+>
+> `6d75ec4` re-priced the sender's gate. `convention_max_cost = 0.05` meant
+> *0.05 of success probability* before it and *0.05 in the ask objective's own
+> units* after. **The same label denotes two different senders**, so -0.0712
+> and -0.0403 were never two measurements of one configuration. Fewer asks
+> carry the message, the sender picks different cards, and the baseline is not
+> "better" --- it is a different set of positions.
+>
+> The validation that makes this trustworthy: the probe at `1a96689`
+> reproduces `results/convention_posterior.json` exactly --- 1,074 decisions,
+> base 1.3995, flat 0.8 -0.0712.
+>
+> **The spec check could not have caught it.** `convention_max_cost` is not in
+> the stored spec; the instrument sets it. And what moved was not its value but
+> its units. A configuration fingerprint compares values, not meanings.
 
 The consequence is not in doubt: **the marginal arms have crossed over.**
 `flat 2.0` has gone from -0.0342 to **+0.0252** --- significantly harmful now,
@@ -226,9 +252,11 @@ where it was significantly helpful then --- and `mix 0.6` and above with it.
 > baseline stops improving after 720 draws while the gain keeps growing, so the
 > gain is not tracking what the receiver already knows at all.
 >
-> That sweep is a different axis --- sampler precision, not a model change ---
-> so it does not explain the drift either. The honest position is that the
-> drift is measured, real, and **unexplained**.
+> That sweep is a different axis --- sampler precision --- so it did not
+> explain the gap either. It did not need to: the bisect above shows there was
+> no gap to explain, only a gate that had been re-priced. Both registered
+> sweeps stand on their own terms; what is withdrawn is the premise that
+> something had changed about the world between the two runs.
 
 There is a second thing that run prices, and it applies to every figure in this
 document. The engine ships at `n_draws = 480`; every number here was scored at

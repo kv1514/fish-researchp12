@@ -8,6 +8,13 @@ at `n_draws = 480`, clustered by game).
 
 ## The claim this is checking is my own, and it is an hour old
 
+> **NOTE added 2026-08-31.** The gap that started this whole sequence was
+> later bisected to a gate re-pricing, not a change in the engine's belief
+> (`results/convention_drift_bisect.json`). This registration's own result is
+> unaffected --- it compares two arms on one set of transcripts --- and it is
+> the one that establishes the scaling is an instrument property rather than
+> a fact about code books.
+
 The channel-precision sweep found the aimed book's paired NLL gain growing with
 sampler draws --- a null at 180, -0.0436 at 1440 --- while the baseline belief
 stopped improving after 720. I wrote, in three files, that this means the gain
