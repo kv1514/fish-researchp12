@@ -359,10 +359,52 @@ def test_the_identity_check_only_runs_where_a_registration_asks_for_it():
     """The registrations that predate the identity cannot be held to a gate
     they never agreed to, and a gate nobody chose is a gate nobody owns."""
     declared = {k for k, r in run.REGISTRATIONS.items() if r.get("identity")}
-    assert declared == {"signal_budget"}
+    assert declared == {"signal_budget", "signal_generality"}
+    predates = {"signal_vs_defer_additivity", "defer_gate_at_power",
+                "where_the_margin_lives"}
+    assert not declared & predates
 
 
 def test_the_primary_line_says_it_is_provisional_where_gates_follow(budget,
                                                                     capsys):
     _payload(_budget_rows())
     assert "PROVISIONAL" in capsys.readouterr().out
+
+
+# --- the opponent axis ----------------------------------------------------
+
+@pytest.fixture()
+def generality():
+    run.select("signal_generality")
+    yield
+    run.select("defer_gate_at_power")
+
+
+def test_the_generality_registration_names_a_grid_and_its_own_size(generality):
+    assert run.VS_GRID == ("probabilistic", "memory", "self")
+    assert run.REGISTERED_N == 800
+    assert run.SEED0 == 12_100_000
+    assert set(run.ARMS) == {"A_shipped", "B_signal"}
+
+
+def test_a_registration_without_a_grid_has_no_opponent_to_choose():
+    """`--vs=` on a fixed-opponent registration would be picking the opponent
+    after the registration, which is the same defect as picking the arm."""
+    for name, r in run.REGISTRATIONS.items():
+        if name == "signal_generality":
+            continue
+        assert "vs_grid" not in r and "vs" not in r
+
+
+def test_the_sample_size_is_the_registrations_and_not_the_files(generality):
+    """Self-play and the weaker policies cost a different amount a game, so
+    N_DEALS is a default and not a constant every registration inherits."""
+    assert run.REGISTERED_N != run.N_DEALS
+    run.select("defer_gate_at_power")
+    assert run.REGISTERED_N == run.N_DEALS
+
+
+def test_every_registration_declares_a_size_that_is_used(generality):
+    for name in run.REGISTRATIONS:
+        run.select(name)
+        assert run.REGISTERED_N >= 400, name
