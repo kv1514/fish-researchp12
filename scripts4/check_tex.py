@@ -40,9 +40,33 @@ def strip_comments(text: str) -> str:
     return "\n".join(out)
 
 
+def _inline_inputs(raw: str, base: Path, depth: int = 0) -> str:
+    """Splice in \\input{...} files so the checks see the whole document.
+
+    Without this the guard reports "reference to a missing label" for every
+    label that lives in an included file -- which pdflatex resolves happily,
+    so the guard would be the only thing complaining and it would be wrong.
+    Found when the pre-registered-thresholds appendix moved into its own file.
+    """
+    if depth > 4:
+        return raw
+
+    def one(m):
+        name = m.group(1).strip()
+        f = base / (name if name.endswith(".tex") else name + ".tex")
+        if not f.exists():
+            return m.group(0)
+        return _inline_inputs(f.read_text(encoding="utf-8"), base, depth + 1)
+
+    #: Comments FIRST. An included file's own header comment names the
+    #: \input line a reader should add, and inlining before stripping expanded
+    #: that comment once per recursion level -- five copies of the appendix and
+    #: five "duplicate label" reports, from a document that has one.
+    return re.sub(r"\\input\{([^}]+)\}", one, strip_comments(raw))
+
+
 def check(path: Path) -> int:
-    raw = path.read_text(encoding="utf-8")
-    text = strip_comments(raw)
+    text = _inline_inputs(path.read_text(encoding="utf-8"), path.parent)
     problems = []
 
     # -- environments
