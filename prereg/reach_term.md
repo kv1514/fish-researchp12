@@ -166,7 +166,9 @@ and it would close the last direction the error ledger points at.
 
 ## The registered screen
 
-`scripts4/path_ledger.py --vs=self`, 480 games, identical deals, our seats only:
+`scripts4/path_ledger.py --vs=self`, 480 games, identical deals, our seats only.
+Baseline `results/path_ledger_self.json`, arm
+`results/path_ledger_self_w_reach0.8.json`:
 
 | path | baseline | /game | wrong | `w_reach = 0.8` | /game | wrong |
 |---|---|---|---|---|---|---|

@@ -119,6 +119,10 @@ go looking for it rather than celebrate.
 
 ## OUTCOME, part 1: the primary passes, and the secondary was not run
 
+`results/forced_exhaustive_self.json`, written by
+`scripts4/forced_exhaustive_confirm.py`; the ceiling arm is in
+`results/forced_ceiling_self.json`.
+
 ### The primary, which is the ship criterion
 
 2,400 games, self-play, our seats' forced declarations at one live half-suit:

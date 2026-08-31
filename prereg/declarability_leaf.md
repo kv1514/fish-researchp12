@@ -248,6 +248,8 @@ clearing weight exactly as originally registered.
 
 # OUTCOME, recorded 2026-08-30: closed structurally, and no duel was run
 
+`results/declare_bite.json`, written by `scripts4/declare_bite.py`.
+
 ## The extended grid confirms the prediction
 
 Same 3,786 champion decisions, `w = 2.0` replicated exactly on the earlier

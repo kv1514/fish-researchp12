@@ -143,6 +143,14 @@ jobs:
       # check in the repository passed.
       - name: every watched number in the paper matches its result file
         run: python scripts4/check_paper_numbers.py
+      # One layer below the paper. unwatched_claims asks whether a figure the
+      # paper asserts is watched; this asks whether the pre-registration that
+      # SETTLED it left a file to watch at all. f8abe6d recorded two outcomes
+      # and committed the direction's DUEL records but not its belief results,
+      # so four figures gating the convention direction existed only as prose
+      # for two days -- in a commit that touched results/ and looked recorded.
+      - name: every prereg outcome names a results file that exists
+        run: python scripts4/check_prereg_backing.py --strict
       - name: no fragile command inside a LaTeX caption
         run: python scripts4/check_tex.py
       - name: every job file is waited on or excluded with a reason
