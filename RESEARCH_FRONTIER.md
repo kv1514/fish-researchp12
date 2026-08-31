@@ -3125,3 +3125,108 @@ comparison, and an instrument that can see what signalling changes BESIDES the
 declaration ledger — turns conceded, who receives them, and what the opponents
 learn from a doomed ask. The declaration ledger has been the lens for this
 whole line and it has now been shown not to contain the answer.
+
+---
+
+## UPDATE 2026-08-31 — the margin is an identity. The line was reading a third of it.
+
+The section above ends by saying the declaration ledger "has now been shown not
+to contain the answer," and recommends building an instrument that can see what
+signalling changes *besides* declarations. That was pointing away from the
+answer. The answer is in the declaration ledger. It is in the half of it that
+no instrument in this line ever recorded: **the opponent's declarations.**
+
+### The identity
+
+Under `wrong_distribution_outcome="opponent"` — the award rule on every figure
+in this line — the `NULL_TEAM` branch of `engine._apply_claim` is unreachable.
+Each of the nine half-suits is awarded to exactly one team, by exactly one
+`ClaimEvent`, and by nothing else. So, with `D` for declarations a side makes
+and `W` for the ones it loses:
+
+    ours   = (D_us - W_us) + W_them        theirs = (D_them - W_them) + W_us
+    D_us + D_them = 9
+
+    margin = 2 * (D_us - W_us + W_them) - 9
+
+Three channels, each worth two sets a declaration:
+
+| channel | what it counts |
+|---|---|
+| **RACE** | how many of the nine we get to declare at all |
+| **OURS** | how many of the ones we declare we get wrong |
+| **THEIRS** | how many of the ones they declare they get wrong |
+
+This is arithmetic, not a model. It has been true of every game this project
+has ever played. `scripts4/margin_identity.py` computes it; the residual is
+zero to fifteen places on all five runs on disk, including a 200-deal probe
+and the withdrawn one.
+
+### What it says about runs already collected
+
+| run | arm | effect | race | ours | theirs |
+|---|---|---|---|---|---|
+| `signal_no_repeat.json` | `B_incumbent` — signalling | +0.1435 | −0.1695 | +0.0505 | **+0.2625** |
+| `signal_no_repeat.json` | `C_norepeat` | +0.0360 | −0.0220 | +0.0550 | +0.0030 |
+| `signal_vs_defer.json` | `C_defer` — deferral | +0.0455 | −0.0700 | **+0.1160** | −0.0005 |
+
+**Signalling is an opponent-error intervention.** Its own-error saving is
++0.0505 — a fifth of its effect. It buys **+0.2625 of the opponent's
+mistakes** and pays −0.1695 of that back in half-suits it never gets to
+declare, because eight turns a game of deliberately doomed asks are eight
+turns not spent racing.
+
+**Deferral is an own-error intervention.** +0.1160 of our own mistakes, nothing
+at all from theirs, and the race eats sixty per cent of it before it reaches
+the margin.
+
+They were never the same effect. The previous section's table — deferral
+drains the same gate volume, cuts twice the errors, gains a third of the
+margin — is not a paradox once the other two channels are visible. It is two
+different mechanisms that happen to touch the same counter.
+
+**And the repeats are the mechanism, exactly.** `C_norepeat` keeps the
+own-error saving (+0.0550, the largest of any arm) and loses the opponent
+channel outright: +0.0030 against +0.2625. Suppressing the repeated doomed asks
+does not tidy up the convention. It switches it off. The earlier finding that
+"the value is the postponement" priced one channel of three and got the sign of
+the story wrong: postponement is what `C_defer` does, it is worth +0.0455, and
+it is not what signalling is for.
+
+### The open question is answered, and it is the one from task #58
+
+Task #58 asked whether our silence causes the opponents' misdeclarations. The
+answer is that it is not silence — it is noise. Forty-two doomed asks an
+episode over 1.74 distinct cards, which every read of this mechanism has called
+96% waste, are what makes the other side declare wrong nearly 0.98 times a game
+against 0.85 without them.
+
+### This is derived, and the run that measures it directly is still going
+
+Everything above solves `W_them` as a residual from three numbers the runs did
+record. `scripts4/signal_vs_defer.py --prereg=where_the_margin_lives` is
+running at seed 11,300,000, pairs all three arms on the same deals, and is the
+first instrument in this line to **count** the opponent's declarations.
+`prereg/where_the_margin_lives.md` states the prediction and its falsification
+conditions, and was committed while that run had printed nothing.
+
+If the counted opponent errors do not move under signalling, the residual is
+absorbing an error somewhere else — a dropped declaration path would do it —
+and the finding is withdrawn in favour of the defect.
+
+### Where the line stands
+
+| claim | status |
+|---|---|
+| signalling is real | +0.1435 [+0.0971, +0.1899] |
+| the deferred gate is real | +0.0455 [+0.0134, +0.0776], and free |
+| they do not stack | signalling pre-empts deferral; 0 of 400 games changed |
+| removing signalling's repeats costs | −0.1075 [−0.1429, −0.0721], twice replicated |
+| neither ships | against a bar of +0.15 set before either was seen |
+| what signalling buys | **the opponent's mistakes: +0.2625 of +0.1435, net of a −0.1695 race cost. Derived from the identity; the direct count lands tonight.** |
+
+The methodological lesson is the largest one this line has produced, and it is
+not about signalling. **Every ledger this project has built counts what our
+seats do.** Six instruments, four registrations and a fortnight of measurement
+went past a term that was two lines of code away, because the question "where
+did the margin go" was only ever asked of half the board.
