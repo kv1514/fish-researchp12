@@ -342,7 +342,8 @@ making the harness able to observe its own null at all
 \section{Related work}
 \label{sec:related}
 
-\paragraph{Literature itself.} We could find no peer-reviewed AI work on
+\subsection{Fish and Literature}
+ We could find no peer-reviewed AI work on
 Literature, Canadian Fish or Russian Fish. Several open-source implementations
 with bots exist; the best documented uses Q-learning on a four-player variant
 with a first-order knowledge encoding. The game family did recently enter a
@@ -354,7 +355,8 @@ result about exactly the failure mode this paper attacks from the other side ---
 they identify that action history carries information their determinizations
 ignore; we quantify how much, and put it in.
 
-\paragraph{The concurrent engine.} The one serious exception is
+\subsection{The concurrent engine}
+ The one serious exception is
 \citet{dylan2026fishbot}: an independently developed C++ engine for
 six-player, 54-card Literature, with its own seven-version paper series ---
 the engine this paper's exhibition and foreign-opponent checks play against
@@ -382,7 +384,8 @@ state value where ours declare at a fixed certainty bar --- the
 disagreements are now measurable across a real engine boundary, which
 neither project could do alone.
 
-\paragraph{Determinization and its pathologies.} Evaluating an
+\subsection{Determinization, and why double-dummy analysis fails here}
+ Evaluating an
 imperfect-information position by sampling consistent worlds and solving each
 one perfectly is the standard technique, and its two failure modes are named:
 \emph{strategy fusion}, where the searcher implicitly assumes it can act
@@ -400,7 +403,8 @@ plainly that they do not consider belief distributions; v0.3's own experiments
 found ISMCTS losing badly to its own prior, which is consistent with both that
 and with the variance diagnosis it measured.
 
-\paragraph{Inference from what opponents chose.} The closest published line is
+\subsection{Policy-aware inference}
+ The closest published line is
 \citet{solinas2019improving} and \citet{rebstock2019policy}, who infer hidden
 cards in trick-taking games from the actions players took, using a learned
 policy as the likelihood. Their factorised belief does not enforce hand-size
@@ -412,7 +416,8 @@ exhaustive history filtering is polynomial only when the public tree is sparse;
 Literature's is dense, so their route does not port --- but the count abstraction
 makes the constraint side tractable anyway.
 
-\paragraph{Counting and sampling with fixed margins.} The combinatorial problem
+\subsection{Counting and sampling with fixed margins}
+ The combinatorial problem
 underneath is counting bipartite degree-constrained subgraphs, equivalently a
 restricted permanent, $\#P$-complete in general \citep{valiant1979complexity},
 with a celebrated approximation scheme \citep{jerrum2004polynomial} and a
@@ -425,7 +430,8 @@ constraint \citep{regin1996generalized}, which achieves arc consistency by a
 flow argument; our dynamic program is stronger in that it also \emph{counts},
 which is what claim probabilities require.
 
-\paragraph{Team games without communication.} Literature is a two-team zero-sum
+\subsection{Team games and common information}
+ Literature is a two-team zero-sum
 game with pre-play agreement and no in-play communication, which is exactly
 \citeauthor{celli2018computational}'s regime; the solution concept is a team
 maximin equilibrium with correlation, not a Nash equilibrium
@@ -444,6 +450,8 @@ no published treatment of that combination, and it is the motivation for the
 % =====================================================================
 \section{The game}
 \label{sec:game}
+
+\subsection{Rules}
 
 Six players sit in a circle in alternating team order: seats $\{0,2,4\}$
 against $\{1,3,5\}$. The deck is partitioned into \emph{half-suits} of six
@@ -470,6 +478,8 @@ opposing team. The requirement to name the exact distribution, not merely to
 assert possession, is what makes Literature a game about inference rather
 than collection.
 
+\subsection{The rule dialect studied}
+
 \paragraph{The rule this engine got wrong for five versions.} From v0.1
 through the v0.4 measurement campaign, the engine's default scored the
 second kind of miss --- right team, wrong split --- as a \emph{void}: the
@@ -494,6 +504,8 @@ A player with no cards on move passes the turn to a teammate who has cards. If
 an entire team is out of cards, the other team must claim out the remaining
 half-suits without asking.
 
+\subsection{Termination, and the solution concept}
+
 \begin{remark}[Termination is a property of the players, not the rules]
 Nothing in the rules forces progress: two opponents can pass a card back and
 forth and return to an identical position, so the state graph contains cycles.
@@ -515,7 +527,7 @@ exactly solved subgame.
 \end{remark}
 
 % =====================================================================
-\section{Information integrity}
+\subsection{Information integrity}
 \label{sec:integrity}
 
 An imperfect-information study is worthless if the agents can see the hidden
@@ -714,7 +726,7 @@ disjunctive constraints remain outside this guarantee.
 \end{remark}
 
 % =====================================================================
-\section{The disjunctive constraints}
+\subsection{The disjunctive constraints}
 \label{sec:clauses}
 
 The OR-constraints are the part of the system \eqref{eq:world} that the
@@ -741,7 +753,7 @@ exclusion over that player's clauses. The refined state space, however, has a
 bad tail: median $5{,}760$ but p90 $230{,}000$ and p99 $2.7\times10^{7}$. Exact
 in the median case, hopeless in the tail.
 
-\subsection{Sequential importance sampling with closed-form densities}
+\subsubsection{Sequential importance sampling with closed-form densities}
 
 We therefore sample. Cards are assigned in a fixed order, so each world has
 exactly one generating path and its proposal density $q(w)$ is the product of
@@ -787,7 +799,7 @@ $6.8\times$ faster at the median for identical output ($11.5\times$ on
 average, over $60$ positions); before that change the scalar loop
 was 67\% of the policy's total runtime.
 
-\subsection{A correction: option (c) is in fact tractable}
+\subsubsection{A correction: option (c) is in fact tractable}
 \label{sec:clauses-correction}
 
 Our estimate above that folding the clauses into the dynamic program is
@@ -843,7 +855,7 @@ above says it would buy approximately nothing in strength; we state it because
 it is the right thing to build if that evidence ever changes.
 
 % =====================================================================
-\section{Opponent modelling: relaxing the false hypothesis}
+\subsection{Opponent modelling: relaxing the false hypothesis}
 \label{sec:oppmodel}
 
 Proposition~\ref{prop:uniform} rests on a hypothesis that is plainly false:
@@ -908,7 +920,7 @@ not that either measurement looked wrong.
 \end{remark}
 
 % =====================================================================
-\section{Scoring a posterior against the truth}
+\subsection{Scoring a posterior against the truth}
 \label{sec:posterior-quality}
 
 Every belief metric in v0.3 was indirect: sampler cost, agreement with an exact
@@ -1103,10 +1115,12 @@ dictionary ordering were never load-bearing, even though in general they could
 have been.
 
 % =====================================================================
-\section{The ask objective}
+\section{KRAKEN: the decision procedure}
+
+\subsection{The ask objective}
 \label{sec:objective}
 
-\subsection{A wider basis}
+\subsubsection{A wider basis}
 
 v0.3 scored an ask as $\Prob(\text{success}) + 0.06 \cdot \text{depth}$, later
 adding a turn-risk and a scarcity term. Those terms are in incommensurable
@@ -1170,7 +1184,7 @@ enforced by test, for the reason given in Section~\ref{sec:eval}.}
 \label{tab:terms}
 \end{table}
 
-\subsection{An alternative in the units that are actually paid out}
+\subsubsection{An alternative in the units that are actually paid out}
 
 The additive form has a principled competitor. What the game pays is half-suits,
 so define, for each unresolved half-suit,
@@ -1201,7 +1215,7 @@ success pins the asked card to us, a failure removes the target from that card's
 candidate set.
 
 % =====================================================================
-\section{Declaring}
+\subsection{Declaring}
 \label{sec:claiming}
 
 v0.3 swept the claim-confidence threshold directly and found two things. First,
@@ -1327,7 +1341,7 @@ fusion \citep{frank1998search}. Claims in v0.4 are always decided from the
 posterior.
 
 % =====================================================================
-\section{Search over the belief}
+\subsection{Search over the belief}
 \label{sec:lookahead}
 
 Every search this project has tried --- PIMC, Information-Set MCTS, and two
@@ -1348,7 +1362,7 @@ function --- run it twice on one position and it returns the same vector --- so
 the variance that killed the previous attempts is structurally absent rather
 than merely reduced.
 
-\subsection{What it computes}
+\subsubsection{What it computes}
 
 A Literature turn is a run of asks that ends the instant one misses. Greedy
 scoring maximises the immediate success probability; what a possession is
@@ -1381,7 +1395,7 @@ one. At $d \le 1$ the bonus is identically zero, so the policy reproduces the
 incumbent decision for decision; that is enforced by test, for the reason
 Section~\ref{sec:eval} gives.
 
-\subsection{Why the obvious version is provably a no-op}
+\subsubsection{Why the obvious version is provably a no-op}
 
 The natural transition is to collapse the asked card's row to a point mass on
 us. That is exact, and on its own it is \emph{inert}, which is worth stating
@@ -1430,7 +1444,7 @@ normalisation per node, and it is separately ablatable, so
 Proposition~\ref{prop:greedy} is not merely argued but measured: the
 no-coupling cell in Table~\ref{tab:lookahead} is the experiment.
 
-\subsection{Cost}
+\subsubsection{Cost}
 \label{sec:lookahead-cost}
 
 The branching factor of a real mid-game position is large: measured over 615
@@ -1779,7 +1793,7 @@ weight demonstrably changes some decision. Every term in
 Table~\ref{tab:terms} passes both.
 
 % =====================================================================
-\section{Results: what the inference is worth}
+\section{Results: what the inference, the objective and the ladder are worth}
 \label{sec:results}
 
 Figure~\ref{fig:effects} is this section on one axis: every in-play effect the
@@ -2479,10 +2493,10 @@ paper, and exactly not the situation of a human table. The profile is a fact
 about this policy's behaviour, not about Fish.
 
 % =====================================================================
-\section{Strength, absolute and relative}
+\subsection{Strength, absolute and relative}
 \label{sec:strength}
 
-\subsection{The strength ladder}
+\subsubsection{The strength ladder}
 \label{sec:res-ladder}
 
 \begin{table}[t]
@@ -2699,7 +2713,7 @@ blurry posterior, and encoding something genuinely strategic --- and it is worth
 noting that the gains do \emph{not} simply add: $1.85$ (the headline) is less
 than $1.92$ (the model alone against the v0.3 champion) plus anything.
 
-\subsection{Absolute strength: agreement with provably optimal play}
+\subsubsection{Absolute strength: agreement with provably optimal play}
 \label{sec:res-absolute}
 
 Every number above is relative. Table~\ref{tab:exact} is not. It reports, over
@@ -2767,10 +2781,10 @@ endgame in the sense v0.3 meant --- these positions \emph{are} the endgame --- i
 is in choosing correctly when the hidden information genuinely has not resolved.
 
 % =====================================================================
-\section{Where the strength is missing}
+\subsection{Where the strength is missing}
 \label{sec:missing}
 
-\subsection{How much the ask objective leaves on the table}
+\subsubsection{How much the ask objective leaves on the table}
 \label{sec:res-regret}
 
 Table~\ref{tab:exact} is absolute but narrow: it needs a position the exact
@@ -2875,7 +2889,7 @@ of decisions, and one-step improvements do not add. A regret under half a set pe
 decision is compatible with enormous headroom. The argument rests only on the
 three measurements that are in the same units as each other.
 
-\subsection{Where the declarations actually go wrong}
+\subsubsection{Where the declarations actually go wrong}
 \label{sec:res-pathledger}
 
 Section~\ref{sec:claiming} predicted where the leverage in declaring would be:
@@ -3238,7 +3252,7 @@ registration braced for the opposite: knowing where a card is \emph{not} pays
 only if you can also act on it.
 
 % =====================================================================
-\section{What did not work}
+\section{What did not work, what search buys, and what a learner recovers}
 \label{sec:negative}
 
 \subsection{Everything else we tried}
@@ -3543,10 +3557,10 @@ the tell. Promoting it would have shipped a change worth nothing and, worse,
 would have anchored the next version's baseline on it.
 
 % =====================================================================
-\section{Search over the belief, measured}
+\subsection{Search over the belief, measured}
 \label{sec:searchres}
 
-\subsection{Belief-space search: four rounds to one answer}
+\subsubsection{Belief-space search: four rounds to one answer}
 \label{sec:res-lookahead}
 
 Section~\ref{sec:lookahead} describes the one search design the variance
@@ -3868,7 +3882,7 @@ configuration under its own name rather than by moving the default, because ever
 redefine what those runs measured.
 
 % =====================================================================
-\subsection{Is the opponent model just fitting its own kind?}
+\subsubsection{Is the opponent model just fitting its own kind?}
 \label{sec:res-robust}
 
 The model is a hypothesis about how opponents choose, and the opponents it was
@@ -3909,7 +3923,7 @@ is that the model is not \emph{harmed} by an opponent designed to mislead it,
 not that it cannot be exploited by a stronger adversary. A genuinely coordinated
 best-responder is future work.
 
-\subsection{Does it survive the rule variants?}
+\subsubsection{Does it survive the rule variants?}
 \label{sec:res-rules}
 
 The engine supports several rule options, and a result that only holds under one
@@ -3956,10 +3970,10 @@ costs a belief update rather than a posterior per seat, and offers it identicall
 to both generations so that the comparison stays a comparison of one thing.
 
 % =====================================================================
-\section{Learning the objective from data}
+\subsection{Learning the objective from data}
 \label{sec:learnres}
 
-\subsection{Learning the ask objective}
+\subsubsection{Learning the ask objective}
 \label{sec:res-learn}
 
 v0.3's stated top priority for this version was to learn the ask objective
@@ -4407,7 +4421,7 @@ across eleven terms: the vector is stable, and the ambiguity turned out not to
 matter. Learning that afterwards is the only order in which it is worth
 anything.
 
-\subsection{The split posterior is badly under-confident}
+\subsubsection{The split posterior is badly under-confident}
 \label{sec:res-splitcal}
 
 Section~\ref{sec:claiming} sets the claim threshold at $0.97$ and argues for it
@@ -4487,7 +4501,7 @@ the size of the answer, and went looking for why it was too good. Pricing this
 properly needs the null rate re-measured over this population, and until then
 there is no estimate and no queued run.
 
-\subsection{The declaration threshold: the one screen that resolved, re-run}
+\subsubsection{The declaration threshold: the one screen that resolved, re-run}
 \label{sec:res-claimthreshold}
 
 Section~\ref{sec:res-null} reports a cell that lowers the claim bar from $0.97$
@@ -5034,7 +5048,7 @@ improves is not a measure of skill, and we would retract the v0.3 claim rather
 than qualify it.
 
 % =====================================================================
-\section{The engine as an instrument}
+\subsection{The engine as an instrument}
 \label{sec:engine}
 
 A strong policy that can only be measured in aggregate is a weak research
@@ -5115,14 +5129,14 @@ the terminal client, the browser client and the batch experiments, so what a
 user sees is what the experiments measured.
 
 % =====================================================================
-\section{Perpetual states: does Fish have a stalemate?}
+\subsection{Does Fish have a stalemate? Three layers of answer}
 \label{sec:perpetual}
 
 Chess has stalemate and threefold repetition. The natural question is whether
 Literature has an analogue --- a position the game cannot get out of --- and the
 answer comes in three layers, of which only the third is interesting.
 
-\subsection{Layer 1: the state graph is cyclic}
+\subsubsection{Layer 1: the state graph is cyclic}
 
 Nothing in the rules forces progress. Two opponents can trade a card back and
 forth and return to a bit-identical position, so positions can repeat. This is a
@@ -5132,7 +5146,7 @@ Fish ends'' describes a convention rather than the game. Our policies carry an
 explicit progress rule and our harness a cap, and Section~\ref{sec:res-perpetual}
 measures how much of ``games end'' those conventions are actually doing.
 
-\subsection{Layer 2: under perfect information it does not matter}
+\subsubsection{Layer 2: under perfect information it does not matter}
 
 Cycles exist, but the exact solver of Section~\ref{sec:exact} shows that no
 \emph{optimal} line needs one: with all cards visible, optimal play always
@@ -5140,7 +5154,7 @@ terminates. Cyclicity on its own is therefore not a strategic phenomenon. The
 reason is the closed form \eqref{eq:closedform} --- footholds only shrink, so the
 mover simply collects everything reachable and the position marches forward.
 
-\subsection{Layer 3: dead positions}
+\subsubsection{Layer 3: dead positions}
 
 This layer has no chess counterpart, and it is the one worth having.
 
@@ -5165,7 +5179,7 @@ only state changes left are declarations. This is as close to a stalemate as
 Fish gets --- and, unlike a chess stalemate, it is not a draw. The sets are
 already decided; they have simply not been claimed.
 
-\subsection{The apparent deadlock, and why it is not one}
+\subsubsection{The apparent deadlock, and why it is not one}
 
 A dead position looks like a genuine trap for a team that holds a half-suit but
 cannot place the split among its own members. No card will move again, so
@@ -5200,7 +5214,7 @@ plies.
 \end{remark}
 
 % =====================================================================
-\section{The price of a turn, and why it is conditional}
+\subsection{The price of a turn, and why it is conditional}
 \label{sec:tempo}
 
 A turn and a card are different currencies, and this section prices the
@@ -5210,7 +5224,7 @@ buys --- and none of those weights was ever fitted against a measured scale,
 because none existed. This section supplies one, and the answer is not a
 constant.
 
-\subsection{Measuring it}
+\subsubsection{Measuring it}
 
 The design is a duplicate deal with one intervention. Both arms play the
 identical deck with identical agent seeds; at one pre-chosen decision of one
@@ -5226,7 +5240,7 @@ $[+0.092, +0.450]$ when the donation falls at decisions $0$--$4$, and $+0.497$,
 95\% CI $[+0.324, +0.671]$ at decisions $14$--$21$. Tempo value rises through a
 game.
 
-\subsection{It depends entirely on whether you have an ask worth making}
+\subsubsection{It depends entirely on whether you have an ask worth making}
 
 Bucketing $1464$ donations by $p_{\text{best}}$, the success probability of the
 ask the seat would otherwise have made:
@@ -5274,7 +5288,7 @@ late turn prices \emph{higher} than an early one, so if low-$p_{\text{best}}$
 positions were merely late positions they would be worth more rather than
 nothing.
 
-\subsection{What it explains, and what it cost to find out}
+\subsubsection{What it explains, and what it cost to find out}
 
 The measurement began as a critique of the engine. On $1.5\%$ of decisions
 ($229$ of $15{,}542$) the champion plays an ask that cannot land while one with
@@ -5306,7 +5320,7 @@ probability term --- and they do. The discrepancy was a selection effect in the
 instrument: turns priced at positions sampled without regard to option quality
 and spent at positions where $p_{\text{best}} = 0$ by construction.
 
-\subsection{A note on public information}
+\subsubsection{A note on public information}
 
 One candidate explanation, tested and set aside, produced a fact about the game
 worth keeping. Forking each firing and playing the champion's doomed ask in one
@@ -5739,7 +5753,7 @@ plausibly reverse, and it is queued rather than presumed.
 
 % =====================================================================
 % =====================================================================
-\section{The all-champion profile is not an equilibrium}
+\subsection{The all-champion profile is not an equilibrium}
 \label{sec:noneq}
 
 Computed with the corrected solver, and therefore not covered by the
@@ -5803,7 +5817,7 @@ champion as it plays, and the claim is correspondingly narrow: \emph{that}
 profile is not an equilibrium.
 
 % =====================================================================
-\section{Playing the endgame from the solution}
+\subsection{Playing the endgame from the solution}
 \label{sec:exactplay}
 
 Section~\ref{sec:iidiff} measures that the champion picks the exact optimum at
@@ -5894,7 +5908,7 @@ champion, and promoting this would invalidate all of them at once. That is a
 decision with a cascade behind it, to be taken deliberately and re-measured
 afterwards, not a consequence of a good table.
 
-\section{The solver as a critic: a defect found, fixed and shipped}
+\subsection{The solver as a critic: a defect found, fixed and shipped}
 \label{sec:critic}
 
 \begin{quote}
@@ -6583,7 +6597,9 @@ be \emph{bit-identical} when the knob is off, and requires the first divergence
 to fall at two live half-suits or fewer when it is on --- checked by replaying
 the shared prefix, not by asking the agent where it was.
 
-\section{What this says about playing Fish}
+\section{Discussion}
+
+\subsection{What this says about playing Fish}
 \label{sec:strategy}
 
 The results have readings that do not require an engine, and we state them
@@ -6781,7 +6797,7 @@ the ask lands is not one consideration among several. It is the objective, and
 everything else is a tie-break.
 
 % =====================================================================
-\section{Failed and abandoned experiments}
+\subsection{Failed and abandoned experiments}
 \label{sec:failures}
 
 Recorded deliberately, because in this project the negative results have
@@ -7006,7 +7022,7 @@ of search --- was the premise of this version and is not contradicted by
 anything we measured.
 
 % =====================================================================
-\section{KRAKEN v1.1: seven directions, seven closures, nothing shipped}
+\subsection{KRAKEN v1.1: seven directions, seven closures, nothing shipped}
 \label{sec:v11}
 
 Version 1.0 established where the remaining errors are: allocation rather than
@@ -7021,7 +7037,7 @@ informative, so this section is organised around what each one rules out. Two
 are stronger than a null: one is a \emph{theorem}, and one is a correction to
 intervals published earlier in this paper.
 
-\subsection{The discipline: a futility screen before a duel}
+\subsubsection{The discipline: a futility screen before a duel}
 
 Each direction carried a pre-registered screen with thresholds fixed before any
 number was read --- typically ``does this knob change enough decisions to be
@@ -7063,7 +7079,7 @@ table shipped.}
 \label{tab:v11}
 \end{table}
 
-\subsection{Direction 6, closed by proof: an invariant of the possession search}
+\subsubsection{Direction 6, closed by proof: an invariant of the possession search}
 \label{sec:v11-theorem}
 
 The largest single class of remaining error is \emph{allocation} --- our team
@@ -7094,7 +7110,7 @@ allocation errors actually occur --- $\Prob(\text{we own all six}) \ge 0.9$ ---
 it is $\mathbf{99.96\%}$ over $91$ pairs. Deepening or widening this search, or
 giving it a perfect leaf, cannot buy the thing it would need to buy.
 
-\subsection{Direction 4: the teammate ceiling is 46\% interaction}
+\subsubsection{Direction 4: the teammate ceiling is 46\% interaction}
 
 \S\ref{sec:missing} priced perfect card-reading at $+6.61$ sets per game and
 split it: teammates' cards are worth $+3.41$ $[+3.16, +3.66]$, opponents'
@@ -7124,7 +7140,7 @@ That is the finding that makes directions 5, 6 and 7 the right things to have
 tried and the wrong things to have expected to work. Each attacks one channel.
 The interaction term is by construction unreachable from either.
 
-\subsection{How much is actually left, measured with power}
+\subsubsection{How much is actually left, measured with power}
 
 An earlier draft of this paper carried an assertion of ours --- \emph{``what is
 left in this engine is not a defect to be fixed''} --- that nothing measured
@@ -7160,7 +7176,7 @@ not because early declaration is better --- and that certainty cannot be
 bought: the public record holds $92.1\%$ $[91.2, 92.9]$ of which partner holds
 an unlocated card, and quadrupling the posterior draws moves it $0.2$ points.
 
-\subsection{The one-step regret belongs to the turf, and the turf is the positions}
+\subsubsection{The one-step regret belongs to the turf, and the turf is the positions}
 
 The champion shows a small positive one-step regret while the ask objective
 alone does not. Read side by side those two runs appear to say the lookahead
@@ -7200,7 +7216,7 @@ the size of what remains is a lead rather than a finding. We priced settling it
 at $15$--$30$ CPU-hours for an interval that would still touch zero, and did
 not spend it.
 
-\subsection{The endgame ask correction does not survive the rule change}
+\subsubsection{The endgame ask correction does not survive the rule change}
 
 \S\ref{sec:res-rules} flipped the misdeclaration rule to the standard
 opponent-award baseline. The endgame ask correction \texttt{endgame\_d\_info}
@@ -7236,7 +7252,7 @@ with no interval. \textbf{Standing rule adopted:} an offline screen nominates
 an arm for a duel only if its held-out gain has an interval excluding zero,
 clustered by whatever unit shares a deal.
 
-\subsection{A correction to intervals published earlier in this paper}
+\subsubsection{A correction to intervals published earlier in this paper}
 \label{sec:v11-cluster}
 
 \texttt{ask\_regret}'s harvest walks games in order and emits \emph{every}
@@ -7279,7 +7295,7 @@ and already used a $t$ critical value at the pair count. Every headline duel
 figure in this paper --- including $+2.3466$ against v0.7 and the $+0.104$
 lookahead result --- stands exactly as written.
 
-\subsection{What v1.1 leaves}
+\subsubsection{What v1.1 leaves}
 
 The interaction term of direction~4 is real, it is $46\%$ of the largest
 information channel in the game, and directions 5, 6 and 7 establish that it is
@@ -7296,7 +7312,7 @@ refused it, at a cost the belief-space instrument could not see because
 both the theorem and that duel, and we say so rather than nominating one.
 
 % =====================================================================
-\section{Limitations}
+\subsection{Limitations}
 \label{sec:limitations}
 
 \paragraph{The opponent model is a model.} Everything else in the inference
