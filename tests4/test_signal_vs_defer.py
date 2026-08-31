@@ -429,3 +429,91 @@ def test_every_registration_declares_a_size_that_is_used(generality):
     for name in run.REGISTRATIONS:
         run.select(name)
         assert run.REGISTERED_N >= 400, name
+
+
+# --- the generality registration, as a document -----------------------------
+#
+# The tests above bind the CODE to the opponent screen. These bind the
+# DOCUMENT, which is where the sample size, the power limits and the verdicts
+# are actually chosen. A registration that the instrument can drift away from
+# is decoration.
+
+GENERALITY = (ROOT / "prereg" / "signal_generality.md").read_text()
+FLAT = " ".join(GENERALITY.split())
+
+
+def test_the_generality_registration_predates_its_bank():
+    assert "before any pair of the 12,100,000 bank is played" in FLAT
+
+
+@pytest.mark.parametrize("value", ["12,100,000", "800 deals x 2 parities",
+                                   "121,000", "+-0.0734", "+0.1435"])
+def test_the_generality_registration_names_its_constants(value):
+    assert value in FLAT
+
+
+def test_the_documents_grid_is_the_codes_grid(generality):
+    """Two places name the opponents. They must not be able to disagree."""
+    for name in run.VS_GRID:
+        assert "`%s`" % name in GENERALITY
+    for barred in ("probabilistic", "memory", "value_search"):
+        assert "`%s`" % barred in GENERALITY, (
+            "an opponent left out must be named as left out, not omitted")
+
+
+def test_the_projected_half_width_is_the_arithmetic_it_claims():
+    """+-0.0464 at 2,000 deals scaled to 800. A retyped projection keeps
+    agreeing after the run it scales from moves."""
+    import math
+    assert round(0.0464 * math.sqrt(2000 / 800), 4) == 0.0734
+
+
+def test_the_screen_figures_quoted_in_the_document_are_the_screens():
+    """The table of error rates is quoted, not computed at read time, so it
+    can rot. This is what stops it."""
+    import json
+    opp = json.loads(
+        (ROOT / "results" / "opponent_error_screen.json").read_text()
+    )["opponents"]
+    for name, err, decl, head in [("dylan_v07", 21.78, 4.02, 6.28),
+                                  ("ev_claim", 10.76, 3.72, 6.63),
+                                  ("self", 3.33, 4.50, 8.70)]:
+        o = opp[name]
+        assert round(100 * o["their_err"], 2) == err, name
+        assert round(o["their_declares_per_game"], 2) == decl, name
+        assert round(o["theirs_headroom"], 2) == head, name
+        assert "%.2f%%" % err in GENERALITY, name
+
+
+def test_self_is_declared_underpowered_before_the_run_not_after():
+    """Its 3.33% error rate is in the same floor band the screen exists to
+    catch. Saying so afterwards would be reading a null as a finding."""
+    assert "A null against `self` is predicted here, in advance, by arithmetic"\
+        in FLAT
+    assert "will not be reported as evidence about generality" in FLAT
+
+
+def test_self_is_a_control_that_can_refute():
+    """It cannot confirm generality, so it is not asked to. It can show the
+    margin arriving from somewhere the identity does not account for, which
+    is the one outcome here that would change a published claim."""
+    assert "CONTROL VIOLATED" in FLAT
+    assert "the reading of the mechanism in this paper is wrong" in FLAT
+
+
+@pytest.mark.parametrize("verdict", ["GENERAL", "DYLAN-SPECIFIC", "PARTIAL",
+                                     "CONTROL VIOLATED", "UNDERPOWERED"])
+def test_every_verdict_is_fixed_in_advance(verdict):
+    assert "**%s**" % verdict in GENERALITY
+
+
+def test_the_generality_run_ships_nothing_on_any_outcome():
+    assert "It still does not enter `V06_DEPLOYED`" in FLAT
+
+
+def test_the_identity_withdrawal_names_the_rule_it_depends_on():
+    """The decomposition is an identity only under the award rule; under any
+    other the NULL_TEAM branch is reachable and a half-suit can be awarded by
+    no ClaimEvent at all."""
+    assert 'wrong_distribution_outcome="opponent"' in FLAT
+    assert "`NULL_TEAM` branch is reachable" in FLAT
