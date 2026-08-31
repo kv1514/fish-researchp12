@@ -2033,13 +2033,15 @@ this is not a different instrument measuring a different thing.
 
 **The baseline saturates and the gain does not.** From 720 to 1440 the baseline
 gets no better (+0.0011, noise) while the gain still grows -0.0382 -> -0.0436.
-So the gain is not tracking what the receiver already knows. It tracks **how
-many sampled worlds the decoder has to reweight**.
+So the gain is not tracking what the receiver already knows.
 
 At 180 draws there is **no channel at all** --- an interval covering zero --- on
 the same transcripts where 1440 draws gives -0.0436. The message is byte-for-
-byte identical in all four cells. Only the number of worlds it can act on
-differs.
+byte identical in all four cells.
+
+> **AMENDED an hour later, and the reason is the next section.** This passage
+> continued: *"It tracks how many sampled worlds the decoder has to reweight ...
+> only the number of worlds it can act on differs."* That is withdrawn too.
 
 The opponent pool makes the same point louder, with a **sign change**:
 
@@ -2083,3 +2085,78 @@ the smallest number of points that could suggest it, in the sentence most likely
 to be quoted. That shape is now the trigger, and it has fired four times on this
 branch --- the aimed book's "neutral", the locating book's motivation, the
 unlocated covariate's transfer, and this.
+
+---
+
+# UPDATE, 2026-08-31: the replacement explanation lasted an hour, and it is also refuted
+
+The section above refuted "the channel is worth less against a better belief"
+and replaced it with "the gain tracks how many sampled worlds the decoder has
+to reweight". **Same day, same treatment, same outcome.**
+
+The duller competitor the sweep could not distinguish: *any* paired difference
+between two beliefs may grow with draws, because at low precision both
+marginals are coarse and there is less room for the arms to differ. That would
+make it a property of the instrument, true of everything, and not a fact about
+code books. Registered in `prereg/precision_generality.md` and swept.
+
+## An unrelated, opposite-signed arm grows too
+
+`w_unlocated = -4.0` against the incumbent, on the champion's own transcripts,
+no message involved anywhere. Its effect is a **harm**, so a shared mechanism
+has to explain a harm growing as well as a gain growing.
+
+| `n_draws` | baseline team NLL | paired team NLL (+ is harm) |
+|---|---|---|
+| 180 | 1.2972 | +0.0371 [+0.0293, +0.0448] |
+| 480 | 1.2728 | **+0.0422** [+0.0339, +0.0505] |
+| 1440 | 1.2658 | +0.0465 [+0.0376, +0.0553] |
+
+    D = d_1440 - d_180 = +0.0094 [+0.0016, +0.0172]    k = 40 games
+
+Entirely above zero. **INSTRUMENT PROPERTY**, by the rule fixed in advance.
+Growth-with-draws is not about code books.
+
+The 480 cell reproduced `results/unlocated_belief.json`'s **+0.0422** to
+**0.0000**. Both sweeps today landed on their anchor to four decimals, which is
+the only reason either contrast is worth reading.
+
+## The size difference, which is a lead and not a third mechanism
+
+| | 180 draws | 1440 | growth | as % of its own end effect |
+|---|---|---|---|---|
+| aimed code book | -0.0064 (null) | -0.0436 | **0.0372** | **85%** |
+| `w_unlocated = -4.0` | +0.0371 | +0.0465 | **0.0094** | **20%** |
+
+The channel grows **4x** what the unrelated arm does, and four times more again
+as a share of where it ends. Something beyond the shared instrument effect is
+happening to it.
+
+**That is not allowed to reinstate the sentence.** The registration asked one
+question and got one answer, and a size difference noticed afterwards is the
+post-hoc rescue pre-registration exists to refuse. It is recorded as a lead.
+
+## The caveat that survives, and grew
+
+Every convention belief figure was scored at `n_draws = 720`; the engine ships
+at **480**. This run adds the other half: `results/unlocated_belief.json` was
+written at **480** while the convention files were written at **720**, so those
+two directions were **never scored at the same precision** and their magnitudes
+were never directly comparable. Nobody had noticed, because `N_DRAWS` is a
+module constant in two different instruments and neither prints it next to a
+result.
+
+## The pattern, and it is now the whole shape of this branch
+
+Three explanations were offered today for one drift. Two were registered and
+refuted within an hour of being written; the third was never offered, because
+by then the rule was clear:
+
+1. *the belief improved, so the message is worth less* --- refuted, the gain grows;
+2. *the decoder has more worlds to reweight* --- refuted, an unrelated arm grows too;
+3. --- nothing. The drift is measured, real, and **unexplained**, and that is
+   where it stays until something measures it rather than explains it.
+
+Both refutations cost one registration and a four-minute run. The expensive
+part was never the experiment; it was noticing that a sentence I liked had
+arrived without one.

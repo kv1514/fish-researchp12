@@ -97,3 +97,74 @@ convention direction is already closed by its duels.
   reason.
 * **SPECIFIC TO THE CHANNEL** and the sentence stands, with this run cited as
   the reason it is not merely an artefact.
+
+---
+
+# OUTCOME, recorded 2026-08-31: INSTRUMENT PROPERTY
+
+**An unrelated, opposite-signed intervention also grows with draws.** 40 games,
+1,027 scored decisions, `results/precision_generality.json`.
+
+| `n_draws` | baseline team NLL | paired team NLL (+ is harm) | paired opp NLL |
+|---|---|---|---|
+| 180 | 1.2972 | +0.0371 [+0.0293, +0.0448] | +0.0293 [+0.0233, +0.0353] |
+| 360 | 1.2777 | +0.0400 [+0.0324, +0.0476] | +0.0336 [+0.0277, +0.0394] |
+| 480 | 1.2728 | **+0.0422** [+0.0339, +0.0505] | +0.0349 [+0.0291, +0.0407] |
+| 720 | 1.2689 | +0.0435 [+0.0355, +0.0515] | +0.0381 [+0.0318, +0.0444] |
+| 1440 | 1.2658 | +0.0465 [+0.0376, +0.0553] | +0.0402 [+0.0333, +0.0471] |
+
+    D = d_1440 - d_180 = +0.0094 [+0.0016, +0.0172]    k = 40 games
+
+Entirely above zero. By the rule fixed in advance this is **INSTRUMENT
+PROPERTY**: *"more worlds to reweight" is not a fact about the channel and the
+sentence in three files is over-read.*
+
+## The anchor reproduced exactly
+
+The 480 cell measures **+0.042197** against `results/unlocated_belief.json`'s
+**+0.0422** --- off by **0.0000**. Different instrument, same seeds, same seed
+expression, same number.
+
+Both sweeps run today have now landed on their anchor to four decimal places.
+That is worth stating once: the reason these contrasts can be believed is that
+each was made to reproduce a published figure before it was allowed to report a
+new one.
+
+## The magnitudes are not the same, and that does not rescue the claim
+
+| | at 180 draws | at 1440 | growth | as % of its own end effect |
+|---|---|---|---|---|
+| aimed code book | -0.0064 (a null) | -0.0436 | **0.0372** | **85%** |
+| `w_unlocated = -4.0` | +0.0371 | +0.0465 | **0.0094** | **20%** |
+
+The channel's growth is **4x** the unrelated arm's in absolute nats, and four
+times larger again as a fraction of the effect it ends at. So the two are not
+the same phenomenon in size, and something beyond the shared instrument effect
+is happening to the channel.
+
+**That observation does not reinstate the sentence, and is not allowed to.**
+The registration asked one question --- does an unrelated intervention also grow
+with draws --- and the answer is yes, with an interval excluding zero. A
+size difference noticed afterwards is exactly the kind of post-hoc rescue the
+pre-registration exists to refuse. What can be said is: growth-with-draws is
+**not** specific to the channel; the channel grows several times more than the
+shared effect accounts for; and **this run does not explain why**. That is a
+lead, not a finding, and by the standing rule recorded under #49 it does not get
+quoted as one.
+
+## What is untouched
+
+The REFUTED verdict of `prereg/channel_vs_precision.md` stands entirely. That
+run asked whether the gain *shrinks* as the belief improves, and it does not ---
+whatever the reason it grows. Nothing here bears on it.
+
+So does the practical caveat: the engine ships at `n_draws = 480` and the
+convention's belief figures were all scored at 720. This run adds that the same
+is true in the other direction --- `results/unlocated_belief.json` was written
+at 480 while the convention files were written at 720, so those two directions
+were never scored at the same precision and their magnitudes were never directly
+comparable.
+
+Per the licensing clause above, the "worlds to reweight" sentence is weakened
+in `RESEARCH_FRONTIER.md`, `prereg/channel_vs_precision.md` and
+`fish4/convention.py`.

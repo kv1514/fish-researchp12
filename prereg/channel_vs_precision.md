@@ -175,7 +175,20 @@ the withdrawal condition is what resolves it.
 **The baseline saturates and the gain does not.** From 720 to 1440 the baseline
 belief gets no better at all (+0.0011, noise), while the gain still grows from
 -0.0382 to -0.0436. So the gain is not tracking how much the receiver already
-knows. It is tracking **how many sampled worlds the decoder has to reweight**.
+knows.
+
+> **AMENDED 2026-08-31, an hour later.** This paragraph originally continued:
+> *"It is tracking how many sampled worlds the decoder has to reweight."* That
+> second explanation was registered in `prereg/precision_generality.md` and
+> **refuted**: an unrelated, opposite-signed arm (`w_unlocated = -4.0`, no
+> message involved) also grows with draws, +0.0371 -> +0.0465, contrast
+> +0.0094 [+0.0016, +0.0172]. Growth-with-draws is a property of the
+> **instrument**, not of code books.
+>
+> What that run leaves unexplained is a size difference --- the channel grows
+> 0.0372 nats against the unrelated arm's 0.0094, and 85% of its own end effect
+> against 20% --- which is a lead and is deliberately not written up as a third
+> mechanism.
 
 At 180 draws there is **no measurable channel**: -0.0064 [-0.0217, +0.0090],
 an interval covering zero, on the same transcripts where 1440 draws gives

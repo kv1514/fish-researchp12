@@ -284,14 +284,28 @@ def aimed_position_table():
 # transcripts, the gain does the OPPOSITE of what it predicts: at 180 sampler
 # draws the convention is a null (-0.0064 [-0.0217,+0.0090]) and at 1440 it is
 # -0.0436, with the paired contrast -0.0372 [-0.0481,-0.0263]. The baseline
-# stops improving after 720 draws and the gain keeps growing, so the gain is
-# not tracking what the receiver already knows -- it tracks HOW MANY SAMPLED
-# WORLDS THE DECODER HAS TO REWEIGHT. prereg/channel_vs_precision.md,
-# results/channel_precision.json.
+# stops improving after 720 draws and the gain keeps growing, so it is not
+# tracking what the receiver already knows.
+# prereg/channel_vs_precision.md, results/channel_precision.json.
+#
+# THE SECOND EXPLANATION IS ALSO WITHDRAWN, and it lasted about an hour. I
+# replaced the first with "the gain tracks how many sampled worlds the decoder
+# has to reweight", registered that too, and swept an unrelated
+# opposite-signed arm across the same grid: w_unlocated = -4.0, no message
+# involved. Its HARM grows with draws as well, +0.0371 -> +0.0465, contrast
+# +0.0094 [+0.0016,+0.0172]. So growth-with-draws is a property of the
+# instrument, not of code books. prereg/precision_generality.md.
+#
+# What is left unexplained is a size difference: the channel grows 0.0372 nats
+# where the unrelated arm grows 0.0094, four times more, and 85% of its own end
+# effect against 20%. That is a lead and is deliberately not written up as a
+# third mechanism.
 #
 # That is a different axis from the engine drift, which was a model change, so
 # it does not explain the drift either. What it leaves is: the drift is
-# measured and unexplained, and the tidy explanation for it was wrong.
+# measured and unexplained, two tidy explanations for it have now been
+# registered and refuted on the same day, and the useful part of this block is
+# the numbers rather than any story about them.
 #
 # It also prices every belief number in this direction. The engine ships at
 # n_draws = 480 and all of them were scored at 720, so -0.0382 would be roughly
