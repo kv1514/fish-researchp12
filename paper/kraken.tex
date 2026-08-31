@@ -2986,9 +2986,17 @@ result above $+0.15$ should have prompted suspicion rather than pleasure.
 
 \paragraph{Two experiments have now produced that shape, and the arithmetic of
 it is measurable.} The gate is the second. The first was the signalling
-protocol of \S\ref{sec:perpetual}, which cut nulls by $20\%$ and returned
-$+0.002$ $[-0.086, +0.090]$ sets per pair. Both were filed as ``a real
-reduction that buys no sets'', which is honest and is not an explanation.
+protocol of \S\ref{sec:perpetual}. Both were filed at the time as ``a real
+reduction that buys no sets'', which was honest at that power and has since
+turned out to be wrong about both. The signalling protocol's registered
+confirmation is $+0.1180$ $[+0.0325, +0.2035]$ and $+0.1220$ $[+0.0291,
++0.2149]$, and the deferred gate was re-run at power on the current engine
+under \path{prereg/defer_gate_at_power.md}: over $2{,}000$ deal clusters it
+returns $+0.0455$ $[+0.0134, +0.0776]$, clear of zero
+(\path{results/signal_vs_defer.json}). Both buy sets. Neither clears the
+$+0.15$ bar, which is the reason neither ships, and the thousand-game runs that
+produced the original filings could not have separated ``buys nothing'' from
+``buys a twentieth of a set''.
 
 A paired margin is a \emph{net}. An arm that defers declarations avoids some
 errors, worth $+v$ sets each, and leaves half-suits live, which costs
@@ -4755,6 +4763,7 @@ left.
 incumbent $0.15$ carried as a replication arm --- if it did not reproduce the
 $+0.068$ above, the new rung would mean nothing.
 
+\label{sec:res-signal}
 \paragraph{It ran, and the argument was right about the price of a turn and
 wrong about what was limiting the mechanism.} $1{,}000$ games per arm against
 v0.7 on identical deals, both parities, bridge revision 2, zero fallbacks
@@ -4891,7 +4900,13 @@ That last sentence is right about the information and wrong about the value,
 which was worth the cost of finding out. Registered in advance and run over
 $4{,}000$ games, suppressing the repeats makes the engine \emph{worse} by
 $-0.0715$ $[-0.1068, -0.0362]$ sets a game
-(\path{prereg/signal_no_repeat.md}, \path{results/signal_no_repeat.json}).
+(\path{prereg/signal_no_repeat.md},
+\path{results/signal_no_repeat_9900000.json}). A second registered run at a
+fresh seed base replicated it at $-0.1075$ $[-0.1429, -0.0721]$
+(\path{results/signal_no_repeat.json}), and measured the mechanism's own value
+on the current engine at $+0.1435$ $[+0.0971, +0.1899]$ --- consistent with the
+$+0.1220$ above, and the figure to quote for signalling after the
+exhaustive-search change.
 The two arms are level on declaration errors --- $0.1383$ a game against
 $0.1388$ --- so nothing is paid in mistakes. What the repeats buy is
 postponement. The engine reaches the signalling branch before the gated
@@ -4901,10 +4916,19 @@ defers it again: $0.069$ gated declarations a game against $0.299$ with
 signalling off, at a tenth the error rate. Remove the repetition and the
 deferral goes with it --- the suppressed arm returns to $0.226$ gated
 declarations at $23.4\%$ wrong and lands back on the no-signalling baseline,
-$+2.4395$ against $+2.4450$. The ninety-six percent of asks that carry no
-information are the only thing buying the delay, and a mechanism whose value
-survives none of its own repetition is not a communication protocol that
-happens to stall; it is a stall that happens to communicate.
+$+2.4395$ against $+2.4450$. Across the three runs of this arm the repeats are
+$92.7\%$ of all fires --- $33{,}248$ fires over $2{,}473$ distinct cards in
+the largest --- so the asks that carry no new information are almost all of
+them, and they are what buys the delay.
+
+What that does \emph{not} establish is where the value goes. The two arms are
+level on our own declaration errors, so the cost is not paid in our mistakes,
+and this instrument cannot see the rest of the board: it counts what our three
+seats declare and discards what the opposing three do. An earlier draft closed
+here by calling the mechanism ``a stall that happens to communicate''. That
+reads a ledger of one team's declarations as though it were the whole
+scoreboard, and it is withdrawn pending the measurement that counts both
+sides.
 
 One methodological note, recorded rather than buried. The regression form of
 the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
@@ -6319,10 +6343,13 @@ $25.5$, and only $16$ of $130$ were assembled with no turn left to spend. The
 lever is reachable in $88\%$ of the cases that go wrong.
 
 Whether spending those turns pays is a different question and this paper has
-already answered a version of it in the negative: \S\ref{sec:perpetual}'s
-signalling protocol cut nulls by $20\%$ and returned $+0.002$ $[-0.086,
-+0.090]$ sets per pair, and it is switched \emph{off} in the deployed
-configuration. What the measurements above add is not a new mechanism but a
+already answered a version of it, though not in the negative. The void-era
+duel of \S\ref{sec:perpetual}'s signalling protocol returned $+0.002$
+$[-0.086, +0.090]$ sets per pair; the registered confirmation under the award
+rule returned $+0.1180$ $[+0.0325, +0.2035]$ and $+0.1220$ $[+0.0291,
++0.2149]$, both clear of zero (\S\ref{sec:res-signal}). The protocol is
+switched \emph{off} in the deployed configuration because it misses a ship bar
+fixed in advance, not because it does nothing. What the measurements above add is not a new mechanism but a
 different \emph{trigger}: that protocol fires when the current turn is cheap,
 and the errors are concentrated in half-suits identifiable a median of $25$
 turns before the turn gets cheap. Whether a deadline-priced trigger changes
@@ -6579,10 +6606,13 @@ where a card is not. Use it when you are stuck on a split. (Our engine cut
 its misdeclarations about 20\% doing this in void-era measurement and it did
 not gain games there; re-measured under the award rule, where each save is
 worth two points of differential instead of one, the cut persists --- $109$
-misdeclarations against $138$ --- and the measured value comes back
-$+0.0680$ $[-0.0326, +0.1686]$ over $500$ pairs: the right sign, about the
-predicted size, still unproven at that power, so the protocol stays off in
-the engine. For a human, who is far more likely to misplace a split than an
+misdeclarations against $138$. The $500$-pair \emph{screen} put the value at
+$+0.0680$ $[-0.0326, +0.1686]$, which does not clear zero; the registered
+confirmation that followed does, at $+0.1180$ $[+0.0325, +0.2035]$ and
+$+0.1220$ $[+0.0291, +0.2149]$ (\S\ref{sec:res-signal}). So the mechanism's
+value is established and positive. It stays off in the engine because that
+registration's ship bar was a point estimate at or above $+0.15$, and the bar
+was not amended after the fact --- not because the effect is unproven. For a human, who is far more likely to misplace a split than an
 engine is, the trade is almost certainly worth it.)
 
 \paragraph{Spend your effort on card-tracking, not on cleverness about which ask
