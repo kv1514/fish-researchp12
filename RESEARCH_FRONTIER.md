@@ -23,11 +23,44 @@ when something forces it to answer.
 | attempt | result |
 |---|---|
 | `gamma_team` — believe the teammate model harder | **refuted**; better NLL, worse top-1 |
-| `unlocated_now` — give that model a better covariate | +3,143 nats on the fit; build licensed, not yet measured in a belief |
+| `unlocated_now` — give that model a better covariate | **refuted in the belief**; +3,143 nats on the fit and the posterior gets *worse*, monotonically, on both criteria |
 | declarer-holding lever — let the best-informed teammate declare | refuted; the covariate was a confound |
 
 All three attack the **inference**: squeeze more out of the asks that happen.
 None attacks the **channel**: how much the asks carry in the first place.
+
+### What `unlocated_now` cost, and what it bought
+
+It is the sharpest of the three because the offline case was the strongest.
+`prereg/choice_basis.md` put it at **+3,143 held-out nats** over the shipped
+covariate — three times its own pre-registered bar of 1,000 — on 17,005 choices
+with folds at the game level. On predicting which half-suit a teammate asks in,
+it is not a marginal improvement; it is the best covariate anyone has found.
+
+`prereg/unlocated_belief.md` then asked the only question that matters, over 40
+games and 1,027 decisions, clustered on the game (k=40):
+
+    w        team NLL   team top-1        paired vs w=0, clustered by game
+    0.0      1.27280      0.41648         (incumbent)
+    -0.5     1.29318      0.41183         NLL +0.0204 [+0.0162, +0.0246]
+    -1.0     1.30445      0.40710         NLL +0.0317 [+0.0253, +0.0380]
+    -2.0     1.31258      0.40306         NLL +0.0398 [+0.0319, +0.0477]
+    -4.0     1.31500      0.40089         NLL +0.0422 [+0.0339, +0.0505]
+
+Every cell is worse, on both criteria, and the harm grows monotonically with
+the weight. The best cell is the incumbent, which the pre-registration named in
+advance as a refutation. The opponent pool moves the same way, so this is not
+error being shifted from one side of the table to the other.
+
+**A dose-response refutes a mechanism rather than merely failing to find it**,
+and this one is unusually clean: the covariate that best predicts *which
+half-suit a teammate asks in* actively damages the posterior over *where the
+cards are*. Those are different questions, and 3,143 nats of skill at the first
+bought less than nothing at the second.
+
+That is the fourth attempt on the inference to die, and the second — after
+`gamma_team` — to die specifically because a better model of the ask is not a
+better model of the deal.
 
 ## Direction 1 — the card choice is an unused communication channel
 
