@@ -27,8 +27,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 #: The payload keys that identify a run. Two payloads that disagree on any of
-#: them are different experiments and must not share a filename.
-IDENTITY = ("seed_deal", "prereg", "n_deals")
+#: them are different experiments and must not share a filename. Only keys
+#: present in BOTH payloads are compared, so an instrument that records none of
+#: them is unguarded rather than blocked -- add its own key here when it grows
+#: one, which is cheaper than discovering the collision from the paper.
+IDENTITY = ("seed_deal", "seed_agent", "prereg", "n_deals", "n_games",
+            "stride")
 
 
 def default_path(stem: str, seed: int) -> Path:
