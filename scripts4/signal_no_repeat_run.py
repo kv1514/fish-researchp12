@@ -272,6 +272,28 @@ def report(rows) -> dict:
         print("  The switch is not doing what it is named for. No reading of\n"
               "  the primary outcome below is valid.")
 
+    # ---- every pairwise contrast, so no run needs post-processing by hand --
+    #
+    # This instrument has served two registrations with DIFFERENT primaries:
+    # prereg/signal_no_repeat.md fixed C - B, and
+    # prereg/signal_value_after_exhaustive.md fixed B - A. The first run of the
+    # second registration had to have its own primary computed afterwards from
+    # the stored rows, which is a step at which a number can quietly become the
+    # wrong number. All three contrasts are reported now, every time, and which
+    # one is primary is a property of the registration rather than of the code.
+    out["contrasts"] = {}
+    print(f"\n  --- every pairwise contrast, clustered on the deal ---")
+    names = list(ARMS)
+    for i, x in enumerate(names):
+        for y in names[i + 1:]:
+            v = [r[y]["margin"] - r[x]["margin"] for r in rows]
+            mm, hh, kk = cluster_ci(v, deals)
+            tag = "  <- PRIMARY" if (x, y) == (BASE, ARM) else ""
+            print(f"    {y} - {x:<12} {fmt(mm, hh, kk)}{tag}")
+            out["contrasts"][f"{y}-{x}"] = {
+                "mean": mm, "half_width": hh, "ci95": [mm - hh, mm + hh],
+                "n_clusters": kk}
+
     # ---- primary ----------------------------------------------------------
     d = [r[ARM]["margin"] - r[BASE]["margin"] for r in rows]
     mean, half, k = cluster_ci(d, deals)

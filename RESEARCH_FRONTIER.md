@@ -2931,3 +2931,69 @@ it needs the interval this run failed to keep, not new deals.
 
 That is the fourth reading overturned in this line of work, and the only one
 where the record was already right and I was quoting it wrong.
+
+
+---
+
+## UPDATE 2026-08-31 — SURVIVES. The mechanism's value is intact after the engine change.
+
+`prereg/signal_value_after_exhaustive.md`, registered before the run and run at
+seed base 10,100,000 (4,000 games x 3 arms).
+
+    PRIMARY  margin(B_incumbent) - margin(A_shipped)
+             +0.1435 [+0.0971, +0.1899]   2,000 deal clusters
+
+Clear of zero and containing the published +0.1220, which is **SURVIVES** by
+the rule fixed in advance.
+
+**The mechanistic argument for a shrink was wrong.** Signalling works by moving
+declarations out of the gated path into the forced path; `claim_forced_exhaustive`
+improved the forced path; so moving a declaration there should be worth less.
+That reasoning is why the registration was written. The measurement declined
+it, which is the point of writing the reasoning down first.
+
+| contrast | effect | reading |
+|---|---|---|
+| `B_incumbent - A_shipped` | **+0.1435** [+0.0971, +0.1899] | primary, SURVIVES |
+| `C_norepeat - B_incumbent` | -0.1075 [-0.1429, -0.0721] | registered replication: REFUTED again |
+| `C_norepeat - A_shipped` | +0.0360 [-0.0047, +0.0767] | covers zero |
+
+The no-repeat refutation replicates on fresh deals — -0.1075 here against
+-0.0715 at 9,900,000, intervals overlapping — and `C_norepeat` remains
+indistinguishable from the shipped champion. Strip the repeats and the
+mechanism does nothing: the same statement twice, on two seed bases.
+
+### The caveat is about the earlier run, and it is mine
+
+`results/signal_no_repeat_9900000.json` put `B - A` at **+0.0660** and this run
+puts it at **+0.1435**. That is a wide gap for the same contrast on the same
+engine — and **the earlier figure has no interval at all**, because that
+payload did not store per-game rows. So the two cannot be compared properly,
+only noticed. The registered run is the one that counts, and the +0.0660 was
+always a difference of two arm means quoted without an interval, which is
+precisely the kind of number this project should not lean on. I leaned on it
+for two commits, including to write that the mechanism looked "about half as
+valuable".
+
+The instrument now reports every pairwise contrast on every run. This
+registration's own primary had to be computed by hand from the stored rows
+afterwards, because the built-in primary belongs to the previous registration —
+a step at which a number can quietly become the wrong one. Which contrast is
+primary is now a property of the registration, not of the code.
+
+### Where the signalling line stands
+
+* The mechanism is real: +0.1435 [+0.0971, +0.1899], replicating +0.1220.
+* Its value is the POSTPONEMENT of a gated declaration, not the information it
+  sends: removing the informationless repeats costs -0.1075 and returns the
+  engine to baseline.
+* It still does not ship. The point estimate is +0.1435 against a bar of
+  +0.15 — short by 0.0065, on a threshold that is not amended for being
+  narrowly missed.
+* `prereg/stuck_claim_gate.md`'s `B_defer` reaches the same postponement from
+  the declaration side at +0.0580 [-0.0177, +0.1337] and also did not ship.
+
+The open question is no longer whether the effect exists. It is whether the
+postponement can be had without spending eight turns a game on doomed asks —
+and the one attempt at that so far, `B_defer`, was measured at half the size
+with an interval covering zero, on a different engine and a different baseline.
