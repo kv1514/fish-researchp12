@@ -16,6 +16,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{longtable}
 \usepackage{microtype}
 \usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{natbib}
@@ -1495,6 +1496,16 @@ since the optimisation is exact and postdates them.
 % =====================================================================
 \section{Evaluation methodology}
 \label{sec:eval}
+
+\paragraph{Notation, fixed here and used throughout.} A bracketed pair
+$[\,\cdot\,,\cdot\,]$ is always a $95\%$ confidence interval. A figure
+written $x \pm h$ is always a $95\%$ \emph{half-width}, so $x \pm h$ and
+$[x-h,\,x+h]$ say the same thing; where a standard error is meant it is named
+``standard error'' in words. An earlier draft used $\pm$ for both, in the same
+document and occasionally on the same page, which meant a reader could not tell
+a $68\%$ figure from a $95\%$ one without opening the source. Set
+differentials are per duplicate deal-pair unless the text says \emph{per
+game}, which is used for cross-engine results where there is no pairing.
 
 \subsection{Duplicate deals}
 
@@ -4010,7 +4021,8 @@ of the engine.
 
 Repeating the paper's own measurement with the full v0.4 policy finishing every
 rollout, over $110$ positions and $3056$ scored candidate asks: position-centred
-rollout value rises by $+0.681 \pm 0.207$ across the range of
+rollout value rises by $+0.681$ with a deal-clustered standard error of
+$0.207$ across the range of
 $\Prob(\text{success})$, against the $+0.101$ above.\footnote{That standard
 error is clustered on the \emph{deal}, not the position. The harvest emits
 consecutive plies, so these $110$ positions come from \textbf{four} deals;
@@ -4079,7 +4091,7 @@ is what surfaced the information asymmetry, which was the one that mattered.
 
 One caution on that pairing, because it briefly said the opposite. Averaging the
 per-position slope \emph{differences} without weights gives
-$+0.020 \pm 0.246$, apparently a null. That is a different estimand, not a more
+$+0.020$ with a standard error of $0.246$, apparently a null. That is a different estimand, not a more
 careful version of the same one: an unweighted average is dominated by positions
 carrying almost no contrast in $\Prob(\text{success})$, whereas the reported
 slopes weight each position by its own sum of squared centred
@@ -4141,8 +4153,9 @@ Fitted one at a time over the $3076$ rows of that run --- twenty more than the
 $3056$ the slope above uses, because a slope needs two scored asks at a position
 and twenty rows sit alone at theirs --- several features look
 more informative than $\Prob(\text{success})$ itself: \texttt{expose}
-$+1.807 \pm 0.536$, \texttt{deplete} $+1.387 \pm 0.249$, \texttt{certain}
-$+0.919 \pm 0.223$, against $\Prob(\text{success})$'s $+0.681 \pm 0.207$ ---
+$+1.807$, \texttt{deplete} $+1.387$, \texttt{certain} $+0.919$, against
+$\Prob(\text{success})$'s $+0.681$ (standard errors $0.536$, $0.249$, $0.223$
+and $0.207$) ---
 all four deal-clustered, and all four still excluding zero. Fitted
 together, $\Prob(\text{success})$ turns \emph{negative}, at
 $-0.329 \pm 0.264$ (that one is quoted as first computed, position-clustered,
@@ -4508,9 +4521,33 @@ screening cell, 400 pairs \emph{(selected)} & $+0.035$ $[+0.007, +0.063]$ & excl
 \end{center}
 
 The effect does not survive. The confirmatory estimate is a twentieth of the
-screen's, and the decay of $-0.033 \pm 0.016$ is itself $2.1$ standard errors
---- selection inflation measured rather than inferred. The two blocks agree
-($Q = 1.35$ on 1 df, $p = 0.25$).
+screen's, and the decay of $-0.033$, against a two-sample standard error of
+$0.016$, is itself $2.1$ standard errors --- selection inflation measured
+rather than inferred.
+
+\paragraph{The two blocks of that primary did not run the same program.}
+\path{scripts4/check_engine_provenance.py} fingerprints the engine files each
+duel block executed and compares them within a pool. Two pools in this paper
+come back mixed, and this is one of them: the two 1000-pair blocks pooled above
+differ in \path{fish4/askfeat.py} and \path{fish4/oppmodel.py}, and block
+one's \path{askfeat.py} digest is not in this repository's history at all, so
+those blocks cannot be re-run even in principle. The other mixed pool is the
+re-take bonus of \S\ref{sec:failures}, pooled at $+0.013$ $[-0.052, +0.079]$.
+A third, the combined arm, was mixed, was caught by the same check, and was
+re-blocked on one engine under
+\path{jobs/PREREGISTRATION_combined_reblock.md}; the replacement landed at
+$+0.357$ $[+0.191, +0.524]$, near what the registration predicted, so that
+mixture had no numerical consequence.
+
+The blocks here agree within their noise --- $Q = 1.35$ on 1 df, $p = 0.25$ ---
+and that $Q$ is computed by the provenance checker for exactly this reason. It
+is worth being plain about what agreement does and does not buy: it bounds the
+damage, and it does not make the pool one measurement of one thing. The
+interval above describes an average over two programs, which is not what a
+confidence interval is usually read as. The checker exits non-zero on this
+repository today, and is deliberately left out of continuous integration,
+because a check that is permanently red is one people learn to scroll past ---
+but leaving it out of CI is not a reason to leave it out of the paper.
 
 \paragraph{This is a null with a mechanism.} A behavioural measurement taken
 before the run, over $998$ decisions carrying a claim candidate, found that
@@ -4626,8 +4663,9 @@ almost never fires.
 (55\%) a team reached a position where it could prove it held an entire
 half-suit and still could not place the split. Over the $1800$ half-suits of
 those 200 games, $171$ ($9.5\%$) reach that state, and they are nulled
-\textbf{23.4\%} of the time ($\pm 3.2$) against \textbf{0.92\%} ($\pm 0.24$) for
-half-suits that never get stuck --- a factor of $25$ --- so they account for
+\textbf{23.4\%} of the time $[17.7, 30.3]$ against \textbf{0.92\%}
+$[0.56, 1.51]$ for half-suits that never get stuck --- a factor of $25$ --- so
+they account for
 \textbf{73\% of all nulls} while being under a tenth of half-suits.
 
 Four figures in this paragraph were wrong in every draft before this one, and
@@ -4681,8 +4719,11 @@ this protocol fired it at the same threshold. The relaxed mode signals only
 when the ask the seat would otherwise make has $p \leq 0.15$
 (\texttt{signal\_max\_p}), a number chosen when there was no scale to choose it
 against. \S\ref{sec:tempo} then supplied one, bucketed by exactly that
-probability, and it says a turn is worth $-0.043 \pm 0.169$ below $p = 0.25$
-and $+0.004 \pm 0.143$ in $[0.25, 0.50)$ --- free, twice over --- and about
+probability, and it puts a turn at $-0.043$ below $p = 0.25$ and $+0.004$ in
+$[0.25, 0.50)$, with standard errors of $0.169$ and $0.143$ --- so $95\%$
+intervals of $[-0.374, +0.288]$ and $[-0.276, +0.284]$, which do not establish
+that a turn is free there so much as fail to resolve anything smaller than
+about a third of a set --- and about
 $+0.45$ only above $0.50$. The gate sits at less than a third of the way to
 where this paper's own measured price of a turn crosses zero, and the two
 sections have never been read against each other. The sweep in
@@ -7461,6 +7502,8 @@ more.
 
 % =====================================================================
 \appendix
+
+\input{appendix_prereg}
 
 % =====================================================================
 \section{Interoperating with a foreign engine}
