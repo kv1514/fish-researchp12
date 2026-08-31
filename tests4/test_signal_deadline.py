@@ -333,7 +333,9 @@ def _rows(paths, fires=(), n_deals=40):
 
 def test_a_path_that_disagrees_fails_the_anchor(iso):
     """The anchor has to be able to say no, or it is decoration."""
-    iso["paths"].write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
+    iso["paths"].write_text(
+        '{"path_error_rate": {"forced": {"rate": 0.46, "declarations": 300,'
+        ' "wrong": 138}}}')
     # 300 forced declarations with 0 wrong cannot be a 46% error rate
     got = sd.anchors(_rows({"forced": [300, 0]}))
     assert got["path_rates"]["forced"]["judged"]
@@ -342,7 +344,9 @@ def test_a_path_that_disagrees_fails_the_anchor(iso):
 
 
 def test_a_path_that_agrees_passes_the_anchor(iso):
-    iso["paths"].write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
+    iso["paths"].write_text(
+        '{"path_error_rate": {"forced": {"rate": 0.46, "declarations": 300,'
+        ' "wrong": 138}}}')
     got = sd.anchors(_rows({"forced": [300, 138]}))
     assert got["path_rates"]["forced"]["agrees"] is True
     assert got["all_agree"] is True
@@ -351,7 +355,9 @@ def test_a_path_that_agrees_passes_the_anchor(iso):
 def test_a_thin_path_is_reported_and_not_judged(iso):
     """An interval on five declarations agrees with everything, so judging it
     would let a broken instrument pass by being small."""
-    iso["paths"].write_text('{"path_error_rate": {"gate": {"rate": 0.10}}}')
+    iso["paths"].write_text(
+        '{"path_error_rate": {"gate": {"rate": 0.10, "declarations": 500,'
+        ' "wrong": 50}}}')
     got = sd.anchors(_rows({"gate": [5, 5]}))
     assert got["path_rates"]["gate"]["judged"] is False
     assert got["path_rates"]["gate"]["agrees"] is None
@@ -414,3 +420,65 @@ def test_the_payload_keeps_the_per_game_rows():
     games, and an anchor nobody can recheck is an assertion."""
     src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
     assert '"games": [{k: r[k] for k in' in src
+
+
+def test_the_published_side_carries_uncertainty_too(iso):
+    """The correction that separated a real disagreement from a false one.
+
+    The first anchor asked whether the PUBLISHED POINT fell inside this run's
+    interval. On the voluntary path that point rests on TWO wrong declarations
+    out of 3,692 and is itself very noisy, while a 5,972-declaration run makes
+    a tight interval -- so the anchor called a disagreement at z = 1.19. These
+    are the real counts from both runs.
+    """
+    iso["paths"].write_text(
+        '{"path_error_rate": {"voluntary": {"rate": 0.000542,'
+        ' "declarations": 3692, "wrong": 2}}}')
+    got = sd.anchors(_rows({"voluntary": [5972, 8]}))["path_rates"]["voluntary"]
+    assert got["judged"] is True
+    assert got["agrees"] is True, got
+    assert abs(got["z"]) == pytest.approx(1.185, abs=0.01)
+
+    # and the interval-vs-point test it replaced would have said no
+    lo, hi = sd.wilson(8, 5972)
+    assert not (lo <= 0.000542 <= hi), (
+        "if this ever covers, the two tests agree here and the case is no "
+        "longer the one this test is about")
+
+
+def test_a_real_disagreement_still_fails_under_the_two_proportion_test(iso):
+    """The forced path, at both runs' real counts: 142/307 against 180/492.
+    Loosening the test until voluntary passed would have hidden this."""
+    iso["paths"].write_text(
+        '{"path_error_rate": {"forced": {"rate": 0.4625,'
+        ' "declarations": 307, "wrong": 142}}}')
+    got = sd.anchors(_rows({"forced": [492, 180]}))["path_rates"]["forced"]
+    assert got["agrees"] is False
+    assert got["z"] == pytest.approx(-2.71, abs=0.02)
+
+
+def test_a_thin_published_side_is_not_judged(iso):
+    """Symmetry: this run having 30 declarations is not enough if the
+    published side has five."""
+    iso["paths"].write_text(
+        '{"path_error_rate": {"gate": {"rate": 0.2, "declarations": 5,'
+        ' "wrong": 1}}}')
+    got = sd.anchors(_rows({"gate": [400, 200]}))["path_rates"]["gate"]
+    assert got["judged"] is False
+    assert got["agrees"] is None
+
+
+def test_the_diagnostic_override_is_loud_and_recorded():
+    """A run on a non-registered arm must say so on stdout and in the payload,
+    because its anchors are measured against a different configuration."""
+    src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
+    assert "DIAGNOSTIC RUN" in src
+    assert '"diagnostic": diagnostic' in src
+    assert '"registered_arm": REGISTERED_ARM' in src
+
+
+def test_the_arm_parser_keeps_types():
+    got = sd._parse_arm("claim_forced_exhaustive=0,signal_max_p=0.15,x=abc")
+    assert got == {"claim_forced_exhaustive": 0, "signal_max_p": 0.15,
+                   "x": "abc"}
+    assert isinstance(got["claim_forced_exhaustive"], int)

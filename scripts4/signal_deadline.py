@@ -86,7 +86,8 @@ AGENT0 = 93_000
 
 #: arm C from prereg/deadline_signalling.md -- the arm whose 52-vs-72 split is
 #: under study. The gate at the measured free-turn threshold, not the default.
-ARM = {"signal_mode": "stuck", "signal_max_p": 0.50}
+REGISTERED_ARM = {"signal_mode": "stuck", "signal_max_p": 0.50}
+ARM = dict(REGISTERED_ARM)
 
 #: fish/agents/base.py::stalled -- the deadline, in actions since the last
 #: resolution. Read from the source rather than retyped, so a change there
@@ -330,6 +331,28 @@ def wilson(w: int, n: int, z: float = 1.96):
     return (max(0.0, c - h), min(1.0, c + h))
 
 
+def two_proportion_z(w1: int, n1: int, w2: int, n2: int):
+    """Pooled two-proportion z for w1/n1 against w2/n2.
+
+    Both sides carry uncertainty, and the first version of this anchor forgot
+    the second one: it asked whether the PUBLISHED POINT fell inside this
+    run's interval. On the voluntary path the published point rests on TWO
+    wrong declarations out of 3,692, so it is itself very noisy, while this
+    run's 5,972 declarations make a tight interval -- and the anchor called a
+    disagreement that a test of both counts puts at z = 1.19. The forced path
+    disagrees under either test, which is what makes the two cases worth
+    telling apart rather than loosening one threshold until both pass.
+    """
+    if n1 <= 0 or n2 <= 0:
+        return None
+    p1, p2 = w1 / n1, w2 / n2
+    pool = (w1 + w2) / (n1 + n2)
+    se = (pool * (1 - pool) * (1 / n1 + 1 / n2)) ** 0.5
+    if se == 0:                      # both sides perfect, or both all-wrong
+        return 0.0
+    return (p1 - p2) / se
+
+
 def anchors(rows: list[dict]) -> dict:
     """Reproduce two published figures before reporting a new one.
 
@@ -359,14 +382,20 @@ def anchors(rows: list[dict]) -> dict:
     out, ok = {}, True
     for path, (n, w) in sorted(tot.items()):
         rate = w / n if n else None
-        want = pub.get(path, {}).get("rate")
+        ref = pub.get(path, {})
+        want = ref.get("rate")
         lo, hi = wilson(w, n) if n else (None, None)
-        judged = n >= 30 and want is not None and lo is not None
-        agrees = (lo - 1e-12 <= want <= hi + 1e-12) if judged else None
+        judged = (n >= 30 and want is not None
+                  and ref.get("declarations", 0) >= 30)
+        z = (two_proportion_z(w, n, ref.get("wrong", 0),
+                              ref.get("declarations", 0)) if judged else None)
+        agrees = (abs(z) < 1.96) if z is not None else None
         if judged and not agrees:
             ok = False
         out[path] = {"n": n, "wrong": w, "rate": rate, "lo": lo, "hi": hi,
-                     "published": want, "judged": judged, "agrees": agrees}
+                     "published": want, "published_n": ref.get("declarations"),
+                     "published_wrong": ref.get("wrong"), "z": z,
+                     "judged": judged, "agrees": agrees}
 
     #: the margin anchor. Clustered on the deal on both sides, and the test is
     #: whether the published POINT falls inside this run's interval -- one
@@ -453,7 +482,17 @@ def summarise(rows: list[dict]) -> dict:
 
 
 def main(n_deals: int = 400, n_jobs: int | None = None,
-         out: str | None = None) -> int:
+         out: str | None = None, arm: dict | None = None) -> int:
+    global ARM
+    diagnostic = bool(arm)
+    if diagnostic:
+        ARM = dict(REGISTERED_ARM, **arm)
+        print(f"DIAGNOSTIC RUN: arm {ARM} is not the registered "
+              f"{REGISTERED_ARM}.\n  Its anchors are measured against a "
+              f"published figure taken on a DIFFERENT configuration, so an "
+              f"anchor\n  that goes OFF here is the point of the run rather "
+              f"than a fault in it. Nothing\n  from this run belongs beside "
+              f"the registered one without saying which is which.")
     n_jobs = n_jobs or max(1, (os.cpu_count() or 4) - 1)
     jobs = [(SEED0 + i, bool(k)) for i in range(n_deals) for k in (0, 1)]
     t0 = time.time()
@@ -472,8 +511,8 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
             mark = "OK " if a_["agrees"] else "OFF"
             print(f"    {mark} {path:10s} {100 * a_['rate']:5.2f}% "
                   f"[{100 * a_['lo']:5.2f}, {100 * a_['hi']:5.2f}] on "
-                  f"{a_['n']:5d} against {100 * a_['published']:5.2f}% "
-                  f"published")
+                  f"{a_['n']:5d} against {100 * a_['published']:5.2f}% on "
+                  f"{a_['published_n']:5d} published, z = {a_['z']:+.2f}")
         else:
             print(f"    --  {path:10s} {a_['n']} declarations, too few to "
                   f"judge; published {a_['published']}")
@@ -541,7 +580,8 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
         "descriptive": True,
         "registers_nothing": ("A registration must use a seed base other "
                               f"than {SEED0}."),
-        "arm": ARM, "rules": RULES_D,
+        "arm": ARM, "registered_arm": REGISTERED_ARM,
+        "diagnostic": diagnostic, "rules": RULES_D,
         "n_deals": n_deals, "n_games": len(jobs),
         "seed_deal": SEED0, "seed_agent": AGENT0,
         "stall_window": STALL_WINDOW,
@@ -563,8 +603,26 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
     return 0 if an["all_agree"] else 1
 
 
+def _parse_arm(text: str) -> dict:
+    """k=v,k=v -> a dict, ints and floats parsed, everything else a string."""
+    out: dict = {}
+    for part in text.split(","):
+        k, _, v = part.partition("=")
+        try:
+            out[k.strip()] = int(v)
+        except ValueError:
+            try:
+                out[k.strip()] = float(v)
+            except ValueError:
+                out[k.strip()] = v.strip()
+    return out
+
+
 if __name__ == "__main__":
-    a = sys.argv[1:]
+    a = [x for x in sys.argv[1:] if not x.startswith("--arm")]
+    over = next((x.split("=", 1)[1] for x in sys.argv[1:]
+                 if x.startswith("--arm=")), None)
     raise SystemExit(main(int(a[0]) if a else 400,
                           int(a[1]) if len(a) > 1 else None,
-                          a[2] if len(a) > 2 else None))
+                          a[2] if len(a) > 2 else None,
+                          _parse_arm(over) if over else None))
