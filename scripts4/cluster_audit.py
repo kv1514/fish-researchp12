@@ -79,6 +79,7 @@ def report(label, vals, groups, published_hw):
 
 
 def main() -> int:
+    RESULTS: dict = {}
     CANDS = [(130, 260), (260, 130), (65, 130), (60, 120), (130, 130),
              (260, 260), (80, 200), (100, 200), (200, 400)]
 
@@ -103,10 +104,33 @@ def main() -> int:
         report("it DECLARED (ask instead?)", [r["regret"] for r, _ in dec],
                [gg for _, gg in dec],
                d["arms"]["it DECLARED (ask instead?)"]["half_width"])
-        report("best claim - best ask, when asked",
-               [r["best_claim"] - r["best_ask"] for r, _ in ask],
-               [gg for _, gg in ask],
+        gap = [r["best_claim"] - r["best_ask"] for r, _ in ask]
+        report("best claim - best ask, when asked", gap, [gg for _, gg in ask],
                d["best_claim_minus_best_ask_when_asked"]["half_width"])
+        # PERSIST the deal-clustered figures. The paper quotes this one in
+        # bold and it lived only in this script's stdout, which is exactly the
+        # shape of the unwatched claims scripts4/unwatched_claims.py exists to
+        # find: a number the document asserts and no file holds.
+        mu, hw, k = cluster_ci(gap, [gg for _, gg in ask])
+        RESULTS["declare_regret"] = {
+            "best_claim_minus_best_ask_when_asked": {
+                "mean": mu, "half_width_by_deal": hw, "n_deals": k,
+                "n_positions": len(gap),
+                "positions_where_claim_beat_ask":
+                    sum(1 for g in gap if g > 0)},
+        }
+        for label, sel, key in (
+                ("all positions", rows, "all positions"),
+                ("it ASKED (declare instead?)", [r for r, _ in ask],
+                 "it ASKED (declare instead?)"),
+                ("it DECLARED (ask instead?)",
+                 [r for r in rows if r["chose_claim"]],
+                 "it DECLARED (ask instead?)")):
+            g = [gm[r["position"]] for r in sel]
+            m2, h2, k2 = cluster_ci([r["regret"] for r in sel], g)
+            RESULTS["declare_regret"][key] = {
+                "regret": m2, "half_width_by_deal": h2, "n_deals": k2,
+                "n_positions": len(sel)}
     print("\nrollout_target*.json  (slope of rollout value on p_success)")
     import numpy as np
     for name in ("rollout_target", "rollout_target_public",
@@ -160,6 +184,9 @@ def main() -> int:
                  else "NOW STRADDLES 0"
                  if (b - 1.96 * sp) * (b + 1.96 * sp) > 0
                  else "straddles either way"))
+    out = ROOT / "results" / "cluster_audit.json"
+    out.write_text(json.dumps(RESULTS, indent=1))
+    print(f"\nwrote {out}")
     return 0
 
 

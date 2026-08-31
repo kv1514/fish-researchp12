@@ -332,6 +332,31 @@ WATCH = [
     # wrong split -- which means the same thing under both rules. The fresh
     # void run reproduces the archived file on every field, so these figures
     # are unchanged; only their label is.
+    # v1.1, section sec:v11. Every one of these was bolded in the paper with
+    # nothing behind it -- caught by unwatched_claims, not by a reader. The
+    # deal-clustered declaration figures now live in results/cluster_audit.json
+    # (scripts4/cluster_audit.py persists them) and the ceiling interaction in
+    # results/declaration_timing.json (scripts4/derive_ceiling_interaction.py),
+    # rather than being computed in the prose.
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked.mean", "{:.4f}",
+     "best claim minus best ask, deal-clustered", "best claim minus best ask"),
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked.half_width_by_deal",
+     "{:.4f}", "its deal-clustered half-width", "best claim minus best ask"),
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked.n_positions",
+     "{:d}", "positions where it asked", "beat the best ask in"),
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked."
+     "positions_where_claim_beat_ask", "{:d}",
+     "positions where the best claim beat the best ask",
+     "beat the best ask in"),
+    ("declaration_timing.json", "derived.interaction", "{:.2f}",
+     "the ceiling interaction, T - (D+K)", "together are worth"),
+    ("declaration_timing.json", "derived.interaction_share_of_T", "{:.0%}",
+     "the interaction as a share of the teammate ceiling",
+     "largest information channel"),
     ("perpetual_study_void.json", "normal.misdeclares_per_game", "{:.3f}",
      "nulls per game", "cuts nulls from"),
     ("perpetual_study_void.json", "signalling.misdeclares_per_game", "{:.3f}",
