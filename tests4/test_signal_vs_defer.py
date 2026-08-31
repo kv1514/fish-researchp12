@@ -111,7 +111,8 @@ def _rows(a, b, c, d, two_arm=False):
     for i in range(len(a)):
         def arm(m, gate):
             return {"margin": m, "terminal": 1, "fallbacks": 0, "signals": 0,
-                    "paths": {"voluntary": [4, 0], "gate": [gate, 0]}}
+                    "paths": {"voluntary": [4, 0], "gate": [gate, 0]},
+                    "opp_declares": 4, "opp_wrong": 1}
         r = {"deal": i, "kv_even": 0, "rev": 2,
              "A_shipped": arm(a[i], 4), "C_defer": arm(c[i], 2)}
         if not two_arm:
@@ -190,3 +191,28 @@ def test_the_power_limit_is_registered_in_advance():
     flat = " ".join(PREREG.split())
     assert "finely estimate a partial overlap" in flat
     assert "the honest reading is INCONCLUSIVE" in flat
+
+
+def test_the_opponent_s_declarations_are_counted():
+    """Every instrument in this line dropped them, and the smoke says they are
+    where the volume is: the opponent misdeclares about 0.95 times a game
+    against our 0.14. A margin that moves without OUR ledger moving has to be
+    somewhere, and this is the first place to look."""
+    src = (ROOT / "scripts4" / "signal_vs_defer.py").read_text()
+    assert '"opp_declares": opp[0], "opp_wrong": opp[1]' in src
+    # and the drop is gone: the old form skipped opponent claims entirely
+    assert "if not isinstance(ev, ClaimEvent) or not ours:" not in src
+
+
+def test_the_descriptive_registration_is_marked_descriptive():
+    """It fixes no threshold and decides no ship, and the code says so rather
+    than leaving a reader to infer it from the absence of a prereg file."""
+    src = (ROOT / "scripts4" / "signal_vs_defer.py").read_text()
+    block = src[src.index('"where_the_margin_lives"') - 700:
+                src.index('"where_the_margin_lives"')]
+    assert "DESCRIPTIVE, not a registration" in block
+    r = run.REGISTRATIONS["where_the_margin_lives"]
+    assert r["seed"] == 11_300_000
+    assert set(r["arms"]) == {"A_shipped", "B_signal", "C_defer"}, (
+        "signalling and deferral were never played on the same deals; that is "
+        "the omission this pairing exists to fix")

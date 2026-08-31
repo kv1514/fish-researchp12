@@ -74,6 +74,17 @@ REGISTRATIONS = {
         "seed": 10_900_000, "agent": 109_000,
         "base": "A_shipped", "arm": "C_defer", "interaction": False,
     },
+    # DESCRIPTIVE, not a registration: it fixes no threshold and decides no
+    # ship. It asks where the margin difference between signalling (+0.1435)
+    # and deferral (+0.0455) lives, given that OUR declaration ledger says
+    # deferral cuts more than twice as many wrong declarations. The two were
+    # never played on the same deals; this pairs them, and counts the
+    # OPPONENT's declarations, which every instrument in this line has dropped.
+    "where_the_margin_lives": {
+        "arms": ("A_shipped", "B_signal", "C_defer"),
+        "seed": 11_300_000, "agent": 113_000,
+        "base": "A_shipped", "arm": "B_signal", "interaction": False,
+    },
 }
 PREREG = ARMS = SEED0 = AGENT0 = BASE = ARM = INTERACTION = None
 
@@ -121,6 +132,11 @@ def _play(deal_seed: int, kv_even: bool, arm: dict) -> dict:
 
     paths: dict = defaultdict(lambda: [0, 0])
     signals = 0
+    #: THE OPPONENT'S DECLARATIONS, which every instrument in this line has
+    #: dropped. The margin is decided by all nine half-suits, and a
+    #: declaration the other side gets wrong hands US the set -- so an effect
+    #: that lives there moves the margin while our own ledger says nothing.
+    opp = [0, 0]
     for _ in range(600):
         if st.is_terminal:
             break
@@ -131,7 +147,11 @@ def _play(deal_seed: int, kv_even: bool, arm: dict) -> dict:
         if tr.get("kind") == "signal":
             signals += 1
         ev = st.apply(mover, act)
-        if not isinstance(ev, ClaimEvent) or not ours:
+        if not isinstance(ev, ClaimEvent):
+            continue
+        if not ours:
+            opp[0] += 1
+            opp[1] += int(ev.winner != team_of(mover))
             continue
         kind = tr.get("kind", "")
         why = "exact" if kind == "exact" else (
@@ -144,7 +164,8 @@ def _play(deal_seed: int, kv_even: bool, arm: dict) -> dict:
     theirs = sum(1 for w in st.set_winner if w == 1 - our_team)
     return {"margin": ours_sets - theirs, "terminal": int(st.is_terminal),
             "fallbacks": sum(getattr(a, "fallbacks", 0) for a in agents),
-            "paths": {k: v for k, v in paths.items()}, "signals": signals}
+            "paths": {k: v for k, v in paths.items()}, "signals": signals,
+            "opp_declares": opp[0], "opp_wrong": opp[1]}
 
 
 def _one(args) -> dict:
@@ -303,6 +324,24 @@ def _tail(out: dict, rows, n: int) -> dict:
             print(f"  {a:<12}{path:<11}{v['n']:>7}{v['per_game']:>8.3f}"
                   f"{v['wrong']:>7}{e:>8}")
         print(f"  {a:<12}{'WRONG/GAME':<11}{out['ledger'][a]['_wrong_per_game']:>21}")
+
+    #: ours against theirs, side by side. A margin that moves without OUR
+    #: ledger moving has to be somewhere, and the opponent's declarations are
+    #: the first place to look.
+    print(f"\n  --- wrong declarations a game, both sides ---")
+    print(f"  {'arm':<12}{'ours':>9}{'theirs':>9}{'their decls':>13}"
+          f"{'their err':>11}")
+    out["both_sides"] = {}
+    for a in ARMS:
+        ow = out["ledger"][a]["_wrong_per_game"]
+        td = sum(r[a]["opp_declares"] for r in rows)
+        tw = sum(r[a]["opp_wrong"] for r in rows)
+        out["both_sides"][a] = {"ours_wrong_per_game": ow,
+                                "their_declares": td, "their_wrong": tw,
+                                "their_wrong_per_game": round(tw / n, 4),
+                                "their_err": round(tw / td, 4) if td else None}
+        print(f"  {a:<12}{ow:>9.4f}{tw / n:>9.4f}{td / n:>13.3f}"
+              f"{(tw / td if td else 0):>11.3f}")
 
     out["signal_turns_per_game"] = {
         a: round(sum(r[a]["signals"] for r in rows) / n, 3) for a in ARMS}
