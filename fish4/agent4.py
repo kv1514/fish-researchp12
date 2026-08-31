@@ -205,6 +205,12 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  smart_pass: bool = False,
                  signal_mode: str = "off",
                  signal_max_p: float = 0.15,
+                 #: Do not signal a card this seat has already signalled this
+                 #: game. The signal branch re-asks one card a mean of 40.8
+                 #: times an episode to re-prove a fact already public, and
+                 #: those turns come out of the seat's own stall window.
+                 #: False is bit-identical. prereg/signal_no_repeat.md.
+                 signal_no_repeat: bool = False,
                  #: Signed weight on adaptive.contest_bonus. Positive fights
                  #: in opponent-dominated ambiguous half-suits (Dylan's v0.7
                  #: carries the analogous term strongly positive); negative is
@@ -303,6 +309,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.smart_pass = smart_pass
         self.signal_mode = signal_mode
         self.signal_max_p = signal_max_p
+        self.signal_no_repeat = signal_no_repeat
+        self._signalled: set = set()
         self.w_contest = float(w_contest)
         self.silence_delta = float(silence_delta)
         self.stats = PosteriorStats()
@@ -330,6 +338,10 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
     def begin_game(self, player: int, rules, seed: int) -> None:
         super().begin_game(player, rules, seed)
         self.bel = BeliefState(rules, observer=player)
+        # per GAME, not per agent: an agent instance is reused across deals in
+        # some harnesses, and a set that outlived its game would silently
+        # suppress signals in the next one.
+        self._signalled = set()
 
     # -- which belief each channel reads --------------------------------------
     #
@@ -601,8 +613,11 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             if cheap and stuck_half_suits(obs, self.bel, ctx):
                 sig = signalling_ask(
                     obs, self.bel, ctx,
-                    require_dead=(self.signal_mode == "dead"))
+                    require_dead=(self.signal_mode == "dead"),
+                    exclude=(frozenset(self._signalled)
+                             if self.signal_no_repeat else frozenset()))
                 if sig is not None:
+                    self._signalled.add(int(sig.card))
                     self._t(_tr.simple_trace, "signal",
                             target=int(sig.target),
                             # the gate's own input, recorded so an instrument
