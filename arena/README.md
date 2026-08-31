@@ -106,6 +106,31 @@ not one: the split was W2/T2/L2, wins and losses that happened to balance. The
 rate alone could not tell those two apart, which is why the report prints the
 split underneath.
 
+### The matrix disagrees with itself, and that is the calibration
+
+A round-robin measures every matchup **twice** — once with each policy as side
+A — on different deals. Those two cells are independent estimates of one
+quantity, so the gap between them is a free read on the harness's noise at
+whatever sample size you ran.
+
+In the committed 40-deal run, `kraken` against `kraken-nolookahead`:
+
+| | margin, from KRAKEN's side | 95% |
+|---|---|---|
+| KRAKEN as side A | **−0.80** | [−2.15, +0.55] |
+| KRAKEN as side B | **+0.60** | [−0.83, +2.03] |
+
+**The same matchup, 1.40 sets apart, opposite signs.** Neither cell is wrong;
+40 pairs is simply not enough to separate two policies this close, and both
+intervals comfortably contain the truth. For reference, a 6,000-pair
+pre-registered duel puts the lookahead at **+0.104 [+0.020, +0.189]** — an
+effect roughly a *fortieth* of the swing between these two cells.
+
+So: **the matrix orders the field, it does not adjudicate close pairs.** The
+shutouts at the bottom (100% against `heuristic` and `random`, by 13-17 sets)
+are real at any sample size. The top two rows are not separated by this run and
+should not be reported as if they were.
+
 ## Reading the output
 
 Cells are the row policy's win rate as side A. Row averages are unweighted
