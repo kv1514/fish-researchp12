@@ -32,11 +32,38 @@ def test_the_constants_are_the_ones_the_registration_names(value):
     assert value in PREREG
 
 
+REPLICATION = (ROOT / "prereg" / "signal_value_after_exhaustive.md").read_text()
+
+
+@pytest.mark.parametrize("value", ["10,100,000", "2,000 deals x 2 parities",
+                                   "+0.1220", "+0.0660"])
+def test_the_replication_registration_names_its_constants(value):
+    assert value in REPLICATION
+
+
+def test_the_replication_seed_is_none_of_the_four_that_came_before():
+    """3,600,000 produced the original; 9,300,000 the descriptive figures;
+    9,700,000 was withdrawn; 9,900,000 produced the +0.0660 that motivates
+    this one. A registration is not scored on the deals that motivated it."""
+    from scripts4.signal_gate_confirm import SEED0 as ORIGINAL
+    from scripts4.signal_deadline import SEED0 as DESCRIPTIVE
+    assert run.SEED0 == 10_100_000
+    assert run.SEED0 not in (ORIGINAL, DESCRIPTIVE, 9_700_000, 9_900_000)
+
+
+def test_the_replication_states_its_own_power_limit_in_advance():
+    """It can answer GONE and cannot cleanly separate SURVIVES from SHRUNK.
+    Said before the run so it cannot be presented afterwards as a clean
+    discrimination."""
+    flat = " ".join(REPLICATION.split())
+    assert "powered to answer GONE" in flat
+    assert "not powered to distinguish SURVIVES from SHRUNK" in flat
+
+
 def test_the_code_uses_those_constants():
-    #: 9,900,000 after the amendment, not 9,700,000: the first run was
-    #: withdrawn by a mis-specified gate, and a criterion corrected after
-    #: seeing an outcome may not be applied to the data that revealed it.
-    assert run.SEED0 == 9_900_000
+    #: The seed moves with each registration this instrument serves; the
+    #: current one is asserted in test_the_replication_seed_is_none_of_the_
+    #: four_that_came_before, which also says why each earlier base is barred.
     assert run.N_DEALS == 2_000
     assert run.REPLICATE == 2.598
 

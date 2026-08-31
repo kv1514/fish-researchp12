@@ -48,11 +48,12 @@ RULES_D = {"wrong_distribution_outcome": "opponent"}
 
 #: FIXED BY THE REGISTRATION. Not 3,600,000, which produced the 52-vs-72 lead,
 #: and not 9,300,000, which produced the waste figures this run rests on.
-#: AMENDED 2026-08-31: the 9,700,000 run was withdrawn by a mis-specified
-#: replication gate, and a criterion corrected AFTER seeing an outcome may not
-#: then be applied to the data that revealed it. Fresh deals.
-SEED0 = 9_900_000
-AGENT0 = 99_000
+#: 9,700,000 was withdrawn by a mis-specified replication gate; 9,900,000 ran
+#: prereg/signal_no_repeat.md and REFUTED it. 10,100,000 runs
+#: prereg/signal_value_after_exhaustive.md, whose primary is B - A rather than
+#: C - B: does the mechanism's published +0.1220 survive claim_forced_exhaustive?
+SEED0 = 10_100_000
+AGENT0 = 101_000
 N_DEALS = 2_000
 
 ARMS = {
