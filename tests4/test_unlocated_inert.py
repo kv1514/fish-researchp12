@@ -134,3 +134,49 @@ def test_zero_unlocated_does_not_explode():
     assert float(max(0, 1)) ** -4.0 == 1.0
     assert float(max(1, 1)) ** -4.0 == 1.0
     assert float(max(2, 1)) ** -4.0 == 0.0625
+
+
+def _marginals(bel, obs, w, seed=6_100_003):
+    """The posterior the instrument actually scores, at a fixed draw."""
+    import random
+
+    from fish4.posterior import Posterior
+
+    return Posterior(bel, random.Random(seed), n_draws=192, obs=obs,
+                     gamma=0.35, w_unlocated=w).marginals()
+
+
+def test_the_posterior_is_inert_at_the_default_too():
+    """Inert weights are not enough; the instrument scores MARGINALS.
+
+    scripts4/unlocated_belief.py compares Posterior.marginals() across cells at
+    a fixed RNG seed, so the baseline cell must reproduce the shipped posterior
+    exactly. A knob wired into build() but not forwarded by Posterior would
+    give a grid of identical cells -- and a confident null -- which is the
+    opp_lambda failure with a different cause.
+    """
+    bel, obs = _position()
+    import numpy as np
+
+    # marginals() is a numpy array, so identity is array_equal and not ==.
+    assert np.array_equal(_marginals(bel, obs, 0.0),
+                          _marginals(bel, obs, 0.0)), "not reproducible"
+    base = _marginals(bel, obs, 0.0)
+
+    import random
+
+    from fish4.posterior import Posterior
+    shipped = Posterior(bel, random.Random(6_100_003), n_draws=192, obs=obs,
+                        gamma=0.35).marginals()
+    assert np.array_equal(base, shipped), (
+        "w_unlocated=0.0 moved the posterior away from the shipped engine")
+
+
+def test_the_posterior_actually_moves_when_the_knob_is_live():
+    bel, obs = _position()
+    import numpy as np
+
+    assert not np.array_equal(_marginals(bel, obs, -4.0),
+                              _marginals(bel, obs, 0.0)), (
+        "Posterior did not forward w_unlocated to oppmodel.build, so every "
+        "grid cell would score the same belief.")

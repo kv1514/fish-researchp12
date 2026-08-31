@@ -89,7 +89,8 @@ class Posterior:
                  "stats", "n", "_sys", "_card_group", "_free", "_marg",
                  "_worlds", "_batch", "_sampler", "_exact_ok", "_idx",
                  "_free_pos", "depth_mode", "count_mode", "opp_lambda",
-                 "gamma_schedule", "sis_tilt", "silence_delta")
+                 "gamma_schedule", "sis_tilt", "silence_delta",
+                 "w_unlocated")
 
     def __init__(self, belief: BeliefState, rng: random.Random,
                  n_draws: int = 128, n_worlds: int = 32,
@@ -98,6 +99,7 @@ class Posterior:
                  opp_lambda: float = 0.0, gamma_schedule: float = 0.0,
                  sis_tilt: float = 0.0, silence_delta: float = 1.0,
                  gamma_team: Optional[float] = None,
+                 w_unlocated: float = 0.0,
                  convention_beta: float = 0.0,
                  convention_q: float = 0.0,
                  convention_aim: bool = False,
@@ -117,6 +119,10 @@ class Posterior:
         # Like gamma, the silence prior conditions on behaviour, so it needs
         # the observation; without one it is inert.
         self.silence_delta = float(silence_delta) if obs is not None else 1.0
+        #: Opportunity exponent on the choice model, per
+        #: prereg/unlocated_belief.md. Inert at 0.0 and, like gamma, needs the
+        #: observation: without one there are no asks to weight.
+        self.w_unlocated = float(w_unlocated) if obs is not None else 0.0
         self.depth_mode = depth_mode
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda
@@ -200,6 +206,7 @@ class Posterior:
                                        gamma_schedule=self.gamma_schedule,
                                        sis_tilt=self.sis_tilt,
                                        gamma_team=self.gamma_team,
+                                       w_unlocated=self.w_unlocated,
                                        convention_beta=self.convention_beta,
                                        convention_q=self.convention_q,
                                        convention_aim=self.convention_aim,
