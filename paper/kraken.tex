@@ -1291,7 +1291,7 @@ The screening tier is unaffected and deliberately so. It returns a product for
 \emph{both} elements, so the pair is internally consistent; what could not
 stand was one of each.
 
-\paragraph{But the screen itself carries a correctness claim, so we measured
+\paragraph{The screen itself carries a correctness claim, so we measured
 that too.} The middle tier skips the joint query when the product of the
 per-card MAP marginals falls below $0.35$, and returns the product as the
 half-suit's probability. Its justification is the comment ``most half-suits are
@@ -1314,7 +1314,7 @@ screened half-suit ever turns out to be claimable, rather than a comment.
 information.} The mechanism above is right that an opponent cannot take a
 half-suit our team wholly owns: a claim by a player whose team does not hold
 all six \emph{gives} the set to us. But the same fact that makes waiting safe
-makes it sterile, and the argument as first written did not notice.
+makes it sterile.
 \texttt{GameState.legal\_asks} requires the asker to hold a card of the
 half-suit they are asking in. Once our team holds all six, no opponent holds
 one, so \emph{no opponent can ever ask in it again}. Every public event that
@@ -2168,7 +2168,7 @@ could not be right. Split at the halfway point, $\alpha = 1.331 \pm 0.049$ early
 against $0.232 \pm 0.118$ late. The likelihood prefers the fitted constant to
 $\alpha = 0$ by 1402 nats and to $\alpha = 1$ by 40.
 
-\paragraph{And most of the decay is the covariate, not the player.} The obvious
+\paragraph{Most of the decay is the covariate, not the player.} The obvious
 reading of Table~\ref{tab:choicecurve} is behavioural: a player asks where they
 are deep only if they had a choice, and late, holding two cards with most of the
 deck resolved, legality binds. That reading is largely wrong, and the same
@@ -2378,7 +2378,7 @@ worse than the error, and the pre-registration is what stops that from being
 discovered after the fact. Arm C does not clear $+0.15$; G2, against the v0.3
 champion, therefore does not run, and nothing ships.
 
-\paragraph{And in play, it is real and not worth buying.}
+\paragraph{In play it is real and not worth buying.}
 \label{sec:res-atask} Everything above is an
 argument from likelihood and from a normaliser, not from a duel, so the
 configuration it points at --- at-ask-time depth at $\gamma = 1.0$, the better
@@ -2475,8 +2475,7 @@ vertex because past there the parabola turns up and the measurements do not.
 Given the paragraph above it is best read as a \emph{dilution correction}: the
 engine conditions on initial-deal depth, that covariate degrades as the game
 runs on, and a degrading covariate should be believed less. That is a more modest
-claim than the behavioural one this was first written up as, and a better
-supported one, and it predicts the term should become unnecessary under the
+claim than a behavioural one, and a better supported one, and it predicts the term should become unnecessary under the
 at-ask-time covariate, where nothing drifts. It
 is normalised by the profile's mean over the observed distribution of asks, so
 full strength redistributes the model's belief across the game without changing
@@ -2569,7 +2568,7 @@ from the opponent model itself, the largest figure in this paper. It is not the
 largest \emph{single} change: that is the sampler's $+0.340$, and this number is
 two changes at once.
 
-\paragraph{And it has now been played directly, which is the only reason the
+\paragraph{It has now been played directly, which is the only reason the
 number above can stand unqualified.} A chained estimate inherits both links'
 assumptions --- in particular that each change's effect does not depend on the
 deal population the other was measured over. That was plausible, since both
@@ -2631,7 +2630,7 @@ that withdrawn arm at $\texttt{endgame\_m}=2$. The run reported here measures
 the two-knob arm, not today's deployed spec; both are given verbatim in
 Appendix~\ref{app:champion}.
 
-\paragraph{And it stops paying: precision's returns diminish.} If tripling the
+\paragraph{It stops paying: precision's returns diminish.} If tripling the
 sampling budget is worth $+0.340$, the obvious question is whether tripling it
 again is worth as much. Pre-registered in
 \path{jobs/PREREGISTRATION_precision2.md} with a \emph{minimum interesting
@@ -3174,7 +3173,7 @@ the error rate across $k = 0 \ldots 5$ runs $0.050$, $0.068$, $0.057$, $0.057$,
 $0.042$, $0.077$, with no trend. \textbf{What a declaration risks is not how
 many cards you are missing but how many of them have never moved.}
 
-\paragraph{And the split is not frozen, which we asserted before checking.}
+\paragraph{The split is not frozen.}
 It is natural to say that once a team holds all six no opponent may legally ask
 in the half-suit, so nothing further can inform the split. The first clause is
 right and the conclusion does not follow. Hand counts are public and
@@ -3693,7 +3692,7 @@ Coverage is nominal. The observed spread of the block estimates, $0.2454$, is
 \emph{smaller} than their own standard errors predict, $0.2701$; there is no
 excess variance to attribute. A duplicate-deal interval means what it says.
 
-\paragraph{So we retract the between-run variance.} An earlier version of this
+\paragraph{We retract the between-run variance.} An earlier version of this
 section reported $\tau = 0.268$ sets per pair from the three cells above and
 argued that it made every small result in this paper more fragile than it looks.
 That was a Type I error. The $Q = 7.03$, $p = 0.030$ which produced it is exactly
@@ -3703,7 +3702,7 @@ Section~\ref{sec:res-replication} and two of its four lessons to warning against
 committed inside the section doing the warning. The minimum-detectable-effect
 table stands as written.
 
-\paragraph{Which leaves the lookahead genuinely open, on better terms.} If the
+\paragraph{The lookahead is left genuinely open, on better terms.} If the
 cells are homogeneous (and a harness that produces no excess heterogeneity
 under the null is strong evidence that they are), then fixed-effect pooling is
 the valid analysis, and over all 1200 pairs the estimate is $+0.226$, 95\% CI
@@ -3739,7 +3738,7 @@ two decisive ones, neither significant. Combined with the A/A measurement above,
 the story is simply that one cell was selected for being large and the rest is
 sampling noise --- no between-run variance, and nothing wrong with the harness.
 
-\paragraph{And the sizing was wrong, by the error this section is about.} We
+\paragraph{The sizing was wrong, by the error this section is about.} We
 chose $n = 2600$ on the grounds that its minimum detectable effect of $0.21$
 would separate $+0.23$ from zero. But $+0.23$ was the pool \emph{including} the
 selected cell --- the inflated estimate. Against the unbiased $+0.153$, a
@@ -4347,7 +4346,7 @@ well-argued, specific, mechanistic, and supported by a number. It was also never
 tested, because testing it required exactly the thing it asserted was
 impossible.
 
-\paragraph{And the weights were played, which settles the line.} Everything
+\paragraph{The weights were played, which settles the line.} Everything
 above is estimation. \path{jobs/PREREGISTRATION_learned_weights.md} fixes,
 before the fit was run and before any weight vector had been looked at, that
 the \emph{validation duel is the test}: two blocks of $1000$ fresh pairs, the
@@ -4725,7 +4724,7 @@ from ``buys no wins'' to ``plausibly worth about a set every fifteen
 games, not yet demonstrated at this power'' --- a properly sized
 extension is registered future work rather than a post-hoc one.
 
-\paragraph{And there is a specific reason to expect that extension to land
+\paragraph{There is a specific reason to expect that extension to land
 differently, which is not a reason we had at the time.} Both measurements of
 this protocol fired it at the same threshold. The relaxed mode signals only
 when the ask the seat would otherwise make has $p \leq 0.15$
@@ -5480,8 +5479,8 @@ $35\%$. Of the rest, 141 had a belief support above $24$ deals and 63 exceeded
 the $300{,}000$-node budget, and those are the \emph{wide} positions: the ones
 where the champion knows least. (A further 28 positions over the budget had a
 support of \emph{one}: those are pinned, so they belong to the control above
-rather than to the hidden set, and counting them here, as an earlier draft
-of this paragraph did, understates the coverage. The control therefore ran
+rather than to the hidden set, and counting them here would
+understate the coverage. The control therefore ran
 on $34$ of the $62$ pinned positions available, not all of them.) Supports of $2$ and $3$ alone account for
 50 of the 109 solved. So $+0.3250$ is the gain on the easier half of a harder
 layer, which is exactly where one should expect the champion to look better
@@ -5945,7 +5944,7 @@ The better ask is riskier on $113$ of $122$ at $m = 1$ and safer on
 \emph{none}. On $73$ of those $122$ the champion asked a card it was
 \textbf{certain} to get, and that was still a mistake.
 
-\paragraph{But it is certainty, not probability.} The obvious fix (weigh
+\paragraph{It is certainty, not probability.} The obvious fix (weigh
 the success probability less) does not work, and the data says so before any
 duel. The objective is $\mathrm{score}(a) = p(a) + F(a)\cdot w$, and since the
 argmax is scale-invariant, $p + F\cdot(kw)$ ranks asks exactly as
@@ -6328,7 +6327,7 @@ after the netting, not the margin a differently-declaring v0.7 would have
 conceded. The distinction is worth insisting on because the temptation is to
 read the last row as ``our true strength'', and it is not that.
 
-\paragraph{And what the other $39\%$ is made of.} The residual --- everything
+\paragraph{What the other $39\%$ is made of.} The residual --- everything
 asking, inference and search produce once the declarations net out --- has a
 shape that follows from the rules. Every set is won by declaring a half-suit
 your team holds, so once misdeclarations are accounted for what remains is the
@@ -6741,7 +6740,7 @@ artefact of the screen that measured it.
 The advice does not change, and it is now better supported. Withholding does
 not pay. Take the certain ask.
 
-\paragraph{And trading hard does not pay either.} Every cell above
+\paragraph{Trading hard does not pay either.} Every cell above
 \emph{withholds}. The opposite policy --- take the card straight back, trade
 hard inside the duel, which is what strong players more often describe doing
 --- had never been measured. It has now been, at $2000$ pre-registered pairs
@@ -6788,7 +6787,7 @@ an implementation that did not match its own stated hypothesis. The unit test
 that should have caught it was named for exactly this property and its example
 happened to run both ways, so it passed against code that did not have it.
 
-\paragraph{And a warning about the obvious idea.} Scoring asks by ``how much
+\paragraph{A warning about the obvious idea.} Scoring asks by ``how much
 does this improve my team's chance of winning this half-suit'', which sounds
 like the right objective, is measured in the right units, and rests on a
 well-calibrated model --- is a disaster: $-7.4$ sets per deal-pair against simply
