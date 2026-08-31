@@ -3427,3 +3427,74 @@ the discipline, not downstream of it.
 120 games. Either they are the same policy under two names in the registry or
 the seeds made them coincide; worth one look before either is used as a
 separate opponent anywhere.
+
+---
+
+## OUTCOME 2026-08-31 — the prediction holds. The opponent's errors are counted, not solved.
+
+`results/where_the_margin_lives.json`, seed 11,300,000, three arms on the same
+2,000 deals, 116 minutes. The first instrument in this line to **count** the
+opponent's declarations rather than discard them.
+
+Scored against `prereg/where_the_margin_lives.md`, which was committed while
+this run had printed nothing:
+
+| prediction, as registered | measured | |
+|---|---|---|
+| 1. `verify()` empty; `d_us + d_them = 9.000` per arm | no problems; 9.0000 exactly, residual $\le 4\times10^{-16}$ | **held** |
+| 2. `their_wrong/game` B_signal − A_shipped ≈ **+0.13** | **+0.1200** | **held on magnitude** |
+| 3. `their_wrong/game` C_defer − A_shipped ≈ 0, within ±0.02 | **+0.0073** | **held** |
+| 4. margins near +0.14 and +0.05 | +0.1190 and +0.0540 | **held** |
+
+The identity closes on a **measured** opponent ledger, not a solved one. Every
+`w_them` in the table above now reads "measured, and it agrees with the
+identity".
+
+### The decomposition, on data that counted both sides
+
+| arm | effect | race | ours | **theirs** |
+|---|---|---|---|---|
+| `B_signal` | +0.1190 | −0.1655 | +0.0445 | **+0.2400** |
+| `C_defer` | +0.0540 | −0.0645 | **+0.1040** | +0.0145 |
+
+And the rate split, now measured rather than derived:
+
+| arm | their error rate | volume | **rate** | cross |
+|---|---|---|---|---|
+| `A_shipped` | 0.2187 | | | |
+| `B_signal` | **0.2437** | +0.0362 | **+0.1997** | +0.0041 |
+| `C_defer` | 0.2188 | +0.0141 | +0.0004 | +0.0000 |
+
+**83% of what signalling buys is a rise in the opponents' per-declaration error
+rate**, 21.87% to 24.37%. Deferral moves that rate by $+0.0001$ and buys its
+margin entirely from our own errors. The two mechanisms are confirmed distinct
+on data that sees both halves of the board.
+
+The solved figures predicted 21.34% → 24.13% and a rate share of 84%; the
+counted figures are 21.87% → 24.37% and 83%. The residual method and the direct
+count agree to within a quarter of a point.
+
+### What this run cannot say, and why that is my fault
+
+Prediction 2 said the opponent contrast would be **clear of zero**. The point
+estimate is +0.1200 and the magnitude is right, but **there is no interval on
+it**, because the paired deal-clustered interval on `opp_wrong` was added to
+the instrument at about 17:05 and this run started at 16:14. It ran the old
+code. The sequencing error is mine: I added the measurement the prediction
+needed after launching the run that was supposed to test it.
+
+So prediction 2 is scored as held on magnitude and **unscored on clearance**.
+The next run of this instrument reports that interval; `signal_vs_defer._tail`
+now computes it for every registration.
+
+### Where the line stands
+
+| claim | status |
+|---|---|
+| the margin is an identity with three channels | arithmetic; residual zero on 21 arms |
+| signalling is an opponent-error intervention | +0.2400 of +0.1190, **counted on both sides** |
+| 83% of that is a rate change, not a handover | 21.87% → 24.37%, measured |
+| deferral is an own-error intervention | +0.1040 of +0.0540, theirs +0.0145 |
+| they are distinct mechanisms | confirmed on one paired run over the same deals |
+| **it may be a `dylan_v07` fact** | **open, and the screen says there is barely a second place to look** |
+| neither ships | +0.1190 and +0.0540 against a bar of +0.15 |
