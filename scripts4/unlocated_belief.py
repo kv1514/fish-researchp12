@@ -232,6 +232,10 @@ def main(n_games: int = 40, stride: int = 4, out: str | None = None) -> int:
         print(f"{r['w_unlocated']:>6}  {r['team_nll']:>9.5f} "
               f"{r['team_top1']:>10.5f}  {r['opp_nll']:>9.5f} "
               f"{r['opp_top1']:>9.5f}")
+    print(f"\nSCORED AT n_draws = {N_DRAWS}"
+          f"   (gamma_split.py and the convention instruments score at 720; "
+          f"effects measured at different n_draws are not directly "
+          f"comparable -- results/channel_precision.json)")
     print("\npaired against w=0.0, clustered by GAME (t at k-1 df):")
     for r in rows:
         pt = r["paired_team"]

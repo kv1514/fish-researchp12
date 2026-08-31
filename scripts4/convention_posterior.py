@@ -365,7 +365,14 @@ def _v2(bel, obs, spec, decisions, acc):
 def _report(mc, res):
     v = res["validity"]
     print(f"\n=== sender {mc} ===")
-    print(f"{res['decisions']} scored decisions\n")
+    print(f"{res['decisions']} scored decisions, scored at n_draws = "
+          f"{N_DRAWS}")
+    # Printed rather than left in the payload: the engine plays at 480 and this
+    # scores at 720, and a paired belief effect is measurably smaller at 480
+    # (-0.0368 against -0.0382 for the aimed book at beta=0.8,
+    # results/channel_precision_shipped.json).
+    print("(the engine plays at 480; a paired effect here is a few per cent "
+          "larger than at the shipped precision)\n")
     print(f"  V1 message on the wire     {v['v1_carried']}/{v['v1_our_asks']} "
           f"= {100 * v['v1_rate']:.1f}%   (floor 25%)  "
           f"{'PASS' if v['v1_rate'] >= 0.25 else 'VOID'}")

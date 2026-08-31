@@ -2076,6 +2076,27 @@ a fact about all of them that nobody had --- and it is worth a few per cent, not
 a sixth. The four cells the descriptive run shares with the registered one came
 back bit-identical, which is what the per-decision seeding is for.
 
+### The audit that follows, and it comes back clean
+
+If a paired belief effect depends on `n_draws`, then two instruments scoring at
+different precisions cannot have their magnitudes compared, and this project has
+at least two: `gamma_split.py` and the convention instruments at **720**,
+`unlocated_belief.py` at **480**. So: does any standing claim actually compare
+across them?
+
+**No.** Every belief results file already records its own `n_draws` in the
+payload --- checked, all five --- and the one cross-instrument reference in this
+document, `gamma_team`'s refutation cited beside `unlocated_now`'s, compares
+*directions* ("better NLL, worse top-1") and not magnitudes. A direction is a
+sign and survives a precision difference.
+
+Recorded as a clean negative rather than left as an implied problem. What was
+genuinely missing is that **nothing printed the precision beside the table**, so
+a reader had to open a JSON file to find out whether two runs were comparable.
+`gamma_split.py`, `unlocated_belief.py` and `convention_posterior.py` now print
+it in their summary header with the warning attached. The hazard is real, the
+data to detect it was always there, and no result depended on it.
+
 ## What it does not say
 
 It does not explain the drift. That was a **model** change over eleven commits;

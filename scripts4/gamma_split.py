@@ -285,7 +285,16 @@ def main(n_games: int = 40, stride: int = 4, out: str | None = None) -> int:
                  if r["gamma_opp"] == 0.35 and r["gamma_team"] == 0.35), None)
     print(f"\n=== posterior accuracy by side, {decisions} decisions, "
           f"{n_games} games ===")
-    print("play is the incumbent throughout; truth scores only, never acts\n")
+    print("play is the incumbent throughout; truth scores only, never acts")
+    # The scoring precision belongs BESIDE the table, not only in the payload.
+    # It was a module constant in three instruments set to two different values
+    # -- 720 here, 480 in unlocated_belief.py -- and nothing printed it, so two
+    # runs could be read side by side without either saying they were not
+    # scored at the same precision. results/channel_precision.json measures how
+    # much that is worth: a paired belief effect grows with n_draws.
+    print(f"SCORED AT n_draws = {N_DRAWS}"
+          f"   (the engine plays at {V06_DEPLOYED[1]['n_draws']}; effects "
+          f"measured at different n_draws are not directly comparable)\n")
     print(f"{'g_opp':>6} {'g_team':>7} | {'team NLL':>9} {'opp NLL':>9} "
           f"{'pooled':>9} | {'team top1':>10} {'opp top1':>9}")
     print("-" * 74)
