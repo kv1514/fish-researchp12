@@ -4799,6 +4799,31 @@ rates come from the same program, a forced declaration is still wrong
 $273$ times as often as a voluntary one ($36.6\%$ against $0.13\%$). The price of ``too late'' fell; it
 did not stop being the thing that separates the two groups.
 
+A new instrument answers the question this section leaves open, and its first
+answer was wrong in a way worth recording. Measuring the state at each
+signalling decision over $1{,}600$ fresh games
+(\path{results/signal_deadline.json}) shows that the stall clock ---
+$80$ actions with no half-suit resolved, after which the engine forces a
+declaration --- does \emph{not} separate the two groups at the moment the
+signal fires: $13.0$ actions against $12.1$, an interval covering zero. What
+separates them there is how much game is left, and chiefly how many legal asks
+the seat still has, $31.9$ against $20.5$. Read from those observables alone
+the conclusion is that the mechanism runs out of asks rather than time. It is
+the wrong conclusion. Counting which of the engine's two forced routes actually
+fires puts $185$ of the $244$ bad episodes on the stall route and only $59$ on
+the no-legal-ask route.
+
+Both readings are of the same data, and the reconciliation is the result. The
+gate is a per-turn predicate, so a seat with no good ask to make keeps
+satisfying it and signals again: episodes that end badly carry a mean of $42.5$
+signals against $5.6$ for those that end well, and the stall clock they started
+at $12$ stands at $59$ by the last of them. The mechanism is not racing a clock
+it cannot see --- it is running that clock down itself, and low askability
+predicts which episodes will. What the row needs is therefore not a deadline
+predictor but a limit on repeats: a signalling ask proves once that a seat does
+not hold one named card, and proving it forty more times spends forty actions
+of the seat's own window to say nothing new.
+
 One methodological note, recorded rather than buried. The regression form of
 the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
 $[+0.0117, +0.1863]$, excluding zero, where the directly conditioned figure is

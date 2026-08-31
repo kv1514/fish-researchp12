@@ -2592,15 +2592,59 @@ into it.
 
 **What separates them is how much game is left.** Fewer legal asks, fewer cards
 in hand, fewer cards on the weakest teammate, fewer live half-suits, and 24
-actions later in the game. `agent4.decide` has TWO routes to a forced
-declaration — `not asks` and `stalled and claimable` — and every separating
-variable belongs to the first while the only variable belonging to the second
-separates nothing. The mechanism is not running out of TIME. It is running out
-of ASKS.
+actions later in the game.
 
-That is a better answer than the one the paper leaves open, and it points
-somewhere concrete: a predictor firing at signal time would read remaining
-askability, which is a quantity this project already built machinery for.
+### CORRECTION, one commit later: the count says the opposite of the inference
+
+The paragraph that stood here concluded, from the observables alone, that
+"the mechanism is not running out of TIME, it is running out of ASKS" —
+because `agent4.decide` has two routes to a forced declaration, `not asks` and
+`stalled and claimable`, and every separating variable belonged to the first
+while the only variable belonging to the second separated nothing. It was
+recorded at the time that pointing is not counting, and `forced_reason` was
+added to count it. **The count goes the other way, 3 to 1:**
+
+| which deadline actually fired on the 244 too-late episodes | |
+|---|---|
+| `stalled and claimable` | **185** |
+| `not asks` | 59 |
+| unattributed | 0 |
+
+Both facts are true, and reconciling them is the finding. Per episode:
+
+| | in time (n=355) | too late (n=244) |
+|---|---|---|
+| fires in the episode | 5.6 | **42.5** |
+| stall clock at the FIRST fire | 13.0 | 12.1 |
+| stall clock at the LAST fire | 14.2 | **59.4** |
+| `legal_asks` at the first fire | 31.9 | 20.5 |
+| `p_best` at the first fire | 0.111 | 0.070 |
+
+The clock does not predict at the first fire because at the first fire there is
+nothing to predict: both groups are twelve or thirteen actions into a window of
+eighty. What happens next is that the low-askability episodes **spin** — 42.5
+signals against 5.6 — and the spinning is what walks the clock from 12 to 59.
+The gate is a per-turn predicate on `p_best <= signal_max_p`; a seat with few
+legal asks has no good ask to make, so the gate stays true, so it signals
+again, so it burns another action of its own stall window.
+
+**The signal is not racing a clock it cannot see. It is running the clock down
+itself.** Remaining askability is the right PREDICTOR of which episodes do
+that; the stall window is the deadline that then fires. The previous paragraph
+had the predictor right and the deadline exactly backwards.
+
+### Which changes what a fix would be
+
+Not a deadline predictor. A REPEAT LIMIT. A signalling ask proves publicly that
+this seat does not hold one named card; re-proving it on the next turn adds
+nothing, and the mechanism does it a mean of 42.5 times in exactly the episodes
+that end badly. The intervention is cheap, local to the gate in
+`agent4.decide`, and has an obvious inert default (no limit = today's
+behaviour, bit-identical).
+
+It is a lead, not a result. It has not been registered and has not been run,
+and the reason for the delay is on the record above: the previous confident
+reading of this same data survived one commit.
 
 ### The negative control moved, and it does not mean what it looks like
 
