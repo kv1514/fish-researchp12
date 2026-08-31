@@ -67,17 +67,43 @@ def test_kraken_resolves_to_the_deployed_champion():
     assert resolve("kraken") == V06_DEPLOYED
 
 
+def _fake(with_split: bool):
+    def cell(rate, margin, w, t_, l):
+        c = {"win_rate": rate, "margin": margin}
+        if with_split:
+            c.update(wins=w, ties=t_, losses=l)
+        return c
+    return {"field": ["a", "b"], "n_deals_per_cell": 10,
+            "cells": {"a|a": cell(0.5, 0.0, 2, 2, 2),
+                      "a|b": cell(0.7, 1.0, 4, 0, 2),
+                      "b|a": cell(0.3, -1.0, 2, 0, 4),
+                      "b|b": cell(0.5, 0.0, 3, 0, 3)}}
+
+
 def test_the_report_flags_a_structural_diagonal():
     """The diagonal note has to be present, because a 50.0% diagonal under the
     harness DEFAULT is a tautology rather than a check."""
-    t = {"field": ["a", "b"], "n_deals_per_cell": 10,
-         "cells": {"a|a": {"win_rate": 0.5, "margin": 0.0},
-                   "a|b": {"win_rate": 0.7, "margin": 1.0},
-                   "b|a": {"win_rate": 0.3, "margin": -1.0},
-                   "b|b": {"win_rate": 0.5, "margin": 0.0}}}
-    out = render_matrix(t)
+    out = render_matrix(_fake(with_split=True))
     assert "INDEPENDENTLY" in out
     assert "50.0%" in out
+
+
+def test_the_report_prints_the_self_match_split():
+    """A diagonal cell reading exactly 50.0% is ambiguous from the rate alone:
+    either a coincidence (wins and losses balancing) or the structural tie the
+    harness default produces. Only the split separates them, and a 6-deal
+    pilot really did produce the ambiguous case."""
+    out = render_matrix(_fake(with_split=True))
+    assert "self-match splits" in out
+    assert "a 2/2/2" in out
+
+
+def test_the_report_degrades_on_cells_without_a_split():
+    """An older run, or any caller that recorded only rates, must still get
+    the note rather than a KeyError."""
+    out = render_matrix(_fake(with_split=False))
+    assert "INDEPENDENTLY" in out
+    assert "self-match splits" not in out
 
 
 def test_tournament_declares_its_two_design_choices():

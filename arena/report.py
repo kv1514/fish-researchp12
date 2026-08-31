@@ -45,9 +45,15 @@ def render_matrix(t: dict) -> str:
         # or the structural tie the harness default produces. Only the split
         # tells them apart, and the difference is whether the check means
         # anything.
-        out.append("")
-        out.append("  self-match splits (W/T/L of pairs): " + ",  ".join(
-            f"{a} {c['wins']}/{c['ties']}/{c['losses']}" for a, c in diag))
+        # Degrade rather than raise: a cell may come from an older run, or
+        # from any caller that only recorded rates. The note above is the
+        # load-bearing part; the split is an aid to reading it.
+        split = [(a, c) for a, c in diag
+                 if all(k in c for k in ("wins", "ties", "losses"))]
+        if split:
+            out.append("")
+            out.append("  self-match splits (W/T/L of pairs): " + ",  ".join(
+                f"{a} {c['wins']}/{c['ties']}/{c['losses']}" for a, c in split))
     return "\n".join(out)
 
 
