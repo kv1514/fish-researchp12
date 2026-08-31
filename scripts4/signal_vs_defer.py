@@ -36,6 +36,8 @@ from fish4.clustered import cluster_ci, fmt                   # noqa: E402
 from fish4.dylan_v07 import BRIDGE_REV                        # noqa: E402
 from scripts4.duel import engine_fingerprint                  # noqa: E402
 from scripts4.margin_identity import verify as identity_check  # noqa: E402
+from scripts4.resultfile import (default_path,                # noqa: E402
+                                 write as write_result)
 from scripts4.path_ledger import PATHS, _path_of              # noqa: E402
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
@@ -542,8 +544,10 @@ def main(n_deals: int | None = None, n_jobs: int | None = None,
     payload["registered_n_deals"] = REGISTERED_N
     payload["smoke"] = n_deals != REGISTERED_N
     payload["minutes"] = round((time.time() - t0) / 60, 1)
-    path = Path(out) if out else ROOT / "results" / "signal_vs_defer.json"
-    path.write_text(json.dumps(payload, indent=1))
+    #: Four registrations share this instrument. A single default filename
+    #: for all of them is the hazard that already cost one cited run.
+    path = Path(out) if out else default_path(PREREG, SEED0)
+    path = write_result(path, payload)
     print(f"\nwrote {path}  ({payload['minutes']} min)")
     return 0 if not payload["interaction"]["verdict"].startswith("WITHDRAWN") \
         else 1

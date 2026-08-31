@@ -42,6 +42,8 @@ from fish.rules import RuleConfig                             # noqa: E402
 from fish4.clustered import cluster_ci, fmt                   # noqa: E402
 from fish4.dylan_v07 import BRIDGE_REV                        # noqa: E402
 from scripts4.duel import engine_fingerprint                  # noqa: E402
+from scripts4.resultfile import (default_path,                # noqa: E402
+                                 write as write_result)
 from scripts4.path_ledger import PATHS, _path_of              # noqa: E402
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
@@ -364,8 +366,11 @@ def main(n_deals: int = N_DEALS, n_jobs: int | None = None,
     payload["registered_n_deals"] = N_DEALS
     payload["smoke"] = n_deals != N_DEALS
     payload["minutes"] = round((time.time() - t0) / 60, 1)
-    path = Path(out) if out else ROOT / "results" / "signal_no_repeat.json"
-    path.write_text(json.dumps(payload, indent=1))
+    #: The seed is in the DEFAULT filename because it was not, and the
+    #: registered re-run at 10,100,000 overwrote the 9,900,000 run the paper
+    #: cites by name. resultfile.write refuses the rest.
+    path = Path(out) if out else default_path("signal_no_repeat", SEED0)
+    path = write_result(path, payload)
     print(f"\nwrote {path}  ({payload['minutes']} min)")
     return 0 if payload["primary"]["verdict"].split(":")[0] != "WITHDRAWN" else 1
 
