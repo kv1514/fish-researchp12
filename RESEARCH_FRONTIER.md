@@ -2469,7 +2469,55 @@ declaration worse?** Avoiding an error is worth +1.61 and adding one costs
 turns a real mechanism into a +0.122 that misses a +0.15 bar.
 
 That is a well-posed question with a measured decomposition already behind it,
-and it is left as a question here rather than answered with a mechanism.
+and it needs no new play to answer: `results/signal_gate_journal.jsonl` already
+carries a per-game, per-arm declaration path ledger for all 1,000 games.
+
+### Answered, from data already on disk
+
+`scripts4/signal_error_paths.py`, `results/signal_error_paths.json`. The split
+reconciles exactly against the registration --- **52 added, 72 avoided, 876
+unchanged** --- which is the check that the right baseline is being used, since
+C against `B_incumbent` instead gives 22 / 28 / 950 and would have looked like a
+new finding.
+
+**Where the declarations move, C minus A, per game:**
+
+| group | voluntary | gate | forced | exact |
+|---|---|---|---|---|
+| errors **ADDED** (n=52) | **-0.788** | -0.635 | **+1.327** | -0.250 |
+| errors **AVOIDED** (n=72) | **+0.139** | -0.847 | **-0.139** | +0.111 |
+
+**And what each path costs**, arm C over all 1,000 games:
+
+| path | declarations | wrong |
+|---|---|---|
+| voluntary | 3,692 | **0.1%** |
+| exact | 796 | 0.0% |
+| gate | 78 | 10.3% |
+| **forced** | 307 | **46.3%** |
+
+Signalling drains the **gate** path in both groups, by about the same amount
+(-0.635 against -0.847). That part is the mechanism working as designed and it
+is *not* what separates the two outcomes.
+
+What separates them is entirely **where the drained declaration lands instead**:
+
+* **avoided** -> it becomes **voluntary** (+0.139) and exact (+0.111). The split
+  got placed, so the declaration is made knowingly, at 0.1% wrong.
+* **added** -> it becomes **forced** (+1.327) while voluntary *falls* (-0.788).
+  The split did not get placed; the spent turn pushed the seat past the
+  deadline, at 46.3% wrong.
+
+So the protocol is not choosing badly between targets --- measured above, 208/208
+--- or between thresholds --- retired by its own registration. **It is spending a
+turn on information that arrives in time in 72 games and too late in 52**, and
+the price of "too late" is a 0.1%-wrong declaration becoming a 46.3%-wrong one.
+
+That is the first statement of this mechanism's failure mode in terms of the
+thing it actually trades, and it says what a fix would have to be: not a better
+target and not a wider gate, but a condition that predicts **whether the
+information will arrive before the deadline**. Which is what "how early" was
+groping at, now with a measurement under it instead of a guess.
 
 ## The probe reported zero first, and the reason is the recurring one
 
