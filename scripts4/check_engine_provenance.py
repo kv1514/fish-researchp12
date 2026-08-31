@@ -119,6 +119,32 @@ def in_history(path: str, digest: str) -> bool:
     return False
 
 
+def heterogeneity(cells):
+    """Do these blocks disagree by more than their noise? Cochran's Q, 1 df.
+
+    The closing note of this check has always said that a mixed pool "is not
+    automatically wrong -- the blocks may differ by less than their noise",
+    and then never worked out whether they did. So the reader was told the
+    reassuring possibility and left to assume it. It is one line of arithmetic
+    from data already in the record, and it is the difference between "two
+    programs, unknown consequence" and "two programs whose blocks agree to
+    within a fifth of a sigma".
+
+    A small Q does NOT prove the programs identical: two blocks of a thousand
+    pairs cannot see a difference much smaller than their own interval. It
+    rules out the case that matters here -- one program carrying a real effect
+    that the other cancels, which is exactly what would show up as spread.
+    """
+    est = [c["diff_mean"] for c in cells]
+    se = [(c["diff_ci"][1] - c["diff_ci"][0]) / (2 * 1.96) for c in cells]
+    if any(s <= 0 for s in se) or len(cells) < 2:
+        return None
+    w = [1.0 / (s * s) for s in se]
+    mu = sum(wi * e for wi, e in zip(w, est)) / sum(w)
+    q = sum(wi * (e - mu) ** 2 for wi, e in zip(w, est))
+    return q, len(cells) - 1, mu, 1.96 * (1.0 / sum(w)) ** 0.5
+
+
 def _wrap(text: str, width: int = 68):
     line, out = "", []
     for word in text.split():
@@ -195,14 +221,25 @@ def main() -> int:
                     marks.append(f"{f}@{d} NOT IN GIT HISTORY")
             note = ("  <- " + "; ".join(marks)) if marks else ""
             print(f"      {ts}Z  {r['diff_mean']:+.3f}  {r['label']}{note}")
+        het = heterogeneity(fp)
+        if het:
+            q, df, mu, half = het
+            # 3.84 is chi2(0.95, 1); for more blocks this is only indicative.
+            verdict = ("blocks DISAGREE -- the mixture is doing something"
+                       if (df == 1 and q > 3.84) else
+                       "blocks agree within their noise")
+            print(f"      Q = {q:.2f} on {df} df: {verdict}. "
+                  f"Pooled {mu:+.4f} +/- {half:.4f}")
         print()
 
     print(f"\n{clean} pools on one engine, {bad} mixed, {settled} mixed but "
           f"superseded, {unknown} not fully fingerprinted.")
     if bad:
         print("\nA mixed pool is not automatically wrong -- the blocks may differ by\n"
-              "less than their noise. It is that the interval describes an\n"
-              "average over two programs, which is not what it is quoted as.")
+              "less than their noise, and the Q above says whether they do. It is\n"
+              "that the interval describes an average over two programs, which is\n"
+              "not what it is quoted as. Agreement bounds the damage; it does not\n"
+              "make the pool one measurement of one thing.")
     return 1 if bad else 0
 
 
