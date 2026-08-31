@@ -154,6 +154,34 @@ def paired(cell_pool, base_pool):
 
     Returns (mean, lo, hi, n_decisions). Positive means the cell is WORSE on a
     loss (NLL) and BETTER on a hit rate (top-1); callers label the direction.
+
+    THE UNIT HERE IS THE DECISION, AND THAT IS NOT THE WHOLE STORY.
+
+    Cards inside one decision are strongly correlated, which is why the
+    decision and not the card is the unit -- see the Pool docstring above. But
+    decisions inside one GAME are correlated too: they share a deal, a seed and
+    a policy realisation. This run scored 1,557 decisions drawn from 60 games,
+    so the 1.96 interval below is computed over roughly twenty-six times more
+    units than there are independent ones, and is understated by a factor this
+    function cannot know -- the design effect depends on the intra-game
+    correlation, not on the counts alone.
+
+    That is #83's finding one level in, and it was not re-clustered with the
+    rest: results/cluster_audit.json covers declare_regret only. Nor can it be
+    from the file, because to_dict() keeps means and intervals and drops
+    per_decision -- exactly the case the paper names as the argument for
+    storing per-pair data.
+
+    What it does NOT touch is the conclusion. gamma_team was refuted because
+    top-1 moved the WRONG WAY (0.39279 -> 0.38178 at gamma_team=0.7 while NLL
+    improved), and a direction is a sign, not a significance. A wider interval
+    makes that refutation harder to dispute, not easier. What is overstated is
+    only the confidence attached to each number, and a re-run at game level is
+    the way to restate them if anyone ever needs them restated.
+
+    New work on this instrument should use ``fish4.clustered.cluster_ci``,
+    which does the grouping and the t at k-1 df together so neither can be
+    fixed without the other. ``scripts4/unlocated_belief.py`` does.
     """
     b = {d: (nll, t1) for d, nll, t1 in base_pool.per_decision}
     dn, dt = [], []
