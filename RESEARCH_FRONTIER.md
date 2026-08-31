@@ -2390,3 +2390,58 @@ the file most quoted in this direction: **all of it is old-gate.** It remains a
 valid measurement of inference on its own transcripts, as `6d75ec4` said at the
 time. It is not comparable in magnitude to anything measured after 20:18 that
 day.
+
+---
+
+# UPDATE, 2026-08-31: Direction 2 is already aimed, so its stated mechanism has no headroom
+
+Direction 2 above proposes:
+
+> The shipped signalling gate fires on *cheapness*. It does not consider what
+> the team needs to know. Aim it instead at the half-suit whose allocation is
+> most likely to be forced unresolved.
+
+That is a claim about the code, and the code is right there, so it was measured
+before it was implemented. `scripts4/signal_aim.py`, `results/signal_aim.json`.
+
+**208 signalling opportunities over 60 games. The ask points at a stuck
+half-suit 208 times out of 208 --- 100.0% --- with a mean of 1.04 stuck
+half-suits available when it fires.**
+
+The gate in `agent4.decide` already refuses to signal unless
+`stuck_half_suits()` is non-empty, and although `perpetual.signalling_ask` then
+searches every half-suit our team *owns* rather than only the stuck ones, the
+two sets do not come apart in practice: a card whose holder is already placed is
+skipped, which leaves essentially the stuck set. And with about **one** candidate
+available there is nothing to choose between even in principle.
+
+So the proposal's mechanism --- pick a better target --- **has no headroom.** It
+is not that aiming would help a little; there is no aiming decision being made
+badly.
+
+## Where Direction 2's headroom must actually be
+
+Not in *which* half-suit. What is left, and neither is what the direction says:
+
+* **When.** The `cheap` gate is `p_best <= 0.15`, and the tempo table says a
+  turn is free below `p_best = 0.50`. The threshold was set before that table
+  existed --- which `prereg/deadline_signalling.md` already says, and which is a
+  different intervention from aiming.
+* **How early.** `stuck_half_suits` is a statement about the CURRENT state:
+  provably ours and unplaceable *now*. The direction's own words are "most
+  likely to be **forced** unresolved", which is a **prediction**. Signalling
+  before a half-suit is stuck is a genuinely different mechanism from aiming at
+  one that already is, and nothing here has measured it.
+
+The second is the interesting one and it is deliberately left as a question
+rather than written up as a plan: this branch has spent the day learning what a
+mechanism asserted from one reading is worth.
+
+## The probe reported zero first, and the reason is the recurring one
+
+The first version reached for `agent._ctx(obs)` --- which does not exist ---
+inside a bare `except Exception`, and reported **0 opportunities**. A zero from
+a probe that never ran looks exactly like a zero from a phenomenon that never
+happens, and the only reason it was caught is that "never, in 30 games" was
+implausible enough to check rather than record. The instrument now builds the
+context the way `agent4.decide` builds it and swallows nothing.
