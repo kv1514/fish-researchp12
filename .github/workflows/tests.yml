@@ -96,9 +96,20 @@ jobs:
             requirements-dev.txt
       - run: pip install -r requirements.txt -r requirements-dev.txt
       - run: python -m pytest tests4 -q
-        # Playwright is not installed here, so tests4/test_browser_panels.py
-        # skips itself. That is the intended behaviour and the reason the
-        # tally reads "skipped" rather than "passed" for two tests.
+        # WHAT SKIPS HERE, and it is not what an earlier version of this
+        # comment claimed. tests4/ holds 689 tests. Two skip anywhere:
+        # test_learn.py:347 (torch is not a declared dependency) and
+        # test_opp_lambda.py:135 (the scalar sampler does not apply
+        # opp_lambda, recorded rather than silently tolerated).
+        #
+        # A third skips only here. test_browser_panels.py gates on whether
+        # NODE can require('playwright') -- not the Python package -- so it
+        # runs on a machine with the browser stack installed and skips on a
+        # stock runner. That is a real gap and worth naming: the one test
+        # that drives a browser against the live panels is not exercised by
+        # CI. Installing the browser stack would cost minutes per run for one
+        # test; running it where a browser already exists is the trade taken.
+        # If the panels start regressing unseen, that is the trade to revisit.
 
   guards:
     concurrency:
