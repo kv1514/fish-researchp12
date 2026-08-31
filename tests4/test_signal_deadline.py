@@ -270,3 +270,98 @@ def test_p_best_is_carried_as_a_negative_control():
     agent = (ROOT / "fish4" / "agent4.py").read_text()
     sig = agent[agent.index('"signal"'):agent.index('"signal"') + 700]
     assert "p_best" in sig, "the signal trace must carry the gate's own input"
+
+
+# --------------------------------------------------------------------------
+# the anchors
+# --------------------------------------------------------------------------
+
+def test_wilson_is_finite_wide_at_zero_successes():
+    """The bug the anchor was born with.
+
+    The voluntary path is right about 999 times in 1000, so a few hundred
+    declarations routinely contain ZERO errors. A normal approximation there
+    gives half-width exactly 0 -- a point interval at 0 that cannot cover the
+    published 0.05%, and the first run duly reported a false disagreement.
+    """
+    lo, hi = sd.wilson(0, 83)
+    assert lo == pytest.approx(0.0, abs=1e-12)
+    assert hi > 0.04, hi
+    assert lo <= 0.00054 <= hi, "must cover the published voluntary rate"
+
+
+def test_wilson_is_finite_wide_at_every_success():
+    lo, hi = sd.wilson(50, 50)
+    assert hi == pytest.approx(1.0, abs=1e-12)
+    assert lo < 0.95
+
+
+def test_wilson_matches_a_known_interval():
+    lo, hi = sd.wilson(142, 307)
+    assert (lo, hi) == pytest.approx((0.40757, 0.51843), abs=5e-5)
+
+
+def _rows(paths, fires=()):
+    return [{"deal": 1, "kv_even": 0, "margin": 0, "terminal": 1,
+             "paths": paths, "fires": list(fires)}]
+
+
+def test_a_path_that_disagrees_fails_the_anchor(tmp_path, monkeypatch):
+    """The anchor has to be able to say no, or it is decoration."""
+    pub = tmp_path / "p.json"
+    pub.write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
+    monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
+    # 300 forced declarations with 0 wrong cannot be a 46% error rate
+    got = sd.anchors(_rows({"forced": [300, 0]}))
+    assert got["path_rates"]["forced"]["judged"]
+    assert got["path_rates"]["forced"]["agrees"] is False
+    assert got["all_agree"] is False
+
+
+def test_a_path_that_agrees_passes_the_anchor(tmp_path, monkeypatch):
+    pub = tmp_path / "p.json"
+    pub.write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
+    monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
+    got = sd.anchors(_rows({"forced": [300, 138]}))
+    assert got["path_rates"]["forced"]["agrees"] is True
+    assert got["all_agree"] is True
+
+
+def test_a_thin_path_is_reported_and_not_judged(tmp_path, monkeypatch):
+    """An interval on five declarations agrees with everything, so judging it
+    would let a broken instrument pass by being small."""
+    pub = tmp_path / "p.json"
+    pub.write_text('{"path_error_rate": {"gate": {"rate": 0.10}}}')
+    monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
+    got = sd.anchors(_rows({"gate": [5, 5]}))
+    assert got["path_rates"]["gate"]["judged"] is False
+    assert got["path_rates"]["gate"]["agrees"] is None
+    assert got["all_agree"] is True
+
+
+def test_a_signal_that_misses_the_stuck_set_fails_the_aim_anchor(monkeypatch,
+                                                                 tmp_path):
+    pub = tmp_path / "p.json"
+    pub.write_text('{"path_error_rate": {}}')
+    aim = tmp_path / "a.json"
+    aim.write_text('{"on_stuck_rate": 1.0}')
+    monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
+    monkeypatch.setattr(sd, "ANCHOR_AIM", aim)
+    good = sd.anchors(_rows({}, [fire(1, 0, "forced", on_stuck=1)]))
+    assert good["aim"]["agrees"] is True and good["all_agree"] is True
+    bad = sd.anchors(_rows({}, [fire(1, 0, "forced", on_stuck=1),
+                                fire(1, 1, "forced", on_stuck=0)]))
+    assert bad["aim"]["agrees"] is False and bad["all_agree"] is False
+
+
+def test_the_published_values_are_read_not_retyped():
+    """A retyped anchor keeps agreeing after the figure it anchors to moves."""
+    src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
+    assert "signal_error_paths.json" in src and "signal_aim.json" in src
+    assert "0.46254" not in src and "0.10256" not in src, (
+        "the published rates must be read from the results files")
+
+
+def test_a_failed_anchor_exits_non_zero():
+    src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
+    assert 'return 0 if an["all_agree"] else 1' in src

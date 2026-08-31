@@ -99,7 +99,19 @@ STALL_WINDOW = int(inspect.signature(FishBot4.__init__)
 #: second thing to forget when an observable is added.
 KEYS = ("since_claim", "window_left", "legal_asks", "my_cards",
         "min_team_cards", "team_cards", "opp_cards", "live", "n_stuck",
-        "unplaced", "dead", "p_best", "step")
+        "on_stuck", "unplaced", "dead", "p_best", "step")
+
+#: The published figures this instrument must reproduce before it is allowed
+#: to report anything new. Read from the results files rather than retyped, so
+#: a re-measurement upstream cannot leave the anchor quoting a stale number.
+#:
+#: Both are arm C on the SAME opponents and the SAME arm as this run, taken on
+#: other deals by other code -- results/signal_error_paths.json over 1000 games
+#: at seed base 3,600,000, and results/signal_aim.json over 30 games at
+#: 910,000. If this instrument cannot land on them, its new numbers are not
+#: evidence about the world, and the run says so instead of reporting a table.
+ANCHOR_PATHS = ROOT / "results" / "signal_error_paths.json"
+ANCHOR_AIM = ROOT / "results" / "signal_aim.json"
 
 #: paths that mean the split was placed before the deadline, against the two
 #: that mean it was not. Error rates measured in results/signal_error_paths.json
@@ -136,6 +148,9 @@ def _play(deal_seed: int, kv_even: bool) -> dict:
 
     fires: list[dict] = []
     seen_hs: dict[int, int] = {}
+    #: every declaration OUR team makes, by path, with its error count. Not a
+    #: by-product: it is the anchor. See ANCHORS in main().
+    paths: dict = defaultdict(lambda: [0, 0])
     #: half-suit -> the path its declaration eventually came through
     outcome: dict[int, dict] = {}
 
@@ -189,6 +204,9 @@ def _play(deal_seed: int, kv_even: bool) -> dict:
                                  if team_of(q) != our_team),
                 "live": sum(1 for x in obs.set_winner if x is None),
                 "n_stuck": len(stuck),
+                # the signal_aim.py anchor, per fire: does the ask point at a
+                # half-suit that is actually stuck? Published: 208/208.
+                "on_stuck": int(hs in stuck),
                 # in "stuck" mode the gate does NOT require a dead position,
                 # so an ask somewhere may still land and resolve a half-suit,
                 # which resets the stall clock. That is a different race.
@@ -204,15 +222,20 @@ def _play(deal_seed: int, kv_even: bool) -> dict:
             })
 
         ev = st.apply(mover, act)
-        if isinstance(ev, ClaimEvent) and ev.half_suit not in outcome:
+        if isinstance(ev, ClaimEvent):
             kind = (tr or {}).get("kind", "")
             why = "exact" if kind == "exact" else (
                 (tr or {}).get("why", "") if kind == "declare" else "")
-            outcome[int(ev.half_suit)] = {
-                "path": _path_of(why) if ours else "opponent",
-                "by_us": int(ours),
-                "wrong": int(ev.winner != team_of(mover)),
-            }
+            if ours:
+                bucket = paths[_path_of(why)]
+                bucket[0] += 1
+                bucket[1] += int(ev.winner != team_of(mover))
+            if ev.half_suit not in outcome:
+                outcome[int(ev.half_suit)] = {
+                    "path": _path_of(why) if ours else "opponent",
+                    "by_us": int(ours),
+                    "wrong": int(ev.winner != team_of(mover)),
+                }
 
     ours_sets = sum(1 for w in st.set_winner if w == our_team)
     for f in fires:
@@ -225,7 +248,7 @@ def _play(deal_seed: int, kv_even: bool) -> dict:
         f["kv_even"] = int(kv_even)
     return {"deal": deal_seed, "kv_even": int(kv_even),
             "margin": 2 * ours_sets - 9, "terminal": int(st.is_terminal),
-            "fires": fires}
+            "paths": {k: v for k, v in paths.items()}, "fires": fires}
 
 
 def _one(args) -> dict:
@@ -284,6 +307,73 @@ def diff_ci(firsts: list[dict], key: str, conf: float = 0.95):
     lo = draws[int((1 - conf) / 2 * len(draws))]
     hi = draws[int((1 + conf) / 2 * len(draws)) - 1]
     return (point, lo, hi, len(deals))
+
+
+def wilson(w: int, n: int, z: float = 1.96):
+    """Wilson score interval for w successes in n, as (lo, hi).
+
+    Correct at w = 0 and w = n, where the normal approximation collapses to a
+    zero-width interval that cannot cover anything.
+    """
+    if n <= 0:
+        return (None, None)
+    ph = w / n
+    d = 1 + z * z / n
+    c = (ph + z * z / (2 * n)) / d
+    h = z * ((ph * (1 - ph) / n + z * z / (4 * n * n)) ** 0.5) / d
+    return (max(0.0, c - h), min(1.0, c + h))
+
+
+def anchors(rows: list[dict]) -> dict:
+    """Reproduce two published figures before reporting a new one.
+
+    The rule this obeys is the project's, not this instrument's: a new
+    instrument must land on a published number before its own numbers count.
+    Both anchors are the SAME arm against the SAME opponents, measured on
+    other deals by other code, so a disagreement is about this instrument.
+
+    The path rates are proportions, so each carries a WILSON interval on THIS
+    run's count and is checked for covering the published value. Wilson rather
+    than the normal approximation for a specific reason: the voluntary path is
+    right about 999 times in 1000, so a run of a few hundred declarations
+    routinely has ZERO wrong, and the normal approximation there gives a
+    half-width of exactly 0 -- a point interval at 0 that cannot cover the
+    published 0.05% and reports a false disagreement. The first version of
+    this anchor did exactly that. A path with fewer than 30 declarations is
+    reported and not judged; an interval on five declarations agrees with
+    everything.
+    """
+    tot: dict = defaultdict(lambda: [0, 0])
+    for r in rows:
+        for k, v in r["paths"].items():
+            tot[k][0] += v[0]
+            tot[k][1] += v[1]
+
+    pub = json.loads(ANCHOR_PATHS.read_text())["path_error_rate"]
+    out, ok = {}, True
+    for path, (n, w) in sorted(tot.items()):
+        rate = w / n if n else None
+        want = pub.get(path, {}).get("rate")
+        lo, hi = wilson(w, n) if n else (None, None)
+        judged = n >= 30 and want is not None and lo is not None
+        agrees = (lo - 1e-12 <= want <= hi + 1e-12) if judged else None
+        if judged and not agrees:
+            ok = False
+        out[path] = {"n": n, "wrong": w, "rate": rate, "lo": lo, "hi": hi,
+                     "published": want, "judged": judged, "agrees": agrees}
+
+    fires = [f for r in rows for f in r["fires"]]
+    aim = json.loads(ANCHOR_AIM.read_text())
+    on = sum(f["on_stuck"] for f in fires)
+    aim_ok = (on == len(fires)) if fires else None
+    if aim_ok is False:
+        ok = False
+    return {"path_rates": out,
+            "aim": {"on_stuck": on, "fires": len(fires),
+                    "rate": (on / len(fires)) if fires else None,
+                    "published_rate": aim["on_stuck_rate"],
+                    "agrees": aim_ok},
+            "all_agree": ok}
 
 
 def summarise(rows: list[dict]) -> dict:
@@ -350,8 +440,30 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
     took = time.time() - t0
 
     s = summarise(rows)
+    an = anchors(rows)
     print(f"\n{len(jobs)} games ({n_deals} deals x 2 parities), "
           f"seed base {SEED0}, {took / 60:.1f} min")
+
+    print("\n  ANCHORS -- published figures this run must land on first")
+    for path, a_ in an["path_rates"].items():
+        if a_["judged"]:
+            mark = "OK " if a_["agrees"] else "OFF"
+            print(f"    {mark} {path:10s} {100 * a_['rate']:5.2f}% "
+                  f"[{100 * a_['lo']:5.2f}, {100 * a_['hi']:5.2f}] on "
+                  f"{a_['n']:5d} against {100 * a_['published']:5.2f}% "
+                  f"published")
+        else:
+            print(f"    --  {path:10s} {a_['n']} declarations, too few to "
+                  f"judge; published {a_['published']}")
+    aim = an["aim"]
+    if aim["fires"]:
+        print(f"    {'OK ' if aim['agrees'] else 'OFF'} aim        "
+              f"{aim['on_stuck']}/{aim['fires']} of signals point at a stuck "
+              f"half-suit, against {aim['published_rate']:.0%} published")
+    if not an["all_agree"]:
+        print("\n  AN ANCHOR IS OFF. The table below is NOT reported as "
+              "evidence: fix the\n  instrument, or explain the disagreement, "
+              "before reading anything from it.")
     print(f"  signalling opportunities taken: {s['n_fires']} "
           f"in {s['n_games_with_a_fire']} of {s['n_games']} games")
     sp = s["spin"]
@@ -408,13 +520,17 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
         "seed_deal": SEED0, "seed_agent": AGENT0,
         "stall_window": STALL_WINDOW,
         "in_time_paths": list(IN_TIME), "too_late_paths": list(TOO_LATE),
+        "anchors": an,
         "summary": s,
         "fires": [f for r in rows for f in r["fires"]],
     }
     path = Path(out) if out else ROOT / "results" / "signal_deadline.json"
     path.write_text(json.dumps(payload, indent=1))
     print(f"\nwrote {path}")
-    return 0
+    # A failed anchor exits non-zero. The payload is still written -- a run
+    # that disagrees with a published figure is itself the evidence about what
+    # disagrees -- but nothing downstream should treat it as a measurement.
+    return 0 if an["all_agree"] else 1
 
 
 if __name__ == "__main__":
