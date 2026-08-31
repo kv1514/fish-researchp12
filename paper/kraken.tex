@@ -4824,6 +4824,25 @@ predictor but a limit on repeats: a signalling ask proves once that a seat does
 not hold one named card, and proving it forty more times spends forty actions
 of the seat's own window to say nothing new.
 
+That last sentence is right about the information and wrong about the value,
+which was worth the cost of finding out. Registered in advance and run over
+$4{,}000$ games, suppressing the repeats makes the engine \emph{worse} by
+$-0.0715$ $[-0.1068, -0.0362]$ sets a game
+(\path{prereg/signal_no_repeat.md}, \path{results/signal_no_repeat.json}).
+The two arms are level on declaration errors --- $0.1383$ a game against
+$0.1388$ --- so nothing is paid in mistakes. What the repeats buy is
+postponement. The engine reaches the signalling branch before the gated
+declaration, so a seat that can signal signals \emph{instead of} declaring at a
+bar that is wrong about a quarter of the time, and signalling again next turn
+defers it again: $0.069$ gated declarations a game against $0.299$ with
+signalling off, at a tenth the error rate. Remove the repetition and the
+deferral goes with it --- the suppressed arm returns to $0.226$ gated
+declarations at $23.4\%$ wrong and lands back on the no-signalling baseline,
+$+2.4395$ against $+2.4450$. The ninety-six percent of asks that carry no
+information are the only thing buying the delay, and a mechanism whose value
+survives none of its own repetition is not a communication protocol that
+happens to stall; it is a stall that happens to communicate.
+
 One methodological note, recorded rather than buried. The regression form of
 the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
 $[+0.0117, +0.1863]$, excluding zero, where the directly conditioned figure is

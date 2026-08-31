@@ -177,3 +177,16 @@ def test_a_smoke_run_says_so_in_the_payload():
     src = (ROOT / "scripts4" / "signal_no_repeat_run.py").read_text()
     assert 'payload["smoke"] = n_deals != N_DEALS' in src
     assert "SMOKE RUN" in src
+
+
+def test_the_payload_keeps_per_game_margins():
+    """Without them a contrast this registration did not fix -- B against A,
+    the mechanism's own value -- can only be reported as a difference of two
+    means with no interval, which is exactly what the 9,900,000 run had to do.
+    """
+    src = (ROOT / "scripts4" / "signal_no_repeat_run.py").read_text()
+    assert 'out["games"] = [{"deal": r["deal"]' in src
+    rows = _rows([2.598] * 40, [2.598] * 40)
+    got = run.report(rows)
+    assert len(got["games"]) == 40
+    assert set(got["games"][0]) == {"deal", "kv_even", *run.ARMS}

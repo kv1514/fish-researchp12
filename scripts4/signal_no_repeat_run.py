@@ -311,6 +311,13 @@ def report(rows) -> dict:
     for a in ARMS:
         print(f"  {a:<12}{fby[a]}")
 
+    # per-game margins, so a contrast this registration did not fix -- above
+    # all B against A, the mechanism's own value -- can be given an INTERVAL
+    # later instead of a bare difference of two means. The 9,900,000 run had
+    # to report B - A = +0.0660 as a point estimate with no interval, because
+    # the payload did not carry the rows.
+    out["games"] = [{"deal": r["deal"], "kv_even": r["kv_even"],
+                     **{a: r[a]["margin"] for a in ARMS}} for r in rows]
     out["bridge_fallbacks"] = sum(r[a]["fallbacks"] for r in rows for a in ARMS)
     out["unfinished"] = sum(1 for r in rows for a in ARMS
                             if not r[a]["terminal"])

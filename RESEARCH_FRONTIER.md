@@ -2765,3 +2765,64 @@ a claimable half-suit" as distinct trace reasons, and `path_ledger._path_of`
 folds both into `forced`. Every separating variable above points at the first,
 but pointing is not counting, and this project has been wrong before about a
 mechanism whose evidence all leaned one way.
+
+
+---
+
+## UPDATE 2026-08-31 — the repeats were not waste. They were the mechanism.
+
+`prereg/signal_no_repeat.md` registered, built and ran. Both gates passed and
+**the primary refuted the proposal**: D = -0.0715 [-0.1068, -0.0362] over 4,000
+games at seed base 9,900,000. Removing 40.8 wasted turns an episode makes the
+engine worse.
+
+The decomposition is the finding, and it inverts the premise this whole line
+of work rested on. Per game:
+
+| arm | gate decls | wrong | forced decls | wrong | signal turns | margin |
+|---|---|---|---|---|---|---|
+| A_shipped (signalling off) | 0.299 | 0.0750 | 0.181 | 0.0842 | 0.00 | +2.4450 |
+| B_incumbent (arm C) | **0.069** | **0.0070** | 0.315 | 0.1276 | 8.18 | **+2.5110** |
+| C_norepeat (the switch) | 0.226 | 0.0529 | 0.193 | 0.0857 | 0.63 | +2.4395 |
+
+Total wrong declarations a game: A 0.1590, B 0.1383, C 0.1388. B and C are
+LEVEL on errors, so what the switch costs is not paid in mistakes.
+
+`agent4.decide` reaches the signal branch BEFORE the gate branch. A seat that
+can signal signals instead of taking a gate declaration — and a gate
+declaration is wrong about a quarter of the time. Signalling again next turn
+defers it again. B takes 0.069 gate declarations a game against A's 0.299, at a
+tenth the error rate. Stop the repetition and the deferral stops with it:
+C's gate path returns to 0.226 at 23.4% wrong and **C lands on A**, +2.4395
+against +2.4450.
+
+**The value of the signalling mechanism is the postponement, not the message.**
+The 96% of asks carrying no information are the only thing buying the delay.
+"A signalling ask proves once that a seat does not hold one named card, and
+proving it forty more times spends forty actions to say nothing new" is right
+about the information and wrong about the value — and it was the sentence that
+motivated the registration.
+
+That is the third time in this one line of work that a confident reading of
+this data has been overturned by measuring the next thing down:
+
+1. the stall clock looked like the predictor, and does not separate the groups;
+2. the observables all pointed at `not asks`, and the count said `stalled`, 3 to 1;
+3. the repeats looked like pure waste, and they are the mechanism.
+
+### What is open
+
+`B - A = +0.0660` is a point estimate with NO interval — the payload did not
+carry per-game margins, and that contrast was not registered here anyway.
+Whether the signalling mechanism itself is positive on 4x the data of
+`prereg/deadline_signalling.md` (+0.068 [-0.033, +0.169]) is the obvious next
+registered question, and the instrument now stores the rows so it can be
+answered with an interval.
+
+If it is positive, the interesting version is not "switch signalling on" but
+"the gate declaration is worth deferring, and signalling is an accidental and
+expensive way to defer it" — the cheap version would be a declaration-side
+change, not an ask-side one.
+
+Nothing enters `V06_DEPLOYED`. `signal_no_repeat` stays False and `signal_mode`
+stays "off".

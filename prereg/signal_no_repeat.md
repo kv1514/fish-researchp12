@@ -174,3 +174,64 @@ switch doing exactly what it was built to do:
 Signalling adds 456 stall-forced declarations over the shipped champion, and
 the switch removes almost all of them, back to near baseline. Whether that
 buys anything in sets is the question the re-run answers.
+
+
+---
+
+# OUTCOME, 2026-08-31: REFUTED, and the premise was backwards
+
+The re-run at seed base 9,900,000 completed (4,000 games x 3 arms, 97 minutes).
+`results/signal_no_repeat.json`. **Both gates passed and the primary refutes
+the proposal.**
+
+    REPLICATION   B_incumbent +2.5110 +-0.0849 against the published
+                  +2.5980 +-0.1674 on 500 deals, two-sample z = -0.91   PASS
+    MANIPULATION  fires/episode 20.14 -> 1.53, wasted/episode 18.67 -> 0.00  PASS
+    PRIMARY       D = -0.0715 [-0.1068, -0.0362]   REFUTED
+
+Removing 40.8 wasted turns an episode makes the engine **worse** by 0.07
+sets a game.
+
+## Why, and it is not what the registration expected
+
+The registration expected a null on the grounds that the mechanism's own value
+is unestablished. The decomposition says something sharper. Per game:
+
+| arm | gate declarations | wrong | forced declarations | wrong | signal turns | margin |
+|---|---|---|---|---|---|---|
+| A_shipped | 0.299 | 0.0750 | 0.181 | 0.0842 | 0.00 | +2.4450 |
+| B_incumbent | **0.069** | **0.0070** | 0.315 | 0.1276 | 8.18 | **+2.5110** |
+| C_norepeat | 0.226 | 0.0529 | 0.193 | 0.0857 | 0.63 | +2.4395 |
+
+Total wrong declarations a game: A 0.1590, B 0.1383, C 0.1388. **B and C are
+level on errors**, so the margin B loses under the switch is not paid in
+mistakes.
+
+What the repeats do is DRAIN THE GATE PATH. `agent4.decide` reaches the signal
+branch BEFORE the gate branch, so a seat that can signal signals instead of
+taking a gate declaration — and a gate declaration is wrong about a quarter of
+the time. Signalling again next turn defers it again. B takes 0.069 gate
+declarations a game against A's 0.299, at a tenth the error rate.
+
+Turn off the repetition and the deferral goes with it: C's gate path returns to
+0.226 at 23.4% wrong, and **C lands on A**, +2.4395 against +2.4450, a
+difference of -0.0055. With the repeats removed, the signalling mechanism does
+essentially nothing.
+
+**So the value of this mechanism is the postponement, not the message.** The
+96% of asks that carry no information are not waste — they are the only thing
+buying the delay. The framing that motivated this registration, that a
+signalling ask exists to prove a card's location and repeating it says nothing
+new, is correct about the INFORMATION and wrong about the VALUE.
+
+## What this does not establish
+
+`B - A = +0.0660` is a point estimate with **no interval**: this run's payload
+did not carry per-game margins, and that contrast was not fixed by this
+registration in any case. Whether the mechanism itself is positive on 4x the
+data of `prereg/deadline_signalling.md` is now the obvious next registered
+question, and the instrument has been changed to store the rows so it can be
+answered with an interval rather than a difference of two means.
+
+Nothing enters `V06_DEPLOYED`. `signal_no_repeat` stays False and
+`signal_mode` stays "off": the shipped engine is untouched by any of this.
