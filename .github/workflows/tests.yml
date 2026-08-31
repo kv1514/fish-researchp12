@@ -1,0 +1,102 @@
+# The suite this repository actually has, run automatically.
+#
+# WHY THIS EXISTS. Every guard in tests4/ -- the cheat guard on the arena
+# roster, the brand/version guards, the result-path rule, the cluster-robust
+# intervals -- only guards if somebody runs pytest. Nothing did. And until
+# 2026-08-31 a bare `pytest` collected 193 of 878 tests, because `testpaths`
+# was written before tests4/ existed: it printed "193 passed" and looked green
+# while skipping three quarters of the suite. Both halves are named explicitly
+# below so this workflow cannot inherit that failure a second time.
+#
+# WHAT IS DELIBERATELY NOT HERE. The paper. `paper/build.sh` needs four LaTeX
+# packages a clean runner lacks (multirow and cm-super among them) and takes
+# three passes; paper/kraken.pdf is committed for exactly that reason. Adding
+# a TeX install here would trade fifteen minutes per run for a check the
+# committed artefact already answers.
+#
+# WHY THERE IS NO `pip install -e .`. There is no [build-system] in
+# pyproject.toml and the layout is flat -- fish/, fish4/, arena/, kraken/,
+# scripts4/, tests/, tests4/ all sit at the top level -- so setuptools
+# auto-discovery would refuse it. More to the point, nobody installs this
+# project: conftest.py puts the repository root on sys.path and every entry
+# point runs from the checkout. CI that installs what developers never install
+# is testing a different thing from the one that ships.
+
+name: tests
+
+on:
+  pull_request:
+  push:
+    # Only the base branch. A PR branch would otherwise run twice per push.
+    branches: [engine-v2, main]
+
+# A new push supersedes the run in flight; no reason to pay for both.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    # tests/ is the v0.3 engine: rules, fuzz, leakage proofs. Three minutes,
+    # so a broken commit says so before the long job has finished starting.
+    name: engine (tests/)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'      # pyproject requires >=3.11
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests -q
+
+  full:
+    # tests4/ is everything since the rebuild: the award rule, the exact
+    # solver, the opponent model, the packages. ~17 minutes locally, and a
+    # two-core runner is slower, so budget rather more.
+    #
+    # IF THIS GOES RED INTERMITTENTLY, look at the wall clock before looking
+    # at the diff. Two places in tests4/ are sensitive to a slow machine and
+    # neither was written with a shared runner in mind:
+    #   * test_lobby.py asserts a poll lands within 0.2s of now -- true unless
+    #     the process is descheduled between two adjacent statements;
+    #   * test_regret_specs.py gives its subprocesses 180s, which is ample
+    #     here and may not be on a loaded runner.
+    # Both are left exactly as they are. Widening a passing assertion on a
+    # guess is how a real timing bug gets papered over; if one of them fails,
+    # that failure is the evidence to fix it with.
+    name: research engine (tests4/)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests4 -q
+        # Playwright is not installed here, so tests4/test_browser_panels.py
+        # skips itself. That is the intended behaviour and the reason the
+        # tally reads "skipped" rather than "passed" for two tests.
+
+  guards:
+    # The standing checks that are scripts rather than tests. Each exits
+    # non-zero on a real problem, which is the whole point of running them.
+    name: standing guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: every finished run has a verdict, and none is stale
+        run: python scripts4/check_verdicts.py
+      - name: no two pooled cells share a deal
+        run: python scripts4/check_seeds.py
+      - name: every bolded number in the paper is watched or exempt
+        run: python scripts4/unwatched_claims.py
