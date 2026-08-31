@@ -211,6 +211,14 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  #: those turns come out of the seat's own stall window.
                  #: False is bit-identical. prereg/signal_no_repeat.md.
                  signal_no_repeat: bool = False,
+                 #: Cap on signals a GAME; 0 is unlimited and bit-identical.
+                 #: Each signal is a deliberately doomed ask and a doomed ask
+                 #: loses the turn, so the mechanism pays -0.1695 of margin in
+                 #: half-suits it never gets to declare for the +0.2625 of
+                 #: opponent errors it buys. If the first few fires carry the
+                 #: confusion, a budget keeps the second number and returns
+                 #: some of the first. prereg/signal_budget.md.
+                 signal_budget: int = 0,
                  #: Signed weight on adaptive.contest_bonus. Positive fights
                  #: in opponent-dominated ambiguous half-suits (Dylan's v0.7
                  #: carries the analogous term strongly positive); negative is
@@ -310,7 +318,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         self.signal_mode = signal_mode
         self.signal_max_p = signal_max_p
         self.signal_no_repeat = signal_no_repeat
+        self.signal_budget = int(signal_budget)
         self._signalled: set = set()
+        self._signals = 0
         self.w_contest = float(w_contest)
         self.silence_delta = float(silence_delta)
         self.stats = PosteriorStats()
@@ -342,6 +352,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         # some harnesses, and a set that outlived its game would silently
         # suppress signals in the next one.
         self._signalled = set()
+        self._signals = 0
 
     # -- which belief each channel reads --------------------------------------
     #
@@ -610,7 +621,9 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
             from .perpetual import signalling_ask, stuck_half_suits
             cheap = p[order[0]] <= (self.signal_max_p
                                     if self.signal_mode == "stuck" else 0.0)
-            if cheap and stuck_half_suits(obs, self.bel, ctx):
+            spent = (self.signal_budget
+                     and self._signals >= self.signal_budget)
+            if cheap and not spent and stuck_half_suits(obs, self.bel, ctx):
                 sig = signalling_ask(
                     obs, self.bel, ctx,
                     require_dead=(self.signal_mode == "dead"),
@@ -618,6 +631,7 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                              if self.signal_no_repeat else frozenset()))
                 if sig is not None:
                     self._signalled.add(int(sig.card))
+                    self._signals += 1
                     self._t(_tr.simple_trace, "signal",
                             target=int(sig.target),
                             # the gate's own input, recorded so an instrument
