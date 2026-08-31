@@ -301,16 +301,39 @@ def test_wilson_matches_a_known_interval():
     assert (lo, hi) == pytest.approx((0.40757, 0.51843), abs=5e-5)
 
 
-def _rows(paths, fires=()):
-    return [{"deal": 1, "kv_even": 0, "margin": 0, "terminal": 1,
-             "paths": paths, "fires": list(fires)}]
-
-
-def test_a_path_that_disagrees_fails_the_anchor(tmp_path, monkeypatch):
-    """The anchor has to be able to say no, or it is decoration."""
+@pytest.fixture
+def iso(tmp_path, monkeypatch):
+    """Neutral files for all three anchors, so a test isolates the one it is
+    about. Without this, a fixture aimed at the path rates also has to satisfy
+    the margin anchor against the real journal, and its failure names the
+    wrong thing."""
     pub = tmp_path / "p.json"
-    pub.write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
+    pub.write_text('{"path_error_rate": {}}')
+    aim = tmp_path / "a.json"
+    aim.write_text('{"on_stuck_rate": 1.0}')
+    jrn = tmp_path / "j.jsonl"
+    jrn.write_text("\n".join(f'{{"deal": {i}, "C": {{"margin": 0}}}}'
+                              for i in range(60)))
     monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
+    monkeypatch.setattr(sd, "ANCHOR_AIM", aim)
+    monkeypatch.setattr(sd, "ANCHOR_JOURNAL", jrn)
+    monkeypatch.setattr(sd, "ANCHOR_JOURNAL_ARM", "C")
+    return {"paths": pub, "aim": aim, "journal": jrn}
+
+
+def _rows(paths, fires=(), n_deals=40):
+    """Enough deals for a clustered margin interval to exist at all; the path
+    counts are summed across rows, so they ride on the first."""
+    out = [{"deal": d, "kv_even": 0, "margin": 0, "terminal": 1,
+            "paths": {}, "fires": []} for d in range(n_deals)]
+    out[0]["paths"] = paths
+    out[0]["fires"] = list(fires)
+    return out
+
+
+def test_a_path_that_disagrees_fails_the_anchor(iso):
+    """The anchor has to be able to say no, or it is decoration."""
+    iso["paths"].write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
     # 300 forced declarations with 0 wrong cannot be a 46% error rate
     got = sd.anchors(_rows({"forced": [300, 0]}))
     assert got["path_rates"]["forced"]["judged"]
@@ -318,35 +341,24 @@ def test_a_path_that_disagrees_fails_the_anchor(tmp_path, monkeypatch):
     assert got["all_agree"] is False
 
 
-def test_a_path_that_agrees_passes_the_anchor(tmp_path, monkeypatch):
-    pub = tmp_path / "p.json"
-    pub.write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
-    monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
+def test_a_path_that_agrees_passes_the_anchor(iso):
+    iso["paths"].write_text('{"path_error_rate": {"forced": {"rate": 0.46}}}')
     got = sd.anchors(_rows({"forced": [300, 138]}))
     assert got["path_rates"]["forced"]["agrees"] is True
     assert got["all_agree"] is True
 
 
-def test_a_thin_path_is_reported_and_not_judged(tmp_path, monkeypatch):
+def test_a_thin_path_is_reported_and_not_judged(iso):
     """An interval on five declarations agrees with everything, so judging it
     would let a broken instrument pass by being small."""
-    pub = tmp_path / "p.json"
-    pub.write_text('{"path_error_rate": {"gate": {"rate": 0.10}}}')
-    monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
+    iso["paths"].write_text('{"path_error_rate": {"gate": {"rate": 0.10}}}')
     got = sd.anchors(_rows({"gate": [5, 5]}))
     assert got["path_rates"]["gate"]["judged"] is False
     assert got["path_rates"]["gate"]["agrees"] is None
     assert got["all_agree"] is True
 
 
-def test_a_signal_that_misses_the_stuck_set_fails_the_aim_anchor(monkeypatch,
-                                                                 tmp_path):
-    pub = tmp_path / "p.json"
-    pub.write_text('{"path_error_rate": {}}')
-    aim = tmp_path / "a.json"
-    aim.write_text('{"on_stuck_rate": 1.0}')
-    monkeypatch.setattr(sd, "ANCHOR_PATHS", pub)
-    monkeypatch.setattr(sd, "ANCHOR_AIM", aim)
+def test_a_signal_that_misses_the_stuck_set_fails_the_aim_anchor(iso):
     good = sd.anchors(_rows({}, [fire(1, 0, "forced", on_stuck=1)]))
     assert good["aim"]["agrees"] is True and good["all_agree"] is True
     bad = sd.anchors(_rows({}, [fire(1, 0, "forced", on_stuck=1),
@@ -365,3 +377,40 @@ def test_the_published_values_are_read_not_retyped():
 def test_a_failed_anchor_exits_non_zero():
     src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
     assert 'return 0 if an["all_agree"] else 1' in src
+
+
+def _margin_rows(margins):
+    return [{"deal": i, "kv_even": 0, "margin": v, "terminal": 1,
+             "paths": {}, "fires": []} for i, v in enumerate(margins)]
+
+
+def test_a_margin_far_from_the_published_one_fails_the_anchor(iso):
+    """The strongest anchor: the arm's own outcome variable, not a rate
+    derived from it. It has to be able to say no."""
+    iso["journal"].write_text("\n".join(
+        f'{{"deal": {i}, "C": {{"margin": {2 + (i % 3) - 1}}}}}'
+        for i in range(60)))
+
+    near = sd.anchors(_margin_rows([2, 2, 1, 3, 2, 2, 1, 3] * 8))
+    assert near["margin"]["agrees"] is True, near["margin"]
+    assert near["all_agree"] is True
+
+    far = sd.anchors(_margin_rows([-5, -5, -4, -6] * 16))
+    assert far["margin"]["agrees"] is False, far["margin"]
+    assert far["all_agree"] is False
+
+
+def test_the_margin_anchor_clusters_on_the_deal():
+    """Both parities of a deal share a shuffle on both sides of the
+    comparison, so both intervals are clustered on the deal."""
+    src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
+    block = src[src.index("def anchors("):src.index("def summarise(")]
+    assert block.count("cluster_ci(") == 2, (
+        "both this run's margin and the published one must be clustered")
+
+
+def test_the_payload_keeps_the_per_game_rows():
+    """Without them the anchors cannot be re-derived without replaying 1600
+    games, and an anchor nobody can recheck is an assertion."""
+    src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
+    assert '"games": [{k: r[k] for k in' in src

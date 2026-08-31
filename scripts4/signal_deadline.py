@@ -71,6 +71,7 @@ from fish.cards import NUM_PLAYERS, team_of                 # noqa: E402
 from fish.engine import ClaimEvent, GameState               # noqa: E402
 from fish.observation import Observation                    # noqa: E402
 from fish.rules import RuleConfig                           # noqa: E402
+from fish4.clustered import cluster_ci                      # noqa: E402
 from scripts4.duel import engine_fingerprint                # noqa: E402
 from scripts4.path_ledger import _path_of                   # noqa: E402
 
@@ -112,6 +113,11 @@ KEYS = ("since_claim", "window_left", "legal_asks", "my_cards",
 #: evidence about the world, and the run says so instead of reporting a table.
 ANCHOR_PATHS = ROOT / "results" / "signal_error_paths.json"
 ANCHOR_AIM = ROOT / "results" / "signal_aim.json"
+#: the strongest anchor of the three, because it is the experiment's own
+#: outcome variable rather than a rate derived from it: arm C's margin against
+#: the same opponent, +2.598 [+2.431, +2.765] over 500 deals x 2 parities.
+ANCHOR_JOURNAL = ROOT / "results" / "signal_gate_journal.jsonl"
+ANCHOR_JOURNAL_ARM = "C_measured"
 
 #: paths that mean the split was placed before the deadline, against the two
 #: that mean it was not. Error rates measured in results/signal_error_paths.json
@@ -362,6 +368,18 @@ def anchors(rows: list[dict]) -> dict:
         out[path] = {"n": n, "wrong": w, "rate": rate, "lo": lo, "hi": hi,
                      "published": want, "judged": judged, "agrees": agrees}
 
+    #: the margin anchor. Clustered on the deal on both sides, and the test is
+    #: whether the published POINT falls inside this run's interval -- one
+    #: interval against one number, rather than eyeballing two intervals for
+    #: overlap, which is a weaker and vaguer comparison.
+    ours = cluster_ci([r["margin"] for r in rows], [r["deal"] for r in rows])
+    pub_rows = [json.loads(line) for line in ANCHOR_JOURNAL.open()]
+    theirs = cluster_ci([r[ANCHOR_JOURNAL_ARM]["margin"] for r in pub_rows],
+                        [r["deal"] for r in pub_rows])
+    m_ok = abs(theirs[0] - ours[0]) <= ours[1]
+    if not m_ok:
+        ok = False
+
     fires = [f for r in rows for f in r["fires"]]
     aim = json.loads(ANCHOR_AIM.read_text())
     on = sum(f["on_stuck"] for f in fires)
@@ -369,6 +387,10 @@ def anchors(rows: list[dict]) -> dict:
     if aim_ok is False:
         ok = False
     return {"path_rates": out,
+            "margin": {"mean": ours[0], "half_width": ours[1],
+                       "n_clusters": ours[2], "published_mean": theirs[0],
+                       "published_half_width": theirs[1],
+                       "published_clusters": theirs[2], "agrees": m_ok},
             "aim": {"on_stuck": on, "fires": len(fires),
                     "rate": (on / len(fires)) if fires else None,
                     "published_rate": aim["on_stuck_rate"],
@@ -455,6 +477,10 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
         else:
             print(f"    --  {path:10s} {a_['n']} declarations, too few to "
                   f"judge; published {a_['published']}")
+    m = an["margin"]
+    print(f"    {'OK ' if m['agrees'] else 'OFF'} margin     "
+          f"{m['mean']:+.4f} +-{m['half_width']:.4f} on {m['n_clusters']} "
+          f"deals against {m['published_mean']:+.4f} published")
     aim = an["aim"]
     if aim["fires"]:
         print(f"    {'OK ' if aim['agrees'] else 'OFF'} aim        "
@@ -521,6 +547,10 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
         "stall_window": STALL_WINDOW,
         "in_time_paths": list(IN_TIME), "too_late_paths": list(TOO_LATE),
         "anchors": an,
+        # per-game rows, so the anchors can be re-derived without replaying
+        "games": [{k: r[k] for k in
+                   ("deal", "kv_even", "margin", "terminal", "paths")}
+                  for r in rows],
         "summary": s,
         "fires": [f for r in rows for f in r["fires"]],
     }
