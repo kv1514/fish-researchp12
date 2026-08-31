@@ -184,3 +184,77 @@ matters beside that. The variable that buys the argmax is *where the message
 points*, not *what it says* --- which is the opposite of the hypothesis this
 document was written to test, and is only visible because the book was built
 and measured anyway.
+
+---
+
+# REPRODUCTION, recorded 2026-08-31: condition 2 no longer passes
+
+**The outcome above is reversed on the current engine, by the rule this
+document fixed in advance.**
+
+## The run above committed no results file
+
+`f8abe6d` recorded this OUTCOME and touched this document,
+`prereg/convention_aimed.md` and a duels JSONL --- no results file. Its figures
+existed in this repository only as prose. `results/convention_replication.json`
+is the re-run that closes that; see the matching section in
+`prereg/convention_aimed.md` for why the magnitudes moved.
+
+## Re-run, seed base 880,000, 40 games, stride 4
+
+| gate | arm | teammate NLL | teammate top-1 |
+|---|---|---|---|
+| 0.02 | flat 0.25 | -0.0161 [-0.0206, -0.0116] | +0.0104 [+0.0034, +0.0174] |
+| 0.02 | flat 0.5 | **-0.0184** [-0.0266, -0.0103] | +0.0196 [+0.0100, +0.0293] |
+| 0.05 | flat 0.25 | -0.0224 [-0.0271, -0.0178] | +0.0196 [+0.0121, +0.0270] |
+| 0.05 | flat 0.5 | **-0.0284** [-0.0366, -0.0202] | **+0.0227** [+0.0141, +0.0312] |
+| 0.05 | flat 0.8 | -0.0192 [-0.0315, -0.0069] | +0.0158 [+0.0061, +0.0255] |
+
+Validity: V1 48.9%/58.1% (floor 25%), V2 amended 26.4%/23.0% (floor 20%),
+V3 92.5%/93.7% (floor 50%). Nothing voids.
+
+**Both gates of `prereg/convention.md` still pass**, at both sender settings.
+The book is not refuted as a channel: it still decodes into a better belief and
+it still improves the argmax.
+
+## Condition 2 fails
+
+The decision rule above says the locating book supersedes the depth book only
+if its best passing arm's top-1 point estimate is **at least as good as** the
+aimed depth book's. On the same engine, the same seed base and the same run:
+
+| | top-1 |
+|---|---|
+| aimed depth book, `beta = 0.8` | **+0.0260** [+0.0164, +0.0356] |
+| locating book, best passing arm (gate 0.05, `flat 0.5`) | **+0.0227** [+0.0141, +0.0312] |
+
++0.0227 is not at least +0.0260, so **condition 2 fails and the locating book
+does not supersede**. Against the literal bar the amendment wrote down
+(+0.0351, the exploratory aimed figure) it fails by more. Both readings agree,
+which is the useful part: the outcome does not depend on which of the two bars
+is meant.
+
+Two things must be said against this, and neither rescues it:
+
+* **The comparison is unpaired.** Each sender setting plays its own games, so
+  the two books are not scored on shared positions; this document's design
+  section flagged that from the start. The gap (0.0033) is far inside the
+  overlap of the two intervals.
+* **The rule is on point estimates, deliberately.** It was written that way
+  because "at least as good as" needs an orderable quantity, and it was fixed
+  before either number existed. A rule that only bites when it is comfortable
+  is not a rule.
+
+So the honest reading is not "the locating book lost". It is that **it never
+beat the aimed depth book by more than noise in either direction**, its
+apparent win came from a run that no longer reproduces, and by its own
+pre-registered criterion it does not earn the supersession it was written to
+claim.
+
+## What this leaves standing
+
+The finding recorded above --- that what buys the argmax is *aiming*, not the
+payload --- is not weakened by this; it is sharpened. Two books that aim, one
+carrying a count and one carrying a location, are indistinguishable from each
+other and both beat the book that does not aim. The variable that mattered was
+never the one this document was written to test.

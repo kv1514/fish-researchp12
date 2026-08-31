@@ -1894,3 +1894,99 @@ no-op* looks like from the outside. This project has a rule for that case —
 instrument the thing directly rather than trusting the summary — and it applies
 to its own tooling. `check_tex` is cheap and worth keeping, but the load-bearing
 check is `bash paper/build.sh`, and it now works.
+
+---
+
+# UPDATE, 2026-08-31: the convention's numbers had no file, and re-running them found something better
+
+Two defects in this direction, one bookkeeping and one substantive.
+
+## The strongest claims in the direction were backed by nothing
+
+`f8abe6d` recorded the aimed replication and the locating book's outcome, and
+touched three files: two pre-registrations and a duels JSONL. **No results
+file.** `-0.0535`, `+0.0392`, `-0.0315`, `+0.0408` existed in this repository
+only as prose in a prereg and a commit message, and could not be re-derived by
+anyone, including me. `results/convention_posterior.json` is the *exploratory*
+560,000 run, which `prereg/convention_aimed.md` exists to say is superseded.
+
+That is `scripts4/unwatched_claims.py`'s finding one layer below the paper: the
+numbers a document repeats most are the ones nobody re-derives. It is now
+closed --- `results/convention_replication.json` holds five sender settings on
+one engine at one seed base --- but it was open for two days across the two
+documents that license the whole direction.
+
+`fish4/convention.py` had the matching defect in code: it still stated the
+retracted "aiming came out neutral, so the book trades a locating signal for a
+counting one" theory as established fact, in a comment block that used it to
+motivate the locating book defined immediately below. Every other copy of that
+theory in the repository sat under an explicit retraction banner. The code was
+the one place a reader would meet it as a finding.
+
+## Re-running it: the conclusion holds, the magnitudes are down a third
+
+At the same seed base 880,000, the aimed book clears all three pre-registered
+conditions again --- but NLL at `beta = 0.8` is **-0.0382** where **-0.0535**
+was recorded, and top-1 **+0.0260** where **+0.0392** was.
+
+The exploratory 560,000 arm, whose file *is* committed, was re-run as a control
+to find out why. Identical seeds, identical `n_games`, byte-identical stored
+spec:
+
+| | committed 08-29 | re-run 08-31 |
+|---|---|---|
+| scored decisions | 1,074 | 1,023 |
+| **baseline** teammate NLL | 1.3995 | **1.3567** |
+| paired NLL at `beta = 0.8` | -0.0712 | -0.0403 |
+
+**The decode did not get worse; the belief it decodes into got better.** Eleven
+engine commits landed in between and the baseline is 0.043 nats stronger. A
+channel is worth what the receiver could not already work out, so every number
+in this direction is measured against a target this project is deliberately
+moving. The marginal arms have already crossed over: `flat 2.0` has gone from
+-0.0342 to **+0.0252**, significantly harmful where it was significantly
+helpful.
+
+## The locating book no longer supersedes, by its own rule
+
+`prereg/convention_locate.md` fixed condition 2 in advance: the locating book
+supersedes only if its best passing arm's top-1 is at least as good as the
+aimed depth book's. On today's engine, best locate arm **+0.0227** against
+aimed **+0.0260** --- it fails, and against the literal bar the amendment wrote
+down (+0.0351) it fails by more. Both gates of `prereg/convention.md` still
+pass, so it is not refuted as a channel; it simply never beat the aimed depth
+book by more than noise in either direction, and its apparent win came from a
+run that no longer reproduces.
+
+## What the re-run found that the original could not
+
+The unaimed control was run at the *matched* gate, which the original comparison
+never was. It gives a direct A/B where the sender's price, the seeds, the
+engine, the arm and the instrument are identical and the only difference is
+where the message points:
+
+| gate 0.05, `beta = 0.8` | paired NLL | paired top-1 |
+|---|---|---|
+| depth, **unaimed** | -0.0284 [-0.0345, -0.0223] | **-0.0086** [-0.0161, -0.0010] |
+| depth, **aimed** | -0.0382 [-0.0466, -0.0299] | **+0.0260** [+0.0164, +0.0356] |
+
+**The NLL barely separates them. The top-1 changes sign.** Across all five
+settings, every book that aims lands top-1 between +0.020 and +0.026; neither
+book that does not aim clears +0.007. And the NLL column does not order them
+that way at all --- unaimed at gate 0.10 (-0.0358) beats both locating books on
+the proper score while losing to both on the argmax.
+
+So aiming does not buy a generally better belief. **It buys the argmax
+specifically, and a proper score is close to blind to it.** Which is also the
+best explanation for why aiming was mistaken for a null for as long as it was:
+the first number anyone reads is the NLL, and on the NLL there is not much to
+see.
+
+## The pattern
+
+A retracted theory survived in the one place nothing checks --- a code comment
+--- while every document that could be searched for it carried the retraction.
+And the run that refuted it wrote no file, so the refutation was as
+unre-derivable as the claim. The fix for both is the same: put the number where
+something can read it back, and re-run before quoting. The re-run cost twenty
+minutes and produced a sharper result than the original had.

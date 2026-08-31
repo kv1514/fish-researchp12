@@ -151,3 +151,126 @@ decoder are both live and the belief that picks the ask is itself shifted.
 
 Nothing ships on a belief result. This project has already measured one case
 where a better posterior was worth nothing in play.
+
+---
+
+# REPRODUCTION, recorded 2026-08-31
+
+**The conclusion holds. The magnitudes do not, and the reason is worth more
+than the magnitudes were.**
+
+## The run above committed no results file
+
+`f8abe6d` recorded this OUTCOME and touched three files: this document,
+`prereg/convention_locate.md`, and a duels JSONL. No results file. Every figure
+in the section above therefore existed in this repository only as prose --- here
+and in a commit message --- and could not be re-derived by anyone, including its
+author. `results/convention_posterior.json` is the *exploratory* 560,000 run,
+which this document exists to say should not be quoted.
+
+That is the same defect `scripts4/unwatched_claims.py` was written about, one
+layer below the paper: the numbers a document repeats most are the ones nobody
+re-derives.
+
+## Re-run at the same seed base, the pre-registered conditions still pass
+
+40 games, stride 4, seed base 880,000, `results/convention_replication.json`.
+
+| | recorded 2026-08-29 | re-run 2026-08-31 | condition | |
+|---|---|---|---|---|
+| NLL at `beta = 0.8` | -0.0535 | **-0.0382** [-0.0466, -0.0299] | below zero; at most -0.0356 | PASS |
+| top-1 at `beta = 0.8` | +0.0392 | **+0.0260** [+0.0164, +0.0356] | above zero; at least +0.0176 | PASS |
+| scored decisions | 1,169 | 1,068 | | |
+
+All five flat arms from 0.25 to 1.2 still clear both gates and top-1 is still
+significantly positive at every one of them, 2.0 included. The claim this
+document was written to protect --- that this is the first belief change in the
+project to improve the argmax --- holds on a third run.
+
+The NLL margin against condition 3 is now thin: -0.0382 against a bar of
+-0.0356. That is worth stating plainly, because on the next engine improvement
+it is the condition that will fail first.
+
+## Why the magnitudes fell: the engine, not the decode
+
+The exploratory arm at seed 560,000 --- the one whose file *is* committed --- was
+re-run as a control, so the drift could be attributed rather than guessed at.
+
+| | committed 2026-08-29 | re-run 2026-08-31 |
+|---|---|---|
+| scored decisions | 1,074 | 1,023 |
+| **baseline** teammate NLL | 1.3995 | **1.3567** |
+| paired NLL at `beta = 0.8` | -0.0712 | **-0.0403** |
+| paired top-1 at `beta = 0.8` | +0.0351 | **+0.0226** |
+
+Identical seeds, identical `n_games`, identical stride, and the stored spec is
+byte-for-byte the same seven keys. What changed is the eleven engine commits in
+between: the baseline belief is **0.043 nats better** than it was.
+
+The decode did not get worse. The belief it decodes into got better, and a
+message is worth only what the receiver could not already work out. This is the
+first place in the project where that shows up as a measurement rather than a
+caveat, and it has a consequence: **the marginal arms have crossed over.**
+`flat 2.0` has gone from -0.0342 to **+0.0252** --- significantly harmful now,
+where it was significantly helpful then --- and `mix 0.6` and above with it.
+
+## What should and should not be quoted
+
+* **Do** quote: aiming replicates on pre-registered conditions, at two seed
+  bases, on two engines a fortnight apart.
+* **Do not** quote -0.0535 or +0.0392. They are the values of a policy that no
+  longer exists.
+* Expect the re-run figures to date the same way. Every number in this
+  direction is measured against a moving baseline, and the baseline is the
+  thing this project is deliberately trying to move.
+
+## The within-run unaimed control, and the withdrawal condition
+
+The withdrawal condition above voids the run if the unaimed control at the same
+gate does not reproduce its own published result to within a factor of two. It
+was re-run at gate 0.05, seed base 880,000, and **it holds**:
+
+| arm | 560,000 committed | 880,000 recorded 08-29 | 880,000 today | ratio to committed |
+|---|---|---|---|---|
+| flat 0.25 | -0.0117 | -0.0111 | -0.0129 | 1.11 |
+| flat 0.5 | -0.0183 | -0.0175 | -0.0221 | 1.21 |
+
+Nothing voids. The unaimed book is, if anything, slightly stronger on NLL than
+it was.
+
+## The head to head, which is the sharpest form of the result
+
+The unaimed book was also re-run at gate 0.10 for the four-book comparison. But
+the gate-0.05 control gives something better: a direct A/B in which the sender's
+cost gate, the seed base, the engine, the arm and the instrument are all
+identical, and **the only difference is where the message points**.
+
+| gate 0.05, `beta = 0.8` | paired NLL | paired top-1 |
+|---|---|---|
+| depth, **unaimed** | -0.0284 [-0.0345, -0.0223] | **-0.0086** [-0.0161, -0.0010] |
+| depth, **aimed** | -0.0382 [-0.0466, -0.0299] | **+0.0260** [+0.0164, +0.0356] |
+
+**The NLL barely separates them. The top-1 changes sign**, from significantly
+negative to significantly positive, on the same asks at the same price.
+
+Across every book measured on this engine and seed base:
+
+| book, at its lowest-NLL arm clearing both gates | paired NLL | paired top-1 |
+|---|---|---|
+| depth, unaimed, gate 0.05 | -0.0221 | -0.0061 [-0.0124, +0.0003] |
+| depth, unaimed, gate 0.10 | -0.0358 | +0.0067 [-0.0006, +0.0140] |
+| depth, **aimed**, gate 0.05 | **-0.0382** | **+0.0260** [+0.0164, +0.0356] |
+| locate (aimed by construction), gate 0.02 | -0.0184 | +0.0196 [+0.0100, +0.0293] |
+| locate (aimed by construction), gate 0.05 | -0.0284 | +0.0227 [+0.0141, +0.0312] |
+
+Every book that aims lands top-1 between +0.020 and +0.026. Neither book that
+does not aim clears +0.007, and at the matched gate it is negative. Meanwhile
+the NLL column does not order the books that way at all: unaimed at gate 0.10
+(-0.0358) beats both locating books on the proper score while losing to both on
+the argmax.
+
+So aiming does not buy a generally better belief. It buys the **argmax
+specifically**, and a proper score is close to blind to it. That is also the
+best available explanation for why the aimed book was mistaken for a null for as
+long as it was: the first number anyone reads is the NLL, and on the NLL there
+is not much to see.

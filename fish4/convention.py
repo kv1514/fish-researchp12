@@ -250,26 +250,46 @@ def aimed_position_table():
 # Carrying a location instead of a count
 # ---------------------------------------------------------------------------
 #
-# WHY THE AIMED BOOK CAME OUT NEUTRAL, WHICH IS THE USEFUL PART. Aiming at the
-# most-unlocated half-suit targets 4.03x the entropy, the round trip confirms
-# sender and receiver agree (74.7% decode-under-truth against 74.9% unaimed),
-# and it discriminates more worlds (V2 48.8% against 30%). It still moved the
-# belief by nothing.
+# RETRACTED, AND NAMED HERE RATHER THAN QUIETLY DELETED. This section used to
+# open "why the aimed book came out neutral, which is the useful part" and
+# build a theory on that null. The null was an artefact and the theory was a
+# rationalisation of it. Both are withdrawn.
 #
-# The reason is an asymmetry that entropy does not see. The unaimed book's
-# forward test is a function of the asker's EXACT HOLDING in the half-suit
-# asked in -- two holdings of the same depth have different free sets and so
-# name different cards. The aimed book's payload is `depth in G`, a pure COUNT:
-# two worlds that give the asker the same number of G's cards are not separated
-# at all, however differently they place them. So aiming did not ADD a signal,
-# it TRADED a locating one for a counting one.
+# What produced it: a 70-decision probe of the aimed decoder, run through the
+# mixture at q = 0.6 -- a parameterisation later refuted on its own withdrawal
+# condition -- returning +0.0017 +- 0.0652. That interval covers every effect
+# this direction has since measured, so it was never evidence of a null. The
+# theory it grew into -- that `depth in G` is a pure COUNT, so aiming did not
+# ADD a signal but TRADED a locating one for a counting one -- explained
+# something that did not happen. Nothing below rests on it.
 #
-# Cards are scored one at a time. A count constrains the joint; only a location
-# pins a card.
+# Measured at 40 games rather than 70 decisions, aiming is the largest result
+# in this direction and the only belief change in this project to improve the
+# argmax instead of paying in it. prereg/convention_aimed.md fixed the
+# magnitude conditions before the replication ran, and it clears all three.
 #
-# THE LOCATING BOOK. Both sides take U, the unlocated cards of G in index order
-# -- public, and snapshotted at the ask like every other target -- truncated to
-# the k cards the ask has to choose between. The message is
+# AND THE EFFECT IS SHRINKING AS THE ENGINE IMPROVES, which is the part worth
+# carrying forward. Re-run on the same seeds two days later, the paired NLL gain
+# at beta = 0.8 is about 40% smaller than when it was first measured -- because
+# the baseline belief it is scored against got roughly 0.043 nats better in the
+# meantime, not because the decode got worse. Arms that were merely weak then
+# are harmful now: flat 2.0 has crossed from -0.0342 to +0.0252. A channel is
+# worth what the belief cannot already work out, so every number in this
+# direction is against a moving target and dates quickly.
+# results/convention_replication.json is the current run; the reproduction that
+# established the drift is beside it.
+#
+# THE LOCATING BOOK below was built to repair the failure that did not happen
+# -- see the amendment at the top of prereg/convention_locate.md, written
+# before the book was run. It is kept because it decodes into a better belief
+# on its own terms, but it does NOT supersede the aimed depth book: on the
+# current engine it fails the top-1 condition its own registration fixed in
+# advance for exactly that comparison. It is a question in its own right and
+# not a fix for anything.
+#
+# Both sides take U, the unlocated cards of G in index order -- public, and
+# snapshotted at the ask like every other target -- truncated to the k cards
+# the ask has to choose between. The message is
 #
 #     j = the index in U of the FIRST card the asker holds, or k - 1 if none
 #
@@ -277,10 +297,48 @@ def aimed_position_table():
 # that the asker does NOT hold U[0..j-1] and DOES hold U[j]: j negatives and a
 # positive, j + 1 cards located, from one ask that was happening anyway. At the
 # measured mean of 3.57 legal cards that is typically two to three cards, where
-# a depth is none.
-#
-# This is the same channel, the same cost, the same single gather. Only the
+# a depth locates none. Same channel, same cost, same single gather; only the
 # code book changes.
+#
+# WHAT THE BOOKS ACTUALLY SHOW is that the payload was the wrong variable to
+# argue about, and that only one of the two scores can see it. Five sender
+# settings on one engine and one seed base, each at its lowest-NLL arm that
+# clears both gates:
+#
+#     depth, UNAIMED, gate 0.05   NLL -0.0221   top-1 -0.0061 [-0.0124,+0.0003]
+#     depth, UNAIMED, gate 0.10   NLL -0.0358   top-1 +0.0067 [-0.0006,+0.0140]
+#     depth, AIMED,   gate 0.05   NLL -0.0382   top-1 +0.0260 [+0.0164,+0.0356]
+#     locate,         gate 0.02   NLL -0.0184   top-1 +0.0196 [+0.0100,+0.0293]
+#     locate,         gate 0.05   NLL -0.0284   top-1 +0.0227 [+0.0141,+0.0312]
+#
+# Every book that aims lands top-1 between +0.020 and +0.026; neither book that
+# does not aim clears +0.007. The NLL column does not order them that way at
+# all -- unaimed at gate 0.10 beats both locating books on the proper score and
+# loses to both on the argmax.
+#
+# THE CLEANEST FORM OF IT is the head to head at gate 0.05 and beta = 0.8,
+# where the sender's price, the seeds, the engine, the arm and the instrument
+# are identical and the ONLY difference is where the message points:
+#
+#     unaimed   NLL -0.0284 [-0.0345,-0.0223]   top-1 -0.0086 [-0.0161,-0.0010]
+#     aimed     NLL -0.0382 [-0.0466,-0.0299]   top-1 +0.0260 [+0.0164,+0.0356]
+#
+# The NLL barely separates them. The top-1 CHANGES SIGN, from significantly
+# negative to significantly positive, on the same asks at the same price. So
+# aiming does not buy a generally better belief; it buys the argmax
+# specifically, and a proper score is close to blind to it -- which is also the
+# best explanation for why the aimed book was mistaken for a null for as long
+# as it was. The first number anyone reads is the NLL, and on the NLL there is
+# not much to see. That is the opposite of the hypothesis this file was
+# extended to test, and is visible only because the book got built and measured
+# after its motivation had evaporated.
+#
+# NONE OF IT SHIPS, and the belief is not the reason. Priced at a gate the
+# sender will actually pay, the champion beats the encoder by 1.267
+# [0.526, 2.008] sets a game; re-priced so the message is free the duel is a
+# null (-0.02 [-0.515, +0.475], 200 pairs); and the decoder alone, reading the
+# coincidences already on the wire, is a tighter null at 3,000 pairs (+0.002
+# [-0.123, +0.127]). results/convention_duels.json. Speaking is the whole cost.
 
 
 def locate_payload(hand: int, targets) -> int:
