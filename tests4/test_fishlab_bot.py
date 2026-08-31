@@ -129,3 +129,25 @@ def test_hand_that_disagrees_with_hand_counts_is_refused():
         br.observation({"seat": 0, "turn": 0, "hand": ["2S", "3S"],
                         "hand_counts": [9, 9, 9, 9, 9, 9],
                         "set_winner": [None] * 9, "history": []})
+
+
+def test_every_script_the_readme_tells_you_to_run_exists():
+    """The README's FIRST command was ``./build.sh`` for a build.sh that had
+    been replaced by build.py. Anyone following it got "No such file or
+    directory" on line one. A README is an interface; this checks it compiles.
+    """
+    import re
+
+    here = Path(__file__).resolve().parents[1] / "fishlab"
+    text = (here / "README.md").read_text(encoding="utf-8")
+    # Scripts named as a command (./x.py, python3 x.py) or in backticks.
+    named = set(re.findall(r'(?:\./|python3?\s+|`)([A-Za-z0-9_]+\.(?:py|sh))',
+                           text))
+    assert named, "the README names no script at all; the pattern stopped matching"
+    missing = sorted(n for n in named
+                     if not (here / n).exists()
+                     and not (here.parent / "scripts4" / n).exists())
+    assert not missing, (
+        f"fishlab/README.md tells the reader to run {missing}, which do not "
+        f"exist in fishlab/ or scripts4/."
+    )

@@ -3,7 +3,7 @@
 Drop `kraken.zip` on a FishLab table's **Bots** panel and it takes a seat.
 
 ```bash
-./build.sh                       # produces kraken.zip, engine vendored in
+python3 build.py                 # produces kraken.zip, engine vendored in
 # then, on the FishLab side:
 ./fish bots add /path/to/kraken.zip
 ./fish bots check kraken
@@ -11,7 +11,28 @@ Drop `kraken.zip` on a FishLab table's **Bots** panel and it takes a seat.
 ```
 
 No dependencies. Pure standard library plus this project's own engine, which
-`build.sh` copies into the package so it is self-contained.
+`build.py` copies into the package so it is self-contained. The builder is
+Python rather than shell because it has to run where `rsync` and `zip` are not
+installed, which is where it was first built.
+
+## What this was built against
+
+`fishlab-json-v1`, as specified 2026-08-30. The three things a future protocol
+revision is most likely to move, written down because reading them back out of
+the code took longer than it should have:
+
+| | |
+|---|---|
+| request field | `op` — `{"op":"ask", ...}`, not `type` |
+| event field | `t` — `{"t":"ask","actor":0, ...}` |
+| deck | 54 cards, nine half-suits of six, spades first; eights and jokers are half-suit 8, and the jokers are `RJ` and `BJ` |
+
+None of these are hardcoded assumptions the bot makes blindly: the handshake
+hands over the whole deck and `bot.py` derives the mapping from it, refusing
+names it does not recognise rather than guessing. `scripts4/fishlab_check.py`
+is the executable copy of this table — it speaks the protocol from the outside,
+as a subprocess, so a change on FishLab's side shows up as a failing check
+rather than as a bot that plays badly for no visible reason.
 
 ## Why this speaks `fishlab-json-v1` and not `kv-json-v1`
 
