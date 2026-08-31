@@ -222,11 +222,26 @@ direction --- the depth book, the aimed book, the locating book, all of
 --- was scored at **720**, because that is what `gamma_split.py` fixed and the
 convention instrument imported.
 
-Interpolating this grid, the aimed book's -0.0382 at 720 would be roughly
-**-0.033** at the shipped 480. That is an interpolation and not a measurement,
-and it is small; but the direction is now known, and "the belief numbers are
-quoted at 1.5x the precision the engine runs at" is a fact about all of them
-that nobody had before this run.
+Interpolating this grid put the aimed book's -0.0382 at roughly **-0.033** at
+the shipped 480.
+
+> **MEASURED 2026-08-31, replacing that interpolation.** A descriptive run on
+> the same transcripts with 480 added to the grid gives **-0.0368**
+> [-0.0523, -0.0213] --- `results/channel_precision_shipped.json`. That is a
+> **4%** difference from the 720 figure, not the 15% a straight line between
+> the 360 and 720 cells predicted: the curve flattens well before 720 and the
+> interpolation could not see it.
+>
+> The run is marked non-registered everywhere it can be --- on stdout, in the
+> payload's `registered: false`, and in a verdict prefixed DESCRIPTIVE ---
+> because a run on a different grid is not this registration's test however
+> similar it looks. The four cells it shares with the registered run came back
+> **bit-identical** (delta 0.00e+00 on all four), which is what the
+> per-decision RNG seeding is for: inserting a cell perturbs no other cell.
+>
+> So the caveat survives but shrinks. "These numbers are quoted at 1.5x the
+> sampler precision the engine uses" is still true and still worth knowing; it
+> is worth about 4% on the aimed book, not 15%.
 
 ## What this does and does not say about the engine drift
 

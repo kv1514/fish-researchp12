@@ -69,8 +69,11 @@ from unlocated_belief import (MIN_CLUSTERS, Pool,           # noqa: E402
 
 RULES = RuleConfig(wrong_distribution_outcome="opponent")
 
-#: Fixed by prereg/channel_vs_precision.md.
-GRID = (180, 360, 720, 1440)
+#: Fixed by prereg/channel_vs_precision.md. REGISTERED_GRID is the record
+#: of what was registered; GRID is what this process ran, and they differ
+#: only on a descriptive run, which says so everywhere it can.
+REGISTERED_GRID = (180, 360, 720, 1440)
+GRID = REGISTERED_GRID
 SENDER_GATE = 0.05
 BETA = 0.8
 SEED_BASE = 880_000
@@ -188,7 +191,27 @@ def contrast(team: dict, hi: int, lo: int) -> dict | None:
             "interval_withheld": withheld}
 
 
-def main(n_games: int = 40, stride: int = 4, out: str | None = None) -> int:
+def main(n_games: int = 40, stride: int = 4, out: str | None = None,
+         draws: tuple[int, ...] | None = None) -> int:
+    """``draws`` overrides the registered grid for DESCRIPTIVE runs only.
+
+    The registration fixes GRID, and a run on any other grid is not the
+    registered test however similar it looks. So an override is loud: it says
+    so on stdout, it sets ``registered: false`` in the payload, and it prefixes
+    the verdict with DESCRIPTIVE. The reason for having it at all is that the
+    registered run left an INTERPOLATION standing in three documents -- what
+    the gain would be at the n_draws = 480 the engine actually ships -- and an
+    interpolation that costs four minutes to replace with a measurement should
+    be replaced with one.
+    """
+    global GRID
+    registered = draws is None
+    if not registered:
+        GRID = tuple(draws)
+        print(f"DESCRIPTIVE RUN: grid {GRID} is not the registered "
+              f"{REGISTERED_GRID}. Not the pre-registered test.",
+              file=sys.stderr)
+
     team, opp, decisions, our_asks = transcripts_and_scores(n_games, stride)
 
     cells = []
@@ -252,13 +275,17 @@ def main(n_games: int = 40, stride: int = 4, out: str | None = None) -> int:
             verdict = "REFUTED"
         else:
             verdict = "UNRESOLVED"
+    if not registered:
+        verdict = f"DESCRIPTIVE ({verdict} on a non-registered grid)"
     print(f"\n  VERDICT: {verdict}   "
           "(prereg/channel_vs_precision.md fixed these in advance)")
 
     payload = {
         "prereg": "prereg/channel_vs_precision.md",
         "n_games": n_games, "stride": stride, "seed_base": SEED_BASE,
-        "grid": list(GRID), "beta": BETA, "sender_gate": SENDER_GATE,
+        "grid": list(GRID), "registered_grid": list(REGISTERED_GRID),
+        "registered": registered,
+        "beta": BETA, "sender_gate": SENDER_GATE,
         "decisions": decisions, "our_asks": our_asks,
         "cells": cells, "contrast": D,
         "condition_1_baseline_monotone": monotone,
@@ -283,4 +310,6 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     raise SystemExit(main(int(a[0]) if a else 40,
                           int(a[1]) if len(a) > 1 else 4,
-                          a[2] if len(a) > 2 else None))
+                          a[2] if len(a) > 2 else None,
+                          tuple(int(x) for x in a[3].split(","))
+                          if len(a) > 3 else None))

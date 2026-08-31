@@ -233,9 +233,15 @@ where it was significantly helpful then --- and `mix 0.6` and above with it.
 There is a second thing that run prices, and it applies to every figure in this
 document. The engine ships at `n_draws = 480`; every number here was scored at
 **720**, because that is what `gamma_split.py` fixed and this instrument
-imported. Interpolating that grid, -0.0535 and -0.0382 would both be about 15%
-smaller at the precision the engine actually runs at. An interpolation, not a
-measurement --- but the direction is now known.
+imported. That was first written as an interpolation --- "about 15% smaller" ---
+and then **measured**: `results/channel_precision_shipped.json` puts the aimed
+book at **-0.0368** [-0.0523, -0.0213] at 480 against -0.0382 at 720, a
+difference of **4%**, not 15%. The curve flattens well before 720, which a
+straight line between the 360 and 720 cells could not see.
+
+So the figures in this document are quoted at 1.5x the sampler precision the
+engine runs at, and that is worth a few per cent rather than a sixth. Worth
+knowing; not worth restating the tables over.
 
 ## What should and should not be quoted
 

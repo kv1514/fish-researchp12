@@ -308,8 +308,12 @@ def aimed_position_table():
 # the numbers rather than any story about them.
 #
 # It also prices every belief number in this direction. The engine ships at
-# n_draws = 480 and all of them were scored at 720, so -0.0382 would be roughly
-# -0.033 at the shipped precision. That is an interpolation, not a measurement.
+# n_draws = 480 and all of them were scored at 720. Measured rather than
+# interpolated (results/channel_precision_shipped.json): -0.0368 at 480 against
+# -0.0382 at 720, a 4% difference and not the 15% a straight line between the
+# 360 and 720 cells predicted. The curve flattens well before 720, which the
+# interpolation could not see and which is the reason it was replaced with a
+# four-minute run.
 #
 # THE LOCATING BOOK below was built to repair the failure that did not happen
 # -- see the amendment at the top of prereg/convention_locate.md, written

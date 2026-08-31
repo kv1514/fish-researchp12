@@ -2060,11 +2060,21 @@ worlds. Reweighting few worlds by one fact distorts the rest of the joint.
 The engine ships at **`n_draws = 480`**. Every belief figure in this
 direction --- the depth book, the aimed book, the locating book, both results
 files --- was scored at **720**, because `gamma_split.py` fixed it there and the
-convention instrument imported the constant. On this grid that is worth roughly
-15%: -0.0382 would be about -0.033 at the precision the engine runs at.
+convention instrument imported the constant.
 
-An interpolation, not a measurement. But "these numbers are quoted at 1.5x the
-sampler precision the engine uses" is a fact about all of them that nobody had.
+That was first written here as an interpolation --- "roughly 15%, about -0.033"
+--- and then **measured**, because an interpolation standing in three documents
+when the measurement costs four minutes should not stand. A descriptive run
+with 480 added to the grid gives **-0.0368** [-0.0523, -0.0213] against -0.0382
+at 720: **4%**, not 15%. The curve flattens well before 720 and a straight line
+between the 360 and 720 cells could not see it.
+`results/channel_precision_shipped.json`, marked `registered: false` because a
+different grid is not the registered test.
+
+So "these numbers are quoted at 1.5x the sampler precision the engine uses" is
+a fact about all of them that nobody had --- and it is worth a few per cent, not
+a sixth. The four cells the descriptive run shares with the registered one came
+back bit-identical, which is what the per-decision seeding is for.
 
 ## What it does not say
 
