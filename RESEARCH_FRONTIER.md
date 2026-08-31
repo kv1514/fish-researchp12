@@ -2421,21 +2421,55 @@ badly.
 
 ## Where Direction 2's headroom must actually be
 
-Not in *which* half-suit. What is left, and neither is what the direction says:
+Not in *which* half-suit.
 
-* **When.** The `cheap` gate is `p_best <= 0.15`, and the tempo table says a
-  turn is free below `p_best = 0.50`. The threshold was set before that table
-  existed --- which `prereg/deadline_signalling.md` already says, and which is a
-  different intervention from aiming.
-* **How early.** `stuck_half_suits` is a statement about the CURRENT state:
-  provably ours and unplaceable *now*. The direction's own words are "most
-  likely to be **forced** unresolved", which is a **prediction**. Signalling
-  before a half-suit is stuck is a genuinely different mechanism from aiming at
-  one that already is, and nothing here has measured it.
+> **CORRECTION, half an hour after the above was written.** This section
+> originally offered two remaining leads and the first of them, **when**, was
+> already closed --- by `prereg/deadline_signalling.md`, which is the very
+> document I cited beside it. It did not merely note the gate was uncalibrated;
+> it **registered and ran** the re-priced gate. Arm B at `p_best <= 0.15`
+> against arm C at `0.50`, 1,000 games:
+>
+> | arm | gate declarations | wrong/game |
+> |---|---|---|
+> | B (0.15) | 75 (9.3% wrong) | 0.156 |
+> | C (0.50) | 78 (10.3% wrong) | 0.152 |
+>
+> **Widening the gate by 3.3x changed the engine's behaviour on three
+> declarations in a thousand games.** Its own words: *"the gate was never the
+> binding constraint ... p_best <= 0.15 is very nearly implied by the situation
+> the protocol fires in ... That retires the hypothesis rather than leaving it
+> open."*
+>
+> I proposed a lead without checking whether the project had already closed it,
+> in a note whose whole point was that a claim about the code should be measured
+> before it is built. It is the day's own lesson, missed on the day.
 
-The second is the interesting one and it is deliberately left as a question
-rather than written up as a plan: this branch has spent the day learning what a
-mechanism asserted from one reading is worth.
+That correction also explains the measurement above rather than merely competing
+with it. **1.04 stuck half-suits when the signal fires** and *"a stuck seat is
+one whose best ask is already bad"* are the same fact from two angles: by the
+time this protocol engages, the situation has almost no degrees of freedom left.
+Neither the target nor the threshold is a choice being made badly, because
+neither is much of a choice.
+
+## What the project itself names as the open question
+
+`prereg/deadline_signalling.md`, having measured the mechanism at
+**+0.122 [+0.029, +0.215]** sets/game and declined it against a +0.15 bar, says
+where the ceiling is:
+
+> **Its ceiling is that it adds errors almost as often as it avoids them** ---
+> 52 games against 72. That is the number to attack if this mechanism is ever
+> revisited, **not the gate**.
+
+So the open question is not when to signal or what to aim at. It is: **why does
+a deliberately dead ask that proves where a card is not sometimes make the
+declaration worse?** Avoiding an error is worth +1.61 and adding one costs
+-0.96, so the two are not symmetric, and 52 against 72 at those prices is what
+turns a real mechanism into a +0.122 that misses a +0.15 bar.
+
+That is a well-posed question with a measured decomposition already behind it,
+and it is left as a question here rather than answered with a mechanism.
 
 ## The probe reported zero first, and the reason is the recurring one
 
