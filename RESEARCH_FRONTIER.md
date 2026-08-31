@@ -3498,3 +3498,46 @@ now computes it for every registration.
 | they are distinct mechanisms | confirmed on one paired run over the same deals |
 | **it may be a `dylan_v07` fact** | **open, and the screen says there is barely a second place to look** |
 | neither ships | +0.1190 and +0.0540 against a bar of +0.15 |
+
+## The paper's format, against the paper it is meant to sit beside
+
+Four of the five items the audit raised were real and are done. The fifth was
+not, and the measurement is worth keeping because it was a mis-diagnosis of a
+familiar kind: a property measured in isolation and assumed bad.
+
+**Structure.** Thirty-one flat top-level sections became thirteen and a
+lettered appendix, matching SESTINA. Nothing was rewritten and no prose moved;
+nineteen sections became subsections of the umbrella they already sat under in
+reading order. Two umbrellas were inserted, for the decision procedure and for
+the discussion. With tocdepth at 1 the contents page is now thirteen lines.
+
+**The em-dash.** 688 over 111 pages, about six a page, against SESTINA's 15 in
+the whole document. Down to 365 under two rules: a coordinating or relative
+word after a dash takes a comma instead, and a paired dash keeps its dashes
+when the phrase it encloses carries a comma of its own. Where the enclosed
+phrase can be read as an independent clause it takes brackets rather than
+commas, because commas round a clause make a splice. All 100 paired
+conversions were logged and read; two rules had to be corrected after reading
+them (an -ing word does not settle whether a phrase is a clause, and a bracket
+wants a comma after it where a dash did not).
+
+**Headings.** Fifteen paragraph headings opened with a conjunction. A heading
+is a label, not a continuation.
+
+**Drafting narrated in the text.** Four passages narrated the writing rather
+than the work and carried no figure; they are gone, and the two that recorded
+a real change of position are in C11. The other nineteen mentions of an
+earlier draft stay inline beside the figures they correct, which is the most
+useful place for them. Stripping those would have been a scientific
+regression dressed as a formatting fix.
+
+**Sentence length: the audit item was wrong.** It flagged 252 sentences over
+45 words. Measured against the target rather than against a rule of thumb,
+this paper is already the shorter-sentenced of the two:
+
+    kraken   2326 sentences  median 24  mean 26.1  >45w 10.8%  >60w 75
+    SESTINA  1303 sentences  median 22  mean 29.7  >45w 13.8%  >60w 92
+
+Ours has more sentences over 45 words in absolute count only because it is
+twice the length. Rewriting 252 sentences would have moved the paper away from
+the comparison, not toward it. No edit made.
