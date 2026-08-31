@@ -2606,9 +2606,15 @@ zero at $68\%$ power. So the defensible ordering remains
 \]
 with the first inequality undemonstrated --- and the leftmost quantity now
 measured directly rather than assembled. The engine names this configuration
-\texttt{V04\_COMBINED} and the public table has been playing it all along;
-until this run reported, no figure in this paper described what the website was
-actually running.
+\texttt{V04\_COMBINED}. It is \emph{not} what the site runs, and an earlier
+draft of this sentence said it was. The deployed configuration is
+\texttt{V06\_DEPLOYED}: the same sampler and depth-3 belief-space lookahead
+with \texttt{claim\_forced\_exhaustive} on and the endgame correction
+\emph{off} ($\texttt{endgame\_m}=0$), the correction having been withdrawn
+under the award rule (\S\ref{sec:critic}). \texttt{V04\_COMBINED} carries
+that withdrawn arm at $\texttt{endgame\_m}=2$. The run reported here measures
+the two-knob arm, not today's deployed spec; both are given verbatim in
+Appendix~\ref{app:champion}.
 
 \paragraph{And it stops paying: precision's returns diminish.} If tripling the
 sampling budget is worth $+0.340$, the obvious question is whether tripling it
@@ -6191,13 +6197,21 @@ plies holding a set unspoken & $78.166$ & $32.440$ & $+45.726$ $[+41.5, +49.9]$ 
 \end{tabular}
 \end{center}
 
-\noindent Splitting the $3.665$-card gap at the mean gives $+1.802$ to volume
-and $+1.863$ to conversion: \textbf{almost exactly half and half}. We take
-$4.7$ more turns a game than v0.7, and that is worth as much as the
-$3.7$-point edge in ask accuracy this paper has been quoting as the mechanism.
-Tempo is not a term in our objective, is not a knob anywhere in the engine,
-and has never appeared in a results table --- it is a by-product of asking
-well, and it accounts for half of what asking well is worth.
+\noindent Splitting the $3.665$-card gap at the mean assigns $+1.802$ to
+volume and $+1.863$ to conversion, and an earlier draft of this paragraph read
+that as two mechanisms of equal size. It is one mechanism counted twice. A
+landed ask retains the turn, so asks per possession is $1/(1-p)$, and the two
+hit rates alone --- $0.5151$ against $0.4779$ --- predict an ask-count ratio of
+$2.062/1.915 = 1.077$ against an observed $51.894/48.265 = 1.075$. The volume
+term is not a second contribution; it is what the conversion term implies. Our
+extra $4.7$ turns a game are a consequence of asking better, not an
+independent source of cards, and the two may not be added.
+
+That the product splits evenly at the mean is a property of the arithmetic and
+not a finding: for any two factors whose ratio is close to one, the
+symmetric split assigns each about half. The honest statement is the
+conversion edge: we land $51.5\%$ of asks against $47.8\%$, and every other
+row of the table above follows from it.
 
 \paragraph{The last row is the one that costs us.} We hold assembled
 half-suits for $78$ plies a game against their $32$, and our own declaration
@@ -7560,13 +7574,34 @@ result. \path{summarise_duels.py} prints, alongside every interval, the
 smallest effect that run could have detected --- which is the column that stops
 a null being read as a negative.
 
-\section{The champion}
+\section{The champion, and the deployed configuration}
 \label{app:champion}
 
+Two different objects, named separately because the paper has confused them
+before. The first is the reference point every ablation is measured against;
+the second is what the public site runs.
+
+\paragraph{The reference champion.}
 \begin{verbatim}
 from fish4.registry4 import make_agent
 agent = make_agent(("fishbot4", {"opponent_gamma": 0.35}))
 \end{verbatim}
+
+\paragraph{The deployed configuration}, \texttt{V06\_DEPLOYED} in
+\path{fish4/registry4.py} and \texttt{WEB\_SPEC} in \path{api/_engine.py},
+which agree key for key:
+\begin{verbatim}
+{"opponent_gamma": 0.35, "n_draws": 480,
+ "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4,
+ "endgame_m": 0, "claim_forced_exhaustive": 1}
+\end{verbatim}
+\noindent \texttt{endgame\_m} is $0$: the endgame ask correction is
+\emph{not} deployed, having been withdrawn under the award rule
+(\S\ref{sec:critic}). \texttt{V04\_COMBINED}, which several measurements in
+this paper use as their arm, carries it at $\texttt{endgame\_m} = 2$ and is
+not what the site runs. Signalling and the pre-play convention are off
+(\texttt{signal\_mode} defaults to \texttt{"off"}), so nothing in
+\S\ref{sec:v11} changes the deployed engine.
 
 Everything else is at its default, and the defaults are deliberately v0.3's own
 ask objective ($w_{\mathrm{suit}} = 0.06$, $w_{\mathrm{turn}} = 0.60$,

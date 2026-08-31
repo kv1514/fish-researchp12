@@ -381,7 +381,7 @@ def generality():
 
 
 def test_the_generality_registration_names_a_grid_and_its_own_size(generality):
-    assert run.VS_GRID == ("probabilistic", "memory", "self")
+    assert run.VS_GRID == ("ev_claim", "self")
     assert run.REGISTERED_N == 800
     assert run.SEED0 == 12_100_000
     assert set(run.ARMS) == {"A_shipped", "B_signal"}
@@ -402,6 +402,27 @@ def test_the_sample_size_is_the_registrations_and_not_the_files(generality):
     assert run.REGISTERED_N != run.N_DEALS
     run.select("defer_gate_at_power")
     assert run.REGISTERED_N == run.N_DEALS
+
+
+def test_the_generality_grid_was_chosen_from_the_screen(generality):
+    """The first grid here was written BEFORE results/opponent_error_screen.json
+    existed and the screen refuted it: every opponent in it sits at a 3-7%
+    declaration error rate against dylan_v07's 21.8%, so a null would have
+    measured the floor. Only opponents with error volume to move may be in the
+    grid, and the screen is the authority on which those are."""
+    import json
+    d = json.loads((ROOT / "results" / "opponent_error_screen.json").read_text())
+    opp = d["opponents"]
+    assert opp["dylan_v07"]["their_err"] > 0.20
+    for name in run.VS_GRID:
+        if name == "self":
+            continue                      # the floor case, included on purpose
+        assert opp[name]["their_err"] > 0.10, (
+            f"{name} misdeclares too rarely to carry the effect")
+        assert opp[name]["theirs_headroom"] > 5.0, name
+    for barred in ("probabilistic", "memory", "value_search"):
+        assert opp[barred]["their_err"] < 0.10
+        assert barred not in run.VS_GRID
 
 
 def test_every_registration_declares_a_size_that_is_used(generality):

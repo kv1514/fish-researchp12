@@ -121,7 +121,17 @@ REGISTRATIONS = {
         "seed": 12_100_000, "agent": 121_000,
         "base": "A_shipped", "arm": "B_signal", "interaction": False,
         "identity": True,
-        "vs_grid": ("probabilistic", "memory", "self"),
+        #: CHOSEN FROM results/opponent_error_screen.json, not before it. The
+        #: first grid written here was ("probabilistic", "memory", "self"),
+        #: picked before the screen ran, and the screen says all three sit at
+        #: a 3-7% declaration error rate against dylan_v07's 21.8% -- so a
+        #: null against any of them would have measured the floor, which is
+        #: exactly what the screen exists to prevent. `ev_claim` at 10.8% is
+        #: the ONLY other honest opponent with error volume to move;
+        #: `heuristic` is higher at 72.5% but declares 1.09 times a game
+        #: against dylan_v07's 4.02, so its headroom is 0.60 sets against
+        #: 6.28 and it cannot carry the effect either.
+        "vs_grid": ("ev_claim", "self"),
         "n_deals": 800,
     },
 }

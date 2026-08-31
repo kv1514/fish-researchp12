@@ -3364,3 +3364,66 @@ Both large channels are about the opponents: how many half-suits they get to
 declare, and how often they are right when they do. Neither has ever been
 measured on purpose. The first instrument to count them at all is the run
 landing tonight.
+
+---
+
+## UPDATE 2026-08-31 — the opponent-error channel is nearly a dylan_v07 fact
+
+`results/opponent_error_screen.json`, 60 deals x 2 parities against each honest
+policy in the registry, descriptive:
+
+| opponent | margin | their decls/game | **their error rate** | headroom in THEIRS |
+|---|---|---|---|---|
+| `dylan_v07` | +2.3333 | 4.017 | **0.2178** | 6.283 |
+| `heuristic` | +7.8500 | 1.092 | 0.7252 | **0.600** |
+| `ev_claim` | +1.9167 | 3.717 | **0.1076** | 6.633 |
+| `probabilistic` | +1.8500 | 3.592 | 0.0673 | 6.700 |
+| `tuned` | +1.8500 | 3.592 | 0.0673 | 6.700 |
+| `search` | +3.0500 | 2.867 | 0.0669 | 5.350 |
+| `paired_search` | +1.6500 | 3.633 | 0.0619 | 6.817 |
+| `memory` | +2.2833 | 3.183 | 0.0445 | 6.083 |
+| `self` | +0.0000 | 4.500 | 0.0333 | 8.700 |
+| `value_search` | +1.7667 | 3.525 | 0.0307 | 6.833 |
+
+**`dylan_v07` is an outlier by a factor of two.** The next honest opponent that
+declares at all often is `ev_claim` at 10.8%; the rest sit between 3% and 7%,
+and the champion itself at 3.3%. `heuristic`'s 72.5% is not a counterexample —
+it declares 1.09 times a game against `dylan_v07`'s 4.02, so the whole THEIRS
+channel against it is worth 0.60 sets rather than 6.28.
+
+So the +0.2216 rate term that is 84% of what signalling buys is measured
+against the one opponent in the registry with a large error rate to raise. That
+does not make it an artefact — the rate change is real, replicated across five
+arms and two engine revisions — but it does mean **this project cannot
+currently tell a property of the convention from an exploit of one policy**,
+because there is barely a second place to look.
+
+### The screen caught me choosing the grid before the evidence
+
+`prereg/signal_generality.md` was going to name `probabilistic`, `memory` and
+`self`, and the registration entry in `signal_vs_defer.REGISTRATIONS` said so
+before this screen ran. All three are at 3–7%. A null against any of them would
+have measured the floor, which is the exact failure the screen was built to
+prevent — and it caught its own author. The grid is now `ev_claim` and `self`,
+chosen from the table above, and a test binds it to the screen so it cannot
+drift back.
+
+`self` stays in deliberately as the floor case: the champion misdeclares on
+3.3% of its declarations, so if signalling moves that rate the finding is about
+the convention and not about any opponent's weakness.
+
+### The generality question is weaker than it looked
+
+With one alternative opponent above 10%, a two-arm generality run can confirm
+the effect transfers and cannot cleanly refute it. That limit is a fact about
+the opponent pool, not about the design, and the registration must say so
+before it runs. It is also the same gap the head-to-head section already
+concedes: robustness of the opponent pool belongs beside pre-registration in
+the discipline, not downstream of it.
+
+### An observation to check, not a finding
+
+`probabilistic` and `tuned` returned identical values in every column over
+120 games. Either they are the same policy under two names in the registry or
+the seeds made them coincide; worth one look before either is used as a
+separate opponent anywhere.
