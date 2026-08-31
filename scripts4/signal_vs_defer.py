@@ -555,8 +555,12 @@ def main(n_deals: int | None = None, n_jobs: int | None = None,
     payload["smoke"] = n_deals != REGISTERED_N
     payload["minutes"] = round((time.time() - t0) / 60, 1)
     #: Four registrations share this instrument. A single default filename
-    #: for all of them is the hazard that already cost one cited run.
-    path = Path(out) if out else default_path(PREREG, SEED0)
+    #: for all of them is the hazard that already cost one cited run, and a
+    #: registration that runs once per OPPONENT at one seed carries it again:
+    #: without the opponent in the name, run two silently replaces run one and
+    #: every IDENTITY key still matches.
+    stem = PREREG if VS_GRID is None else f"{PREREG}_{VS}"
+    path = Path(out) if out else default_path(stem, SEED0)
     path = write_result(path, payload)
     print(f"\nwrote {path}  ({payload['minutes']} min)")
     return 0 if not payload["interaction"]["verdict"].startswith("WITHDRAWN") \

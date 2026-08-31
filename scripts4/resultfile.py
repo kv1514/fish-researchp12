@@ -10,6 +10,12 @@ warned anybody: the second run reported success and exited 0.
 `scripts4/signal_vs_defer.py` carried the same hazard by default, across four
 registrations sharing one output name.
 
+It then carried it a second time along a new axis. `signal_generality` runs the
+same registration, at the same seed, once per OPPONENT -- and the opponent was
+in neither the filename nor this list, so the second opponent's run would have
+overwritten the first and the guard would have seen two identical identities
+and allowed it. `vs` is in both now.
+
 Two rules, both cheap:
 
   * the default filename carries the seed base, so two runs of one instrument
@@ -32,7 +38,7 @@ ROOT = Path(__file__).resolve().parents[1]
 #: them is unguarded rather than blocked -- add its own key here when it grows
 #: one, which is cheaper than discovering the collision from the paper.
 IDENTITY = ("seed_deal", "seed_agent", "prereg", "n_deals", "n_games",
-            "stride")
+            "stride", "vs")
 
 
 def default_path(stem: str, seed: int) -> Path:

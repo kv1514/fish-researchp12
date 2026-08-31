@@ -517,3 +517,47 @@ def test_the_identity_withdrawal_names_the_rule_it_depends_on():
     no ClaimEvent at all."""
     assert 'wrong_distribution_outcome="opponent"' in FLAT
     assert "`NULL_TEAM` branch is reachable" in FLAT
+
+
+def test_two_opponents_at_one_seed_cannot_share_a_filename(generality):
+    """The defect resultfile.py exists to prevent, along a new axis.
+
+    signal_generality runs the SAME registration at the SAME seed once per
+    opponent. Every IDENTITY key matched, so the guard would have compared two
+    identical identities and allowed the second opponent's run to replace the
+    first -- silently, exiting 0, exactly as the run this project already lost.
+    """
+    from scripts4.resultfile import default_path, IDENTITY
+    assert "vs" in IDENTITY, "the guard must be able to see the opponent axis"
+    names = set()
+    for vs in run.VS_GRID:
+        run.VS = vs
+        stem = run.PREREG if run.VS_GRID is None else f"{run.PREREG}_{run.VS}"
+        names.add(default_path(stem, run.SEED0).name)
+    assert len(names) == len(run.VS_GRID), names
+
+
+def test_a_fixed_opponent_registration_keeps_its_bare_filename():
+    """The opponent belongs in the name only where it varies; adding it
+    everywhere would orphan the files the paper already cites."""
+    from scripts4.resultfile import default_path
+    run.select("signal_budget")
+    assert run.VS_GRID is None
+    stem = run.PREREG if run.VS_GRID is None else f"{run.PREREG}_{run.VS}"
+    assert default_path(stem, run.SEED0).name == "signal_budget_11700000.json"
+    run.select("defer_gate_at_power")
+
+
+def test_the_guard_refuses_two_opponents_written_to_one_path(tmp_path):
+    """Belt and braces: even if a caller hands both runs the same --out, the
+    payloads now differ on an IDENTITY key and the write is refused."""
+    import pytest as _pytest
+    from scripts4.resultfile import write
+    base = dict(seed_deal=12_100_000, seed_agent=121_000,
+                prereg="signal_generality", n_deals=800, n_games=3200)
+    p = tmp_path / "collision.json"
+    write(p, dict(base, vs="ev_claim"))
+    with _pytest.raises(SystemExit) as e:
+        write(p, dict(base, vs="self"))
+    assert "DIFFERENT run" in str(e.value)
+    assert "ev_claim" in str(e.value) and "self" in str(e.value)
