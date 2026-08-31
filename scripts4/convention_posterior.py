@@ -40,6 +40,7 @@ from fish4.convention import encoded_card, is_encoded     # noqa: E402
 from fish4.posterior import Posterior                     # noqa: E402
 from fish4.registry4 import V06_DEPLOYED, make_agent      # noqa: E402
 
+from duel import engine_fingerprint                       # noqa: E402
 from gamma_split import (N_DRAWS, Pool, paired,           # noqa: E402
                          true_holder_map)
 
@@ -245,7 +246,8 @@ def main(n_games: int = 30, stride: int = 4, out: str | None = None,
         key = f"{mc} {book}"
         _report(key, results[key])
 
-    payload = {"results": results, "n_games": n_games, "stride": stride,
+    payload = {"engine": engine_fingerprint(),
+               "results": results, "n_games": n_games, "stride": stride,
                "n_draws": N_DRAWS, "senders": senders, "seed_base": seed_base,
                "spec": V06_DEPLOYED[1]}
     if out:

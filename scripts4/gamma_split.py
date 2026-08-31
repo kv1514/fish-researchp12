@@ -63,6 +63,8 @@ from fish.rules import RuleConfig                         # noqa: E402
 from fish4.posterior import Posterior                     # noqa: E402
 from fish4.registry4 import V06_DEPLOYED, make_agent      # noqa: E402
 
+from duel import engine_fingerprint                       # noqa: E402
+
 EPS = 1e-12
 
 #: The incumbent's single value, and the grid around it. gamma_opp is swept too
@@ -389,7 +391,8 @@ def main(n_games: int = 40, stride: int = 4, out: str | None = None) -> int:
                   "the read improving. The split is NOT licensed by this "
                   "instrument and no play experiment should be run on it.")
 
-    payload = {"rows": rows, "decisions": decisions, "n_games": n_games,
+    payload = {"engine": engine_fingerprint(),
+               "rows": rows, "decisions": decisions, "n_games": n_games,
                "stride": stride, "n_draws": N_DRAWS,
                "gamma_opp_grid": GAMMA_OPP, "gamma_team_grid": GAMMA_TEAM,
                "spec": V06_DEPLOYED[1], "rules": RULES.to_dict(),

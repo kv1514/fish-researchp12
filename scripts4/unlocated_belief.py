@@ -57,6 +57,8 @@ from fish4.clustered import cluster_ci                     # noqa: E402
 from fish4.posterior import Posterior                      # noqa: E402
 from fish4.registry4 import V06_DEPLOYED, make_agent       # noqa: E402
 
+from duel import engine_fingerprint                       # noqa: E402
+
 EPS = 1e-12
 RULES = RuleConfig(wrong_distribution_outcome="opponent")
 N_DRAWS = 480
@@ -212,6 +214,7 @@ def main(n_games: int = 40, stride: int = 4, out: str | None = None) -> int:
     doc = {
         "prereg": "prereg/unlocated_belief.md",
         "grid": list(GRID), "base": BASE,
+        "engine": engine_fingerprint(),
         "n_games": n_games, "stride": stride, "n_draws": N_DRAWS,
         "decisions": decisions,
         "spec": ["kraken", dict(V06_DEPLOYED[1])],

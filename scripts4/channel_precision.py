@@ -64,6 +64,7 @@ from fish4.clustered import cluster_ci                      # noqa: E402
 from fish4.posterior import Posterior                       # noqa: E402
 from fish4.registry4 import V06_DEPLOYED, make_agent        # noqa: E402
 
+from duel import engine_fingerprint                       # noqa: E402
 from unlocated_belief import (MIN_CLUSTERS, Pool,           # noqa: E402
                               paired_by_game, true_holder_map)
 
@@ -282,6 +283,18 @@ def main(n_games: int = 40, stride: int = 4, out: str | None = None,
 
     payload = {
         "prereg": "prereg/channel_vs_precision.md",
+        # THE ENGINE DIGEST, and it is here because its absence cost a day.
+        # results/convention_posterior.json stored the spec and not the code.
+        # A later run at identical seeds gave a different number, the two
+        # specs were byte-identical on all seven keys, and three explanations
+        # were written for a change in the world. The change was in the code:
+        # 6d75ec4 re-priced convention_max_cost from success probability into
+        # the ask objective's units, so one label named two senders. A spec
+        # fingerprint compares VALUES and cannot see a field's meaning move.
+        # This digest can: 4d7896f938dd before that commit, ca40192a1f3a
+        # after. results/convention_drift_bisect.json.
+        "engine": engine_fingerprint(),
+
         "n_games": n_games, "stride": stride, "seed_base": SEED_BASE,
         "grid": list(GRID), "registered_grid": list(REGISTERED_GRID),
         "registered": registered,
