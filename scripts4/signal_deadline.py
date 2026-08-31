@@ -275,17 +275,27 @@ def _play(deal_seed: int, kv_even: bool) -> dict:
                     "path": _path_of(why) if ours else "opponent",
                     "by_us": int(ours),
                     "wrong": int(ev.winner != team_of(mover)),
+                    # WHICH forced route. agent4.decide reaches a forced
+                    # declaration two ways -- `not asks` and `stalled and
+                    # claimable` -- and path_ledger._path_of folds them into
+                    # one bucket, so the ledger cannot say which deadline
+                    # actually fired. Every separating observable points at
+                    # the first; this counts it instead of inferring it.
+                    "forced_reason": (
+                        "no_asks" if "no legal ask" in why
+                        else "stalled" if "stalled" in why else None),
                 }
 
     ours_sets = sum(1 for w in st.set_winner if w == our_team)
     for f in fires:
         f.update(outcome.get(f["hs"], {"path": "unresolved", "by_us": 0,
-                                       "wrong": 0}))
+                                       "wrong": 0, "forced_reason": None}))
         # carried on the row itself: the bootstrap clusters on the deal, and a
         # fire that does not know which shuffle it came from cannot be
         # clustered at all.
         f["deal"] = deal_seed
         f["kv_even"] = int(kv_even)
+        f.setdefault("forced_reason", None)
     return {"deal": deal_seed, "kv_even": int(kv_even),
             "margin": 2 * ours_sets - 9, "terminal": int(st.is_terminal),
             "paths": {k: v for k, v in paths.items()}, "fires": fires}
@@ -507,7 +517,14 @@ def summarise(rows: list[dict]) -> dict:
             runs[(r["deal"], r["kv_even"], f["hs"])] += 1
     spins = sorted(runs.values())
     diffs = {k: diff_ci(firsts, k) for k in keys}
+    #: which of the two forced routes actually fired, counted rather than
+    #: inferred from the observables that point at it
+    forced_by: dict = defaultdict(int)
+    for f in firsts:
+        if f["path"] in TOO_LATE:
+            forced_by[f.get("forced_reason") or "unattributed"] += 1
     return {"n_fires": len(fires), "n_first_fires": len(firsts),
+            "too_late_forced_by": dict(forced_by),
             "diff_too_late_minus_in_time": {
                 k: (None if v is None else
                     {"point": v[0], "lo": v[1], "hi": v[2], "n_deals": v[3]})
@@ -590,6 +607,10 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
               f"median {sp['median']}, max {sp['max']}")
     print(f"  first-fire targets, by eventual declaration path: "
           f"{s['by_path_first_fire']}")
+    if s["too_late_forced_by"]:
+        print(f"  WHICH DEADLINE fired on the too-late group: "
+              f"{s['too_late_forced_by']}\n  (agent4.decide forces on `not "
+              f"asks` or on `stalled and claimable`; path_ledger folds them)")
     if not s["n_first_fires"]:
         print("\n  NO FIRES. That is a result about the arm, not a null "
               "about the clock:\n  nothing was measured, so nothing is "

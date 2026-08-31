@@ -552,3 +552,37 @@ def test_the_engine_dated_entry_names_the_commit_that_moved_it():
 def test_only_the_forced_path_is_engine_dated():
     """A growing exemption list is the failure mode this guards against."""
     assert set(REAL_ENGINE_DATED) == {"forced"}
+
+
+def test_the_two_forced_routes_are_counted_separately():
+    """agent4.decide reaches a forced declaration two ways and
+    path_ledger._path_of folds them into one bucket, so the ledger cannot say
+    WHICH deadline fired. Every separating observable in the 1600-game run
+    points at `not asks`; pointing is not counting."""
+    fires = [fire(1, 0, "forced"), fire(1, 1, "forced"), fire(1, 2, "forced"),
+             fire(1, 3, "voluntary")]
+    fires[0]["forced_reason"] = "no_asks"
+    fires[1]["forced_reason"] = "no_asks"
+    fires[2]["forced_reason"] = "stalled"
+    s = sd.summarise(rows_of(fires))
+    assert s["too_late_forced_by"] == {"no_asks": 2, "stalled": 1}
+
+
+def test_an_unattributed_forced_declaration_is_counted_not_dropped():
+    """A forced declaration matching neither trace string is a hole in the
+    attribution, and a hole that is dropped looks like a route that never
+    fires."""
+    f = fire(1, 0, "forced")
+    f["forced_reason"] = None
+    s = sd.summarise(rows_of([f]))
+    assert s["too_late_forced_by"] == {"unattributed": 1}
+
+
+def test_the_reason_is_read_from_the_trace_strings_agent4_writes():
+    """If agent4's wording changes, this must stop matching rather than
+    silently attribute everything to one route."""
+    agent = (ROOT / "fish4" / "agent4.py").read_text()
+    assert "forced: no legal ask" in agent
+    assert "forced: stalled with a claimable half-suit" in agent
+    src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
+    assert '"no legal ask" in why' in src and '"stalled" in why' in src
