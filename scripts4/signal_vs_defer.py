@@ -40,9 +40,10 @@ from scripts4.path_ledger import PATHS, _path_of              # noqa: E402
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
 
-#: FIXED BY THE REGISTRATION. Barred from 2,400,000 (the gate registration),
-#: 3,600,000 (the signalling confirm), 9,300,000 (descriptive), 9,700,000
-#: (withdrawn), 9,900,000 and 10,100,000.
+#: FIXED BY THE REGISTRATION, which may override it: self-play and the
+#: weaker policies cost a different amount a game, so the sample size is a
+#: registration's choice and not this file's. Barred seed bases are listed
+#: with each registration.
 N_DEALS = 2_000
 
 SIGNAL = {"signal_mode": "stuck", "signal_max_p": 0.50}
@@ -110,26 +111,47 @@ REGISTRATIONS = {
         #: agreed to -- and because a gate nobody chose is a gate nobody owns.
         "identity": True,
     },
+    # prereg/signal_generality.md. One invocation per opponent, each choosing
+    # from `vs_grid` with --vs=; the deals are shared across opponents on
+    # purpose so the three readings differ by the opponent and nothing else.
+    "signal_generality": {
+        "arms": ("A_shipped", "B_signal"),
+        "seed": 12_100_000, "agent": 121_000,
+        "base": "A_shipped", "arm": "B_signal", "interaction": False,
+        "identity": True,
+        "vs_grid": ("probabilistic", "memory", "self"),
+        "n_deals": 800,
+    },
 }
-PREREG = ARMS = SEED0 = AGENT0 = BASE = ARM = INTERACTION = None
+PREREG = ARMS = SEED0 = AGENT0 = BASE = ARM = INTERACTION = REGISTERED_N = None
 REPLICATE_SPEC = SIGNAL_ORDER = SIGNAL_CAPS = IDENTITY = None
+VS = "dylan_v07"
+VS_GRID = None
+#: Agents that read hidden state. They exist to price a ceiling and their
+#: numbers carry the word `ceiling`; an arm played against one is not a
+#: strength measurement of anything.
+BARRED_OPPONENTS = frozenset({"oracle", "oracle_gated"})
 
 
 def select(name: str) -> None:
     """Point the module at one registration. Called at import for the default
     and by `--prereg=`; the tests use it too rather than poking globals."""
     global PREREG, ARMS, SEED0, AGENT0, BASE, ARM, INTERACTION
-    global REPLICATE_SPEC, SIGNAL_ORDER, SIGNAL_CAPS, IDENTITY
+    global REPLICATE_SPEC, SIGNAL_ORDER, SIGNAL_CAPS, IDENTITY, VS, VS_GRID
+    global REGISTERED_N
     r = REGISTRATIONS[name]
     PREREG = name
     ARMS = {k: ALL_ARMS[k] for k in r["arms"]}
     SEED0, AGENT0 = r["seed"], r["agent"]
     BASE, ARM = r["base"], r["arm"]
     INTERACTION = r["interaction"]
+    REGISTERED_N = r.get("n_deals", N_DEALS)
     REPLICATE_SPEC = r.get("replicate")
     SIGNAL_ORDER = r.get("signal_order")
     SIGNAL_CAPS = r.get("signal_caps") or {}
     IDENTITY = bool(r.get("identity"))
+    VS_GRID = r.get("vs_grid")
+    VS = r.get("vs", VS_GRID[0] if VS_GRID else "dylan_v07")
 
 
 select("defer_gate_at_power")
@@ -145,17 +167,39 @@ REPLICATE = (0.1435, 0.0464)          # mean, half-width, from seed 10,100,000
 POWER_TARGET = 0.05
 
 
+def _opponent():
+    """Who sits in the other three seats.
+
+    `dylan_v07` is the standard opponent and every margin this project reports
+    is against it. That makes any effect measured in the OPPONENT's counters
+    ambiguous: a mechanism that raises their error rate might be a property of
+    the convention or an exploit of one policy. `--vs=self` seats the champion
+    opposite itself so the question can be asked.
+    """
+    from fish4.registry4 import V06_DEPLOYED
+    if VS in ("self", "fishbot4", "kraken"):
+        #: The champion's own deployed parameters, with the arm applied to
+        #: OUR seats only -- an asymmetric self-play, not a mirror.
+        return "fishbot4", dict(V06_DEPLOYED[1])
+    if VS in BARRED_OPPONENTS:
+        raise SystemExit(
+            f"{VS!r} sees hidden state. Nothing it produces is a strength "
+            f"figure and it may never sit opposite an honest arm.")
+    return VS, {}
+
+
 def _play(deal_seed: int, kv_even: bool, arm: dict) -> dict:
     from fish4.registry4 import V06_DEPLOYED, make_agent
 
     rules = RuleConfig(**RULES_D)
     params = dict(V06_DEPLOYED[1], trace=True, **arm)
+    kind, opp_params = _opponent()
     agents = []
     for p in range(NUM_PLAYERS):
         if (p % 2 == 0) == kv_even:
             agents.append(make_agent(("fishbot4", params)))
         else:
-            agents.append(make_agent(("dylan_v07", {})))
+            agents.append(make_agent((kind, opp_params)))
     st = GameState.deal(rules, seed=deal_seed)
     for p, a in enumerate(agents):
         a.begin_game(p, rules, AGENT0 + deal_seed * 13 + p)
@@ -247,6 +291,7 @@ def report(rows) -> dict:
     out: dict = {"engine": engine_fingerprint(),
                  "prereg": f"prereg/{PREREG}.md", "primary": f"{ARM}-{BASE}",
                  "rules": RULES_D, "bridge_rev": BRIDGE_REV, "n_games": n,
+                 "vs": VS,
                  "seed_deal": SEED0, "seed_agent": AGENT0,
                  "arms": {k: dict(v) for k, v in ARMS.items()}}
 
@@ -376,6 +421,25 @@ def _tail(out: dict, rows, n: int) -> dict:
         print(f"  {a:<12}{ow:>9.4f}{tw / n:>9.4f}{td / n:>13.3f}"
               f"{(tw / td if td else 0):>11.3f}")
 
+    #: The opponent's wrong declarations are recorded PER GAME, so unlike
+    #: their error rate they carry a paired, deal-clustered interval on the
+    #: same footing as the margin. This is the counter the whole signalling
+    #: line turns on and it was reported without one until now.
+    base = next(iter(ARMS))
+    deals = [r["deal"] for r in rows]
+    print(f"\n  --- their wrong declarations a game, against {base}, "
+          f"paired ---")
+    out["their_wrong_effects"] = {}
+    for a in ARMS:
+        if a == base:
+            continue
+        v = cluster_ci([r[a]["opp_wrong"] - r[base]["opp_wrong"]
+                        for r in rows], deals)
+        print(f"    {a:14s} {fmt(*v)}")
+        out["their_wrong_effects"][a] = {
+            "mean": v[0], "half_width": v[1],
+            "ci95": [v[0] - v[1], v[0] + v[1]], "n_clusters": v[2]}
+
     out["signal_turns_per_game"] = {
         a: round(sum(r[a]["signals"] for r in rows) / n, 3) for a in ARMS}
     print(f"\n  signal turns per game: {out['signal_turns_per_game']}")
@@ -461,11 +525,13 @@ def _finish(out: dict, rows) -> dict:
     return out
 
 
-def main(n_deals: int = N_DEALS, n_jobs: int | None = None,
+def main(n_deals: int | None = None, n_jobs: int | None = None,
          out: str | None = None) -> int:
-    if n_deals != N_DEALS:
-        print(f"SMOKE RUN: {n_deals} deals is not the registered {N_DEALS}. "
-              f"Nothing from this run is the registered measurement.")
+    n_deals = REGISTERED_N if n_deals is None else n_deals
+    if n_deals != REGISTERED_N:
+        print(f"SMOKE RUN: {n_deals} deals is not the registered "
+              f"{REGISTERED_N}. Nothing from this run is the registered "
+              f"measurement.")
     n_jobs = n_jobs or max(1, (os.cpu_count() or 4) - 1)
     jobs = [(SEED0 + i, bool(k)) for i in range(n_deals) for k in (0, 1)]
     t0 = time.time()
@@ -473,8 +539,8 @@ def main(n_deals: int = N_DEALS, n_jobs: int | None = None,
         rows = pool.map(_one, jobs, chunksize=1)
     payload = report(rows)
     payload["n_deals"] = n_deals
-    payload["registered_n_deals"] = N_DEALS
-    payload["smoke"] = n_deals != N_DEALS
+    payload["registered_n_deals"] = REGISTERED_N
+    payload["smoke"] = n_deals != REGISTERED_N
     payload["minutes"] = round((time.time() - t0) / 60, 1)
     path = Path(out) if out else ROOT / "results" / "signal_vs_defer.json"
     path.write_text(json.dumps(payload, indent=1))
@@ -488,7 +554,24 @@ if __name__ == "__main__":
                  if x.startswith("--prereg=")), None)
     if over:
         select(over)
-    a = [x for x in sys.argv[1:] if not x.startswith("--prereg")]
-    raise SystemExit(main(int(a[0]) if a else N_DEALS,
+    vs = next((x.split("=", 1)[1] for x in sys.argv[1:]
+               if x.startswith("--vs=")), None)
+    if vs is not None:
+        if VS_GRID is None:
+            raise SystemExit(
+                f"prereg/{PREREG}.md fixes its opponent; --vs= would be "
+                f"choosing one after the registration.")
+        if vs not in VS_GRID:
+            raise SystemExit(
+                f"{vs!r} is not in this registration's grid {VS_GRID}. "
+                f"Adding an opponent after the fact is choosing one.")
+        VS = vs
+    elif VS_GRID is not None:
+        raise SystemExit(
+            f"prereg/{PREREG}.md runs once per opponent: pass --vs= from "
+            f"{VS_GRID}.")
+    a = [x for x in sys.argv[1:]
+         if not x.startswith("--prereg") and not x.startswith("--vs")]
+    raise SystemExit(main(int(a[0]) if a else None,
                           int(a[1]) if len(a) > 1 else None,
                           a[2] if len(a) > 2 else None))

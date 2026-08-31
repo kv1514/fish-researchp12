@@ -206,8 +206,15 @@ def adapt(payload: dict) -> dict | None:
         `margins[arm]["mean"]` and `ledger[arm]`.
       * the `*_confirm` shape, from the arm-vs-champion instruments:
         `margin_A` for the base and `arms[arm]["margin"]` for the rest.
-      * `path_ledger_self`, a single arm against itself: refused, because a
-        self-play margin is zero by symmetry and the identity says nothing.
+      * `path_ledger_self`, ONE arm played against itself with no `margins`
+        block: refused, because a symmetric self-play margin is zero by
+        construction and the identity says nothing about it.
+
+    `vs: "self"` is not itself disqualifying. A run that seats the champion
+    opposite itself but puts the arm on only one side is asymmetric, carries a
+    `margins` block, and decomposes like any other -- which is the whole point
+    of asking whether an effect measured in the opponent's counters survives a
+    change of opponent.
     """
     if not isinstance(payload, dict) or "ledger" not in payload:
         return None

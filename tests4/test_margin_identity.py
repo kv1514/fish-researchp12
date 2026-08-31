@@ -369,3 +369,16 @@ def test_the_headroom_is_computed_from_the_arms_own_counters():
 def test_a_flawless_arm_has_no_own_error_headroom_left():
     p = _payload({"X": (2 * (5.0 + 1.0) - 9, {"voluntary": (5 * 4000, 0)})})
     assert mi.headroom(p, "X")["ours"] == 0.0
+
+
+def test_a_self_play_run_with_two_arms_is_still_decomposed():
+    """`vs: "self"` disqualifies nothing on its own. The single-arm symmetric
+    shape is refused because its margin is zero by construction; an asymmetric
+    run that seats the champion opposite itself and puts the arm on one side
+    only is exactly the run that asks whether an effect in the opponent's
+    counters survives a change of opponent."""
+    p = _payload({"A": (2.0, {"voluntary": (20000, 600)}),
+                  "B": (2.3, {"voluntary": (19000, 400)})})
+    p["vs"] = "self"
+    assert mi.adapt(p) is not None
+    assert mi.decompose(p, "A", "B")["residual"] == pytest.approx(0, abs=1e-12)
