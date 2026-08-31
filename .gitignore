@@ -41,3 +41,7 @@ results/*_smoke.json
 # See that file: a tracked journal that changes on every flush means the tree
 # is never clean while a measurement is running.
 *.jsonl.partial
+
+# The FishLab package is a build artifact -- fishlab/build.py makes it from
+# the manifest, bot.py and the vendored engine.
+fishlab/kraken.zip
