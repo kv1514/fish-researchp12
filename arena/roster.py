@@ -26,14 +26,25 @@ class CheatingAgentRefused(ValueError):
     """Raised when a roster entry would put a hidden-state agent in a ladder."""
 
 
+#: There is deliberately no ``kraken-v1.0`` beside ``kraken``, and the reason
+#: is a result rather than an omission. v1.1 took seven pre-registered
+#: directions at the residue v1.0 left and shipped none of them, so the two
+#: releases play the SAME tuple -- ``fish4.brand.CONFIG_UNCHANGED_SINCE``
+#: records that, and ``tests4/test_brand.py`` fails if it stops being true.
+#: Entering both would stage a bot against itself and report the harness's own
+#: noise as a version difference, which is exactly the reading someone who saw
+#: two entries would take from it. When a knob does clear its bar, THAT is when
+#: a second entry becomes meaningful, and the fingerprint guard is what will
+#: say so.
+#:
 #: The arena's named policies. Each maps to a registry spec understood by
 #: ``fish4.registry4.make_agent``. Descriptions are what the report prints.
 ROSTER: dict[str, dict] = {
     "kraken": {
         "spec": ("__registry__", "KRAKEN_V1"),
-        "blurb": "KRAKEN v1.0, the deployed configuration: exact inference, "
+        "blurb": "KRAKEN v1.1, the deployed configuration: exact inference, "
                  "opponent model, belief-space lookahead, exhaustive forced "
-                 "declarations.",
+                 "declarations. Same tuple v1.0 played.",
     },
     "kraken-nolookahead": {
         "spec": ("fishbot4", {"opponent_gamma": 0.35}),

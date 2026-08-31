@@ -65,7 +65,7 @@ merges.
   [fish4/evalx/README.md](fish4/evalx/README.md), and in the raw duel records at
   `results/v04_duels.jsonl`)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
-- Research paper (current): [paper/kraken.tex](paper/kraken.tex) — KRAKEN v1.0
+- Research paper (current): [paper/kraken.tex](paper/kraken.tex) — KRAKEN v1.1
 - Research paper, v0.3 (superseded, kept because its results still reproduce):
   [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
@@ -76,7 +76,7 @@ The front of this file described `tuned-v1` as the current champion for two
 versions after it stopped being one. It is not; that section is retitled below
 and kept because its findings still hold for the rung it describes.
 
-The deployed engine is **KRAKEN v1.0** (`V06_DEPLOYED` in
+The deployed engine is **KRAKEN v1.1** (`V06_DEPLOYED` in
 `fish4/registry4.py`; it was called KV's FishBot v0.6 before 2026-08-28 and the
 identifiers did not move with the name — see `fish4/brand.py` for why). Against
 **Dylan's FishBot v0.7** (github.com/dylann4500/fishbot, a genuinely foreign

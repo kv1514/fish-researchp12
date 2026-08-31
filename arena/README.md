@@ -35,12 +35,21 @@ written C++ engine.
 
 | policy | what it is |
 |---|---|
-| `kraken` | KRAKEN v1.0, the deployed configuration: exact combinatorial inference, an opponent model, belief-space lookahead, and an exhaustive search on forced declarations. |
+| `kraken` | KRAKEN v1.1, the deployed configuration: exact combinatorial inference, an opponent model, belief-space lookahead, and an exhaustive search on forced declarations. |
 | `kraken-nolookahead` | The same inference and ask objective with the lookahead off and fewer posterior draws. The ablation that isolates what search is worth. |
 | `tuned` | The v0.3 champion. Hand-tuned ask weights, no exact inference. |
 | `probabilistic` | Picks the ask most likely to succeed, and nothing else. |
 | `heuristic` | Public information only. No belief state. |
 | `random` | Uniform over legal actions. The floor. |
+
+**Why there is no `kraken-v1.0`.** v1.1 took seven pre-registered directions at
+the residue v1.0 left and shipped none of them, so the two releases play the
+same configuration tuple — the version names the release, not the policy.
+Entering both would stage a bot against itself and hand you the harness's own
+noise dressed up as a version difference, which is precisely what a reader
+seeing two entries would take it for. `fish4.brand.CONFIG_UNCHANGED_SINCE`
+records the claim and `tests4/test_brand.py` pins the tuple's fingerprint, so
+the day a knob clears its bar the guard fails until someone says so out loud.
 
 ## Method, and one decision that matters
 

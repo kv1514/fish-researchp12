@@ -13,7 +13,9 @@ import re
 
 import pytest
 
-from fish4.brand import NAME, VERSION, FULL_NAME, FORMER_NAME, OPPONENT_NAME
+from fish4.brand import (NAME, VERSION, VERSION_NUMBER, FULL_NAME, FORMER_NAME,
+                         OPPONENT_NAME, CONFIG_UNCHANGED_SINCE,
+                         CONFIG_FINGERPRINT)
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -63,6 +65,131 @@ def test_surface_does_not_carry_the_old_name(rel):
 def test_full_name_is_the_two_parts():
     assert FULL_NAME == f"{NAME} {VERSION}"
     assert VERSION.startswith("v")
+    assert VERSION == f"v{VERSION_NUMBER}"
+
+
+#: Every literal spelling of a version that means "what you are running".
+#: ``KRAKEN v1.1`` as a display label, a Python ``VERSION = "1.1"``, and a
+#: manifest ``"version": "1.1"``. A version built from the constant --
+#: ``f"KRAKEN v{VERSION}"`` -- is deliberately NOT matched: it cannot drift.
+_LABELS = [
+    re.compile(r'KRAKEN\s+v(\d+\.\d+)'),
+    re.compile(r'VERSION\s*=\s*"v?(\d+\.\d+)"'),
+    re.compile(r'"version"\s*:\s*"v?(\d+\.\d+)"'),
+]
+
+#: Files where a version label states what the reader is running, so every
+#: label in them must be the current one. The paper is NOT here: it narrates
+#: v0.4 through v1.1 and must be free to say "v1.0" about v1.0.
+#:
+#: The convention that makes both possible: "KRAKEN v1.0" is a claim about the
+#: engine you are running and is checked; a bare "v1.0" is prose about a past
+#: release and is not. So a versioned surface CAN discuss an older release --
+#: kraken/README.md tells a host its v1.0 results are still comparable -- it
+#: just may not put the engine's name in front of the old number.
+VERSIONED_SURFACES = [
+    "public/index.html",
+    "README.md",
+    "kraken/README.md",
+    "kraken/decide.py",
+    "arena/roster.py",
+    "arena/README.md",
+    "fishlab/fishbot.json",
+    "fishlab/bot.py",
+]
+
+
+def _version_labels(text):
+    return [m for rx in _LABELS for m in rx.findall(text)]
+
+
+@pytest.mark.parametrize("rel", VERSIONED_SURFACES)
+def test_surface_states_the_current_version(rel):
+    """The gap this closes: brand.py said the guard checks the version, and
+    for a long time it checked only the NAME. The paper reached v1.1 while
+    brand.py, the site, the handout and the arena still said v1.0, and two
+    shipped adapters reported DIFFERENT versions for one policy over the wire.
+    Nothing failed, because nothing was looking.
+    """
+    p = ROOT / rel
+    assert p.exists(), f"{rel} is listed as a version surface but does not exist"
+    found = _version_labels(p.read_text(encoding="utf-8"))
+    assert found, (
+        f"{rel} is listed as a version surface and states no version at all. "
+        f"Either it stopped naming the release or the pattern stopped matching "
+        f"it -- and a guard that matches nothing passes silently."
+    )
+    stale = sorted({v for v in found if v != VERSION_NUMBER})
+    assert not stale, (
+        f"{rel} states version(s) {stale} but the release is {VERSION_NUMBER}. "
+        f"fish4/brand.py is the single source; update the copy, not the source."
+    )
+
+
+def test_the_paper_titles_itself_the_current_version():
+    """The paper narrates every version, so only its TITLE is pinned."""
+    text = (ROOT / "paper/kraken.tex").read_text(encoding="utf-8")
+    head = text[:text.index(r"\begin{document}")]
+    assert f"{NAME} {VERSION}" in head, (
+        f"paper/kraken.tex does not title itself {NAME} {VERSION}. The paper "
+        f"is the release; if it has moved on, fish4/brand.py moves with it."
+    )
+
+
+def test_the_shipped_configuration_is_the_one_the_version_claims():
+    """``CONFIG_UNCHANGED_SINCE`` is a claim about the tuple, so pin the tuple.
+
+    v1.1 shipped none of its seven pre-registered directions, which is why the
+    arena has one ``kraken`` entry and not two. That is only true while the
+    tuple is unchanged -- so this fails the moment it changes, and whoever
+    changes it has to move CONFIG_UNCHANGED_SINCE in the same commit rather
+    than leave a stale sentence in three READMEs.
+    """
+    import hashlib
+    import json
+
+    from fish4.registry4 import V06_DEPLOYED
+
+    key, cfg = V06_DEPLOYED
+    blob = json.dumps([key, dict(sorted(cfg.items()))], separators=(",", ":"))
+    got = hashlib.sha256(blob.encode()).hexdigest()[:12]
+    assert got == CONFIG_FINGERPRINT, (
+        f"the shipped configuration changed ({got} != {CONFIG_FINGERPRINT}).\n"
+        f"  now: {blob}\n"
+        f"If a knob finally cleared its pre-registered bar: set "
+        f"CONFIG_UNCHANGED_SINCE = {VERSION_NUMBER!r} and CONFIG_FINGERPRINT = "
+        f"{got!r} together, and give the arena its second entry -- a v1.0 and "
+        f"a v1.1 that differ are finally worth duelling. If it changed by "
+        f"accident, that is what this test is for."
+    )
+    if CONFIG_UNCHANGED_SINCE != VERSION_NUMBER:
+        assert "kraken-v1.0" not in _roster_names(), (
+            "the arena has a separate v1.0 entry while the two versions play "
+            "the same tuple; that duel measures harness noise."
+        )
+
+
+def _roster_names():
+    from arena.roster import ROSTER
+
+    return set(ROSTER)
+
+
+def test_both_wire_adapters_report_the_same_version():
+    """A host running the handout and a host running the FishLab package must
+    not be told they have two different bots. They have one.
+    """
+    import kraken.decide as decide
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "_fishlab_bot", ROOT / "fishlab" / "bot.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    assert decide.VERSION == VERSION_NUMBER
+    assert mod.VERSION == VERSION_NUMBER
+    assert decide.decide({"op": "version"})["bot"] == FULL_NAME
 
 
 def test_the_opponent_is_not_renamed():
