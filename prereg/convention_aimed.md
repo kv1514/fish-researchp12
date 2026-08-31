@@ -172,24 +172,50 @@ That is the same defect `scripts4/unwatched_claims.py` was written about, one
 layer below the paper: the numbers a document repeats most are the ones nobody
 re-derives.
 
-## Re-run at the same seed base, the pre-registered conditions still pass
+## Re-run at the same seed base
 
 40 games, stride 4, seed base 880,000, `results/convention_replication.json`.
 
 | | recorded 2026-08-29 | re-run 2026-08-31 | condition | |
 |---|---|---|---|---|
-| NLL at `beta = 0.8` | -0.0535 | **-0.0382** [-0.0466, -0.0299] | below zero; at most -0.0356 | PASS |
-| top-1 at `beta = 0.8` | +0.0392 | **+0.0260** [+0.0164, +0.0356] | above zero; at least +0.0176 | PASS |
+| NLL at `beta = 0.8` | -0.0535 | **-0.0382** [-0.0466, -0.0299] | below zero; at most -0.0356 | see below |
+| top-1 at `beta = 0.8` | +0.0392 | **+0.0260** [+0.0164, +0.0356] | above zero; at least +0.0176 | see below |
 | scored decisions | 1,169 | 1,068 | | |
 
-All five flat arms from 0.25 to 1.2 still clear both gates and top-1 is still
-significantly positive at every one of them, 2.0 included. The claim this
-document was written to protect --- that this is the first belief change in the
-project to improve the argmax --- holds on a third run.
+> **THIS TABLE COMPARES TWO DIFFERENT SENDERS, and an earlier version of this
+> section did not know that.** The timeline settles it:
+>
+>     1a96689  20:03  exploratory, 560,000     |
+>     f8abe6d  20:14  replication, 880,000     |  OLD gate
+>     -------------------------------------------------------------
+>     6d75ec4  20:18  the sender's gate re-priced
+>     -------------------------------------------------------------
+>     2026-08-31      every re-run below       |  NEW gate
+>
+> Both figures in the left column were measured **before** `6d75ec4` re-priced
+> `convention_max_cost` from success probability into the ask objective's own
+> units; both in the right column were measured after. V1 carry 72.0% against
+> 57.8%. So the left-to-right movement is **not** a magnitude changing --- it is
+> a different sender being measured.
+>
+> **The original replication is unaffected**: exploratory and replication were
+> both old-gate, checked against bars derived from the exploratory, and
+> internally consistent. It replicated, and that stands.
+>
+> **What the re-run establishes is smaller than "the conditions still pass".**
+> Conditions 1 and 2 --- NLL below zero, top-1 above zero --- are properties of
+> the arm and it clears both under the re-priced sender, which is worth knowing.
+> Condition 3's bars (-0.0356 and +0.0176) were set at *half the exploratory
+> magnitudes*, and those magnitudes belong to a sender that no longer exists.
+> Scoring a new-gate run against them is a cross-gate comparison, so "PASS" on
+> condition 3 means less than it looks and is recorded here as `see below`
+> rather than as a pass.
 
-The NLL margin against condition 3 is now thin: -0.0382 against a bar of
--0.0356. That is worth stating plainly, because on the next engine improvement
-it is the condition that will fail first.
+All five flat arms from 0.25 to 1.2 still clear both channel gates and top-1 is
+still significantly positive at every one of them, 2.0 included. The claim this
+document was written to protect --- that this is the first belief change in the
+project to improve the argmax --- holds for the re-priced sender too, which is
+the part that does transfer across the gate change.
 
 ## Why the magnitudes fell: the engine, not the decode
 

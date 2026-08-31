@@ -2350,3 +2350,43 @@ What is withdrawn is the premise underneath them: that something had changed
 about the world between the two runs. Nothing had. Four explanations were
 offered for a phenomenon that did not exist, and the one action that settled it
 in twenty minutes was to stop explaining and bisect.
+
+## The bisect has a consequence I nearly left un-drawn
+
+If `6d75ec4` re-priced the gate at **20:18** on 29 August, then every convention
+belief figure measured before it belongs to a different sender than every figure
+measured after. Checking the timeline against what each run actually is:
+
+    1a96689  20:03   exploratory, seed 560,000    |
+    f8abe6d  20:14   replication, seed 880,000    |  OLD gate, V1 carry 72.0%
+    ------------------------------------------------------------------------
+    6d75ec4  20:18   the sender's gate re-priced
+    ------------------------------------------------------------------------
+    2026-08-31       every re-run today           |  NEW gate, V1 carry 57.8%
+
+**The original replication is clean.** Exploratory and replication were both
+old-gate, checked against bars derived from the exploratory, internally
+consistent. It replicated and that stands, and so does the reading that its NLL
+regression was the cost of reading ten arms.
+
+**Two comparisons made today were not**, and both were mine:
+
+* the aimed re-run scored against **condition 3**, whose bars were set at half
+  the *exploratory* magnitudes --- old-gate numbers used as a bar for a new-gate
+  run. Conditions 1 and 2 are properties of the arm and still hold; condition 3
+  is now recorded as `see below` rather than PASS.
+* the locating book's **condition 2** against the literal **+0.0351**, also
+  old-gate. The verdict does not move --- the same-gate comparison
+  (+0.0227 against +0.0260) is the one that decides it and was already the one
+  quoted --- but the second reading is withdrawn rather than kept as
+  corroboration.
+
+Neither changes a verdict. Both are cases of a number surviving a change in what
+it denotes, which is precisely what the engine digest now committed to every
+belief instrument exists to make visible.
+
+`results/convention_posterior.json` is worth one explicit sentence, since it is
+the file most quoted in this direction: **all of it is old-gate.** It remains a
+valid measurement of inference on its own transcripts, as `6d75ec4` said at the
+time. It is not comparable in magnitude to anything measured after 20:18 that
+day.

@@ -229,10 +229,15 @@ aimed depth book's. On the same engine, the same seed base and the same run:
 | locating book, best passing arm (gate 0.05, `flat 0.5`) | **+0.0227** [+0.0141, +0.0312] |
 
 +0.0227 is not at least +0.0260, so **condition 2 fails and the locating book
-does not supersede**. Against the literal bar the amendment wrote down
-(+0.0351, the exploratory aimed figure) it fails by more. Both readings agree,
-which is the useful part: the outcome does not depend on which of the two bars
-is meant.
+does not supersede**.
+
+The literal bar this document's amendment wrote down --- **+0.0351** --- would
+fail it by more, but that comparison is **not sound and is not relied on**:
++0.0351 was measured before `6d75ec4` re-priced the sender's gate, so it belongs
+to a different sender than the run above (V1 carry 72.0% against 57.8%; see the
+amendment in `prereg/convention_aimed.md`). The comparison that decides this is
+the **same-gate** one --- +0.0227 against +0.0260, both measured today, both
+under the re-priced sender --- and it is the only one quoted as evidence here.
 
 Two things must be said against this, and neither rescues it:
 
