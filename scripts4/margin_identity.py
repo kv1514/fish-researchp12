@@ -18,6 +18,14 @@ sets a head:
     OURS    how many of the ones we declare we get wrong       -2 each
     THEIRS  how many of the ones they declare they get wrong   +2 each
 
+IT IS AN ACCOUNTING, NOT A CAUSAL DECOMPOSITION. Each channel is exactly what
+happened to that counter, and the three sum to the effect exactly. They are not
+independent: a half-suit we stop declaring is one THEY declare, so it leaves
+RACE and arrives in THEIRS carrying their error rate with it. No single channel
+may be read as "what this arm would gain if only that counter moved", and
+`rates` below exists to separate the part of THEIRS that is merely that
+handover from the part that is a change in how well the opponents declare.
+
 WHY THIS FILE EXISTS. Every instrument in the signalling line reported the
 second channel and neither of the others, and the line then spent a week asking
 where a margin went that its own ledger could not hold. The identity closes:
@@ -118,6 +126,32 @@ def verify(payload: dict) -> list[str]:
     return bad
 
 
+def rates(payload: dict, base: str, arm: str) -> dict:
+    """Split the THEIRS channel into volume and rate.
+
+    Handing the opponents a half-suit adds wrong opponent declarations even if
+    nothing about their play changed, because they are wrong about a fifth of
+    the time either way. That part is arithmetic and says nothing. The part
+    that is a change in their per-declaration ERROR RATE is the part that is a
+    claim about the opponents.
+
+        w_them = d_them * e_them
+        d(w_them) = e_base * dd  +  d_base * de  +  dd * de
+
+    reported x2, in margin units, so the three sum to the THEIRS channel.
+    """
+    b, a = channels(payload, base), channels(payload, arm)
+    d_b, d_a = N_HALF_SUITS - b["d_us"], N_HALF_SUITS - a["d_us"]
+    e_b = b["w_them"] / d_b if d_b else 0.0
+    e_a = a["w_them"] / d_a if d_a else 0.0
+    dd, de = d_a - d_b, e_a - e_b
+    return {"their_err_base": e_b, "their_err_arm": e_a,
+            "our_err_base": b["w_us"] / b["d_us"] if b["d_us"] else 0.0,
+            "our_err_arm": a["w_us"] / a["d_us"] if a["d_us"] else 0.0,
+            "volume": 2 * e_b * dd, "rate": 2 * d_b * de,
+            "interaction": 2 * dd * de}
+
+
 def decompose(payload: dict, base: str, arm: str) -> dict:
     """The arm's effect, split into the three channels it can come from.
 
@@ -131,7 +165,8 @@ def decompose(payload: dict, base: str, arm: str) -> dict:
     total = a["margin"] - b["margin"]
     return {"base": base, "arm": arm, "effect": total,
             "race": race, "ours": ours, "theirs": theirs,
-            "residual": total - (race + ours + theirs)}
+            "residual": total - (race + ours + theirs),
+            **rates(payload, base, arm)}
 
 
 def adapt(payload: dict) -> dict | None:
@@ -184,6 +219,7 @@ def report(path: Path) -> int:
               f"{c['w_us']:>12.4f}{c['w_them']:>14.4f}  {c['w_them_source']}")
     base = next(iter(payload["margins"]))
     print(f"\n  --- where each arm's effect lives, in margin units ---")
+    print(f"  (an accounting, not a causal split: the channels co-move)")
     print(f"  {'arm':<14}{'effect':>9}{'race':>9}{'ours':>9}{'theirs':>9}"
           f"{'resid':>9}")
     for arm in payload["margins"]:
@@ -192,6 +228,21 @@ def report(path: Path) -> int:
         d = decompose(payload, base, arm)
         print(f"  {arm:<14}{d['effect']:>+9.4f}{d['race']:>+9.4f}"
               f"{d['ours']:>+9.4f}{d['theirs']:>+9.4f}{d['residual']:>+9.4f}")
+    print(f"\n  --- per-declaration error rates, and the THEIRS channel split "
+          f"into\n      the half-suits handed over and the rate they are "
+          f"declared at ---")
+    print(f"  {'arm':<14}{'ours':>8}{'theirs':>9}{'volume':>10}{'rate':>9}"
+          f"{'cross':>9}")
+    print(f"  {base + ' (base)':<14}"
+          f"{decompose(payload, base, base)['our_err_base']:>8.4f}"
+          f"{decompose(payload, base, base)['their_err_base']:>9.4f}")
+    for arm in payload["margins"]:
+        if arm == base:
+            continue
+        d = decompose(payload, base, arm)
+        print(f"  {arm:<14}{d['our_err_arm']:>8.4f}{d['their_err_arm']:>9.4f}"
+              f"{d['volume']:>+10.4f}{d['rate']:>+9.4f}"
+              f"{d['interaction']:>+9.4f}")
     return 1 if bad else 0
 
 

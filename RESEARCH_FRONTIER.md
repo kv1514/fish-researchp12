@@ -3286,3 +3286,51 @@ cuts 0.058 wrong declarations a game — worth +0.116 — and delivers +0.0455,
 because not declaring at the gate also means not declaring, and the race term
 takes 60% of it back. That is visible in the identity and invisible in any
 error rate.
+
+### Correction to how the channels may be read, and a sharper claim
+
+The table above is an **accounting**, not a causal decomposition, and the
+previous section's phrasing invites the wrong reading. The channels co-move: a
+half-suit we stop declaring is one *they* declare, so it leaves RACE and
+arrives in THEIRS carrying their error rate with it. No channel is "what this
+arm would gain if only that counter moved."
+
+That matters here, because it supplies the obvious objection to the finding.
+Signalling hands the opponents 0.085 declarations a game, and they are wrong on
+about a fifth of anything they declare, so **some** of the +0.2625 is
+arithmetic and says nothing about confusing anybody. Splitting it:
+
+    w_them = d_them * e_them
+    d(w_them) = e_base * dd   +   d_base * de   +   dd * de
+                  volume            rate            cross
+
+| arm | theirs | volume | **rate** | cross | their error rate |
+|---|---|---|---|---|---|
+| `B_incumbent` — signalling | +0.2625 | +0.0362 | **+0.2216** | +0.0047 | 0.2134 → **0.2413** |
+| `C_norepeat` | +0.0030 | +0.0047 | −0.0017 | −0.0000 | 0.2134 → 0.2132 |
+| `C_defer` — deferral | −0.0005 | +0.0151 | −0.0155 | −0.0001 | 0.2156 → 0.2137 |
+
+**Eighty-four per cent of what signalling buys is a rate change.** The
+opponents' per-declaration error rate rises from 21.34% to 24.13% — they do not
+merely declare more, they declare worse. The handover accounts for 14% of it.
+Neither of the two arms that touch only our own seats moves their rate at all,
+which is what makes the split a measurement rather than an artefact of the
+arithmetic.
+
+### The asymmetry nobody had looked at
+
+| | declarations a game | wrong | error rate |
+|---|---|---|---|
+| the champion | 5.03 | 0.16 | **3.2%** |
+| the opponents | 3.97 | 0.86 | **21.4%** |
+
+Six and a half times. Every knob this project has tuned — the gate, the
+threshold, the claim gamma, the exhaustive forced search, the deferred gate —
+has been aimed at the 3.2%, which is the smaller of the two numbers by almost
+an order of magnitude and is bounded below by zero. The 21.4% is the one with
+room in it, and until this week no instrument recorded it.
+
+Whether it can be *moved* on purpose is the open question. Signalling moves it
+by 2.8 points, at a race cost that eats two thirds of the gain.
+`prereg/signal_budget.md` asks whether that cost can be cut without losing the
+rate change, and is registered, implemented and pending a run.

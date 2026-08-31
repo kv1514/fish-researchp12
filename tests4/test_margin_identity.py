@@ -269,3 +269,71 @@ def test_the_tempo_arm_is_not_read_from_the_run_that_did_not_replicate():
                if r["run"] == "tempo_rep8k_confirm" and r["arm"] == "B_free")
     assert small["effect"] > 0.2 and big["effect"] < 0
     assert big["games"] == 8 * small["games"]
+
+
+# --- volume against rate --------------------------------------------------
+
+def test_the_theirs_channel_splits_into_volume_rate_and_cross():
+    p = json.loads((ROOT / "results" / "signal_no_repeat.json").read_text())
+    d = mi.decompose(p, "A_shipped", "B_incumbent")
+    assert (d["volume"] + d["rate"] + d["interaction"]
+            == pytest.approx(d["theirs"], abs=1e-12))
+
+
+def test_a_pure_handover_shows_as_volume_and_not_as_rate():
+    """Give the opponents a half-suit and change nothing else about them: the
+    wrong count rises at their unchanged error rate. A split that called that
+    a rate change would credit every arm with confusing them."""
+    def arm(margin, d_us, w_us):
+        return (margin, {"voluntary": (int(d_us * 1000), int(w_us * 1000))})
+    # base: we declare 5.0 at 3.2% wrong; they declare 4.0 at 20% wrong
+    # arm:  we declare 4.5, they declare 4.5, still at 20%
+    p = _payload({"A": arm(2 * (5.0 - 0.16 + 0.80) - 9, 5.0, 0.16),
+                  "B": arm(2 * (4.5 - 0.144 + 0.90) - 9, 4.5, 0.144)},
+                 games=1000)
+    d = mi.decompose(p, "A", "B")
+    assert d["their_err_base"] == pytest.approx(0.20)
+    assert d["their_err_arm"] == pytest.approx(0.20)
+    assert d["rate"] == pytest.approx(0.0, abs=1e-9)
+    assert d["volume"] > 0.1
+
+
+def test_most_of_what_signalling_buys_is_a_rate_change_not_a_handover():
+    """The claim that survives the obvious objection. Signalling does hand the
+    opponents half-suits, and they are wrong on a fifth of anything they
+    declare, so SOME of the gain is arithmetic. Most of it is not: their
+    per-declaration error rate itself rises."""
+    p = json.loads((ROOT / "results" / "signal_no_repeat.json").read_text())
+    d = mi.decompose(p, "A_shipped", "B_incumbent")
+    assert d["rate"] > 3 * d["volume"] > 0
+    assert d["their_err_arm"] > d["their_err_base"] + 0.02
+
+
+def test_neither_the_no_repeat_switch_nor_deferral_moves_their_rate():
+    """Two arms that touch only our own seats. If either showed a rate change,
+    the split would be measuring the fixture and not the opponents."""
+    for f, base, arm in (("signal_no_repeat", "A_shipped", "C_norepeat"),
+                         ("signal_vs_defer", "A_shipped", "C_defer")):
+        p = json.loads((ROOT / "results" / f"{f}.json").read_text())
+        d = mi.decompose(p, base, arm)
+        assert abs(d["rate"]) < 0.03, (f, arm, d["rate"])
+
+
+def test_the_two_sides_declare_at_very_different_accuracies():
+    """Reported nowhere before the identity: the champion is wrong on about
+    3% of its declarations and the opponents on about 21%. Every arm in this
+    project has been tuned against the smaller of those two numbers."""
+    p = json.loads((ROOT / "results" / "signal_vs_defer.json").read_text())
+    d = mi.decompose(p, "A_shipped", "C_defer")
+    assert 0.02 < d["our_err_base"] < 0.05
+    assert 0.18 < d["their_err_base"] < 0.25
+    assert d["their_err_base"] > 5 * d["our_err_base"]
+
+
+def test_the_docstring_refuses_the_causal_reading():
+    """The channels co-move: a half-suit we stop declaring leaves RACE and
+    arrives in THEIRS carrying their error rate. Saying so is part of the
+    instrument, not a footnote to it."""
+    src = (ROOT / "scripts4" / "margin_identity.py").read_text()
+    assert "NOT A CAUSAL DECOMPOSITION" in src
+    assert "an accounting, not a causal split" in src
