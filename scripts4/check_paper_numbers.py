@@ -356,7 +356,7 @@ WATCH = [
      "the ceiling interaction, T - (D+K)", "together are worth"),
     ("declaration_timing.json", "derived.interaction_share_of_T", "{:.0%}",
      "the interaction as a share of the teammate ceiling",
-     "largest information channel"),
+     "of the\nteammate ceiling is in neither channel alone"),
     ("perpetual_study_void.json", "normal.misdeclares_per_game", "{:.3f}",
      "nulls per game", "cuts nulls from"),
     ("perpetual_study_void.json", "signalling.misdeclares_per_game", "{:.3f}",
@@ -490,17 +490,17 @@ WATCH = [
     # learned to read the duel pool it was unwatchable -- the most-quoted
     # figure in the paper, outside every drift check, because it lives in a
     # JSONL and everything else lives in JSON.
-    ("duel:FINAL: v04 champion vs v03 champion", "diff_mean", "{:.2f}",
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_mean", "{:.3f}",
      "margin over the v0.3 champion",
-     "explicit one-parameter model recovers the loss"),
+     "champion (\\texttt{tuned})"),
     ("duel:FINAL: v04 champion vs v03 champion", "n_pairs", "{:d}",
      "pairs behind the headline", "champion (\\texttt{tuned})"),
-    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.0", "{:.2f}",
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.0", "{:.3f}",
      "headline interval, low",
-     "explicit one-parameter model recovers the loss"),
-    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.1", "{:.2f}",
+     "champion (\\texttt{tuned})"),
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.1", "{:.3f}",
      "headline interval, high",
-     "explicit one-parameter model recovers the loss"),
+     "champion (\\texttt{tuned})"),
     # The absolute-strength table. Its rates were computed in the LaTeX and
     # stored nowhere, so the table carrying this paper's independent
     # confirmation of the opponent model -- including the contrast the

@@ -85,128 +85,60 @@ Literature\\[0.35em]
 % headline number in the paper and still finish on the first page, which is
 % where a reader decides whether to read the other seventy-two.
 \begin{abstract}
-\small\setstretch{0.93}\setlength{\parskip}{0pt}\noindent
-Literature --- also called Fish --- is a six-player, two-team,
+\noindent
+Literature --- also called Fish or Canadian Fish --- is a six-player, two-team,
 imperfect-information card game in which players interrogate opponents for
 named cards and score by declaring the exact distribution of a six-card
-half-suit among their own team. Hidden information plus no legal communication
-channel puts it outside both the two-player zero-sum machinery that solved
-poker and the fully cooperative machinery developed for Hanabi. This paper
-covers four iterations of an engine for it, \textbf{KRAKEN} --- v0.4, which
-built the inference; v0.6, which corrected a rule and re-measured everything
-that depended on it; v1.0, which asked where the remaining errors are and
-found that the answer had almost nothing to do with card-reading; and v1.1,
-which took seven pre-registered runs at that residue and shipped none of them
---- organised throughout around results that contradicted the expectations
-motivating them.
+half-suit among their own team. Every action is public, so the entire hidden
+state is the deal; there is no legal communication channel, which places the
+game outside both the two-player zero-sum machinery that solved poker and the
+fully cooperative machinery developed for Hanabi. We present KRAKEN and the
+four development cycles that produced it.
 
-We first make the inference exact. Hidden-state inference here reduces to counting assignments in a
-degree-constrained bipartite system, $\#P$-complete in general but small in the
-dimension that matters: real positions carry $25.1$ unlocated cards but only
-$4.1$ \emph{distinct candidate sets}, so cards are exchangeable and the problem
-collapses onto a count matrix with at most nine rows. A dynamic program over it returns the exact partition function, marginals, uniform samples
-and joint probabilities, validated against exhaustive enumeration.
+Hidden-state inference here reduces to counting assignments in a
+degree-constrained bipartite system. The general problem is $\#P$-complete, but
+real positions carry only $4.1$ distinct candidate sets across $25.1$ unlocated
+cards, so a dynamic program returns the exact partition function, marginals,
+uniform samples and joint probabilities, validated against exhaustive
+enumeration.
 
-Making the posterior exactly correct \textbf{changed nothing} in play
-($-0.22$ sets per duplicate deal-pair, 95\% CI $[-0.96, +0.52]$), and made it
-measurably \emph{worse} at predicting reality: over $13{,}640$ uncertain-card predictions the uniform posterior scored a
-negative log-likelihood of $1.362$ against the biased sampler's $1.341$. The
-uniform posterior is a correct theorem about a false hypothesis --- that
-players' choices carry no information beyond legality --- and the sampler it replaced had accidentally encoded an opponent model. Replacing the
-accident with an explicit one-parameter model recovers the loss and is worth
-$\mathbf{+1.85}$ \textbf{sets per duplicate deal-pair}, 95\% CI
-$[+1.54, +2.17]$ (void-era scoring; restated below). Tripling the sampling budget is worth a further $+0.340$, three times what
-belief-space search buys: the leverage sits in the belief rather than in what
-is computed from it.
+\textbf{The central result is negative.} Making the posterior exactly correct
+changed nothing in play --- $-0.008$ sets per duplicate deal-pair over $250$
+pairs --- and made it a \emph{worse} predictor of where cards actually sit than
+the biased sampler it replaced ($1.3618$ against $1.3408$ in mean negative
+log-likelihood). A uniform posterior is a correct theorem about a false
+hypothesis: it assumes choices carry no information beyond legality. The old
+sampler's bias had accidentally encoded an opponent model, and removing the
+bias removed the model. Replacing that accident with an explicit one-parameter
+choice model is worth $\mathbf{+1.92}$ $[+1.48, +2.36]$ sets per pair, the
+largest single gain in the study.
 
-We then solve the endgame. Its perfect-information value has a closed form
-verified at every $m$; under
-\emph{imperfect} information we compute exact best responses over information
-sets against the engine's own policy, measuring its exploitability rather than
-bounding it --- $+0.4405$ over $305$ positions at $95\%$ coverage with one
-half-suit live, $+0.3250$ at $35\%$ with two. Because two thirds of the second layer is out of
-reach we bound it rather than extrapolate: a single-deal solve is the perfect-information relaxation and
-upper-bounds any imperfect-information best response, while the best one-ply
-deviation followed by incumbent play lower-bounds it. The exact value lies
-inside its own interval on all $716$ positions where both are computed. The
-bounds do not settle whether the reported figures are lower bounds on their
-layers, and they show that the cheap instrument which appeared to settle it
-cannot: its looseness \emph{grows} with belief support ($t = +6.27$).
+Three results follow. The residual errors are not failures to \emph{find}
+cards: $\mathbf{95.3\%}$ are \emph{allocation} errors, where our team held all
+six of a half-suit and split them wrongly. Handing a seat the true deal one
+side at a time --- a ceiling obtained by cheating, never a strength figure ---
+prices teammates' cards at $+3.41$ against opponents' $+1.31$, and we had
+predicted the reverse. Exact best responses over information sets measure the
+deployed policy's endgame exploitability at $+0.4405$ over $305$ positions with
+one half-suit live, against a deterministic realisation of a policy that
+mixes. Under the corrected misdeclaration rule --- the engine scored it wrongly
+for five versions --- the deployed configuration beats the v0.3 champion by
+$\mathbf{+2.412}$ $[+2.088, +2.736]$ sets per pair and an independently
+developed C++ engine \citep{nguyen2026sestina} by $\mathbf{+2.347}$ sets per
+game over $10{,}000$ games, under this paper's rule dialect rather than that
+engine's.
 
-The solver also does something no duel can: it names the move. Exploitation in
-the endgame is almost always \emph{one} move ($88/100$ at $m = 2$, $543/616$ at
-$m = 1$); it is an ask rather than a declaration; and it is systematically
-riskier than the engine's ($p = 0.218$ against $0.799$, paired $t = -18.88$,
-the engine asking a card it was \emph{certain} to receive on $73$ of $122$
-positions and still being wrong). Fitting the ask objective
-against exact one-ply values overturns the obvious diagnosis --- de-weighting
-success probability changes nothing --- and isolates certainty rather than
-probability as the defect. The resulting one-parameter correction, pre-registered, and replicated
-against the champion at $+0.0907$ $[+0.0555, +0.1260]$, gains on the stronger
-base over a single $2{,}000$-pair run
-$\mathbf{+0.1220}$ $[+0.0711, +0.1729]$ sets on top of the void-era deployed
-configuration. It does \emph{not} make that policy harder to
-exploit: over $285$ paired positions what a best response extracts moves by
-$-0.0002$, half-width $0.026$ --- as a critic it improves average-case play
-and leaves the worst case where it was. Two solver faults, caught by controls
-needing no ground truth, are reported with it.
-
-Finally we correct the game itself. From v0.1 the engine scored a
-right-team, wrong-split declaration as a \emph{void}; the standard rule
-awards every misdeclared set to the opponents and is now the baseline,
-results labelled by rule era. Under standard scoring the deployed
-configuration beats the v0.3 champion by $\mathbf{+2.412}$
-$[+2.088, +2.736]$ sets per pair; against Dylan's FishBot v0.7 --- an
-independently developed C++ engine running its own code --- it wins
-$\mathbf{+2.347}$ sets per game, of which $\mathbf{57\%}$ is declaration
-accounting ($96.5\%$ correct against $78.9\%$), once a bridge defect of ours
-worth $-0.08$ to them is repaired;
-the endgame correction, fitted against void-era targets, re-measures at
-$-0.104$ and is withdrawn.
-
-Version 1.0 then asks where the rest of the margin is, and every answer is a
-surprise. Our residual errors are not failures to \emph{find} cards:
-$\mathbf{95.3\%}$ of them are \emph{allocation} errors --- our team held all
-six and we split them wrongly --- at $0.1676$ a game against $0.0083$
-ownership errors. What a declaration risks turns out not to be how many of the
-six the declarer holds, which is the natural lever and is worth nothing, but
-how many have \emph{never been publicly located}; the counting channel alone
-resolves $53.4\%$ of wholly-held sets, which is why the obvious lever has
-nothing left to move. Handing a seat the true deal one side at a time prices
-the two halves of the information ceiling separately: teammates' cards are
-worth $\mathbf{+3.41}$ $[+3.16, +3.66]$ against opponents' $+1.31$
-$[+1.01, +1.61]$ --- $2.6\times$, and we predicted the reverse. Two
-methodological results underwrite the rest: the deal contributes
-\textbf{nothing} to a game's outcome variance ($-1.3\%$ $[-4.0\%, +1.5\%]$
-over $5{,}000$ deals played from both parities), and the value of pairing runs
-from $1.1\times$ to $414\times$ the games, set by \emph{how often a knob
-changes a decision} rather than by effect size --- which is now how runs here
-are sized. One change shipped from this round, an exhaustive search on forced
-declarations worth $+0.0233$ $[+0.0133, +0.0334]$ on $0.9\%$ of games; four
-candidates were withdrawn, each on a condition fixed before its run.
+Version 1.1 took seven pre-registered directions at the residue and shipped
+none: four were stopped by a futility screen fixed in advance, one is closed by
+a proof that the belief-space search cannot move $99.96\%$ of the allocation
+uncertainty, and an audit of our own clustering restates every position-level
+interval and withdraws one conclusion. Across the whole project, thirty-eight
+pre-registrations produced exactly one change to the deployed engine
+(Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
+not ship, because the bar was fixed before the runs and was not amended
+afterwards.
 
 \vspace{2pt}
-\noindent
-Version~1.1 then took \textbf{seven} pre-registered directions at the residue
-and closed all seven, shipping nothing. Four never reached a duel because a
-futility screen fixed in advance stopped them, saving roughly $9{,}000$ pairs.
-Two closures are stronger than a null. Handing a seat the true deal in one
-channel at a time shows that knowing it only when you \emph{declare} is worth
-$+1.08$ and only when you \emph{ask} $+0.76$, against $+3.41$ for both:
-\textbf{$46\%$ of the largest information channel in the game is interaction},
-reachable from neither side alone. And the belief-space search provably cannot
-resolve the allocation errors that dominate the residue --- its only update
-preserves the ratio $M[c,t_1]/M[c,t_2]$ between two teammates at every depth,
-every beam width and \emph{every leaf evaluation including a perfect one},
-which prices $99.96\%$ of the allocation uncertainty as unreachable exactly
-where the errors occur. Finally, an audit of our own instrument found that a
-run reported as ``$162$ positions'' is $162$ consecutive plies from
-\textbf{eight deals}; every affected interval is restated with deal-clustered
-standard errors and a $t$ critical value at the cluster count, one conclusion
-is withdrawn, and no duel result moves --- the duel harness had the right unit
-from the start.
-
-\vspace{1pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
 \end{abstract}
 
@@ -4748,12 +4680,17 @@ where this paper's own measured price of a turn crosses zero, and the two
 sections have never been read against each other. The sweep in
 \path{jobs/j14_signalling.json} tried $0.35$ and stopped.
 
-Two other things are now known that were not. What an avoided misdeclaration
-is worth in play is $+1.7898$ $[+1.5927, +1.9870]$ sets
-(\S\ref{sec:res-pathledger}), measured rather than taken from the rulebook, so
-a signal pays whenever its chance of placing a split we would otherwise get
-wrong exceeds the turn's price divided by $1.79$ --- and below $0.50$ that
-numerator is indistinguishable from zero. And the population it would act on
+Two other things are now known that were not. An avoided misdeclaration is
+worth measurably less than the two points the rulebook implies. For the
+signalling arms themselves it is $+1.2784$ $[+1.0642, +1.4926]$ sets
+(\path{results/error_value_signal_gate.json}), an interval that excludes the
+assumed $2$; the deferral gate's own figure is higher at $+1.7898$
+$[+1.5927, +1.9870]$ (\S\ref{sec:res-pathledger}) and an earlier draft used
+that one here, which prices one mechanism with another's exchange rate. On the
+signalling figure, a signal pays whenever its chance of placing a split we
+would otherwise get wrong exceeds the turn's price divided by $1.28$ --- and
+below $p_{\text{best}} = 0.50$ that numerator is not resolved by the run that
+measured it. And the population it would act on
 is reachable: of the $130$ half-suits we declared wrongly over $800$
 cross-engine games, the median number of \emph{our own} turns between
 assembling the set and the deadline is $25.5$, with only $16$ having none
