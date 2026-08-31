@@ -798,12 +798,18 @@ WATCH = [
     # R3/R4: the threshold sanity and the correction's re-pricing. R4 is the
     # number that withdrew a shipped knob, which makes it the figure whose
     # silent drift would be most misleading in either direction.
+    # The anchor is "correction scores", not "against the same". The latter
+    # is an ordinary three-word English phrase, and a paragraph added
+    # elsewhere in the paper wrote it a second time -- which
+    # test_no_watched_anchor_is_ambiguous caught, correctly, because a
+    # duplicated anchor lets a drifted figure pass off a coincidental match
+    # beside the first occurrence. An anchor has to name its own sentence.
     ("r4_award_check.json", "estimate", "{:+.4f}",
-     "correction stack under award rule", "against the same"),
+     "correction stack under award rule", "correction scores"),
     ("r4_award_check.json", "ci.0", "{:+.4f}",
-     "correction stack CI low", "against the same"),
+     "correction stack CI low", "correction scores"),
     ("r4_award_check.json", "ci.1", "{:+.4f}",
-     "correction stack CI high", "against the same"),
+     "correction stack CI high", "correction scores"),
     ("r4_award_check.json", "x_misdeclares", "{:d}",
      "correction-arm misdeclares", "misdeclares \\emph{more}"),
     ("r4_award_check.json", "y_misdeclares", "{:d}",
