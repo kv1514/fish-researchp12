@@ -1835,7 +1835,7 @@ inference & NLL $\downarrow$ & Brier $\downarrow$ & top-1 $\uparrow$ & ms/decisi
 exact DP, clauses ignored          & 1.4776 & 0.7568 & 0.287 & 50.4 \\
 v0.3 sampler, 32 draws             & 1.4399 & 0.7065 & 0.386 & 5.9 \\
 v0.4 importance sampler, 160       & 1.3731 & 0.7006 & 0.396 & 29.5 \\
-\textbf{v0.4 importance sampler, 512} & \textbf{1.3618} & 0.6955 & 0.403 & 92.3 \\
+v0.4 importance sampler, 512       & \textbf{1.3618} & 0.6955 & 0.403 & 92.3 \\
 v0.3 sampler, 96 draws             & 1.3552 & 0.6891 & 0.406 & 16.6 \\
 \textbf{v0.3 sampler, 512 draws}   & \textbf{1.3408} & 0.6833 & 0.416 & 87.8 \\
 v0.4 + opponent model, 160, $\gamma{=}0.45$ & 1.3476 & 0.6856 & 0.401 & 31.9 \\
@@ -1845,8 +1845,8 @@ v0.4 + opponent model, 512, $\gamma{=}0.60$ & 1.3248 & 0.6744 & 0.411 & 100.8 \\
 \bottomrule
 \end{tabular}
 \caption{How much probability each inference configuration places on where the
-cards actually are. Lower NLL and Brier are better. Bold marks the three rows
-the text turns on. The comparison that matters is the first two: the
+cards actually are. Lower NLL and Brier are better. A bold NLL marks the three
+figures the text turns on. The comparison that matters is the first two: the
 \emph{exactly correct} uniform posterior at 512 draws (1.3618) is worse than
 v0.3's \emph{biased} sampler at the same budget (1.3408). The third is the
 best configuration found. \textbf{Ten of the fourteen configurations scored in
