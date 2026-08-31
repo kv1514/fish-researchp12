@@ -216,3 +216,153 @@ def test_the_descriptive_registration_is_marked_descriptive():
     assert set(r["arms"]) == {"A_shipped", "B_signal", "C_defer"}, (
         "signalling and deferral were never played on the same deals; that is "
         "the omission this pairing exists to fix")
+
+
+# --- prereg/signal_budget.md, and the three withdrawal conditions ----------
+
+BUDGET = (ROOT / "prereg" / "signal_budget.md").read_text()
+
+
+@pytest.fixture()
+def budget():
+    run.select("signal_budget")
+    yield
+    run.select("defer_gate_at_power")
+
+
+def test_the_budget_registration_names_its_arms_and_seed(budget):
+    assert run.SEED0 == 11_700_000 and run.AGENT0 == 117_000
+    assert (run.BASE, run.ARM) == ("B_uncapped", "C_budget6")
+    assert run.ARMS["B_uncapped"] == run.SIGNAL
+    assert run.ARMS["C_budget6"] == dict(run.SIGNAL, signal_budget=6)
+    assert run.ARMS["D_budget2"] == dict(run.SIGNAL, signal_budget=2)
+
+
+def test_the_budget_seed_is_none_of_the_nine_the_registration_bars(budget):
+    barred = {r["seed"] for k, r in run.REGISTRATIONS.items()
+              if k != "signal_budget"}
+    assert run.SEED0 not in barred | {2_400_000, 3_600_000, 9_300_000,
+                                      9_700_000, 9_900_000, 10_100_000}
+
+
+def test_the_uncapped_control_is_the_same_parameters_as_b_signal(budget):
+    """Renamed, not re-tuned: a different incumbent would make the
+    replication gate compare two different things."""
+    assert run.ARMS["B_uncapped"] == run.ALL_ARMS["B_signal"]
+
+
+def _game(d_us: int, w_us: int, w_them: int, gate: int = 1) -> dict:
+    """One possible game, built from the identity rather than asserted at.
+
+    A real per-game margin is `2*(d_us - w_us + w_them) - 9`, an odd integer
+    between -9 and +9, and every count below is a whole declaration. So these
+    rows are games that could actually have been played, and the identity
+    closes on them by construction rather than by a fixture that was tuned
+    until the check went quiet.
+    """
+    vol = d_us - gate
+    return {"margin": 2 * (d_us - w_us + w_them) - 9, "terminal": 1,
+            "fallbacks": 0, "signals": 0,
+            "paths": {"voluntary": [vol, 0], "gate": [gate, w_us]},
+            "opp_declares": 9 - d_us, "opp_wrong": w_them}
+
+
+def _budget_rows(n=200, hi_a=0.72, hi_c=0.75, sig=(8.0, 5.0, 1.8)):
+    """Two-point mixtures: `hi_*` is the share of games won by one more set.
+
+    A margin near +2.4 is a mix of +3 and +1 games, and moving the share moves
+    the mean by 2 * the share -- which is how a real contrast of a few
+    hundredths is actually made.
+    """
+    out = []
+    for i in range(n):
+        f = (i + 0.5) / n
+
+        def arm(hi, gate):
+            return (_game(5, 0, 1, gate) if f < hi else _game(5, 1, 1, gate))
+        out.append({"deal": i, "kv_even": 0, "rev": 2,
+                    "A_shipped": arm(0.60, 4),
+                    "B_uncapped": arm(hi_a, 3),
+                    "C_budget6": arm(hi_c, 2),
+                    "D_budget2": arm(0.64, 1)})
+    for name, s in zip(("B_uncapped", "C_budget6", "D_budget2"), sig):
+        for r in out:
+            r[name]["signals"] = s
+    return out
+
+
+def _payload(rows):
+    got = run.report(rows)
+    got["n_deals"] = len(rows)
+    return got
+
+
+def test_the_fixture_is_made_of_games_that_could_have_been_played(budget):
+    """If the fixture cheated, every identity test below would be vacuous."""
+    for r in _budget_rows(20):
+        for arm in run.ARMS:
+            g = r[arm]
+            d_us = sum(n for n, _ in g["paths"].values())
+            w_us = sum(w for _, w in g["paths"].values())
+            assert d_us + g["opp_declares"] == 9
+            assert g["margin"] == 2 * (d_us - w_us + g["opp_wrong"]) - 9
+            assert g["margin"] % 2 == 1
+
+
+def test_all_three_withdrawal_checks_pass_on_a_clean_run(budget):
+    got = _payload(_budget_rows())
+    assert got["replication"]["passes"]
+    assert got["manipulation"]["passes"]
+    assert got["identity"]["passes"], got["identity"]["problems"]
+    assert not got["primary"].get("withdrawn")
+
+
+def test_a_failed_replication_withdraws_the_budget_run(budget):
+    """B_uncapped must reproduce the +0.1435 the registration rests on."""
+    got = _payload(_budget_rows(hi_a=0.60))     # B identical to A: no effect
+    assert got["replication"]["passes"] is False
+    assert got["primary"]["verdict"].startswith("WITHDRAWN")
+    assert "replication" in got["primary"]["verdict"]
+
+
+def test_a_cap_that_did_not_bind_withdraws_the_budget_run(budget):
+    """Signals a game must fall strictly B > C > D. An arm whose knob never
+    landed has been reported twice in this project already."""
+    got = _payload(_budget_rows(sig=(8.0, 8.0, 1.8)))
+    assert got["manipulation"]["strictly_decreasing"] is False
+    assert got["primary"]["verdict"].startswith("WITHDRAWN")
+
+
+def test_a_cap_exceeded_withdraws_the_budget_run(budget):
+    """Strictly decreasing is not enough: `signal_budget=2` that averages 3.5
+    a game means the counter is not counting what the name says."""
+    got = _payload(_budget_rows(sig=(9.0, 7.0, 3.5)))
+    assert got["manipulation"]["strictly_decreasing"] is True
+    assert got["manipulation"]["within_cap"] == {"C_budget6": False,
+                                                 "D_budget2": False}
+    assert got["primary"]["verdict"].startswith("WITHDRAWN")
+
+
+def test_a_ledger_that_loses_a_declaration_withdraws_the_budget_run(budget):
+    """The defect the identity exists to catch: a declaration path that the
+    instrument does not record. The margin still looks fine."""
+    rows = _budget_rows()
+    for r in rows:
+        r["C_budget6"]["paths"]["gate"] = [0, 0]      # drop the gate path
+    got = _payload(rows)
+    assert got["identity"]["passes"] is False
+    assert any("is not 9" in p for p in got["identity"]["problems"])
+    assert got["primary"]["verdict"].startswith("WITHDRAWN")
+
+
+def test_the_identity_check_only_runs_where_a_registration_asks_for_it():
+    """The registrations that predate the identity cannot be held to a gate
+    they never agreed to, and a gate nobody chose is a gate nobody owns."""
+    declared = {k for k, r in run.REGISTRATIONS.items() if r.get("identity")}
+    assert declared == {"signal_budget"}
+
+
+def test_the_primary_line_says_it_is_provisional_where_gates_follow(budget,
+                                                                    capsys):
+    _payload(_budget_rows())
+    assert "PROVISIONAL" in capsys.readouterr().out

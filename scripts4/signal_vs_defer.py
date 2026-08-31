@@ -35,6 +35,7 @@ from fish.rules import RuleConfig                             # noqa: E402
 from fish4.clustered import cluster_ci, fmt                   # noqa: E402
 from fish4.dylan_v07 import BRIDGE_REV                        # noqa: E402
 from scripts4.duel import engine_fingerprint                  # noqa: E402
+from scripts4.margin_identity import verify as identity_check  # noqa: E402
 from scripts4.path_ledger import PATHS, _path_of              # noqa: E402
 
 RULES_D = {"wrong_distribution_outcome": "opponent"}
@@ -51,6 +52,12 @@ ALL_ARMS = {
     "B_signal": dict(SIGNAL),
     "C_defer": dict(DEFER),
     "D_both": dict(SIGNAL, **DEFER),
+    #: prereg/signal_budget.md. Same parameters as B_signal under a name that
+    #: says what it is the control FOR, so a reader of the budget run is not
+    #: asked to remember that "B_signal" means "uncapped".
+    "B_uncapped": dict(SIGNAL),
+    "C_budget6": dict(SIGNAL, signal_budget=6),
+    "D_budget2": dict(SIGNAL, signal_budget=2),
 }
 
 #: THE REGISTRATION IS AN EXPLICIT SELECTOR, not a comment.
@@ -85,20 +92,44 @@ REGISTRATIONS = {
         "seed": 11_300_000, "agent": 113_000,
         "base": "A_shipped", "arm": "B_signal", "interaction": False,
     },
+    # prereg/signal_budget.md. Three withdrawal conditions, all declared here
+    # rather than in the code that checks them.
+    "signal_budget": {
+        "arms": ("A_shipped", "B_uncapped", "C_budget6", "D_budget2"),
+        "seed": 11_700_000, "agent": 117_000,
+        "base": "B_uncapped", "arm": "C_budget6", "interaction": False,
+        #: (arm, base, published mean, published half-width)
+        "replicate": ("B_uncapped", "A_shipped", 0.1435, 0.0464),
+        #: signals a game must fall strictly along this order ...
+        "signal_order": ("B_uncapped", "C_budget6", "D_budget2"),
+        #: ... and each capped arm must respect its own cap.
+        "signal_caps": {"C_budget6": 6.0, "D_budget2": 2.0},
+        #: The counted opponent ledger must close the margin identity. Named
+        #: per registration like the other two, because a run registered
+        #: before the identity existed cannot be held to a check it never
+        #: agreed to -- and because a gate nobody chose is a gate nobody owns.
+        "identity": True,
+    },
 }
 PREREG = ARMS = SEED0 = AGENT0 = BASE = ARM = INTERACTION = None
+REPLICATE_SPEC = SIGNAL_ORDER = SIGNAL_CAPS = IDENTITY = None
 
 
 def select(name: str) -> None:
     """Point the module at one registration. Called at import for the default
     and by `--prereg=`; the tests use it too rather than poking globals."""
     global PREREG, ARMS, SEED0, AGENT0, BASE, ARM, INTERACTION
+    global REPLICATE_SPEC, SIGNAL_ORDER, SIGNAL_CAPS, IDENTITY
     r = REGISTRATIONS[name]
     PREREG = name
     ARMS = {k: ALL_ARMS[k] for k in r["arms"]}
     SEED0, AGENT0 = r["seed"], r["agent"]
     BASE, ARM = r["base"], r["arm"]
     INTERACTION = r["interaction"]
+    REPLICATE_SPEC = r.get("replicate")
+    SIGNAL_ORDER = r.get("signal_order")
+    SIGNAL_CAPS = r.get("signal_caps") or {}
+    IDENTITY = bool(r.get("identity"))
 
 
 select("defer_gate_at_power")
@@ -274,11 +305,13 @@ def report(rows) -> dict:
               f"covers zero, but at +-{ph:.4f} against the registered "
               f"+-{POWER_TARGET:.3f} this is UNDERPOWERED and retires nothing")
         print(f"\n  PRIMARY  D = margin({ARM}) - margin({BASE})")
-        print(f"    {fmt(pm, ph, pk)}\n    {pv}")
+        note = ("  (PROVISIONAL: the withdrawal checks are below)"
+                if REPLICATE_SPEC or SIGNAL_ORDER or IDENTITY else "")
+        print(f"    {fmt(pm, ph, pk)}\n    {pv}{note}")
         out["primary"] = {"mean": pm, "half_width": ph, "ci95": [plo, phi],
                           "n_clusters": pk, "verdict": pv}
         out["interaction"] = {"verdict": pv}     # for the exit code
-        return _tail(out, rows, n)
+        return _finish(_tail(out, rows, n), rows)
 
     inter = [(r["D_both"]["margin"] - r["B_signal"]["margin"])
              - (r["C_defer"]["margin"] - r["A_shipped"]["margin"])
@@ -308,7 +341,7 @@ def report(rows) -> dict:
                           "n_clusters": ik, "d_above_b": d_above_b,
                           "d_above_c": d_above_c, "verdict": verdict}
 
-    return _tail(out, rows, n)
+    return _finish(_tail(out, rows, n), rows)
 
 
 def _tail(out: dict, rows, n: int) -> dict:
@@ -353,6 +386,78 @@ def _tail(out: dict, rows, n: int) -> dict:
                             if not r[a]["terminal"])
     print(f"  bridge fallbacks {out['bridge_fallbacks']}   "
           f"unfinished {out['unfinished']}")
+    return out
+
+
+def _finish(out: dict, rows) -> dict:
+    """The registration's withdrawal conditions, run after everything they
+    need exists, and applied to the verdict rather than printed beside it.
+
+    A gate that decorates a run instead of withdrawing it is not a gate. Each
+    of these has already earned its place: the replication check because a
+    published POINT was once compared against a fresh INTERVAL and a run was
+    withdrawn for gathering more evidence; the manipulation check because an
+    arm whose knob did not bind has been reported twice; the identity check
+    because every instrument in this line spent a fortnight decomposing a
+    third of the margin.
+    """
+    failed: list[str] = []
+
+    if REPLICATE_SPEC:
+        arm, base, pm, phw = REPLICATE_SPEC
+        deals = [r["deal"] for r in rows]
+        v = cluster_ci([r[arm]["margin"] - r[base]["margin"] for r in rows],
+                       deals)
+        se = ((v[1] / 1.96) ** 2 + (phw / 1.96) ** 2) ** 0.5
+        z = (v[0] - pm) / se if se else 0.0
+        ok = abs(z) < 1.96
+        out["replication"] = {"arm": arm, "base": base, "target": pm,
+                              "target_half_width": phw, "mean": v[0],
+                              "half_width": v[1], "z": z, "passes": ok}
+        print(f"\n  WITHDRAWAL 1  replication: {arm} - {base} "
+              f"{v[0]:+.4f} +-{v[1]:.4f}\n    against the registered "
+              f"{pm:+.4f} +-{phw:.4f}, two-sample z = {z:+.2f} -> "
+              f"{'PASS' if ok else 'FAIL'}")
+        if not ok:
+            failed.append("the replication gate")
+
+    if SIGNAL_ORDER:
+        sig = out["signal_turns_per_game"]
+        order = [sig[a] for a in SIGNAL_ORDER]
+        strict = all(a > b for a, b in zip(order, order[1:]))
+        capped = {a: sig[a] <= c for a, c in SIGNAL_CAPS.items()}
+        ok = strict and all(capped.values())
+        out["manipulation"] = {"order": list(SIGNAL_ORDER), "signals": order,
+                               "strictly_decreasing": strict,
+                               "within_cap": capped, "passes": ok}
+        print(f"\n  WITHDRAWAL 2  manipulation: signals a game must fall "
+              f"strictly along\n    {' > '.join(SIGNAL_ORDER)}")
+        print(f"    {'  '.join(f'{a}={sig[a]:.3f}' for a in SIGNAL_ORDER)}"
+              f"   strictly decreasing: {strict}")
+        for a, c in SIGNAL_CAPS.items():
+            print(f"    {a} <= {c}: {capped[a]}")
+        print(f"    -> {'PASS' if ok else 'FAIL'}")
+        if not ok:
+            failed.append("the manipulation check")
+
+    if IDENTITY:
+        bad = identity_check(out)
+        out["identity"] = {"passes": not bad, "problems": bad}
+        print(f"\n  WITHDRAWAL 3  the margin identity closes on the counted "
+              f"ledger -> {'PASS' if not bad else 'FAIL'}")
+        for line in bad:
+            print(f"    {line}")
+        if bad:
+            failed.append("the identity check")
+
+    if failed:
+        v = (f"WITHDRAWN: {' and '.join(failed)} failed. The registration "
+             f"says to report the discrepancy rather than read the primary.")
+        print(f"\n  {v}")
+        for k in ("primary", "interaction"):
+            if k in out:
+                out[k]["withdrawn"] = True
+                out[k]["verdict"] = v
     return out
 
 
