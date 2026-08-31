@@ -660,7 +660,7 @@ WATCH = [
     ("foreign_m2_check.json", "ci95.1", "{:+.4f}",
      "m<=2 vs v0.7, CI high", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "n_pairs", "{:d}",
-     "foreign-opponent paired games", "rotations --- $500$ games per arm"),
+     "foreign-opponent paired games", "games per arm, the statistic being"),
     ("foreign_m2_check.json", "kv_margin_on", "{:+.3f}",
      "margin over v0.7, correction on", "beats v0.7 by"),
     ("foreign_m2_check.json", "kv_margin_off", "{:+.3f}",
@@ -830,9 +830,9 @@ WATCH = [
     ("r5_signal_check.json", "ci.1", "{:+.4f}",
      "signalling CI high", "the effect moves to"),
     ("r5_signal_check.json", "x_misdeclares", "{:d}",
-     "misdeclares with signalling on", "cuts misdeclarations ---"),
+     "misdeclares with signalling on", "cuts misdeclarations"),
     ("r5_signal_check.json", "y_misdeclares", "{:d}",
-     "misdeclares with signalling off", "cuts misdeclarations ---"),
+     "misdeclares with signalling off", "cuts misdeclarations"),
     # R6: the ported contestation term and the silence prior, both measured
     # against Dylan and both rejected. Watched because a negative result is
     # exactly the kind of number that rots quietly -- and because the
