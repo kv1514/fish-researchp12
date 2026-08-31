@@ -2646,6 +2646,44 @@ It is a lead, not a result. It has not been registered and has not been run,
 and the reason for the delay is on the record above: the previous confident
 reading of this same data survived one commit.
 
+### And the repeats are not a knob. They are waste.
+
+Before registering a repeat CAP with a grid, one fact had to be measured,
+because it changes what the intervention is rather than how it is tuned:
+`perpetual.signalling_ask` picks the highest-entropy card among legal asks in a
+half-suit our team owns and skips one already placed, but proving *this seat
+does not hold X* removes only OUR bit from X's mask. With two teammates left
+the mask still has two bits, so X can stay the top pick and be re-asked
+forever. The instrument now records the CARD, not just its half-suit:
+
+| | fires per episode | distinct cards | repeats saying nothing new |
+|---|---|---|---|
+| in time (n=355) | 5.6 | 1.27 | 4.3 |
+| **too late (n=244)** | **42.5** | **1.74** | **40.8** |
+
+**Ninety-six percent of the signalling asks in a bad episode re-prove a fact
+already on the public record.** The mechanism has about 1.7 things to say and
+spends 42.5 turns saying them, and those turns come out of its own stall
+window — which is the deadline that then fires in 185 of the 244 cases. The
+waste is not confined to the bad episodes either; the good ones spend 4.3 of
+their 5.6 the same way. They simply have the slack to afford it.
+
+So there is no grid to register. The intervention has no free parameter: do
+not signal a card this seat has already signalled, and fall through to normal
+ask selection once they are exhausted. It is a two-arm question — off against
+on — not a sweep.
+
+One caveat, stated rather than assumed. A repeat is redundant because under
+the no-bluff rule *seat P does not hold X* is permanent once proven: P could
+only acquire X by asking for it, which is public, and a seat holding X cannot
+make a doomed ask for it. If that reading of the rules is wrong, the 40.8
+figure is an upper bound on the waste rather than the waste.
+
+That the implementation has no parameter does not mean it helps. Whether
+removing 40.8 turns per bad episode changes the margin is a separate question
+and needs a duel under its own registration, with the switch shipped inert
+(off = today's behaviour, bit-identical) as every knob on this branch has been.
+
 ### The negative control moved, and it does not mean what it looks like
 
 `p_best` — the gate's own input — came in at 0.11 against 0.07, difference
