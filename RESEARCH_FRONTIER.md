@@ -2191,3 +2191,75 @@ by then the rule was clear:
 Both refutations cost one registration and a four-minute run. The expensive
 part was never the experiment; it was noticing that a sentence I liked had
 arrived without one.
+
+---
+
+# UPDATE, 2026-08-31: there is no plateau, and that changes what a belief number is
+
+The precision sweep stopped at 1440 because that is where the registered grid
+stopped. The obvious question it left is whether the effect had converged there,
+and it had not. Extended descriptively to **2880** --- six times the precision
+the engine ships at --- `results/channel_precision_plateau.json`:
+
+| `n_draws` | baseline team NLL | paired team NLL |
+|---|---|---|
+| 180 | 1.3155 | -0.0064 |
+| 360 | 1.3004 | -0.0300 |
+| 480 | 1.2968 | -0.0368 |
+| 720 | 1.2919 | -0.0382 |
+| 1440 | 1.2930 | -0.0436 |
+| **2880** | 1.2908 | **-0.0493** |
+
+Each step tested as a **paired contrast** clustered on the game, because
+comparing two intervals by eye is what the per-decision rows exist to avoid:
+
+    d_360  - d_180  = -0.0236 [-0.0346, -0.0126]   SIGNIFICANT
+    d_480  - d_360  = -0.0068 [-0.0144, +0.0008]   covers zero
+    d_720  - d_480  = -0.0015 [-0.0066, +0.0037]   covers zero
+    d_1440 - d_720  = -0.0053 [-0.0089, -0.0018]   SIGNIFICANT
+    d_2880 - d_1440 = -0.0057 [-0.0080, -0.0034]   SIGNIFICANT
+
+**The last step is significant.** The effect is still growing at 2880 draws,
+and the baseline it is scored against has been flat since 480
+(1.2968, 1.2919, 1.2930, 1.2908 --- noise). So this is not the belief improving,
+and there is no convergence anywhere in the measured range.
+
+## What that does to every belief figure in this project
+
+It means **"the aimed book is worth -0.0382 nats" is not a property of the aimed
+book.** It is a property of *(the aimed book, 720 draws)*. Quote it without the
+second half and it reads as a measurement of an intervention when it is a
+measurement of an intervention *and an instrument setting* --- one that can be
+made 29% larger by changing the setting alone, on the same transcripts, with the
+same message.
+
+At the precisions this project actually uses, **75--78% of the 2880-draw value
+is present**, so nothing recorded is badly attenuated and no result changes. The
+severe attenuation is at 180 draws (13%), which nothing uses. That is the
+reassuring half and it is worth stating plainly, because the alarming half ---
+no asymptote --- is easy to over-read.
+
+## Deliberately not explained
+
+Two explanations for the precision dependence were offered today, registered,
+and refuted within an hour of being written. A third is available: the
+convention's term can only separate worlds of the *same depth* that place cards
+differently, and the instrument already measures how rare that is --- V2
+discrimination at **8.2%** of asks as registered, 31.3% among live ones --- so a
+small discriminating subpopulation would need many draws before it is
+represented at all.
+
+That is a hypothesis, it is **untested**, and it is written here as one sentence
+rather than a section for exactly the reason the two before it were wrong. What
+would test it is a book whose term discriminates on every ask rather than on
+8%; whether that is worth building is a separate question from whether this
+story is true.
+
+## The shape of the finding
+
+An off-policy belief instrument's magnitudes are not converging on a true
+effect. They scale with how many worlds you pay to sample, without bound in the
+range anyone would run. A null on such an instrument is therefore a statement
+about a budget as much as about a hypothesis --- and the only reason that is not
+a problem for anything recorded here is that the budget happened to sit above
+the steep part of the curve.
