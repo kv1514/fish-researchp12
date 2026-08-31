@@ -124,3 +124,15 @@ jobs:
         run: python scripts4/check_seeds.py
       - name: every bolded number in the paper is watched or exempt
         run: python scripts4/unwatched_claims.py
+      # ...and its other half. unwatched_claims says every bolded figure is
+      # WATCHED; this says every watched figure is RIGHT. Shipping one without
+      # the other leaves the half that catches a number drifting away from the
+      # result file it came from, which is the failure that actually happened
+      # -- error_value.py overwrote a result the paper cited twice, and every
+      # check in the repository passed.
+      - name: every watched number in the paper matches its result file
+        run: python scripts4/check_paper_numbers.py
+      - name: no fragile command inside a LaTeX caption
+        run: python scripts4/check_tex.py
+      - name: every job file is waited on or excluded with a reason
+        run: python scripts4/queue_state.py
