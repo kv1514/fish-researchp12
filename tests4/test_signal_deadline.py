@@ -259,7 +259,10 @@ def test_every_observable_the_instrument_records_is_compared():
     src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
     block = src[src.index('fires.append({'):src.index('"step": len(obs.history)')]
     recorded = set(__import__("re").findall(r'"(\w+)":', block)) | {"step"}
-    bookkeeping = {"seat", "hs", "repeat"}
+    # identifiers, not observables: a mean card index or seat number is not a
+    # quantity worth comparing between the groups, and `card` is here to
+    # answer whether the repeats re-ask the same one, not to be averaged.
+    bookkeeping = {"seat", "hs", "repeat", "card"}
     assert recorded - bookkeeping == set(sd.KEYS), (
         f"recorded but not compared: {recorded - bookkeeping - set(sd.KEYS)}; "
         f"compared but not recorded: {set(sd.KEYS) - recorded}")
@@ -586,3 +589,24 @@ def test_the_reason_is_read_from_the_trace_strings_agent4_writes():
     assert "forced: stalled with a claimable half-suit" in agent
     src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
     assert '"no legal ask" in why' in src and '"stalled" in why' in src
+
+
+def test_repeats_that_re_ask_one_card_are_counted_as_saying_nothing_new():
+    """An episode of 5 fires over 2 distinct cards is 3 asks that re-prove a
+    fact already on the public record. That count is what decides whether a
+    repeat cap needs a registered grid or whether the fix has no free
+    parameter at all."""
+    fires = [dict(fire(1, 0, "forced", repeat=i), card=c)
+             for i, c in enumerate([3, 3, 3, 4, 4])]
+    fires.append(dict(fire(2, 1, "voluntary", repeat=0), card=9))
+    info = sd.summarise(rows_of(fires))["information"]
+    assert info["too_late"]["episodes"] == 1
+    assert info["too_late"]["fires_per_episode"] == 5
+    assert info["too_late"]["distinct_cards_per_episode"] == 2
+    assert info["too_late"]["repeats_saying_nothing_new"] == 3
+    assert info["in_time"]["repeats_saying_nothing_new"] == 0
+
+
+def test_the_card_is_recorded_from_the_action_not_the_half_suit():
+    src = (ROOT / "scripts4" / "signal_deadline.py").read_text()
+    assert '"card": int(act.card),' in src

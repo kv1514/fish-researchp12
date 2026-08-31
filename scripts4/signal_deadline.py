@@ -216,6 +216,15 @@ def _play(deal_seed: int, kv_even: bool) -> dict:
             seen_hs[int(hs)] = seen_hs.get(int(hs), -1) + 1
             fires.append({
                 "seat": mover, "hs": int(hs),
+                # the CARD, not just its half-suit. signalling_ask picks the
+                # highest-entropy card among legal asks in a half-suit we own,
+                # and proving this seat does not hold X removes only OUR bit
+                # from X's mask -- with two teammates left it can stay the
+                # top pick and be re-asked forever, saying nothing new. That
+                # is the difference between a repeat cap (a knob needing a
+                # registered grid) and never re-signalling a card already
+                # signalled (a correctness fix with no free parameter).
+                "card": int(act.card),
                 # which repeat this is on this half-suit. The gate is a
                 # per-turn predicate, so once it is true in a dead position it
                 # stays true and the seat signals EVERY turn: a single
@@ -512,10 +521,39 @@ def summarise(rows: list[dict]) -> dict:
 
     #: how hard the mechanism spins once it starts, per (deal, parity, hs)
     runs = defaultdict(int)
+    cards: dict = defaultdict(set)
     for r in rows:
         for f in r["fires"]:
-            runs[(r["deal"], r["kv_even"], f["hs"])] += 1
+            key = (r["deal"], r["kv_even"], f["hs"])
+            runs[key] += 1
+            if "card" in f:
+                cards[key].add(f["card"])
     spins = sorted(runs.values())
+
+    #: are the repeats saying anything new? An episode of 42 fires over 3
+    #: distinct cards is 39 asks that re-prove a fact already on the public
+    #: record. Split by how the episode ended, since that is the comparison
+    #: that decides whether a repeat cap needs a registered grid at all.
+    ep_path = {}
+    for r in rows:
+        for f in r["fires"]:
+            if f["repeat"] == 0:
+                ep_path[(r["deal"], r["kv_even"], f["hs"])] = f["path"]
+    info: dict = {}
+    for label, want in (("in_time", IN_TIME), ("too_late", TOO_LATE)):
+        # NOT `keys`: that name holds the observable list this function
+        # compares, and shadowing it here fed episode tuples to diff_ci.
+        eps = [k for k in runs if ep_path.get(k) in want and cards.get(k)]
+        if not eps:
+            continue
+        info[label] = {
+            "episodes": len(eps),
+            "fires_per_episode": sum(runs[k] for k in eps) / len(eps),
+            "distinct_cards_per_episode":
+                sum(len(cards[k]) for k in eps) / len(eps),
+            "repeats_saying_nothing_new":
+                sum(runs[k] - len(cards[k]) for k in eps) / len(eps),
+        }
     diffs = {k: diff_ci(firsts, k) for k in keys}
     #: which of the two forced routes actually fired, counted rather than
     #: inferred from the observables that point at it
@@ -531,6 +569,7 @@ def summarise(rows: list[dict]) -> dict:
                 for k, v in diffs.items()},
             "n_games_with_a_fire": sum(1 for r in rows if r["fires"]),
             "n_games": len(rows),
+            "information": info,
             "spin": {"n_episodes": len(spins),
                      "mean_fires_per_episode": (sum(spins) / len(spins)
                                                 if spins else None),
@@ -607,6 +646,14 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
               f"median {sp['median']}, max {sp['max']}")
     print(f"  first-fire targets, by eventual declaration path: "
           f"{s['by_path_first_fire']}")
+    if s.get("information"):
+        print("  DO THE REPEATS SAY ANYTHING NEW?  "
+              "fires   distinct cards   repeats saying nothing")
+        for label, v in s["information"].items():
+            print(f"    {label:9s} n={v['episodes']:4d}      "
+                  f"{v['fires_per_episode']:6.1f}   "
+                  f"{v['distinct_cards_per_episode']:12.2f}   "
+                  f"{v['repeats_saying_nothing_new']:20.1f}")
     if s["too_late_forced_by"]:
         print(f"  WHICH DEADLINE fired on the too-late group: "
               f"{s['too_late_forced_by']}\n  (agent4.decide forces on `not "
