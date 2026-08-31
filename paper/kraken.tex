@@ -140,7 +140,9 @@ the engine asking a card it was \emph{certain} to receive on $73$ of $122$
 positions and still being wrong). Fitting the ask objective
 against exact one-ply values overturns the obvious diagnosis --- de-weighting
 success probability changes nothing --- and isolates certainty rather than
-probability as the defect. The resulting one-parameter correction, pre-registered and replicated, gains
+probability as the defect. The resulting one-parameter correction, pre-registered, and replicated
+against the champion at $+0.0907$ $[+0.0555, +0.1260]$, gains on the stronger
+base over a single $2{,}000$-pair run
 $\mathbf{+0.1220}$ $[+0.0711, +0.1729]$ sets on top of the void-era deployed
 configuration. It does \emph{not} make that policy harder to
 exploit: over $285$ paired positions what a best response extracts moves by
@@ -234,7 +236,7 @@ hidden information and \emph{no legal communication channel}, so neither the
 two-player zero-sum machinery that solved poker nor the fully cooperative
 machinery developed for Hanabi applies directly.
 
-This paper covers three iterations of an engine for the game, which is called
+This paper covers four iterations of an engine for the game, which is called
 \textbf{KRAKEN}. The bulk of it is v0.4, which built the inference and the
 evaluation discipline; \S\ref{sec:critic} then reports v0.6, whose first act
 was to discover that this engine had been playing a house variant of the
@@ -388,8 +390,11 @@ further: their first-order behaviour prior (an ask-tally over every seat,
 teammates included) is this paper's choice model with two parameters in
 place of one; their unguarded determinized search lost $35.7$ points to its
 own blueprint, our sampled searches all lost to their prior
-(\S\ref{sec:lookahead}); and their deception feature (``feint'') cost
-$-2.2$ replicated where our deception ladder had to be withdrawn wholesale.
+(\S\ref{sec:lookahead}); and our own deception ladder had to be withdrawn
+wholesale. An earlier draft added that their ``feint'' deception feature cost
+$-2.2$ on replication. That is withdrawn: in \citet{nguyen2026sestina},
+\texttt{feint} is a near-class member of their opponent \emph{panel}, which
+their engine beats by $+6.07$ percentage points, and no such figure appears.
 Where the projects genuinely differ --- their deployed belief is an
 approximate Sinkhorn object seeded by the prior where ours is exact
 counting reweighted by the model; their declarations price by a learned
@@ -4914,10 +4919,14 @@ is the entire problem.
 \paragraph{Evaluation, in sets.} The banked differential plus, for every
 unresolved half-suit, the learned probability that our team scores it minus the
 probability that theirs does \eqref{eq:hsvalue}. So $+1.4$ reads as ``expect to
-finish 1.4 sets ahead of the current score''. Because the underlying model is
-fitted to outcomes and checked for calibration --- held-out log-loss $0.727$
-against $0.821$ for the class prior, mean bias $-0.006$, reliable in every
-decile --- the number means what it says. This is the one component that is a
+finish 1.4 sets ahead of the current score''. The underlying model is fitted
+to outcomes and scores well in aggregate: held-out log-loss $0.727$ against
+$0.821$ for the class prior, with a mean bias of $-0.006$. It is not, however,
+calibrated. That mean bias is near zero because errors cancel, not because
+each decile is right, and five of the ten deciles are individually
+miscalibrated at the $95\%$ level (\S\ref{sec:res-null}) --- so the number
+is a usable ranking and should not be read as a probability. This is the one
+component that is a
 good \emph{predictor} and a disastrous \emph{objective}
 (Section~\ref{sec:res-null}), which is itself worth knowing: an evaluation
 function and an objective function are not the same object.
@@ -5962,7 +5971,10 @@ the withdrawal actually demands is an opponent with \emph{no} shared code, and
 one exists: \textbf{FishBot v0.7} by dylann4500, an independently written
 C++ engine for the same six-player, 54-card game --- different author,
 different belief representation, different search, its 55-parameter policy
-frozen upstream after self-play tuning. It plays under this engine's arbiter
+frozen upstream. Its published account \citep{nguyen2026sestina} gives that
+policy's fit objective as minimax regret over an opponent panel, not
+self-play; an earlier draft of this paragraph described it as self-play tuned,
+which was wrong. It plays under this engine's arbiter
 through a process bridge that replays the public history to the frozen policy and
 legality-checks every move it proposes, substitutions counted rather than
 hidden; zero were needed across the $2{,}000$ games this section reports.
@@ -5985,10 +5997,15 @@ deception-scale flips. The sharper reading is what the interval
 \emph{excludes}: $+0.1220$, the correction's own sibling-measured size. On a
 third, unrelated opponent the effect is a tie, so the sibling number does not
 transfer at anything like face value --- the section's finding again,
-demonstrated this time on an engine from outside the project entirely, and
-converging with the upstream author's own documentation, which reports of its
-final tuning stage that ``the advantage is a self-play advantage \dots\ it
-does not transfer.''
+demonstrated this time on an engine from outside the project entirely. An
+earlier draft of this sentence attributed to the upstream author a remark that
+its advantage ``does not transfer''; that quotation is withdrawn. It is not in
+\citet{nguyen2026sestina}, whose \S12.1 argues the opposite --- that the
+advantage is \emph{not} an artefact of self-play coordination, one seat's
+upgrade being worth $+1.93$ of a $+4.49$ percentage-point three-seat gain, and
+cross-play between three independently trained runs moving the result by
+$0.01$ points. Our result here stands on our own measurement and needs no
+support from theirs.
 
 The context the check ran in: with the correction on, the deployed
 configuration beats v0.7 by $+2.448$ sets per game ($+2.478$ with it off),
@@ -6106,7 +6123,8 @@ from the scoreboard.
 qualitative reading of two rows, and it had never been priced. It can be:
 every declaration in a game is either right or one of two kinds of wrong, and
 under the award rule each wrong one moves the margin by two sets, so the
-scoreboard decomposes exactly. Over $600$ cross-engine games
+scoreboard decomposes exactly. Over the same $10{,}000$ cross-engine games
+the headline margin is measured on
 (\path{scripts4/margin_decomposition.py}):
 
 \begin{center}
@@ -6327,8 +6345,13 @@ eras. The void-era $+0.1220$ stands as what it always was, a measurement
 of the void-era game.
 
 \paragraph{Their one load-bearing mechanism, ported and measured here: it
-does not transfer.} The other project's attribution study credits a single
-coordinate with essentially the whole gain of its v0.7 cycle --- a
+does not transfer.} The other project's attribution study puts a single
+coordinate's leave-one-out contribution at $+1.69$ $[+0.80, +2.57]$ of a
+$+4.73$ percentage-point whole, and states in terms that the stronger claim,
+that the gain \emph{lives} in that coordinate, is not supported at its power
+\citep{nguyen2026sestina}; an earlier draft of this sentence credited the
+coordinate with essentially the whole gain, which overstates what they claim.
+The mechanism is a
 \emph{contestation} term that scores a candidate ask by
 $(1 - p_{\text{hit}}) \times (\text{opponent-held mass of the half-suit}/6)
 \times (\text{cards of it nobody can place}/6)$ and carries a strongly
@@ -7581,12 +7604,25 @@ the deal, for a seated player and for an anonymous visitor alike.
 % =====================================================================
 \begin{thebibliography}{99}
 
-\bibitem[Nguyen(2026)]{dylan2026fishbot}
+\bibitem[Nguyen(2026a)]{dylan2026fishbot}
 Dylan Nguyen.
 \newblock FishBot: an engine for six-player Literature, versions 0.2--0.7.
 \newblock Software repository and technical reports,
   \url{https://github.com/dylann4500/fishbot}, 2026. Version 0.7 pinned at
-  commit \texttt{d017fbc} for every game reported here.
+  commit \texttt{d017fbc} for every game reported here. That commit may no
+  longer resolve: \citet{nguyen2026sestina} records that the repository's
+  history was rewritten after its evaluation. The frozen configuration string
+  in \path{external_v07/v07_spec.txt} identifies the build we played.
+
+\bibitem[Nguyen(2026b)]{nguyen2026sestina}
+Dylan Nguyen.
+\newblock SESTINA v1.0: exact inference, robust evaluation, and adversarial
+  testing in six-player Canadian Fish.
+\newblock Zenodo preprint, 31 August 2026.
+  \url{https://doi.org/10.5281/zenodo.22196900}.
+  Developed and evaluated as FishBot v0.7; the frozen
+  \texttt{v07:r12=25,\ldots} of its Appendix~B is the configuration this
+  paper plays against.
 
 \bibitem[Celli and Gatti(2018)]{celli2018computational}
 Andrea Celli and Nicola Gatti.
