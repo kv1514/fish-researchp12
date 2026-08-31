@@ -657,6 +657,22 @@ WATCH = [
      "m<=2 effect vs Dylan v0.7", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
      "m<=2 vs v0.7, CI low", "at a power sized for\ndeception-scale flips"),
+    # The signalling budget (prereg/signal_budget.md). Watched because it is
+    # a REFUTATION with three passing gates: the numbers that carry it are the
+    # primary, the channel split it rests on, and the replication that lets
+    # the primary be read at all.
+    ("signal_budget_11700000.json", "primary.mean", "{:+.4f}",
+     "budget 6 against uncapped, primary", "per-game budget of six is"),
+    ("signal_budget_11700000.json", "effects.B_uncapped.mean", "{:+.4f}",
+     "uncapped against shipped", "replicates a third time at"),
+    ("signal_budget_11700000.json", "replication.z", "{:+.2f}",
+     "replication z, both uncertainties", "a two-sample $z$ of"),
+    ("signal_budget_11700000.json", "their_wrong_effects.C_budget6.mean",
+     "{:+.4f}", "their extra wrong declarations under a budget of 6",
+     "extra wrong declarations are"),
+    ("signal_budget_11700000.json", "signal_turns_per_game.C_budget6",
+     "{:.2f}", "signals a game under a budget of 6",
+     "signals a game the opponents"),
     ("foreign_m2_check.json", "ci95.1", "{:+.4f}",
      "m<=2 vs v0.7, CI high", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "n_pairs", "{:d}",

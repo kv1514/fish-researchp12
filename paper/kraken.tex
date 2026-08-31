@@ -4978,6 +4978,56 @@ own-error saving and returns the opponents' rate to baseline. Read that way the
 $92.7\%$ of asks carrying no new information are not a cost the protocol pays,
 they are what it is for.
 
+\paragraph{A budget tests the interior, and the dose-response is convex.}
+Suppressing the repeats is one end of that curve. The other question is whether
+the first few signals buy most of the confusion while the rest only burn turns,
+in which case a cap would keep the opponent channel and return the race. That
+was registered before the parameter existed, with three withdrawal conditions
+and a stated power limit (\path{prereg/signal_budget.md}), and run over
+$4{,}000$ fresh games at a seed base used by nothing else
+(\path{results/signal_budget_11700000.json}). All three conditions pass. The
+mechanism replicates a third time at $+0.1605$ $[+0.1134, +0.2076]$ against the
+registered $+0.1435$, a two-sample $z$ of $+0.50$ carrying both uncertainties;
+the caps bind in the registered order at $8.94$, $1.48$ and $0.69$ signals a
+game; and the identity closes on all four arms. The primary is refuted. A
+per-game budget of six is $-0.0780$ $[-0.1065, -0.0495]$ against the uncapped
+arm, and the channels say why.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+arm & effect & race & ours & theirs \\
+\midrule
+uncapped   & $+0.1605$ & $-0.1585$ & $+0.0465$ & $+0.2725$ \\
+budget $6$ & $+0.0825$ & $-0.0115$ & $+0.0795$ & $+0.0145$ \\
+budget $2$ & $+0.0645$ & $-0.0075$ & $+0.0555$ & $+0.0165$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A budget does two of the three things it was meant to do. It returns
+almost all of the race loss, and it keeps the own-error saving; it improves it,
+to the best of the four arms, at $2.46\%$ of our declarations wrong against the
+shipped $3.25\%$. It then deletes the channel that was most of the gross gain.
+At $1.48$ signals a game the opponents' extra wrong declarations are $+0.0073$
+$[-0.0063, +0.0208]$, which covers zero, and their error rate is $21.24\%$
+against a baseline of $21.08\%$ and an uncapped $24.02\%$. So the dose-response
+is convex rather than concave. Volume is not a cost the mechanism pays on the
+way to something cheaper; it is the whole of what it buys, and there is no
+inexpensive version of this protocol to find. Two registrations now say so from
+opposite directions: suppressing repeats deletes the channel, and so does
+rationing them.
+
+One figure from that run is worth recording rather than acting on. The
+replication arrived at $+0.1605$, above the $+0.15$ bar the roster was given
+before any arm was seen, where the registered run arrived at $+0.1435$, below
+it. Taking the larger of two agreeing replications is exactly the selection
+this project is built to avoid. Pooled on both uncertainties they are $+0.1519$
+$[+0.1188, +0.1849]$, a point estimate sitting on the bar with an interval
+spanning it. Nothing ships on that, and this registration fixed no ship
+criterion; the deployed configuration still has \texttt{signal\_mode="off"}.
+
 \paragraph{Two limits, stated with it.} The three channels are an
 \emph{accounting} and they co-move --- a half-suit we stop declaring leaves
 \textsc{race} and arrives in \textsc{theirs} carrying their error rate with it,

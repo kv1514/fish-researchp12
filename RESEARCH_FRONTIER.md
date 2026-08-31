@@ -3541,3 +3541,52 @@ this paper is already the shorter-sentenced of the two:
 Ours has more sentences over 45 words in absolute count only because it is
 twice the length. Rewriting 252 sentences would have moved the paper away from
 the comparison, not toward it. No edit made.
+
+## signal_budget: REFUTED, and the second refutation in the same direction
+
+Registered in `prereg/signal_budget.md` before the parameter existed. Seed
+11,700,000, four arms x 2,000 deals x 2 parities, 110.1 minutes. All three
+withdrawal conditions pass, so the primary is read.
+
+    replication   B_uncapped - A_shipped +0.1605 +-0.0471 against the
+                  registered +0.1435 +-0.0464, two-sample z = +0.50    PASS
+    manipulation  signals/game 8.940 > 1.477 > 0.686, caps respected   PASS
+    identity      closes on the counted ledger, residual 0, all arms   PASS
+
+    PRIMARY  C_budget6 - B_uncapped = -0.0780 [-0.1065, -0.0495]
+             REFUTED: clear of zero and negative
+
+The question was whether the first few signals buy most of the confusion and
+the rest only burn turns. They buy almost none of it.
+
+    arm            effect     race     ours   theirs
+    B_uncapped    +0.1605  -0.1585  +0.0465  +0.2725
+    C_budget6     +0.0825  -0.0115  +0.0795  +0.0145
+    D_budget2     +0.0645  -0.0075  +0.0555  +0.0165
+
+A budget does two of the three things it was meant to. It returns almost all
+the race loss and it keeps the own-error saving, improving it to the best of
+the four arms (2.46% of our declarations wrong against 3.25% shipped). It then
+deletes the channel that was most of the gross gain: their extra wrong
+declarations fall from +0.1363 [+0.1135, +0.1590] to +0.0073 [-0.0063,
++0.0208], and their error rate from 24.02% to 21.24% against a 21.08%
+baseline.
+
+**The dose-response is convex, not concave.** `signal_no_repeat` cut the
+mechanism to 1.5 fires an episode and deleted the opponent channel; a per-game
+budget of 6 cuts it to 1.48 signals a game and deletes it again. Two
+registrations now say the same thing from opposite directions: volume is not a
+cost the protocol pays on the way to something cheaper, it is the whole of what
+it buys. There is no inexpensive version of this mechanism to find, and the
+line is closed unless the generality question reopens it.
+
+**One figure recorded rather than acted on.** This replication came in at
++0.1605, above the +0.15 roster bar; the registered run came in at +0.1435,
+below it. Taking the larger of two agreeing replications is the selection this
+project exists to avoid. Pooled on both uncertainties: +0.1519 [+0.1188,
++0.1849] -- a point estimate sitting on the bar with an interval spanning it.
+That is not a clearance, no ship criterion was registered for this run, and
+`V06_DEPLOYED` keeps `signal_mode="off"` and `signal_budget=0`.
+
+Written into the paper alongside the identity, with five new figures added to
+`check_paper_numbers` so they cannot rot.
