@@ -3334,3 +3334,33 @@ Whether it can be *moved* on purpose is the open question. Signalling moves it
 by 2.8 points, at a race cost that eats two thirds of the gain.
 `prereg/signal_budget.md` asks whether that cost can be cut without losing the
 rate change, and is registered, implemented and pending a run.
+
+### The channel this project has spent its whole history on is nearly empty
+
+From `A_shipped`'s own counters, the most each channel could ever give — bounds,
+not targets, and not simultaneously reachable, since a half-suit moved into one
+leaves another:
+
+| channel | if it were taken all the way | bound |
+|---|---|---|
+| **ours** | we never misdeclare again | **+0.317** |
+| race | we declare all nine ourselves | +5.975 |
+| theirs | they never get one right | +6.226 |
+
+The declaration gate, the 0.5 threshold, the claim gamma, the claim-specific
+gamma, the declarer-holding lever, the exhaustive forced search, the deferred
+gate, the split-pricing check — the whole declaration-side programme — draws on
+a channel worth **a third of a set a game in total**, and the champion has
+already taken most of what is cheaply there. `C_defer` would take 37% of what
+remains, and it is worth +0.0455 because the race hands two thirds of it back.
+
+Signalling's rate term alone, +0.2216, is larger than everything left in the
+own-error channel. That is not an argument for signalling — it is at +0.1435
+against a +0.15 bar and does not ship. It is an argument about where to look
+next, and the honest summary is that fourteen registrations have been spent
+optimising the smallest of three terms.
+
+Both large channels are about the opponents: how many half-suits they get to
+declare, and how often they are right when they do. Neither has ever been
+measured on purpose. The first instrument to count them at all is the run
+landing tonight.

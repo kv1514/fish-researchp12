@@ -126,6 +126,31 @@ def verify(payload: dict) -> list[str]:
     return bad
 
 
+def headroom(payload: dict, arm: str) -> dict:
+    """The most each channel could ever give, from this arm's own counters.
+
+    Bounds, not targets, and not simultaneously reachable -- a half-suit moved
+    into RACE leaves THEIRS. They are worth computing for one reason: the
+    OURS bound is small, fixed and nearly spent, and it is the only channel
+    this project has ever optimised.
+
+      OURS    declare perfectly:            2 * w_us
+      RACE    declare all nine at our own
+              current accuracy:             2*(9 - w_us*9/d_us) - 9 - margin
+      THEIRS  they are wrong on every one
+              they declare:                 2 * (d_them - w_them)
+    """
+    games = payload["n_games"]
+    m = payload["margins"][arm]["mean"]
+    d_us, w_us = our_counts(payload["ledger"][arm], games)
+    w_them = their_wrong(m, d_us, w_us)
+    d_them = N_HALF_SUITS - d_us
+    e_us = w_us / d_us if d_us else 0.0
+    return {"ours": 2 * w_us,
+            "race": (2 * (N_HALF_SUITS * (1 - e_us)) - N_HALF_SUITS) - m,
+            "theirs": 2 * (d_them - w_them)}
+
+
 def rates(payload: dict, base: str, arm: str) -> dict:
     """Split the THEIRS channel into volume and rate.
 
@@ -228,6 +253,12 @@ def report(path: Path) -> int:
         d = decompose(payload, base, arm)
         print(f"  {arm:<14}{d['effect']:>+9.4f}{d['race']:>+9.4f}"
               f"{d['ours']:>+9.4f}{d['theirs']:>+9.4f}{d['residual']:>+9.4f}")
+    h = headroom(payload, base)
+    print(f"\n  --- the most each channel could ever give, from {base} ---")
+    print(f"      (bounds, not targets, and not simultaneously reachable)")
+    print(f"      ours   declare perfectly            {h['ours']:>+8.3f}")
+    print(f"      race   declare all nine             {h['race']:>+8.3f}")
+    print(f"      theirs they never get one right     {h['theirs']:>+8.3f}")
     print(f"\n  --- per-declaration error rates, and the THEIRS channel split "
           f"into\n      the half-suits handed over and the rate they are "
           f"declared at ---")

@@ -337,3 +337,35 @@ def test_the_docstring_refuses_the_causal_reading():
     src = (ROOT / "scripts4" / "margin_identity.py").read_text()
     assert "NOT A CAUSAL DECOMPOSITION" in src
     assert "an accounting, not a causal split" in src
+
+
+# --- the headroom bounds --------------------------------------------------
+
+def test_the_own_error_channel_is_small_and_nearly_spent():
+    """The finding that reframes the programme: every knob this project has
+    tuned lives in a channel whose ENTIRE remaining value is about a third of
+    a set a game, and the deferred gate alone would take a third of that."""
+    p = json.loads((ROOT / "results" / "signal_vs_defer.json").read_text())
+    h = mi.headroom(p, "A_shipped")
+    assert 0.30 < h["ours"] < 0.35
+    taken = mi.decompose(p, "A_shipped", "C_defer")["ours"]
+    assert 0.3 < taken / h["ours"] < 0.45
+
+
+def test_the_other_two_channels_are_an_order_of_magnitude_larger():
+    p = json.loads((ROOT / "results" / "signal_vs_defer.json").read_text())
+    h = mi.headroom(p, "A_shipped")
+    assert h["race"] > 15 * h["ours"]
+    assert h["theirs"] > 15 * h["ours"]
+
+
+def test_the_headroom_is_computed_from_the_arms_own_counters():
+    """A bound retyped from another run keeps agreeing after the engine moves.
+    Perfect declarations are worth exactly twice the wrong ones."""
+    p = _payload({"X": (1.0, {"voluntary": (5 * 4000, 4000)})})
+    assert mi.headroom(p, "X")["ours"] == pytest.approx(2.0)
+
+
+def test_a_flawless_arm_has_no_own_error_headroom_left():
+    p = _payload({"X": (2 * (5.0 + 1.0) - 9, {"voluntary": (5 * 4000, 0)})})
+    assert mi.headroom(p, "X")["ours"] == 0.0
