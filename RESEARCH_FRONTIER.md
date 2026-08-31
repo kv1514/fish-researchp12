@@ -2871,3 +2871,63 @@ it the cheapest open item on this branch rather than the most expensive.
 
 Nothing enters `V06_DEPLOYED`. `signal_no_repeat` stays False and `signal_mode`
 stays "off".
+
+
+---
+
+## CORRECTION 2026-08-31 — I cited the screen, not the confirm, all day
+
+Every place above where this session says the signalling mechanism was measured
+at **+0.068 [-0.033, +0.169], covering zero**, is wrong. That is
+`results/r5_signal_check.json`, the SCREENING estimate arm B was carried to
+reproduce. The registered confirm, `results/signal_gate_confirm.json`, is:
+
+| arm against A_shipped | effect | interval |
+|---|---|---|
+| B_incumbent, `signal_max_p` 0.15 | +0.1180 | [+0.0325, +0.2035] **clear of zero** |
+| C_measured, `signal_max_p` 0.50 | **+0.1220** | **[+0.0291, +0.2149] clear of zero** |
+
+**The mechanism's value is established and positive.** It does not ship because
+`prereg/deadline_signalling.md` set its bar at a point estimate of +0.15 and
++0.1220 clears zero without reaching it — a bar deliberately not amended after
+seeing the number. `paper/kraken.tex` says this correctly at the tab:signal
+table; the error was mine, in `prereg/signal_no_repeat.md`, in this document,
+and in several commit messages.
+
+I used the wrong figure to argue that a null was the expected outcome of the
+no-repeat registration, and to write "whether the mechanism itself is positive
+is the obvious next registered question". It is not a question. It is answered.
+
+### What survives, and what the real open question is
+
+The refutation stands untouched: `C_norepeat - B_incumbent = -0.0715
+[-0.1068, -0.0362]` is measured on that run's own arms and owes nothing to the
+earlier figure. So does the decomposition, and so does the finding that the
+value is the postponement.
+
+The convergence note above is weaker than I wrote it. Three estimates of
+nearly the same intervention:
+
+| | contrast | effect | seed |
+|---|---|---|---|
+| `B_defer` — declaration side | vs shipped | +0.0580 [-0.0177, +0.1337] | 2,400,000 |
+| `C_measured` — ask side, registered confirm | vs shipped | +0.1220 [+0.0291, +0.2149] | 3,600,000 |
+| `B_incumbent` — ask side, today | vs shipped | +0.0660, no interval | 9,900,000 |
+
+Their LEDGER movements really are alike — each drains about 0.23 gated
+declarations a game into the forced path and cuts wrong declarations — and that
+part of the note stands. Their MARGINS are not as tidy as I made them look:
+one covers zero, one clears it, and the third has no interval at all. Two of
+the three baselines differ by 0.17 sets a game, which is larger than the effect
+under discussion.
+
+**The real open question is whether +0.1220 survives the engine change.**
+Today's point estimate is +0.0660, about half, on an engine that now carries
+`claim_forced_exhaustive`. That is mechanically coherent rather than
+coincidental: signalling works by pushing declarations out of the gated path
+into the forced path, and the forced path is precisely what that commit
+improved — so the value of moving a declaration there should fall. Establishing
+it needs the interval this run failed to keep, not new deals.
+
+That is the fourth reading overturned in this line of work, and the only one
+where the record was already right and I was quoting it wrong.

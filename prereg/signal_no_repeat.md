@@ -235,3 +235,47 @@ answered with an interval rather than a difference of two means.
 
 Nothing enters `V06_DEPLOYED`. `signal_no_repeat` stays False and
 `signal_mode` stays "off": the shipped engine is untouched by any of this.
+
+
+---
+
+# ERRATUM, 2026-08-31: the premise of the "reason to doubt" was a superseded number
+
+The section above headed *The reason to doubt it, stated before the run* says:
+
+> `prereg/deadline_signalling.md` measured the signalling mechanism itself at
+> `+0.068 [-0.033, +0.169]` — an interval covering zero.
+
+**That is the SCREEN, not the confirm, and it is superseded.** `+0.068` is
+`results/r5_signal_check.json`, the screening estimate that arm B was required
+to reproduce. The registered confirm in `results/signal_gate_confirm.json` is:
+
+| arm against A_shipped | effect | interval |
+|---|---|---|
+| B_incumbent, `signal_max_p` 0.15 | +0.1180 | [+0.0325, +0.2035] clear of zero |
+| C_measured, `signal_max_p` 0.50 | **+0.1220** | **[+0.0291, +0.2149] clear of zero** |
+
+The mechanism's value is **established and positive**. It does not ship only
+because that registration's bar was a point estimate at or above +0.15, and
++0.1220 clears zero without reaching it. `paper/kraken.tex` states this
+correctly; the error was mine, in this registration and repeated in commit
+messages and RESEARCH_FRONTIER.md through the day.
+
+The section is left standing rather than rewritten, because a registration's
+stated expectation is part of its record and editing it after the fact is the
+thing registrations exist to prevent. What is corrected is the claim about the
+world, here.
+
+**What it changes.** Nothing about the primary: `C_norepeat - B_incumbent =
+-0.0715 [-0.1068, -0.0362]` is measured directly on this run's own arms and
+stands. What it changes is the follow-up. "Whether the mechanism itself is
+positive is the obvious next registered question" was wrong — that question is
+answered. The real one is narrower and more interesting:
+
+**does +0.1220 survive the engine change?** This run puts `B - A` at +0.0660,
+about half, on an engine that now carries `claim_forced_exhaustive`. That
+matters mechanically rather than incidentally: signalling works by pushing
+declarations out of the gated path and into the forced path, and the forced
+path is exactly what that commit improved — so the benefit of moving a
+declaration there should shrink. The +0.0660 has no interval because this
+payload did not keep per-game margins, which is now fixed.
