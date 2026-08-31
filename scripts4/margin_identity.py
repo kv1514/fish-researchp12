@@ -291,13 +291,21 @@ def sweep(paths: list[Path]) -> list[dict]:
     across runs at different seeds, sample sizes and engine revisions is the
     thing worth believing, and it is only visible side by side.
     """
-    rows = []
+    rows, skipped = [], []
     for path in paths:
         try:
             payload = adapt(json.loads(path.read_text()))
-        except (ValueError, OSError):
+        except (ValueError, OSError) as e:
+            skipped.append((path.stem, f"unreadable: {type(e).__name__}"))
             continue
-        if payload is None or verify(payload):
+        if payload is None:
+            continue                      # not a run of this shape at all
+        bad = verify(payload)
+        if bad:
+            #: NOT silently. A run excluded without saying so is how a table
+            #: comes to describe only the data that agreed with it, and it is
+            #: the exact failure this instrument was written to catch.
+            skipped.append((path.stem, bad[0]))
             continue
         base = next(iter(payload["margins"]))
         for arm in payload["margins"]:
@@ -315,6 +323,10 @@ def sweep(paths: list[Path]) -> list[dict]:
         print(f"  {r['run'][:33]:<34}{r['arm'][:13]:<14}{r['games']:>7}"
               f"{r['effect']:>+9.4f}{r['race']:>+9.4f}{r['ours']:>+9.4f}"
               f"{r['theirs']:>+9.4f}")
+    if skipped:
+        print(f"\n  --- EXCLUDED, and why ({len(skipped)}) ---")
+        for name, why in skipped:
+            print(f"  {name[:33]:<34}{why}")
     return rows
 
 

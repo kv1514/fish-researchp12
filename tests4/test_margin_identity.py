@@ -382,3 +382,20 @@ def test_a_self_play_run_with_two_arms_is_still_decomposed():
     p["vs"] = "self"
     assert mi.adapt(p) is not None
     assert mi.decompose(p, "A", "B")["residual"] == pytest.approx(0, abs=1e-12)
+
+
+def test_a_run_the_identity_rejects_is_named_not_dropped(tmp_path, capsys):
+    """A table that quietly excludes the runs that disagreed with it is how a
+    decomposition comes to describe only its own supporting data. This is the
+    failure the whole instrument was written to catch, so it may not be the
+    instrument's own."""
+    good = _payload({"A": (2.0, {"voluntary": (20000, 600)}),
+                     "B": (2.3, {"voluntary": (19000, 400)})})
+    bad = dict(good, rules={"wrong_distribution_outcome": "null"})
+    (tmp_path / "good.json").write_text(json.dumps(good))
+    (tmp_path / "bad.json").write_text(json.dumps(bad))
+    rows = mi.sweep(sorted(tmp_path.glob("*.json")))
+    out = capsys.readouterr().out
+    assert [r["run"] for r in rows] == ["good"]
+    assert "EXCLUDED, and why" in out
+    assert "bad" in out and "NULL_TEAM is reachable" in out
