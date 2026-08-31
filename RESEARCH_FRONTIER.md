@@ -2553,3 +2553,133 @@ a probe that never ran looks exactly like a zero from a phenomenon that never
 happens, and the only reason it was caught is that "never, in 30 games" was
 implausible enough to check rather than record. The instrument now builds the
 context the way `agent4.decide` builds it and swallows nothing.
+
+---
+
+## UPDATE 2026-08-31 — the clock was the wrong variable, and the instrument says so
+
+The previous section named the honest next step and its price: the journal
+stores per-GAME aggregates and holds nothing about the state at the moment the
+signal fired, so the descriptive step before any registration needs new
+instrumented play. `scripts4/signal_deadline.py` is that play, and
+`results/signal_deadline.json` is 1600 games of it — 800 deals x 2 parities,
+arm C, seed base 9,300,000, deliberately not the 3,600,000 whose deals produced
+the lead.
+
+**The hypothesis this instrument was built to test is REFUTED.** The reasoning
+was clean and it was wrong: `fish/agents/base.py::stalled` declares a position
+stuck after 80 actions with no resolution, `agent4.decide` turns that into a
+forced declaration, every signal spends one of those 80, and neither
+`signalling_ask` nor its gate reads the counter — so the stall clock looked
+like the clock the mechanism cannot see. Measured at the moment of the first
+signal, per (deal, parity, half-suit), clustered on the deal:
+
+| observable at fire time | in time | too late | difference |
+|---|---|---|---|
+| **`since_claim`** (the stall clock) | 13.00 | 12.12 | **-0.88 [-2.46, +0.71]** covers 0 |
+| `legal_asks` | 31.91 | 20.45 | **-11.46 [-14.45, -8.42]** |
+| `my_cards` | 7.19 | 5.57 | -1.62 [-2.08, -1.17] |
+| `team_cards` | 19.28 | 16.49 | -2.78 [-3.82, -1.73] |
+| `min_team_cards` | 4.61 | 3.84 | -0.76 [-1.14, -0.40] |
+| `live` half-suits | 5.51 | 4.64 | -0.86 [-1.20, -0.53] |
+| `unplaced` in the target | 1.57 | 1.90 | +0.33 [+0.21, +0.45] |
+| `step` | 70.38 | 94.78 | **+24.40 [+18.68, +30.53]** |
+
+The stall clock is the one thing that does not separate them, and it is not
+close: 13.0 against 12.1 out of a window of 80, with an interval covering zero.
+Nothing is racing that deadline. Both groups signal about a sixth of the way
+into it.
+
+**What separates them is how much game is left.** Fewer legal asks, fewer cards
+in hand, fewer cards on the weakest teammate, fewer live half-suits, and 24
+actions later in the game. `agent4.decide` has TWO routes to a forced
+declaration — `not asks` and `stalled and claimable` — and every separating
+variable belongs to the first while the only variable belonging to the second
+separates nothing. The mechanism is not running out of TIME. It is running out
+of ASKS.
+
+That is a better answer than the one the paper leaves open, and it points
+somewhere concrete: a predictor firing at signal time would read remaining
+askability, which is a quantity this project already built machinery for.
+
+### The negative control moved, and it does not mean what it looks like
+
+`p_best` — the gate's own input — came in at 0.11 against 0.07, difference
+-0.04 [-0.07, -0.01], excluding zero. It was carried as a control precisely
+because `prereg/deadline_signalling.md` widened that threshold 3.3x and moved
+three declarations in a thousand games, so a probe finding it predictive would
+be disagreeing with a settled result.
+
+It is not disagreeing, and the reason is worth writing down rather than
+assuming. Both group means sit BELOW 0.15, so almost every fire already
+happened under the incumbent gate; the band the registration opened,
+[0.15, 0.50], is nearly empty. A threshold move that adds an almost-empty band
+changes almost nothing whether or not `p_best` correlates with the outcome
+inside [0, 0.15]. The two results are about different things: one about where
+the bar sits, this one about what the variable predicts below it. The control
+is not violated, but it is not the clean null it was framed as either, and
+`p_best` is in any case a plausible proxy for the same "late, few cards"
+factor as every other separating row.
+
+### Two corrections to what was said before the run
+
+**The 300-fire probe said the signal never fires in a dead position.** At 1600
+games it does, in about 2% of first fires (0.01 against 0.04, [+0.00, +0.06]).
+"Zero in 300" was a small sample, not a property. The `dead` reading stands
+only as "rare", which is still enough to say the free-turn justification in
+`perpetual.signalling_ask` describes a position the shipped arm almost never
+reaches.
+
+**It does not spend A turn.** 623 episodes take a mean of 20.0 fires each,
+median 3, max 163. The gate is a per-turn predicate, so once true it stays true
+and the seat re-signals at the same half-suit every turn. Counting every fire
+rather than the first put the stall clock at 12.3 against 38.5 — a 26-action
+separation, in the hoped-for direction, that was entirely the repeats walking
+the clock upward and counting one declaration once per repeat. That number
+would have been reported as the finding.
+
+### What the anchors caught on the way
+
+The instrument reproduces three published figures before reporting anything and
+exits non-zero if one fails. Two failed on the first run.
+
+`voluntary` was the anchor's own fault: it asked whether the published POINT
+fell inside this run's interval, which treats the published figure as exact.
+That point rests on TWO wrong declarations out of 3,692. A pooled
+two-proportion test on both counts puts it at z = +1.19 — agreement.
+
+`forced` was real, and it was engine drift. 36.59% here against 46.25%
+published, z = -2.71, while the path MIX reproduced almost exactly per 1000
+games (voluntary 3733 against 3692, forced 308 against 307, exact 823 against
+796). `signal_gate_journal.jsonl` was committed 2026-08-28 13:48:06 and
+`claim_forced_exhaustive` shipped at 14:08:23, twenty minutes later, and the
+journal carries the bridge rev and no engine digest. Dates are not evidence, so
+the instrument re-ran with the field switched back off:
+
+| `claim_forced_exhaustive` | forced error rate | against published 46.25% |
+|---|---|---|
+| 0 — as the journal was measured | 44.62% [37.66, 51.80] on 186 | z = -0.35, agrees |
+| 1 — the shipped champion | 36.59% on 492 | z = -2.71, disagrees |
+
+Switching the field back reproduces the published figure. `ENGINE_DATED`
+records that, and an entry there is VOID unless its results file exists on
+disk — the rule `check_prereg_backing.py` applies to a pre-registration, for
+the same reason. A dated path still reports `agrees: False`; being explained is
+not being in agreement.
+
+**The finding survives the drift**, which is the part that mattered. On the
+pre-exhaustive engine the same table gives `legal_asks` -8.43 [-13.83, -3.13],
+`step` +21.80 [+11.04, +32.87], `my_cards` -1.39 [-2.06, -0.73], and
+`since_claim` covering zero — the same shape, on 600 games.
+See `results/signal_deadline_noexhaustive.json`.
+
+### Still no registration, and now for a different reason
+
+The earlier reason was that the criteria could not be chosen without inventing
+them. They can be chosen now — remaining askability at signal time, on a seed
+base other than 9,300,000. What is missing is one fact the payload does not
+carry: `agent4.decide` writes "forced: no legal ask" and "forced: stalled with
+a claimable half-suit" as distinct trace reasons, and `path_ledger._path_of`
+folds both into `forced`. Every separating variable above points at the first,
+but pointing is not counting, and this project has been wrong before about a
+mechanism whose evidence all leaned one way.
