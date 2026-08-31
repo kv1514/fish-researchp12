@@ -605,6 +605,12 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                 if sig is not None:
                     self._t(_tr.simple_trace, "signal",
                             target=int(sig.target),
+                            # the gate's own input, recorded so an instrument
+                            # can use it as a NEGATIVE control: widening this
+                            # threshold 3.3x moved three declarations in a
+                            # thousand games (prereg/deadline_signalling.md),
+                            # so a probe that finds it predictive is suspect.
+                            p_best=float(p[order[0]]),
                             note="a deliberately dead ask that proves to a "
                                  "partner which card this seat does not hold")
                     return sig

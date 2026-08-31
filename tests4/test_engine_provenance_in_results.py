@@ -31,12 +31,18 @@ sys.path.insert(0, str(ROOT / "scripts4"))
 
 from duel import FINGERPRINTED, engine_fingerprint            # noqa: E402
 
-#: Instruments that write a belief-scoring results file. Each must record the
-#: engine digest beside its numbers, so two runs can be told apart by code and
-#: not only by config.
+#: Instruments that write a results file whose numbers depend on the engine.
+#: Each must record the engine digest beside them, so two runs can be told
+#: apart by code and not only by config.
+#:
+#: The first five score beliefs. `signal_deadline.py` does not -- it is a play
+#: instrument -- and it is here anyway because the file the incident turned on
+#: is `fish4/agent4.py`, and that is precisely the file holding the signalling
+#: gate whose firing it records. The list's criterion is "the engine can move
+#: this file's numbers", not "the instrument touches the posterior".
 INSTRUMENTS = ("convention_posterior.py", "gamma_split.py",
                "unlocated_belief.py", "channel_precision.py",
-               "precision_generality.py")
+               "precision_generality.py", "signal_deadline.py")
 
 
 @pytest.mark.parametrize("name", INSTRUMENTS)

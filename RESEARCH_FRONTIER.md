@@ -2503,7 +2503,7 @@ is *not* what separates the two outcomes.
 What separates them is entirely **where the drained declaration lands instead**:
 
 * **avoided** -> it becomes **voluntary** (+0.139) and exact (+0.111). The split
-  got placed, so the declaration is made knowingly, at 0.1% wrong.
+  got placed, so the declaration is made knowingly, at 0.05% wrong.
 * **added** -> it becomes **forced** (+1.327) while voluntary *falls* (-0.788).
   The split did not get placed; the spent turn pushed the seat past the
   deadline, at 46.3% wrong.
@@ -2511,7 +2511,7 @@ What separates them is entirely **where the drained declaration lands instead**:
 So the protocol is not choosing badly between targets --- measured above, 208/208
 --- or between thresholds --- retired by its own registration. **It is spending a
 turn on information that arrives in time in 72 games and too late in 52**, and
-the price of "too late" is a 0.1%-wrong declaration becoming a 46.3%-wrong one.
+the price of "too late" is a 0.05%-wrong declaration becoming a 46.3%-wrong one.
 
 That is the first statement of this mechanism's failure mode in terms of the
 thing it actually trades, and it says what a fix would have to be: not a better
