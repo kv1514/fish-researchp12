@@ -1856,7 +1856,7 @@ inference & NLL $\downarrow$ & Brier $\downarrow$ & top-1 $\uparrow$ & ms/decisi
 exact DP, clauses ignored          & 1.4776 & 0.7568 & 0.287 & 50.4 \\
 v0.3 sampler, 32 draws             & 1.4399 & 0.7065 & 0.386 & 5.9 \\
 v0.4 importance sampler, 160       & 1.3731 & 0.7006 & 0.396 & 29.5 \\
-v0.4 importance sampler, 512       & 1.3618 & 0.6955 & 0.403 & 92.3 \\
+\textbf{v0.4 importance sampler, 512} & \textbf{1.3618} & 0.6955 & 0.403 & 92.3 \\
 v0.3 sampler, 96 draws             & 1.3552 & 0.6891 & 0.406 & 16.6 \\
 \textbf{v0.3 sampler, 512 draws}   & \textbf{1.3408} & 0.6833 & 0.416 & 87.8 \\
 v0.4 + opponent model, 160, $\gamma{=}0.45$ & 1.3476 & 0.6856 & 0.401 & 31.9 \\
@@ -1866,10 +1866,18 @@ v0.4 + opponent model, 512, $\gamma{=}0.60$ & 1.3248 & 0.6744 & 0.411 & 100.8 \\
 \bottomrule
 \end{tabular}
 \caption{How much probability each inference configuration places on where the
-cards actually are. Lower NLL and Brier are better. The row that matters is the
-comparison between the two bold entries: the \emph{exactly correct} uniform
-posterior at 512 draws (1.3618) is worse than v0.3's \emph{biased} sampler at
-the same budget (1.3408).}
+cards actually are. Lower NLL and Brier are better. Bold marks the three rows
+the text turns on. The comparison that matters is the first two: the
+\emph{exactly correct} uniform posterior at 512 draws (1.3618) is worse than
+v0.3's \emph{biased} sampler at the same budget (1.3408). The third is the
+best configuration found. \textbf{Ten of the fourteen configurations scored in
+that campaign are shown}; the four omitted are
+$\gamma \in \{0.15, 0.30, 0.60, 0.80\}$ at 160 draws, and the last is the
+point of saying so --- at $\gamma = 0.80$ on 160 draws the model scores
+$1.3955$, \emph{worse} than switching it off ($1.3731$). Two later campaigns
+scored 21 more configurations, 35 in all; the winning cell is a grid maximum
+over that set, reported without a multiplicity correction. All three files are
+named in \S\ref{sec:repro}.}
 \label{tab:posterior}
 \end{table}
 
@@ -2077,11 +2085,14 @@ $\gamma$ & pair score & set diff / pair & 95\% CI \\
 rises to a plateau by $\gamma = 0.30$ and stays there over a threefold range,
 which is what one wants from a model with a single free parameter --- and unlike
 the ask-objective terms of v0.3, which showed a sharp inverted-U, there is no
-weight at which this becomes destructive within the range tested.}
+weight in this range that is destructive \emph{in play}. Belief quality is a
+different estimand and does have one: at $\gamma = 0.80$ on a 160-draw budget
+the model scores a worse NLL than switching it off
+(\S\ref{sec:res-posterior}).}
 \label{tab:gamma}
 \end{table}
 
-\paragraph{The cleanest attribution.} Tables~\ref{tab:gamma} measures the model
+\paragraph{The cleanest attribution.} Table~\ref{tab:gamma} measures the model
 against copies of itself. The sharper experiment holds the \emph{opponent} fixed
 at the v0.3 champion and varies only whether the model is on, at identical deal
 seeds and identical agent seeds, 250 duplicate deal-pairs each:
@@ -5124,8 +5135,8 @@ plies.
 \section{The price of a turn, and why it is conditional}
 \label{sec:tempo}
 
-Every result in this paper is denominated in one unit: the information exchange
-rate of about $0.45$ sets per hidden card revealed. Half the ask objective
+A turn and a card are different currencies, and this section prices the
+first. Half the ask objective
 prices \emph{tempo} --- $\mathrm{turn\_risk}$, depth, the retained turn a hit
 buys --- and none of those weights was ever fitted against a measured scale,
 because none existed. This section supplies one, and the answer is not a
@@ -5155,7 +5166,7 @@ ask the seat would otherwise have made:
 \begin{center}
 \begin{tabular}{lrrr}
 \toprule
-$p_{\text{best}}$ & pairs & price & se \\
+$p_{\text{best}}$ & pairs & price & standard error \\
 \midrule
 $[0.00, 0.25)$ & $374$ & $-0.043$ & $0.169$ \\
 $[0.25, 0.50)$ & $511$ & $+0.004$ & $0.143$ \\
@@ -5165,9 +5176,30 @@ $[0.75, 1.01)$ & $400$ & $\mathbf{+0.415}$ & $0.164$ \\
 \end{tabular}
 \end{center}
 
-Below $p_{\text{best}} = 0.5$ a turn is worth nothing; above it, about $+0.45$
-sets. \textbf{A turn is worth nothing unless you have something to do with it.}
-Tempo in Fish is not a resource in itself.
+Above $p_{\text{best}} = 0.5$ a turn prices at about $+0.45$ sets. Below it
+this design resolves nothing: the two low bands carry $95\%$ intervals of
+$[-0.374, +0.288]$ and $[-0.276, +0.284]$, so anything up to about a third of a
+set remains possible there. \textbf{What the run establishes is the
+conditionality, not a zero} --- a turn is worth much less to a seat with no
+good ask than to one with a good ask, and how much less is not measured here.
+Both halves are champion self-play (\path{scripts4/turn_price.py} seats six
+copies of the engine), so this is a statement about how this policy values a
+turn, not about Fish.
+
+\paragraph{A provenance note this table needs.} The four prices and standard
+errors above are not recoverable from any results file.
+\path{scripts4/turn_price.py} persists its summary but not the per-decision
+$p_{\text{best}}$ values the bands are cut on, so the table cannot be rebuilt
+from the run that produced it; and \path{scripts4/tempo_regime.py}, which
+writes \path{results/tempo_regime.json}, carries these four prices as a
+hardcoded constant copied from this paper and measures only the bucket
+\emph{counts} beside them --- which it puts at $340/347/155/356$ over $1{,}198$
+decisions against the $374/511/179/400$ over $1{,}464$ printed here. So the one
+file that appears to back this table in fact contains the table's own numbers.
+This is the defect \S\ref{sec:res-learn} names in another context --- a figure
+that lives in the paper and in no results file is one that stays unchallenged
+--- and it is recorded here rather than repaired, because repairing it means
+re-running the measurement and this paper does not have that run.
 
 This is not the timing effect in disguise, and the direction rules that out: a
 late turn prices \emph{higher} than an early one, so if low-$p_{\text{best}}$
@@ -7576,6 +7608,7 @@ The JSON-transport handout runs the same comparison at a larger scale as its
 self-test: $329$ decisions, $0$ mismatches, plus $520$ off-turn polls.
 
 \section{Reproducing this work}
+\label{sec:repro}
 \label{app:repro}
 
 The engine, agents, experiments and this paper are in one repository. v0.3's
