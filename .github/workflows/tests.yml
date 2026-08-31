@@ -30,13 +30,25 @@ on:
     # Only the base branch. A PR branch would otherwise run twice per push.
     branches: [engine-v2, main]
 
-# A new push supersedes the run in flight; no reason to pay for both.
-concurrency:
-  group: tests-${{ github.ref }}
-  cancel-in-progress: true
+# CONCURRENCY IS PER JOB, and the split is the point.
+#
+# This started as one workflow-level group with cancel-in-progress: true --
+# correct-looking, and it meant the long job never finished once. Three pushes
+# in a row killed tests4/ at five, eight and eleven minutes, so the only job
+# that actually needed verifying was the only one never verified. A superseded
+# three-minute job is waste worth cancelling; a superseded thirty-minute job is
+# the answer you were waiting for.
+#
+# So the quick jobs still cancel: newest push wins, fast signal, nothing paid
+# twice. tests4/ instead QUEUES -- cancel-in-progress: false makes a new run
+# wait for the one in flight rather than kill it -- so every push eventually
+# gets a real tests4/ result instead of a cancellation.
 
 jobs:
   fast:
+    concurrency:
+      group: tests-quick-${{ github.ref }}
+      cancel-in-progress: true
     # tests/ is the v0.3 engine: rules, fuzz, leakage proofs. Three minutes,
     # so a broken commit says so before the long job has finished starting.
     name: engine (tests/)
@@ -54,6 +66,9 @@ jobs:
       - run: python -m pytest tests -q
 
   full:
+    concurrency:
+      group: tests-full-${{ github.ref }}
+      cancel-in-progress: false
     # tests4/ is everything since the rebuild: the award rule, the exact
     # solver, the opponent model, the packages. ~17 minutes locally, and a
     # two-core runner is slower, so budget rather more.
@@ -86,6 +101,9 @@ jobs:
         # tally reads "skipped" rather than "passed" for two tests.
 
   guards:
+    concurrency:
+      group: tests-guards-${{ github.ref }}
+      cancel-in-progress: false
     # The standing checks that are scripts rather than tests. Each exits
     # non-zero on a real problem, which is the whole point of running them.
     name: standing guards
