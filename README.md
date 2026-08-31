@@ -317,7 +317,7 @@ Then open two pages:
   holding 2C, so you could not have said no to P1").
 
 ```bash
-py -m pytest tests -q
+py -m pytest tests -q     # the v0.3 tests only; `py -m pytest -q` runs all of them
 ```
 
 Other entry points:
