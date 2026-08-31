@@ -126,6 +126,36 @@ def test_surface_states_the_current_version(rel):
     )
 
 
+def test_the_distribution_version_is_the_engine_version():
+    """pyproject.toml read 0.2.0 while the engine shipped v1.1. Nothing
+    depended on it, which is exactly why it drifted -- and why ``pip show``
+    would have told you a number matching no release this project ever made.
+    """
+    text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.M)
+    assert m, "pyproject.toml states no version"
+    assert m.group(1) == VERSION_NUMBER, (
+        f"pyproject.toml is at {m.group(1)} but the engine is at "
+        f"{VERSION_NUMBER}. fish4/brand.py is the single source."
+    )
+
+
+def test_the_default_pytest_command_collects_tests4():
+    """A bare ``pytest`` collected 193 of 852 tests for most of this project's
+    life: testpaths was written as ["tests"] before tests4/ existed and never
+    moved. It printed "193 passed" and looked green while skipping every guard
+    in tests4/ -- including this one.
+    """
+    text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    m = re.search(r'^testpaths\s*=\s*\[([^\]]*)\]', text, re.M)
+    assert m, "pyproject.toml sets no testpaths"
+    paths = re.findall(r'"([^"]+)"', m.group(1))
+    assert "tests4" in paths, (
+        f"testpaths is {paths}; without tests4 the default pytest run skips "
+        f"the majority of this project's tests and still reports success."
+    )
+
+
 def test_the_paper_titles_itself_the_current_version():
     """The paper narrates every version, so only its TITLE is pinned."""
     text = (ROOT / "paper/kraken.tex").read_text(encoding="utf-8")
