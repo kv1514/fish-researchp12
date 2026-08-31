@@ -87,3 +87,70 @@ signalling is +0.1435 against a bar of +0.15, and `C_defer`'s published
 interval covers zero — and ONE EFFECT would not make the pair shippable
 either. A positive `d` clearing +0.15 buys a further duel under its own
 registration, not a place in the champion.
+
+
+---
+
+# OUTCOME, 2026-08-31: NOT RUN. The design is degenerate, and that is the answer.
+
+A 400-game probe at the registered arms (`results/signal_vs_defer_probe200.json`,
+200 deals x 2 parities, 11 minutes) was taken before committing to the
+registered 2,000-deal run. It found:
+
+**`B_signal` and `D_both` produce identical margins in all 400 games.**
+
+    b  B_signal  +0.1150 [-0.0563, +0.2863]
+    c  C_defer   +0.0850 [-0.0367, +0.2067]
+    d  D_both    +0.1150 [-0.0563, +0.2863]
+
+    I = (D_both - B_signal) - (C_defer - A_shipped)
+      = -0.0850,  which is exactly  -c
+
+The two arms are not bit-identical in play — the ledgers differ by one gated
+declaration, 19 against 18, two exact and one voluntary — so the knob does
+reach the engine and the distinctness guard correctly declines to fire. It just
+never changes a result.
+
+## Why, and it was predictable from the branch order
+
+`agent4.decide` reaches the signal branch at `p_best <= signal_max_p` (0.50)
+and the gated-declaration branch at `p_best <= 0.0`, a strict subset. With
+signalling on, the gate is reachable only where there is no stuck half-suit or
+no available signalling ask — about 0.048 declarations a game — and the defer
+knob binds on a subset of that. **Signalling does not merely coincide with
+deferral; it pre-empts it.**
+
+## Why the registered primary is therefore uninformative
+
+If `D - B` is identically zero then `I = (D - B) - (C - A) = -c`. The
+registered interaction reduces to minus the C effect and says nothing about
+additivity. Running it over 4,000 games would measure `-c` more precisely and
+then report **ONE EFFECT** — a verdict that would be true, but for a
+code-path reason the statistic does not establish and a reader would take as a
+statistical finding.
+
+**So the run is not executed.** Spending 130 minutes to produce a correct
+verdict by an argument that does not support it is worse than not running.
+
+## What is established, stated precisely
+
+Adding the deferred gate on top of signalling buys **nothing**: 0 of 400 games
+changed. That is the additivity question answered, in the strongest available
+form — structurally rather than statistically.
+
+What is **not** established is that signalling and deferral are the same
+mechanism. The order is asymmetric and only one direction was tested.
+`C_defer` runs with signalling off, so nothing here says whether adding
+signalling on top of deferral would buy anything. `b` and `c` remain two
+separate estimates, +0.1150 and +0.0850 on 200 deals, of two interventions that
+drain the same path.
+
+## The one number worth carrying forward
+
+`C_defer`'s ledger is the best of the four on this probe: 0.075 gated
+declarations a game at 6.7% wrong, and **0.09 wrong declarations a game**
+against A's 0.1375 and B_signal's 0.1475 — and it spends **zero** signalling
+turns where `B_signal` spends 7.76. On 400 games those are noisy, and
+`prereg/stuck_claim_gate.md` already measured that arm at +0.0580 [-0.0177,
++0.1337] over 1,000 games on an older engine. The live question is that arm on
+its own at power, not this four-arm design.

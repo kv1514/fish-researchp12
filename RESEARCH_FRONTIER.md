@@ -2997,3 +2997,64 @@ The open question is no longer whether the effect exists. It is whether the
 postponement can be had without spending eight turns a game on doomed asks —
 and the one attempt at that so far, `B_defer`, was measured at half the size
 with an interval covering zero, on a different engine and a different baseline.
+
+
+---
+
+## UPDATE 2026-08-31 — signalling PRE-EMPTS the deferred gate. The four-arm design was degenerate.
+
+`prereg/signal_vs_defer_additivity.md` was registered, built, and then **not
+run**, on the evidence of a 400-game probe that cost 11 minutes instead of 130
+(`results/signal_vs_defer_probe200.json`).
+
+**`B_signal` and `D_both` produce identical margins in all 400 games.**
+
+    b  B_signal  +0.1150 [-0.0563, +0.2863]
+    c  C_defer   +0.0850 [-0.0367, +0.2067]
+    d  D_both    +0.1150 [-0.0563, +0.2863]
+    I = (D - B) - (C - A) = -0.0850, which is exactly -c
+
+The arms are not bit-identical in play — one gated declaration differs, 19
+against 18 — so the knob reaches the engine. It just never changes a result.
+
+The branch order in `agent4.decide` predicted this: the signal branch fires at
+`p_best <= 0.50` and the gated declaration at `p_best <= 0.0`, a strict subset.
+With signalling on, the gate is reachable only where there is no stuck
+half-suit or no available signalling ask, about 0.048 declarations a game, and
+the defer knob binds on a subset of that.
+
+**The registered primary is uninformative as a consequence.** If `D - B` is
+identically zero then `I` reduces to `-c` and says nothing about additivity.
+Running 4,000 games would have measured `-c` more precisely and then printed
+ONE EFFECT — a verdict that is true, for a reason the statistic does not
+establish and a reader would take as statistical. That is worse than not
+running, so it was not run.
+
+### What is and is not established
+
+**Established:** adding the deferred gate on top of signalling buys nothing.
+0 of 400 games changed. The additivity question is answered structurally, which
+is stronger than the statistical answer the design was reaching for.
+
+**Not established:** that the two are the same mechanism. The order is
+asymmetric and only one direction was tested — `C_defer` runs with signalling
+off, so nothing here says whether adding signalling on top of deferral buys
+anything. They remain two interventions that drain the same path, at +0.1150
+and +0.0850 on 200 deals.
+
+### Where the signalling line now stands, in full
+
+| claim | status |
+|---|---|
+| the mechanism is real | +0.1435 [+0.0971, +0.1899], replicating the published +0.1220 |
+| its value is postponement, not information | removing the informationless repeats costs -0.1075 and returns the engine to baseline |
+| it still does not ship | +0.1435 against a bar of +0.15, short by 0.0065, bar not amended |
+| the deferred gate reaches the same path | +0.0580 [-0.0177, +0.1337] on 1,000 games, older engine |
+| the two do not stack | signalling pre-empts deferral; 0 of 400 games changed |
+
+The live question is `C_defer` alone at power on the current engine: it was
+last measured before `claim_forced_exhaustive`, its interval covered zero at
+1,000 games, and on this probe it posts the lowest wrong-declaration rate of
+the four arms (0.09 a game against A's 0.1375) while spending **zero**
+signalling turns where `B_signal` spends 7.76. If the postponement can be had
+for nothing, that is the arm that has it.
