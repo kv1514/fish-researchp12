@@ -6543,7 +6543,22 @@ have been. Registered at \path{prereg/gamma_split.md} with two conditions fixed
 before the numbers were read --- the paired NLL interval must clear zero
 \emph{and} the paired top-1 interval must not fall below it --- and run over
 $1{,}557$ decisions at positions the incumbent reaches, scoring every cell on
-the same positions.
+the same positions at $720$ sampler draws.
+
+That last clause is a measurement condition and not a detail, which we learned
+after this section was written. A paired belief difference \emph{scales with the
+draw budget it is scored at}, and does not converge in the range anyone would
+run: the same intervention on the same transcripts measures $-0.0064$
+$[-0.0217, +0.0090]$ --- a null --- at $180$ draws and $-0.0493$
+$[-0.0649, -0.0337]$ at $2{,}880$, with every doubling above $720$ still
+significant on a paired contrast
+(\path{results/channel_precision_plateau.json}). So a figure of this kind is a
+property of an intervention \emph{and a budget}, and both belong beside it. At
+the $480$--$720$ this project uses, $75$--$78\%$ of the $2{,}880$-draw value is
+present, so no result here is materially attenuated; the steep part of the curve
+is below $360$, which nothing uses. Why the scaling happens is open --- two
+explanations were registered and refuted --- and it is recorded in
+\path{RESEARCH_FRONTIER.md} rather than resolved here.
 
 The predicted cell $(0.35, 0.70)$ improves NLL by $-0.0119$
 $[-0.0150, -0.0088]$ and worsens top-1 by $-0.0093$ $[-0.0128, -0.0057]$.
