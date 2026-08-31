@@ -207,12 +207,35 @@ Identical seeds, identical `n_games`, identical stride, and the stored spec is
 byte-for-byte the same seven keys. What changed is the eleven engine commits in
 between: the baseline belief is **0.043 nats better** than it was.
 
-The decode did not get worse. The belief it decodes into got better, and a
-message is worth only what the receiver could not already work out. This is the
-first place in the project where that shows up as a measurement rather than a
-caveat, and it has a consequence: **the marginal arms have crossed over.**
+The consequence is not in doubt: **the marginal arms have crossed over.**
 `flat 2.0` has gone from -0.0342 to **+0.0252** --- significantly harmful now,
 where it was significantly helpful then --- and `mix 0.6` and above with it.
+
+> **WITHDRAWN 2026-08-31, the same day it was written.** This paragraph
+> originally continued: *"The decode did not get worse. The belief it decodes
+> into got better, and a message is worth only what the receiver could not
+> already work out. This is the first place in the project where that shows up
+> as a measurement rather than a caveat."*
+>
+> It was not a measurement. It was an explanation for two points, on two
+> engines, eleven commits apart, and it was registered and tested the same day
+> in `prereg/channel_vs_precision.md`. **Refuted.** Swept on fixed transcripts,
+> the paired gain grows as the belief improves rather than shrinking: -0.0064
+> [-0.0217, +0.0090] at 180 sampler draws against -0.0436 [-0.0593, -0.0279] at
+> 1440, contrast **-0.0372 [-0.0481, -0.0263]** over 40 game clusters. And the
+> baseline stops improving after 720 draws while the gain keeps growing, so the
+> gain is not tracking what the receiver already knows at all.
+>
+> That sweep is a different axis --- sampler precision, not a model change ---
+> so it does not explain the drift either. The honest position is that the
+> drift is measured, real, and **unexplained**.
+
+There is a second thing that run prices, and it applies to every figure in this
+document. The engine ships at `n_draws = 480`; every number here was scored at
+**720**, because that is what `gamma_split.py` fixed and this instrument
+imported. Interpolating that grid, -0.0535 and -0.0382 would both be about 15%
+smaller at the precision the engine actually runs at. An interpolation, not a
+measurement --- but the direction is now known.
 
 ## What should and should not be quoted
 

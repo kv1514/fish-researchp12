@@ -128,3 +128,108 @@ Nothing ships; this is scored off-policy with the decoder off during play.
 That last clause is the point of registering this. The claim is mine, it is
 already written into three files, and the cheapest thing to do would be to
 leave it there.
+
+---
+
+# OUTCOME, recorded 2026-08-31: REFUTED
+
+**The gain grows as the belief improves. It does not shrink.** 40 games, 1,068
+scored decisions, `results/channel_precision.json`.
+
+| `n_draws` | baseline team NLL | paired team NLL | paired team top-1 |
+|---|---|---|---|
+| 180 | 1.3155 | -0.0064 [-0.0217, +0.0090] | +0.0139 [-0.0002, +0.0281] |
+| 360 | 1.3004 | -0.0300 [-0.0444, -0.0156] | +0.0154 [+0.0011, +0.0296] |
+| 720 | 1.2919 | **-0.0382** [-0.0538, -0.0227] | +0.0260 [+0.0121, +0.0399] |
+| 1440 | 1.2930 | **-0.0436** [-0.0593, -0.0279] | +0.0273 [+0.0136, +0.0409] |
+
+    D = d_1440 - d_180 = -0.0372 [-0.0481, -0.0263]    k = 40 games, 1,046 decisions
+
+D's interval lies **entirely below zero**, which the decision rule above calls
+**REFUTED**: the message is worth *more* against a better-sampled belief, not
+less.
+
+## The anchor held exactly
+
+The 720 cell measures **-0.038245** against
+`results/convention_replication.json`'s **-0.0382**, off by **0.0000** on a
+tolerance of 0.010. Different instrument, different clustering, same number:
+this is not measuring something else.
+
+## Condition 1, and the tie-break that was written for it
+
+The baseline is monotone over the first three cells and then ticks the wrong
+way: steps of **-0.0151, -0.0085, +0.0011** against a grid span of **-0.0224**.
+That last step is a single adjacent pair differing by 5% of the span, which is
+the case the withdrawal condition names --- *"non-monotone in a way that is not
+a single adjacent near-tie"* --- so condition 1 does not fail and the verdict is
+REFUTED rather than UNRESOLVED.
+
+Writing that tie-break in advance is the only reason this is not a judgement
+call made after seeing which reading was tidier. The rule as stated was
+genuinely ambiguous between REFUTED and UNRESOLVED for this exact pattern, and
+the withdrawal condition is what resolves it.
+
+## The finding is sharper than the refutation
+
+**The baseline saturates and the gain does not.** From 720 to 1440 the baseline
+belief gets no better at all (+0.0011, noise), while the gain still grows from
+-0.0382 to -0.0436. So the gain is not tracking how much the receiver already
+knows. It is tracking **how many sampled worlds the decoder has to reweight**.
+
+At 180 draws there is **no measurable channel**: -0.0064 [-0.0217, +0.0090],
+an interval covering zero, on the same transcripts where 1440 draws gives
+-0.0436. The message is identical in all four cells. Only the number of worlds
+it can act on differs.
+
+The registration named this possibility before the run --- *"more draws gives
+the convention's reweighting more worlds to act on, which could make the decode
+more effective rather than less"* --- and it is what happened.
+
+## The opponent pool, secondary and worth more than most secondaries
+
+| `n_draws` | paired **opponent** NLL |
+|---|---|
+| 180 | **+0.0435** [+0.0287, +0.0582] |
+| 360 | +0.0173 [+0.0083, +0.0262] |
+| 720 | +0.0025 [-0.0033, +0.0082] |
+| 1440 | **-0.0086** [-0.0135, -0.0037] |
+
+At low precision the decode makes the **opponent-side belief significantly
+worse**, and it crosses to significantly better between 720 and 1440. Same
+message, same transcripts, opposite sign. Reweighting a small set of worlds by
+a fact about a teammate distorts the rest of the joint; with enough worlds it
+stops having to.
+
+## A caveat this hands to every convention number in the project
+
+The shipped engine samples at **`n_draws = 480`**. Every belief figure in this
+direction --- the depth book, the aimed book, the locating book, all of
+`results/convention_posterior.json` and `results/convention_replication.json`
+--- was scored at **720**, because that is what `gamma_split.py` fixed and the
+convention instrument imported.
+
+Interpolating this grid, the aimed book's -0.0382 at 720 would be roughly
+**-0.033** at the shipped 480. That is an interpolation and not a measurement,
+and it is small; but the direction is now known, and "the belief numbers are
+quoted at 1.5x the precision the engine runs at" is a fact about all of them
+that nobody had before this run.
+
+## What this does and does not say about the engine drift
+
+**It does not rehabilitate or refute the drift explanation**, and the
+registration said so before the numbers existed: that was a *model* change over
+eleven commits, and this sweeps *sampler precision*. The two are different axes
+and this run cannot speak to the other one.
+
+What it does is remove the support the claim was resting on. "A message is
+worth what the receiver could not already work out" was asserted from two
+confounded points; the one controlled test available to it went the other way
+on the nearest axis. It also supplies a competing explanation for the drift
+that cannot be ruled out from here: eleven commits could have changed how many
+*effective* worlds the sampler produces as easily as they changed the belief's
+quality, and the old engine is not available to check.
+
+Per this document's own licensing clause, the sentence is weakened wherever it
+appears: `RESEARCH_FRONTIER.md`, `prereg/convention_aimed.md` and
+`fish4/convention.py`.

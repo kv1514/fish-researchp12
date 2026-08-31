@@ -268,16 +268,34 @@ def aimed_position_table():
 # argmax instead of paying in it. prereg/convention_aimed.md fixed the
 # magnitude conditions before the replication ran, and it clears all three.
 #
-# AND THE EFFECT IS SHRINKING AS THE ENGINE IMPROVES, which is the part worth
-# carrying forward. Re-run on the same seeds two days later, the paired NLL gain
-# at beta = 0.8 is about 40% smaller than when it was first measured -- because
-# the baseline belief it is scored against got roughly 0.043 nats better in the
-# meantime, not because the decode got worse. Arms that were merely weak then
-# are harmful now: flat 2.0 has crossed from -0.0342 to +0.0252. A channel is
-# worth what the belief cannot already work out, so every number in this
-# direction is against a moving target and dates quickly.
-# results/convention_replication.json is the current run; the reproduction that
-# established the drift is beside it.
+# AND THE EFFECT MOVES UNDER THE ENGINE, which is the part worth carrying
+# forward. Re-run on the same seeds two days later, the paired NLL gain at
+# beta = 0.8 is about 40% smaller than when it was first measured, and the
+# baseline belief it is scored against is roughly 0.043 nats better. Arms that
+# were merely weak then are harmful now: flat 2.0 has crossed from -0.0342 to
+# +0.0252. So every number in this direction is measured against a moving
+# target and dates quickly. results/convention_replication.json is the current
+# run; the reproduction that established the drift is beside it.
+#
+# WHY THE OBVIOUS EXPLANATION IS NOT GIVEN HERE. An earlier version of this
+# block said the gain shrank *because* the belief improved -- "a channel is
+# worth what the belief cannot already work out". That was asserted from two
+# points on two engines and it is withdrawn. Swept properly, on fixed
+# transcripts, the gain does the OPPOSITE of what it predicts: at 180 sampler
+# draws the convention is a null (-0.0064 [-0.0217,+0.0090]) and at 1440 it is
+# -0.0436, with the paired contrast -0.0372 [-0.0481,-0.0263]. The baseline
+# stops improving after 720 draws and the gain keeps growing, so the gain is
+# not tracking what the receiver already knows -- it tracks HOW MANY SAMPLED
+# WORLDS THE DECODER HAS TO REWEIGHT. prereg/channel_vs_precision.md,
+# results/channel_precision.json.
+#
+# That is a different axis from the engine drift, which was a model change, so
+# it does not explain the drift either. What it leaves is: the drift is
+# measured and unexplained, and the tidy explanation for it was wrong.
+#
+# It also prices every belief number in this direction. The engine ships at
+# n_draws = 480 and all of them were scored at 720, so -0.0382 would be roughly
+# -0.033 at the shipped precision. That is an interpolation, not a measurement.
 #
 # THE LOCATING BOOK below was built to repair the failure that did not happen
 # -- see the amendment at the top of prereg/convention_locate.md, written

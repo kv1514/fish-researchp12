@@ -1939,13 +1939,19 @@ spec:
 | **baseline** teammate NLL | 1.3995 | **1.3567** |
 | paired NLL at `beta = 0.8` | -0.0712 | -0.0403 |
 
-**The decode did not get worse; the belief it decodes into got better.** Eleven
-engine commits landed in between and the baseline is 0.043 nats stronger. A
-channel is worth what the receiver could not already work out, so every number
-in this direction is measured against a target this project is deliberately
-moving. The marginal arms have already crossed over: `flat 2.0` has gone from
--0.0342 to **+0.0252**, significantly harmful where it was significantly
-helpful.
+Eleven engine commits landed in between and the baseline is 0.043 nats
+stronger. Every number in this direction is therefore measured against a target
+this project is deliberately moving, and the marginal arms have already crossed
+over: `flat 2.0` has gone from -0.0342 to **+0.0252**, significantly harmful
+where it was significantly helpful.
+
+**What is NOT said here, and was, for about an hour.** This paragraph read
+*"the decode did not get worse; the belief it decodes into got better ... a
+channel is worth what the receiver could not already work out."* That is
+withdrawn. It was an explanation for two points on two engines, and it was
+registered and tested the same day --- see the update below. **It is refuted on
+the nearest axis available**, and the drift itself is now measured, real and
+unexplained.
 
 ## The locating book no longer supersedes, by its own rule
 
@@ -1990,3 +1996,90 @@ And the run that refuted it wrote no file, so the refutation was as
 unre-derivable as the claim. The fix for both is the same: put the number where
 something can read it back, and re-run before quoting. The re-run cost twenty
 minutes and produced a sharper result than the original had.
+
+---
+
+# UPDATE, 2026-08-31: I registered my own explanation and it was refuted in an hour
+
+The previous update explained a shrinking effect with a sentence I liked:
+*a message is worth only what the receiver could not already work out.* Two
+points, two engines, eleven commits apart. It went into three files.
+
+It is the same shape as the aimed book's own retracted "neutral" reading --- a
+mechanism built on one underpowered comparison --- so it was registered
+(`prereg/channel_vs_precision.md`) and swept before it could be repeated a
+fourth time. **REFUTED**, by the rule fixed in advance.
+
+## The sweep
+
+Scoring `n_draws` on **fixed transcripts**: a better-sampled belief on the same
+1,068 decisions, model unchanged. 40 games, seed base 880,000, sender gate 0.05
+aimed, `beta = 0.8`, clustered on the game.
+
+| `n_draws` | baseline team NLL | paired team NLL |
+|---|---|---|
+| 180 | 1.3155 | **-0.0064** [-0.0217, +0.0090] |
+| 360 | 1.3004 | -0.0300 [-0.0444, -0.0156] |
+| 720 | 1.2919 | -0.0382 [-0.0538, -0.0227] |
+| 1440 | 1.2930 | **-0.0436** [-0.0593, -0.0279] |
+
+    D = d_1440 - d_180 = -0.0372 [-0.0481, -0.0263]   over 40 game clusters
+
+Entirely below zero. **The gain grows as the belief improves.** The 720 cell
+reproduced `results/convention_replication.json`'s -0.0382 to **0.0000**, so
+this is not a different instrument measuring a different thing.
+
+## The finding is better than the refutation
+
+**The baseline saturates and the gain does not.** From 720 to 1440 the baseline
+gets no better (+0.0011, noise) while the gain still grows -0.0382 -> -0.0436.
+So the gain is not tracking what the receiver already knows. It tracks **how
+many sampled worlds the decoder has to reweight**.
+
+At 180 draws there is **no channel at all** --- an interval covering zero --- on
+the same transcripts where 1440 draws gives -0.0436. The message is byte-for-
+byte identical in all four cells. Only the number of worlds it can act on
+differs.
+
+The opponent pool makes the same point louder, with a **sign change**:
+
+| `n_draws` | paired **opponent** NLL |
+|---|---|
+| 180 | **+0.0435** [+0.0287, +0.0582] |
+| 720 | +0.0025 [-0.0033, +0.0082] |
+| 1440 | **-0.0086** [-0.0135, -0.0037] |
+
+Decoding a teammate's message into a small world-sample **actively damages** the
+opponent-side belief, significantly, and stops doing so once there are enough
+worlds. Reweighting few worlds by one fact distorts the rest of the joint.
+
+## A caveat this hands to every convention number in the project
+
+The engine ships at **`n_draws = 480`**. Every belief figure in this
+direction --- the depth book, the aimed book, the locating book, both results
+files --- was scored at **720**, because `gamma_split.py` fixed it there and the
+convention instrument imported the constant. On this grid that is worth roughly
+15%: -0.0382 would be about -0.033 at the precision the engine runs at.
+
+An interpolation, not a measurement. But "these numbers are quoted at 1.5x the
+sampler precision the engine uses" is a fact about all of them that nobody had.
+
+## What it does not say
+
+It does not explain the drift. That was a **model** change over eleven commits;
+this sweeps **sampler precision**. The registration said so before the numbers
+existed, so the limit is not being discovered now to make the result look
+tidier. The drift is measured, real, and unexplained --- and this run supplies a
+competing hypothesis for it that cannot be checked, since eleven commits could
+have changed how many *effective* worlds the sampler produces as easily as they
+changed the belief's quality, and the old engine is not available to ask.
+
+## The pattern
+
+The claim was mine, an hour old, already in three files, and refuting it cost
+one registration and a four-minute run. The reason it got tested rather than
+repeated is that it had the recognisable shape: a tidy mechanism, asserted from
+the smallest number of points that could suggest it, in the sentence most likely
+to be quoted. That shape is now the trigger, and it has fired four times on this
+branch --- the aimed book's "neutral", the locating book's motivation, the
+unlocated covariate's transfer, and this.
