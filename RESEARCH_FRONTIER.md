@@ -2519,6 +2519,32 @@ target and not a wider gate, but a condition that predicts **whether the
 information will arrive before the deadline**. Which is what "how early" was
 groping at, now with a measurement under it instead of a guess.
 
+### And what it would cost to build one, checked rather than assumed
+
+A predictor has to fire at the moment of the signalling decision, so the useful
+next question is whether anything observable *then* separates the 52 from the
+72. **The journal cannot answer it**, which is worth stating so the next person
+does not spend the afternoon discovering that:
+
+| field | added (n=52) | avoided (n=72) |
+|---|---|---|
+| `rev` | 2 for every game | 2 for every game |
+| `fallbacks` | 0.000 | 0.000 |
+| `kv_even` | 0.52 | 0.47 |
+| declarations (arm C) | 4.67 | 4.71 |
+
+The one field that looked like a separator is not one. Baseline declarations per
+game are 5.019 against 5.444, a difference of **-0.425 [-0.882, +0.031]** ---
+covering zero. Quoted with its interval rather than as two means, because two
+means differing in the direction you hoped is how the last four mechanisms on
+this branch got written down.
+
+`signal_gate_journal.jsonl` stores per-game aggregates: a path ledger, a margin,
+a deal id. It holds nothing about the *state at the moment the signal fired*.
+So the descriptive step before any registration --- which observable predicts
+the group --- needs **new instrumented play**, not more analysis of what is on
+disk. That is the honest price, and it is why no registration is written here.
+
 ## The probe reported zero first, and the reason is the recurring one
 
 The first version reached for `agent._ctx(obs)` --- which does not exist ---
