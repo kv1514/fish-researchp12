@@ -212,6 +212,53 @@ then learn the objective, and make claiming decision-theoretic.
 We carried that programme out, and the headline result is not the one we
 expected.
 
+\subsection{Three senses of ``strongest'', kept separate throughout}
+\label{sec:senses}
+
+This paper reports margins against several opponents, and they support
+different claims. Stating which before any number, so that none of them is
+read as another:
+
+\begin{description}[leftmargin=1.6em,style=nextline,itemsep=2pt]
+\item[Lineage strength] The deployed configuration against this project's own
+earlier champions, on duplicate deals under one rule dialect. This is
+established: $+2.412$ $[+2.088, +2.736]$ sets per pair against the v0.3
+champion.
+\item[Cross-engine strength] The same configuration against a frozen build of
+an independently developed engine \citep{nguyen2026sestina}, through a
+process bridge, under \emph{this} paper's rule dialect rather than that
+engine's. This is measured but narrower than it looks: the two dialects differ
+on out-of-turn declaration, which that project's own sweep shows moves its edge
+by about half a percentage point, and it is one opponent rather than a
+population.
+\item[Global standing] How good this engine is at Fish. \textbf{Not claimed.}
+No equilibrium is computed, no upper bound on exploitability exists for any
+class, and the phrase ``near-optimal'' does not appear in this paper about any
+configuration of it. The exact best responses of \S\ref{sec:ii} are lower
+bounds against a deterministic realisation of a policy that mixes.
+\end{description}
+
+\subsection{Research questions}
+\label{sec:rqs}
+
+\begin{description}[leftmargin=2.6em,style=nextline,itemsep=2pt]
+\item[RQ1] What is exact hidden-state inference worth in play, and what must a
+posterior model beyond legality to be worth anything?
+\item[RQ2] Where does the residual loss sit --- in finding the opponents'
+cards, or in allocating our own team's?
+\item[RQ3] Can search over the belief, or a learned ask objective, recover
+that residue?
+\item[RQ4] How exploitable is the deployed policy where the game can be solved
+exactly, and does a correction fitted against exact values transfer to play?
+\end{description}
+
+\noindent RQ1 is answered in \S\ref{sec:res-exact} and
+\S\ref{sec:res-posterior}, RQ2 in \S\ref{sec:missing}, RQ3 in
+\S\ref{sec:res-lookahead} and \S\ref{sec:res-learn}, and RQ4 in
+\S\ref{sec:ii} and \S\ref{sec:critic}. RQ1 and RQ3 return negative answers,
+RQ2 returns the finding that reframed the project, and RQ4 returns a
+correction that measures well and does not survive the rule change.
+
 \paragraph{Contributions.}
 \begin{enumerate}
 \item \textbf{Exact combinatorial inference.} We show that hidden-state
@@ -7313,7 +7360,7 @@ last of these puts it at $+1.9$ sets per deal-pair against the previous
 champion, which is larger than the entire objective improvement that separated
 that champion from its own baseline.
 
-Seven lessons generalise beyond this game.
+Seven lessons we would carry to another game.
 
 \textbf{Correct is not the same as good.} An inference procedure is correct
 relative to a model. When a cheaper, wronger procedure beats an exact one, the
