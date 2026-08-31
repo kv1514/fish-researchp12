@@ -459,15 +459,21 @@ def anchors(rows: list[dict]) -> dict:
                      "judged": judged, "agrees": agrees,
                      "engine_dated": dated if excused else None}
 
-    #: the margin anchor. Clustered on the deal on both sides, and the test is
-    #: whether the published POINT falls inside this run's interval -- one
-    #: interval against one number, rather than eyeballing two intervals for
-    #: overlap, which is a weaker and vaguer comparison.
+    #: the margin anchor. Clustered on the deal on both sides, and judged by a
+    #: two-sample z using BOTH uncertainties -- see the amendment note below.
     ours = cluster_ci([r["margin"] for r in rows], [r["deal"] for r in rows])
     pub_rows = [json.loads(line) for line in ANCHOR_JOURNAL.open()]
     theirs = cluster_ci([r[ANCHOR_JOURNAL_ARM]["margin"] for r in pub_rows],
                         [r["deal"] for r in pub_rows])
-    m_ok = abs(theirs[0] - ours[0]) <= ours[1]
+    # AMENDED: this asked whether the published POINT fell inside THIS run's
+    # interval, which treats a 500-deal estimate as exact -- the same defect
+    # the path anchors above already correct. It passed here only because 800
+    # deals is wide enough to hide it: the same arm at +2.4962 passed, and at
+    # +2.4980 on 2000 deals it FAILED in scripts4/signal_no_repeat_run.py. A
+    # test a run fails by gathering more evidence is not a test.
+    m_se = ((ours[1] / 1.96) ** 2 + (theirs[1] / 1.96) ** 2) ** 0.5
+    m_z = (ours[0] - theirs[0]) / m_se if m_se else 0.0
+    m_ok = abs(m_z) < 1.96
     if not m_ok:
         ok = False
 
@@ -481,7 +487,8 @@ def anchors(rows: list[dict]) -> dict:
             "margin": {"mean": ours[0], "half_width": ours[1],
                        "n_clusters": ours[2], "published_mean": theirs[0],
                        "published_half_width": theirs[1],
-                       "published_clusters": theirs[2], "agrees": m_ok},
+                       "published_clusters": theirs[2], "z": m_z,
+                       "agrees": m_ok},
             "aim": {"on_stuck": on, "fires": len(fires),
                     "rate": (on / len(fires)) if fires else None,
                     "published_rate": aim["on_stuck_rate"],
@@ -619,7 +626,8 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
     m = an["margin"]
     print(f"    {'OK ' if m['agrees'] else 'OFF'} margin     "
           f"{m['mean']:+.4f} +-{m['half_width']:.4f} on {m['n_clusters']} "
-          f"deals against {m['published_mean']:+.4f} published")
+          f"deals against {m['published_mean']:+.4f} "
+          f"+-{m['published_half_width']:.4f}, z = {m['z']:+.2f}")
     aim = an["aim"]
     if aim["fires"]:
         print(f"    {'OK ' if aim['agrees'] else 'OFF'} aim        "

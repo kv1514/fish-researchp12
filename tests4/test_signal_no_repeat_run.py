@@ -26,15 +26,44 @@ def test_the_registration_exists_and_predates_the_switch():
     assert "Registered 2026-08-31, before the switch exists" in PREREG
 
 
-@pytest.mark.parametrize("value", ["9,700,000", "2,000 deals", "+2.598"])
+@pytest.mark.parametrize("value", ["9,700,000", "2,000 deals", "+2.598",
+                                  "9,900,000"])
 def test_the_constants_are_the_ones_the_registration_names(value):
     assert value in PREREG
 
 
 def test_the_code_uses_those_constants():
-    assert run.SEED0 == 9_700_000
+    #: 9,900,000 after the amendment, not 9,700,000: the first run was
+    #: withdrawn by a mis-specified gate, and a criterion corrected after
+    #: seeing an outcome may not be applied to the data that revealed it.
+    assert run.SEED0 == 9_900_000
     assert run.N_DEALS == 2_000
     assert run.REPLICATE == 2.598
+
+
+def test_the_withdrawn_run_is_kept_and_named_as_withdrawn():
+    """Its primary is not evidence, but hiding it would be worse: it is what
+    the gate defect was found in."""
+    assert (ROOT / "results" / "signal_no_repeat_withdrawn_9700000.json"
+            ).exists()
+    assert "WITHDRAWN and its primary outcome is\nnot read" in PREREG
+
+
+def test_the_replication_gate_uses_both_uncertainties():
+    """The defect the first run exposed: comparing this run's interval against
+    the published POINT means a run can FAIL by gathering more evidence."""
+    src = (ROOT / "scripts4" / "signal_no_repeat_run.py").read_text()
+    assert "two-sample" in src
+    pm, ph, pk = run._published_margin()
+    assert (round(pm, 4), pk) == (2.598, 500)
+    assert ph > 0.1, "the published side must carry its own uncertainty"
+
+
+def test_the_published_margin_is_read_not_retyped():
+    """A retyped figure keeps agreeing after the thing it anchors to moves."""
+    src = (ROOT / "scripts4" / "signal_no_repeat_run.py").read_text()
+    assert "signal_gate_journal.jsonl" in src
+    assert "cluster_ci([r[REPLICATE_ARM][\"margin\"] for r in rows]" in src
 
 
 def test_the_seed_base_is_neither_of_the_two_that_motivated_it():

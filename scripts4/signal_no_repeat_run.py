@@ -48,8 +48,11 @@ RULES_D = {"wrong_distribution_outcome": "opponent"}
 
 #: FIXED BY THE REGISTRATION. Not 3,600,000, which produced the 52-vs-72 lead,
 #: and not 9,300,000, which produced the waste figures this run rests on.
-SEED0 = 9_700_000
-AGENT0 = 97_000
+#: AMENDED 2026-08-31: the 9,700,000 run was withdrawn by a mis-specified
+#: replication gate, and a criterion corrected AFTER seeing an outcome may not
+#: then be applied to the data that revealed it. Fresh deals.
+SEED0 = 9_900_000
+AGENT0 = 99_000
 N_DEALS = 2_000
 
 ARMS = {
@@ -62,11 +65,31 @@ ARMS = {
 #: carry the replication gate and to price the mechanism as a whole.
 BASE, ARM = "B_incumbent", "C_norepeat"
 
-#: REPLICATION GATE. arm C of prereg/deadline_signalling.md scores this margin
-#: over 500 deals x 2 parities in results/signal_gate_journal.jsonl. If
-#: B_incumbent does not cover it, the two runs are not measuring the same thing
-#: and the registration says to withdraw the run rather than report it.
+#: REPLICATION GATE. arm C of prereg/deadline_signalling.md scores +2.598 over
+#: 500 deals x 2 parities in results/signal_gate_journal.jsonl.
+#:
+#: AMENDED 2026-08-31 after the 9,700,000 run was withdrawn by this gate. The
+#: gate as registered asked whether THIS run's interval covers the published
+#: POINT, which treats a 500-deal estimate as exact. That is the same defect
+#: found and fixed in signal_deadline.py's path anchors earlier the same day
+#: and then written straight into this file. Its signature: the 800-deal
+#: signal_deadline run put the same arm at +2.4962 and PASSED, while the
+#: 2000-deal run put it at +2.4980 and FAILED -- the same number, opposite
+#: verdicts, decided by nothing but the width of the interval.
+#:
+#: The gate is now a two-sample z using BOTH uncertainties. Under it the
+#: withdrawn run reads z = -1.04, comfortably inside noise. The withdrawn run
+#: is NOT re-read under the amended gate; see prereg/signal_no_repeat.md.
 REPLICATE = 2.598
+REPLICATE_JOURNAL = ROOT / "results" / "signal_gate_journal.jsonl"
+REPLICATE_ARM = "C_measured"
+
+
+def _published_margin():
+    """The published arm and ITS uncertainty, read rather than retyped."""
+    rows = [json.loads(line) for line in REPLICATE_JOURNAL.open()]
+    return cluster_ci([r[REPLICATE_ARM]["margin"] for r in rows],
+                      [r["deal"] for r in rows])
 
 
 def _play(deal_seed: int, kv_even: bool, arm: dict) -> dict:
@@ -210,14 +233,16 @@ def report(rows) -> dict:
 
     # ---- gate 1: the replication -----------------------------------------
     m, h, _ = margins[BASE]
-    # the epsilon is for float noise, not for slack: a mean of forty identical
-    # margins lands 4e-16 off the literal, and a zero-width interval would
-    # then fail its own target.
-    ok_rep = abs(m - REPLICATE) <= h + 1e-9
-    out["replication"] = {"target": REPLICATE, "mean": m, "half_width": h,
-                          "passes": ok_rep}
-    print(f"\n  REPLICATION GATE: {BASE} must cover {REPLICATE:+.4f} "
-          f"-> {'PASS' if ok_rep else 'FAIL'}")
+    pm, ph, pk = _published_margin()
+    se = ((h / 1.96) ** 2 + (ph / 1.96) ** 2) ** 0.5
+    z = (m - pm) / se if se else 0.0
+    ok_rep = abs(z) < 1.96
+    out["replication"] = {"target": pm, "target_half_width": ph,
+                          "target_clusters": pk, "mean": m, "half_width": h,
+                          "z": z, "passes": ok_rep}
+    print(f"\n  REPLICATION GATE: {BASE} {m:+.4f} +-{h:.4f} against the "
+          f"published {pm:+.4f} +-{ph:.4f}\n    on {pk} deals, two-sample "
+          f"z = {z:+.2f} -> {'PASS' if ok_rep else 'FAIL'}")
     if not ok_rep:
         print("  The registration says to WITHDRAW the run and report the\n"
               "  discrepancy rather than read the primary outcome.")

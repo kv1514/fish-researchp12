@@ -104,3 +104,73 @@ caught a silently-discarded parameter over 800 deals applies here.
 That removing the waste makes signalling worth switching on. That is a separate
 question about the mechanism's value, already measured at an interval covering
 zero, and nothing here re-opens it.
+
+
+---
+
+# AMENDMENT, 2026-08-31, after the first run was withdrawn
+
+## What happened
+
+The 9,700,000 run completed (4,000 games x 3 arms, 96 minutes) and **the
+replication gate failed**, so the run is WITHDRAWN and its primary outcome is
+not read. `results/signal_no_repeat_withdrawn_9700000.json` keeps it.
+
+    B_incumbent   +2.4980 [+2.4118, +2.5842]   target +2.5980   FAIL
+
+## The gate was mis-specified, and the defect is one I had already fixed once
+
+The gate as registered asked whether THIS run's interval covers the published
+POINT. That treats a 500-deal estimate as exact. It is the same defect found
+and corrected in `scripts4/signal_deadline.py`'s path anchors earlier the same
+day — where the voluntary rate rested on two wrong declarations out of 3,692
+and was being compared as though it were certain — and it was then written
+straight into this registration.
+
+Its signature is unmistakable once looked for:
+
+| run | same arm, same opponents | half-width | verdict under the registered gate |
+|---|---|---|---|
+| `signal_deadline`, 800 deals | +2.4962 | 0.1349 | PASS |
+| this run, 2,000 deals | +2.4980 | 0.0862 | **FAIL** |
+
+The same number, opposite verdicts, decided by nothing but how much data was
+behind the interval. A gate that a run fails BECAUSE it gathered more evidence
+is not a gate.
+
+Against the published estimate and ITS uncertainty — +2.598 +- 0.1674 on 500
+deals — the difference is -0.100 with a combined standard error of 0.0960:
+**z = -1.04**. The two runs agree.
+
+## The correction, and why the withdrawn run is not simply re-read
+
+The gate is now a two-sample z using both uncertainties, with the published
+mean and its interval READ from `results/signal_gate_journal.jsonl` rather than
+retyped as a literal.
+
+**The withdrawn run is not re-read under the amended gate.** A criterion
+corrected after seeing an outcome may not then be applied to the data that
+revealed it, however clearly correct the correction is. The re-run uses seed
+base **9,900,000**; everything else in this registration is unchanged.
+
+This matters in the direction that is easy to get wrong. The withdrawn run's
+primary was **negative** — reading it would have produced a REFUTATION of my
+own proposal, not a confirmation. Declining to read it is not protecting the
+hypothesis; it is refusing to let a criterion be chosen after the fact in
+either direction. When the re-run lands, the withdrawn run's primary is not
+evidence and does not count as prior support for its verdict.
+
+## What the withdrawn run does establish, being descriptive rather than inferential
+
+The manipulation check passed decisively, and the forced-route counts show the
+switch doing exactly what it was built to do:
+
+| arm | fires/episode | wasted/episode | forced by `stalled` | forced by `not asks` |
+|---|---|---|---|---|
+| A_shipped | -- | -- | 129 | 619 |
+| B_incumbent | 20.47 | 18.98 | **585** | 668 |
+| C_norepeat | 1.58 | **0.00** | **156** | 649 |
+
+Signalling adds 456 stall-forced declarations over the shipped champion, and
+the switch removes almost all of them, back to near baseline. Whether that
+buys anything in sets is the question the re-run answers.
