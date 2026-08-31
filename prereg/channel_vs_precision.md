@@ -1,0 +1,130 @@
+# Pre-registration: does the channel's value shrink as the belief improves?
+
+**Registered 2026-08-31, before any run at any `n_draws` other than 720, and
+before the instrument below exists.** What has been read: the five sender
+settings of `results/convention_replication.json`, all at `n_draws = 720`, and
+the two-point engine-drift comparison recorded the same day in
+`prereg/convention_aimed.md`.
+
+## Why this exists: I asserted a mechanism from two confounded points
+
+Re-running the aimed code book today produced a smaller effect than the one
+recorded two days earlier on identical seeds --- paired NLL at `beta = 0.8`
+went from -0.0712 to -0.0403 --- while the *baseline* teammate NLL improved
+from 1.3995 to 1.3567. I wrote, in `RESEARCH_FRONTIER.md`, in
+`prereg/convention_aimed.md` and in `fish4/convention.py`:
+
+> The decode did not get worse. The belief it decodes into got better, and a
+> message is worth only what the receiver could not already work out.
+
+That is a mechanism, stated from **two points, on two engines, differing by
+eleven commits**. It is the most quotable sentence I wrote today and the least
+supported. It is exactly the shape of the claim this project has had to retract
+before --- the aimed book's own "neutral" reading was a theory built on one
+underpowered comparison --- so it gets a test before it gets repeated again.
+
+## What this tests, and what it does not
+
+The manipulation here is the **scoring posterior's sample count**, `n_draws`.
+More draws means a lower-variance belief on the same positions, so the baseline
+gets better without the model changing.
+
+That is a **different axis** from the one the drift was on. The engine drift
+was a model improvement --- calibration work, a different action model --- not
+more draws. So a result here does not directly confirm or refute the drift
+explanation. What it does is ask whether the *general* form of the claim holds
+on the one axis that can be swept cleanly and cheaply: **when the receiver's
+belief gets better, is the message worth less?**
+
+Stating that limit now, before the numbers exist, because the temptation
+afterwards will be to quote whichever reading is tidier.
+
+It is also not obvious which way this should go. More draws gives the
+convention's reweighting more worlds to act on, which could make the decode
+*more* effective rather than less. A null is a real possibility and so is the
+opposite sign.
+
+## Design
+
+`scripts4/channel_precision.py`, a sibling of `scripts4/convention_posterior.py`.
+
+* **Transcripts.** Generated once, exactly as in that instrument: sender gate
+  0.05 aimed, encoder on at every seat, decoder OFF during play, seed base
+  **880,000**, 40 games, stride 4. Identical to
+  `results/convention_replication.json`, so the positions are the same ones
+  already measured.
+* **Cells.** Scoring `n_draws` in **{180, 360, 720, 1440}**. 720 is today's
+  value and serves as the anchor.
+* **Arm.** `convention_beta = 0.8` --- the pre-registered optimum --- against
+  the shared inert baseline *within each cell*.
+* **Clustering.** By **game**, through `fish4.clustered.cluster_ci`, which does
+  the grouping and the t at k-1 df together. k = 40, floor 8. The existing
+  convention instrument clusters by decision and understates its intervals;
+  that is #83 one level in and is not inherited here.
+* **Storage.** Every per-decision row is written out **with its game id**, so
+  the cross-cell contrast below can be re-derived from the file without a
+  re-run. `results/gamma_split.json` cannot be, and that is the reason.
+
+## The statistic the decision rule is on
+
+The four cells score the **same decisions**, so the comparison across cells is
+paired per decision and does not have to go through two independent intervals.
+
+For each decision `i` and cell `c`, let
+
+    d_c(i) = NLL_arm(i) - NLL_base(i)      (negative when the decode helps)
+
+The primary quantity is the **contrast**
+
+    D(i) = d_1440(i) - d_180(i)
+
+clustered by game. Gains are negative, so **D > 0 means the gain has shrunk
+toward zero at higher precision** --- the direction the mechanism predicts.
+
+## Decision rule, fixed in advance
+
+**SUPPORTED** only if BOTH:
+
+1. the baseline teammate NLL falls monotonically across 180 -> 360 -> 720 ->
+   1440, so the manipulation did what it is for; **and**
+2. the clustered 95% interval on **D** lies entirely **above** zero.
+
+**REFUTED** if the interval on D lies entirely **below** zero: the message is
+worth *more* against a better belief, which is the opposite of the claim.
+
+**UNRESOLVED** if the interval on D covers zero, or if condition 1 fails. An
+unresolved result is reported as unresolved and does not get described as
+"consistent with" the mechanism.
+
+## Withdrawal conditions
+
+* If the `n_draws = 720` cell does not reproduce
+  `results/convention_replication.json`'s -0.0382 to within +-0.010, this
+  instrument is not measuring the same thing as the one that produced that
+  number, and the run is **void** rather than negative.
+* If fewer than 8 game clusters contribute, no interval is reported.
+* If the baseline NLL is non-monotone in a way that is not a single adjacent
+  near-tie, condition 1 fails and the run is unresolved rather than negative.
+
+## Sample size, fixed here and not later
+
+**40 games, stride 4, and no extension.** This matches the run whose numbers
+motivated the question, so the two are comparable in power, and it gives k = 40
+clusters against a floor of 8. If 40 games cannot resolve the contrast, that is
+a finding about power and not a licence to run 80 against the same hypothesis.
+
+## What this licenses
+
+Nothing ships; this is scored off-policy with the decoder off during play.
+
+* **SUPPORTED** upgrades the frontier's sentence from an assertion to a
+  measurement, and it must then be stated on the axis actually swept ---
+  *sampler precision* --- rather than as a general claim about belief quality.
+* **REFUTED or UNRESOLVED** and the sentence gets **weakened wherever it
+  appears** --- `RESEARCH_FRONTIER.md`, `prereg/convention_aimed.md`,
+  `fish4/convention.py` --- to say it was asserted from two confounded points
+  and that the one controlled test run on it did not support it.
+
+That last clause is the point of registering this. The claim is mine, it is
+already written into three files, and the cheapest thing to do would be to
+leave it there.
