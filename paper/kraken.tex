@@ -4783,6 +4783,22 @@ and not mis-gated --- it is running a race it cannot see the clock of, and a
 future attempt would need a condition predicting whether the information will
 arrive in time, not a better target or a wider threshold.
 
+Those four rates are the pre-registration's own, and one of them has since
+moved. A fresh $1{,}600$ games of the same arm against the same opponent put
+the forced path at $36.6\%$ rather than $46.3\%$, and the cause is measured
+rather than guessed: the journal was written twenty minutes before
+\texttt{claim\_forced\_exhaustive} shipped into the champion, and re-running
+the new instrument with that field switched back off returns the forced path
+to $44.6\%$ $[37.7, 51.8]$, against $36.6\%$ with it on
+(\path{results/signal_deadline_noexhaustive.json}). The journal records the
+bridge revision and no engine digest, which is exactly how a figure outlives
+the program that produced it. Nothing above changes: the decomposition and
+its $52$-against-$72$ split were taken on one engine and are internally
+consistent, and on today's champion, measured on that one run so that both
+rates come from the same program, a forced declaration is still wrong
+$273$ times as often as a voluntary one ($36.6\%$ against $0.13\%$). The price of ``too late'' fell; it
+did not stop being the thing that separates the two groups.
+
 One methodological note, recorded rather than buried. The regression form of
 the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
 $[+0.0117, +0.1863]$, excluding zero, where the directly conditioned figure is

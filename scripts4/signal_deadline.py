@@ -120,6 +120,39 @@ ANCHOR_AIM = ROOT / "results" / "signal_aim.json"
 ANCHOR_JOURNAL = ROOT / "results" / "signal_gate_journal.jsonl"
 ANCHOR_JOURNAL_ARM = "C_measured"
 
+#: A published anchor figure measured on a DIFFERENT ENGINE than this run's.
+#:
+#: This is NOT a tolerance and NOT an exemption for a number that would not
+#: reproduce. Each entry names the commit that moved the figure AND the
+#: diagnostic run that proved that commit is the cause, and an entry is void
+#: unless its `results` file exists -- the same rule
+#: scripts4/check_prereg_backing.py applies to a pre-registration, for the
+#: same reason. An explanation with nothing on disk behind it is how a failing
+#: anchor becomes a comment nobody rechecks.
+#:
+#: The forced entry is the one this mechanism was built for.
+#: results/signal_gate_journal.jsonl was committed at 2026-08-28 13:48:06 and
+#: `claim_forced_exhaustive` shipped into the champion at 14:08:23, twenty
+#: minutes later; the journal records only the bridge rev and carries no
+#: engine digest. The dates are circumstantial, so they are not the evidence:
+#: re-running this instrument at claim_forced_exhaustive=0 puts the forced
+#: path back on the published figure, and the shipped champion does not.
+ENGINE_DATED = {
+    "forced": {
+        "why": ("the published rate was measured before "
+                "claim_forced_exhaustive shipped into the champion"),
+        "journal_committed": "b9aec2d, 2026-08-28 13:48:06 +0000",
+        "field_shipped": "468fb5f, 2026-08-28 14:08:23 +0000",
+        "proof": ("py scripts4/signal_deadline.py 300 4 out.json "
+                  "--arm=claim_forced_exhaustive=0 gives 44.62% "
+                  "[37.66, 51.80] on 186 declarations, z = -0.35 against the "
+                  "published 46.25%. The shipped champion gives 36.59% on "
+                  "492, z = -2.71. Switching the field back reproduces the "
+                  "published figure; that is the measurement, not the dates."),
+        "results": "results/signal_deadline_noexhaustive.json",
+    },
+}
+
 #: paths that mean the split was placed before the deadline, against the two
 #: that mean it was not. Error rates measured in results/signal_error_paths.json
 IN_TIME = ("voluntary", "exact")
@@ -390,12 +423,22 @@ def anchors(rows: list[dict]) -> dict:
         z = (two_proportion_z(w, n, ref.get("wrong", 0),
                               ref.get("declarations", 0)) if judged else None)
         agrees = (abs(z) < 1.96) if z is not None else None
-        if judged and not agrees:
+        #: an explained difference stops being a failure only when the run
+        #: that explains it is on disk. A missing file voids the entry.
+        dated = ENGINE_DATED.get(path)
+        backed = bool(dated) and (ROOT / dated["results"]).exists()
+        excused = bool(dated) and backed and judged and not agrees
+        if judged and not agrees and not excused:
             ok = False
+        if dated and not backed:
+            print(f"    !!  {path}: ENGINE_DATED names "
+                  f"{dated['results']}, which does not exist. The entry is "
+                  f"void and the anchor is judged on its own.")
         out[path] = {"n": n, "wrong": w, "rate": rate, "lo": lo, "hi": hi,
                      "published": want, "published_n": ref.get("declarations"),
                      "published_wrong": ref.get("wrong"), "z": z,
-                     "judged": judged, "agrees": agrees}
+                     "judged": judged, "agrees": agrees,
+                     "engine_dated": dated if excused else None}
 
     #: the margin anchor. Clustered on the deal on both sides, and the test is
     #: whether the published POINT falls inside this run's interval -- one
@@ -508,7 +551,8 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
     print("\n  ANCHORS -- published figures this run must land on first")
     for path, a_ in an["path_rates"].items():
         if a_["judged"]:
-            mark = "OK " if a_["agrees"] else "OFF"
+            mark = ("OK " if a_["agrees"]
+                    else ("DATED" if a_["engine_dated"] else "OFF"))
             print(f"    {mark} {path:10s} {100 * a_['rate']:5.2f}% "
                   f"[{100 * a_['lo']:5.2f}, {100 * a_['hi']:5.2f}] on "
                   f"{a_['n']:5d} against {100 * a_['published']:5.2f}% on "
@@ -525,6 +569,13 @@ def main(n_deals: int = 400, n_jobs: int | None = None,
         print(f"    {'OK ' if aim['agrees'] else 'OFF'} aim        "
               f"{aim['on_stuck']}/{aim['fires']} of signals point at a stuck "
               f"half-suit, against {aim['published_rate']:.0%} published")
+    for path, a_ in an["path_rates"].items():
+        if a_.get("engine_dated"):
+            d = a_["engine_dated"]
+            print(f"\n  {path} is ENGINE-DATED, not in disagreement: "
+                  f"{d['why']}.\n  Journal {d['journal_committed']}; field "
+                  f"{d['field_shipped']}.\n  {d['proof']}\n  Backed by "
+                  f"{d['results']}.")
     if not an["all_agree"]:
         print("\n  AN ANCHOR IS OFF. The table below is NOT reported as "
               "evidence: fix the\n  instrument, or explain the disagreement, "

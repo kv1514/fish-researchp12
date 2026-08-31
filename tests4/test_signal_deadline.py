@@ -32,6 +32,9 @@ from fish4.agent4 import FishBot4                              # noqa: E402
 from scripts4 import signal_deadline as sd                     # noqa: E402
 from scripts4.path_ledger import PATHS                         # noqa: E402
 
+#: snapshotted at import, because the `iso` fixture blanks the live one
+REAL_ENGINE_DATED = dict(sd.ENGINE_DATED)
+
 
 def fire(deal, hs, path, repeat=0, kv_even=0, **kw):
     row = {"deal": deal, "kv_even": kv_even, "hs": hs, "path": path,
@@ -318,6 +321,10 @@ def iso(tmp_path, monkeypatch):
     monkeypatch.setattr(sd, "ANCHOR_AIM", aim)
     monkeypatch.setattr(sd, "ANCHOR_JOURNAL", jrn)
     monkeypatch.setattr(sd, "ANCHOR_JOURNAL_ARM", "C")
+    # ENGINE_DATED is neutralised too: the real `forced` entry would otherwise
+    # excuse the very path the "the anchor can say no" test uses to prove the
+    # anchor can say no. Tests about the exemption set it themselves.
+    monkeypatch.setattr(sd, "ENGINE_DATED", {})
     return {"paths": pub, "aim": aim, "journal": jrn}
 
 
@@ -482,3 +489,66 @@ def test_the_arm_parser_keeps_types():
     assert got == {"claim_forced_exhaustive": 0, "signal_max_p": 0.15,
                    "x": "abc"}
     assert isinstance(got["claim_forced_exhaustive"], int)
+
+
+# --------------------------------------------------------------------------
+# the engine-dated exemption
+# --------------------------------------------------------------------------
+
+def test_an_engine_dated_entry_without_its_results_file_excuses_nothing(
+        iso, tmp_path, monkeypatch):
+    """The teeth. An explanation with nothing on disk behind it is how a
+    failing anchor turns into a comment nobody rechecks -- the same rule
+    scripts4/check_prereg_backing.py applies to a pre-registration."""
+    iso["paths"].write_text(
+        '{"path_error_rate": {"forced": {"rate": 0.4625,'
+        ' "declarations": 307, "wrong": 142}}}')
+    monkeypatch.setattr(sd, "ENGINE_DATED", {
+        "forced": {"why": "x", "journal_committed": "a", "field_shipped": "b",
+                   "proof": "c", "results": "results/does_not_exist.json"}})
+    got = sd.anchors(_rows({"forced": [492, 180]}))
+    assert got["path_rates"]["forced"]["agrees"] is False
+    assert got["path_rates"]["forced"]["engine_dated"] is None
+    assert got["all_agree"] is False, "a void entry must not excuse the path"
+
+
+def test_an_engine_dated_entry_with_its_results_file_excuses_the_path(
+        iso, monkeypatch):
+    """The real entry, at both runs' real counts."""
+    monkeypatch.setattr(sd, "ENGINE_DATED", REAL_ENGINE_DATED)
+    iso["paths"].write_text(
+        '{"path_error_rate": {"forced": {"rate": 0.4625,'
+        ' "declarations": 307, "wrong": 142}}}')
+    assert (ROOT / REAL_ENGINE_DATED["forced"]["results"]).exists(), (
+        "the committed diagnostic is what makes the entry legitimate")
+    got = sd.anchors(_rows({"forced": [492, 180]}))
+    assert got["path_rates"]["forced"]["agrees"] is False, (
+        "it still disagrees -- being explained is not being in agreement")
+    assert got["path_rates"]["forced"]["engine_dated"] is not None
+    assert got["all_agree"] is True
+
+
+def test_an_engine_dated_path_that_agrees_is_not_marked_dated(iso, monkeypatch):
+    """The exemption applies only where there is a difference to explain."""
+    monkeypatch.setattr(sd, "ENGINE_DATED", REAL_ENGINE_DATED)
+    iso["paths"].write_text(
+        '{"path_error_rate": {"forced": {"rate": 0.4625,'
+        ' "declarations": 307, "wrong": 142}}}')
+    got = sd.anchors(_rows({"forced": [492, 228]}))["path_rates"]["forced"]
+    assert got["agrees"] is True
+    assert got["engine_dated"] is None
+
+
+def test_the_engine_dated_entry_names_the_commit_that_moved_it():
+    """Not 'engine drift' in the abstract: the two commits and the diagnostic
+    that proves which one is the cause."""
+    e = REAL_ENGINE_DATED["forced"]
+    assert "claim_forced_exhaustive" in e["why"]
+    assert "468fb5f" in e["field_shipped"]
+    assert "b9aec2d" in e["journal_committed"]
+    assert "44.62" in e["proof"] and "36.59" in e["proof"]
+
+
+def test_only_the_forced_path_is_engine_dated():
+    """A growing exemption list is the failure mode this guards against."""
+    assert set(REAL_ENGINE_DATED) == {"forced"}
