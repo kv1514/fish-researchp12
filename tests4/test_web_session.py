@@ -37,7 +37,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from fish.cards import NUM_PLAYERS                              # noqa: E402
-from api._engine import CHAMPION_GAMMA, Session, new_session    # noqa: E402
+from api._engine import (CHAMPION_GAMMA, MAX_LOG, Session,      # noqa: E402
+                         new_session)
 
 
 def test_the_human_is_on_the_move_at_the_deal():
@@ -219,7 +220,26 @@ def test_both_modes_reveal_the_same_shape_at_game_over():
                        ("play", {"seat": 0})):
         s = new_session(body)
         tok, log = s.token(), list(s.wire_log)
-        for _ in range(250):
+        # THE BOUND IS DERIVED FROM MAX_LOG, and that is the point of it.
+        # At six actions an iteration a 250-iteration loop can build a
+        # 1,500-action log, and Session.restore refuses anything past
+        # MAX_LOG = 1,200. So a game that failed to finish did not fail on
+        # this test's own "fixture never finished" -- it failed one loop
+        # earlier, inside the engine, with "action log too long", which is a
+        # far worse error for exactly the same bug. It happened once in CI.
+        #
+        # MAX_LOG // 6 caps the log at 1,194 at the last restore, so the
+        # engine can no longer be the thing that complains, and the
+        # assertion below is what fires. It is not a smaller test: 1,200
+        # actions is about ten times a real game. Measured over 100 fresh
+        # fixtures (40 spectate, 60 play, all terminating): median 105,
+        # max 191.
+        #
+        # This does NOT fix whatever produced a game long enough to reach
+        # 1,200 in the first place -- that is rare enough not to appear in
+        # 100 tries and is still unexplained. It makes the next occurrence
+        # say what it is.
+        for _ in range(MAX_LOG // 6):
             cur = Session.restore(tok, log)
             if cur.state.is_terminal:
                 break
