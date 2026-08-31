@@ -2824,5 +2824,50 @@ If it is positive, the interesting version is not "switch signalling on" but
 expensive way to defer it" — the cheap version would be a declaration-side
 change, not an ask-side one.
 
+### That declaration-side version already exists, and was already measured
+
+Checked before proposing it, because this branch has nearly rebuilt an existing
+mechanism before. `prereg/stuck_claim_gate.md` registered and ran exactly that
+change on 2026-08-28: `B_defer` raises the doomed-ask branch's declaration bar
+instead of declaring at a coin flip. Its ledger and mine are the same
+intervention reached from opposite sides of the engine.
+
+| | gate/game | forced/game | wrong/game | margin against A |
+|---|---|---|---|---|
+| **declaration side** — `B_defer`, 1,000 games, seed 2,400,000 | 0.317 -> 0.093 | 0.178 -> 0.262 | 0.193 -> 0.129 | **+0.0580** [-0.0177, +0.1337] |
+| **ask side** — signalling, 4,000 games, seed 9,900,000 | 0.299 -> 0.069 | 0.181 -> 0.315 | 0.159 -> 0.138 | **+0.0660** (point only) |
+
+Both drain the gate path by about 0.23 declarations a game, both push the
+displaced declarations into the forced path, both cut wrong declarations, and
+both land near +0.06 sets a game. One does it by declining to declare; the
+other by spending a turn on a doomed ask so that declining happens as a side
+effect.
+
+**They do not pool.** The baselines differ (+2.302 against +2.4450), the older
+run records no engine digest, and its forced-path error rate of 57.9% against
+today's 46.5% says it predates `claim_forced_exhaustive` — the same drift
+already proved above. Different engines, different seeds, different arms.
+Nothing here combines two intervals covering zero into one that does not.
+
+What it does change is the standing of the effect. An estimate near +0.06
+reached twice by unrelated routes is better evidence that something is there
+than either run alone, and both registrations declined to ship on it, which
+was right both times. So the open question is not a third route to the same
+intervention. It is whether +0.06 survives a run powered to see it — and the
+power arithmetic is better than it looks, because the right quantity is the
+PAIRED contrast and not the arm margin.
+
+`B_defer - A` had a half-width of 0.0757 on 500 deals. Scaled to 2,000 that is
+0.0379, comfortably under +0.058: **roughly 850 deals would settle it**, and
+both routes have already been run at or above that. The signalling run's own
+paired contrast `C - B` came in at half-width 0.0353 on 2,000 deals, which is
+the scale to expect.
+
+So the 9,900,000 run very probably already contains the answer for `B - A`,
+and the reason it cannot be read is not sample size but that the payload did
+not keep the per-game margins. That is a bookkeeping failure, not a
+measurement one, and it is now fixed in the instrument — which makes re-running
+it the cheapest open item on this branch rather than the most expensive.
+
 Nothing enters `V06_DEPLOYED`. `signal_no_repeat` stays False and `signal_mode`
 stays "off".
