@@ -68,6 +68,24 @@ incumbent and `-4.0` about the fitted `b`. Positive values are not swept: the
 fit's sign is not in doubt at 3,143 nats, and sweeping both signs would spend
 half the grid establishing something already measured.
 
+## Sample size
+
+**40 games at stride 4, added 2026-08-31 before the instrument was run on more
+than a two-game smoke test, and before any interval was read.**
+
+The first version of this document fixed the grid, the clamp, the decision rule
+and a floor of 8 clusters, and did not fix `n_games`. That is optional stopping
+with the door left open: run forty, look, run eighty if the answer is not yet
+the one you expected. The omission is recorded rather than quietly filled,
+because a registration edited after the data is worth nothing and the only
+thing that makes this edit legitimate is that it is not.
+
+40 is what `scripts4/gamma_split.py` uses on the same positions-per-game basis,
+which makes the two instruments comparable in power, and it gives k = 40
+clusters against a floor of 8. If 40 games turn out to be too few to resolve
+the question, that is a finding about power and gets reported as one -- it does
+not license a longer run against the same hypothesis.
+
 ## Primary outcome and decision rule, fixed in advance
 
 The pool that matters is **team**. This covariate exists to attack the
