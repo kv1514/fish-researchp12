@@ -25,7 +25,7 @@ given a run's margins and its ledger of OUR declarations, the opponent's wrong
 count is not unknown, it is determined -- and a run that also measures it
 directly (`both_sides`) has to agree, which is the check `verify` performs.
 
-    py scripts4/margin_identity.py results/a.json [results/b.json ...]
+    py scripts4/margin_identity.py [results/a.json ...] [--sweep]
 """
 from __future__ import annotations
 
@@ -134,10 +134,42 @@ def decompose(payload: dict, base: str, arm: str) -> dict:
             "residual": total - (race + ours + theirs)}
 
 
+def adapt(payload: dict) -> dict | None:
+    """Normalise the shapes this project has stored margins-plus-ledger in.
+
+    The identity is older than any of these files -- it has been true of every
+    game the project has played -- so a run is worth decomposing whichever
+    instrument wrote it. Three shapes exist. `None` means the payload is not a
+    run of this kind at all.
+
+      * canonical, from `signal_vs_defer` and `signal_no_repeat`:
+        `margins[arm]["mean"]` and `ledger[arm]`.
+      * the `*_confirm` shape, from the arm-vs-champion instruments:
+        `margin_A` for the base and `arms[arm]["margin"]` for the rest.
+      * `path_ledger_self`, a single arm against itself: refused, because a
+        self-play margin is zero by symmetry and the identity says nothing.
+    """
+    if not isinstance(payload, dict) or "ledger" not in payload:
+        return None
+    if "margins" in payload:
+        return payload
+    if payload.get("vs") == "self":
+        return None
+    if "margin_A" not in payload or "arms" not in payload:
+        return None
+    margins = {"A_shipped": {"mean": payload["margin_A"]}}
+    for name, v in payload["arms"].items():
+        if isinstance(v, dict) and "margin" in v:
+            margins[name] = {"mean": v["margin"]}
+    if set(margins) != set(payload["ledger"]):
+        return None
+    return dict(payload, margins=margins)
+
+
 def report(path: Path) -> int:
-    payload = json.loads(path.read_text())
-    if "margins" not in payload or "ledger" not in payload:
-        print(f"{path.name}: no margins/ledger, skipping")
+    payload = adapt(json.loads(path.read_text()))
+    if payload is None:
+        print(f"{path.name}: not a margins-plus-ledger run, skipping")
         return 0
     print(f"\n=== {path.name}   ({payload['n_games']:,} games, "
           f"{payload.get('prereg', 'no registration')})")
@@ -163,9 +195,47 @@ def report(path: Path) -> int:
     return 1 if bad else 0
 
 
+def sweep(paths: list[Path]) -> list[dict]:
+    """One row per (run, arm): the effect and its three channels, in one table.
+
+    A single run's decomposition is a reading. The same decomposition holding
+    across runs at different seeds, sample sizes and engine revisions is the
+    thing worth believing, and it is only visible side by side.
+    """
+    rows = []
+    for path in paths:
+        try:
+            payload = adapt(json.loads(path.read_text()))
+        except (ValueError, OSError):
+            continue
+        if payload is None or verify(payload):
+            continue
+        base = next(iter(payload["margins"]))
+        for arm in payload["margins"]:
+            if arm == base:
+                continue
+            d = decompose(payload, base, arm)
+            rows.append(dict(d, run=path.stem, games=payload["n_games"],
+                             params=(payload.get("arms") or {}).get(arm)))
+    rows.sort(key=lambda r: -r["effect"])
+    print(f"\n=== every arm this project has measured, by channel "
+          f"({len(rows)} arms)")
+    print(f"  {'run':<34}{'arm':<14}{'games':>7}{'effect':>9}{'race':>9}"
+          f"{'ours':>9}{'theirs':>9}")
+    for r in rows:
+        print(f"  {r['run'][:33]:<34}{r['arm'][:13]:<14}{r['games']:>7}"
+              f"{r['effect']:>+9.4f}{r['race']:>+9.4f}{r['ours']:>+9.4f}"
+              f"{r['theirs']:>+9.4f}")
+    return rows
+
+
 def main(argv: list[str]) -> int:
-    paths = [Path(a) for a in argv] or sorted(
-        (ROOT / "results").glob("signal_*.json"))
+    args = [a for a in argv if not a.startswith("--")]
+    paths = [Path(a) for a in args] or sorted(
+        (ROOT / "results").glob("*.json"))
+    if "--sweep" in argv:
+        sweep(paths)
+        return 0
     return max([report(p) for p in paths] or [0])
 
 

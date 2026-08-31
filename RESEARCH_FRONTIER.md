@@ -3230,3 +3230,59 @@ not about signalling. **Every ledger this project has built counts what our
 seats do.** Six instruments, four registrations and a fortnight of measurement
 went past a term that was two lines of code away, because the question "where
 did the margin go" was only ever asked of half the board.
+
+### The decomposition replicates across every arm this project has measured
+
+`py scripts4/margin_identity.py --sweep` adapts the two shapes results have
+been stored in and decomposes all twenty arms with a declaration ledger — every
+confirm run this project has done, back to before the exhaustive-search engine
+change. The residual is zero on all twenty.
+
+| run | arm | games | effect | race | ours | theirs |
+|---|---|---|---|---|---|---|
+| `tempo_confirm` | `B_free` | 1000 | +0.2280 | **+0.1260** | +0.0180 | +0.0840 |
+| `signal_no_repeat` | `B_incumbent` | 4000 | +0.1435 | −0.1695 | +0.0505 | **+0.2625** |
+| `signal_gate_confirm` | `C_measured` | 1000 | +0.1220 | −0.2620 | +0.0360 | **+0.3480** |
+| `signal_gate_confirm` | `B_incumbent` | 1000 | +0.1180 | −0.1740 | +0.0280 | **+0.2640** |
+| `signal_vs_defer_probe200` | `B_signal` | 400 | +0.1150 | −0.2300 | −0.0200 | **+0.3650** |
+| `signal_no_repeat_withdrawn_9700000` | `B_incumbent` | 4000 | +0.0965 | −0.1955 | +0.0345 | **+0.2575** |
+| `signal_vs_defer_probe200` | `C_defer` | 400 | +0.0850 | +0.0050 | **+0.0950** | −0.0150 |
+| `tempo_confirm` | `C_half` | 1000 | +0.0840 | +0.0780 | +0.0020 | +0.0040 |
+| `signal_no_repeat_9900000` | `B_incumbent` | 4000 | +0.0660 | −0.2190 | +0.0415 | **+0.2435** |
+| `stuck_gate_confirm` | `B_defer` | 1000 | +0.0580 | −0.0860 | **+0.1280** | +0.0160 |
+| `signal_vs_defer` | `C_defer` | 4000 | +0.0455 | −0.0700 | **+0.1160** | −0.0005 |
+| `stuck_gate_confirm` | `B2_mid` | 1000 | +0.0400 | −0.1200 | **+0.1320** | +0.0280 |
+| `signal_no_repeat` | `C_norepeat` | 4000 | +0.0360 | −0.0220 | +0.0550 | +0.0030 |
+| `signal_no_repeat_9900000` | `C_norepeat` | 4000 | −0.0055 | −0.0660 | +0.0405 | +0.0200 |
+| `tempo_rep8k_confirm` | `B_free` | 8000 | −0.0162 | +0.0303 | −0.0060 | −0.0405 |
+| `signal_no_repeat_withdrawn_9700000` | `C_norepeat` | 4000 | −0.0260 | −0.0420 | +0.0215 | −0.0055 |
+| `concent_confirm` | `B_turnsized` | 4000 | −0.0430 | −0.0335 | −0.0420 | +0.0325 |
+| `tempo_rep8k_confirm` | `C_half` | 8000 | −0.0985 | −0.0545 | −0.0160 | −0.0280 |
+| `concent_confirm` | `C_dose` | 4000 | −0.1445 | −0.0695 | −0.0520 | −0.0230 |
+
+Three families, and each one sits in a different channel:
+
+* **Signalling — five arms, four seed bases, both sides of the engine change,
+  10,800 games.** `theirs` between +0.2435 and +0.3650 every time; `ours` never
+  above +0.0505; `race` between −0.1695 and −0.2620. The single-run reading is
+  a mechanism-level replication.
+* **Deferral — four arms.** `ours` between +0.0950 and +0.1320 every time;
+  `theirs` inside ±0.03 every time.
+* **No-repeat — three arms.** `ours` intact, `theirs` inside ±0.02. The switch
+  removes the channel that is the whole point of the mechanism.
+
+`tempo_confirm` `B_free` is the only arm anywhere with a large positive race
+term, and it is the arm the 8,000-game replication turned over (−0.0162, race
++0.0303). Nothing may be built on the 1,000-game row; the test
+`test_the_tempo_arm_is_not_read_from_the_run_that_did_not_replicate` exists to
+stop exactly that.
+
+### What was actually wrong with the reasoning, not just the instrument
+
+The instrument dropped a term. The reasoning did something worse: it treated
+"fewer of our wrong declarations" as a synonym for "more sets," and those are
+different quantities separated by two channels of comparable size. Deferral
+cuts 0.058 wrong declarations a game — worth +0.116 — and delivers +0.0455,
+because not declaring at the gate also means not declaring, and the race term
+takes 60% of it back. That is visible in the identity and invisible in any
+error rate.

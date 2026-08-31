@@ -129,7 +129,7 @@ def _carries_a_ledger(path: Path) -> bool:
         d = json.loads(path.read_text())
     except (ValueError, OSError):
         return False
-    return isinstance(d, dict) and {"margins", "ledger", "n_games"} <= set(d)
+    return mi.adapt(d) is not None and "n_games" in d
 
 
 REAL = [p for p in sorted((ROOT / "results").glob("*.json"))
@@ -144,7 +144,7 @@ def test_there_are_real_runs_to_check():
 def test_the_identity_closes_on_every_run_on_disk(path):
     """Not approximately: these are integer counts over the same games, so the
     only slack is float noise. A run where this fails has lost declarations."""
-    payload = json.loads(path.read_text())
+    payload = mi.adapt(json.loads(path.read_text()))
     if payload.get("rules") != mi.REQUIRED_RULE or payload.get("unfinished"):
         pytest.skip(f"{path.name} is outside the identity's preconditions")
     base = next(iter(payload["margins"]))
@@ -184,3 +184,88 @@ def test_the_deferred_gate_touches_only_our_own_errors():
     d = mi.decompose(p, "A_shipped", "C_defer")
     assert d["ours"] > 2 * d["effect"] > 0     # the race eats over half of it
     assert abs(d["theirs"]) < 0.02
+
+
+# --- the adapter, and the sweep it makes possible -------------------------
+
+def test_the_confirm_shape_is_adapted_not_skipped():
+    """The arm-vs-champion instruments store `margin_A` and `arms[x].margin`
+    instead of `margins`. Nine of this project's twenty measured arms are in
+    that shape, including the registered signalling confirm."""
+    d = json.loads((ROOT / "results" / "signal_gate_confirm.json").read_text())
+    assert "margins" not in d
+    got = mi.adapt(d)
+    assert got is not None
+    assert got["margins"]["A_shipped"]["mean"] == d["margin_A"]
+    assert got["margins"]["C_measured"]["mean"] == d["arms"]["C_measured"]["margin"]
+
+
+def test_a_self_play_run_is_refused():
+    """Its margin is zero by symmetry, so the identity is true and empty."""
+    d = json.loads((ROOT / "results" / "path_ledger_self.json").read_text())
+    assert d["margin"] == 0.0
+    assert mi.adapt(d) is None
+
+
+def test_an_arm_without_a_ledger_row_is_refused_rather_than_guessed():
+    """A margin whose declarations were never counted cannot be decomposed,
+    and filling the gap with the base arm's ledger would invent a channel."""
+    d = json.loads((ROOT / "results" / "signal_gate_confirm.json").read_text())
+    d["arms"]["D_invented"] = {"margin": 2.7}
+    assert mi.adapt(d) is None
+
+
+def test_a_payload_that_is_not_a_run_is_refused():
+    assert mi.adapt({"hello": 1}) is None
+    assert mi.adapt([1, 2, 3]) is None
+
+
+SWEEP = mi.sweep(REAL)
+
+
+def test_the_sweep_covers_every_run_that_can_be_decomposed():
+    assert len(SWEEP) >= 20
+    assert all(abs(r["residual"]) < 1e-9 for r in SWEEP)
+
+
+SIGNAL_ARMS = [r for r in SWEEP
+               if r["arm"] in ("B_incumbent", "B_signal", "D_both")
+               and r["run"].startswith("signal")]
+DEFER_ARMS = [r for r in SWEEP if r["arm"] in ("B_defer", "B2_mid", "C_defer")]
+NOREPEAT_ARMS = [r for r in SWEEP if r["arm"] == "C_norepeat"]
+
+
+def test_every_signalling_arm_ever_run_lives_in_the_opponent_channel():
+    """Five arms, four seed bases, both sides of the exhaustive-search engine
+    change, 10,800 games. This is the replication a single run cannot give."""
+    assert len(SIGNAL_ARMS) >= 5
+    for r in SIGNAL_ARMS:
+        assert r["theirs"] > 0.2, r
+        assert r["ours"] < 0.06, r
+        assert r["race"] < -0.15, r
+
+
+def test_every_deferral_arm_ever_run_lives_in_our_own_channel():
+    assert len(DEFER_ARMS) >= 4
+    for r in DEFER_ARMS:
+        assert r["ours"] > 0.09, r
+        assert abs(r["theirs"]) < 0.05, r
+
+
+def test_suppressing_the_repeats_removes_the_opponent_channel_in_every_run():
+    assert len(NOREPEAT_ARMS) >= 3
+    for r in NOREPEAT_ARMS:
+        assert abs(r["theirs"]) < 0.05, r
+
+
+def test_the_tempo_arm_is_not_read_from_the_run_that_did_not_replicate():
+    """`tempo_confirm` B_free is the largest effect in the whole sweep and the
+    only arm with a large positive RACE term. `tempo_rep8k_confirm` is the
+    8,000-game replication of the same arm and it is negative. Any story built
+    on the race channel has to start from the second one."""
+    small = next(r for r in SWEEP
+                 if r["run"] == "tempo_confirm" and r["arm"] == "B_free")
+    big = next(r for r in SWEEP
+               if r["run"] == "tempo_rep8k_confirm" and r["arm"] == "B_free")
+    assert small["effect"] > 0.2 and big["effect"] < 0
+    assert big["games"] == 8 * small["games"]
