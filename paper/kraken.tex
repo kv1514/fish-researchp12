@@ -70,10 +70,10 @@
 \title{\vspace{-1.6cm}\bfseries\large
 Exact Inference Is Not Enough: Opponent Models and Endgames in Six-Player
 Literature\\[0.35em]
-\normalsize\normalfont KRAKEN v1.0\vspace{-0.5em}}
+\normalsize\normalfont KRAKEN v1.1\vspace{-0.5em}}
 
 \author{\normalsize Kausthubh Veldanda}
-\date{\small 28 August 2026\vspace{-0.4em}}
+\date{\small 30 August 2026\vspace{-0.4em}}
 
 \begin{document}
 \maketitle
@@ -91,11 +91,13 @@ named cards and score by declaring the exact distribution of a six-card
 half-suit among their own team. Hidden information plus no legal communication
 channel puts it outside both the two-player zero-sum machinery that solved
 poker and the fully cooperative machinery developed for Hanabi. This paper
-covers three iterations of an engine for it, \textbf{KRAKEN} --- v0.4, which
+covers four iterations of an engine for it, \textbf{KRAKEN} --- v0.4, which
 built the inference; v0.6, which corrected a rule and re-measured everything
-that depended on it; and v1.0, which asked where the remaining errors are and
-found that the answer had almost nothing to do with card-reading --- organised
-throughout around results that contradicted the expectations motivating them.
+that depended on it; v1.0, which asked where the remaining errors are and
+found that the answer had almost nothing to do with card-reading; and v1.1,
+which took seven pre-registered runs at that residue and shipped none of them
+--- organised throughout around results that contradicted the expectations
+motivating them.
 
 We first make the inference exact. Hidden-state inference here reduces to counting assignments in a
 degree-constrained bipartite system, $\#P$-complete in general but small in the
@@ -179,6 +181,27 @@ changes a decision} rather than by effect size --- which is now how runs here
 are sized. One change shipped from this round, an exhaustive search on forced
 declarations worth $+0.0233$ $[+0.0133, +0.0334]$ on $0.9\%$ of games; four
 candidates were withdrawn, each on a condition fixed before its run.
+
+\vspace{2pt}
+\noindent
+Version~1.1 then took \textbf{seven} pre-registered directions at the residue
+and closed all seven, shipping nothing. Four never reached a duel because a
+futility screen fixed in advance stopped them, saving roughly $9{,}000$ pairs.
+Two closures are stronger than a null. Handing a seat the true deal in one
+channel at a time shows that knowing it only when you \emph{declare} is worth
+$+1.08$ and only when you \emph{ask} $+0.76$, against $+3.41$ for both:
+\textbf{$46\%$ of the largest information channel in the game is interaction},
+reachable from neither side alone. And the belief-space search provably cannot
+resolve the allocation errors that dominate the residue --- its only update
+preserves the ratio $M[c,t_1]/M[c,t_2]$ between two teammates at every depth,
+every beam width and \emph{every leaf evaluation including a perfect one},
+which prices $99.96\%$ of the allocation uncertainty as unreachable exactly
+where the errors occur. Finally, an audit of our own instrument found that a
+run reported as ``$162$ positions'' is $162$ consecutive plies from
+\textbf{eight deals}; every affected interval is restated with deal-clustered
+standard errors and a $t$ critical value at the cluster count, one conclusion
+is withdrawn, and no duel result moves --- the duel harness had the right unit
+from the start.
 
 \vspace{1pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
@@ -6693,6 +6716,287 @@ that direct measurement falsified. None of these were re-attempted here, because
 v0.3's diagnosis --- that the binding constraint is the objective, not the depth
 of search --- was the premise of this version and is not contradicted by
 anything we measured.
+
+% =====================================================================
+\section{KRAKEN v1.1: seven directions, seven closures, nothing shipped}
+\label{sec:v11}
+
+Version 1.0 established where the remaining errors are: allocation rather than
+ownership, and compelled rather than voluntary declarations. Version~1.1 took
+seven pre-registered runs at that residue. All seven closed. \textbf{None
+shipped}, and \texttt{V06\_DEPLOYED} is byte-for-byte what it was --- every
+parameter added in this round is bit-identical to the champion at its default,
+which \texttt{tests4/} asserts rather than assumes.
+
+A round that ships nothing is worth reporting only if the closures are
+informative, so this section is organised around what each one rules out. Two
+are stronger than a null: one is a \emph{theorem}, and one is a correction to
+intervals published earlier in this paper.
+
+\subsection{The discipline: a futility screen before a duel}
+
+Each direction carried a pre-registered screen with thresholds fixed before any
+number was read --- typically ``does this knob change enough decisions to be
+worth $n$ pairs?'' \textbf{Four of the seven never reached a duel}, because the
+screen stopped them first. At the sizes those duels were registered for, that
+discipline saved roughly $9{,}000$ duplicate-deal pairs.
+
+This matters for reading the table below. A direction marked ``no duel'' is not
+untested; it is a direction whose own pre-registered condition for deserving a
+duel came back false.
+
+\begin{table}[htbp]
+\centering\small
+\begin{tabular}{@{}clp{7.2cm}@{}}
+\toprule
+\# & direction & outcome \\
+\midrule
+1 & one $\gamma$ per side of the table & \textbf{refuted} on a co-primary; withdrawn, no duel \\
+2 & the choice model's covariate & \texttt{unlocated\_now} beats depth by $+3{,}143$ nats; build licensed, not run \\
+3 & a pre-play convention in the rules & belief says yes three times, the duel says no; \emph{speaking} is the entire cost \\
+4 & decompose the teammate ceiling & \textbf{46\% is interaction}: $D+K = 1.84$ against $T = 3.41$ \\
+5 & \texttt{locate}: price an ask by the declaration it enables & \textbf{null}, $+0.047$ $[-0.075, +0.168]$, diagnosed \\
+6 & declarability inside the possession search & \textbf{closed by proof}, no duel \\
+7 & \texttt{claim\_gamma} and \texttt{reach} & both screens fired on each; no duel \\
+\bottomrule
+\end{tabular}
+\caption{The seven v1.1 directions. Four closed without a duel because a
+futility screen with thresholds fixed in advance stopped them. Nothing in this
+table shipped.}
+\label{tab:v11}
+\end{table}
+
+\subsection{Direction 6, closed by proof: an invariant of the possession search}
+\label{sec:v11-theorem}
+
+The largest single class of remaining error is \emph{allocation} --- our team
+holds all six cards of a half-suit and names the wrong split. The natural fix
+is to make the belief-space search resolve which teammate holds which card, by
+scoring declarability at its leaves rather than only material.
+
+That search cannot resolve it, and the reason is structural rather than
+empirical. Let $M[c,p]$ be the posterior mass on seat $p$ holding card $c$. The
+search's only update, \texttt{apply\_success}, scales the \emph{target's}
+column by a constant and renormalises each row. Both operations preserve ratios
+among non-target entries, and in Literature the target of an ask is always an
+\emph{opponent}. Therefore, for any two teammates $t_1, t_2$ and any card $c$
+the chain does not itself take:
+\[
+  \frac{M[c, t_1]}{M[c, t_2]} \quad\text{is \textbf{invariant} under the entire
+  search tree}
+\]
+--- at every depth, under every beam width, and \emph{under every leaf
+evaluation, including a perfect one}. The quantity a declaration must get right
+is exactly the quantity the search cannot move.
+
+We assert the invariant numerically to $5\times10^{-16}$ and price it over
+$20{,}472$ (decision, live half-suit) pairs with no ground truth, by measuring
+what share of the allocation uncertainty lies in ratios the tree cannot reach.
+Over all pairs that share is $40.7\%$; restricted to the band where the
+allocation errors actually occur --- $\Prob(\text{we own all six}) \ge 0.9$ ---
+it is $\mathbf{99.96\%}$ over $91$ pairs. Deepening or widening this search, or
+giving it a perfect leaf, cannot buy the thing it would need to buy.
+
+\subsection{Direction 4: the teammate ceiling is 46\% interaction}
+
+\S\ref{sec:missing} priced perfect card-reading at $+6.61$ sets per game and
+split it: teammates' cards are worth $+3.41$ $[+3.16, +3.66]$, opponents'
+$+1.31$ $[+1.01, +1.61]$. Direction~4 asks what the teammate half is
+\emph{for}, by handing a seat the true deal in one channel at a time over
+$600$ games:
+
+\begin{center}\small
+\begin{tabular}{@{}llr@{}}
+\toprule
+arm & what the seat is given & ceiling \\
+\midrule
+$D$ & the truth only when it \emph{declares} & $+1.077$ $[+0.798, +1.355]$ \\
+$K$ & the truth only when it \emph{asks} & $+0.760$ $[+0.473, +1.047]$ \\
+$T$ & both & $+3.410$ $[+3.162, +3.658]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$D + K = 1.84$ against $T = 3.41$. \textbf{The two channels together are worth
+$1.57$ sets per game more than the sum of their parts} --- $46\%$ of the
+teammate ceiling is in neither channel alone. Knowing the deal only when you
+declare, or only when you ask, each buys about a set; knowing it in both buys
+three and a half.
+
+That is the finding that makes directions 5, 6 and 7 the right things to have
+tried and the wrong things to have expected to work. Each attacks one channel.
+The interaction term is by construction unreachable from either.
+
+\subsection{How much is actually left, measured with power}
+
+An earlier draft of this paper carried an assertion of ours --- \emph{``what is
+left in this engine is not a defect to be fixed''} --- that nothing measured
+supported. It is corrected in place, and these runs replace it.
+
+\begin{center}\small
+\begin{tabular}{@{}lp{8.4cm}@{}}
+\toprule
+channel & verdict \\
+\midrule
+ask, one ply, objective alone & \textbf{no headroom}: $-0.0188$ $[-0.0951, +0.0575]$ \\
+ask, one ply, deployed champion & \textbf{weak positive}: $+0.1641$ $[+0.0046, +0.3236]$, and not caused by the ask choice \\
+declaration & \textbf{correct in both directions} \\
+single-seat deviation & $-0.608$ $[-1.122, -0.095]$; uninformative by construction \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Both ask intervals are clustered by deal (\S\ref{sec:v11-cluster}), which is
+why they are wider than the figures an earlier draft carried.
+
+\paragraph{The declaration is taken at the right moment.}
+\texttt{scripts4/declare\_regret.py} fills a hole \texttt{ask\_regret} names in
+its own source (\texttt{if not isinstance(chosen, Ask): continue}). With claim
+actions in the set, over $109$ positions where a declaration was available,
+the load-bearing figure is a within-position contrast: where the policy asked,
+\textbf{best claim minus best ask $= -1.1849 \pm 0.1051$} over $98$ positions,
+and the best claim beat the best ask in \textbf{3 of 98}.
+
+This refutes the story that motivated four earlier directions. The teammate
+oracle declares at move $39.2$ against our $70.6$ because it is \emph{certain},
+not because early declaration is better --- and that certainty cannot be
+bought: the public record holds $92.1\%$ $[91.2, 92.9]$ of which partner holds
+an unlocated card, and quadrupling the posterior draws moves it $0.2$ points.
+
+\subsection{The one-step regret belongs to the turf, and the turf is the positions}
+
+The champion shows a small positive one-step regret while the ask objective
+alone does not. Read side by side those two runs appear to say the lookahead
+makes ask selection worse. They cannot support that: they differ in the
+positions harvested, in the continuation that scores them, and in whether the
+acting and evaluating posteriors agree.
+
+\texttt{scripts4/actor\_compare.py} holds all three fixed by construction ---
+one set of positions, one set of worlds, one set of rollouts, \emph{both}
+actors scored on them. Run as a $2\times2$ over the two remaining confounds,
+every interval clustered by deal:
+
+\begin{center}\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+harvest & continuation & pos & deals & champion $-$ objective \\
+\midrule
+objective & objective & 129 & 5 & $-0.0006$ $[-0.0409, +0.0396]$ \\
+objective & champion  & 110 & 4 & $+0.0417$ $[-0.0439, +0.1273]$ \\
+champion  & objective & 125 & 6 & $-0.0087$ $[-0.0843, +0.0669]$ \\
+champion  & champion  & 103 & 5 & $+0.0202$ $[-0.0465, +0.0870]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{The actors do not separate in any cell}, the tightest at $\pm0.041$,
+while picking a different ask in $34$--$36\%$ of positions. So the lookahead is
+not a tie-break, and whatever it earns --- it won $+0.104$ $[+0.020, +0.189]$
+over $6{,}000$ pairs --- it earns \emph{beyond} one ply. That is the first
+direct evidence of it.
+
+The continuation, measured paired on identical positions, is null:
+$+0.0176$ $[-0.1010, +0.1362]$ over $213$ positions in $9$ deals. What is left
+is the position distribution, at $+0.0803$ $[-0.0786, +0.2393]$. So the answer
+is an \textbf{elimination} --- not the ask choice, not the continuation --- and
+the size of what remains is a lead rather than a finding. We priced settling it
+at $15$--$30$ CPU-hours for an interval that would still touch zero, and did
+not spend it.
+
+\subsection{The endgame ask correction does not survive the rule change}
+
+\S\ref{sec:res-rules} flipped the misdeclaration rule to the standard
+opponent-award baseline. The endgame ask correction \texttt{endgame\_d\_info}
+$= +2.0$ was fitted against \emph{void-era} one-ply targets --- the fit landed
+twelve hours before the flip --- and was withdrawn from the deployed
+configuration pending a refit. The refit does not bring it back, and it says
+something sharper than ``null''.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+rows & rule & grid's \texttt{info} & held-out gain over champion \\
+\midrule
+388 & void & $+2.00$ & $+0.0092$ $[-0.0282, +0.0467]$ \\
+457 & award, same 79 deals & $\mathbf{-1.00}$ & $+0.0142$ $[-0.0118, +0.0403]$ \\
+764 & award, all 156 deals & $+0.10$ & $-0.0011$ $[-0.0033, +0.0011]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Held to the same deals, so that only the rule moves, the grid's pick
+\textbf{reverses sign}. The scale family still picks $k=1$ under both rules, so
+that half of the original diagnosis stands: de-weighting the success
+probability does not help.
+
+The part that is not about this knob: $\texttt{info} = +2.0$ was nominated for
+a $4{,}000$-pair duel on a held-out gain of $+0.0092$ whose interval covers
+zero and is four times the estimate. The duel itself was pre-registered and run
+as written, and its $+0.0835$ $[+0.0338, +0.1332]$ remains a true fact about
+the void rule. What was wrong is upstream: the screen that chose where to spend
+the pairs could not tell its winner from zero, and reported a point estimate
+with no interval. \textbf{Standing rule adopted:} an offline screen nominates
+an arm for a duel only if its held-out gain has an interval excluding zero,
+clustered by whatever unit shares a deal.
+
+\subsection{A correction to intervals published earlier in this paper}
+\label{sec:v11-cluster}
+
+\texttt{ask\_regret}'s harvest walks games in order and emits \emph{every}
+qualifying ply, returning as soon as it has enough. So a run reported as
+``$162$ positions'' is $162$ consecutive plies drawn from \textbf{eight deals},
+sampled twenty to forty deep. Positions inside one deal share the hands, the
+history and every earlier decision. Every interval this instrument published
+divided by $162$ rather than by $8$.
+
+Fixing the count alone would have replaced one too-narrow interval with
+another: cluster-robust variance is asymptotic in the \emph{number of
+clusters}, and these runs have three to ten deals, so the standard error must
+be paired with a $t$ critical value at $k-1$ degrees of freedom rather than
+$1.96$. At six clusters that is a $31\%$ difference; at four, $62\%$.
+
+\begin{center}\small
+\begin{tabular}{@{}lrrc@{}}
+\toprule
+run & as published & clustered by deal & deals \\
+\midrule
+ask objective alone & $-0.0188$ $[-0.0808, +0.0431]$ & $-0.0188$ $[-0.0951, +0.0575]$ & 8 \\
+deployed champion & $+0.1641$ $[+0.0797, +0.2484]$ & $+0.1641$ $[+0.0046, +0.3236]$ & 8 \\
+champion, narrow run & $-0.0893$ $[-0.2535, +0.0749]$ & $-0.0893$ $[-0.7109, +0.5323]$ & 3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{No conclusion reverses, but one comes close}: the champion's positive
+one-step regret still excludes zero, by $+0.0046$ against a published lower
+bound of $+0.0797$, with an interval $1.89\times$ wider. One conclusion
+elsewhere \emph{is} withdrawn --- a regret figure over $11$ positions from $4$
+deals, which no longer excludes zero and is reported as silent rather than
+supporting.
+
+The audit extends to every other instrument that harvests positions this way.
+The four slopes in \S\ref{sec:res-learn} are restated with deal-clustered
+standard errors; none reverses. \textbf{Duplicate-deal duels are unaffected}:
+the duel harness pairs on the deal and treats the pair as the independent unit,
+and already used a $t$ critical value at the pair count. Every headline duel
+figure in this paper --- including $+2.3466$ against v0.7 and the $+0.104$
+lookahead result --- stands exactly as written.
+
+\subsection{What v1.1 leaves}
+
+The interaction term of direction~4 is real, it is $46\%$ of the largest
+information channel in the game, and directions 5, 6 and 7 establish that it is
+not reachable from the ask basis, not reachable from the possession search, and
+not reachable by the two auxiliary knobs. The theorem of \S\ref{sec:v11-theorem}
+is the strongest of these because it holds against a perfect leaf evaluation
+rather than against the one we have.
+
+What that leaves is a channel this engine does not have: something that couples
+the ask and the declaration rather than improving either. Direction~3 built the
+one such mechanism the rules permit --- a pre-play convention --- and the duel
+refused it, at a cost the belief-space instrument could not see because
+\emph{speaking} is itself the price. We do not have a candidate that survives
+both the theorem and that duel, and we say so rather than nominating one.
 
 % =====================================================================
 \section{Limitations}
