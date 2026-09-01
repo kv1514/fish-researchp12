@@ -3647,3 +3647,62 @@ returns. This inverts the claim that held across all five earlier arms, and
 than letting the old claim be restated as though it had been tested broadly.
 `margin_identity.sweep` carries `vs` on every row for the same reason: without
 it, two opponents read as a replication of one.
+
+## Why the dose differs: it factors into three, and one of them is our own
+
+400 deals an opponent, both arms on the identical deal, every opponent-side
+quantity read off the arm that does not signal
+(`results/signal_dose_arms.json`).
+
+    fires/game = opportunity  x  amplification  x  second gate
+                   (s_A)        (s_B / s_A)       (f / s_B)
+
+    opponent      s_A   s_B/s_A   f/s_B   product   measured
+    dylan_v07   4.150      3.02   0.896    11.248     11.248
+    ev_claim    3.005      1.65   0.462     2.285      2.283
+    search      3.112      1.64   0.390     1.992      1.992
+    memory      2.770      1.95   0.421     2.275      2.277
+    self        1.030      1.44   0.423     0.627      0.627
+
+Against ev_claim the dose ratio is 4.93 and the three terms are 1.38, 1.84 and
+1.94, product 4.92. **No term dominates.**
+
+1. **Opportunity is not what it looks like.** We enter the stuck state LESS
+   often against dylan_v07 (0.517 episodes a game) than against ev_claim
+   (0.703), search (0.733) or memory (0.812). The entire opportunity
+   difference is duration: 1.87x longer episodes. Board ambiguity (24.5-26.0
+   cards) and how often their asks land on our seats (22.5-27.9) are flat
+   across all five, so it is not that dylan_v07 leaves our hands less located.
+
+2. **The second gate is the largest term and the most interpretable.** The
+   protocol needs the stuck state AND a best ask unlikely to land. Against
+   dylan_v07, 89.6% of stuck turns clear that bar; everywhere else 39-46%.
+   When we cannot place a half-suit against this opponent we usually have
+   nothing worth asking anywhere either. The position is more thoroughly
+   exhausted, not merely more ambiguous.
+
+3. **The dose is partly endogenous, and that is the finding with consequences.**
+   A signal is a doomed ask, so it throws away the turn and returns us to the
+   same stuck state: the protocol EXTENDS the state that triggers it, 3.02x
+   against dylan_v07 and 1.44-1.95x against the rest.
+
+**This is why prereg/signal_generality.md could not work, and the reason is
+worse than underpowering.** That registration predicted each opponent's effect
+by scaling one rate multiplier onto that opponent's baseline error rate, which
+assumes the dose is an opponent property that can be measured in advance and
+matched across arms. A third of the difference is the mechanism's own feedback,
+so the independent variable was not independent. A matched-dose design cannot
+be built by choosing opponents; it would have to hold fires a game fixed by
+construction, and the budget parameter caps a dose but cannot raise one, while
+no opponent in this registry but dylan_v07 reaches the volume where the effect
+exists.
+
+Amplification tracks the second gate across these five opponents, which is what
+a mechanism that spends turns to stay where it is should do, but five points do
+not fix a functional form and none is claimed.
+
+**Process note.** The first pass of this screen measured only the shipped arm,
+found the opportunity differed by 1.38x where the dose differed by 4.12x, and
+reported the 2.98x gap as unexplained rather than reaching for a story. The
+gap was the two gates it had not instrumented. Naming the residual is what made
+the second pass obvious.

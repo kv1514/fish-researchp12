@@ -1,0 +1,142 @@
+{
+ "opponents": {
+  "dylan_v07": {
+   "shipped": {
+    "stuck_turns_per_game": 4.15,
+    "stuck_turns_half_width": 1.238,
+    "episodes_per_game": 0.5175,
+    "episodes_half_width": 0.065,
+    "turns_per_episode": 8.019,
+    "game_turns": 112.14,
+    "their_hits_on_us_per_game": 23.3725,
+    "their_hits_half_width": 0.5609,
+    "ambiguous_cards_mean": 24.4878
+   },
+   "signalling": {
+    "stuck_turns_per_game": 12.5525,
+    "stuck_turns_half_width": 2.8349,
+    "episodes_per_game": 0.545,
+    "fires_per_game": 11.2475,
+    "fires_half_width": 2.739,
+    "game_turns": 127.435
+   },
+   "stuck_turns_ratio_signal_over_shipped": 3.025,
+   "fires_per_stuck_turn": 0.896,
+   "games": 400,
+   "unfinished": 0
+  },
+  "ev_claim": {
+   "shipped": {
+    "stuck_turns_per_game": 3.005,
+    "stuck_turns_half_width": 0.4515,
+    "episodes_per_game": 0.7025,
+    "episodes_half_width": 0.0678,
+    "turns_per_episode": 4.278,
+    "game_turns": 109.3325,
+    "their_hits_on_us_per_game": 27.935,
+    "their_hits_half_width": 0.743,
+    "ambiguous_cards_mean": 25.634
+   },
+   "signalling": {
+    "stuck_turns_per_game": 4.945,
+    "stuck_turns_half_width": 0.6845,
+    "episodes_per_game": 0.72,
+    "fires_per_game": 2.2825,
+    "fires_half_width": 0.3376,
+    "game_turns": 112.2175
+   },
+   "stuck_turns_ratio_signal_over_shipped": 1.646,
+   "fires_per_stuck_turn": 0.462,
+   "games": 400,
+   "unfinished": 0
+  },
+  "search": {
+   "shipped": {
+    "stuck_turns_per_game": 3.1125,
+    "stuck_turns_half_width": 0.443,
+    "episodes_per_game": 0.7325,
+    "episodes_half_width": 0.0736,
+    "turns_per_episode": 4.249,
+    "game_turns": 106.95,
+    "their_hits_on_us_per_game": 24.17,
+    "their_hits_half_width": 0.6532,
+    "ambiguous_cards_mean": 25.2767
+   },
+   "signalling": {
+    "stuck_turns_per_game": 5.1075,
+    "stuck_turns_half_width": 0.6658,
+    "episodes_per_game": 0.8025,
+    "fires_per_game": 1.9925,
+    "fires_half_width": 0.2861,
+    "game_turns": 109.27
+   },
+   "stuck_turns_ratio_signal_over_shipped": 1.641,
+   "fires_per_stuck_turn": 0.39,
+   "games": 400,
+   "unfinished": 0
+  },
+  "memory": {
+   "shipped": {
+    "stuck_turns_per_game": 2.77,
+    "stuck_turns_half_width": 0.4206,
+    "episodes_per_game": 0.8125,
+    "episodes_half_width": 0.0822,
+    "turns_per_episode": 3.409,
+    "game_turns": 109.98,
+    "their_hits_on_us_per_game": 22.5075,
+    "their_hits_half_width": 0.6999,
+    "ambiguous_cards_mean": 26.0197
+   },
+   "signalling": {
+    "stuck_turns_per_game": 5.405,
+    "stuck_turns_half_width": 0.8126,
+    "episodes_per_game": 0.905,
+    "fires_per_game": 2.2775,
+    "fires_half_width": 0.3881,
+    "game_turns": 113.1875
+   },
+   "stuck_turns_ratio_signal_over_shipped": 1.951,
+   "fires_per_stuck_turn": 0.421,
+   "games": 400,
+   "unfinished": 0
+  },
+  "self": {
+   "shipped": {
+    "stuck_turns_per_game": 1.03,
+    "stuck_turns_half_width": 0.2136,
+    "episodes_per_game": 0.3475,
+    "episodes_half_width": 0.0538,
+    "turns_per_episode": 2.964,
+    "game_turns": 104.065,
+    "their_hits_on_us_per_game": 26.625,
+    "their_hits_half_width": 0.7661,
+    "ambiguous_cards_mean": 25.2372
+   },
+   "signalling": {
+    "stuck_turns_per_game": 1.4825,
+    "stuck_turns_half_width": 0.3853,
+    "episodes_per_game": 0.3525,
+    "fires_per_game": 0.6275,
+    "fires_half_width": 0.2704,
+    "game_turns": 104.635
+   },
+   "stuck_turns_ratio_signal_over_shipped": 1.439,
+   "fires_per_stuck_turn": 0.423,
+   "games": 400,
+   "unfinished": 0
+  }
+ },
+ "descriptive": true,
+ "seed_deal": 13100000,
+ "seed_agent": 131000,
+ "n_deals": 200,
+ "n_games": 4000,
+ "arms": [
+  "A_shipped",
+  "B_signal"
+ ],
+ "vs": "dylan_v07|ev_claim|search|memory|self",
+ "prereg": null,
+ "smoke": false,
+ "minutes": 32.4
+}

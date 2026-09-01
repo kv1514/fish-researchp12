@@ -657,6 +657,22 @@ WATCH = [
      "m<=2 effect vs Dylan v0.7", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
      "m<=2 vs v0.7, CI low", "at a power sized for\ndeception-scale flips"),
+    # Why the dose differs (scripts4/signal_dose_screen.py). Watched because
+    # the paper's claim is that the dose FACTORS, and a factorisation whose
+    # terms drift stops being one.
+    ("signal_dose_arms.json", "opponents.dylan_v07.shipped.stuck_turns_per_game",
+     "{:.3f}", "dylan_v07 stuck turns, protocol off", "$4.150$"),
+    ("signal_dose_arms.json", "opponents.dylan_v07.fires_per_stuck_turn",
+     "{:.3f}", "dylan_v07 second-gate pass rate", "$0.896$"),
+    ("signal_dose_arms.json", "opponents.ev_claim.fires_per_stuck_turn",
+     "{:.3f}", "ev_claim second-gate pass rate", "$0.462$"),
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.stuck_turns_ratio_signal_over_shipped",
+     "{:.2f}", "dylan_v07 amplification", "$3.02$"),
+    ("signal_dose_arms.json", "opponents.dylan_v07.shipped.episodes_per_game",
+     "{:.3f}", "dylan_v07 episodes a game", "$0.517$ episodes a"),
+    ("signal_dose_arms.json", "opponents.memory.shipped.episodes_per_game",
+     "{:.3f}", "memory episodes a game", "$0.812$"),
     # The generality run (prereg/signal_generality.md). Watched because the
     # conclusion is that the run does NOT answer its question, and the reason
     # is a comparison of doses -- so the doses are the numbers that carry it.
