@@ -226,6 +226,93 @@ def _pair_job(a):
     return _play(seed, kv, vs, arm, agent0)
 
 
+SCORE_DEALS_AMENDED = 2_500          # prereg amendment 1, 2026-09-01
+
+
+def score(n_deals=None, n_jobs=None, out=None) -> int:
+    """Stage two. Refuses to run unless calibration passed its gate."""
+    t0 = time.time()
+    cal_path = ROOT / "results" / "matched_dose_calibration.json"
+    if not cal_path.exists():
+        raise SystemExit("calibration has not run; stage two is not licensed.")
+    cal = json.loads(cal_path.read_text())
+    if cal.get("smoke"):
+        raise SystemExit("the calibration on disk is a SMOKE, not the "
+                         "registered bank.")
+    if not cal.get("gate_passes"):
+        raise SystemExit(
+            "the feasibility gate FAILED: %s. prereg/signal_matched_dose.md "
+            "abandons the study on that outcome, and re-picking D after "
+            "seeing it is barred." % cal["gate"])
+    D = cal["common_dose_D"]
+    params = {vs: {k: v for k, v in p.items() if not k.startswith("_")}
+              for vs, p in cal["params"].items()}
+    n_deals = SCORE_DEALS_AMENDED if n_deals is None else n_deals
+
+    jobs = [(SCORE_SEED + i, kv, vs, arm, SCORE_AGENT)
+            for i in range(n_deals) for kv in (True, False)
+            for vs in GRID for arm in ({}, params[vs])]
+    with Pool(n_jobs or 4) as pool:
+        rows = pool.map(_pair_job, jobs)
+
+    out_p = {"opponents": {}}
+    print("\n=== matched dose, seed %d, %d deals x 2 parities, D = %.1f"
+          % (SCORE_SEED, n_deals, D))
+    withdrawn = []
+    for vs in GRID:
+        idx = [i for i, j in enumerate(jobs) if j[2] == vs]
+        a = [rows[i] for i in idx[0::2]]
+        b = [rows[i] for i in idx[1::2]]
+        deals = [jobs[i][0] for i in idx[0::2]]
+        m, h, k = cluster_ci([x["opp_wrong"] - y["opp_wrong"]
+                              for y, x in zip(a, b)], deals)
+        md, mh, _ = cluster_ci([x["margin"] - y["margin"]
+                                for y, x in zip(a, b)], deals)
+        dose = round(_mean(b, "fires"), 3)
+        off = abs(dose - D) / D
+        out_p["opponents"][vs] = {
+            "params": params[vs], "dose": dose, "dose_off_by": round(off, 4),
+            "their_wrong_effect": {
+                "mean": round(m, 4), "half_width": round(h or 0.0, 4),
+                "ci95": [round(m - (h or 0), 4), round(m + (h or 0), 4)],
+                "n_clusters": k},
+            "margin_effect": {"mean": round(md, 4),
+                              "half_width": round(mh or 0.0, 4)},
+            "unfinished": sum(1 for r in a + b if not r["terminal"]),
+            "fallbacks": sum(r["fallbacks"] for r in a + b)}
+        d = out_p["opponents"][vs]
+        print("\n  %-11s dose %.3f (%.1f%% off D)   params %s"
+              % (vs, dose, 100 * off, params[vs]))
+        print("    their extra wrong declarations  %+0.4f [%+0.4f, %+0.4f]"
+              % (m, d["their_wrong_effect"]["ci95"][0],
+                 d["their_wrong_effect"]["ci95"][1]))
+        print("    margin (NOT the primary)        %+0.4f +-%0.4f"
+              % (md, mh or 0.0))
+        if off > DOSE_TOLERANCE:
+            withdrawn.append("%s dose %.3f is %.1f%% from D=%.1f"
+                             % (vs, dose, 100 * off, D))
+        if d["unfinished"] or d["fallbacks"]:
+            withdrawn.append("%s had unfinished games or bridge fallbacks" % vs)
+
+    out_p["withdrawn"] = withdrawn
+    if withdrawn:
+        print("\n  WITHDRAWN: %s" % "; ".join(withdrawn))
+    out_p.update(prereg="signal_matched_dose", seed_deal=SCORE_SEED,
+                 seed_agent=SCORE_AGENT, n_deals=n_deals,
+                 n_games=len(rows), vs="|".join(GRID), common_dose_D=D,
+                 amendment="n raised 800 -> 2500 after calibration",
+                 smoke=n_deals != SCORE_DEALS_AMENDED,
+                 minutes=round((time.time() - t0) / 60, 1))
+    if out_p["smoke"] and out is None:
+        raise SystemExit("%d is not the amended %d; pass an explicit path "
+                         "for a smoke." % (n_deals, SCORE_DEALS_AMENDED))
+    path = write_result(
+        Path(out) if out else ROOT / "results" / "matched_dose_scored.json",
+        out_p)
+    print("\nwrote %s  (%s min)" % (path, out_p["minutes"]))
+    return 0
+
+
 def main(argv) -> int:
     what = argv[0] if argv else "calibrate"
     rest = [x for x in argv[1:]]
@@ -234,8 +321,9 @@ def main(argv) -> int:
     out = rest[2] if len(rest) > 2 else None
     if what == "calibrate":
         return calibrate(n_deals, n_jobs, out)
-    raise SystemExit("stage %r is not implemented until calibration passes"
-                     % what)
+    if what == "score":
+        return score(n_deals, n_jobs, out)
+    raise SystemExit("stages are 'calibrate' and 'score'; got %r" % what)
 
 
 if __name__ == "__main__":
