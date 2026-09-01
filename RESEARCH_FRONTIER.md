@@ -3706,3 +3706,62 @@ found the opportunity differed by 1.38x where the dose differed by 4.12x, and
 reported the 2.98x gap as unexplained rather than reaching for a story. The
 gap was the two gates it had not instrumented. Naming the residual is what made
 the second pass obvious.
+
+## matched dose: GENERAL, and it transfers as a FACTOR not a fixed rise
+
+The first positive generality result in this line, after two designs that could
+not answer.
+
+**Calibration** (13,900,000, scores nothing). The cheapness gate is saturated
+against dylan_v07: opening it 0.50 -> 1.00 moves the dose 9.242 -> 9.040. And
+against ev_claim opening it fully buys only 2.348 -> 3.112, because the
+amplification term does not rise with it. So the common dose is D = 3.1, far
+below the 8.940 where the effect was known to exist, and the registration's
+feasibility gate applied. It PASSED at +0.0600 [+0.0118, +0.1082], and in
+passing added a fourth point to a dose-response that had three:
+
+    0.686  +0.0083 [-0.0043, +0.0208]
+    1.477  +0.0073 [-0.0063, +0.0208]
+    3.118  +0.0600 [+0.0118, +0.1082]   <- new; the mechanism turns on here
+    8.940  +0.1363 [+0.1135, +0.1590]
+
+**This falsified a sentence I had put in the paper**, that no opponent but
+dylan_v07 reaches a volume where the effect exists. It exists at 3.1 and
+ev_claim reaches it. Corrected in place.
+
+**Scored run** (14,300,000, 2,500 paired deals, both arms on identical deals):
+
+    opponent     dose   their extra wrong declarations
+    dylan_v07   2.766   +0.0454 [+0.0326, +0.0582]
+    ev_claim    2.872   +0.0172 [+0.0048, +0.0296]   z = 2.72
+
+Both clear zero. Doses 10.8% and 7.3% off D, inside the registered 15%
+tolerance; 0 unfinished, 0 fallbacks.
+
+**VERDICT: GENERAL.** At equal dose the mechanism raises a second engine's
+declaration error rate, so the effect is not specific to dylan_v07.
+
+**And the registration's two readings separate.** Transferring this run's own
+reference rise of 1.136pp onto ev_claim's 7.96% baseline: the same rate FACTOR
+predicts +0.0160, inside the interval; the same rate RISE in points predicts
++0.0423, outside it. The mechanism costs an opponent a roughly constant
+FRACTION of the declarations they were already getting wrong. An opponent who
+misdeclares half as often loses half as much to it -- which is why every
+low-error engine in the registry looked like a null.
+
+**What travels with it.** The dose is 2.8, not the 8.9 the shipped protocol
+produces, so this is generality at a volume neither engine plays at by default.
+The test arm has its gate fully open and pays for it in tempo: margin -0.1372
++-0.0529 against the reference arm's +0.0760 +-0.0393, which the registration
+said in advance is the instrument's cost and not the outcome. Two engines under
+one rule set; nothing about human declarers.
+
+**One condition unverified, recorded as such.** Withdrawal condition 1 requires
+the margin identity to close on every arm, and the scoring instrument as run
+did not record our own declaration ledger, so it could not be checked from the
+payload. The primary is directly counted and does not pass through the
+identity, and the rule it depends on is pinned; the instrument now records the
+ledger and reports a residual, zero on every game of a re-run smoke. But on
+this bank the condition is recorded as UNVERIFIED, not as passed.
+
+Nothing ships. signal_max_p above 0.50 is an instrument, not a configuration.

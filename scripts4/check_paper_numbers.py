@@ -657,6 +657,23 @@ WATCH = [
      "m<=2 effect vs Dylan v0.7", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
      "m<=2 vs v0.7, CI low", "at a power sized for\ndeception-scale flips"),
+    # The matched-dose study (prereg/signal_matched_dose.md). The first
+    # positive generality result in this line, so the two intervals that
+    # carry it and the doses that make them comparable are all watched.
+    ("matched_dose_scored.json",
+     "opponents.dylan_v07.their_wrong_effect.mean", "{:+.4f}",
+     "matched dose, reference channel", "$+0.0454$"),
+    ("matched_dose_scored.json",
+     "opponents.ev_claim.their_wrong_effect.mean", "{:+.4f}",
+     "matched dose, test channel", "$+0.0172$"),
+    ("matched_dose_scored.json", "opponents.dylan_v07.dose", "{:.3f}",
+     "matched dose, reference dose", "$2.766$"),
+    ("matched_dose_scored.json", "opponents.ev_claim.dose", "{:.3f}",
+     "matched dose, test dose", "$2.872$"),
+    ("matched_dose_calibration.json", "gate.mean", "{:+.4f}",
+     "feasibility gate at D", "It cleared, at"),
+    ("matched_dose_calibration.json", "common_dose_D", "{:.1f}",
+     "the common dose D", "highest dose both reach is $D = "),
     # Why the dose differs (scripts4/signal_dose_screen.py). Watched because
     # the paper's claim is that the dose FACTORS, and a factorisation whose
     # terms drift stops being one.

@@ -80,6 +80,11 @@ def _play(deal_seed: int, kv_even: bool, vs: str, arm: dict,
     our_team = 0 if kv_even else 1
     fires = 0
     opp_declares = opp_wrong = 0
+    #: OUR side of the ledger. Without it withdrawal condition 1 -- that the
+    #: margin identity closes -- cannot be checked from the payload, which is
+    #: how the 14,300,000 run came to be scored with that condition merely
+    #: assumed rather than verified.
+    our_declares = our_wrong = 0
     for _ in range(600):
         if st.is_terminal:
             break
@@ -90,12 +95,21 @@ def _play(deal_seed: int, kv_even: bool, vs: str, arm: dict,
                      or {}).get("kind") == "signal":
             fires += 1
         ev = st.apply(mover, act)
-        if isinstance(ev, ClaimEvent) and not ours:
-            opp_declares += 1
-            opp_wrong += int(ev.winner != team_of(mover))
+        if isinstance(ev, ClaimEvent):
+            if ours:
+                our_declares += 1
+                our_wrong += int(ev.winner != team_of(mover))
+            else:
+                opp_declares += 1
+                opp_wrong += int(ev.winner != team_of(mover))
     ours_sets = sum(1 for w in st.set_winner if w == our_team)
     theirs = sum(1 for w in st.set_winner if w == 1 - our_team)
-    return {"margin": ours_sets - theirs, "fires": fires, "opp_declares": opp_declares,
+    #: margin = 2*(d_us - w_us + w_them) - 9 under the award rule, exactly.
+    identity = 2 * (our_declares - our_wrong + opp_wrong) - 9
+    return {"margin": ours_sets - theirs, "fires": fires,
+            "our_declares": our_declares, "our_wrong": our_wrong,
+            "identity_residual": (ours_sets - theirs) - identity,
+            "opp_declares": opp_declares,
             "opp_wrong": opp_wrong, "terminal": int(st.is_terminal),
             "fallbacks": sum(getattr(a, "fallbacks", 0) for a in agents)}
 
@@ -279,7 +293,9 @@ def score(n_deals=None, n_jobs=None, out=None) -> int:
             "margin_effect": {"mean": round(md, 4),
                               "half_width": round(mh or 0.0, 4)},
             "unfinished": sum(1 for r in a + b if not r["terminal"]),
-            "fallbacks": sum(r["fallbacks"] for r in a + b)}
+            "fallbacks": sum(r["fallbacks"] for r in a + b),
+            "identity_residual_max": max(abs(r["identity_residual"])
+                                         for r in a + b)}
         d = out_p["opponents"][vs]
         print("\n  %-11s dose %.3f (%.1f%% off D)   params %s"
               % (vs, dose, 100 * off, params[vs]))
@@ -293,6 +309,12 @@ def score(n_deals=None, n_jobs=None, out=None) -> int:
                              % (vs, dose, 100 * off, D))
         if d["unfinished"] or d["fallbacks"]:
             withdrawn.append("%s had unfinished games or bridge fallbacks" % vs)
+        if d["identity_residual_max"]:
+            withdrawn.append("%s: the margin identity does not close "
+                             "(max residual %d)"
+                             % (vs, d["identity_residual_max"]))
+        print("    identity residual, worst game   %d"
+              % d["identity_residual_max"])
 
     out_p["withdrawn"] = withdrawn
     if withdrawn:

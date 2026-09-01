@@ -5158,11 +5158,84 @@ across these five opponents, which is what a mechanism that spends turns to
 stay where it is should do, but five points do not fix the functional form and
 none is claimed.
 
-A matched-dose design therefore cannot be built by choosing opponents. It
-would have to hold fires a game fixed by construction --- the budget parameter
-of \S\ref{sec:missing} caps a dose but cannot raise one --- and no opponent
-in this registry other than \texttt{dylan\_v07} reaches the volume at which
-the effect exists.
+A matched-dose design therefore cannot be built by choosing opponents. It has
+to hold fires a game fixed by construction, and the budget parameter of
+\S\ref{sec:missing} caps a dose but cannot raise one.
+
+\paragraph{The matched-dose comparison, and the first generality result in this
+line.} \path{prereg/signal_matched_dose.md} registered that design before
+either of its banks existed. The lever that raises a dose is the cheapness
+gate, \texttt{signal\_max\_p}: the protocol fires only where our best ordinary
+ask is unlikely to land, and opening it fires on stuck turns where a decent ask
+remained. It does not change what a signal proves, because
+\texttt{signalling\_ask} picks a card in a half-suit our own team provably
+holds and is doomed whatever the gate says; only the opportunity cost of the
+turn moves. The price is that the arms are then different policies, and the
+comparison is of the protocol \emph{tuned to fire $N$ times a game} across
+opponents rather than of the shipped protocol.
+
+Calibration (\path{results/matched_dose_calibration.json}, a bank that scores
+nothing) settled two guesses. The gate is saturated against
+\texttt{dylan\_v07}, where opening it from $0.50$ to $1.00$ moves the dose from
+$9.242$ to $9.040$; and against \texttt{ev\_claim} opening it fully buys only
+$2.348$ to $3.112$, because the amplification term does not rise with it. So
+the highest dose both reach is $D = 3.1$, and the reference opponent is brought
+down to it with a budget of $16$.
+
+That is far below the $8.940$ at which the effect was known to exist, so the
+registration's feasibility gate applied: the reference opponent's own channel
+had to clear zero at $D$ or the study was to be abandoned unrun. It cleared, at
+$+0.0600$ $[+0.0118, +0.1082]$, and in clearing it filled the interior of the
+dose-response that had only three measured points. \textbf{This falsifies a
+sentence in the previous paragraph of an earlier revision, which said no other
+opponent reaches a volume at which the effect exists: the effect exists at
+$3.1$, and \texttt{ev\_claim} reaches it.}
+
+The scored run, $2{,}500$ paired deals at a fresh bank
+(\path{results/matched_dose_scored.json}), lands both opponents inside the
+registered $15\%$ dose tolerance at $2.766$ and $2.872$, with no unfinished
+games and no bridge fallbacks:
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+opponent & dose & their extra wrong declarations a game \\
+\midrule
+\texttt{dylan\_v07} & $2.766$ & $+0.0454$ $[+0.0326, +0.0582]$ \\
+\texttt{ev\_claim}  & $2.872$ & $+0.0172$ $[+0.0048, +0.0296]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Both clear zero, so at equal dose the mechanism raises a second
+engine's declaration error rate and the effect is \emph{not} specific to
+\texttt{dylan\_v07}. The registration named two ways it could generalise and
+the interval separates them. Transferring this run's own reference rise of
+$1.136$ points to \texttt{ev\_claim}'s $7.96\%$ baseline, the same rate
+\emph{factor} predicts $+0.0160$, which is inside the interval, and the same
+rate \emph{rise} in points predicts $+0.0423$, which is outside it. The
+mechanism costs an opponent a roughly constant \emph{fraction} of the
+declarations they were already getting wrong, so an opponent who misdeclares
+half as often loses half as much to it.
+
+Three things travel with that. The dose is $2.8$, not the $8.9$ the shipped
+protocol produces against \texttt{dylan\_v07}, so this is generality at a
+volume neither engine plays at by default. The test opponent's arm has its gate
+fully open, which costs it in tempo: its margin effect is $-0.1372$ $\pm
+0.0529$ against the reference arm's $+0.0760$ $\pm 0.0393$, exactly the
+instrument cost the registration said in advance was not the outcome being
+measured. And this is two engines under one rule set, not a statement about
+human declarers.
+
+One condition was not checked. The registration requires the margin identity to
+close on every arm, and the scoring instrument as run did not record our own
+declaration ledger, so that could not be verified from its payload. The
+primary here is a directly counted quantity and does not pass through the
+identity, the rule the identity depends on is pinned in the harness, and the
+instrument now records the ledger and reports a residual --- zero on every game
+of a re-run smoke. But on the $14{,}300{,}000$ bank the condition is recorded as
+unverified rather than as passed.
 
 One reading from that run survives its confound, because it does not depend on
 the opponent channel at all. Against \texttt{ev\_claim} the protocol is almost
