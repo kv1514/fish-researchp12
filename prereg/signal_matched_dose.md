@@ -176,3 +176,62 @@ rather than to total volume would not be controlled by this design.
 Nothing here enters `V06_DEPLOYED` on any outcome. `signal_max_p` above 0.50 is
 a measurement instrument, not a proposed configuration, and the margin it
 produces is expected to be worse than the champion's.
+
+---
+
+## Amendment 1, 2026-09-01: sample size, after calibration and before scoring
+
+Recorded **after the calibration bank at 13,900,000 and before any deal of the
+scored bank at 14,300,000 is played**. It changes the sample size and nothing
+else.
+
+**What calibration found.** The gate passes: at the common dose the reference
+opponent's channel is **+0.0600 [+0.0118, +0.1082]**, clear of zero, so the
+study proceeds. But the achievable common dose is **D = 3.1**, not the 8 to 9
+this document's power section assumed. `ev_claim` tops out at 3.112 fires a
+game even with the cheapness gate fully open, and against `dylan_v07` the gate
+is already so nearly saturated that opening it changes nothing (9.242 at
+p=0.50 against 9.040 at p=1.00), so the reference opponent has to be brought
+down to D with a budget of 16.
+
+**Why that matters.** The power section computed both predictions from the
+effect at FULL dose, +0.1363. At D the reference effect is +0.0600, a factor of
+0.440, and both predictions scale with it:
+
+| | at full dose | at D = 3.1 | z at 800 deals |
+|---|---|---|---|
+| H_proportional | +0.0414 | **+0.0182** | 1.71 |
+| H_absolute | +0.1096 | **+0.0482** | 4.52 |
+
+At the registered 800 deals H_proportional would not be resolved, and a study
+that can see only one of the two hypotheses it named cannot report either
+cleanly.
+
+**The change.** The scored run is **2,500 deals x 2 parities** per arm, which
+puts H_proportional at z = 3. Everything else stands unchanged: the grid, both
+levers, the calibrated parameters, the primary, all four verdicts and all three
+withdrawal conditions, and the seed base 14,300,000.
+
+**Why this is not a licence.** The re-sizing uses only the calibration bank,
+which this document already declares scores nothing, and no deal of the scored
+bank has been played. It does not depend on any outcome the study will report.
+The alternative -- running the registered 800 and calling H_proportional
+"underpowered" afterwards -- would have been honest but wasteful, since the
+information needed to size it correctly was already in hand.
+
+**The UNDERPOWERED verdict is restated to match**: it now fires if the realised
+half-width exceeds $0.0182$, so that H_proportional at D would not have cleared
+zero.
+
+**One thing calibration established that was not asked for.** The dose-response
+had three measured points, absent at 0.686 and 1.477 and present at 8.940, with
+everything between unmeasured -- which is why this document's feasibility gate
+existed at all. There are now four, and the effect is already present at 3.118:
+
+    dose  0.686   +0.0083 [-0.0043, +0.0208]
+    dose  1.477   +0.0073 [-0.0063, +0.0208]
+    dose  3.118   +0.0600 [+0.0118, +0.1082]
+    dose  8.940   +0.1363 [+0.1135, +0.1590]
+
+So the mechanism turns on somewhere between 1.5 and 3.1 signals a game, which
+narrows the gap the budget registration left open.

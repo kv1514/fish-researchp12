@@ -1,0 +1,58 @@
+{
+ "what": "calibration for prereg/signal_matched_dose.md",
+ "calibration_only": true,
+ "prereg": "signal_matched_dose",
+ "seed_deal": 13900000,
+ "seed_agent": 139000,
+ "n_deals": 200,
+ "n_games": 3200,
+ "vs": "dylan_v07|ev_claim",
+ "sweep": [
+  0.5,
+  0.7,
+  0.85,
+  1.0
+ ],
+ "dose_table": {
+  "dylan_v07": {
+   "0.5": 9.242,
+   "0.7": 9.285,
+   "0.85": 9.422,
+   "1.0": 9.04
+  },
+  "ev_claim": {
+   "0.5": 2.348,
+   "0.7": 2.737,
+   "0.85": 2.935,
+   "1.0": 3.112
+  }
+ },
+ "common_dose_D": 3.1,
+ "params": {
+  "dylan_v07": {
+   "signal_mode": "stuck",
+   "signal_max_p": 0.5,
+   "signal_budget": 16,
+   "_dose": 3.013
+  },
+  "ev_claim": {
+   "signal_mode": "stuck",
+   "signal_max_p": 1.0,
+   "_dose": 3.112
+  }
+ },
+ "gate": {
+  "mean": 0.06,
+  "half_width": 0.0482,
+  "ci95": [
+   0.0118,
+   0.1082
+  ],
+  "n_clusters": 200,
+  "fires_per_game": 3.118
+ },
+ "gate_passes": true,
+ "budget_rule": "nearest realised dose to D; fixed at implementation time, not in the registration",
+ "smoke": false,
+ "minutes": 35.3
+}
