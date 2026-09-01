@@ -26,9 +26,27 @@ It decomposes the dose two ways.
                            them and succeeds. So the candidate driver is how
                            much the opponent's own asking locates our cards.
 
-Measured on the SHIPPED arm, with signalling OFF. That is the point: it prices
-the OPPORTUNITY each opponent creates, not what the mechanism does with it. An
-arm that signals perturbs the trajectory it is being measured on.
+Measured on TWO arms on the identical deal. The shipped arm, with signalling
+OFF, prices the OPPORTUNITY each opponent creates. The signalling arm prices
+what the mechanism does with it, and the pair separates two things the first
+pass of this screen could not:
+
+  the cheapness gate   the protocol needs the stuck state AND a best ask
+                       unlikely to land (p <= signal_max_p). Fires divided by
+                       stuck turns on the signalling arm is that gate's pass
+                       rate, per opponent.
+
+  endogenous dose      a signal is a doomed ask, so it throws the turn away
+                       and hands us back the same stuck state. Stuck turns on
+                       the signalling arm against stuck turns on the shipped
+                       arm says whether the mechanism extends the very
+                       episodes it fires in. If it does, "dose" is not an
+                       opponent property a generality design can match, which
+                       is the assumption prereg/signal_generality.md rests on.
+
+The first pass measured only the shipped arm and found the opportunity differs
+by 1.38x between dylan_v07 and ev_claim where the dose differs by 4.12x. This
+pass is for the missing factor of 2.98.
 
 Descriptive. It fixes no threshold, decides no ship, and is not a registration.
 
@@ -64,6 +82,11 @@ SEED0 = 13_100_000
 AGENT0 = 131_000
 N_DEALS = 200
 
+#: The shipped champion, and the champion with the protocol on. Same names as
+#: `signal_vs_defer.ALL_ARMS` uses, and the parameters are read from there
+#: rather than retyped, so an arm cannot drift from the one that was measured.
+ARMS = ("A_shipped", "B_signal")
+
 
 class _Shim:
     """`stuck_half_suits` reads one field off the decision context. Building a
@@ -75,7 +98,7 @@ class _Shim:
         self.my_team = my_team
 
 
-def _play(deal_seed: int, kv_even: bool, vs: str) -> dict:
+def _play(deal_seed: int, kv_even: bool, vs: str, arm: str) -> dict:
     from fish4.registry4 import V06_DEPLOYED, make_agent
     kind, opp_params = ("fishbot4", dict(V06_DEPLOYED[1])) if vs == "self" \
         else (vs, {})
@@ -83,7 +106,7 @@ def _play(deal_seed: int, kv_even: bool, vs: str) -> dict:
     #: THE SHIPPED CONFIGURATION, which is V06_DEPLOYED and not {}. An empty
     #: parameter dict is a different agent, and measuring the stuck state of
     #: an agent nobody runs would answer a question nobody asked.
-    ours = dict(V06_DEPLOYED[1])
+    ours = dict(V06_DEPLOYED[1], trace=True, **run.ALL_ARMS[arm])
     agents = []
     for p in range(NUM_PLAYERS):
         if (p % 2 == 0) == kv_even:
@@ -96,7 +119,7 @@ def _play(deal_seed: int, kv_even: bool, vs: str) -> dict:
     our_team = 0 if kv_even else 1
     shim = _Shim(our_team)
 
-    turns = ours_turns = stuck_turns = episodes = 0
+    turns = ours_turns = stuck_turns = episodes = fires = 0
     first_stuck = None
     ambig_sum = 0
     opp_asks = opp_asks_hit = 0
@@ -115,6 +138,9 @@ def _play(deal_seed: int, kv_even: bool, vs: str) -> dict:
         act = agents[mover].act(obs)
         if ours:
             ours_turns += 1
+            tr = getattr(agents[mover], "last_trace", None) or {}
+            if tr.get("kind") == "signal":
+                fires += 1
             bel = getattr(agents[mover], "bel", None)
             stuck = bool(stuck_half_suits(obs, bel, shim)) if bel else False
             if stuck:
@@ -142,7 +168,7 @@ def _play(deal_seed: int, kv_even: bool, vs: str) -> dict:
     #: episode ends when the position resolves some other way or the game
     #: does. How much game is LEFT once we first get stuck therefore bounds
     #: how long we can stay there, and it is set by the opponent's pace.
-    return {"turns": turns, "ours_turns": ours_turns,
+    return {"turns": turns, "ours_turns": ours_turns, "fires": fires,
             "tail_turns": 0 if first_stuck is None else turns - first_stuck,
             "ever_stuck": int(first_stuck is not None),
             "stuck_turns": stuck_turns, "episodes": episodes,
@@ -153,8 +179,9 @@ def _play(deal_seed: int, kv_even: bool, vs: str) -> dict:
 
 def _one(args) -> dict:
     deal_seed, kv_even, vs = args
-    out = _play(deal_seed, kv_even, vs)
-    out.update(deal=deal_seed, kv_even=int(kv_even), vs=vs)
+    out = {"deal": deal_seed, "kv_even": int(kv_even), "vs": vs}
+    for arm in ARMS:
+        out[arm] = _play(deal_seed, kv_even, vs, arm)
     return out
 
 
@@ -163,49 +190,71 @@ def report(rows: list) -> dict:
     for r in rows:
         by[r["vs"]].append(r)
     out: dict = {"opponents": {}}
-    print(f"\n=== the stuck state, per opponent, with signalling OFF")
-    print(f"    {len(rows) // len(by)} games each, clustered on the deal\n")
-    print("  %-11s %8s %9s %9s %8s %8s %9s %8s"
-          % ("opponent", "stuck/g", "episodes", "turns/ep", "game len",
-             "tail", "their hits", "ambig"))
+    n = len(rows) // max(1, len(by))
+    print(f"\n=== the stuck state and what the protocol does with it")
+    print(f"    {n} deals an opponent, both arms on the identical deal, "
+          f"clustered on the deal\n")
+    print("  %-11s %8s %8s %8s %8s %9s %8s"
+          % ("opponent", "stuck/g", "stuck/g", "ratio", "fires/g",
+             "fires per", "episodes"))
+    print("  %-11s %8s %8s %8s %8s %9s %8s"
+          % ("", "shipped", "signal", "B/A", "signal", "stuck turn",
+             "shipped"))
     for vs in OPPONENTS:
         rs = by.get(vs) or []
         if not rs:
             continue
         deals = [r["deal"] for r in rs]
-        st_m, st_h, _ = cluster_ci([r["stuck_turns"] for r in rs], deals)
-        ep_m, ep_h, _ = cluster_ci([r["episodes"] for r in rs], deals)
-        am_m, am_h, _ = cluster_ci([r["ambig_mean"] for r in rs], deals)
-        hit_m, hit_h, _ = cluster_ci([r["opp_asks_hit"] for r in rs], deals)
-        len_m, len_h, _ = cluster_ci([r["turns"] for r in rs], deals)
-        stuck_rs = [r for r in rs if r["ever_stuck"]]
-        tail_m, tail_h, _ = cluster_ci(
-            [r["tail_turns"] for r in stuck_rs],
-            [r["deal"] for r in stuck_rs]) if stuck_rs else (0.0, 0.0, 0)
-        ask_m, _, _ = cluster_ci([r["opp_asks"] for r in rs], deals)
-        unfinished = sum(1 for r in rs if not r["terminal"])
+
+        def ci(key, arm):
+            m, h, _ = cluster_ci([r[arm][key] for r in rs], deals)
+            return round(m, 4), round(h or 0.0, 4)
+
+        a_stuck, a_stuck_h = ci("stuck_turns", "A_shipped")
+        b_stuck, b_stuck_h = ci("stuck_turns", "B_signal")
+        a_ep, a_ep_h = ci("episodes", "A_shipped")
+        b_ep, _ = ci("episodes", "B_signal")
+        fires, fires_h = ci("fires", "B_signal")
+        a_len, _ = ci("turns", "A_shipped")
+        b_len, _ = ci("turns", "B_signal")
+        hits, hits_h = ci("opp_asks_hit", "A_shipped")
+        ambig, _ = ci("ambig_mean", "A_shipped")
+        unfinished = sum(1 for r in rs for arm in ARMS
+                         if not r[arm]["terminal"])
         out["opponents"][vs] = {
-            "stuck_turns_per_game": round(st_m, 4),
-            "stuck_turns_half_width": round(st_h or 0.0, 4),
-            "episodes_per_game": round(ep_m, 4),
-            "episodes_half_width": round(ep_h or 0.0, 4),
-            "turns_per_episode": round(st_m / ep_m, 3) if ep_m else 0.0,
-            "ambiguous_cards_mean": round(am_m, 3),
-            "ambiguous_half_width": round(am_h or 0.0, 3),
-            "their_asks_at_us_per_game": round(ask_m, 3),
-            "their_hits_on_us_per_game": round(hit_m, 3),
-            "their_hits_half_width": round(hit_h or 0.0, 4),
-            "game_turns": round(len_m, 3),
-            "game_turns_half_width": round(len_h or 0.0, 4),
-            "turns_after_first_stuck": round(tail_m, 3),
-            "tail_half_width": round(tail_h or 0.0, 4),
-            "games_ever_stuck": len(stuck_rs),
+            "shipped": {
+                "stuck_turns_per_game": a_stuck,
+                "stuck_turns_half_width": a_stuck_h,
+                "episodes_per_game": a_ep,
+                "episodes_half_width": a_ep_h,
+                "turns_per_episode": round(a_stuck / a_ep, 3) if a_ep else 0.0,
+                "game_turns": a_len,
+                "their_hits_on_us_per_game": hits,
+                "their_hits_half_width": hits_h,
+                "ambiguous_cards_mean": ambig,
+            },
+            "signalling": {
+                "stuck_turns_per_game": b_stuck,
+                "stuck_turns_half_width": b_stuck_h,
+                "episodes_per_game": b_ep,
+                "fires_per_game": fires,
+                "fires_half_width": fires_h,
+                "game_turns": b_len,
+            },
+            #: the two quantities this pass exists for
+            "stuck_turns_ratio_signal_over_shipped":
+                round(b_stuck / a_stuck, 3) if a_stuck else 0.0,
+            "fires_per_stuck_turn": round(fires / b_stuck, 3) if b_stuck else 0.0,
             "games": len(rs), "unfinished": unfinished,
         }
         d = out["opponents"][vs]
-        print("  %-11s %8.3f %9.3f %9.2f %8.1f %8.1f %9.3f %8.2f"
-              % (vs, st_m, ep_m, d["turns_per_episode"], len_m, tail_m,
-                 hit_m, am_m))
+        print("  %-11s %8.3f %8.3f %8.2f %8.3f %9.3f %8.3f"
+              % (vs, a_stuck, b_stuck,
+                 d["stuck_turns_ratio_signal_over_shipped"], fires,
+                 d["fires_per_stuck_turn"], a_ep))
+    print("\n  ratio > 1 means the protocol EXTENDS the state that triggers it,")
+    print("  so the dose is partly its own doing and not the opponent's alone.")
+    print("  fires per stuck turn is the cheapness gate's pass rate.")
     return out
 
 
@@ -218,10 +267,11 @@ def main(n_deals=None, n_jobs=None, out=None) -> int:
         rows = pool.map(_one, jobs, chunksize=1)
     payload = report(rows)
     payload.update(descriptive=True, seed_deal=SEED0, seed_agent=AGENT0,
-                   n_deals=n_deals, n_games=len(rows), vs="|".join(OPPONENTS),
+                   n_deals=n_deals, n_games=len(rows) * len(ARMS),
+                   arms=list(ARMS), vs="|".join(OPPONENTS),
                    prereg=None, smoke=n_deals != N_DEALS,
                    minutes=round((time.time() - t0) / 60, 1))
-    path = Path(out) if out else ROOT / "results" / "signal_dose_screen.json"
+    path = Path(out) if out else ROOT / "results" / "signal_dose_arms.json"
     path = write_result(path, payload)
     print(f"\nwrote {path}  ({payload['minutes']} min)")
     return 0
