@@ -228,21 +228,62 @@ def test_the_sweep_covers_every_run_that_can_be_decomposed():
     assert all(abs(r["residual"]) < 1e-9 for r in SWEEP)
 
 
-SIGNAL_ARMS = [r for r in SWEEP
+_ALL_SIGNAL = [r for r in SWEEP
                if r["arm"] in ("B_incumbent", "B_signal", "D_both")
                and r["run"].startswith("signal")]
+#: Split by OPPONENT, which is the axis that broke this claim. Every arm in
+#: this line was played against `dylan_v07` until signal_generality.
+SIGNAL_ARMS = [r for r in _ALL_SIGNAL if r["vs"] == "dylan_v07"]
+FOREIGN_SIGNAL_ARMS = [r for r in _ALL_SIGNAL if r["vs"] != "dylan_v07"]
 DEFER_ARMS = [r for r in SWEEP if r["arm"] in ("B_defer", "B2_mid", "C_defer")]
 NOREPEAT_ARMS = [r for r in SWEEP if r["arm"] == "C_norepeat"]
 
 
-def test_every_signalling_arm_ever_run_lives_in_the_opponent_channel():
+def test_every_signalling_arm_against_dylan_lives_in_the_opponent_channel():
     """Five arms, four seed bases, both sides of the exhaustive-search engine
-    change, 10,800 games. This is the replication a single run cannot give."""
+    change, 10,800 games. This is the replication a single run cannot give.
+
+    Scoped to `dylan_v07` since signal_generality: the claim held across every
+    arm this project had run, and every one of them was against that opponent.
+    """
     assert len(SIGNAL_ARMS) >= 5
+    assert all(r["vs"] == "dylan_v07" for r in SIGNAL_ARMS)
     for r in SIGNAL_ARMS:
         assert r["theirs"] > 0.2, r
         assert r["ours"] < 0.06, r
         assert r["race"] < -0.15, r
+
+
+def test_against_another_opponent_the_channel_inverts():
+    """The counterexample, pinned rather than excluded.
+
+    Against `ev_claim` the same arm puts its whole effect in OUR channel and
+    none in theirs -- the exact reverse of the five rows above. The generality
+    run cannot say whether that is the opponent or the dose (it fired 2.171
+    signals a game against 8.940), but it can say the earlier claim was never
+    tested outside one opponent, and this is what stops it being restated as
+    though it had been.
+    """
+    ev = [r for r in FOREIGN_SIGNAL_ARMS if "ev_claim" in r["run"]]
+    assert len(ev) == 1, FOREIGN_SIGNAL_ARMS
+    r = ev[0]
+    assert r["ours"] > 0.2, r          # ours, where dylan_v07 gives < 0.06
+    assert abs(r["theirs"]) < 0.05, r  # theirs, where dylan_v07 gives > 0.2
+
+
+def test_the_self_control_moves_no_channel_much():
+    """The control that could have refuted the identity's account and did
+    not: against the champion itself every channel is small."""
+    me = [r for r in FOREIGN_SIGNAL_ARMS if "self" in r["run"]]
+    assert len(me) == 1, FOREIGN_SIGNAL_ARMS
+    assert all(abs(me[0][k]) < 0.05 for k in ("ours", "theirs", "race")), me[0]
+
+
+def test_the_sweep_names_the_opponent_of_every_row():
+    """Without it two opponents read as a replication of one, which is how
+    the claim above survived four runs without being tested."""
+    assert all(r.get("vs") for r in SWEEP)
+    assert {r["vs"] for r in SWEEP} >= {"dylan_v07", "ev_claim", "self"}
 
 
 def test_every_deferral_arm_ever_run_lives_in_our_own_channel():

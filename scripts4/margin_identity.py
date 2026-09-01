@@ -312,17 +312,23 @@ def sweep(paths: list[Path]) -> list[dict]:
             if arm == base:
                 continue
             d = decompose(payload, base, arm)
+            #: The opponent belongs in the row. Every arm here was measured
+            #: against `dylan_v07` until signal_generality, and a table that
+            #: cannot show the opponent invites reading two opponents as a
+            #: replication of one. It already did: the sweep's own signalling
+            #: rows now disagree, and the disagreement IS the opponent.
             rows.append(dict(d, run=path.stem, games=payload["n_games"],
+                             vs=payload.get("vs", "dylan_v07"),
                              params=(payload.get("arms") or {}).get(arm)))
     rows.sort(key=lambda r: -r["effect"])
     print(f"\n=== every arm this project has measured, by channel "
           f"({len(rows)} arms)")
-    print(f"  {'run':<34}{'arm':<14}{'games':>7}{'effect':>9}{'race':>9}"
-          f"{'ours':>9}{'theirs':>9}")
+    print(f"  {'run':<30}{'arm':<13}{'vs':<11}{'games':>7}{'effect':>9}"
+          f"{'race':>9}{'ours':>9}{'theirs':>9}")
     for r in rows:
-        print(f"  {r['run'][:33]:<34}{r['arm'][:13]:<14}{r['games']:>7}"
-              f"{r['effect']:>+9.4f}{r['race']:>+9.4f}{r['ours']:>+9.4f}"
-              f"{r['theirs']:>+9.4f}")
+        print(f"  {r['run'][:29]:<30}{r['arm'][:12]:<13}{r['vs'][:10]:<11}"
+              f"{r['games']:>7}{r['effect']:>+9.4f}{r['race']:>+9.4f}"
+              f"{r['ours']:>+9.4f}{r['theirs']:>+9.4f}")
     if skipped:
         print(f"\n  --- EXCLUDED, and why ({len(skipped)}) ---")
         for name, why in skipped:

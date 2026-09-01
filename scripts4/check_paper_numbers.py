@@ -657,6 +657,22 @@ WATCH = [
      "m<=2 effect vs Dylan v0.7", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
      "m<=2 vs v0.7, CI low", "at a power sized for\ndeception-scale flips"),
+    # The generality run (prereg/signal_generality.md). Watched because the
+    # conclusion is that the run does NOT answer its question, and the reason
+    # is a comparison of doses -- so the doses are the numbers that carry it.
+    ("signal_generality_self_12100000.json", "primary.mean", "{:+.4f}",
+     "control against self, margin", "against\nitself the arm is"),
+    ("signal_generality_ev_claim_12100000.json", "primary.mean", "{:+.4f}",
+     "ev_claim, margin", "in the margin at"),
+    ("signal_generality_ev_claim_12100000.json",
+     "their_wrong_effects.B_signal.mean", "{:+.4f}",
+     "ev_claim, opponent channel", "mechanism works through, at"),
+    ("signal_generality_ev_claim_12100000.json",
+     "signal_turns_per_game.B_signal", "{:.3f}",
+     "ev_claim, signals a game", "$2.171$"),
+    ("signal_generality_self_12100000.json",
+     "signal_turns_per_game.B_signal", "{:.3f}",
+     "self, signals a game", "$0.487$"),
     # The signalling budget (prereg/signal_budget.md). Watched because it is
     # a REFUTATION with three passing gates: the numbers that carry it are the
     # primary, the channel split it rests on, and the replication that lets

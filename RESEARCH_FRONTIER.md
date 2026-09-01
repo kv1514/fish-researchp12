@@ -3590,3 +3590,60 @@ That is not a clearance, no ship criterion was registered for this run, and
 
 Written into the paper alongside the identity, with five new figures added to
 `check_paper_numbers` so they cannot rot.
+
+## signal_generality: the run does not answer its question, and the defect is mine
+
+Both opponents landed at seed 12,100,000, 800 paired deals each. The identity
+closes on every arm, no fallbacks, no unfinished games.
+
+**The control holds.** Against `self` the arm is +0.0200 [-0.0232, +0.0632],
+covering zero. The one outcome that would have refuted the identity's account
+of where this margin comes from did not occur.
+
+**Against `ev_claim` nothing moves.** Margin -0.0525 [-0.1415, +0.0365]; their
+extra wrong declarations -0.0088 [-0.0296, +0.0121], whose upper bound excludes
+the +0.0458 a full-strength generalisation predicted.
+
+That reads DYLAN-SPECIFIC until the dose is put beside it:
+
+    opponent    arm          signals/game   their extra wrong declarations
+    dylan_v07   uncapped        8.940       +0.1363 [+0.1135, +0.1590]  CLEAR
+    ev_claim    uncapped        2.171       -0.0088 [-0.0296, +0.0121]
+    dylan_v07   budget 6        1.477       +0.0073 [-0.0063, +0.0208]
+    dylan_v07   budget 2        0.686       +0.0083 [-0.0043, +0.0208]
+    self        uncapped        0.487       +0.0069 [-0.0010, +0.0147]
+
+Every row consistent with zero is below three signals a game, and the one row
+with a channel is the only one above it. The budget run already showed
+`dylan_v07`'s own channel vanishes at that dose. **Dose alone explains the
+`ev_claim` null**, so this run provides no evidence about opponent robustness
+either way.
+
+**The defect is in the registration.** I predicted each opponent's effect by
+applying `dylan_v07`'s rate multiplier of 1.114 to that opponent's baseline
+error rate, which assumes the mechanism fires equally often against everyone.
+It does not: the dose is set by how often WE get stuck, a property of the
+opponent, and it varies eighteen-fold across this grid. The registration fixed
+the sample size, the verdicts and two power limits, and never fixed the one
+quantity deciding whether the contrast was between opponents or between doses.
+
+**Second, smaller defect: the verdict table has a gap.** DYLAN-SPECIFIC needs a
+half-width <= 0.0734; UNDERPOWERED needs +0.0914 not to clear zero. The realised
+half-width is 0.0890, above the first and just below the second, so neither
+fires. Recorded rather than resolved by choosing the one I preferred.
+
+**What would close it.** Only `dylan_v07` supplies the volume at which the
+mechanism works, and a budget can only lower a dose. Until another opponent can
+be made to draw eight signals a game, "the convention needs volume" and
+"`dylan_v07` is exploitable at volume" are the same measurement.
+
+**A counterexample worth keeping.** Against `ev_claim` the channel split is
+-0.0525 = race -0.2725, ours +0.2375, theirs -0.0175. The protocol is almost
+purely a deferral device there: our own wrong declarations halve, 0.2350 to
+0.1163 a game, the largest own-error saving in this line, as gated declarations
+fall 0.441 to 0.098. It still does not pay, costing more in race than it
+returns. This inverts the claim that held across all five earlier arms, and
+`tests4/test_margin_identity.py` now pins it as a named counterexample rather
+than letting the old claim be restated as though it had been tested broadly.
+`margin_identity.sweep` carries `vs` on every row for the same reason: without
+it, two opponents read as a replication of one.

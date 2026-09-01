@@ -5035,9 +5035,72 @@ so no channel is what the arm would gain if only that counter moved. And
 the rate this rests on is one opponent's: a screen over every honest policy in
 the registry (\path{results/opponent_error_screen.json}) puts \texttt{dylan\_v07}
 at $21.8\%$, the next at $10.8\%$, and the rest between $3\%$ and $7\%$. The
-effect is real and replicates across five arms and two engine revisions. Whether
+effect is real and replicates across five arms and two engine revisions, every
+one of them against that same opponent. Whether
 it is a property of the convention or an exploit of one policy is not something
-this opponent pool can currently answer.
+this opponent pool can answer, and a registered attempt to make it answer
+established why not.
+
+\paragraph{The generality run, and the confound that was in its registration.}
+\path{prereg/signal_generality.md} put the arm against the only other honest
+opponent with error volume to move, and against the champion itself as a
+control that could refute the identity's account without being able to confirm
+generality. Both ran over $800$ paired deals at a fresh seed
+(\path{results/signal_generality_ev_claim_12100000.json},
+\path{results/signal_generality_self_12100000.json}). The control holds: against
+itself the arm is $+0.0200$ $[-0.0232, +0.0632]$, covering zero, so the margin
+is not arriving from somewhere the identity fails to account for. Against
+\texttt{ev\_claim} nothing moves either, in the margin at $-0.0525$ $[-0.1415,
++0.0365]$ or in the channel the mechanism works through, at $-0.0088$ $[-0.0296,
++0.0121]$, whose upper bound excludes the $+0.0458$ a full-strength
+generalisation predicts.
+
+That reads as an opponent-specific effect until the dose is put beside it.
+
+\begin{center}
+\small
+\begin{tabular}{llrl}
+\toprule
+opponent & arm & signals/game & their extra wrong declarations \\
+\midrule
+\texttt{dylan\_v07} & uncapped  & $8.940$ & $+0.1363$ $[+0.1135, +0.1590]$ \\
+\texttt{ev\_claim}  & uncapped  & $2.171$ & $-0.0088$ $[-0.0296, +0.0121]$ \\
+\texttt{dylan\_v07} & budget $6$ & $1.477$ & $+0.0073$ $[-0.0063, +0.0208]$ \\
+\texttt{dylan\_v07} & budget $2$ & $0.686$ & $+0.0083$ $[-0.0043, +0.0208]$ \\
+\texttt{self}       & uncapped  & $0.487$ & $+0.0069$ $[-0.0010, +0.0147]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Every row consistent with zero is a row below three signals a game,
+and the single row with a channel is the only one that rises above it. The
+budget result already established that \texttt{dylan\_v07}'s own channel
+disappears at that dose, so the dose alone accounts for the
+\texttt{ev\_claim} null and opponent robustness is not needed to explain it.
+
+The defect is in the registration rather than in the run. It predicted each
+opponent's effect by applying the rate multiplier measured against
+\texttt{dylan\_v07} to that opponent's own baseline error rate, which assumes
+the mechanism fires equally often against everyone. It does not. How often a
+seat is stuck with nothing worth asking is a property of the opponent one is
+playing, not a parameter of the experiment, and it varies by a factor of
+eighteen across this grid. The registration fixed the sample size, the
+verdicts, and two power limits in advance, and did not fix the one quantity
+that decides whether the contrast is between opponents or between doses.
+
+So the question stands open with a sharper statement of what would close it.
+Only \texttt{dylan\_v07} supplies the volume at which the mechanism works, and
+a budget can only lower a dose. Until an opponent other than \texttt{dylan\_v07}
+can be made to draw eight signals a game, ``the convention needs volume'' and
+``\texttt{dylan\_v07} is exploitable at volume'' are the same measurement.
+
+One reading from that run survives its confound, because it does not depend on
+the opponent channel at all. Against \texttt{ev\_claim} the protocol is almost
+purely a deferral device: its split is race $-0.2725$, ours $+0.2375$, theirs
+$-0.0175$, and our own wrong declarations halve from $0.2350$ a game to
+$0.1163$, the largest own-error saving measured anywhere in this line, as gated
+declarations fall from $0.441$ to $0.098$. It still does not pay, because it
+costs more in race than it returns.
 
 One methodological note, recorded rather than buried. The regression form of
 the same decomposition puts the cost-when-nothing-is-avoided at $+0.0990$
