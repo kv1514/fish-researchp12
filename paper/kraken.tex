@@ -5121,38 +5121,57 @@ The dose factors exactly, into three terms that are each opponent-dependent:
 \noindent where $s_A$ and $s_B$ are stuck turns a game with the protocol off
 and on, and $f$ is fires a game.
 
+\noindent That equation is an \emph{identity}: the two inner terms cancel and
+leave $f$. Writing a ``product'' column beside a ``measured'' one, as an
+earlier revision of this table did, therefore checks nothing at all --- the
+two can differ only by display rounding. What the decomposition buys is which
+\emph{term} differs by opponent, so only the terms are shown, each with the
+interval it went two revisions without.
+
 \begin{center}
 \small
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrr}
 \toprule
-opponent & $s_A$ & $s_B/s_A$ & $f/s_B$ & product & measured \\
+opponent & $s_A$, stuck turns/game & $s_B/s_A$ & $f/s_B$ \\
 \midrule
-\texttt{dylan\_v07} & $4.150$ & $3.02$ & $0.896$ & $11.248$ & $11.248$ \\
-\texttt{ev\_claim}  & $3.005$ & $1.65$ & $0.462$ & $2.285$  & $2.283$ \\
-\texttt{search}     & $3.112$ & $1.64$ & $0.390$ & $1.992$  & $1.992$ \\
-\texttt{memory}     & $2.770$ & $1.95$ & $0.421$ & $2.275$  & $2.277$ \\
-\texttt{self}       & $1.030$ & $1.44$ & $0.423$ & $0.627$  & $0.627$ \\
+\texttt{dylan\_v07} & $4.150 \pm 1.238$ & $3.02$ $[2.32, 4.16]$ & $0.896$ $[0.868, 0.916]$ \\
+\texttt{ev\_claim}  & $3.005 \pm 0.452$ & $1.65$ $[1.46, 1.88]$ & $0.462$ $[0.428, 0.497]$ \\
+\texttt{search}     & $3.112 \pm 0.443$ & $1.64$ $[1.45, 1.87]$ & $0.390$ $[0.359, 0.420]$ \\
+\texttt{memory}     & $2.770 \pm 0.421$ & $1.95$ $[1.70, 2.25]$ & $0.421$ $[0.388, 0.455]$ \\
+\texttt{self}       & $1.030 \pm 0.214$ & $1.44$ $[1.16, 1.76]$ & $0.423$ $[0.313, 0.525]$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\noindent Against \texttt{ev\_claim} the dose ratio is $4.93$, and the three
-terms contribute $1.38$, $1.84$ and $1.94$, whose product is $4.92$. No term
-dominates, and the first one is not what it looks like: we enter the stuck
-state \emph{less} often against \texttt{dylan\_v07} than against
-\texttt{ev\_claim}, \texttt{search} or \texttt{memory} ($0.517$ episodes a
-game against $0.703$, $0.733$ and $0.812$), and the whole of the opportunity
-difference is that each episode lasts $1.87$ times longer. Board-wide
-ambiguity is flat across all five at $24.5$ to $26.0$ cards, as is how often
-their asks land on our seats, at $22.5$ to $27.9$, so it is not that this
-opponent leaves our own hands less located.
+\noindent The two ratio columns are cluster bootstraps over deals, since both
+arms are played on the identical deal and a ratio of aggregates is not a mean.
+Against \texttt{ev\_claim} the dose ratio is $4.93$ and the three terms
+contribute $1.38$, $1.84$ and $1.94$. No term dominates, and the first is not
+what it looks like: we enter the stuck state \emph{less} often against
+\texttt{dylan\_v07} than against \texttt{ev\_claim}, \texttt{search} or
+\texttt{memory} ($0.517 \pm 0.065$ episodes a game against $0.703 \pm 0.068$,
+$0.733 \pm 0.074$ and $0.812 \pm 0.082$), and the whole of the opportunity
+difference is that each episode lasts $1.87$ times longer.
+
+An earlier revision explained that away by calling board-wide ambiguity and
+opponent ask-hits ``flat'' across the five. Measured against their own
+intervals neither is: ambiguity runs $24.49 \pm 0.30$ to $26.02 \pm 0.21$
+cards and their asks land on our seats $22.51 \pm 0.70$ to $27.94 \pm 0.74$
+times a game, both separated several times over. The conclusion survives, and
+for a better reason than the one it was given. \texttt{dylan\_v07} leaves our
+hands the \emph{most} located of the five --- the lowest ambiguity in the
+column --- and is the opponent we get stuck against most; \texttt{memory}
+leaves them least located and we get stuck against it least. Whatever drives
+the opportunity term, it is not that this opponent tells us less about our own
+cards, because it tells us more.
 
 The second gate is the largest single term and the most interpretable. The
 protocol needs the stuck state \emph{and} a best ask unlikely to land, and
-against \texttt{dylan\_v07} $89.6\%$ of stuck turns clear that bar against
-$39$ to $46\%$ everywhere else. When we cannot place a half-suit against this
-opponent we usually have nothing worth asking anywhere either: the position is
-more thoroughly exhausted, not merely more ambiguous.
+against \texttt{dylan\_v07} $89.6\%$ $[86.8, 91.6]$ of stuck turns clear that
+bar against $39$ to $46\%$ everywhere else, with no interval on either side
+coming near the other. When we cannot place a half-suit against this opponent
+we usually have nothing worth asking anywhere either: the position is more
+thoroughly exhausted, not merely more ambiguous.
 
 The middle term is the one with consequences beyond this section. A signal is
 a doomed ask, so it throws away the turn and hands back the same stuck state,

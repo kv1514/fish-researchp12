@@ -21,7 +21,20 @@
     "game_turns": 127.435
    },
    "stuck_turns_ratio_signal_over_shipped": 3.025,
+   "stuck_turns_ratio_ci95": [
+    2.3237,
+    4.16
+   ],
    "fires_per_stuck_turn": 0.896,
+   "fires_per_stuck_turn_ci95": [
+    0.8682,
+    0.9164
+   ],
+   "turns_per_episode_ci95": [
+    5.8408,
+    10.4764
+   ],
+   "ambiguous_cards_half_width": 0.2966,
    "games": 400,
    "unfinished": 0
   },
@@ -46,7 +59,20 @@
     "game_turns": 112.2175
    },
    "stuck_turns_ratio_signal_over_shipped": 1.646,
+   "stuck_turns_ratio_ci95": [
+    1.4589,
+    1.8811
+   ],
    "fires_per_stuck_turn": 0.462,
+   "fires_per_stuck_turn_ci95": [
+    0.428,
+    0.4969
+   ],
+   "turns_per_episode_ci95": [
+    3.7745,
+    4.8301
+   ],
+   "ambiguous_cards_half_width": 0.2113,
    "games": 400,
    "unfinished": 0
   },
@@ -71,7 +97,20 @@
     "game_turns": 109.27
    },
    "stuck_turns_ratio_signal_over_shipped": 1.641,
+   "stuck_turns_ratio_ci95": [
+    1.4501,
+    1.8648
+   ],
    "fires_per_stuck_turn": 0.39,
+   "fires_per_stuck_turn_ci95": [
+    0.3588,
+    0.4197
+   ],
+   "turns_per_episode_ci95": [
+    3.7738,
+    4.7656
+   ],
+   "ambiguous_cards_half_width": 0.2511,
    "games": 400,
    "unfinished": 0
   },
@@ -96,7 +135,20 @@
     "game_turns": 113.1875
    },
    "stuck_turns_ratio_signal_over_shipped": 1.951,
+   "stuck_turns_ratio_ci95": [
+    1.7017,
+    2.2497
+   ],
    "fires_per_stuck_turn": 0.421,
+   "fires_per_stuck_turn_ci95": [
+    0.3875,
+    0.4549
+   ],
+   "turns_per_episode_ci95": [
+    3.0559,
+    3.8049
+   ],
+   "ambiguous_cards_half_width": 0.214,
    "games": 400,
    "unfinished": 0
   },
@@ -121,7 +173,20 @@
     "game_turns": 104.635
    },
    "stuck_turns_ratio_signal_over_shipped": 1.439,
+   "stuck_turns_ratio_ci95": [
+    1.1635,
+    1.7566
+   ],
    "fires_per_stuck_turn": 0.423,
+   "fires_per_stuck_turn_ci95": [
+    0.3129,
+    0.525
+   ],
+   "turns_per_episode_ci95": [
+    2.5625,
+    3.4189
+   ],
+   "ambiguous_cards_half_width": 0.2704,
    "games": 400,
    "unfinished": 0
   }
@@ -138,5 +203,5 @@
  "vs": "dylan_v07|ev_claim|search|memory|self",
  "prereg": null,
  "smoke": false,
- "minutes": 32.4
+ "minutes": 46.2
 }

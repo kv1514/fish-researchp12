@@ -670,6 +670,27 @@ WATCH = [
      "dose law, how far the dose missed D", "the dose lands"),
     ("signal_dose_law.json", "their_wrong_effect.half_width", "{:.4f}",
      "dose law, realised half-width", "half-width of $0.0130$"),
+    # The dose screen's uncertainties, added after an audit found the paper
+    # printing $4.150$ for a quantity whose recorded half-width is 1.238 and
+    # quoting two ratio columns that had no interval at all.
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.shipped.stuck_turns_half_width", "{:.3f}",
+     "dylan_v07 stuck turns, half-width", "$4.150 \\pm 1.238$"),
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.stuck_turns_ratio_ci95.1", "{:.2f}",
+     "dylan_v07 amplification, interval high", "$[2.32, 4.16]$"),
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.fires_per_stuck_turn_ci95.0", "{:.3f}",
+     "dylan_v07 second gate, interval low", "$[0.868, 0.916]$"),
+    ("signal_dose_arms.json",
+     "opponents.ev_claim.fires_per_stuck_turn_ci95.1", "{:.3f}",
+     "ev_claim second gate, interval high", "$[0.428, 0.497]$"),
+    ("signal_dose_arms.json",
+     "opponents.memory.ambiguous_cards_half_width", "{:.2f}",
+     "memory ambiguity, half-width", "$26.02 \\pm 0.21$"),
+    ("signal_dose_arms.json",
+     "opponents.ev_claim.shipped.their_hits_half_width", "{:.2f}",
+     "ev_claim ask-hits, half-width", "$27.94 \\pm 0.74$"),
     # The dose-linearity run (prereg/signal_dose_linearity.md). The verdict is
     # NEITHER, which rests on ONE interval excluding two predictions, so the
     # interval, both predictions and the power limit it had to clear are all
@@ -746,18 +767,18 @@ WATCH = [
     # the paper's claim is that the dose FACTORS, and a factorisation whose
     # terms drift stops being one.
     ("signal_dose_arms.json", "opponents.dylan_v07.shipped.stuck_turns_per_game",
-     "{:.3f}", "dylan_v07 stuck turns, protocol off", "$4.150$"),
+     "{:.3f}", "dylan_v07 stuck turns, protocol off", "$4.150 \\pm 1.238$"),
     ("signal_dose_arms.json", "opponents.dylan_v07.fires_per_stuck_turn",
      "{:.3f}", "dylan_v07 second-gate pass rate", "$0.896$"),
     ("signal_dose_arms.json", "opponents.ev_claim.fires_per_stuck_turn",
      "{:.3f}", "ev_claim second-gate pass rate", "$0.462$"),
     ("signal_dose_arms.json",
      "opponents.dylan_v07.stuck_turns_ratio_signal_over_shipped",
-     "{:.2f}", "dylan_v07 amplification", "$3.02$"),
+     "{:.2f}", "dylan_v07 amplification", "$3.02$ $[2.32, 4.16]$"),
     ("signal_dose_arms.json", "opponents.dylan_v07.shipped.episodes_per_game",
-     "{:.3f}", "dylan_v07 episodes a game", "$0.517$ episodes a"),
+     "{:.3f}", "dylan_v07 episodes a game", "$0.517 \\pm 0.065$ episodes a"),
     ("signal_dose_arms.json", "opponents.memory.shipped.episodes_per_game",
-     "{:.3f}", "memory episodes a game", "$0.812$"),
+     "{:.3f}", "memory episodes a game", "$0.812 \\pm 0.082$"),
     # The generality run (prereg/signal_generality.md). Watched because the
     # conclusion is that the run does NOT answer its question, and the reason
     # is a comparison of doses -- so the doses are the numbers that carry it.
