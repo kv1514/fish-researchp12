@@ -61,7 +61,10 @@ class Tablebase4Mixin:
     def tablebase_action(self, obs: Observation):
         if not self.use_tablebase:
             return None
-        state = pinned_state(obs, self.bel)
+        # _claim_bel is the identity everywhere but the gated oracle; the
+        # tablebase reads it because when it fires it usually ends the
+        # half-suit by claiming. See fish4/agent4.py.
+        state = pinned_state(obs, self._claim_bel())
         if state is None:
             return None
         live = sum(1 for w in state.set_winner if w is None)
@@ -75,6 +78,16 @@ class Tablebase4Mixin:
         try:
             state.check_legal(obs.player, action)
         except Exception:
+            return None
+        # The claim ban has to bite here too. A tablebase declaration is
+        # certainly correct -- pinned_state only returns a state when the
+        # belief pins every live card -- so it can never misfire under either
+        # misdeclaration rule, but it CAN resolve a
+        # half-suit that a counterfactual is deliberately holding open, which
+        # silently ends the replay. Empty on every shipped path.
+        from fish.engine import Claim
+        banned = getattr(getattr(self, "claim_cfg", None), "banned", ())
+        if banned and isinstance(action, Claim) and action.half_suit in banned:
             return None
         return action
 

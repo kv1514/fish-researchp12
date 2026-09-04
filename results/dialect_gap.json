@@ -1,0 +1,37 @@
+{
+ "arms": {
+  "own-turn": {
+   "n_games": 80,
+   "margin": 2.675,
+   "ci95": [
+    2.115199956584858,
+    3.2348000434151416
+   ],
+   "win_rate": 0.85,
+   "offturn_kv": 0,
+   "offturn_dylan": 0
+  },
+  "both-any": {
+   "n_games": 80,
+   "margin": 2.375,
+   "ci95": [
+    1.8504018415509818,
+    2.8995981584490185
+   ],
+   "win_rate": 0.8375,
+   "offturn_kv": 344,
+   "offturn_dylan": 194
+  },
+  "us-handicap": {
+   "n_games": 80,
+   "margin": 1.575,
+   "ci95": [
+    1.0033805926707502,
+    2.1466194073292497
+   ],
+   "win_rate": 0.725,
+   "offturn_kv": 0,
+   "offturn_dylan": 201
+  }
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "n_games": 60,
+ "seed0": 73000,
+ "gap": {
+  "n_queries": 29406,
+  "n_differ": 27902,
+  "n_product_overstates": 24062,
+  "n_product_understates": 3840,
+  "share_overstates_where_they_differ": 0.8623754569564905,
+  "median_signed": -0.005715896825542091,
+  "median_abs_where_differ": 0.007738702761975589,
+  "max_abs": 0.3130356725921421
+ },
+ "decision": {
+  "n_positions": 5885,
+  "n_multi_candidate": 5356,
+  "n_negative_wrongly_split": 7,
+  "n_declaration_changed": 31
+ }
+}

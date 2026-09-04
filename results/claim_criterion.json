@@ -1,0 +1,55 @@
+{
+ "n_games": 10,
+ "decisions": 1065,
+ "candidates": 998,
+ "threshold": 0.97,
+ "q_is_one_share": 0.12024048096192384,
+ "median_q": 0.24077898074763648,
+ "median_gap": 0.7592210192523636,
+ "max_gap": 0.99999829665706,
+ "disagreements": 0,
+ "p_only": 0,
+ "ev_only": 0,
+ "threshold_sweep": {
+  "0.999": {
+   "both": 83,
+   "p_only": 0,
+   "ev_only": 0
+  },
+  "0.99": {
+   "both": 83,
+   "p_only": 0,
+   "ev_only": 0
+  },
+  "0.97": {
+   "both": 83,
+   "p_only": 0,
+   "ev_only": 0
+  },
+  "0.95": {
+   "both": 83,
+   "p_only": 0,
+   "ev_only": 0
+  },
+  "0.9": {
+   "both": 84,
+   "p_only": 0,
+   "ev_only": 0
+  },
+  "0.85": {
+   "both": 86,
+   "p_only": 0,
+   "ev_only": 0
+  },
+  "0.8": {
+   "both": 88,
+   "p_only": 2,
+   "ev_only": 0
+  },
+  "0.7": {
+   "both": 93,
+   "p_only": 12,
+   "ev_only": 0
+  }
+ }
+}

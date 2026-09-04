@@ -279,6 +279,11 @@ holds at least one card ("has a foothold"):
 | m = 1 | 2,604 | yes, 100% | -1: 1,302, +1: 1,302 |
 | m = 2 | 1,275,960 | yes, 100% | -2: 565,068, 0: 145,824, +2: 565,068 |
 | m = 3 | 61 sampled, solved by reachability | yes, 61/61 | - |
+| m = 1..9 | 360 sampled, greedy playout | yes, 360/360 | see below |
+
+The last row is no longer a sample of a conjecture. The sketch below is a
+proof, and `scripts4/closed_form_proof.py` checks its three premises against
+the engine rather than against a reading of it -- see section 5.1.
 
 The mechanism, which is also a proof sketch:
 
@@ -312,6 +317,57 @@ Note the closed form is a statement about *values*, not about *actions*: which
 asks and claims are optimal, and in which order, is not closed-form trivial
 (mean 4.3 optimal actions out of 8.1 legal in the corpus), and that is what the
 corpus scores agents on.
+
+### 5.1 Why it holds at every m, with no table
+
+Steps 1-4 use only three facts, and each is a property of the RULES rather than
+of any position, so none of them needs a layer to be enumerated:
+
+**A. Footholds never grow.** `check_legal` refuses an ask unless
+`self.hands[player] & half_suit_mask(hs)`, so a team holding no card of h can
+never receive one. Its foothold set only shrinks. Hence the mover's team can
+claim at most the f half-suits it has a foothold in *now*.
+
+**B. A team with no foothold in h cannot deny h.** All six cards of h are in
+opponents' hands, so in `_apply_claim` the `any(team_of(h) != team)` branch
+fires for every assignment it could submit and `winner = 1 - team` -- under
+BOTH misdeclaration rules. Under the legacy null variant the further point
+was that no spite-null is available: the mover cannot convert a certain -1
+into a 0. Under the opponent-award baseline the premise only strengthens,
+since nulls do not exist at all (not even the owning team can void its own
+set; a wrong order gifts it instead). Hence the opponents take all m - f
+regardless of what the mover does.
+
+**C. The mover takes all f without surrendering the turn.** A hit retains the
+turn; `_apply_claim` never touches `self.turn`; a claim that empties the
+claimant leaves `_normalize_turn` waiting for a `Pass`, which
+`legal_passes` restricts to teammates with cards. With perfect information
+every ask can be made to hit, so the mover drains and claims each of its f
+half-suits in turn, and only when its team is cardless does the turn normalise
+to an opponent -- who by symmetry then takes the rest.
+
+A and B give V <= 2f - m; C gives V >= 2f - m.
+
+The optimal perfect-information policy is correspondingly short: *take a
+hitting ask if one exists; otherwise claim a half-suit your team wholly owns;
+otherwise pass to a teammate with cards.* Played out from 360 random positions
+across m = 1 to 9 it realises 2f - m every time, and at m = 1 and m = 2 it
+agrees with `Exact2Solver.value` on every position tested -- the one step in
+the argument anchored to a solver rather than to internal consistency.
+
+**What the answer actually is.** A team lacks a foothold in a half-suit only if
+all six of its cards landed in the opponents' 27, with probability
+C(27,6)/C(54,6) = 1.15%. So at a fresh deal
+
+    E[V] = 2 * (9 - 9 * 0.01146) - 9 = +8.794
+
+out of 9. The team on move takes everything. Perfect-information Fish is not a
+hard game that the tables partly solve; it is a trivial game, and the whole
+difficulty of Fish is the hidden information. `results/determinization_gap.json`
+measures that from the other side: the tables overstate the mover by +5.29 sets
+on positions real play reaches, +8.18 at a fresh deal. Extending the tablebase
+to larger m would therefore buy nothing -- the closed form already answers
+every layer, and the answer is the wrong game's answer.
 
 ### Deliberately losing claims
 

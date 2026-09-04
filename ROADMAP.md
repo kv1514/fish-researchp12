@@ -9,6 +9,26 @@ that bottleneck?**
 
 ---
 
+## Status as of v0.4 — read this first
+
+Everything below this section is **v0.3's roadmap**, kept because its reasoning
+is still worth reading. Four of its items have since been settled, so a reader
+picking them up today would be redoing finished work:
+
+| v0.3 item | what v0.4 found |
+|---|---|
+| 1. Beat the prior at least once | Still open, but narrowed. A belief-space possession-chain search is a null at 500 pairs (paper §"Belief-space search"). More usefully, Proposition 1 there proves that such a search whose transition edits only the asked card's row is *exactly* greedy at every depth — so that branch was never going to work, by construction rather than by measurement. |
+| 2. Learn the ask objective | Done, and it **lost**: paired rollout regression over 874 positions and 83,168 games gives weights that score −2.183 sets/pair against the incumbent. The binding constraint was located in the rollout continuation policy, not the statistics. |
+| 3. Finish the claim study | Done. The EV model's predicted 0.70 threshold was **falsified** by direct measurement; 0.85 to 0.999 play near-identically, and the leverage is in the declared distribution, not the threshold. |
+| 4. Fix sampler bias | Done, exactly — and it changed nothing in play (−0.008 sets/pair). The uniform posterior turned out to be a correct theorem about a false hypothesis; what paid was modelling *why* opponents ask where they do (+1.9 sets/pair). |
+
+The live question v0.4 leaves is not on this list: the opponent choice model is a
+one-parameter proxy, and the principled version — the acting policy's own
+probability of the observed action given the hand — is a fixpoint nobody has
+built.
+
+---
+
 ## Where strength is currently lost (measured)
 
 Agreement with exact optimal play, 327 solvable endgame positions:
@@ -77,11 +97,74 @@ opponents, and which opponent receives the turn on failure. `TunedAgent`-style
 weights make each term individually ablatable so the data, not intuition,
 sets them.
 
+**2026-08-28: one of those terms is measured, mis-specified, and correcting it
+does not pay.** The tempo term charges `0.6 * (1-p) * turn_risk` at a constant
+rate, but a turn is free below `p_best = 0.50` and worth about +0.45 above it,
+and 53% of ask decisions sit in the free regime. Switching the term off below
+the threshold returned +0.2280 [+0.0076, +0.4484] over 1,000 games; the
+8,000-game replication returns **-0.0163 [-0.0973, +0.0648]**, with the half-
+weight rung at -0.0985 [-0.1746, -0.0224], worse than shipped. Withdrawal
+condition 3 fired (hit rate fell, margin did not rise) and it is withdrawn.
+
+The measurement still stands; acting on it does not. That is now twice -- here
+and the signalling gate -- that the tempo table has correctly identified
+something the engine gets wrong and the fix has bought no sets. The lesson for
+this item is that a term can be mis-specified against a measured scale and
+still be earning its weight for a reason the scale does not capture: `turn_risk`
+is minus the target's hand size, so it also steers asks toward short hands.
+Any learned objective has to beat that, not merely notice it.
+
+The wider point for this item: 33.0% of the game-to-game variance in our ask
+hit rate is neither the deal (8.7%) nor binomial noise (58.3%) but the
+position our own play built (`results/deal_luck.json`). That third is the
+budget any learned objective is competing for.
+
 ### 3. Finish the claim study
 The EV model derives a claim threshold near 0.70, well below the 0.97 that
 was used by intuition. The threshold sweep is the direct test. Then extend
 the model with the terms it currently approximates: score dependence, number
 of unresolved sets, and the probability an opponent claims first.
+
+**2026-08-28: the claim study's remaining mass is one specific failure.** Of
+our 0.1759 wrong declarations a game, 0.1676 are allocation class -- our own
+team held all six and we named the wrong split -- against 0.0083 ownership
+errors. Threshold tuning cannot touch that: the question is not *whether* to
+declare a set we own, it is *how it is split*, and once the team holds all six
+`legal_asks` bars every opponent from asking there, so no further ask can NAME
+one of those cards. Public hand counts still constrain it, so the split can be
+settled later by the rest of the game draining teammates' hands. The split is frozen at the moment the last card arrives.
+
+That makes it a distributed-knowledge problem: every card is held by someone
+who knows they hold it, and no member of the team knows the split. Two levers
+exist, and only one is free.
+
+- **Costly:** a deliberately failed ask, the signalling protocol. Priced at
+  +0.1220 [+0.0291, +0.2149], below the ship bar, and it adds an error almost
+  as often as it avoids one (52 games against 72). `prereg/deadline_signalling.md`.
+- **Concentration: refuted, with a reason.** Preferring asks that concentrate
+  the team's holding returned -0.0430 [-0.1369, +0.0509] at w=0.60 and
+  -0.1445 [-0.2490, -0.0400] at w=1.50, and allocation errors ROSE rather than
+  fell, so `prereg/concentration_v2.md` withdrew on its own condition 1.
+  `legal_asks` requires holding a card of the half-suit, so concentrating a
+  holding narrows what that hand can ask in -- forced declarations rose 30%
+  across the dose ladder and the forced path is 47-49% wrong. The term buys a
+  better split and pays in the resource that keeps a seat able to act.
+
+- **Free, and it does not work.** *Who* declares. Any teammate may, on their
+  own turn, and 30.4% of wholly-held declarations are made by someone a
+  teammate could have out-informed — so the opportunity is there. But measured
+  over 16,156 of them (`scripts4/declarer_holding.py`,
+  `results/declarer_holding_self.json`) the error rate *rises* with the
+  declarer's own holding: 0.017 at one card, 0.068 at five, and trivially 0.000
+  at six. Selection, not skill: a player holding one card only declares when
+  the other five are publicly pinned, while holding five leaves exactly one
+  card that may never have moved and is then a coin flip between two teammates.
+  Deferring to the better-placed teammate would move declarations *up* that
+  curve. Closed without a pre-registration.
+
+  What it leaves behind is a better statement of the problem: the residual risk
+  on a wholly-held half-suit is not proportional to how much you are missing,
+  it is about whether what you are missing has ever moved in public.
 
 ### 4. Fix sampler bias
 The world sampler satisfies every constraint but is not uniform over the

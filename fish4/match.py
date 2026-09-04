@@ -35,7 +35,18 @@ from fish.rules import RuleConfig
 from .registry4 import make_agent
 
 
-def play_capped(agents, rules, deck_order, agent_seed, max_actions=4000):
+def side_seeds(agent_seed: int, side: int, n: int = 3) -> list:
+    """``n`` agent seeds for one side of the match, derived from the pair seed.
+
+    Used only when ``independent_seeds`` is on. Domain-separated by side so the
+    two sides draw from streams that cannot coincide.
+    """
+    r = _random.Random((int(agent_seed) << 1) | (side & 1))
+    return [r.getrandbits(64) for _ in range(n)]
+
+
+def play_capped(agents, rules, deck_order, agent_seed, max_actions=4000,
+                seat_seeds=None):
     """Play a game, returning ``(state, timed_out)`` instead of raising.
 
     WHY NOT ``fish.runner.play_game``: it raises on the action cap, and the v0.3
@@ -55,7 +66,8 @@ def play_capped(agents, rules, deck_order, agent_seed, max_actions=4000):
     state.agent_seed = agent_seed
     agent_rng = _random.Random(agent_seed)
     for p, agent in enumerate(agents):
-        agent.begin_game(p, rules, agent_rng.getrandbits(64))
+        agent.begin_game(p, rules, seat_seeds[p] if seat_seeds is not None
+                         else agent_rng.getrandbits(64))
     poll = rules.claims_any_time
     n = 0
     while not state.is_terminal:
@@ -162,6 +174,16 @@ class Result:
     y_nulls: int = 0
     x_gifts: int = 0        # sets handed to the opponents by X's own claim
     y_gifts: int = 0
+    #: gifts whose half-suit was wholly on the declarer's team but misordered
+    #: -- the case the misdeclaration rule governs. Under the baseline
+    #: (opponent-award) these are a subset of gifts; under the legacy null
+    #: variant they appear as nulls instead and this stays 0.
+    x_misdeclares: int = 0
+    y_misdeclares: int = 0
+    #: the rules the games were actually played under, so an archived record
+    #: is self-describing. Every row in results/v04_duels.jsonl written
+    #: before this field existed was played under the legacy null variant.
+    rules: Optional[dict] = None
     timeouts: int = 0
     dropped_pairs: int = 0
     actions: int = 0
@@ -216,13 +238,24 @@ class Result:
                 "wilson_ci": [lo, hi], "diff_mean": m, "diff_ci": [ml, mh],
                 "nulls": self.nulls, "x_nulls": self.x_nulls,
                 "y_nulls": self.y_nulls, "x_gifts": self.x_gifts,
-                "y_gifts": self.y_gifts, "timeouts": self.timeouts,
+                "y_gifts": self.y_gifts,
+                "x_misdeclares": self.x_misdeclares,
+                "y_misdeclares": self.y_misdeclares,
+                "rules": self.rules, "timeouts": self.timeouts,
                 "dropped_pairs": self.dropped_pairs,
-                "actions": self.actions, "seconds": self.seconds}
+                "actions": self.actions, "seconds": self.seconds,
+                # The per-pair differentials themselves. Without these a run's
+                # raw observations are unrecoverable and any re-analysis - a
+                # different interval, a variance decomposition, a pooling across
+                # runs - needs the whole run repeated. They are the actual
+                # measurement; everything else in this record is a summary of
+                # them. A 500-pair run costs about 2 kB.
+                "diffs": list(self.diffs)}
 
 
 def _one_deal(args) -> dict:
-    spec_x, spec_y, rules_dict, deal_seed, start_seat, agent_seed = args
+    spec_x, spec_y, rules_dict, deal_seed, start_seat, agent_seed = args[:6]
+    independent = bool(args[6]) if len(args) > 6 else False
     rng = random.Random(deal_seed)
     base = RuleConfig.from_dict(rules_dict)
     deck = list(range(deck_size(base.variant)))
@@ -230,13 +263,26 @@ def _one_deal(args) -> dict:
     rules = RuleConfig(**{**rules_dict, "starting_player": start_seat})
     rec = {"diff": 0, "nulls": 0, "x_nulls": 0, "y_nulls": 0,
            "x_gifts": 0, "y_gifts": 0,
+           "x_misdeclares": 0, "y_misdeclares": 0,
            "timeout": 0, "actions": 0, "complete": True}
+    xs_seeds = side_seeds(agent_seed, 0) if independent else None
+    ys_seeds = side_seeds(agent_seed, 1) if independent else None
     for swap in (0, 1):
         agents = []
+        seat_seeds = [] if independent else None
         for seat in range(6):
             on_x = (seat % 2 == 0) if swap == 0 else (seat % 2 == 1)
             agents.append(make_agent(spec_x if on_x else spec_y))
-        st, timed_out = play_capped(agents, rules, deck, agent_seed)
+            if independent:
+                # Seeded by position WITHIN THE SIDE, not by seat, so a policy
+                # carries the same randomness into both halves of the pair while
+                # the two sides stay on streams that never coincide. Without
+                # this an A/A is identical in both swaps and its differential is
+                # exactly zero for every deal - see the docstring of
+                # play_matchup.
+                seat_seeds.append((xs_seeds if on_x else ys_seeds)[seat // 2])
+        st, timed_out = play_capped(agents, rules, deck, agent_seed,
+                                    seat_seeds=seat_seeds)
         if timed_out:
             rec["timeout"] += 1
         a, b, nulls = st.scores()
@@ -256,20 +302,48 @@ def _one_deal(args) -> dict:
                 rec["x_nulls" if claimer_is_x else "y_nulls"] += 1
             elif team_of(ev.claimer) != ev.winner:
                 rec["x_gifts" if claimer_is_x else "y_gifts"] += 1
+                # A gift whose cards were all on the declarer's own team is a
+                # misdeclaration: the case the misdeclaration rule governs,
+                # kept separate so the diagnostic keeps meaning what it meant
+                # across the rule change (a plain gift named a card the
+                # opponents actually held).
+                if all(team_of(h) == team_of(ev.claimer)
+                       for h in ev.revealed):
+                    rec["x_misdeclares" if claimer_is_x
+                        else "y_misdeclares"] += 1
     return rec
 
 
 def play_matchup(spec_x, spec_y, n_deals: int, rules: Optional[RuleConfig] = None,
                  base_seed: int = 0, n_jobs: int = 4,
                  agent_seed_base: Optional[int] = None,
-                 progress: bool = False) -> Result:
+                 progress: bool = False,
+                 independent_seeds: bool = False) -> Result:
+    """Duplicate-deal matchup of two agent specs.
+
+    ``independent_seeds`` gives each SIDE its own agent-randomness stream rather
+    than seeding by seat. It is off by default because turning it on changes
+    every number this harness produces, and the archive in
+    ``results/v04_duels.jsonl`` was built without it.
+
+    It exists because the default makes the harness unable to measure its own
+    null. With seat seeding, an A/A - one spec against a copy of itself - plays a
+    bit-identical game in both swaps, so its differential is ``(a-b) + (b-a) = 0``
+    for every deal, exactly, and no amount of sampling reveals anything about the
+    harness's variance. With independent streams the two sides break ties
+    differently, the differential becomes a real random variable with mean zero,
+    and a null distribution can actually be measured.
+    """
     rules = rules or RuleConfig()
     rd = rules.to_dict()
     seed_rng = random.Random(agent_seed_base if agent_seed_base is not None
                              else secrets.randbits(64))
-    jobs = [(spec_x, spec_y, rd, base_seed + i, i % 6, seed_rng.getrandbits(64))
-            for i in range(n_deals)]
+    jobs = [(spec_x, spec_y, rd, base_seed + i, i % 6, seed_rng.getrandbits(64),
+             independent_seeds) for i in range(n_deals)]
     res = Result(spec_x, spec_y)
+    # Self-describing archive: starting_player is per-deal (i % 6 above), so
+    # it is stripped rather than stamped with a misleading single value.
+    res.rules = {k: v for k, v in rd.items() if k != "starting_player"}
     t0 = time.time()
     if n_jobs > 1:
         with Pool(n_jobs) as pool:
@@ -293,6 +367,8 @@ def play_matchup(spec_x, spec_y, n_deals: int, rules: Optional[RuleConfig] = Non
         res.y_nulls += r["y_nulls"]
         res.x_gifts += r["x_gifts"]
         res.y_gifts += r["y_gifts"]
+        res.x_misdeclares += r.get("x_misdeclares", 0)
+        res.y_misdeclares += r.get("y_misdeclares", 0)
         res.actions += r["actions"]
         if d > 0:
             res.x_wins += 1

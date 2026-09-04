@@ -1,0 +1,116 @@
+[
+ {
+  "label": "GAMMA_SCHEDULE s1.0 vs champion block 0",
+  "n_pairs": 1000,
+  "base_seed": 34000000,
+  "agent_seed": 34001,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "GAMMA_SCHEDULE s1.0 vs champion block 1",
+  "n_pairs": 1000,
+  "base_seed": 34200000,
+  "agent_seed": 34002,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "GAMMA_SCHEDULE s1.0 vs champion block 2",
+  "n_pairs": 1000,
+  "base_seed": 34400000,
+  "agent_seed": 34003,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "GAMMA_SCHEDULE s1.0 vs champion block 3",
+  "n_pairs": 1000,
+  "base_seed": 34600000,
+  "agent_seed": 34004,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "GAMMA_SCHEDULE s1.0 vs champion block 4",
+  "n_pairs": 1000,
+  "base_seed": 34800000,
+  "agent_seed": 34005,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "GAMMA_SCHEDULE s1.0 vs champion block 5",
+  "n_pairs": 1000,
+  "base_seed": 35000000,
+  "agent_seed": 34006,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]

@@ -20,29 +20,67 @@ search (noise-to-signal 2.4); the paired differences ``V[a,k] - V[a',k]``
 computed here share the world and the seeds, so the position's own value level
 - which is the dominant variance term - cancels exactly.
 
-**No information leaks into the continuation.** The rollout is run on a FRESH
-``GameState`` built by ``GameState.from_components``, whose history starts
-empty. Each rollout seat is handed an ``Observation`` for its own seat and
-nothing else, so it sees its own hand in the determinized world plus whatever
-becomes public during the rollout. The knowledge set of the continuation policy
-is spelled out on ``PublicInfoHeuristic`` and audited by
-``tests4/test_learn.py``.
+**No information leaks into the continuation.** Each rollout seat is handed an
+``Observation`` for its own seat and nothing else, so it sees its own hand in
+the determinized world plus the public log. Nothing inside a rollout consults
+the world it is being played in; the world only generates observations. That is
+what separates determinization from strategy fusion, and it holds under both
+continuations below. The knowledge set of the public one is spelled out on
+``PublicInfoHeuristic`` and audited by ``tests4/test_learn.py``.
 
 WHY THE WORLDS COME FROM OUTSIDE
 --------------------------------
-``fish.beliefs.BeliefState`` is anchored on the initial deal and refuses to
-attach to a mid-game position (it raises ``BeliefContradiction``). So a
-posterior cannot be rebuilt from a stored position after the fact. Worlds are
-therefore drawn at harvest time, inside the game, from the acting agent's own
+Worlds are drawn at harvest time, inside the game, from the acting agent's own
 live ``BeliefState`` (see ``dataset.py``), and stored with the position. That is
-also the leak-free choice: the worlds are a function of the acting seat's own
+the leak-free choice: the worlds are a function of the acting seat's own
 information only.
+
+The original reason given here was stronger and was wrong. It said a posterior
+"cannot be rebuilt from a stored position after the fact", because
+``fish.beliefs.BeliefState`` is anchored on the initial deal. It is anchored on
+the initial deal, but it does not have to be handed one: given the current hand
+and the real public history, ``initial_hand()`` back-computes a deal consistent
+with both, and the tracker attaches to that. ``scripts4/ask_regret.py`` does
+exactly this and ``scripts4/rollout_target.py`` runs it over 110 positions
+without a single ``BeliefContradiction``. Harvest-time sampling is therefore a
+convenience, not a necessity, and it is kept because the stored worlds make
+every rollout batch reproducible from the file alone.
 
 WHY THE CONTINUATION POLICY IS WHAT IT IS
 -----------------------------------------
-The strong v0.4 policy cannot be used as a continuation: it needs a
-``BeliefState`` attached from the start of the game, which does not exist for a
-determinized mid-game position. ``fish.agents.heuristic.HeuristicAgent`` is the
+For the same reason, the claim that once stood here - that the strong v0.4
+policy cannot be used as a continuation - is false, and it mattered. The paper
+diagnosed the failure of the whole objective-learning line on the continuation
+being weak, and that diagnosis was correct: with the full v0.4 policy finishing
+the rollout, position-centred value rises by +0.681 +/- 0.142 sets across the
+range of P(success), against +0.101 for the public-information heuristic
+(``results/rollout_target.json``, 110 positions, robustness in
+``results/rollout_target_robust.json``). The target the regression could not
+learn from was flat because of what finished the game, and finishing it properly
+un-flattens it.
+
+``RolloutConfig.policy`` therefore selects the continuation, and
+``POLICY_PUBLIC`` remains the default so that every rollout file already on disk
+still means what it meant. ``POLICY_V04`` requires ``seed_history=True``: the
+strong policy attaches to the position through the real public log, so a
+configuration that withheld it would silently anchor the tracker on a game that
+never happened. That combination is refused rather than run.
+
+``POLICY_V04`` ALSO CONSTRAINS THE WORLDS, and the constraint is stronger than
+it looks. The public continuation accepts any determinized world that preserves
+hand counts, because it has no model to contradict. The strong one has six of
+them: every seat rebuilds an initial deal from its own hand plus the public log,
+so a world must satisfy everything that log implies -- cards a successful ask
+located sit with their holder, and every FAILED ask asserts, under the no-bluff
+rule, that the asker holds at least one card of that half-suit. A count-
+preserving shuffle violates the second constraint routinely. ``BeliefState``
+enforces both, so worlds for this continuation must come from the belief
+sampler, which is what ``dataset.py`` stores at harvest time anyway. A world
+that does not qualify raises ``BeliefContradiction`` from inside the rollout,
+loudly, and ``tests4/test_learn.py`` pins that it keeps doing so.
+
+The public continuation and its knobs, below, are unchanged.
+``fish.agents.heuristic.HeuristicAgent`` is the
 documented starting point - it tracks only publicly-established card locations -
 but it is slow to terminate, because it will happily shuttle a card back and
 forth until its stall rule fires. ``PublicInfoHeuristic`` therefore offers two
@@ -200,6 +238,14 @@ class PublicInfoHeuristic(HeuristicAgent):
 # Configuration
 # ---------------------------------------------------------------------------
 
+#: The strong continuation. Fixed by name so that a rollout file records which
+#: policy produced it and a later run cannot silently mean something else.
+V04_SPEC = ("fishbot4", {"opponent_gamma": 0.35})
+
+POLICY_PUBLIC = "rollout-public"
+POLICY_V04 = "v04"
+
+
 @dataclass(frozen=True)
 class RolloutConfig:
     """Everything that makes a rollout batch reproducible."""
@@ -210,18 +256,45 @@ class RolloutConfig:
     stall_window: int = 80
     #: whether the continuation policy uses negative information.
     use_negative: bool = False
+    #: which continuation finishes the rollout: ``POLICY_PUBLIC`` (the
+    #: incumbent, public information only) or ``POLICY_V04`` (the full engine).
+    policy: str = POLICY_PUBLIC
+    #: whether the determinized state is seeded with the REAL public history of
+    #: the position, rather than starting from an empty log.
+    seed_history: bool = False
+
+    def __post_init__(self) -> None:
+        if self.policy not in (POLICY_PUBLIC, POLICY_V04):
+            raise ValueError(f"unknown continuation policy {self.policy!r}")
+        if self.policy == POLICY_V04 and not self.seed_history:
+            # Not a taste question. The belief tracker anchors on an initial
+            # deal it back-computes from (current hand, public history); with an
+            # empty history it would anchor on the determinized mid-game hand as
+            # if it were the deal, and every inference downstream would be drawn
+            # from a game that never happened. Refuse rather than produce it.
+            raise ValueError(
+                "policy='v04' requires seed_history=True: the belief tracker "
+                "has nothing to attach to without the real public history")
 
     def to_dict(self) -> dict:
         return {"max_actions": self.max_actions,
                 "stall_window": self.stall_window,
                 "use_negative": self.use_negative,
-                "policy": PublicInfoHeuristic.name}
+                "seed_history": self.seed_history,
+                "policy": (PublicInfoHeuristic.name
+                           if self.policy == POLICY_PUBLIC else self.policy)}
 
     @classmethod
     def from_dict(cls, d: dict) -> "RolloutConfig":
+        pol = d.get("policy", POLICY_PUBLIC)
+        if pol == PublicInfoHeuristic.name:
+            pol = POLICY_PUBLIC
         return cls(max_actions=int(d.get("max_actions", 900)),
                    stall_window=int(d.get("stall_window", 80)),
-                   use_negative=bool(d.get("use_negative", False)))
+                   use_negative=bool(d.get("use_negative", False)),
+                   policy=pol,
+                   seed_history=bool(d.get("seed_history",
+                                           pol == POLICY_V04)))
 
 
 @dataclass
@@ -259,11 +332,24 @@ def _seat_seeds(world_seed: int) -> list[int]:
     return [rng.getrandbits(64) for _ in range(NUM_PLAYERS)]
 
 
+def _make_agents(cfg: RolloutConfig) -> list:
+    """Six continuation agents, one per seat.
+
+    ``fish4.registry4`` is imported here rather than at module scope: it pulls
+    in the whole engine, and a rollout file written by the public continuation
+    must stay loadable without it.
+    """
+    if cfg.policy == POLICY_V04:
+        from fish4.registry4 import make_agent
+        return [make_agent(V04_SPEC) for _ in range(NUM_PLAYERS)]
+    return [PublicInfoHeuristic(stall_window=cfg.stall_window,
+                                use_negative=cfg.use_negative)
+            for _ in range(NUM_PLAYERS)]
+
+
 def _play_out(state: GameState, seat_seeds: Sequence[int],
               cfg: RolloutConfig, stats: RolloutStats) -> None:
-    agents = [PublicInfoHeuristic(stall_window=cfg.stall_window,
-                                  use_negative=cfg.use_negative)
-              for _ in range(NUM_PLAYERS)]
+    agents = _make_agents(cfg)
     for p, ag in enumerate(agents):
         ag.begin_game(p, state.rules, seat_seeds[p])
     n = 0
@@ -283,11 +369,18 @@ def _differential(state: GameState, my_team: int) -> int:
     return (a - b) if my_team == 0 else (b - a)
 
 
+#: Distinguishes "the caller did not pass a history" from "the caller passed an
+#: empty one". They are the same value and opposite claims: the first is an
+#: omission, the second is an assertion that the game has not started.
+_NO_HISTORY = object()
+
+
 def rollout_matrix(rules: RuleConfig, turn: int, set_winner: Sequence,
                    seat: int, worlds: Sequence[Sequence[int]],
                    asks: Sequence[Ask], seed: int,
                    cfg: Optional[RolloutConfig] = None,
-                   stats: Optional[RolloutStats] = None) -> np.ndarray:
+                   stats: Optional[RolloutStats] = None,
+                   history: Sequence = _NO_HISTORY) -> np.ndarray:
     """``V[a, k]``: set differential GAINED by the acting team, in world k.
 
     The value is incremental - the differential already banked at the position
@@ -301,6 +394,30 @@ def rollout_matrix(rules: RuleConfig, turn: int, set_winner: Sequence,
     candidate - that is the common-random-numbers guarantee.
     """
     cfg = cfg or RolloutConfig()
+    if cfg.policy == POLICY_V04 and history is _NO_HISTORY:
+        # RolloutConfig.__post_init__ refuses policy='v04' with
+        # seed_history=False, which reads like the guard is in place. It is
+        # not: it checks the FLAG, while `history` used to default to (). So
+        # policy='v04' with the flag set and the argument forgotten seeded an
+        # empty log, anchored six belief trackers on a determinized mid-game
+        # hand as though it were the deal, and returned an ordinary-looking
+        # number computed from a game that could not have happened. The engine
+        # often notices -- the back-computed deal is usually infeasible and
+        # BeliefContradiction fires -- but "usually" is not a guarantee, and a
+        # world that happens to be consistent produces a wrong number quietly.
+        #
+        # Inferring the omission from the position does not work: 20 plies of
+        # asking with no claim leaves every hand full and no set decided, so it
+        # is indistinguishable from an opening. A sentinel makes "not passed"
+        # exactly detectable, which is the thing actually worth refusing. An
+        # empty history explicitly passed is a caller's assertion that this is
+        # ply zero, and is honoured.
+        raise ValueError(
+            "policy='v04' needs the real public history: pass history=... "
+            "(explicitly history=() at an opening position). Without it the "
+            "belief tracker anchors on a mid-game hand as if it were the deal")
+    if history is _NO_HISTORY:
+        history = ()
     stats = stats if stats is not None else RolloutStats()
     my_team = team_of(seat)
     base = banked_differential(set_winner, my_team)
@@ -312,6 +429,8 @@ def rollout_matrix(rules: RuleConfig, turn: int, set_winner: Sequence,
         for i, ask in enumerate(asks):
             state = GameState.from_components(rules, list(world), turn,
                                               list(set_winner))
+            if cfg.seed_history:
+                state.history = list(history)
             try:
                 state.apply(seat, ask)
             except IllegalAction:
@@ -421,6 +540,30 @@ def completed_rollouts(root) -> set:
     return out
 
 
+def recorded_policies(root) -> dict:
+    """How many stored rollout records were produced by each policy.
+
+    ``None`` counts records written before the policy was recorded at all.
+    Resuming keys on the position id alone, so without this a pass run with
+    ``--continuation v04`` on top of a public pass would skip every position
+    the weak policy had already done and leave one file holding both -- values
+    that differ by a factor of seven in the slope they support, with nothing on
+    disk saying which line is which.
+    """
+    import json
+    p = rollouts_path(root)
+    if not p.exists():
+        return {}
+    seen: dict = {}
+    with p.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if line:
+                k = json.loads(line).get("policy")
+                seen[k] = seen.get(k, 0) + 1
+    return seen
+
+
 def load_rollouts(root) -> dict:
     """``pid -> V`` matrix over the position's ``eval_idx`` candidates."""
     import json
@@ -471,17 +614,31 @@ def rollout_summary(root) -> dict:
 def _eval_one(args) -> dict:
     """Worker: evaluate one harvested position. Pure function of its input."""
     import time
-    from .dataset import record_asks, record_rules, record_worlds
+    from .dataset import (decode_history, record_asks, record_rules,
+                          record_worlds)
     rec, cfg_dict, seed = args
     cfg = RolloutConfig.from_dict(cfg_dict)
+    hist = ()
+    if cfg.seed_history:
+        if "history" not in rec:
+            # A schema-1 position, harvested before the log was stored. Seeding
+            # an empty history here would anchor six belief trackers on a deal
+            # that never happened and the rollout would run, silently, on a
+            # different game. Refuse by name.
+            raise ValueError(
+                f"position {rec.get('pid')} predates the stored public history "
+                f"(schema askobj-positions/1) and cannot be finished by "
+                f"policy={cfg.policy!r}; re-harvest it")
+        hist = tuple(decode_history(rec["history"]))
     asks = record_asks(rec)
     cands = [asks[i] for i in rec["eval_idx"]]
     stats = RolloutStats()
     t0 = time.time()
     V = rollout_matrix(record_rules(rec), rec["seat"], rec["set_winner"],
                        rec["seat"], record_worlds(rec), cands, seed,
-                       cfg=cfg, stats=stats)
-    return {"pid": rec["pid"], "eval_idx": list(rec["eval_idx"]),
+                       cfg=cfg, stats=stats, history=hist)
+    return {"pid": rec["pid"], "policy": cfg.policy,
+            "eval_idx": list(rec["eval_idx"]),
             "v": V.astype(int).tolist(), "stats": stats.to_dict(),
             "seconds": round(time.time() - t0, 3)}
 
@@ -509,6 +666,18 @@ def evaluate_positions(root, cfg: Optional[RolloutConfig] = None,
     root = Path(root)
     cfg = cfg or RolloutConfig()
     n_workers = max(1, min(n_workers, MAX_WORKERS))
+    seen = recorded_policies(root)
+    wrong = {k: v for k, v in seen.items() if k is not None and k != cfg.policy}
+    if wrong:
+        raise ValueError(
+            f"{rollouts_path(root)} already holds "
+            f"{sum(wrong.values())} record(s) from "
+            f"{sorted(wrong)}; this pass is {cfg.policy!r}. Resuming keys on "
+            f"the position id alone, so continuing here would leave one file "
+            f"mixing two continuations. Use a different --run.")
+    if seen.get(None):
+        print(f"note: {seen[None]} rollout record(s) predate the policy tag "
+              f"and cannot be checked against {cfg.policy!r}", file=sys.stderr)
     done = completed_rollouts(root)
     jobs = []
     for rec in iter_positions(root):

@@ -42,6 +42,13 @@ from fish4.learn import rollout as R                      # noqa: E402
 from fish4.learn.dataset import (MAX_WORKERS, HarvestConfig, harvest,  # noqa: E402
                                  load_positions)
 
+#: The run whose outputs keep the original, unsuffixed filenames. Every number
+#: the paper quotes for the objective-learning line came from this run, so a
+#: second run must not be able to land on top of them: the stages here MERGE
+#: into the results file, so a v2 fit written to v1's path would leave a file
+#: that is partly one experiment and partly another, with nothing in it saying
+#: so. Any other run gets its own suffixed pair of files.
+PRIMARY_RUN = "v1"
 RESULTS = ROOT / "results" / "ask_objective_fit.json"
 REPORT = ROOT / "fish4" / "learn" / "FIT.md"
 
@@ -50,15 +57,30 @@ def data_root(run: str) -> Path:
     return ROOT / "data" / "learn" / run
 
 
-def load_results() -> dict:
-    if RESULTS.exists():
-        return json.loads(RESULTS.read_text(encoding="utf-8"))
+def results_path(run: str) -> Path:
+    if run == PRIMARY_RUN:
+        return RESULTS
+    return RESULTS.with_name(f"ask_objective_fit_{run}.json")
+
+
+def report_path(run: str) -> Path:
+    if run == PRIMARY_RUN:
+        return REPORT
+    return REPORT.with_name(f"FIT_{run}.md")
+
+
+def load_results(run: str = PRIMARY_RUN) -> dict:
+    p = results_path(run)
+    if p.exists():
+        return json.loads(p.read_text(encoding="utf-8"))
     return {}
 
 
-def save_results(d: dict) -> None:
-    RESULTS.parent.mkdir(parents=True, exist_ok=True)
-    RESULTS.write_text(json.dumps(d, indent=2), encoding="utf-8")
+def save_results(d: dict, run: str = PRIMARY_RUN) -> None:
+    p = results_path(run)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    d = dict(d, run=run)
+    p.write_text(json.dumps(d, indent=2), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -71,29 +93,51 @@ def stage_harvest(args) -> dict:
                         n_eval=args.candidates)
     summary = harvest(root, cfg, n_workers=args.workers)
     print(json.dumps(summary, indent=2))
-    res = load_results()
+    res = load_results(args.run)
     res["harvest"] = {"config": cfg.to_dict(), "summary": summary,
                       "run": args.run}
-    save_results(res)
+    save_results(res, args.run)
     return summary
 
 
 def stage_rollout(args) -> dict:
     root = data_root(args.run)
-    cfg = R.RolloutConfig()
+    if args.continuation == "v04":
+        # The paper wrote off this whole line because the continuation was too
+        # weak to let a won card matter by the end of the deal. It measured that
+        # claim at a slope of +0.101; with the engine finishing the rollout the
+        # same measurement gives +0.681 +/- 0.142 (results/rollout_target.json).
+        # A rollout is roughly 20x slower this way, which is the price of the
+        # target carrying signal.
+        cfg = R.RolloutConfig(policy=R.POLICY_V04, seed_history=True,
+                              max_actions=args.max_actions)
+    else:
+        # max_actions was dropped here, so `--continuation public
+        # --max-actions 400` accepted the flag, printed nothing and ran at the
+        # default 900. A documented argument that silently does nothing is
+        # worse than one that is not offered.
+        cfg = R.RolloutConfig(max_actions=args.max_actions)
     summary = R.evaluate_positions(root, cfg=cfg, n_workers=args.workers,
                                    seed=args.seed, limit=args.limit)
     print(json.dumps(summary, indent=2))
-    res = load_results()
+    res = load_results(args.run)
     prev = res.get("rollout", {})
     # Accumulate across resumed passes so the reported totals are the totals.
     for k in ("evaluated", "seconds"):
         summary[k] = prev.get(k, 0) + summary.get(k, 0)
-    if "rollout_stats" in prev and "rollout_stats" in summary:
-        for k, v in prev["rollout_stats"].items():
-            summary["rollout_stats"][k] = summary["rollout_stats"].get(k, 0) + v
+    # When every position is already done, evaluate_positions returns early and
+    # its summary carries no rollout_stats at all -- so the old `k in prev and
+    # k in summary` dropped everything accumulated so far. run_learn_v2.sh
+    # restarts this stage up to 40 times, so that fired as soon as the pass
+    # finished: the totals were erased by the run that confirmed they were
+    # complete.
+    if "rollout_stats" in prev:
+        merged = dict(prev["rollout_stats"])
+        for k, v in summary.get("rollout_stats", {}).items():
+            merged[k] = merged.get(k, 0) + v
+        summary["rollout_stats"] = merged
     res["rollout"] = summary
-    save_results(res)
+    save_results(res, args.run)
     return summary
 
 
@@ -101,7 +145,21 @@ def stage_fit(args) -> dict:
     root = data_root(args.run)
     positions = load_positions(root)
     rolls = R.load_rollouts(root)
-    blocks = F.build_blocks(positions, rolls)
+    # A term whose FORMULA changed after this harvest cannot be fitted from
+    # it: the stored column describes a feature the engine no longer computes.
+    # fish4/learn/fit.py refuses such a column by default. Here we name the
+    # ones we know about, zero them, and record that they were not fitted --
+    # because a ridge coefficient of exactly 0.0 for `claim` reads identically
+    # to "fitted and came out at zero", and those are different statements.
+    from fish4.askfeat import stale_terms
+    stale = sorted({t for rec in positions
+                    for t in stale_terms(rec.get("tv"))})
+    if stale:
+        print(f"NOT FITTED: {stale} -- this harvest predates a change to their "
+              f"formula.\n  Their columns are zeroed, so their reported "
+              f"weight is 0.0 by construction and\n  is not a measurement. "
+              f"Re-harvest to fit them.")
+    blocks = F.build_blocks(positions, rolls, zero_terms=stale)
     if len(blocks) < 20:
         raise SystemExit(f"only {len(blocks)} evaluated positions; run "
                          f"'rollout' first")
@@ -119,6 +177,7 @@ def stage_fit(args) -> dict:
     print(f"  slope on p: {pr.get('slope_on_p', float('nan')):+.3f}")
 
     lin = F.fit_linear(blocks, n_boot=args.boot, n_perm=args.perm)
+    lin["terms_not_fitted"] = stale
     lin_top = F.fit_linear(blocks, n_boot=max(100, args.boot // 4),
                            n_perm=max(100, args.perm // 3), max_rank=8)
     mlp = F.fit_mlp(blocks)
@@ -137,7 +196,7 @@ def stage_fit(args) -> dict:
         print(f"MLP val MSE {mlp['val_mse_mlp']:.4f} vs linear "
               f"{mlp['val_mse_linear']:.4f} (zero {mlp['val_mse_zero']:.4f})")
 
-    res = load_results()
+    res = load_results(args.run)
     res["rollout_totals"] = R.rollout_summary(root)
     res["fit"] = {"linear": lin, "linear_top8": lin_top, "mlp": mlp,
                   "noise_to_signal": nts, "p_response": pr,
@@ -150,14 +209,14 @@ def stage_fit(args) -> dict:
                   # detectable rather than merely wrong.
                   "term_names": list(TERM_NAMES),
                   "n_blocks": len(blocks)}
-    save_results(res)
+    save_results(res, args.run)
     return res["fit"]
 
 
 def stage_validate(args) -> dict:
     from fish4.match import play_matchup
 
-    res = load_results()
+    res = load_results(args.run)
     if "fit" not in res:
         raise SystemExit("run 'fit' first")
     if args.weights == "pinned":
@@ -188,7 +247,7 @@ def stage_validate(args) -> dict:
                 "base_seed": args.base_seed, "agent_seed_base": args.agent_seed,
                 "wall_seconds": time.time() - t0})
     res.setdefault("validation", []).append(rec)
-    save_results(res)
+    save_results(res, args.run)
     return rec
 
 
@@ -206,7 +265,7 @@ def _verdict(rec: dict) -> str:
 
 
 def stage_report(args) -> None:
-    res = load_results()
+    res = load_results(args.run)
     if "fit" not in res:
         raise SystemExit("nothing to report; run 'fit' first")
     lin = res["fit"]["linear"]
@@ -570,20 +629,35 @@ def stage_report(args) -> None:
           f"had been learned would have been a real error, and it is the exact "
           f"shape of error this project's own methodological warning is about.")
         a("")
-        a("The likeliest mechanism is the continuation policy. The rollouts "
-          "have to be finished by a policy that can attach to a determinized "
-          "mid-game position, and `fish.beliefs.BeliefState` cannot - it is "
-          "anchored on the initial deal and refuses. That leaves a "
-          "public-information heuristic, which throws away most of the value of "
-          "a marginal card, so a card won by a good ask is largely squandered "
-          "before the game ends and the ask stops mattering to the final "
-          "differential. The measured variance is not the binding constraint: "
-          "common random numbers already cut the paired variance to "
+        a("The likeliest mechanism is the continuation policy. A rollout has "
+          "to be finished by a policy that can attach to a determinized "
+          "mid-game position, and the public-information heuristic that does "
+          "throws away most of the value of a marginal card, so a card won by "
+          "a good ask is largely squandered before the game ends and the ask "
+          "stops mattering to the final differential. The measured variance is "
+          "not the binding constraint: common random numbers already cut the "
+          "paired variance to "
           f"{nts['crn_var_ratio']:.2f} of independent worlds and brought the "
           f"noise-to-signal ratio from v0.3's 2.4 down to "
           f"{nts['nsr_paired']:.2f}. What is missing is not precision, it is a "
           "continuation strong enough for the difference between two asks to "
           "survive to the end of the game.")
+        a("")
+        a("**This paragraph used to end differently, and the difference "
+          "mattered.** It said `fish.beliefs.BeliefState` *cannot* attach to a "
+          "determinized mid-game position - anchored on the initial deal, and "
+          "refuses - and the whole line was closed on that. It is anchored on "
+          "the initial deal but does not have to be *handed* one: given the "
+          "current hand and the public log, `initial_hand()` back-computes a "
+          "consistent deal and the tracker attaches to it. "
+          "`scripts4/rollout_target.py` does exactly that over 110 positions "
+          "with no `BeliefContradiction`, and on identical positions, worlds "
+          "and root asks the target's slope on P(success) goes from "
+          "+0.040 +/- 0.045 with the heuristic to +0.681 +/- 0.142 with the "
+          "engine - a paired difference of +0.641 +/- 0.145. The heuristic "
+          "needs 181 plies to finish a position the engine finishes in 26. So "
+          "the mechanism above is right and the wall was not there; see "
+          "`fish4/NEGATIVE_CLAIMS.md`.")
         a("")
         a("So the honest summary is narrower than the roadmap item hoped for: "
           "the *machinery* for learning an ask objective works - the pairing, "
@@ -610,8 +684,9 @@ def stage_report(args) -> None:
       f"append-only data files are resumable: re-running a stage picks up where "
       f"it stopped rather than starting over.")
     a("")
-    REPORT.write_text("\n".join(L) + "\n", encoding="utf-8")
-    print(f"wrote {REPORT}")
+    dest = report_path(args.run)
+    dest.write_text("\n".join(L) + "\n", encoding="utf-8")
+    print(f"wrote {dest}")
 
 
 # ---------------------------------------------------------------------------
@@ -643,6 +718,14 @@ def main() -> None:
                          "free-p fit divided by its own p coefficient, or the "
                          "incumbent (a null-change control)")
     ap.add_argument("--label", default=None)
+    ap.add_argument("--continuation", choices=["public", "v04"],
+                    default="public",
+                    help="policy that finishes each rollout. 'public' is the "
+                         "incumbent and reproduces every rollout file on disk; "
+                         "'v04' is the full engine and needs schema-2 "
+                         "positions, which carry the public history.")
+    ap.add_argument("--max-actions", type=int, default=900,
+                    help="cap on actions inside one rollout")
     args = ap.parse_args()
 
     if args.stage in ("harvest", "all"):

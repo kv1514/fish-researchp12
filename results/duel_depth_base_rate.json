@@ -1,0 +1,28 @@
+{
+ "n_positions": 400,
+ "depths": {
+  "0": 327,
+  "2": 20,
+  "3": 21,
+  "4": 13,
+  "5": 9,
+  "6": 8,
+  "7": 2
+ },
+ "retake_by_depth": {
+  "0": 21,
+  "2": 9,
+  "3": 8,
+  "4": 3,
+  "5": 1,
+  "6": 3
+ },
+ "retake_share": 0.1125,
+ "min_depth": 2,
+ "spared_retake_share": 0.0525,
+ "gate_share_of_flagged": 0.4666666666666667,
+ "max_recoverable": 0.15866666666666668,
+ "est_divergence_share": 0.20533333333333334,
+ "est_pair_sd": 1.7705003151657404,
+ "worth_a_screen": true
+}
