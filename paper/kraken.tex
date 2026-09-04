@@ -5214,10 +5214,31 @@ engine's declaration error rate and the effect is \emph{not} specific to
 the interval separates them. Transferring this run's own reference rise of
 $1.136$ points to \texttt{ev\_claim}'s $7.96\%$ baseline, the same rate
 \emph{factor} predicts $+0.0160$, which is inside the interval, and the same
-rate \emph{rise} in points predicts $+0.0423$, which is outside it. The
-mechanism costs an opponent a roughly constant \emph{fraction} of the
-declarations they were already getting wrong, so an opponent who misdeclares
-half as often loses half as much to it.
+rate \emph{rise} in points predicts $+0.0423$, which is outside it. So the
+effect is not a fixed number of percentage points: it scales with how often
+the opponent was already wrong, and an opponent who misdeclares half as often
+loses about half as much to it.
+
+\paragraph{What that does not establish, having named only two candidates.}
+A registration can only separate the hypotheses it writes down, and the two
+this one wrote down are not the only ones. A rate bounded by one is more
+naturally shifted in log-odds than multiplied, and a constant log-odds shift
+fitted to the same reference point predicts $+0.0188$ at \texttt{ev\_claim},
+which is \emph{also} inside the observed interval. That is not a coincidence
+to be argued away: for small $p$ the odds $p/(1-p)$ are approximately $p$, so
+multiplicative and logistic scaling agree wherever the baseline is low, and
+every opponent in this registry except one has a baseline below $22\%$. The
+two laws differ by less than $20\%$ at every error rate this study has
+measured.
+
+They separate in one place. \texttt{heuristic} misdeclares $72.5\%$ of the
+time, three times \texttt{dylan\_v07}'s rate, and there the multiplicative law
+predicts $+0.0426$ against the logistic law's $+0.0143$, a factor of $2.97$.
+So the shape of the transfer is an open question with a sharp discriminating
+test, and \path{prereg/signal_dose_law.md} registers it. Until that runs, what
+is established is the negative half --- the effect is not additive in
+percentage points --- and the positive half is stated as scaling with the
+baseline without committing to which of the two scalings it is.
 
 Three things travel with that. The dose is $2.8$, not the $8.9$ the shipped
 protocol produces against \texttt{dylan\_v07}, so this is generality at a

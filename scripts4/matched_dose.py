@@ -335,6 +335,138 @@ def score(n_deals=None, n_jobs=None, out=None) -> int:
     return 0
 
 
+LAW_OPPONENT = "heuristic"
+LAW_CAL_SEED, LAW_CAL_AGENT = 14_700_000, 147_000
+LAW_SEED, LAW_AGENT, LAW_DEALS = 14_900_000, 149_000, 2_500
+
+
+def law(n_deals=None, n_jobs=None, out=None) -> int:
+    """prereg/signal_dose_law.md. Puts a third point on the transfer curve at
+    the ONE opponent whose baseline separates a multiplicative law from a
+    logistic one, at the dose the other two already share."""
+    t0 = time.time()
+    cal = json.loads((ROOT / "results"
+                      / "matched_dose_calibration.json").read_text())
+    if cal.get("smoke") or not cal.get("gate_passes"):
+        raise SystemExit("the matched-dose calibration is a smoke or failed "
+                         "its gate; D is not established.")
+    D = cal["common_dose_D"]
+    n_deals = LAW_DEALS if n_deals is None else n_deals
+    #: the registered run calibrates on 200 deals, as the matched-dose study
+    #: did; a smoke calibrates on its own small size so it stays a smoke.
+    cal_deals = 200 if n_deals == LAW_DEALS else n_deals
+
+    #: STAGE ONE, on its own bank: can this opponent even reach D?
+    cjobs = [(LAW_CAL_SEED + i, kv, LAW_OPPONENT, p, 0, LAW_CAL_AGENT)
+             for i in range(cal_deals) for kv in (True, False) for p in SWEEP]
+    with Pool(n_jobs or 4) as pool:
+        crows = pool.map(_sweep_job, cjobs, chunksize=1)
+    table = {}
+    for p in SWEEP:
+        table[p] = round(_mean([r for r in crows if r["max_p"] == p],
+                               "fires"), 3)
+    print("\n=== dose law, calibrating %s to the established D = %.1f"
+          % (LAW_OPPONENT, D))
+    print("  fires a game: %s"
+          % "  ".join("p=%.2f %6.3f" % (p, table[p]) for p in SWEEP))
+    reach = [p for p in SWEEP if table[p] >= D]
+    if not reach:
+        print("\n  %s tops out at %.3f, below D = %.1f."
+              % (LAW_OPPONENT, table[1.00], D))
+        print("  ABANDONED. prereg/signal_dose_law.md forbids running it at a "
+              "lower dose,\n  and re-deriving D to fit would be choosing the "
+              "operating point after the data.")
+        payload = {"what": "prereg/signal_dose_law.md", "prereg":
+                   "signal_dose_law", "abandoned": True,
+                   "reason": "%s cannot reach D=%.1f; ceiling %.3f at p=1.00"
+                             % (LAW_OPPONENT, D, table[1.00]),
+                   "dose_table": table, "common_dose_D": D,
+                   "seed_deal": LAW_CAL_SEED, "seed_agent": LAW_CAL_AGENT,
+                   "n_deals": cal_deals, "n_games": len(crows),
+                   "vs": LAW_OPPONENT, "smoke": n_deals != LAW_DEALS,
+                   "minutes": round((time.time() - t0) / 60, 1)}
+        write_result(ROOT / "results" / "signal_dose_law.json", payload)
+        return 3
+    p_star = min(reach)
+    params = {"signal_mode": "stuck", "signal_max_p": p_star}
+    if table[p_star] > D * (1 + DOSE_TOLERANCE):
+        bjobs = [(LAW_CAL_SEED + i, kv, LAW_OPPONENT, p_star, b, LAW_CAL_AGENT)
+                 for i in range(cal_deals) for kv in (True, False)
+                 for b in BUDGET_SWEEP]
+        with Pool(n_jobs or 4) as pool:
+            brows = pool.map(_sweep_job, bjobs, chunksize=1)
+        cand = {b: round(_mean([r for r in brows if r["budget"] == b],
+                               "fires"), 3) for b in BUDGET_SWEEP}
+        params["signal_budget"] = min(cand, key=lambda b: abs(cand[b] - D))
+    print("  calibrated to %s" % params)
+
+    #: STAGE TWO, scored.
+    jobs = [(LAW_SEED + i, kv, LAW_OPPONENT, arm, LAW_AGENT)
+            for i in range(n_deals) for kv in (True, False)
+            for arm in ({}, params)]
+    with Pool(n_jobs or 4) as pool:
+        rows = pool.map(_pair_job, jobs)
+    a, b = rows[0::2], rows[1::2]
+    deals = [j[0] for j in jobs[0::2]]
+    m, h, k = cluster_ci([x["opp_wrong"] - y["opp_wrong"]
+                          for y, x in zip(a, b)], deals)
+    dose = round(_mean(b, "fires"), 3)
+    resid = max(abs(r["identity_residual"]) for r in rows)
+    off = abs(dose - D) / D
+    lo_, hi_ = m - (h or 0), m + (h or 0)
+
+    MULT, LOGIT = 0.0426, 0.0143
+    covers = lambda v: lo_ <= v <= hi_                        # noqa: E731
+    if (h or 0) > 0.0142 or (covers(MULT) and covers(LOGIT)):
+        verdict = "UNDERPOWERED: the interval cannot separate the two laws"
+    elif covers(MULT):
+        verdict = "MULTIPLICATIVE: covers +0.0426, excludes +0.0143"
+    elif covers(LOGIT):
+        verdict = "LOGISTIC: covers +0.0143, excludes +0.0426"
+    else:
+        verdict = ("NEITHER: excludes both, so the transfer is not a "
+                   "one-parameter function of the baseline rate")
+
+    withdrawn = []
+    if off > DOSE_TOLERANCE:
+        withdrawn.append("dose %.3f is %.1f%% from D=%.1f" % (dose, 100*off, D))
+    if resid:
+        withdrawn.append("the margin identity does not close (residual %d)"
+                         % resid)
+    if any(not r["terminal"] for r in rows) or any(r["fallbacks"] for r in rows):
+        withdrawn.append("unfinished games or bridge fallbacks")
+
+    print("\n  %s  dose %.3f (%.1f%% off D)" % (LAW_OPPONENT, dose, 100 * off))
+    print("    their extra wrong declarations  %+0.4f [%+0.4f, %+0.4f]"
+          % (m, lo_, hi_))
+    print("    multiplicative predicts %+0.4f, logistic %+0.4f" % (MULT, LOGIT))
+    print("    identity residual, worst game   %d" % resid)
+    print("    -> %s" % verdict)
+    if withdrawn:
+        print("\n  WITHDRAWN: %s" % "; ".join(withdrawn))
+
+    payload = {"what": "prereg/signal_dose_law.md", "prereg": "signal_dose_law",
+               "abandoned": False, "params": params, "dose_table": table,
+               "common_dose_D": D, "dose": dose, "dose_off_by": round(off, 4),
+               "predictions": {"multiplicative": MULT, "logistic": LOGIT},
+               "their_wrong_effect": {
+                   "mean": round(m, 4), "half_width": round(h or 0.0, 4),
+                   "ci95": [round(lo_, 4), round(hi_, 4)], "n_clusters": k},
+               "identity_residual_max": resid, "verdict": verdict,
+               "withdrawn": withdrawn, "seed_deal": LAW_SEED,
+               "seed_agent": LAW_AGENT, "n_deals": n_deals,
+               "n_games": len(rows), "vs": LAW_OPPONENT,
+               "smoke": n_deals != LAW_DEALS,
+               "minutes": round((time.time() - t0) / 60, 1)}
+    if payload["smoke"] and out is None:
+        raise SystemExit("%d is not the registered %d; pass an explicit path."
+                         % (n_deals, LAW_DEALS))
+    path = write_result(
+        Path(out) if out else ROOT / "results" / "signal_dose_law.json", payload)
+    print("\nwrote %s  (%s min)" % (path, payload["minutes"]))
+    return 0
+
+
 def main(argv) -> int:
     what = argv[0] if argv else "calibrate"
     rest = [x for x in argv[1:]]
@@ -345,7 +477,10 @@ def main(argv) -> int:
         return calibrate(n_deals, n_jobs, out)
     if what == "score":
         return score(n_deals, n_jobs, out)
-    raise SystemExit("stages are 'calibrate' and 'score'; got %r" % what)
+    if what == "law":
+        return law(n_deals, n_jobs, out)
+    raise SystemExit("stages are 'calibrate', 'score' and 'law'; got %r"
+                     % what)
 
 
 if __name__ == "__main__":
