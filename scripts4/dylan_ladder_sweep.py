@@ -164,6 +164,78 @@ def main(n_deals=None, n_jobs=None) -> int:
     return 0
 
 
+PROBE_SEED, PROBE_AGENT = 16_300_000, 163_000
+
+
+def probe(pairs, n_deals=200, n_jobs=4, out="dylan_probe.json") -> int:
+    """Play labelled specs head to head against us on one fresh bank.
+
+    Exists because the sweep left an anomaly: OUR OWN declaration error rate
+    against `dylan_v04` is 8.38% where every other rung sits at 2-4%, which is
+    6.6 standard deviations out and is NOT a volume effect (drop v04 and the
+    correlation between our error rate and our declaration count falls from
+    +0.71 to +0.10). v04 is also the only rung whose spec carries an extra
+    option -- `mgate=0.008`, their marginal declaration gate, taken from their
+    own manifest. This runs the same base with and without it.
+    """
+    from fish4.dylan_ladder import refuse_if_cheating
+    import fish4.dylan_ladder as L
+
+    t0 = time.time()
+    for _label, spec in pairs:
+        refuse_if_cheating(spec)
+    orig = dict(L.RELEASES)
+    L.RELEASES.update({lab: (spec, "probe") for lab, spec in pairs})
+    try:
+        jobs = [(PROBE_SEED + i, kv, lab, PROBE_AGENT)
+                for lab, _s in pairs for i in range(n_deals)
+                for kv in (True, False)]
+        with Pool(n_jobs) as pool:
+            rows = pool.map(_job, jobs, chunksize=1)
+    finally:
+        L.RELEASES.clear()
+        L.RELEASES.update(orig)
+
+    res = {"what": "dylan ladder probe", "descriptive": True, "prereg": None,
+           "specs": {lab: spec for lab, spec in pairs}, "opponents": {},
+           "seed_deal": PROBE_SEED, "seed_agent": PROBE_AGENT,
+           "n_deals": n_deals, "n_games": len(rows),
+           "vs": "|".join(lab for lab, _ in pairs)}
+    print("\n=== probe, %d duplicate deals an arm" % n_deals)
+    print("  %-22s %22s %10s %10s" % ("arm", "margin", "their err", "our err"))
+    for lab, spec in pairs:
+        rs = [r for r in rows if r["vs"] == lab]
+        m, h, k = cluster_ci([r["margin"] for r in rs], [r["deal"] for r in rs])
+        h = h or 0.0
+        td = sum(r["opp_declares"] for r in rs)
+        od = sum(r["our_declares"] for r in rs)
+        res["opponents"][lab] = {
+            "spec": spec, "margin": round(m, 4), "half_width": round(h, 4),
+            "ci95": [round(m - h, 4), round(m + h, 4)], "n_clusters": k,
+            "their_declares": td, "our_declares": od,
+            "their_err": round(sum(r["opp_wrong"] for r in rs) / td, 4),
+            "our_err": round(sum(r["our_wrong"] for r in rs) / od, 4),
+            "our_declares_per_game": round(od / len(rs), 3),
+            "fallbacks": sum(r["fallbacks"] for r in rs),
+            "identity_residual_max": max(abs(r["identity_residual"])
+                                         for r in rs),
+            "games": len(rs)}
+        v = res["opponents"][lab]
+        print("  %-22s %+8.4f [%+7.4f, %+7.4f] %9.2f%% %9.2f%%"
+              % (lab, m, m - h, m + h, 100 * v["their_err"],
+                 100 * v["our_err"]))
+    res["minutes"] = round((time.time() - t0) / 60, 1)
+    print("\n  wrote results/%s  (%.1f min)" % (out, res["minutes"]))
+    write_result(ROOT / "results" / out, res)
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "mgate":
+        raise SystemExit(probe(
+            [("v04_bare", "v04"), ("v04_mgate", "v04:mgate=0.008")],
+            n_deals=int(sys.argv[2]) if len(sys.argv) > 2 else 200,
+            n_jobs=int(sys.argv[3]) if len(sys.argv) > 3 else 4,
+            out="dylan_v04_mgate_probe.json"))
     raise SystemExit(main(int(sys.argv[1]) if len(sys.argv) > 1 else None,
                           int(sys.argv[2]) if len(sys.argv) > 2 else None))

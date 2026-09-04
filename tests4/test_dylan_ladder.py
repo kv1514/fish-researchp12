@@ -162,3 +162,44 @@ def test_the_sweep_had_no_fallbacks_and_closed_the_identity():
         assert o["fallbacks"] == 0, vs
         assert o["unfinished"] == 0, vs
         assert o["identity_residual_max"] == 0, vs
+
+
+PROBE = ROOT / "results" / "dylan_v04_mgate_probe.json"
+
+
+def _probe():
+    if not PROBE.exists():
+        pytest.skip("the mgate probe has not been run")
+    return json.loads(PROBE.read_text())
+
+
+def test_the_mgate_probe_played_both_arms_on_one_bank():
+    d = _probe()
+    assert set(d["opponents"]) == {"v04_bare", "v04_mgate"}
+    assert d["opponents"]["v04_bare"]["spec"] == "v04"
+    assert d["opponents"]["v04_mgate"]["spec"] == "v04:mgate=0.008"
+    for o in d["opponents"].values():
+        assert o["fallbacks"] == 0
+        assert o["identity_residual_max"] == 0
+
+
+def test_mgate_is_inert_on_the_v04_path():
+    """Bit-identical, for two reasons in their source: v04.hpp defaults
+    marginalGate to .008 already, and makeAgent's v04 branch parses only
+    `belief` and never applies mgate at all.
+
+    If this ever stops holding, the spec fish4/dylan_ladder.py uses for v0.4
+    is no longer a no-op and the ladder's v04 number is measuring something
+    else -- so the docstring claiming inertness has to change with it.
+    """
+    d = _probe()
+    a, b = d["opponents"]["v04_bare"], d["opponents"]["v04_mgate"]
+    for key in ("margin", "half_width", "their_err", "our_err",
+                "their_declares", "our_declares"):
+        assert a[key] == b[key], key
+
+
+def test_the_ladder_documents_that_v04s_option_is_inert():
+    doc = " ".join(L.__doc__.split())
+    assert "INERT" in doc
+    assert "never on the v04 path" in doc

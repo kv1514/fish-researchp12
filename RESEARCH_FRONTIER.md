@@ -4092,3 +4092,32 @@ measures their v0.N as it exists at d017fbcb — what their current tree runs �
 not a verified reproduction of their published v0.N. One thing the manifests
 do pin: v0.4's policy_spec is `v04:mgate=0.008`, not a bare `v04`, and the
 bare base would have measured a configuration they never published.
+
+### OPEN: our own error rate doubles against v0.4 and mgate does not explain it
+
+The ladder sweep left one anomaly. OUR declaration error rate is 8.38% against
+`dylan_v04` where every other rung sits between 2.05% and 4.19% — 6.6 standard
+deviations outside the other five. Our engine is identical in all six cells.
+
+**Not a volume effect.** We do declare most against v04 (5.343 a game, against
+their lowest 3.658), and across all six rungs our error rate correlates with
+our declaration count at +0.71 — but drop v04 and that correlation collapses
+to +0.10. The correlation IS v04.
+
+**Not mgate either.** v04 is the only rung whose spec carries an extra option,
+`mgate=0.008`, their marginal declaration gate, taken from their own manifest.
+A 250-deal probe (`results/dylan_v04_mgate_probe.json`) plays `v04` against
+`v04:mgate=0.008` and they are bit-identical — +2.0240 [+1.7690, +2.2790],
+16.42% their error, 7.61% ours, on both arms. Two reasons in their source:
+`v04.hpp:130` already defaults `marginalGate` to .008, and the `v04` branch of
+`makeAgent` parses only `belief` and never applies `mgate` at all.
+
+So the hypothesis is dead and the anomaly stands. Something about how v0.4
+plays makes OUR declarations wrong more than twice as often as any other
+opponent does, and nothing measured so far says what.
+
+**A side-finding for Dylan, from the same probe.** Their v0.4 manifest records
+`policy_spec = v04:mgate=0.008`, and that option is inert on the v04 code
+path. It is harmless because it equals the default, but anyone setting
+`v04:mgate=0.05` would silently get .008. Same shape as the off-turn polling
+issue: a knob that looks connected and is not.

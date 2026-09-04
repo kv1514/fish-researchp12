@@ -62,10 +62,24 @@ therefore "their v0.N as it exists at d017fbcb" -- which is what their current
 tree would run -- and NOT a verified reproduction of their published v0.N.
 That distinction is stated here rather than discovered later.
 
-One thing the manifests do pin, and it matters: v0.4's `policy_spec` is
-`v04:mgate=0.008`, not a bare `v04`. Running bare `v04` would measure a
-configuration they never published numbers for. `mgate` is still parsed by the
-factory at the pinned commit, so the published spec is used here.
+One thing the manifests do pin: v0.4's `policy_spec` is `v04:mgate=0.008`,
+not a bare `v04`, and that is the string used here -- their published spec,
+not one we chose.
+
+IT IS ALSO INERT, WHICH IS WORTH KNOWING RATHER THAN ASSUMING. Measured on a
+250-deal probe (`scripts4/dylan_ladder_sweep.py mgate`), `v04` and
+`v04:mgate=0.008` are bit-identical: same margin, same interval, same error
+rates to four decimals. Two independent reasons, both in their source at the
+pinned commit:
+
+  * `v04.hpp:130` sets `marginalGate = .008` as v0.4's DEFAULT, so the option
+    assigns the value it already had; and
+  * the `v04` branch of `makeAgent` parses only `belief`. `mgate` is applied
+    in the v05/v06 option helpers (factory.hpp:80, :398) and never on the v04
+    path at all, so the key is read into the option map and dropped.
+
+Harmless here because the two agree. It would not be harmless to someone who
+set `v04:mgate=0.05` expecting a different gate and silently got the default.
 """
 from __future__ import annotations
 
