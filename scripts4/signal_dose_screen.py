@@ -185,6 +185,53 @@ def _one(args) -> dict:
     return out
 
 
+#: Deterministic, so two runs over one bank report the same interval. A
+#: bootstrap whose seed moves is a number that drifts for no reason.
+BOOT_DRAWS, BOOT_SEED = 2000, 20260904
+
+
+def _ratio_ci(rs, num, den, conf=0.95):
+    """A cluster bootstrap interval for a ratio of two aggregates.
+
+    The two derived columns of this screen -- how far the protocol extends its
+    own trigger, and the cheapness gate's pass rate -- are ratios of noisy
+    aggregates, and until this existed neither had an interval at all. The
+    paper printed them to three decimals beside quantities whose recorded
+    half-widths run to 30% of the estimate.
+
+    Resampling is over DEALS, not games, because both arms are played on the
+    identical deal and the two games of a deal are not independent. A ratio of
+    aggregates is not a mean, so cluster_ci does not apply and a delta-method
+    standard error would import a normality assumption the tail of a fires
+    count does not earn.
+    """
+    import random
+    by_deal = defaultdict(list)
+    for r in rs:
+        by_deal[r["deal"]].append(r)
+    keys = list(by_deal)
+    if not keys:
+        return None
+
+    def ratio(sample):
+        n = sum(num(r) for d in sample for r in by_deal[d])
+        m = sum(den(r) for d in sample for r in by_deal[d])
+        return n / m if m else None
+
+    rng = random.Random(BOOT_SEED)
+    draws = []
+    for _ in range(BOOT_DRAWS):
+        v = ratio([keys[rng.randrange(len(keys))] for _ in keys])
+        if v is not None:
+            draws.append(v)
+    if len(draws) < BOOT_DRAWS // 2:
+        return None
+    draws.sort()
+    lo = draws[int((1 - conf) / 2 * len(draws))]
+    hi = draws[min(len(draws) - 1, int((1 + conf) / 2 * len(draws)))]
+    return [round(lo, 4), round(hi, 4)]
+
+
 def report(rows: list) -> dict:
     by = defaultdict(list)
     for r in rows:
@@ -218,7 +265,7 @@ def report(rows: list) -> dict:
         a_len, _ = ci("turns", "A_shipped")
         b_len, _ = ci("turns", "B_signal")
         hits, hits_h = ci("opp_asks_hit", "A_shipped")
-        ambig, _ = ci("ambig_mean", "A_shipped")
+        ambig, ambig_h = ci("ambig_mean", "A_shipped")
         unfinished = sum(1 for r in rs for arm in ARMS
                          if not r[arm]["terminal"])
         out["opponents"][vs] = {
@@ -241,10 +288,21 @@ def report(rows: list) -> dict:
                 "fires_half_width": fires_h,
                 "game_turns": b_len,
             },
-            #: the two quantities this pass exists for
+            #: the two quantities this pass exists for, each with the
+            #: interval it went without for two revisions of the paper
             "stuck_turns_ratio_signal_over_shipped":
                 round(b_stuck / a_stuck, 3) if a_stuck else 0.0,
+            "stuck_turns_ratio_ci95": _ratio_ci(
+                rs, lambda r: r["B_signal"]["stuck_turns"],
+                lambda r: r["A_shipped"]["stuck_turns"]),
             "fires_per_stuck_turn": round(fires / b_stuck, 3) if b_stuck else 0.0,
+            "fires_per_stuck_turn_ci95": _ratio_ci(
+                rs, lambda r: r["B_signal"]["fires"],
+                lambda r: r["B_signal"]["stuck_turns"]),
+            "turns_per_episode_ci95": _ratio_ci(
+                rs, lambda r: r["A_shipped"]["stuck_turns"],
+                lambda r: r["A_shipped"]["episodes"]),
+            "ambiguous_cards_half_width": ambig_h,
             "games": len(rs), "unfinished": unfinished,
         }
         d = out["opponents"][vs]
@@ -252,10 +310,32 @@ def report(rows: list) -> dict:
               % (vs, a_stuck, b_stuck,
                  d["stuck_turns_ratio_signal_over_shipped"], fires,
                  d["fires_per_stuck_turn"], a_ep))
+    print("\n  the two derived columns, with the intervals they lacked:")
+    print("  %-11s %24s %24s" % ("opponent", "stuck ratio B/A [95%]",
+                                 "fires per stuck turn [95%]"))
+    for vs in OPPONENTS:
+        d = out["opponents"].get(vs)
+        if not d:
+            continue
+        print("  %-11s %8.3f %-15s %8.3f %-15s"
+              % (vs, d["stuck_turns_ratio_signal_over_shipped"],
+                 _span(d["stuck_turns_ratio_ci95"]),
+                 d["fires_per_stuck_turn"],
+                 _span(d["fires_per_stuck_turn_ci95"])))
+
     print("\n  ratio > 1 means the protocol EXTENDS the state that triggers it,")
     print("  so the dose is partly its own doing and not the opponent's alone.")
     print("  fires per stuck turn is the cheapness gate's pass rate.")
+    print("\n  THE FACTORISATION IS AN IDENTITY. s_A x (s_B/s_A) x (f/s_B) is")
+    print("  f by cancellation, so a 'product' column beside a 'measured' one")
+    print("  can differ only by display rounding and checks nothing. What the")
+    print("  decomposition buys is which TERM differs by opponent, not that")
+    print("  the arithmetic works.")
     return out
+
+
+def _span(ci):
+    return "[%.3f, %.3f]" % tuple(ci) if ci else "[no interval]"
 
 
 def main(n_deals=None, n_jobs=None, out=None) -> int:

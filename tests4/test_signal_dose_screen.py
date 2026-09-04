@@ -8,8 +8,11 @@ its seed bank is not one a registration has already used.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -89,3 +92,76 @@ def test_it_is_marked_descriptive_and_fixes_no_threshold():
     assert "Descriptive." in src
     assert "descriptive=True" in src
     assert "is not a registration" in src
+
+
+def test_the_ratio_bootstrap_is_deterministic():
+    """Two runs over one bank must report the same interval. A bootstrap whose
+    seed moves is a number that drifts in the paper for no reason at all."""
+    rs = [{"deal": d, "n": {"v": d % 3}, "m": {"v": 1 + d % 2}}
+          for d in range(40)]
+    num, den = (lambda r: r["n"]["v"]), (lambda r: r["m"]["v"])
+    assert screen._ratio_ci(rs, num, den) == screen._ratio_ci(rs, num, den)
+
+
+def test_the_ratio_bootstrap_brackets_the_point_estimate():
+    rs = [{"deal": d, "n": {"v": d % 5}, "m": {"v": 2}} for d in range(60)]
+    num, den = (lambda r: r["n"]["v"]), (lambda r: r["m"]["v"])
+    lo, hi = screen._ratio_ci(rs, num, den)
+    point = sum(num(r) for r in rs) / sum(den(r) for r in rs)
+    assert lo <= point <= hi
+
+
+def test_a_noiseless_ratio_gets_a_degenerate_interval():
+    """Every deal identical, so every resample is identical."""
+    rs = [{"deal": d, "n": {"v": 3}, "m": {"v": 4}} for d in range(30)]
+    lo, hi = screen._ratio_ci(rs, lambda r: r["n"]["v"], lambda r: r["m"]["v"])
+    assert lo == hi == 0.75
+
+
+def test_the_bootstrap_resamples_deals_and_not_games():
+    """Both arms are played on the identical deal, so the two games of a deal
+    are not independent and must move together.
+
+    Two deals, two games each, deals differing. Resampling DEALS can only ever
+    draw {AA, AB, BA, BB}, so the ratio takes one of three values. Resampling
+    games would reach values in between, which is the bug this pins.
+    """
+    rs = [{"deal": 0, "n": {"v": 1}, "m": {"v": 1}},
+          {"deal": 0, "n": {"v": 1}, "m": {"v": 1}},
+          {"deal": 1, "n": {"v": 0}, "m": {"v": 1}},
+          {"deal": 1, "n": {"v": 0}, "m": {"v": 1}}]
+    lo, hi = screen._ratio_ci(rs, lambda r: r["n"]["v"], lambda r: r["m"]["v"])
+    assert {lo, hi} <= {0.0, 0.5, 1.0}
+
+
+def test_the_ratio_bootstrap_reports_nothing_rather_than_guessing():
+    assert screen._ratio_ci([], lambda r: 1, lambda r: 1) is None
+    #: every denominator zero: no ratio exists on any resample.
+    rs = [{"deal": d, "n": {"v": 1}, "m": {"v": 0}} for d in range(20)]
+    assert screen._ratio_ci(rs, lambda r: r["n"]["v"], lambda r: r["m"]["v"]) is None
+
+
+def test_the_span_formatter_says_so_when_there_is_no_interval():
+    assert screen._span(None) == "[no interval]"
+    assert screen._span([0.1, 0.2]) == "[0.100, 0.200]"
+
+
+def test_the_factorisation_is_flagged_as_an_identity_in_the_code():
+    """s_A x (s_B/s_A) x (f/s_B) is f by cancellation. The paper printed a
+    'product' column beside a 'measured' one as though that checked
+    something; it can differ only by display rounding."""
+    src = Path(screen.__file__).read_text()
+    assert "IDENTITY" in src
+
+
+def test_the_identity_holds_on_the_bank_to_display_rounding():
+    path = ROOT / "results" / "signal_dose_arms.json"
+    if not path.exists():
+        pytest.skip("the 13,100,000 screen has not been run")
+    d = json.loads(path.read_text())
+    for vs, o in d["opponents"].items():
+        product = (o["shipped"]["stuck_turns_per_game"]
+                   * o["stuck_turns_ratio_signal_over_shipped"]
+                   * o["fires_per_stuck_turn"])
+        assert product == pytest.approx(o["signalling"]["fires_per_game"],
+                                        rel=2e-3), vs
