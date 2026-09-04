@@ -126,3 +126,47 @@ claim that the opponent's error rate is the only thing the transfer depends on
 that it is not.
 
 Nothing enters `V06_DEPLOYED` on any outcome.
+
+---
+
+## Post-hoc note, 2026-09-04. NOT AN AMENDMENT.
+
+Everything above is what was registered and nothing in it is edited. This note
+records something found after the run, and it cannot change the predictions,
+the verdicts or the withdrawal conditions above; it is here so that a reader
+who checks the arithmetic finds the objection already stated.
+
+**`heuristic`'s 72.52% baseline was a screen figure.** Both predictions in the
+table above were computed from it, and it came from
+`results/opponent_error_screen.json` -- 60 deals, 120 games, 131 declarations,
+95 of them wrong. At that size the standard error on the rate is about 4
+points. This document quoted it to four decimals.
+
+**Measured properly it is 62.01%.** `scripts4/dose_law_table.py baseline`, a
+bank of its own at 15,300,000: 500 deals, 1,000 games, 1,166 declarations,
+62.01% wrong, at 1.166 declarations a game against the registered 1.092. The
+gap from 72.52% is 10.5 points, about 2.4 of the screen's own standard errors
+-- sampling noise, not a defect in either measurement. The defect is that
+nothing objected when a figure good to +-4 points was used as an exact input,
+and that the check which caught it was written after the run rather than
+before.
+
+**The verdict does not change.** Recomputing both predictions at 62.01% over
+1.166 declarations a game:
+
+| law | at the registered 72.52% | at the measured 62.01% |
+|---|---|---|
+| multiplicative | +0.0426 | +0.0389 |
+| logistic | +0.0143 | +0.0182 |
+
+The measured interval is [+0.0048, +0.0308]. It excludes the multiplicative
+prediction and covers the logistic one under either input, and the separation
+between the two narrows from a factor of 2.97 to 2.14 without closing.
+
+This is a post-hoc robustness check and is worth what those are worth. It
+could not have rescued a verdict that flipped. Had it flipped, the honest
+report would have been that the run answered a question posed with a wrong
+input -- and that report would have had to be made, which is why the check is
+here rather than in a drawer. `tests4/test_dose_law_table.py` holds the band
+that was fixed before the bank finished playing, the record of it being
+breached, and the assertion that the verdict survives.

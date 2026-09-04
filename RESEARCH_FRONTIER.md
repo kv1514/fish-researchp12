@@ -3749,6 +3749,15 @@ FRACTION of the declarations they were already getting wrong. An opponent who
 misdeclares half as often loses half as much to it -- which is why every
 low-error engine in the registry looked like a null.
 
+> **REFUTED by the dose law, 2026-09-04.** The FRACTION reading was one
+> candidate too few. A constant LOG-ODDS shift fits ev_claim just as well,
+> because for small p the odds are approximately p and the two laws agree
+> everywhere in the registry below 22%. `heuristic` sits at 72.5% and
+> separates them by a factor of three; the interval there covers the logistic
+> prediction and excludes the multiplicative one. The heading above is wrong
+> and is left standing because it is what this run was taken to have shown.
+> See the next section.
+
 **What travels with it.** The dose is 2.8, not the 8.9 the shipped protocol
 produces, so this is generality at a volume neither engine plays at by default.
 The test arm has its gate fully open and pays for it in tempo: margin -0.1372
@@ -3765,3 +3774,93 @@ ledger and reports a residual, zero on every game of a re-run smoke. But on
 this bank the condition is recorded as UNVERIFIED, not as passed.
 
 Nothing ships. signal_max_p above 0.50 is an instrument, not a configuration.
+
+## dose law: LOGISTIC. The transfer is a constant shift in log-odds
+
+`prereg/signal_dose_law.md`, registered 2026-09-01 before the 14,900,000 bank
+existed. The matched-dose run was read as showing a constant FRACTION. It does
+not show that, and no run in this project could have: for small p the odds
+p/(1-p) are approximately p, so a constant factor and a constant log-odds shift
+make the same prediction everywhere in the registry below 22%.
+
+    opponent      baseline   multiplicative   logistic   ratio
+    self             3.33%          +0.0081    +0.0100    0.81
+    memory           4.45%          +0.0076    +0.0093    0.82
+    ev_claim        10.76%          +0.0215    +0.0245    0.88
+    dylan_v07       21.78%          +0.0471    +0.0467    1.01
+    heuristic       72.52%          +0.0426    +0.0143    2.97
+
+`heuristic` is the only opponent that separates them, and it had been barred
+from the generality grid on the ground that it declares 1.09 times a game
+against dylan_v07's 4.02, so its whole opponent channel is 0.60 sets. That
+reasoning was about the CEILING and is still right about the ceiling. Both
+laws predict far below 0.60; what is compared is which prediction the
+measurement lands on, not whether the arm wins.
+
+**Calibrated** to the SAME D = 3.1 the matched-dose study used, by the same
+code: signal_max_p 0.50 already gives 3.800, so a budget of 6 brings it to
+3.093.
+
+**Scored** (14,900,000, 2,500 paired deals, 10,000 games, 96 min):
+
+    heuristic   dose 3.093 (0.2% off D)
+      observed                 +0.0178 [+0.0048, +0.0308]
+      logistic predicted       +0.0143   COVERED
+      multiplicative predicted +0.0426   EXCLUDED
+
+**VERDICT: LOGISTIC.** All four withdrawal conditions passed, including the
+one the matched-dose bank could only record as unverified: the margin identity
+closes on the recorded ledger with a residual of zero on every one of the
+10,000 games. Dose 0.2% off D. No unfinished games, no bridge fallbacks.
+Half-width 0.0130, inside the registered 0.0142 power limit, so the run
+separated the laws rather than failing to.
+
+**What one parameter buys.** Fitting the log-odds shift to dylan_v07 alone and
+applying it unchanged to the other two predicts both, and refitting by least
+squares over all three barely moves it -- across a ninefold range of baseline
+error rate. `scripts4/dose_law_table.py` assembles that table from the files
+the three points live in, because it was hand arithmetic until it wasn't and
+two of its four figures were wrong in the last digit.
+
+**What it is not.** A one-parameter law fitted to three points and chosen from
+two candidates is a description that survived a test designed to break it.
+Nothing here explains WHY the shift should be constant in log-odds, and a
+third functional form nobody wrote down could fit these three points too.
+
+**AND THE GAP IT CLOSED WAS A HOLE.** Both registered predictions were derived
+from `heuristic`'s 72.52% baseline over 1.092 declarations a game, and neither
+number was in any results file -- the two inputs the verdict turns on were the
+two nobody could check. `scripts4/dose_law_table.py baseline` measures them on
+its own bank at 15,300,000, with the tolerance fixed in
+`tests4/test_dose_law_table.py` before the bank finished playing.
+
+**It failed.** 62.01%, not 72.52%, on 1,000 games and 1,166 declarations. The
+72.52% came from `results/opponent_error_screen.json`: 60 deals, 131
+declarations, 95 wrong, a standard error of about 4 points -- quoted to four
+decimals in a document that fixed two predictions from it. The gap is 2.4 of
+the screen's own standard errors, so this is sampling noise and not a bug in
+either measurement. The defect is that nothing objected to a screen figure
+being used as an exact input, and that the check came after the run.
+
+**The verdict survives it.** Recomputed at 62.01% over 1.166 declarations a
+game the predictions become +0.0389 multiplicative and +0.0182 logistic
+against the same [+0.0048, +0.0308]: still excluded, still covered, with the
+separation narrowing from 2.97 to 2.14. Post-hoc, labelled as such, and it
+could not have rescued a verdict that flipped.
+
+**And the law fits BETTER at the corrected baseline.** The shift fitted to
+dylan_v07 alone predicts heuristic to within 0.0004 of what was measured:
+
+    opponent      baseline   decl/g   observed   predicted from dylan_v07
+    ev_claim         7.96%    3.728    +0.0172   +0.0188
+    dylan_v07       21.08%    3.998    +0.0454   +0.0454
+    heuristic       62.01%    1.166    +0.0178   +0.0182
+
+Refitting on all three moves the shift +0.0669 -> +0.0660, 1.4% over an
+eightfold range of baseline.
+
+The band in the test file is NOT widened. Widening a threshold already
+breached is choosing it after the data. The measured value is pinned instead,
+so the discrepancy stays a known quantity rather than a number free to drift.
+
+Nothing ships. This is an instrument reading, not a configuration.

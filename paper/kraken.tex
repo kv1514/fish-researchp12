@@ -5034,7 +5034,10 @@ criterion; the deployed configuration still has \texttt{signal\_mode="off"}.
 so no channel is what the arm would gain if only that counter moved. And
 the rate this rests on is one opponent's: a screen over every honest policy in
 the registry (\path{results/opponent_error_screen.json}) puts \texttt{dylan\_v07}
-at $21.8\%$, the next at $10.8\%$, and the rest between $3\%$ and $7\%$. The
+at $21.8\%$, the next at $10.8\%$, and the rest between $3\%$ and $7\%$. Sixty
+deals is enough to rank the pool and not enough to pin a rate; a later section
+records what happened when one of these figures was used as though it were.
+The
 effect is real and replicates across five arms and two engine revisions, every
 one of them against that same opponent. Whether
 it is a property of the convention or an exploit of one policy is not something
@@ -5227,18 +5230,99 @@ fitted to the same reference point predicts $+0.0188$ at \texttt{ev\_claim},
 which is \emph{also} inside the observed interval. That is not a coincidence
 to be argued away: for small $p$ the odds $p/(1-p)$ are approximately $p$, so
 multiplicative and logistic scaling agree wherever the baseline is low, and
-every opponent in this registry except one has a baseline below $22\%$. The
-two laws differ by less than $20\%$ at every error rate this study has
-measured.
+every opponent in this registry except one has a baseline below $22\%$. Over
+that range the two laws differ by less than $20\%$, which is far less than any
+interval this study can measure.
 
-They separate in one place. \texttt{heuristic} misdeclares $72.5\%$ of the
-time, three times \texttt{dylan\_v07}'s rate, and there the multiplicative law
+They separate in one place. \texttt{heuristic} misdeclares far more often
+than anything else in the registry --- the screen that found it said $72.5\%$,
+and a proper measurement below says $62.0\%$, which is the subject of its own
+paragraph --- and at the rate the registration used, the multiplicative law
 predicts $+0.0426$ against the logistic law's $+0.0143$, a factor of $2.97$.
-So the shape of the transfer is an open question with a sharp discriminating
-test, and \path{prereg/signal_dose_law.md} registers it. Until that runs, what
-is established is the negative half --- the effect is not additive in
-percentage points --- and the positive half is stated as scaling with the
-baseline without committing to which of the two scalings it is.
+\path{prereg/signal_dose_law.md} registered that test before the bank existed,
+naming both predictions and naming in advance the outcome that would hurt most:
+an interval excluding both, which would mean the transfer is not a
+one-parameter function of the baseline at all.
+
+\paragraph{It is logistic, and the multiplicative reading is refuted.} Run at
+the same $D$ on $2{,}500$ paired deals
+(\path{results/signal_dose_law.json}), \texttt{heuristic} lands at
+$+0.0178$ $[+0.0048, +0.0308]$: covering the logistic prediction and
+\emph{excluding} the multiplicative one. All four withdrawal conditions hold
+--- the identity closes on the recorded ledger with a residual of zero on every
+game, the dose lands $0.2\%$ from $D$, no game was unfinished, and the realised
+half-width of $0.0130$ is inside the registered power limit of $0.0142$, so the
+run separates the laws rather than failing to.
+
+That refutes the reading this section carried in an earlier revision, which
+called the effect a constant \emph{fraction} of the opponent's baseline
+errors. It is not; the fraction shrinks as the baseline rises, which is what a
+bounded rate must do and what the multiplicative law cannot represent.
+
+\paragraph{One of the two registered inputs was a screen figure, and it was
+wrong.} Both predictions were computed from \texttt{heuristic}'s baseline of
+$72.52\%$, and that number came from
+\path{results/opponent_error_screen.json}: a $60$-deal descriptive screen,
+$131$ declarations, $95$ of them wrong. A screen is good to about four points
+and this registration quoted it to four decimals. Measured properly on its own
+bank of $1{,}000$ games and $1{,}166$ declarations
+(\path{results/heuristic_baseline.json}), the rate is $62.01\%$ --- a miss of
+$10.5$ points, about $2.4$ of the screen's own standard errors, so sampling
+noise rather than a defect in either measurement. The defect is upstream of
+both: nothing in the pipeline objected when a figure good to $\pm4$ points was
+used as though it were exact, and the check that caught it was written after
+the run rather than before.
+
+Recomputing both predictions at the measured baseline over its measured
+$1.166$ declarations a game gives $+0.0389$ multiplicative and $+0.0182$
+logistic. The interval still excludes the first and covers the second, so the
+registered verdict is also what the properly measured input gives, and the
+separation the test relied on narrows from a factor of $2.97$ to $2.14$
+without closing. That is a post-hoc robustness check and is worth exactly what
+post-hoc robustness checks are worth: it could not have rescued a verdict that
+flipped, and it is reported because the input it corrects is one the
+registration got wrong.
+
+\paragraph{One parameter, three baselines.} The table below reads every
+baseline off the bank that measured that opponent's control arm at length,
+and \path{scripts4/dose_law_table.py} assembles it from those files
+(\path{results/dose_law_table.json}) rather than from arithmetic anybody did
+by hand --- which is how the four figures that stood here in the first draft
+of this paragraph came to be wrong in their last digit.
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+opponent & baseline & declarations/game & observed & predicted \\
+\midrule
+\texttt{ev\_claim}  & $7.96\%$  & $3.728$ & $+0.0172$ & $+0.0188$ \\
+\texttt{dylan\_v07} & $21.08\%$ & $3.998$ & $+0.0454$ & $+0.0454$ \\
+\texttt{heuristic}  & $62.01\%$ & $1.166$ & $+0.0178$ & $+0.0182$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The column on the right is one number applied three times, and the
+number was fitted to the middle row alone: a log-odds shift of $+0.0669$,
+taken from \texttt{dylan\_v07} and carried unchanged to the other two. It
+predicts \texttt{heuristic} to within $0.0004$ at a baseline nearly three
+times as high, and \texttt{ev\_claim} to within $0.0016$ at a bit over a
+third of it. Refitting by least squares on all three moves the shift to
+$+0.0660$, a change of $1.4\%$ over an eightfold range of baseline error rate.
+So the protocol does not merely transfer between opponents: it shifts the
+\emph{log-odds} that an opponent misdeclares by a constant, and one parameter
+measured against one engine predicts the other two.
+
+What that is not is a mechanism. A one-parameter law fitted to three points and
+chosen from two candidates is a description that survived a test designed to
+break it, and the test was a good one --- the two candidates differ by a factor
+of two even at the corrected baseline --- but nothing here explains \emph{why}
+the shift should be constant in log-odds, and a third functional form nobody
+wrote down could fit these three points too. The claim is that the opponent's
+baseline error rate is enough to predict the effect at these three baselines,
+one dose and one rule set, not that it is the only thing the transfer depends
+on.
 
 Three things travel with that. The dose is $2.8$, not the $8.9$ the shipped
 protocol produces against \texttt{dylan\_v07}, so this is generality at a

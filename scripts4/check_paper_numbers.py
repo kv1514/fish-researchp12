@@ -657,15 +657,62 @@ WATCH = [
      "m<=2 effect vs Dylan v0.7", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
      "m<=2 vs v0.7, CI low", "at a power sized for\ndeception-scale flips"),
+    # The dose law (prereg/signal_dose_law.md). The verdict rests on one
+    # interval covering one prediction and excluding the other, so all three
+    # numbers are watched.
+    ("signal_dose_law.json", "their_wrong_effect.mean", "{:+.4f}",
+     "dose law, heuristic observed", "lands at\n$+0.0178$"),
+    ("signal_dose_law.json", "their_wrong_effect.ci95.1", "{:+.4f}",
+     "dose law, interval high", "$[+0.0048, +0.0308]$"),
+    ("signal_dose_law.json", "predictions.multiplicative", "{:+.4f}",
+     "dose law, the excluded prediction", "predicts $+0.0426$ against"),
+    ("signal_dose_law.json", "dose_off_by", "{:.1%}",
+     "dose law, how far the dose missed D", "the dose lands"),
+    ("signal_dose_law.json", "their_wrong_effect.half_width", "{:.4f}",
+     "dose law, realised half-width", "half-width of $0.0130$"),
+    # The transfer law's supporting table (scripts4/dose_law_table.py). Every
+    # figure here was hand arithmetic in the first draft of that paragraph and
+    # two of the four were wrong in the last digit, which is the exact failure
+    # this module exists for -- so the whole table is watched, including the
+    # baseline that both registered predictions were derived from.
+    ("heuristic_baseline.json", "both_sides.A_shipped.their_err", "{:.2%}",
+     "heuristic's measured baseline", "the rate is $62.01\\%$"),
+    ("heuristic_baseline.json", "both_sides.A_shipped.their_declares", "{:,d}",
+     "heuristic's declarations, counted", "games and $1{,}166$ declarations"),
+    ("heuristic_baseline.json", "n_games", "{:,d}",
+     "the baseline bank's games", "bank of $1{,}000$ games"),
+    ("dose_law_table.json", "shift_reference_fit", "{:+.4f}",
+     "the shift fitted to the reference", "a log-odds shift of $+0.0669$"),
+    ("dose_law_table.json", "shift_refit_all", "{:+.4f}",
+     "the shift refitted on all three", "moves the shift to"),
+    ("dose_law_table.json", "refit_moves_shift_by", "{:.1%}",
+     "how far the refit moves it", "a change of $1.4\\%$"),
+    ("dose_law_table.json", "rows.0.predicted_reference_fit", "{:+.4f}",
+     "law table, ev_claim predicted", "$3.728$ & $+0.0172$"),
+    ("dose_law_table.json", "rows.1.predicted_reference_fit", "{:+.4f}",
+     "law table, dylan_v07 predicted", "$3.998$ & $+0.0454$"),
+    ("dose_law_table.json", "rows.2.predicted_reference_fit", "{:+.4f}",
+     "law table, heuristic predicted", "$1.166$ & $+0.0178$"),
+    ("dose_law_table.json", "rows.2.baseline", "{:.2%}",
+     "law table, heuristic baseline", "$1.166$ & $+0.0178$"),
+    ("dose_law_table.json", "rows.0.declares_per_game", "{:.3f}",
+     "law table, ev_claim declarations", "$7.96\\%$  & $3.728$"),
+    ("dose_law_table.json", "rows.1.declares_per_game", "{:.3f}",
+     "law table, dylan_v07 declarations", "$21.08\\%$ & $3.998$"),
     # The matched-dose study (prereg/signal_matched_dose.md). The first
     # positive generality result in this line, so the two intervals that
     # carry it and the doses that make them comparable are all watched.
+    # These two anchors carry their intervals. The bare means were ambiguous
+    # once the dose-law table quoted the same two observed effects a page
+    # later, and widening them to the whole table cell fixes that while also
+    # putting the interval bounds -- which nothing else watches, and on which
+    # "both clear zero" rests -- under the drift check.
     ("matched_dose_scored.json",
      "opponents.dylan_v07.their_wrong_effect.mean", "{:+.4f}",
-     "matched dose, reference channel", "$+0.0454$"),
+     "matched dose, reference channel", "$+0.0454$ $[+0.0326, +0.0582]$"),
     ("matched_dose_scored.json",
      "opponents.ev_claim.their_wrong_effect.mean", "{:+.4f}",
-     "matched dose, test channel", "$+0.0172$"),
+     "matched dose, test channel", "$+0.0172$ $[+0.0048, +0.0296]$"),
     ("matched_dose_scored.json", "opponents.dylan_v07.dose", "{:.3f}",
      "matched dose, reference dose", "dose tolerance at"),
     ("matched_dose_scored.json", "opponents.ev_claim.dose", "{:.3f}",
