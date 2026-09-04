@@ -4013,3 +4013,82 @@ same "trading a card back and forth" pattern is noted for the public-information
 heuristic, where it needed 181 plies on average to terminate.
 
 This is recorded as OPEN. Nothing about it is fixed.
+
+## Dylan's whole ladder: our margin is his misdeclaration rate, r = 0.95
+
+`scripts4/dylan_ladder_sweep.py`, 600 duplicate deals a rung, 7,200 games.
+DESCRIPTIVE — no registration, no threshold, nothing ships.
+
+**The extraction was one string away the whole time.** `external_v07/
+shim_decide.cpp` always read a `SPEC` line and handed it to their
+`makeAgent()`, and their factory always dispatched a ladder off the base
+prefix. We had bridged exactly one policy. `fish4/dylan_ladder.py` extracts
+the six RELEASES and refuses the rest.
+
+**Their `v07x` is a cheat harness and is barred by base name, not just by
+marker.** Their own header calls the three policies "deliberately-cheating":
+`cheat=seed` inverts its reset seed to the deal seed and plays clairvoyantly,
+`cheat=shared` writes to a process-global board across the three team seats,
+`cheat=conv` decodes a teammate's arbitrary tie-break label. The trap: `v07x`
+with NO `cheat=` option falls through to a plain V06Agent, so a guard looking
+only for the word "cheat" passes the base and would pass the real thing the
+day the option was renamed. Same rule as our own `oracle`.
+
+**Excluded as instruments rather than releases:** `v07c` carries an online
+model of its opponent's policy that updates within the match, `v07i` needs the
+opponent's source to invert its transcript, `v07l` is an identity control.
+None is a release and a rung made of one would answer a question nobody asked.
+
+**Results** (KRAKEN's margin, sets a game, clustered on the deal):
+
+    opponent    margin                their err  their d/g  our err  wrong/g
+    dylan_v02  +1.5283 [+1.37, +1.68]     9.13%      3.998    2.05%    0.365
+    dylan_v03  +0.6133 [+0.46, +0.77]     4.71%      4.215    3.69%    0.199
+    dylan_v04  +1.9867 [+1.84, +2.14]    16.36%      3.658    8.38%    0.598
+    dylan_v05  +2.1233 [+1.97, +2.28]    15.06%      3.812    3.87%    0.574
+    dylan_v06  +1.8850 [+1.73, +2.04]    15.72%      3.971    4.19%    0.624
+    dylan_v07  +2.3600 [+2.20, +2.52]    20.71%      4.000    2.97%    0.828
+
+Zero fallbacks on every rung, zero unfinished games, and the margin identity
+closes with residual zero on all 7,200 games.
+
+**THE INSTRUMENT CHECK PASSES, and it was fixed before the run.** Their own E3
+(ten cells, 300 deals each, five replicates a pairing) puts v04/v05/v06 within
++0.046..+0.146 sets of each other. A bridge that mistranslated one version
+would show up as a spurious strength gap. Measured spread across those three
+rungs: 0.238 sets, against per-rung half-widths of about 0.15. Consistent with
+their flatness plus sampling noise; no version-specific defect.
+
+**THE FINDING. Our margin over his ladder is predicted by how often that
+version misdeclares, r = 0.95 over six rungs.** Declarations a game are
+similar throughout (3.66-4.22 theirs, 4.79-5.34 ours), so this is a rate
+comparison and not a volume artifact.
+
+**And his engine got EASIER for us as it advanced.** v0.3 is the hardest rung
+(+0.6133) and v0.7 the easiest (+2.3600). Decomposed through the identity
+`margin = 2*(d_us - w_us + w_them) - 9`, the 1.75-set gap between them is:
+
+    their extra wrong declarations   0.629 of 0.872   72%
+    our extra declarations           0.215 of 0.872   25%
+    our own accuracy                 0.028 of 0.872    3%
+
+So roughly THREE QUARTERS of why v0.7 is easier for us than v0.3 is that v0.7
+misdeclares four times as often (0.828 a game against 0.199).
+
+**What this is NOT.** It is not "Dylan's engine got worse". v02 and v03 are
+scripted baselines, not fitted policies; v04 onward are fitted, and their own
+E3 has v06 beating both v04 and v05 in THEIR arena. A policy tuned to win
+against its own pool can buy declaration volume that costs it against a
+different opponent. Within the fitted family v04-v06 our rungs are within
+noise of each other, which is exactly what their numbers say too — my ordering
+of v04 against v05 differs from theirs by about 0.1 sets against half-widths
+of 0.15, so neither of us should claim that pair either way.
+
+**Provenance, stated rather than assumed.** Their repo is present as a SINGLE
+SQUASHED COMMIT (d017fbcb), so the compiled v04/v05/v06 vectors cannot be
+checked against the ones their published results used; their manifests point
+at commits not in the snapshot and record `working_tree_dirty = True`. This
+measures their v0.N as it exists at d017fbcb — what their current tree runs —
+not a verified reproduction of their published v0.N. One thing the manifests
+do pin: v0.4's policy_spec is `v04:mgate=0.008`, not a bare `v04`, and the
+bare base would have measured a configuration they never published.
