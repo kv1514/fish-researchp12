@@ -155,9 +155,73 @@ def points() -> int:
               % (min(r["dose"] for r in clear), max(r["dose"] for r in clear),
                  100 * min(r["baseline"] for r in clear),
                  100 * max(r["baseline"] for r in clear)))
-    print("\n  DESCRIPTIVE. Three of these share one designed dose, so their\n"
+
+    #: Is ONE constant consistent with all of them? Answered by intersecting
+    #: the per-point ranges rather than by a z-test on the transformed
+    #: estimates: the transform is non-linear, so the mapped endpoints are not
+    #: symmetric about the point estimate and a standard error read off them
+    #: would be a fiction. An intersection needs no such assumption -- it
+    #: either is empty or it is not.
+    both = _intersect(clear)
+    all_ = _intersect(rows)
+    print("\n  one constant consistent with all %d that clear zero:  %s"
+          % (len(clear), _fmt(both)))
+    print("  one constant consistent with all %d points:            %s"
+          % (len(rows), _fmt(all_)))
+    #: And where the REGISTERED constant sits in that. It was fitted to one
+    #: named point before the run, which is the correct procedure and is not
+    #: revised here. Whether it also sits inside what every point jointly
+    #: permits is a different question, and the answer is worth printing
+    #: rather than leaving for a reader to notice.
+    inside_clear = bool(both) and both[0] <= K_PER_SIGNAL <= both[1]
+    inside_all = bool(all_) and all_[0] <= K_PER_SIGNAL <= all_[1]
+    print("\n  the registered k = %+0.5f is %sinside the first and %sinside "
+          "the second." % (K_PER_SIGNAL, "" if inside_clear else "NOT ",
+                           "" if inside_all else "NOT "))
+    if not inside_all:
+        print("  So k sits at the optimistic edge: the low-dose and ev_claim\n"
+              "  intervals cap a shared constant below it. That does not\n"
+              "  revise the registration -- k was fixed in advance from a\n"
+              "  named point -- and it does mean the run is being asked to\n"
+              "  confirm a prediction the existing data already strains.")
+
+    print("\n  NON-EMPTY IS NOT EVIDENCE. The three intervals that permit a\n"
+          "  constant also permit zero, so this says no measurement refutes\n"
+          "  one constant, not that one constant is established.")
+    print("  DESCRIPTIVE. Three of these share one designed dose, so their\n"
           "  agreement about dose is the design and not evidence.")
+
+    payload = {"what": "prereg/signal_dose_linearity.md, the motivating table",
+               "descriptive": True, "rows": rows,
+               "n_clear_zero": len(clear),
+               "constant_consistent_with_clear": both,
+               "constant_consistent_with_all": all_,
+               "registered_k": K_PER_SIGNAL,
+               "registered_k_inside_clear": inside_clear,
+               "registered_k_inside_all": inside_all}
+    write_result(ROOT / "results" / "dose_linearity_points.json", payload)
     return 0
+
+
+def _intersect(rows):
+    """The range of shift-per-signal values consistent with every row.
+
+    A NaN endpoint means the transform has no solution there -- an effect so
+    negative it implies a rate below zero -- and that bounds nothing, so it
+    becomes an infinity rather than being dropped. Dropping it would silently
+    narrow the answer using a point that constrains it least.
+    """
+    lo, hi = float("-inf"), float("inf")
+    for r in rows:
+        a, b = r["shift_per_signal_ci95"]
+        lo = max(lo, a if a == a else float("-inf"))
+        hi = min(hi, b if b == b else float("inf"))
+    return [round(lo, 5), round(hi, 5)] if lo <= hi else None
+
+
+def _fmt(span):
+    return ("EMPTY -- no single constant fits" if span is None
+            else "[%+0.5f, %+0.5f]" % tuple(span))
 
 
 #: prereg/signal_dose_linearity.md. Every one of these is fixed by that

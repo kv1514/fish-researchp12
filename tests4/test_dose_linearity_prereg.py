@@ -206,3 +206,70 @@ def test_the_withdrawal_conditions_were_evaluated_and_recorded():
         "withdrawal condition 1: the margin identity did not close")
     assert d["dose_off_by"] <= 0.15, (
         "withdrawal condition 3: the arm did not reproduce its dose")
+
+
+POINTS_FILE = ROOT / "results" / "dose_linearity_points.json"
+
+
+def _points():
+    if not POINTS_FILE.exists():
+        pytest.skip("the descriptive points file has not been written")
+    return json.loads(POINTS_FILE.read_text())
+
+
+def test_the_points_file_is_marked_descriptive():
+    """It is a pass over spent banks. If anything ever reads it as a result,
+    the flag is what stops that being invisible."""
+    assert _points()["descriptive"] is True
+
+
+def test_the_intersection_is_recomputed_rather_than_trusted():
+    d = _points()
+    assert L._intersect(d["rows"]) == d["constant_consistent_with_all"]
+    clear = [r for r in d["rows"] if r["effect_ci95"][0] > 0]
+    assert len(clear) == d["n_clear_zero"]
+    assert L._intersect(clear) == d["constant_consistent_with_clear"]
+
+
+def test_an_unbounded_endpoint_widens_the_intersection_never_narrows_it():
+    """A NaN endpoint bounds nothing. Dropping such a row would narrow the
+    answer using the point that constrains it least, which is backwards."""
+    nan = float("nan")
+    rows = [{"shift_per_signal_ci95": [0.01, 0.03]},
+            {"shift_per_signal_ci95": [nan, nan]}]
+    assert L._intersect(rows) == [0.01, 0.03]
+    assert L._intersect(rows[:1]) == L._intersect(rows)
+
+
+def test_an_empty_intersection_is_reported_as_empty_not_as_a_range():
+    rows = [{"shift_per_signal_ci95": [0.01, 0.02]},
+            {"shift_per_signal_ci95": [0.03, 0.04]}]
+    assert L._intersect(rows) is None
+    assert "EMPTY" in L._fmt(None)
+
+
+def test_where_the_registered_constant_sits_is_recorded_either_way():
+    """It sits ABOVE what all seven points jointly permit, and that is written
+    down rather than left for a reader to notice.
+
+    This does not revise the registration: k was fixed in advance from one
+    named point, which is the correct procedure, and revising it now against
+    the same data the run is meant to test would be the exact failure the
+    registration exists to prevent. What it does is record that the run is
+    being asked to confirm a prediction the existing data already strains.
+    """
+    d = _points()
+    assert d["registered_k"] == L.K_PER_SIGNAL
+    lo, hi = d["constant_consistent_with_clear"]
+    assert d["registered_k_inside_clear"] == (lo <= L.K_PER_SIGNAL <= hi)
+    lo, hi = d["constant_consistent_with_all"]
+    assert d["registered_k_inside_all"] == (lo <= L.K_PER_SIGNAL <= hi)
+    assert not d["registered_k_inside_all"], (
+        "k now sits inside what every point permits; that is a change in the "
+        "inputs, so re-read which point moved before relaxing this")
+
+
+def test_the_registration_still_holds_the_constant_it_was_registered_with():
+    """The tripwire for the one edit that would invalidate the whole run."""
+    assert L.K_PER_SIGNAL == 0.02170
+    assert "k = +0.02170 log-odds per signal" in FLAT
