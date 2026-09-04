@@ -5013,11 +5013,14 @@ shipped $3.25\%$. It then deletes the channel that was most of the gross gain.
 At $1.48$ signals a game the opponents' extra wrong declarations are $+0.0073$
 $[-0.0063, +0.0208]$, which covers zero, and their error rate is $21.24\%$
 against a baseline of $21.08\%$ and an uncapped $24.02\%$. So the dose-response
-is convex rather than concave. Volume is not a cost the mechanism pays on the
-way to something cheaper; it is the whole of what it buys, and there is no
-inexpensive version of this protocol to find. Two registrations now say so from
-opposite directions: suppressing repeats deletes the channel, and so does
-rationing them.
+is convex rather than concave: volume is most of what the mechanism buys, and
+there is no cheap version of this protocol that keeps the channel intact. Two
+registrations say so from opposite directions --- suppressing repeats deletes
+the channel, and so does rationing them. A later run at $2.5$ times this power
+sharpens the claim and takes one word out of it: at $1.38$ signals a game the
+channel is $+0.0088$ $[+0.0007, +0.0169]$, small but real, so it is not that
+nothing survives a cap, only that a quarter of proportional survives it. That
+is the subject of its own registration below.
 
 One figure from that run is worth recording rather than acting on. The
 replication arrived at $+0.1605$, above the $+0.15$ bar the roster was given
@@ -5076,7 +5079,11 @@ opponent & arm & signals/game & their extra wrong declarations \\
 \end{center}
 
 \noindent Every row consistent with zero is a row below three signals a game,
-and the single row with a channel is the only one that rises above it. The
+and the single row with a channel is the only one that rises above it. That
+pattern is real and the inference it invites is not: a later registered run at
+$2.5$ times the power finds a channel at $1.38$ signals a game, so these rows
+cover zero because they are underpowered and not because the mechanism has a
+threshold. The
 budget result already established that \texttt{dylan\_v07}'s own channel
 disappears at that dose, so the dose alone accounts for the
 \texttt{ev\_claim} null and opponent robustness is not needed to explain it.
@@ -5332,6 +5339,65 @@ fully open, which costs it in tempo: its margin effect is $-0.1372$ $\pm
 instrument cost the registration said in advance was not the outcome being
 measured. And this is two engines under one rule set, not a statement about
 human declarers.
+
+\paragraph{And along the dose axis it is neither a line nor a threshold.}
+The transfer law was measured with the dose held fixed by construction, so it
+says nothing about volume --- and volume is the one lever this project can
+turn. Converting every scored arm into the log-odds shift that would produce
+its measured effect
+(\path{scripts4/dose_linearity.py}, descriptive) put four points between
+$+0.0211$ and $+0.0242$ of shift per signal, across a threefold dose range and
+three engines. One number appeared to describe the whole surface.
+\path{prereg/signal_dose_linearity.md} registered the test: a direct
+replication at power of the arm that produced the $1.48$ point, $5{,}000$
+paired deals against that arm's $2{,}000$, with the constant fitted to a
+single point six times the test dose away, and four verdicts named in advance.
+
+It came back \textbf{NEITHER}, which the registration had named as the outcome
+that would hurt most:
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+realised dose & $1.381$ \\
+their extra wrong declarations & $+0.0088$ $[+0.0007, +0.0169]$ \\
+linear predicts & $+0.0201$ \quad excluded \\
+threshold predicts & $0$ \quad excluded \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Both halves of that matter, and they point opposite ways.
+
+\emph{There is no dead zone.} The interval excludes zero, so the mechanism
+works at $1.4$ signals a game --- less than a sixth of the shipped dose, and
+well inside the range this paper had read as inert. The earlier arms covered
+zero because they were underpowered, exactly as the linear reading said they
+would be, and the sentence above about rows below three signals a game
+describes the power of those rows rather than a property of the mechanism.
+
+\emph{And it is not proportional.} The effect is a quarter of what a constant
+shift per signal predicts, and that prediction is excluded. The per-signal
+shift is $+0.0095$ here against $+0.021$ at every dose from $2.8$ up, so the
+surface turns on softly between one and three signals a game and is
+approximately linear above that. A single constant now survives only on the
+interval $[+0.01823, +0.01826]$, a window $0.00003$ wide where the highest-dose
+point's lower bound grazes this one's upper bound. That is a knife edge, not a
+fit.
+
+Three things are worth saying about the procedure rather than the result. The
+constant was fixed in advance from one named point, and it was recorded before
+the run --- in \path{results/dose_linearity_points.json} --- that it already
+sat \emph{above} what every existing point jointly permitted. Refitting it
+against the low-dose data the run existed to test would have been the failure
+registrations are for. All four withdrawal conditions passed: the identity
+closes with a residual of zero on every one of $20{,}000$ games, the realised
+dose is $6.5\%$ from the arm being replicated, the half-width of $0.0081$ is
+inside the registered limit of $0.0095$, and there were no unfinished games or
+bridge fallbacks. And two doses do not make a curve: a smooth saturating
+function through these points would be indistinguishable here and was not
+tested. What is dead is the pair of readings this project actually wrote down.
 
 One condition was not checked. The registration requires the margin identity to
 close on every arm, and the scoring instrument as run did not record our own

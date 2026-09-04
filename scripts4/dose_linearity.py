@@ -80,6 +80,11 @@ MATCHED = (
      "ev_claim"),
     ("heuristic @ 3.09", "signal_dose_law.json", "dose",
      "their_wrong_effect", "heuristic"),
+    #: the registered low-dose bank, added after it landed. It is the only
+    #: point here measured at a dose CHOSEN to discriminate rather than
+    #: inherited from a study asking something else.
+    ("dylan_v07 @ 1.38", "signal_dose_linearity.json", "dose",
+     "their_wrong_effect", "dylan_v07"),
 )
 
 
@@ -179,15 +184,25 @@ def points() -> int:
           "the second." % (K_PER_SIGNAL, "" if inside_clear else "NOT ",
                            "" if inside_all else "NOT "))
     if not inside_all:
-        print("  So k sits at the optimistic edge: the low-dose and ev_claim\n"
-              "  intervals cap a shared constant below it. That does not\n"
-              "  revise the registration -- k was fixed in advance from a\n"
-              "  named point -- and it does mean the run is being asked to\n"
-              "  confirm a prediction the existing data already strains.")
+        print("  So k sits above what every point jointly permits. That does\n"
+              "  NOT revise the registration -- k was fixed in advance from a\n"
+              "  named point, and refitting it against the data it was meant\n"
+              "  to be tested on is the failure registrations exist to stop.\n"
+              "  It was recorded here before the answer arrived, and the\n"
+              "  answer was NEITHER.")
 
-    print("\n  NON-EMPTY IS NOT EVIDENCE. The three intervals that permit a\n"
-          "  constant also permit zero, so this says no measurement refutes\n"
-          "  one constant, not that one constant is established.")
+    n_zero = len(rows) - len(clear)
+    if all_:
+        width = all_[1] - all_[0]
+        print("  that window is %.5f wide." % width)
+        if width < 0.002:
+            print("  A window that narrow is a knife edge, not a fit: one\n"
+                  "  constant survives only because two intervals graze.")
+    print("\n  NON-EMPTY IS NOT EVIDENCE. The %d interval%s that permit a\n"
+          "  constant while also permitting zero constrain it barely at all,\n"
+          "  so a non-empty window says no measurement REFUTES one constant,\n"
+          "  not that one is established."
+          % (n_zero, "" if n_zero == 1 else "s"))
     print("  DESCRIPTIVE. Three of these share one designed dose, so their\n"
           "  agreement about dose is the design and not evidence.")
 
@@ -198,7 +213,9 @@ def points() -> int:
                "constant_consistent_with_all": all_,
                "registered_k": K_PER_SIGNAL,
                "registered_k_inside_clear": inside_clear,
-               "registered_k_inside_all": inside_all}
+               "registered_k_inside_all": inside_all,
+               "constant_window_width": (round(all_[1] - all_[0], 5)
+                                         if all_ else None)}
     write_result(ROOT / "results" / "dose_linearity_points.json", payload)
     return 0
 

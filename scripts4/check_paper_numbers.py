@@ -670,6 +670,27 @@ WATCH = [
      "dose law, how far the dose missed D", "the dose lands"),
     ("signal_dose_law.json", "their_wrong_effect.half_width", "{:.4f}",
      "dose law, realised half-width", "half-width of $0.0130$"),
+    # The dose-linearity run (prereg/signal_dose_linearity.md). The verdict is
+    # NEITHER, which rests on ONE interval excluding two predictions, so the
+    # interval, both predictions and the power limit it had to clear are all
+    # watched -- and so is the realised dose, because the prediction is a
+    # formula evaluated at it.
+    ("signal_dose_linearity.json", "their_wrong_effect.mean", "{:+.4f}",
+     "dose linearity, observed", "their extra wrong declarations & $+0.0088$"),
+    ("signal_dose_linearity.json", "their_wrong_effect.ci95.0", "{:+.4f}",
+     "dose linearity, interval low", "their extra wrong declarations & $+0.0088$"),
+    ("signal_dose_linearity.json", "predictions.linear", "{:+.4f}",
+     "dose linearity, the linear prediction", "linear predicts & $+0.0201$"),
+    ("signal_dose_linearity.json", "dose", "{:.3f}",
+     "dose linearity, realised dose", "realised dose & $1.381$"),
+    ("signal_dose_linearity.json", "dose_off_by", "{:.1%}",
+     "dose linearity, how far off the replicated arm", "from the arm being"),
+    ("signal_dose_linearity.json", "their_wrong_effect.half_width", "{:.4f}",
+     "dose linearity, realised half-width", "the half-width of $0.0081$"),
+    ("dose_linearity_points.json", "rows.1.shift_per_signal", "{:+.4f}",
+     "the low-dose shift per signal", "shift is $+0.0095$ here"),
+    ("dose_linearity_points.json", "constant_window_width", "{:.5f}",
+     "how wide one constant's window still is", "a window $0.00003$ wide"),
     # The transfer law's supporting table (scripts4/dose_law_table.py). Every
     # figure here was hand arithmetic in the first draft of that paragraph and
     # two of the four were wrong in the last digit, which is the exact failure

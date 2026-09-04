@@ -3864,3 +3864,58 @@ breached is choosing it after the data. The measured value is pinned instead,
 so the discrepancy stays a known quantity rather than a number free to drift.
 
 Nothing ships. This is an instrument reading, not a configuration.
+
+## dose linearity: NEITHER. No dead zone, and not proportional either
+
+`prereg/signal_dose_linearity.md`, registered and pushed before the
+15,700,000 bank was played. The transfer law was measured at a dose held fixed
+by construction, so it said nothing about volume. Converting every scored arm
+into the log-odds shift that would produce its effect put four points between
++0.0211 and +0.0242 per signal across a 3.2x dose range, a 7.8x baseline range
+and three engines. One number looked like it described the whole surface.
+
+**The test.** A direct replication at power of the arm that produced the 1.477
+point -- 5,000 paired deals against that arm's 2,000 -- with k fitted to ONE
+point six times the test dose away, so the prediction was an extrapolation.
+Four verdicts named in advance, including NEITHER.
+
+**Scored** (15,700,000, 5,000 paired deals, 20,000 games, 139 min):
+
+    realised dose                   1.381 (6.5% off the replicated 1.477)
+    their extra wrong declarations  +0.0088 [+0.0007, +0.0169]
+    linear predicts                 +0.0201   EXCLUDED
+    threshold predicts               0        EXCLUDED
+
+**VERDICT: NEITHER**, the outcome the registration named as the one that would
+hurt most. All four withdrawal conditions passed: identity residual zero on
+every one of 20,000 games, dose 6.5% off, half-width 0.0081 inside the
+registered 0.0095, no unfinished games or fallbacks.
+
+**Both halves matter and they point opposite ways.**
+
+THERE IS NO DEAD ZONE. The interval excludes zero at 1.4 signals a game, less
+than a sixth of the shipped dose and well inside the range this paper read as
+inert. The earlier arms covered zero because they were underpowered, exactly
+as the linear reading predicted. The paper's "every row consistent with zero
+is below three signals a game" was a fact about the power of those rows.
+
+AND IT IS NOT PROPORTIONAL. +0.0088 against a predicted +0.0201, excluded. The
+per-signal shift is +0.0095 here against +0.021 at every dose from 2.8 up, so
+the surface turns on softly between one and three and is roughly linear above.
+
+**The constant is now on a knife edge.** Intersecting the per-point ranges, a
+single shift per signal survives only on [+0.01823, +0.01826] -- a window
+0.00003 wide, where the 8.94 point's lower bound grazes this one's upper
+bound. Corroborates NEITHER from an independent direction.
+
+**Procedure.** k was fixed in advance from one named point, and it was
+recorded in results/dose_linearity_points.json BEFORE the run that k already
+sat above what every existing point jointly permitted. Refitting it against
+the low-dose data the run existed to test would have been the failure
+registrations are for. The strain was written down, then confirmed.
+
+**What this cannot do.** Two doses do not make a curve. A smooth saturating
+function through these points would be indistinguishable here and was not
+tested. What is dead is the pair of readings this project wrote down.
+
+Nothing ships. The deployed configuration still has signalling off.

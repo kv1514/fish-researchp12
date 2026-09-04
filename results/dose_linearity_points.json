@@ -24,6 +24,27 @@
    ]
   },
   {
+   "point": "dylan_v07 @ 1.38",
+   "dose": 1.381,
+   "baseline": 0.2108,
+   "declares_per_game": 3.998,
+   "effect": 0.0088,
+   "effect_ci95": [
+    0.0007,
+    0.0169
+   ],
+   "shift": 0.01318,
+   "shift_ci95": [
+    0.00105,
+    0.02522
+   ],
+   "shift_per_signal": 0.00954,
+   "shift_per_signal_ci95": [
+    0.00076,
+    0.01826
+   ]
+  },
+  {
    "point": "dylan_v07 @ 1.48",
    "dose": 1.477,
    "baseline": 0.2108,
@@ -150,16 +171,17 @@
    ]
   }
  ],
- "n_clear_zero": 4,
+ "n_clear_zero": 5,
  "constant_consistent_with_clear": [
   0.01823,
-  0.02511
+  0.01826
  ],
  "constant_consistent_with_all": [
   0.01823,
-  0.0201
+  0.01826
  ],
  "registered_k": 0.0217,
- "registered_k_inside_clear": true,
- "registered_k_inside_all": false
+ "registered_k_inside_clear": false,
+ "registered_k_inside_all": false,
+ "constant_window_width": 3e-05
 }

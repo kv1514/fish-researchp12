@@ -146,7 +146,7 @@ def test_the_descriptive_points_are_labelled_as_descriptive():
 
 
 def test_the_points_stage_covers_every_scored_arm_it_can():
-    assert len(L.POINTS) + len(L.MATCHED) == 7
+    assert len(L.POINTS) + len(L.MATCHED) == 8
     labels = [p[0] for p in L.POINTS] + [m[0] for m in L.MATCHED]
     assert len(set(labels)) == len(labels)
 
