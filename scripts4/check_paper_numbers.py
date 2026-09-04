@@ -200,9 +200,13 @@ WATCH = [
     ("target_feature_fit.json", "multivariate.p_success.coef", "{:+.3f}",
      "P(success) multivariate coefficient", "turns \\emph{negative}, at"),
     ("target_feature_fit.json", "p_success_abscorr.deplete", "{:.3f}",
-     "corr with deplete", "correlates with"),
+     #: NOT the bare phrase "correlates with". That is common enough English
+     #: that a later section using it made both of these ambiguous, which the
+     #: guard caught as "(anchor x2)" before the value could be checked
+     #: against the wrong sentence.
+     "corr with deplete", "\\texttt{deplete} at"),
     ("target_feature_fit.json", "p_success_abscorr.certain", "{:.3f}",
-     "corr with certain", "correlates with"),
+     "corr with certain", "\\texttt{certain} at"),
     ("target_feature_fit.json", "within_r2", "{:.1%}", "within R^2 of the fit",
      "The whole eleven-term fit explains"),
     # `turn` is the control on the collinearity story: the paragraph's point is
@@ -691,6 +695,44 @@ WATCH = [
     ("signal_dose_arms.json",
      "opponents.ev_claim.shipped.their_hits_half_width", "{:.2f}",
      "ev_claim ask-hits, half-width", "$27.94 \\pm 0.74$"),
+    # Dylan's released ladder (scripts4/dylan_ladder_sweep.py). Six rungs, and
+    # the paper's claim is that the ORDERING is his declaration error rate, so
+    # each rung's margin and each rung's error rate are watched together --
+    # a drift in either half would leave the correlation claim standing on a
+    # table that no longer shows it.
+    ("dylan_ladder_sweep.json", "opponents.dylan_v02.margin", "{:+.4f}",
+     "ladder, v02 margin", "$+1.5283$ $[+1.3735, +1.6832]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v03.margin", "{:+.4f}",
+     "ladder, v03 margin", "$+0.6133$ $[+0.4597, +0.7670]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v04.margin", "{:+.4f}",
+     "ladder, v04 margin", "$+1.9867$ $[+1.8371, +2.1362]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v05.margin", "{:+.4f}",
+     "ladder, v05 margin", "$+2.1233$ $[+1.9663, +2.2803]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v06.margin", "{:+.4f}",
+     "ladder, v06 margin", "$+1.8850$ $[+1.7333, +2.0367]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v07.margin", "{:+.4f}",
+     "ladder, v07 margin", "$+2.3600$ $[+2.2017, +2.5183]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v03.their_err", "{:.2%}",
+     "ladder, v03 error rate", "$+0.6133$ $[+0.4597, +0.7670]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v07.their_err", "{:.2%}",
+     "ladder, v07 error rate", "$+2.3600$ $[+2.2017, +2.5183]$"),
+    # The ladder's headline statistic and the one that does NOT survive, both
+    # derived by scripts4/dylan_ladder_sweep.py corr. The r = 0.95 was a shell
+    # command until the bolded-claim guard refused it, which is the same
+    # failure this manifest exists for, caught one layer up.
+    ("dylan_ladder_correlation.json", "corr_margin_their_error", "{:.2f}",
+     #: one line only -- the paper wraps between "at" and the maths, and an
+     #: anchor spanning that break is absent from the file it is searched in.
+     "ladder, margin against their error rate", "$r = 0.95$"),
+    ("dylan_ladder_correlation.json", "corr_our_error_our_declares", "{:.2f}",
+     "ladder, our error against our volume", "declaration count at $+0.71$"),
+    ("dylan_ladder_correlation.json",
+     "corr_our_error_our_declares_without_v04", "{:.2f}",
+     "ladder, the same with v04 dropped", "collapses that to $+0.10$"),
+    ("dylan_ladder_sweep.json", "v04_v06_spread", "{:.3f}",
+     "ladder, the instrument check", "across those three is"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v04.our_err", "{:.2%}",
+     "ladder, our error rate against v04", "rate is $8.38\\%$ against their"),
     # The dose-linearity run (prereg/signal_dose_linearity.md). The verdict is
     # NEITHER, which rests on ONE interval excluding two predictions, so the
     # interval, both predictions and the power limit it had to clear are all

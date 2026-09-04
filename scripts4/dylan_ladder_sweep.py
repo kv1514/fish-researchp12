@@ -31,6 +31,7 @@ is the outcome their own numbers predict.
 """
 from __future__ import annotations
 
+import json
 import sys
 import time
 from multiprocessing import Pool
@@ -164,6 +165,55 @@ def main(n_deals=None, n_jobs=None) -> int:
     return 0
 
 
+def correlate(out="dylan_ladder_correlation.json") -> int:
+    """The ladder's headline statistic, derived from the sweep it summarises.
+
+    Kept a separate derivation rather than a field on the bank, for the same
+    reason `dose_law_table.py` is separate: the sweep's job is to play games
+    and it should not be re-run for forty minutes to add an arithmetic column.
+    This reads the file it produced and writes the derived one, so the number
+    the paper bolds has a results file behind it instead of a shell command.
+    """
+    d = json.loads((ROOT / "results" / "dylan_ladder_sweep.json").read_text())
+    rows = [(k, v["margin"], v["their_err"], v["our_err"],
+             v["our_declares"] / v["games"]) for k, v in d["opponents"].items()]
+
+    def corr(xs, ys):
+        mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+        num = sum((a - mx) * (b - my) for a, b in zip(xs, ys))
+        den = (sum((a - mx) ** 2 for a in xs)
+               * sum((b - my) ** 2 for b in ys)) ** 0.5
+        return num / den if den else 0.0
+
+    margins = [r[1] for r in rows]
+    r_their = corr([r[2] for r in rows], margins)
+    #: and the one that does NOT hold up, kept beside it so the table cannot
+    #: be read as though every correlation in it survived scrutiny.
+    r_ours_all = corr([r[4] for r in rows], [r[3] for r in rows])
+    without = [r for r in rows if r[0] != "dylan_v04"]
+    r_ours_drop = corr([r[4] for r in without], [r[3] for r in without])
+
+    res = {"what": "the ladder sweep's derived statistics",
+           "descriptive": True, "prereg": None,
+           "source": "dylan_ladder_sweep.json",
+           "n_rungs": len(rows),
+           "corr_margin_their_error": round(r_their, 4),
+           "corr_our_error_our_declares": round(r_ours_all, 4),
+           "corr_our_error_our_declares_without_v04": round(r_ours_drop, 4)}
+    print("\n=== derived from the ladder sweep, %d rungs" % len(rows))
+    print("  margin vs THEIR declaration error rate      r = %+.4f" % r_their)
+    print("  our error vs our declaration count          r = %+.4f"
+          % r_ours_all)
+    print("    the same, dropping dylan_v04              r = %+.4f"
+          % r_ours_drop)
+    print("\n  The second collapses without v04, so it is the outlier and not"
+          "\n  a trend v04 sits on. Recorded because a correlation that dies"
+          "\n  when one point leaves is not a finding.")
+    write_result(ROOT / "results" / out, res)
+    print("\n  wrote results/%s" % out)
+    return 0
+
+
 PROBE_SEED, PROBE_AGENT = 16_300_000, 163_000
 
 
@@ -231,6 +281,8 @@ def probe(pairs, n_deals=200, n_jobs=4, out="dylan_probe.json") -> int:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "corr":
+        raise SystemExit(correlate())
     if len(sys.argv) > 1 and sys.argv[1] == "mgate":
         raise SystemExit(probe(
             [("v04_bare", "v04"), ("v04_mgate", "v04:mgate=0.008")],

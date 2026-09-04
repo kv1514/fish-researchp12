@@ -6775,6 +6775,97 @@ after the netting, not the margin a differently-declaring v0.7 would have
 conceded. The distinction is worth insisting on because the temptation is to
 read the last row as ``our true strength'', and it is not that.
 
+\paragraph{The same account, across his whole ladder.}
+\label{sec:ladder-sweep}
+Everything above is one opponent. That was never a limit of the bridge: the
+shim reads a policy spec and hands it to their factory, which dispatches on
+the base prefix, so all six of their releases were one string away and only
+v0.7 had ever been played. Six rungs at $600$ duplicate deals each, $7{,}200$
+games, zero substituted moves, zero unfinished games, and the declaration
+identity closing with residual zero on every game
+(\path{scripts4/dylan_ladder_sweep.py} $\rightarrow$
+\path{results/dylan_ladder_sweep.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+opponent & margin, sets a game & their error rate & their wrong/game \\
+\midrule
+\texttt{v0.2} & $+1.5283$ $[+1.3735, +1.6832]$ & $9.13\%$  & $0.365$ \\
+\texttt{v0.3} & $+0.6133$ $[+0.4597, +0.7670]$ & $4.71\%$  & $0.199$ \\
+\texttt{v0.4} & $+1.9867$ $[+1.8371, +2.1362]$ & $16.36\%$ & $0.598$ \\
+\texttt{v0.5} & $+2.1233$ $[+1.9663, +2.2803]$ & $15.06\%$ & $0.574$ \\
+\texttt{v0.6} & $+1.8850$ $[+1.7333, +2.0367]$ & $15.72\%$ & $0.624$ \\
+\texttt{v0.7} & $+2.3600$ $[+2.2017, +2.5183]$ & $20.71\%$ & $0.828$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The v0.7 row is an unplanned replication of the headline. It is a
+different bank, a different harness and a fortieth of the games, and its
+interval covers the $+2.3466$ above.
+
+\textbf{Across six opponents the margin tracks their declaration error rate at
+$r = 0.95$.} Declarations a game are similar throughout, $3.66$ to $4.22$ for
+them against $4.79$ to $5.34$ for us, so this is a comparison of rates and not
+an artifact of how often anyone declares. The single-opponent decomposition
+above says $57\%$ of the v0.7 margin is declaration accounting; the ladder
+says the same quantity is what orders the whole pool.
+
+\textbf{And their engine became easier for ours as it advanced.} Their v0.3 is
+the hardest rung we face and their v0.7 the easiest, a gap of $1.75$ sets.
+Through the identity that gap is $0.629$ of their extra wrong declarations,
+$0.215$ of our extra declarations, and $0.028$ of our own accuracy: roughly
+three quarters of it is that v0.7 misdeclares four times as often as v0.3.
+
+That is not a claim that their project regressed, and the distinction matters.
+Their v0.2 and v0.3 are scripted baselines rather than fitted policies, and
+their own published head-to-head has v0.6 beating both v0.4 and v0.5 in
+\emph{their} arena. A policy tuned against its own pool can buy declaration
+volume that wins there and costs against a different opponent, which is a
+statement about what each project optimised against rather than about which
+engine is better.
+
+\paragraph{Three things that make the sweep worth trusting, and one that does
+not resolve.} The instrument check was fixed before the run. Their own
+head-to-head puts v0.4, v0.5 and v0.6 within $+0.046$ to $+0.146$ sets of each
+other across five replicates a pairing, so a bridge mistranslating one version
+would surface as a spurious strength gap on that rung. The measured spread
+across those three is $0.238$ sets against per-rung half-widths near $0.15$,
+which is what their flatness plus our sampling noise predicts.
+
+Their cheat harness is excluded, by base name rather than by keyword. Their
+tree exposes a base whose three policies their own header calls
+deliberately-cheating: one inverts its seed to the deal seed and plays
+clairvoyantly, one shares state across the three team seats, one decodes a
+teammate's arbitrary tie-break label. The base with no cheat option selected
+falls through to an honest agent, so a guard matching only the word would
+admit it and would admit the rest the day the option was renamed. Three
+further bases are excluded as instruments rather than releases: one carries an
+online model of its opponent's policy, one requires the opponent's source to
+invert its transcript, one is an identity control.
+
+The provenance is weaker than we would like and is stated rather than assumed.
+Their repository is available to us as a single squashed commit, so the
+parameter vectors compiled into v0.4, v0.5 and v0.6 cannot be checked against
+the ones their published results were generated from; their own manifests cite
+commits absent from the snapshot and record a dirty working tree. This
+measures their v0.N as their current tree runs it, which is not the same
+statement as reproducing their published v0.N.
+
+What does not resolve is a hole in the table above rather than beside it.
+\emph{Our} declaration error rate is $8.38\%$ against their v0.4 where every
+other rung puts it between $2.05\%$ and $4.19\%$, six standard deviations
+outside the rest, with our own engine identical in all six cells. It is not a
+volume effect: our error rate correlates with our declaration count at $+0.71$
+across the six, and dropping v0.4 collapses that to $+0.10$, so the
+correlation is the outlier rather than a trend it sits on. The obvious
+suspect was the one option their manifest attaches to that rung, and a
+$250$-deal probe kills it --- with and without the option the two arms are
+identical to four decimals, for two independent reasons in their source, and
+so the anomaly stands with no hypothesis behind it.
+
 \paragraph{What the other $39\%$ is made of.} The residual --- everything
 asking, inference and search produce once the declarations net out --- has a
 shape that follows from the rules. Every set is won by declaring a half-suit
