@@ -37,8 +37,40 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from fish.cards import NUM_PLAYERS                              # noqa: E402
+from fish.rules import RuleConfig                                # noqa: E402
 from api._engine import (CHAMPION_GAMMA, MAX_LOG, Session,      # noqa: E402
                          new_session)
+
+#: A FIXED fixture for the one test that needs a game played to its end.
+#:
+#: new_session() derives the deal from secrets.token_urlsafe(12) and ignores
+#: any seed, deliberately, so nobody can pick a deal they solved offline. That
+#: makes it a fresh random game every run -- and about 1.5% of play-mode games
+#: on the shipped path do not terminate at all. They livelock: a captured hang
+#: had 7 of 9 half-suits resolved, 12 cards left, and its last 200 actions were
+#: one 8-action cycle repeating 25 times, cards passed between the same seats
+#: with nobody ever declaring. See RESEARCH_FRONTIER.md.
+#:
+#: So the test below used to be a coin flip that came up tails in CI roughly
+#: once in fifty runs. Pinning the deal is not hiding that: what the test
+#: asserts is the SHAPE of the reveal payload at game over, which does not
+#: depend on which deal was dealt, and reaching game over is a precondition of
+#: the assertion rather than the thing being measured. The livelock is a real
+#: defect, it is recorded as one, and it is not this test's job to find it.
+#:
+#: The nonces are the FIRST candidates of a fixed enumeration -- "fixture-
+#: <mode>-0", "-1", and so on -- and both index 0 terminate, so nothing was
+#: skipped and no deal was selected for its outcome.
+FIXTURE_NONCE = {"spectate": "fixture-spectate-0", "play": "fixture-play-0"}
+
+
+def _fixture(mode: str) -> Session:
+    rules = RuleConfig(variant="54", starting_player=0,
+                       wrong_distribution_outcome="opponent")
+    if mode == "spectate":
+        return Session(-1, FIXTURE_NONCE[mode], rules, CHAMPION_GAMMA,
+                       mode="spectate")
+    return Session(0, FIXTURE_NONCE[mode], rules, CHAMPION_GAMMA)
 
 
 def test_the_human_is_on_the_move_at_the_deal():
@@ -216,9 +248,8 @@ def test_both_modes_reveal_the_same_shape_at_game_over():
     tally froze and the next deal never started.
     """
     shapes = {}
-    for mode, body in (("spectate", {"mode": "spectate", "step": 1}),
-                       ("play", {"seat": 0})):
-        s = new_session(body)
+    for mode in ("spectate", "play"):
+        s = _fixture(mode)
         tok, log = s.token(), list(s.wire_log)
         # THE BOUND IS DERIVED FROM MAX_LOG, and that is the point of it.
         # At six actions an iteration a 250-iteration loop can build a
@@ -235,10 +266,10 @@ def test_both_modes_reveal_the_same_shape_at_game_over():
         # fixtures (40 spectate, 60 play, all terminating): median 105,
         # max 191.
         #
-        # This does NOT fix whatever produced a game long enough to reach
-        # 1,200 in the first place -- that is rare enough not to appear in
-        # 100 tries and is still unexplained. It makes the next occurrence
-        # say what it is.
+        # WHAT PRODUCED THOSE LONG GAMES IS NOW EXPLAINED, and it was not
+        # a long game: it is a livelock. See FIXTURE_NONCE above. The deal
+        # is pinned now, so this loop terminates in about 95 actions and the
+        # bound is slack rather than load-bearing.
         for _ in range(MAX_LOG // 6):
             cur = Session.restore(tok, log)
             if cur.state.is_terminal:

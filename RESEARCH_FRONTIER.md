@@ -3958,3 +3958,58 @@ function through these points would be indistinguishable here and was not
 tested. What is dead is the pair of readings this project wrote down.
 
 Nothing ships. The deployed configuration still has signalling off.
+
+## OPEN DEFECT: about one web game in a hundred never ends
+
+Found 2026-09-04 by chasing a CI failure rather than by looking for it.
+`tests4/test_web_session.py::test_both_modes_reveal_the_same_shape_at_game_over`
+went red on 5db64ab with "play fixture never finished". The diff it failed on
+touched signalling analysis and the paper and nothing near the web session, so
+the first question was whether the bound was simply too tight. It is not.
+
+**Counts, and they are counts rather than a rate to two decimals.** On the
+SHIPPED path (`new_session`, 54-card, champion gamma, `WEB_DRAWS` draws),
+playing until either the game ends or the action log reaches the engine's own
+MAX_LOG ceiling of 1,200:
+
+    play mode       4 of 260 fixtures never terminated
+    spectate mode   1 of 260 fixtures never terminated
+
+A median game is about 105 actions. These reach 1,190 and are not finished.
+A first sample of 60 gave 3 hangs and suggested 5%; a further 200 gave 1. The
+honest reading is "on the order of one game in a hundred", and the first
+estimate was an unlucky draw quoted too confidently.
+
+**It is a livelock, not a long game.** A captured hang had 7 of 9 half-suits
+resolved, 12 cards left across the six seats, and our seat on turn. Its last
+200 actions are a single 8-action cycle repeated 25 times:
+
+    ask 3 for 15 | ask 2 for 30 | ask 5 for 13 | ask 0 for 35
+    ask 3 for 15 | ask 2 for 30 | ask 3 for 12 | ask 4 for 30
+
+Two live half-suits passed back and forth between the same seats, every ask
+succeeding, nobody ever declaring. Nothing is stuck in the sense of having no
+legal move; the position simply cycles.
+
+**Why this matters beyond CI.** This is the configuration the public site
+serves. A visitor at fish-engine.vercel.app can be dealt a game that never
+ends, and would sit watching six bots trade two half-suits until they gave up.
+It is not a research artifact.
+
+**What was done and what deliberately was not.** The test's fixture is pinned
+to a fixed nonce, so CI stops being a coin flip that comes up tails about once
+in fifty runs; that test asserts the SHAPE of the reveal payload at game over,
+which does not depend on the deal. THE ENGINE IS UNCHANGED. Making the
+champion declare or concede out of a cycle is a change to shipped play
+behaviour, it would move numbers this paper reports, and it is not a thing to
+do while chasing a red build.
+
+**What a fix would have to decide.** The cycle is individually rational -- each
+ask succeeds and each is a legal, sensible move -- so a cure has to come from
+somewhere outside the per-ask objective: a repetition rule in the arbiter, a
+declaration forced by exhaustion, or a term that prices the position's own
+recurrence. All three change measured play. Prior art in this project: the
+same "trading a card back and forth" pattern is noted for the public-information
+heuristic, where it needed 181 plies on average to terminate.
+
+This is recorded as OPEN. Nothing about it is fixed.
