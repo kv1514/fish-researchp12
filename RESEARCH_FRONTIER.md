@@ -3707,6 +3707,45 @@ reported the 2.98x gap as unexplained rather than reaching for a story. The
 gap was the two gates it had not instrumented. Naming the residual is what made
 the second pass obvious.
 
+> **THIRD PASS, 2026-09-04, and two claims here did not survive it.** An audit
+> for the failure that produced the dose-law baseline error -- a figure quoted
+> as though it were exact -- found this section printing s_A as 4.150 against a
+> RECORDED half-width of 1.238, and quoting the two derived columns to three
+> decimals when neither had an interval at all. They have cluster bootstraps
+> over deals now (a ratio of aggregates is not a mean, so cluster_ci does not
+> apply):
+>
+>     opponent     s_A stuck turns/g   s_B/s_A            f/s_B
+>     dylan_v07    4.150 +- 1.238      3.02 [2.32, 4.16]  0.896 [0.868, 0.916]
+>     ev_claim     3.005 +- 0.452      1.65 [1.46, 1.88]  0.462 [0.428, 0.497]
+>     search       3.112 +- 0.443      1.64 [1.45, 1.87]  0.390 [0.359, 0.420]
+>     memory       2.770 +- 0.421      1.95 [1.70, 2.25]  0.421 [0.388, 0.455]
+>     self         1.030 +- 0.214      1.44 [1.16, 1.76]  0.423 [0.313, 0.525]
+>
+> The second gate separates with room to spare, which is what this section
+> rested on. Two subsidiary claims did not. The paper called board-wide
+> ambiguity and opponent ask-hits "flat across all five"; ambiguity runs
+> 24.49 +- 0.30 to 26.02 +- 0.21 and ask-hits 22.51 +- 0.70 to 27.94 +- 0.74,
+> gaps of 1.5 and 5.4 against combined half-widths of 0.5 and 1.4. Neither is
+> flat.
+>
+> **The conclusion survives and its reason improves.** Flatness was meant to
+> show that dylan_v07's opportunity term is not explained by it leaving our
+> hands less located. The data shows something stronger in the opposite
+> direction: dylan_v07 has the LOWEST ambiguity of the five and is the opponent
+> we get stuck against most, while memory has the highest and we get stuck
+> against it least. It tells us more about our own cards, not less.
+>
+> **And the factorisation is an IDENTITY.** s_A x (s_B/s_A) x (f/s_B) is f by
+> cancellation, so the paper's "product" column beside its "measured" one could
+> differ only by display rounding and checked nothing. Both columns are gone;
+> the decomposition earns its place by saying which TERM differs.
+>
+> `scripts4/check_quoted_precision.py` now makes this class of error
+> mechanical: for every watched figure whose results file records an
+> uncertainty, does an interval appear near it in the paper? Zero naked
+> figures as of this commit, out of 22 that have one.
+
 ## matched dose: GENERAL, and it transfers as a FACTOR not a fixed rise
 
 The first positive generality result in this line, after two designs that could
