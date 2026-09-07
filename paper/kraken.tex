@@ -6846,13 +6846,29 @@ further bases are excluded as instruments rather than releases: one carries an
 online model of its opponent's policy, one requires the opponent's source to
 invert its transcript, one is an identity control.
 
-The provenance is weaker than we would like and is stated rather than assumed.
-Their repository is available to us as a single squashed commit, so the
-parameter vectors compiled into v0.4, v0.5 and v0.6 cannot be checked against
-the ones their published results were generated from; their own manifests cite
-commits absent from the snapshot and record a dirty working tree. This
-measures their v0.N as their current tree runs it, which is not the same
-statement as reproducing their published v0.N.
+The provenance was weaker than we would like, and has since been checked rather
+than stated. Their repository was available to us only as a single squashed
+commit, so the parameter vectors compiled into v0.4, v0.5 and v0.6 could not be
+checked against the ones their published results were generated from, and
+earlier versions of this paragraph said so. Their full history is now published,
+which turns the caveat into a measurement.
+
+The instrument is their own reproduction protocol rather than ours: build
+\emph{their} engine at each release commit and at the commit we measure
+against, run the identical match on both, and compare every field of the
+result. Across five rungs at three seeds and $240$ games a cell, win rate, mean
+sets, ask accuracy, declaration counts and events per game agree \emph{exactly}
+at every cell; the play differences number zero. What moved is their bootstrap
+interval, in the last place at $5$ of $15$ cells, and nine JSON fields their
+older builds did not emit --- reporting rather than play. The rungs we measure
+are the rungs they released.
+
+Two limits survive. A differing field would have localised a change to the
+policy and the arbiter jointly, since both live in one binary; the pass is
+clean, so that distinction never had to be drawn. And this verifies neither
+their published \emph{numbers} for a rung nor the deal banks that produced them
+--- their manifests cite commits absent even from the full history and record a
+dirty working tree, and nothing on our side can reach those.
 
 What does not resolve is a hole in the table above rather than beside it.
 \emph{Our} declaration error rate is $8.38\%$ against their v0.4 where every
@@ -8282,6 +8298,50 @@ compares $150+$ decisions and exercises both the ask and the declaration path.
 The JSON-transport handout runs the same comparison at a larger scale as its
 self-test: $329$ decisions, $0$ mismatches, plus $520$ off-turn polls.
 
+\paragraph{The opponent moved under the pin, and that is a measurement too.}
+Every game reported here was played against their tree at commit
+\texttt{d017fbc}. That project subsequently released the identical
+configuration under a new name, SESTINA v1.0 \citep{nguyen2026sestina}, and put
+five commits under our pin --- among them $124$ new lines in the factory
+function this bridge calls to construct their agent. A margin against ``their
+v0.7'' is a claim about a policy, so a change beneath it threatens the claim;
+and their release note saying that nothing measured changed is their assertion,
+not our measurement.
+
+Rerunning the head-to-head would have been the wrong instrument: it answers a
+noisy question expensively, and a null there is equally consistent with a real
+behavioural change too small for $10{,}000$ games to resolve. The shim is a
+\emph{pure function} of the script fed to it --- it boots, replays the public
+record, answers one decision and exits --- so the two builds can be compared
+exactly instead. We captured the stdin script the bridge sends for every
+decision of real games and replayed each one through a binary built from the
+old pin and one built from the release:
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+decisions compared & $6{,}329$ \\
+\quad asks & $5{,}817$ \\
+\quad declarations & $472$ \\
+mismatches & $\mathbf{0}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Their freeze artifact is byte-identical across the same range, so the
+configuration is unchanged as well as the play, and the pin moves with the
+published margin intact. The limit is worth stating precisely: this exercises
+the decision distribution \emph{our games reach}, which is the distribution our
+claim is about, and says nothing about positions our policy never creates.
+
+The same question, asked of the rest of their ladder, is
+\S\ref{sec:res-ladder}'s provenance check, and it is answered by a different
+instrument for a mechanical reason --- this shim calls a function their v0.4
+tree did not have, so it cannot be built against those headers, and editing it
+to compile would mean verifying a shim other than the one our measurements run
+through.
+
 \section{Reproducing this work}
 \label{sec:repro}
 \label{app:repro}
@@ -8430,11 +8490,16 @@ the deal, for a seated player and for an anonymous visitor alike.
 Dylan Nguyen.
 \newblock FishBot: an engine for six-player Literature, versions 0.2--0.7.
 \newblock Software repository and technical reports,
-  \url{https://github.com/dylann4500/fishbot}, 2026. Version 0.7 pinned at
-  commit \texttt{d017fbc} for every game reported here. That commit may no
-  longer resolve: \citet{nguyen2026sestina} records that the repository's
-  history was rewritten after its evaluation. The frozen configuration string
-  in \path{external_v07/v07_spec.txt} identifies the build we played.
+  \url{https://github.com/dylann4500/fishbot}, 2026. Version 0.7 was pinned at
+  commit \texttt{d017fbc} for every game reported here, and the pin has since
+  moved to \texttt{f9b4743} (the SESTINA v1.0 release) on the evidence of
+  \S\ref{sec:bridges}: the two builds answer all $6{,}329$ of our decisions
+  identically. \citet{nguyen2026sestina} records a history rewrite during that
+  project's evaluation, so an earlier version of this entry warned that
+  \texttt{d017fbc} might not resolve; the published history contains it, and
+  contains the release commits of every rung of \S\ref{sec:res-ladder} as well.
+  The frozen configuration string in \path{external_v07/v07_spec.txt}
+  identifies the build we played.
 
 \bibitem[Nguyen(2026b)]{nguyen2026sestina}
 Dylan Nguyen.

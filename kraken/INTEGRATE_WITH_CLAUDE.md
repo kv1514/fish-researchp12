@@ -11,17 +11,22 @@ bracketed line with a sentence about your own project.
 ---
 
 I want to add a second bot to my Fish/Literature project as an opponent. It is
-called **KRAKEN v1.0** and it lives here:
+called **KRAKEN v1.1** and it lives here:
 
     https://github.com/kv1514/fish-researchp12
 
 Clone it somewhere outside my project, and **check out the branch
-`claude/fishnbot-work-access-g7ciey`** — the default branch does not have the
-`kraken/` directory yet:
+`claude/fishnbot-work-access-g7ciey`**. `main` does carry a `kraken/`
+directory, but it is v1.0; the branch is where v1.1 is:
 
     git clone https://github.com/kv1514/fish-researchp12
     cd fish-researchp12
     git checkout claude/fishnbot-work-access-g7ciey
+
+The two releases play identically — v1.1 took seven pre-registered directions
+at v1.0's errors and shipped none of them — so results recorded against either
+are comparable. Use v1.1 anyway, so the version string in your logs names the
+tree it came from.
 
 The only three directories you need from it are `fish/`, `fish4/` and `kraken/` — 91 Python files, about
 1.5 MB — and they must keep that layout relative to each other, because
@@ -94,6 +99,28 @@ always gets the same amount of work.
 and where you should add the opponent-selection code.]
 
 ---
+
+## If your host is FishLab, none of the above is the shortest path
+
+`dylann4500/fishbot` grew an uploadable bot-package format
+(`docs/BOT_PACKAGE.md`), and this repository ships one. It is a zip you hand to
+their engine, after which KRAKEN is a seat like any other and is measurable
+from their command line:
+
+```bash
+cd fishlab && python3 build.py          # produces kraken.zip, engine vendored in
+cd /path/to/fishbot/engine
+./fish bots add /path/to/kraken.zip
+./fish bots check kraken                # their conformance run, plays real games
+./fish match --a=bot:kraken --b=v07 --games=400 --rotations=6
+```
+
+That package speaks their `fishlab-json-v1` rather than this project's own
+dialect, deliberately: their §8 offers a bridge to ours, and taking it is not
+safe for this bot. Ours wants the true holders at every resolution and theirs
+does not publish them on a wrong declaration, which is the right call for the
+game and the wrong shape for our belief. `fishlab/README.md` has the argument
+and the measurement behind it.
 
 ## If you would rather host it the other way round
 
