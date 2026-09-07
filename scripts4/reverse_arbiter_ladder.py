@@ -107,12 +107,13 @@ def spec_of(rung: str) -> str:
 
 
 def run_cell(engine: Path, opponent: str, deals: int, rotations: int,
-             seed: int, bot: str = "bot:kraken") -> dict:
+             seed: int, bot: str = "bot:kraken",
+             dialect: tuple[str, ...] = ()) -> dict:
     spec = spec_of(opponent)
     _refuse_cheats(spec)
     cmd = [str(engine / "fish"), "match", f"--a={bot}", f"--b={spec}",
            f"--games={deals}", f"--rotations={rotations}", f"--seed={seed}",
-           "--json"]
+           "--json", *dialect]
     t0 = time.time()
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(engine))
     if r.returncode != 0:
@@ -144,6 +145,13 @@ def main(argv=None) -> int:
     ap.add_argument("--opponents", nargs="*", default=LADDER)
     ap.add_argument("--install", action="store_true",
                     help="rebuild and reinstall the package first")
+    ap.add_argument("--dialect", nargs="*", default=[],
+                    help="extra rule flags for THEIR engine, e.g. "
+                         "--dialect --no-out-of-turn. Passing the flags that "
+                         "match this project's own rules is what separates "
+                         "'their arbiter' from 'their dialect': with them the "
+                         "only differences left are the arbiter, the deals and "
+                         "the bridge.")
     ap.add_argument("--out", default=str(ROOT / "results"
                                          / "reverse_arbiter_ladder.json"))
     a = ap.parse_args(argv)
@@ -176,7 +184,8 @@ def main(argv=None) -> int:
               f"rotations, their arbiter ---", flush=True)
         print(f"    spec: {spec_of(opp)[:78]}"
               f"{'...' if len(spec_of(opp)) > 78 else ''}", flush=True)
-        row = run_cell(a.engine, opp, a.deals, a.rotations, a.seed)
+        row = run_cell(a.engine, opp, a.deals, a.rotations, a.seed,
+                       dialect=tuple(a.dialect))
         rows.append(row)
         print(f"  win rate   {row['winRateA'] * 100:.2f}%  "
               f"[{row['ci'][0] * 100:.2f}, {row['ci'][1] * 100:.2f}]  "
@@ -193,8 +202,11 @@ def main(argv=None) -> int:
         "question": "how does KRAKEN measure inside their arbiter and dialect",
         "host": "theirs",
         "bot": "KRAKEN v1.1 via fishlab-json-v1 package",
-        "dialect": "theirs: out-of-turn declarations, cardless may declare, "
-                   "misdeclaration awards to the opponents",
+        "dialect": ("theirs: out-of-turn declarations, cardless may declare, "
+                    "misdeclaration awards to the opponents")
+        if not a.dialect else
+        ("theirs, modified by " + " ".join(a.dialect)),
+        "dialect_flags": list(a.dialect),
         "confounds": ["arbiter", "rule dialect (out-of-turn channel)",
                       "the package"],
         "deals": a.deals, "rotations": a.rotations, "seed": a.seed,

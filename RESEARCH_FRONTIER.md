@@ -4148,3 +4148,82 @@ opponent does, and nothing measured so far says what.
 path. It is harmless because it equals the default, but anyone setting
 `v04:mgate=0.05` would silently get .008. Same shape as the off-turn polling
 issue: a knob that looks connected and is not.
+
+---
+
+## OPEN, 2026-09-07: their declaration accuracy is 79% in our arbiter and 98% in theirs
+
+The highest-value open question this project has, because 57% of the published
++2.3466 head-to-head margin is declaration accounting
+(`results/margin_decomposition.json`) and this is a measurement about exactly
+that component.
+
+### The four cells
+
+| arbiter | dialect | their opponent | their wrong declarations / game |
+|---|---|---|---|
+| ours | ours (no out-of-turn) | KRAKEN | **0.844** |
+| theirs | theirs (out-of-turn on) | KRAKEN | **0.074** |
+| theirs | theirs | v0.6 | 0.125 |
+| theirs | ours (`--no-out-of-turn`) | v0.6 | 0.073 |
+
+Rows 3 and 4 are `scripts4/` one-liners against their built engine at 480 games
+each; rows 1 and 2 are `results/mega_match.json` (10,000 games) and
+`results/reverse_arbiter_v07.json` (1,200 games).
+
+### What the rows rule out
+
+**Not the dialect.** Removing the out-of-turn channel does not degrade their
+declaration accuracy, it *improves* it: 0.125 wrong a game to 0.073. Their own
+dialect sweep agrees in direction, reporting `no-out-of-turn` as +0.52 pp to
+their edge. The paper's caveat that our dialect disadvantages their policy is
+correct about the channel being absent and wrong about the sign of its effect
+on this component.
+
+**Not the opponent.** Facing KRAKEN in their own arbiter, their error rate is
+0.074 a game — the same as facing their own v0.6. KRAKEN as an opponent does
+not, by itself, make their inference worse.
+
+### What that leaves, and why it is not yet a finding
+
+Our arbiter, our bridge, or an interaction of the two. That is the branch this
+project is least entitled to wave through: §"The solver as a critic" of the
+paper is the record of a bridge defect destroying a set of results, and the
+head-to-head has already been re-measured once for one.
+
+It is stated as OPEN rather than as a finding because the reverse cell is not a
+clean control. KRAKEN plays their arbiter through the FishLab package, which is
+not native KRAKEN: it answers off-turn declaration polls only on certainties,
+and the positions the two versions steer into therefore diverge. So row 2's
+opponent is *a* KRAKEN and not *the* KRAKEN of row 1.
+
+The paper already carries a specific hypothesis for row 1, and this measurement
+is in tension with it. It reports that their ownership errors concentrate in
+half-suits we have asked in — 45.4 per 1,000 plies against 0.675, a rate ratio
+of 67 — and proposes that our ask certifies "at least one other card of this
+half-suit", that a later successful take against us appears to discharge that
+certification as though it had been "exactly one", and that every card lost
+afterwards is one that never moved in public. **That mechanism is a property of
+our asking, not of our arbiter, so it predicts the same errors in row 2, and
+row 2 does not show them.** Either the mechanism is wrong, or the package's
+asking differs enough to stop firing it, or something in the bridge produces
+the errors the mechanism was invented to explain.
+
+### The experiments that would settle it, in order of cost
+
+1. **Their arbiter, our dialect, opponent KRAKEN** (`--dialect --no-out-of-turn`
+   on `scripts4/reverse_arbiter_ladder.py`). Holds opponent and dialect fixed
+   against row 1 and varies only arbiter-and-bridge. Cheap.
+2. **Re-run the exposure analysis of the paper's certification hypothesis on
+   row 2's games.** If the 67x rate ratio is absent there, the mechanism is
+   arbiter-dependent and the hypothesis as written is wrong.
+3. **A decision-level parity check of their belief across the bridge**: at
+   matched positions, compare what their engine's own marginals say in their
+   arbiter against what they say through our shim. `engine/src/kv_parity.hpp`
+   and `scripts/kv_parity_*.py` upstream are built for a comparison of this
+   shape and may be reusable.
+
+Until at least (1) lands, no sentence in the paper should claim the
+head-to-head margin is or is not distorted by the bridge. What the paper should
+say, and does not yet, is that the question is open and that the component it
+bears on is the majority of the margin.
