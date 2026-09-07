@@ -58,7 +58,15 @@ class Observation:
         return deck_size(self.rules.variant)
 
     def initial_hand(self) -> int:
-        """Reconstruct own initial hand from current hand + public transfers."""
+        """Reconstruct own initial hand from current hand + public transfers.
+
+        Exact whenever every resolution published its holders, which is always
+        true of games this engine arbitrated. Against a foreign arbiter that
+        resolves a half-suit without revealing it, the cards this seat was
+        holding at that moment cannot be named, and they are missing from the
+        mask returned here -- see ``unknown_own_cards``, which reports exactly
+        which cards those could be and how many of them were ours.
+        """
         hand = self.hand
         me = self.player
         for ev in reversed(self.history):
@@ -69,10 +77,43 @@ class Observation:
                 elif ev.target == me:
                     hand |= bit           # gave it away later; it was mine before
             elif isinstance(ev, ClaimEvent):
+                if not ev.revealed_known:
+                    continue              # nothing to restore; see the docstring
                 for i, holder in enumerate(ev.revealed):
                     if holder == me:
                         hand |= 1 << (ev.half_suit * CARDS_PER_HALF_SUIT + i)
         return hand
+
+    def unknown_own_cards(self) -> tuple[int, int]:
+        """``(mask, count)``: cards whose deal-time ownership by this seat is
+        undetermined, and how many of them were in fact ours.
+
+        Empty for any game this engine arbitrated. A foreign arbiter that
+        resolves a half-suit without publishing holders leaves this seat unable
+        to name which of that half-suit it was holding -- but the arbiter does
+        publish the hand-size change, so *how many* is known exactly. The
+        belief takes the count as a constraint and leaves the identities open,
+        which is sound: it never asserts an ownership it cannot support, and
+        the cards are out of play in any case.
+
+        Cards this seat gave away by ask before the resolution are NOT here.
+        Those are restored by the backward walk in ``initial_hand`` from the
+        ask alone, with no help from the resolution.
+        """
+        me = self.player
+        mask = 0
+        count = 0
+        for ev in self.history:
+            if not isinstance(ev, ClaimEvent) or ev.revealed_known:
+                continue
+            mine = ev.surrendered[me] if me < len(ev.surrendered) else 0
+            if not mine:
+                # We surrendered nothing, so nothing of this half-suit was in
+                # our hand when it resolved and nothing is ambiguous.
+                continue
+            mask |= half_suit_mask(ev.half_suit)
+            count += int(mine)
+        return mask, count
 
     def legal_asks(self) -> list[Ask]:
         """Legal asks for this observer (empty if not on move), computable
@@ -159,6 +200,17 @@ class Observation:
                 else:
                     turn = ev.target
             elif isinstance(ev, ClaimEvent):
+                if not ev.revealed_known:
+                    # Rebuilding a seat's hand forward needs to know WHICH of
+                    # its cards each resolution took, and an unrevealed one
+                    # does not say. Refuse: this reconstruction is what the
+                    # leakage proof compares against, so a hand that is quietly
+                    # wrong here would weaken the very test that exists to
+                    # catch quietly wrong hands. Foreign transcripts belong in
+                    # a BeliefState, which carries the ambiguity honestly.
+                    raise ValueError(
+                        "reconstruct() needs revealed holders; this transcript "
+                        f"resolves half-suit {ev.half_suit} without them")
                 for i, holder in enumerate(ev.revealed):
                     counts[holder] -= 1
                     if holder == player:

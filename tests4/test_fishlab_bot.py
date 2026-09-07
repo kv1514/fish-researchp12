@@ -111,16 +111,84 @@ def test_pass_with_no_candidates_is_an_error_not_a_guess():
 
 
 def test_a_wrong_declaration_contributes_no_holders():
-    """The whole reason this speaks FishLab's protocol. A failed declaration
-    must add NO ClaimEvent, because pinning the claimed split raised
-    BeliefContradiction in 5 of 5 real cases."""
+    """A failed declaration must assert NO holders, because pinning the claimed
+    split raised BeliefContradiction in 5 of 5 real cases.
+
+    It must still contribute the EVENT. Dropping it -- the first version of
+    this adapter -- lost the six cards that left the table, which is its own
+    contradiction (see the regression below).
+    """
     br = _ready()
     hist = [{"t": "declare", "actor": 1, "set": 2, "success": False,
-             "winner": 0, "owner": [1, 3, 5, 1, 3, 5]}]
-    assert br._history(hist) == ()
+             "winner": 0, "owner": [1, 3, 5, 1, 3, 5],
+             "counts": [9, 7, 9, 8, 9, 6]}]
+    evs = br._history(hist, per=9)
+    assert len(evs) == 1
+    ev = evs[0]
+    assert ev.revealed_known is False
+    # 9 - the published post-event counts, seat by seat.
+    assert ev.surrendered == (0, 2, 0, 1, 0, 3)
+
     ok = [{"t": "declare", "actor": 1, "set": 2, "success": True,
-           "winner": 1, "owner": [1, 3, 5, 1, 3, 5]}]
-    assert len(br._history(ok)) == 1
+           "winner": 1, "owner": [1, 3, 5, 1, 3, 5],
+           "counts": [9, 6, 9, 7, 9, 7]}]
+    evs = br._history(ok, per=9)
+    assert len(evs) == 1 and evs[0].revealed_known is True
+
+
+def test_the_position_that_failed_fish_bots_check():
+    """Regression: the exact shape `fish bots check kraken` died on.
+
+    Seat 0 holds seven cards; two half-suits were resolved by WRONG
+    declarations, and one of them took a card out of seat 0's hand. With the
+    event dropped, seat 0's reconstructed deal came to eight cards, its
+    nine-card quota could not be filled from the cards left open to it, and the
+    propagator reported `player 0 count infeasible` on a perfectly legal
+    position. The fix is not to guess which card it was -- that is not public --
+    but to carry the published count and leave the identity open.
+    """
+    from fish.beliefs import BeliefState
+
+    br = _ready()
+    # Seat 0 is dealt nine, gives 2S away by ask, and loses one more card to a
+    # wrong declaration of Low Diamonds. Nothing else moves. The half-suit
+    # indices are looked up rather than written down, because the two projects
+    # number them differently and a hardcoded index would make this test pass
+    # for the wrong reason.
+    from fish.cards import card_id, half_suit_of
+    low_diamonds = br.hs_to_set[half_suit_of(card_id("2D"))]
+    sw = [None] * 9
+    sw[low_diamonds] = 0
+    hist = [
+        # Seat 1 may ask for 2S only while holding another Low Spade, and seat
+        # 0 keeps only 3S of that half-suit, so four of them are still open to
+        # seat 1 and the ask is legal.
+        {"t": "ask", "actor": 1, "target": 0, "card": "2S", "success": True,
+         "counts": [8, 10, 9, 9, 9, 9]},
+        # Seat 3 declares Low Diamonds for its own team and is wrong, because
+        # seat 0 -- an opponent -- holds one of the six. Team 0 takes it.
+        {"t": "declare", "actor": 3, "set": low_diamonds, "success": False,
+         "winner": 0, "owner": [3, 3, 3, 3, 3, 3],
+         "counts": [7, 10, 9, 5, 9, 8]},
+    ]
+    # Seat 0's remaining seven: one Low Spade and all of High Spades. None is a
+    # Low Diamond, which is what makes its share of that half-suit unnameable.
+    state = {"seat": 0, "turn": 0, "deck_sets": 9,
+             "hand": ["3S", "9S", "TS", "JS", "QS", "KS", "AS"],
+             "hand_counts": [7, 10, 9, 5, 9, 8],
+             "set_winner": sw,
+             "history": hist}
+    obs = br.observation(state)
+
+    assert bin(obs.initial_hand()).count("1") == 8, (
+        "eight cards are nameable: the seven held plus the one given away")
+    mask, count = obs.unknown_own_cards()
+    assert count == 1 and bin(mask).count("1") == 6, (
+        "the ninth was one of that half-suit's six, and only the count is public")
+
+    # The whole point: this must not raise.
+    b = BeliefState(obs.rules, observer=0)
+    b.update(obs)
 
 
 def test_hand_that_disagrees_with_hand_counts_is_refused():

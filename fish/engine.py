@@ -72,6 +72,25 @@ class ClaimEvent:
     revealed: tuple[int, int, int, int, int, int]  # actual holders at resolution
     winner: int  # 0, 1, or NULL_TEAM
 
+    #: Whether ``revealed`` is a fact. This engine always reveals, so it is
+    #: always True here and every existing construction site is unchanged.
+    #:
+    #: It is False only when a FOREIGN arbiter resolved the half-suit without
+    #: publishing who held what. FishLab does exactly that on a wrong
+    #: declaration -- "a wrong declaration reveals nothing else, not who really
+    #: held the cards" -- which is the right call for the game and is what a
+    #: person at the table sees. When this is False, ``revealed`` carries no
+    #: information and MUST NOT be read; ``surrendered`` carries what the
+    #: arbiter did publish.
+    revealed_known: bool = True
+
+    #: Per-seat count of cards this resolution took out of that seat's hand.
+    #: Public even when the identities are not: it is the difference between
+    #: the hand-size vectors either side of the event. Meaningful only when
+    #: ``revealed_known`` is False; empty otherwise, because ``revealed``
+    #: already determines it.
+    surrendered: tuple[int, ...] = ()
+
 
 @dataclass(frozen=True)
 class PassEvent:

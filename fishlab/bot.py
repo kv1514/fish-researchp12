@@ -20,9 +20,26 @@ ask history has usually already excluded one of the claimed seats, so pinning
 the claim hits a card whose candidate mask forbids it. KRAKEN would crash at
 the first wrong declaration, which happens in most games.
 
-So this speaks FishLab's own protocol, where the question does not arise: a
-failed declaration contributes its RESOLUTION (via `set_winner`) and nothing
-about holders.
+So this speaks FishLab's own protocol, where the question does not arise.
+
+AND THEN OMITTING THEM WAS ALSO WRONG, which is what the third option is for.
+This adapter's first version answered the dilemma by dropping the whole event
+and letting the resolution reach the agent through `set_winner`. That is a
+quieter failure of the same kind. Six cards leave the table at a wrong
+declaration, and this seat's dealt hand is reconstructed by replaying what left
+it; with the event gone the reconstruction is short by however many of the six
+were ours, the seat's nine-card quota cannot be filled from the cards still
+open to it, and the propagator correctly reports an impossible position:
+
+    fish bots check kraken
+    -> BeliefContradiction: player 0 count infeasible
+
+The dilemma was false because the arbiter publishes a third thing. `counts`,
+the hand sizes after every event, says exactly HOW MANY cards each seat
+surrendered even when it never says which. `ClaimEvent` now carries that as
+`surrendered` with `revealed_known=False`, the belief retires the six cards
+without pinning an owner, and the seat's own quota recovers the count. Nothing
+is invented and nothing is thrown away.
 
 WHAT THE HANDSHAKE IS FOR. The two projects order the deck differently --
 ours is clubs-first, FishLab's spades-first -- and number half-suits
@@ -122,9 +139,18 @@ class Bridge:
         """
         return self.their_card_to_ours[their_set * 6 + j] % 6
 
-    def _history(self, hist: list) -> tuple:
+    def _history(self, hist: list, per: int) -> tuple:
+        """Their event list as ours.
+
+        ``per`` is the deal size, needed because the running hand-size vector
+        is what makes an unrevealed resolution informative: the arbiter
+        publishes hand sizes after every event, so subtracting gives the number
+        of cards each seat surrendered even when it never says which.
+        """
         from fish.engine import AskEvent, ClaimEvent, PassEvent
+        from fish.cards import NUM_PLAYERS
         out = []
+        counts = [per] * NUM_PLAYERS
         for e in hist or []:
             t = e.get("t")
             if t == "ask":
@@ -136,21 +162,46 @@ class Bridge:
                 out.append(PassEvent(player=int(e["actor"]),
                                      teammate=int(e["target"])))
             elif t == "declare":
-                if not e.get("success"):
-                    # THE POINT OF THIS ADAPTER. A wrong declaration reveals
-                    # no holders, so we contribute none. Its RESOLUTION still
-                    # reaches the agent through set_winner in the state.
-                    continue
                 s = int(e["set"])
                 hs = self.set_to_hs[s]
                 owner = list(e["owner"])
                 assign = [0] * 6
                 for j, who in enumerate(owner):
                     assign[self._their_pos_to_our_pos(s, j)] = int(who)
+                if e.get("success"):
+                    out.append(ClaimEvent(claimer=int(e["actor"]),
+                                          half_suit=hs,
+                                          declared=tuple(assign),
+                                          revealed=tuple(assign),
+                                          winner=int(e["winner"])))
+                    counts = list(e["counts"])
+                    continue
+                # THE POINT OF THIS ADAPTER. A wrong declaration reveals no
+                # holders (FishLab §6: "a wrong declaration reveals nothing
+                # else -- not who really held the cards"), so we assert none.
+                #
+                # It is still an EVENT, and dropping it was a defect: six cards
+                # leave the table, and the belief reconstructs this seat's dealt
+                # hand by replaying what left it. With the event gone the
+                # reconstruction came up short by however many of the six were
+                # ours, the seat's nine-card quota could then not be filled from
+                # the cards left open to it, and the propagator -- correctly --
+                # called the position impossible. `fish bots check` failed on it
+                # with `BeliefContradiction: player 0 count infeasible`.
+                #
+                # What the arbiter DOES publish is `counts`, the hand sizes
+                # after the event, so how many each seat gave up is public even
+                # though which cards are not. That is what goes in.
+                after = list(e["counts"])
+                lost = tuple(max(0, counts[p] - after[p])
+                             for p in range(len(after)))
                 out.append(ClaimEvent(claimer=int(e["actor"]), half_suit=hs,
                                       declared=tuple(assign),
                                       revealed=tuple(assign),
-                                      winner=int(e["winner"])))
+                                      winner=int(e["winner"]),
+                                      revealed_known=False,
+                                      surrendered=lost))
+            counts = list(e.get("counts") or counts)
         return tuple(out)
 
     def observation(self, state: dict, turn_override=None):
@@ -179,7 +230,9 @@ class Bridge:
         turn = int(state["turn"]) if turn_override is None else turn_override
         return Observation(player=seat, rules=rules, hand=hand, turn=turn,
                            hand_counts=counts, set_winner=tuple(sw),
-                           history=self._history(state.get("history")))
+                           history=self._history(
+                               state.get("history"),
+                               per=(len(self.set_to_hs) * 6) // NUM_PLAYERS))
 
     def _agent(self, obs):
         from fish4.registry4 import KRAKEN_V1, make_agent
