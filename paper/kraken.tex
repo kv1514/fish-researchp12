@@ -227,10 +227,14 @@ champion.
 \item[Cross-engine strength] The same configuration against a frozen build of
 an independently developed engine \citep{nguyen2026sestina}, through a
 process bridge, under \emph{this} paper's rule dialect rather than that
-engine's. This is measured but narrower than it looks: the two dialects differ
-on out-of-turn declaration, which that project's own sweep shows moves its edge
-by about half a percentage point, and it is one opponent rather than a
-population.
+engine's. This is measured but narrower than it looks, and narrower than
+earlier revisions of this paper said. It is one opponent rather than a
+population; the two dialects differ on out-of-turn declaration, which that
+project's own sweep prices at about half a percentage point of its edge; and,
+newly, \S\ref{sec:otherarbiter} reports the same pairing measured in
+\emph{their} arbiter, where the sign reverses. Both numbers are real and
+neither is a ranking. What separates them is not settled, and the component it
+turns on is the majority of the margin.
 \item[Global standing] How good this engine is at Fish. \textbf{Not claimed.}
 No equilibrium is computed, no upper bound on exploitability exists for any
 class, and the phrase ``near-optimal'' does not appear in this paper about any
@@ -7150,6 +7154,109 @@ paragraph's, and the registry's, record). A test requires whole games to
 be \emph{bit-identical} when the knob is off, and requires the first divergence
 to fall at two live half-suits or fewer when it is on --- checked by replaying
 the shared prefix, not by asking the agent where it was.
+
+% =====================================================================
+\subsection{The same pairing in their arbiter, where the sign reverses}
+\label{sec:otherarbiter}
+
+Appendix~\ref{sec:bridges} argues that a bridge is asymmetric: whoever owns the
+game loop owns the rules, the RNG and every tie-break, so if only one side can
+host, ``our engine is stronger'' and ``our arbiter favours us'' are not
+separable claims. That argument has been in this paper since the bridge was
+built, and until now it was only an argument. Both directions existed, but only
+one of them ever measured anything: every cross-engine number above was taken
+with our engine hosting, because there was no way to seat our policy in a batch
+run of theirs.
+
+There is now. That project's engine has acquired an external-bot protocol, so
+our champion can be packaged, installed into their engine, and played from
+their command line as an ordinary seat. It passes their own conformance check.
+Under their arbiter, their deals, their seat rotation and their dialect, over
+$1{,}200$ games against the same frozen configuration:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& \emph{our arbiter} & \emph{their arbiter} \\
+\midrule
+games & $10{,}000$ & $1{,}200$ \\
+our margin (sets/game) & $\mathbf{+2.3466}$ & $\mathbf{-0.4600}$ \\
+our games won & $80.41\%$ & $43.50\%$ $[40.75, 46.25]$ \\
+our declaration accuracy & $96.49\%$ & $98.89\%$ \\
+their declaration accuracy & $78.87\%$ & $98.43\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The interval on the second column excludes $50\%$, so the reversal is
+not sampling noise at this size. \textbf{Neither column is a ranking of the two
+engines, and the honest reading of the pair is that this paper cannot supply
+one.}
+
+\paragraph{Where the reversal lives, and the explanation that does not survive.}
+It is the same component the margin decomposition already identified: their
+declaration accuracy, which moves by $19.6$ points between the two columns
+while ours moves by $2.4$. Since $57\%$ of the $+2.3466$ is declaration
+accounting (\S\ref{sec:res-headline}), a component that large moving that far
+is the whole reversal.
+
+The standing explanation for their high error rate here was the dialect. Their
+policy routes about $3.4$ declarations a game through an out-of-turn channel
+our rules do not have and our bridge therefore never polls, and a policy leaning
+on a channel it is denied should play worse. That is testable inside their own
+engine, which takes a flag for it, with nothing of ours involved --- their
+policy, their arbiter, their deals, their opponent, one flag changed. It returns
+the opposite:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+their arbiter & out-of-turn/game & their wrong declarations/game \\
+\midrule
+their dialect & $3.28$ & $0.1250$ \\
+\texttt{-{}-no-out-of-turn} & $0.00$ & $\mathbf{0.0729}$ \\
+their \texttt{-{}-legacy} bundle & $0.00$ & $0.0729$ \\
+\midrule
+\emph{our arbiter, our dialect} & $0.00$ & $\mathbf{0.8442}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Taking the channel away makes their declarations \emph{more}
+accurate, not less; their own dialect sweep agrees in direction, pricing
+\texttt{no-out-of-turn} at $+0.52$ points of their edge. So the dialect is not
+what separates $0.073$ from $0.844$, and the caveat this paper has attached to
+the head-to-head since the bridge was built has the sign of this component
+backwards. Nor is it the opponent: facing our champion in their own arbiter
+their error rate is the same as facing their own v0.6.
+
+\paragraph{What that leaves, and why it is reported as open.} Our arbiter, our
+bridge, or an interaction of the two. This paper is in a poor position to wave
+that through: \S\ref{sec:critic} is the record of a bridge defect destroying a
+set of results, and the head-to-head has already been re-measured once for
+another.
+
+It is stated as open rather than resolved because the reverse cell is not a
+clean control. Our champion reaches their arbiter through a package that
+answers off-turn declaration polls only on certainties --- our policy has no
+out-of-turn behaviour to offer, having never been developed against the channel
+--- so the two versions steer into different positions and the opponent in the
+second column is \emph{a} realisation of our champion rather than the one in
+the first. The measurement is also in tension with the mechanism proposed
+earlier in this section, that our ask certifies ``at least one other card of
+this half-suit'' and a later take against us discharges it: that is a property
+of our \emph{asking} rather than of our arbiter, so it predicts the same errors
+in their arbiter, and they are not there.
+
+Three experiments would separate these, and none of them is expensive; they are
+listed in \path{RESEARCH_FRONTIER.md} with the first --- their arbiter, our
+dialect, our champion as the opponent --- holding everything fixed but the
+arbiter and the bridge. Until one lands, the claim this paper makes is the
+narrow one: two measurements exist, they disagree in sign, the disagreement is
+concentrated in the component that carries most of the margin, and what
+produces it is not yet known.
 
 \section{Discussion}
 

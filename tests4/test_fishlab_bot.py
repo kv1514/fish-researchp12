@@ -219,3 +219,26 @@ def test_every_script_the_readme_tells_you_to_run_exists():
         f"fishlab/README.md tells the reader to run {missing}, which do not "
         f"exist in fishlab/ or scripts4/."
     )
+
+
+def test_an_unrevealed_resolution_without_counts_is_refused():
+    """`revealed_known=False` with no `surrendered` accounts for nothing.
+
+    The six cards left the table; if neither the holders nor the hand-size
+    change is recorded, a seat cannot say how many of them were its own.
+    Reading the missing count as zero would silently disclaim cards it may have
+    held -- which is precisely the contradiction `surrendered` exists to
+    remove, reintroduced through the back door.
+    """
+    from fish.engine import ClaimEvent
+    from fish.observation import Observation
+    from fish.rules import RuleConfig
+
+    ev = ClaimEvent(claimer=1, half_suit=2, declared=(1,) * 6,
+                    revealed=(1,) * 6, winner=0, revealed_known=False)
+    obs = Observation(player=0, rules=RuleConfig(), hand=0, turn=0,
+                      hand_counts=(3, 9, 9, 9, 9, 9),
+                      set_winner=(None, None, 0) + (None,) * 6,
+                      history=(ev,))
+    with pytest.raises(ValueError, match="surrendered"):
+        obs.unknown_own_cards()

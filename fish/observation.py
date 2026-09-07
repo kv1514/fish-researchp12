@@ -106,7 +106,17 @@ class Observation:
         for ev in self.history:
             if not isinstance(ev, ClaimEvent) or ev.revealed_known:
                 continue
-            mine = ev.surrendered[me] if me < len(ev.surrendered) else 0
+            if len(ev.surrendered) <= me:
+                # An unrevealed resolution with no hand-size change recorded
+                # carries neither of the two things that could account for the
+                # six cards. Treating the missing count as zero would silently
+                # disclaim cards this seat may have held, which is the exact
+                # shape of the contradiction this field was added to remove.
+                raise ValueError(
+                    f"half-suit {ev.half_suit} resolved without revealed "
+                    "holders and without `surrendered`; one or the other is "
+                    "needed to account for the six cards")
+            mine = ev.surrendered[me]
             if not mine:
                 # We surrendered nothing, so nothing of this half-suit was in
                 # our hand when it resolved and nothing is ambiguous.
