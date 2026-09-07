@@ -581,6 +581,14 @@ def validate_deal_against_history(rules: RuleConfig, initial_hands: list[int],
                 # No holders were published, but the hand-size change was, and
                 # a candidate deal has to reproduce it or it is not a deal this
                 # game could have had.
+                #
+                # The missing `else` is deliberate and not a silent hole: an
+                # unrevealed resolution carrying no counts is refused by name
+                # in `Observation.unknown_own_cards`, which every belief path
+                # runs first, so such an event cannot arrive here. This
+                # function returns a verdict rather than raising, and turning a
+                # malformed event into "no deal is consistent" would be a
+                # different and worse answer than the error already given.
                 hs_mask = half_suit_mask(ev.half_suit)
                 for p in range(NUM_PLAYERS):
                     if p < len(ev.surrendered):
