@@ -8374,23 +8374,30 @@ artifact in its own right, and it has a failure mode severe enough to have
 already destroyed one set of results (\S\ref{sec:critic}), so it is documented
 here rather than left in the code.
 
-\paragraph{Two directions, deliberately.} A bridge is asymmetric: whoever owns
-the game loop owns the rules, the RNG, and every tie-break. If only one side
-can host, every published number is measured through that side's arbiter and
-the two claims ``our engine is stronger'' and ``our arbiter favours us'' are not
-separable. This project therefore ships both directions.
+\paragraph{Three directions, and only the third settled anything.} A bridge is
+asymmetric: whoever owns the game loop owns the rules, the RNG, and every
+tie-break. If only one side can host, every published number is measured
+through that side's arbiter and the two claims ``our engine is stronger'' and
+``our arbiter favours us'' are not separable. This project therefore ships
+every direction it can, which for most of its life was two --- and neither of
+those two could put our champion in \emph{their} arbiter, so the argument stood
+unmeasured until the third arrived.
 
 \begin{center}
 \small
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-& \emph{their engine inside ours} & \emph{our engine inside theirs} \\
+& \emph{their engine} & \emph{our engine} & \emph{our engine as} \\
+& \emph{inside ours} & \emph{driven by a host} & \emph{their bot package} \\
 \midrule
-entry point & \path{external_v07/shim_decide.cpp} & \path{fish4/decide.py} \\
-host owns & our arbiter & their arbiter \\
-transport & one decision per process & one decision per line \\
-cards identified by & integer id & \textbf{card name} \\
-state supplied by caller & hand counts, scores & \textbf{nothing derived} \\
+entry point & \path{external_v07/} & \path{fish4/decide.py} & \path{fishlab/} \\
+ & \path{shim_decide.cpp} & & \path{bot.py} \\
+host owns & our arbiter & the caller's & their arbiter \\
+transport & one decision & one decision & one decision \\
+ & per process & per line & per line \\
+cards identified by & integer id & \textbf{card name} & \textbf{card name} \\
+state from caller & counts, scores & \textbf{nothing derived} & counts, scores \\
+dialect spoken & ours & ours & \textbf{theirs} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -8432,6 +8439,32 @@ bridge cannot share an RNG stream with a long-lived one. Over two games this
 compares $150+$ decisions and exercises both the ask and the declaration path.
 The JSON-transport handout runs the same comparison at a larger scale as its
 self-test: $329$ decisions, $0$ mismatches, plus $520$ off-turn polls.
+
+\paragraph{A third direction, and the one that finally measured something.} The
+two bridges above are both \emph{ours}: we wrote the shim that runs their policy
+here, and we wrote the service that lets a host drive ours. Neither could seat
+our champion in a batch run of \emph{their} arbiter, which is why the
+separability argument at the head of this appendix went eleven months without a
+number attached to it. That project has since published an uploadable
+bot-package format, so our champion now installs into their engine as an
+ordinary seat and is matched from their command line
+(\path{fishlab/}, built by \path{fishlab/build.py}; \S\ref{sec:otherarbiter}
+reports what it found).
+
+Two things about it are worth recording, because both are the same lesson this
+appendix already teaches from the other side. Their format offers a bridge to
+\emph{our} JSON dialect, which would have been one line of manifest, and taking
+it is not safe for this bot: our \texttt{ClaimEvent} wants the true holders at
+resolution and their arbiter publishes none on a wrong declaration --- correctly,
+since that is what a person at the table sees. So the package speaks their
+dialect natively. And the first version of it made our declaration policy
+\emph{unreachable}: it answered their pre-move poll with certainties only at
+both turn states, and the ask path then discarded any declaration the policy
+returned. The tell was a figure that looked like a triumph --- $100.00\%$
+declaration accuracy over $1{,}200$ games --- and was in fact the signature of a
+policy that had been prevented from deciding. A bot that is never wrong about
+anything is not evidence of strength; it is evidence that something upstream is
+answering for it.
 
 \paragraph{The opponent moved under the pin, and that is a measurement too.}
 Every game reported here was played against their tree at commit
