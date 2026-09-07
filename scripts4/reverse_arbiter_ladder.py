@@ -57,6 +57,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 #: Their released ladder, oldest first. Research instruments (v07c adaptive,
 #: v07l leaf, v07i inversion) and the v07x cheat harness are excluded for the
@@ -64,6 +65,28 @@ ROOT = Path(__file__).resolve().parents[1]
 #: a project's strength moved release over release, and an agent that adapts
 #: within the match, needs our source, or cheats is not a release.
 LADDER = ["v02", "v03", "v04", "v05", "v06", "v07"]
+
+#: THE SPEC STRINGS COME FROM `fish4/dylan_ladder.py` AND NOWHERE ELSE, and
+#: this is not tidiness. The whole point of running in their arbiter is to set
+#: the result beside the one measured in ours, and that comparison is void the
+#: moment the two directions face different opponents. Two ways they would
+#: have:
+#:
+#:   * A BARE `v07` IS NOT THE RELEASED AGENT. Their factory builds a
+#:     V07Responder with default coordinates from it; the frozen configuration
+#:     is the long option string of `engine/fishbot_v07.json`. Measured here at
+#:     360 games, the frozen spec beats the bare base by +0.39 sets a game --
+#:     so a ladder run against `v07` reports a margin against a configuration
+#:     that was never released, in our favour. The first version of this script
+#:     did exactly that.
+#:   * v0.4's published spec is `v04:mgate=0.008`, from their own manifest, not
+#:     a bare `v04`. That key measures inert (`scripts4/dylan_ladder_sweep.py`),
+#:     which is a reason to know it is inert, not a reason to drop it.
+#:
+#: The two written forms of the frozen v0.7 -- their `spec` shorthand and the
+#: `allparamsSpec` vector this repository pins in `external_v07/v07_spec.txt`
+#: -- were checked to build the same agent: 360 games, a perfect mirror, every
+#: reported field identical. This module passes the pinned one.
 
 #: Refused by base name and by substring, mirroring `fish4/dylan_ladder.py`.
 #: `v07x` with no `cheat=` falls through to a plain V06Agent in their factory,
@@ -77,10 +100,17 @@ def _refuse_cheats(spec: str) -> None:
         raise SystemExit(f"refusing to put a cheating agent on a ladder: {spec}")
 
 
+def spec_of(rung: str) -> str:
+    """The exact string our own ladder plays, for the same rung."""
+    from fish4.dylan_ladder import spec_for
+    return spec_for(rung if rung.startswith("dylan_") else f"dylan_{rung}")
+
+
 def run_cell(engine: Path, opponent: str, deals: int, rotations: int,
              seed: int, bot: str = "bot:kraken") -> dict:
-    _refuse_cheats(opponent)
-    cmd = [str(engine / "fish"), "match", f"--a={bot}", f"--b={opponent}",
+    spec = spec_of(opponent)
+    _refuse_cheats(spec)
+    cmd = [str(engine / "fish"), "match", f"--a={bot}", f"--b={spec}",
            f"--games={deals}", f"--rotations={rotations}", f"--seed={seed}",
            "--json"]
     t0 = time.time()
@@ -93,6 +123,8 @@ def run_cell(engine: Path, opponent: str, deals: int, rotations: int,
         raise SystemExit(f"no JSON from their engine on {opponent}:\n"
                          f"{r.stdout[-2000:]}")
     out = json.loads(line[-1])
+    out["rung"] = opponent
+    out["spec"] = spec
     out["argv"] = cmd
     out["wall_seconds"] = round(time.time() - t0, 1)
     # Their engine stops a run rather than substituting a move, so a completed
@@ -142,6 +174,8 @@ def main(argv=None) -> int:
     for opp in a.opponents:
         print(f"\n--- KRAKEN vs {opp}, {a.deals} deals x {a.rotations} "
               f"rotations, their arbiter ---", flush=True)
+        print(f"    spec: {spec_of(opp)[:78]}"
+              f"{'...' if len(spec_of(opp)) > 78 else ''}", flush=True)
         row = run_cell(a.engine, opp, a.deals, a.rotations, a.seed)
         rows.append(row)
         print(f"  win rate   {row['winRateA'] * 100:.2f}%  "
@@ -174,7 +208,7 @@ def main(argv=None) -> int:
           f"{'n':>7}")
     for r in rows:
         ci = f"[{r['ci'][0] * 100:.1f}, {r['ci'][1] * 100:.1f}]"
-        print(f"{r['b']:10} {r['winRateA'] * 100:8.2f} {ci:>20} "
+        print(f"{r['rung']:10} {r['winRateA'] * 100:8.2f} {ci:>20} "
               f"{r['meanSetsA'] - r['meanSetsB']:+12.4f} {r['games']:7d}")
     return 0
 
