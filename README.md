@@ -51,15 +51,28 @@ games won · zero substituted moves.
 [37.3, 42.8] over 1,200 games.** Their engine has since grown an uploadable
 bot-package format, so KRAKEN can be seated in it as an ordinary player — which
 is the half of this project's own bridge design that had never been used to
-measure anything. Both numbers are real and neither is a ranking. The two
-obvious explanations are ruled out by experiments inside their engine: removing
-the out-of-turn declaration channel makes their declarations *more* accurate,
-not less, and facing KRAKEN in their own arbiter does not raise their error rate
-above what their own v0.6 draws. What is left is our arbiter, our bridge, or the
-pair — and 57% of the +2.3466 sits in the component that moves.
-That is the largest open question this project has;
-`RESEARCH_FRONTIER.md` carries it with the three experiments that would settle
-it, and the paper reports it as open rather than resolved.
+measure anything. Both numbers are real and neither is a ranking.
+
+Three explanations are ruled out by controls: removing the out-of-turn
+declaration channel makes their declarations *more* accurate, not less; facing
+KRAKEN in their own arbiter does not raise their error rate above what their own
+v0.6 draws; and our bot package is not the problem either, since it beats their
+v0.3 by +1.30 inside their own arbiter.
+
+**What the control found instead is that their whole released ladder reverses
+order.** In their arbiter each successive release beats us by more, which is
+what a version ladder should look like (rank correlation −1.000). In ours their
+later releases do *worse*, and their declaration error climbs monotonically with
+their own version number — 4.71% at v0.3 to 20.71% at v0.7. Their v0.3 is their
+best declarer in our arbiter and their worst in their own; their v0.7 is the
+reverse. The two arbiters disagree about an *order*, not a level, and successive
+releases getting monotonically worse at the one thing this game scores — only
+through our bridge — is not a shape improving strength produces.
+
+57% of the +2.3466 sits in the component that moves. That is the largest open
+question this project has; `RESEARCH_FRONTIER.md` carries it with the
+experiments that would settle it, and the paper reports it as open rather than
+resolved.
 
 Four things measured since, each of which changed what the project believes:
 

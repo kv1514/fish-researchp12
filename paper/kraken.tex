@@ -127,10 +127,13 @@ $\mathbf{+2.412}$ $[+2.088, +2.736]$ sets per pair and an independently
 developed C++ engine \citep{nguyen2026sestina} by $\mathbf{+2.347}$ sets per
 game over $10{,}000$ games, under this paper's rule dialect rather than that
 engine's. \textbf{Measured inside that engine's arbiter instead, the sign
-reverses} ($-0.62$ over $1{,}200$ games); the rule dialect and the opponent are
-both excluded as the cause by experiments run inside their engine, so a
-cross-engine \emph{absolute} is conditional on the host in a way we can
-demonstrate and cannot yet explain.
+reverses} ($-0.62$ over $1{,}200$ games), and their whole released ladder
+reverses \emph{order} with it: in their arbiter each successive release beats us
+by more, while in ours their declaration errors climb monotonically with their
+own version number, from $4.7\%$ at v0.3 to $20.7\%$ at v0.7. The dialect, the
+opponent and our bot package are each excluded as the cause by controls run
+inside their engine. A cross-engine \emph{absolute} from this paper is therefore
+conditional on the host in a way we can demonstrate and cannot yet explain.
 
 Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
@@ -7244,31 +7247,99 @@ their error rate is $0.101$ a game, \emph{lower} than the $0.125$ they make
 against their own v0.6, so meeting this engine does not by itself degrade their
 declarations.
 
+\paragraph{The control that had to run first, and the shape it found.} Before
+any of that can mean something about strength, one alternative has to be
+excluded: that the package simply does not carry our policy, and we lose there
+because we arrive weakened. A bot crippled in transit loses to everything. So
+our champion was run against their \emph{whole} released ladder in their
+arbiter, and the shape compared against the same ladder measured in ours.
+
+It is not crippled --- it beats their v0.3 by $+1.2972$ inside their own
+arbiter. But the two ladders do not merely differ in level. \textbf{They run in
+opposite directions, and so does the quantity underneath them.}
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+& \multicolumn{2}{c}{\emph{our arbiter}} & \multicolumn{2}{c}{\emph{their arbiter}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+their version & our margin & their decl.\ error & our margin & their decl.\ error \\
+\midrule
+v0.2 & $+1.5283$ & $9.13\%$  & --- & --- \\
+v0.3 & $+0.6133$ & $\mathbf{4.71\%}$  & $+1.2972$ & $\mathbf{13.65\%}$ \\
+v0.4 & $+1.9867$ & $16.36\%$ & --- & --- \\
+v0.5 & $+2.1233$ & $15.06\%$ & $-0.3528$ & $2.00\%$ \\
+v0.6 & $+1.8850$ & $15.72\%$ & $-0.4806$ & $1.53\%$ \\
+v0.7 & $+2.3600$ & $\mathbf{20.71\%}$ & $-0.6200$ & $\mathbf{2.09\%}$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Spearman rank correlation against their version number}} \\
+our margin & \multicolumn{2}{r}{$+0.771$} & \multicolumn{2}{r}{$-1.000$} \\
+their decl.\ error & \multicolumn{2}{r}{$+0.771$} & \multicolumn{2}{r}{$-0.400$} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent In \emph{their} arbiter their ladder behaves as a version ladder
+should: each release beats us by more than the last, perfectly monotone over
+the four rungs measured. In \emph{ours} it is inverted --- their later releases
+do \emph{worse} against us --- and their declaration error rate climbs
+monotonically with their own version number, from $4.71\%$ at v0.3 to
+$20.71\%$ at v0.7.
+
+The individual rungs make the inversion sharper than the correlations do. Their
+v0.3 is their \emph{best} declarer in our arbiter and their \emph{worst} in
+their own; their v0.7 is their worst in ours and among their best in theirs.
+The two arbiters do not disagree about the level of a quantity here. They
+disagree about its order.
+
+\textbf{A project's successive releases getting monotonically worse at the one
+thing this game scores, and only when played through our bridge, is not a shape
+that improving strength produces.} The natural place to look is what their v0.4
+introduced and every later version built on --- their fitted belief --- and how
+it fares on the event stream our bridge replays into it.
+
 \paragraph{What that leaves, and why it is reported as open.} Our arbiter, our
 bridge, or an interaction of the two. This paper is in a poor position to wave
 that through: \S\ref{sec:critic} is the record of a bridge defect destroying a
 set of results, and the head-to-head has already been re-measured once for
 another.
 
-It is stated as open rather than resolved because the reverse cell is not a
-clean control. Our champion reaches their arbiter through a package that
-answers off-turn declaration polls only on certainties --- our policy has no
-out-of-turn behaviour to offer, having never been developed against the channel
---- so the two versions steer into different positions and the opponent in the
-second column is \emph{a} realisation of our champion rather than the one in
-the first. The measurement is also in tension with the mechanism proposed
-earlier in this section, that our ask certifies ``at least one other card of
-this half-suit'' and a later take against us discharges it: that is a property
-of our \emph{asking} rather than of our arbiter, so it predicts the same errors
-in their arbiter, and they are not there.
+The reader should weigh the headline accordingly. $57\%$ of $+2.3466$ is
+declaration accounting; their declarations are four times worse against us at
+v0.7 than at v0.3 while their own arbiter says the opposite; and we cannot
+currently say why. We are not withdrawing the number --- it is what
+$10{,}000$ audited games with zero substituted moves returned, and the
+paired contrasts that share the bridge are unaffected either way --- but a
+cross-engine \emph{absolute} from this paper should now be read as
+conditional on the host, and the burden of showing it is not an artifact has
+not been discharged.
 
-Three experiments would separate these, and none of them is expensive; they are
-listed in \path{RESEARCH_FRONTIER.md} with the first --- their arbiter, our
-dialect, our champion as the opponent --- holding everything fixed but the
-arbiter and the bridge. Until one lands, the claim this paper makes is the
-narrow one: two measurements exist, they disagree in sign, the disagreement is
-concentrated in the component that carries most of the margin, and what
-produces it is not yet known.
+One caveat on the reverse cells survives the control and is worth keeping.
+Our champion reaches their arbiter through a package that answers off-turn
+declaration polls only on certainties --- our policy has no out-of-turn
+behaviour to offer, having never been developed against the channel --- so our
+side in the right-hand columns is \emph{a} realisation of our champion rather
+than the one in the left. That is why the argument above rests on the
+\emph{trend across their versions}, which holds our side fixed within each
+arbiter, rather than on comparing levels between them.
+
+The measurement is also in tension with the mechanism proposed earlier in this
+section, that our ask certifies ``at least one other card of this half-suit''
+and a later take against us discharges it. That is a property of our
+\emph{asking} rather than of our arbiter, so it predicts the same errors in
+their arbiter, and they are not there --- and it offers no reason why the
+effect should grow with \emph{their} version number, which is the fact that
+now most needs explaining.
+
+The experiments that would separate these are listed in
+\path{RESEARCH_FRONTIER.md}; the cheapest is a decision-level comparison of
+their own belief against itself, in their arbiter and through our shim at
+matched positions, which their repository already carries the instruments for.
+Until one lands, the claim this paper makes is the narrow one: two measurements
+exist, they disagree in sign and in order, the disagreement is concentrated in
+the component that carries most of the margin, and what produces it is not yet
+known.
 
 \section{Discussion}
 
@@ -8061,20 +8132,23 @@ statement is relative to a named opponent or absolute against an exactly solved
 subgame.
 
 \paragraph{The cross-engine margin is arbiter-dependent, and we cannot yet say
-why.} The largest limitation this paper acquired late.
-\S\ref{sec:otherarbiter} reports the same two engines measured in
-\emph{their} arbiter, where our $+2.3466$ becomes a loss. Both measurements are
-real; neither is a ranking; and the two obvious reconciliations --- the rule
-dialect, and the opponent --- are ruled out by experiments inside their engine
-that involve nothing of ours. What remains is our arbiter, our bridge, or the
-pair, and $57\%$ of the margin sits in the component that moves. A reader
-should treat every cross-engine \emph{absolute} in this paper as conditional on
-the host, and should note that the paired contrasts are not affected: an
-absolute measured through a bridge is a statement about the bridge as well as
-about the engines, whereas a contrast whose arms share the bridge is not
-(Appendix~\ref{sec:bridges}). The experiments that would settle it are named
-and none is expensive; that they had not been run when this version was
-finished is a fact about the schedule and not about their difficulty.
+why.} The largest limitation this paper acquired late, and the one a reader
+should weigh hardest. \S\ref{sec:otherarbiter} reports the same two engines
+measured in \emph{their} arbiter, where our $+2.3466$ becomes a loss --- and
+their whole released ladder reverses order with it. Three reconciliations are
+excluded by controls: the rule dialect and the opponent, by experiments inside
+their engine involving nothing of ours; and our bot package, by its beating
+their v0.3 inside their own arbiter. What remains is our arbiter, our bridge or
+the pair, and $57\%$ of the margin sits in the component that moves.
+
+The specific thing left unexplained is not a level but an \emph{order}: their
+successive releases misdeclare monotonically more against us and monotonically
+less at home, and improving strength does not produce that shape. A reader
+should treat every cross-engine \emph{absolute} here as conditional on the host.
+The paired contrasts are unaffected --- an absolute measured through a bridge is
+a statement about the bridge as well as about the engines, whereas a contrast
+whose arms share the bridge is not (Appendix~\ref{sec:bridges}) --- and that
+distinction is doing real work in this paper rather than being recited.
 
 \paragraph{A rules discrepancy, stated.} The printed rules allow a set to be
 declared at any point, including during an opponent's turn. v0.3's game loop

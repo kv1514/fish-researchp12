@@ -4186,46 +4186,89 @@ on this component.
 0.1008 a game — *lower* than the 0.1250 their own v0.6 draws out of them.
 KRAKEN as an opponent does not, by itself, make their inference worse.
 
-### What that leaves, and why it is not yet a finding
+### Not the package either, and the control found something sharper
+
+The obvious third explanation was that the FishLab package does not carry our
+policy at all — a bot crippled in transit loses to everything. It is excluded:
+our champion beats their v0.3 by **+1.2972** inside their own arbiter.
+
+But the ladder run to check that returned more than a control.
+`scripts4/ladder_shape_comparison.py`, over
+`results/reverse_arbiter_ladder.json`:
+
+| their version | our margin (ours) | their err (ours) | our margin (theirs) | their err (theirs) |
+|---|---:|---:|---:|---:|
+| v0.2 | +1.5283 | 9.13% | — | — |
+| v0.3 | +0.6133 | **4.71%** | +1.2972 | **13.65%** |
+| v0.4 | +1.9867 | 16.36% | — | — |
+| v0.5 | +2.1233 | 15.06% | −0.3528 | 2.00% |
+| v0.6 | +1.8850 | 15.72% | −0.4806 | 1.53% |
+| v0.7 | +2.3600 | **20.71%** | −0.6200 | **2.09%** |
+
+Spearman against their version number: our margin **+0.771** in our arbiter and
+**−1.000** in theirs; their declaration error **+0.771** in ours and −0.400 in
+theirs.
+
+**The ladder inverts.** In their arbiter each successive release beats us by
+more, which is what a version ladder should look like. In ours their later
+releases do *worse*, and their declaration error climbs monotonically with
+their own version number. The rungs make it sharper than the correlations do:
+their v0.3 is their best declarer in our arbiter and their worst in their own;
+their v0.7 is their worst in ours and among their best in theirs. The two
+arbiters do not disagree about a level here — they disagree about an **order**.
+
+A project's successive releases getting monotonically worse at the one thing
+this game scores, and only through our bridge, is not a shape improving
+strength produces. The place to look is what their v0.4 introduced and every
+later version built on — their fitted belief — and how it fares on the event
+stream our bridge replays into it.
+
+### What that leaves, and why it is still OPEN
 
 Our arbiter, our bridge, or an interaction of the two. That is the branch this
 project is least entitled to wave through: §"The solver as a critic" of the
 paper is the record of a bridge defect destroying a set of results, and the
 head-to-head has already been re-measured once for one.
 
-It is stated as OPEN rather than as a finding because the reverse cell is not a
-clean control. KRAKEN plays their arbiter through the FishLab package, which is
-not native KRAKEN: it answers off-turn declaration polls only on certainties,
-and the positions the two versions steer into therefore diverge. So row 2's
-opponent is *a* KRAKEN and not *the* KRAKEN of row 1.
+One caveat survives the control. KRAKEN plays their arbiter through the FishLab
+package, which is not native KRAKEN: it answers off-turn declaration polls only
+on certainties, so the positions the two versions steer into diverge, and row
+2's opponent is *a* KRAKEN and not *the* KRAKEN of row 1. That is why the
+argument above rests on the **trend across their versions**, which holds our
+side fixed within each arbiter, and not on comparing levels between them.
 
-The paper already carries a specific hypothesis for row 1, and this measurement
-is in tension with it. It reports that their ownership errors concentrate in
+The paper already carries a specific hypothesis for row 1, and these
+measurements are in tension with it. It reports that their ownership errors concentrate in
 half-suits we have asked in — 45.4 per 1,000 plies against 0.675, a rate ratio
 of 67 — and proposes that our ask certifies "at least one other card of this
 half-suit", that a later successful take against us appears to discharge that
 certification as though it had been "exactly one", and that every card lost
 afterwards is one that never moved in public. **That mechanism is a property of
 our asking, not of our arbiter, so it predicts the same errors in row 2, and
-row 2 does not show them.** Either the mechanism is wrong, or the package's
-asking differs enough to stop firing it, or something in the bridge produces
-the errors the mechanism was invented to explain.
+row 2 does not show them.** Worse for it, the mechanism offers no reason why
+the effect should grow with THEIR version number, which is now the fact most in
+need of explaining. Either the mechanism is wrong, or the package's asking
+differs enough to stop firing it, or something in the bridge produces the
+errors the mechanism was invented to explain.
 
 ### The experiments that would settle it, in order of cost
 
-1. **Their arbiter, our dialect, opponent KRAKEN** (`--dialect --no-out-of-turn`
+1. **A decision-level comparison of THEIR belief against itself** — at matched
+   positions, what their engine's own marginals say in their arbiter against
+   what they say through our shim. This is now the first experiment rather than
+   the third: the ladder inversion points at their inference specifically, and
+   `engine/src/kv_parity.hpp` with `scripts/kv_parity_*.py` upstream are built
+   for a comparison of exactly this shape.
+2. **Their arbiter, our dialect, opponent KRAKEN** (`--dialect --no-out-of-turn`
    on `scripts4/reverse_arbiter_ladder.py`). Holds opponent and dialect fixed
    against row 1 and varies only arbiter-and-bridge. Cheap.
-2. **Re-run the exposure analysis of the paper's certification hypothesis on
+3. **Re-run the exposure analysis of the paper's certification hypothesis on
    row 2's games.** If the 67x rate ratio is absent there, the mechanism is
    arbiter-dependent and the hypothesis as written is wrong.
-3. **A decision-level parity check of their belief across the bridge**: at
-   matched positions, compare what their engine's own marginals say in their
-   arbiter against what they say through our shim. `engine/src/kv_parity.hpp`
-   and `scripts/kv_parity_*.py` upstream are built for a comparison of this
-   shape and may be reusable.
 
-Until at least (1) lands, no sentence in the paper should claim the
-head-to-head margin is or is not distorted by the bridge. What the paper should
-say, and does not yet, is that the question is open and that the component it
-bears on is the majority of the margin.
+Until at least (1) lands, no sentence in the paper claims the head-to-head
+margin is or is not distorted by the bridge. What the paper now says — in the
+abstract, in §"The same pairing in their arbiter", and in Limitations — is that
+the question is open, that three explanations are excluded by controls, that
+what is left unexplained is an ORDER rather than a level, and that the
+component it bears on is the majority of the margin.

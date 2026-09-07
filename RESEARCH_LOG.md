@@ -841,8 +841,35 @@ declaration, which their policy routes about 3.4 declarations a game through
 and which our bridge therefore never polls.
 
 Neither number is a ranking. Together they bracket one, and that is the honest
-statement. **Not yet established:** that the package transmits our policy's
-strength at all. The control is the ladder — our bot against their v0.2–v0.6 in
-their arbiter, compared in SHAPE to the ladder we measured in ours. A bot
-crippled in transit loses to everything. That run is next, and no claim above
-about relative strength should be repeated until it lands.
+statement.
+
+### The control ran, and it found more than a control
+
+The package is not crippling us: our champion beats their v0.3 by **+1.2972**
+inside their own arbiter. But the ladder run to establish that returned the
+sharpest result of the session — **the ladder inverts.**
+
+| their version | our margin (ours) | their err (ours) | our margin (theirs) | their err (theirs) |
+|---|---:|---:|---:|---:|
+| v0.3 | +0.6133 | **4.71%** | +1.2972 | **13.65%** |
+| v0.5 | +2.1233 | 15.06% | −0.3528 | 2.00% |
+| v0.6 | +1.8850 | 15.72% | −0.4806 | 1.53% |
+| v0.7 | +2.3600 | **20.71%** | −0.6200 | **2.09%** |
+
+Spearman against their version number: our margin **+0.771** in our arbiter,
+**−1.000** in theirs; their declaration error **+0.771** in ours, −0.400 in
+theirs. `results/ladder_shape_comparison.json`.
+
+In their arbiter each release beats us by more than the last, which is what a
+version ladder should look like. In ours their later releases do *worse*, and
+their declaration error climbs monotonically with their own version number. The
+rungs are sharper than the correlations: their v0.3 is their best declarer in
+our arbiter and their worst in their own; their v0.7 is the reverse. The two
+arbiters disagree about an **order**, not a level.
+
+A project's successive releases getting monotonically worse at the one thing
+this game scores, and only through our bridge, is not a shape improving
+strength produces. The place to look is what their v0.4 introduced and every
+later version built on — their fitted belief — and how it fares on the event
+stream our bridge replays into it. That is now the first experiment in
+`RESEARCH_FRONTIER.md`, ahead of the two that were there before it.
