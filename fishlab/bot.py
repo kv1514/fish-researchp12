@@ -256,10 +256,14 @@ class Bridge:
         obs = self.observation(req["state"])
         act = self._agent(obs).act(obs)
         if not isinstance(act, Ask):
-            # FishLab asked for an ask. If the policy would rather declare it
-            # has already been offered the chance in declare_poll, so falling
-            # back to the best legal ask is right -- and answering the wrong
-            # question is a fault, not a move.
+            # Unreachable against a host that polls before it asks: this seat
+            # is on turn, so `declare_poll` has just run the same agent on the
+            # same observation with the same derived seed, and a policy that
+            # wanted to declare has already said so and been played. It is
+            # kept for a host that skips the poll -- answering the wrong
+            # question is a fault, not a move -- and it is why the poll must
+            # run the full policy on turn rather than leave it to be caught
+            # here, where the only honest answer is an arbitrary legal ask.
             legal = obs.legal_asks()
             if not legal:
                 return {"error": "no legal ask available"}
@@ -269,16 +273,53 @@ class Bridge:
                 "target": int(act.target)}
 
     def declare_poll(self, req: dict) -> dict:
-        """Only CERTAIN declarations, which is deliberate.
+        """On our turn the full policy answers; off it, only certainties.
 
-        The answer is a declaration exactly when the public record alone pins
-        every card of a half-suit to a named teammate. A speculative off-turn
-        declaration gambles a whole set under the award rule, and a seat that
-        is merely confident can wait for its own turn and use the full policy.
+        THE SPLIT IS THE WHOLE POINT, and the first version of this method got
+        it wrong in a way that cost measurably.
+
+        FishLab polls every seat before every move, so this single op covers
+        two decisions our own rules keep apart. Off-turn there is no such
+        decision in our dialect at all: the policy has never been developed
+        against an out-of-turn channel, and a speculative declaration there
+        gambles a whole half-suit under the award rule. So off-turn the answer
+        is a declaration exactly when the public record alone PINS every card
+        to a named teammate, and otherwise nothing.
+
+        On our own turn it is the ordinary declare-or-ask decision our engine
+        makes every game, and the full claim policy is what should answer it.
+        It did not. This method used the deduction-only rule at both, and the
+        comment defending that said a merely-confident seat "can wait for its
+        own turn and use the full policy" -- which was false, because on our
+        turn this method ran first and answered `none`, and `ask` below then
+        DISCARDED any declaration the policy returned in favour of the first
+        legal ask. KRAKEN's declaration policy was unreachable through this
+        package, and its 1,200-game record in their arbiter shows the shape of
+        that exactly: 4.10 declarations a game at 100.00% accuracy against
+        their 4.73 at 98.41%. Never wrong, and 0.63 half-suits a game short.
         """
+        from fish.engine import Claim
         from fish.beliefs import BeliefState
         from fish4.match import _deduced_claim
         obs = self.observation(req["state"])
+
+        # `obs.legal_asks()` is empty unless it is our turn AND we hold a card,
+        # so this one condition selects exactly the ordinary declare-or-ask
+        # decision and nothing else. The two states it excludes are the ones
+        # FishLab covers with their own ops, and the full policy must not be
+        # asked about either: a cardless seat on turn goes to `pass`, and
+        # `act()` on that observation takes the pass branch, whose fallback is
+        # `max(legal_passes())` -- which raises on an empty sequence when the
+        # teammates are cardless too, and stopped a 1,200-game run doing it. A
+        # seat holding only complete half-suits has no legal ask and goes to
+        # `forced`. Both still fall through to the deduction below, so a
+        # certainty is still offered in either.
+        if obs.turn == obs.player and obs.legal_asks():
+            act = self._agent(obs).act(obs)
+            if isinstance(act, Claim):
+                return {"action": "declare",
+                        "confidence": 1.0, **self._declaration(act)}
+            return {"action": "none"}
 
         class _Seat:
             pass
