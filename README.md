@@ -4,59 +4,14 @@ A research engine for **Literature** (a.k.a. **Fish** / **Canadian Fish**),
 working toward the strongest practical engine for six-player Literature and
 toward understanding what near-optimal Fish actually looks like.
 
-> **Deploying:** `vercel.json`'s `ignoreCommand` cancels the *build* for pushes
-> that touch nothing the site serves, but Vercel still creates a *deployment*
-> for every push and the free tier caps those at 100/day
-> (`api-deployments-free-per-day`). Every push after that posts a failing
-> Vercel status on the open PR while the last successful deployment keeps
-> serving the site normally.
->
-> That used to be an inference from the error message. It is now measured: over
-> one 4.3-hour window the project recorded **40 deployments — 9.4 per hour —
-> of which 27 (68%) were `CANCELED` by the ignore command**, and the daily cap
-> was still reached. A cancelled deployment saves build minutes and costs a
-> deployment slot exactly like a real one.
->
-> The Vercel docs were then checked for a way to skip deployment *creation*:
-> `git.deploymentEnabled` can disable a whole branch, and `ignoreCommand` is
-> the only path-aware mechanism — and it runs after the deployment record
-> exists. There is no per-path way to stop the record being created, so **the
-> fix is fewer pushes**, not a cleverer ignore command. Batch commits locally
-> and push once per group of work.
->
-> **The error message's "retry in 24 hours" is not the recovery time, and the
-> limit is intermittent rather than a window.** Five consecutive pushes, UTC:
->
-> ```
-> 03:41:06  deployment created, cancelled by ignoreCommand   -> success
-> 03:47:13  refused: "retry in 24 hours"
-> 03:51:16  refused
-> 03:56:02  deployment created, cancelled by ignoreCommand   -> success
-> 03:57:52  refused
-> ```
->
-> Two of five got through, and one arrived less than two minutes after a
-> refusal. So it behaves like a bucket that refills continuously, not a door
-> that shuts for a day — and *not* like something that "releases" and stays
-> released, which is what a first reading of the 03:51→03:56 gap suggested.
-> A refused push also creates **no deployment record at all**, so it costs a
-> red status and nothing else.
->
-> All of that came from the deployment API rather than the message, which is
-> the point of the paragraph: the note above replaced one
-> inference-from-an-error-string with a measurement, then repeated a *different*
-> claim from the same error string without measuring it, and the first
-> correction then over-read a single recovery as a rule. Three passes over four
-> sentences, each one shorter on evidence than it sounded.
-
 **Play it:**
 [fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
 --- six-player Literature against v0.4, with the engine's own posterior visible
 while you play. Public, no sign-in, nothing stored; a game lives in the browser
 tab. The link is Vercel's stable per-branch URL, so it follows this branch
-rather than any one deployment. The project's *production* URL tracks `main`,
-which carries none of `api/`, `public/` or `fish4/`, so it 404s until this work
-merges.
+rather than any one deployment. The project's *production* URL tracks `main`, which now carries
+`api/`, `public/`, `fish4/` and `kraken/` and serves the site; this branch's
+URL is the one that follows the work in progress.
 
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
 - Research log, v0.3: [RESEARCH_LOG.md](RESEARCH_LOG.md) (v0.4 keeps its record in
@@ -65,10 +20,16 @@ merges.
   [fish4/evalx/README.md](fish4/evalx/README.md), and in the raw duel records at
   `results/v04_duels.jsonl`)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
-- Research paper (current): [paper/kraken.tex](paper/kraken.tex) — KRAKEN v1.1
+- **Research paper (current): [paper/kraken.pdf](paper/kraken.pdf)** — KRAKEN
+  v1.1, built from [paper/kraken.tex](paper/kraken.tex) by
+  [paper/build.sh](paper/build.sh). Start here.
 - Research paper, v0.3 (superseded, kept because its results still reproduce):
   [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
+- Running this bot somewhere else: [kraken/README.md](kraken/README.md) (JSON
+  decision service, any host) or [fishlab/README.md](fishlab/README.md) (an
+  uploadable package for FishLab's own engine)
+- Running *their* bot here: [external_v07/README.md](external_v07/README.md)
 
 ## Where the engine is now
 
@@ -487,3 +448,50 @@ predicted. An intermittent room reads as a bug in the game rather than as a
 missing environment variable, so rooms now fail closed wherever each request
 may get a different process. Locally, where there is one process, the in-memory
 store is genuinely shared and rooms work with no setup at all.
+
+## Deploying, and the rate limit that shapes how you push
+
+`vercel.json`'s `ignoreCommand` cancels the *build* for pushes
+that touch nothing the site serves, but Vercel still creates a *deployment*
+for every push and the free tier caps those at 100/day
+(`api-deployments-free-per-day`). Every push after that posts a failing
+Vercel status on the open PR while the last successful deployment keeps
+serving the site normally.
+
+That used to be an inference from the error message. It is now measured: over
+one 4.3-hour window the project recorded **40 deployments — 9.4 per hour —
+of which 27 (68%) were `CANCELED` by the ignore command**, and the daily cap
+was still reached. A cancelled deployment saves build minutes and costs a
+deployment slot exactly like a real one.
+
+The Vercel docs were then checked for a way to skip deployment *creation*:
+`git.deploymentEnabled` can disable a whole branch, and `ignoreCommand` is
+the only path-aware mechanism — and it runs after the deployment record
+exists. There is no per-path way to stop the record being created, so **the
+fix is fewer pushes**, not a cleverer ignore command. Batch commits locally
+and push once per group of work.
+
+**The error message's "retry in 24 hours" is not the recovery time, and the
+limit is intermittent rather than a window.** Five consecutive pushes, UTC:
+
+```
+03:41:06  deployment created, cancelled by ignoreCommand   -> success
+03:47:13  refused: "retry in 24 hours"
+03:51:16  refused
+03:56:02  deployment created, cancelled by ignoreCommand   -> success
+03:57:52  refused
+```
+
+Two of five got through, and one arrived less than two minutes after a
+refusal. So it behaves like a bucket that refills continuously, not a door
+that shuts for a day — and *not* like something that "releases" and stays
+released, which is what a first reading of the 03:51→03:56 gap suggested.
+A refused push also creates **no deployment record at all**, so it costs a
+red status and nothing else.
+
+All of that came from the deployment API rather than the message, which is
+the point of the section: its first version replaced one
+inference-from-an-error-string with a measurement, then repeated a *different*
+claim from the same error string without measuring it, and the first
+correction then over-read a single recovery as a rule. Three passes over four
+sentences, each one shorter on evidence than it sounded.
