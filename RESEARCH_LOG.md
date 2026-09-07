@@ -819,7 +819,10 @@ is a number about our v0.1 unless it says otherwise.
 
 Fixing (2) moved the margin by less than its own interval: −0.3950 before,
 −0.4600 after, win rate 44.42% → 43.50% on identical deals. The result did not
-depend on the defect.
+depend on the defect. Fixing (3) moved it further and in the expected
+direction, the released configuration being the stronger one: the settled
+figure against the frozen spec is **−0.6200 sets a game, 40.08% of games won
+[37.33, 42.83] over 1,200 games** (`results/reverse_arbiter_v07.json`).
 
 What does move, and by an order of magnitude, is **where each engine's
 declarations go wrong, and it moves with the dialect rather than with the
@@ -827,11 +830,11 @@ opponent**:
 
 | wrong declarations / game | in OUR arbiter | in THEIRS |
 |---|---|---|
-| theirs | 0.844 | 0.074 |
-| ours | 0.176 | 0.047 |
+| theirs | 0.8442 | 0.1008 |
+| ours | 0.1759 | 0.0350 |
 
 The gap between the two engines is 17.6 points of declaration accuracy in our
-dialect and 0.45 in theirs. The paper's own decomposition puts **57% of the
+dialect and 1.2 in theirs. The paper's own decomposition puts **57% of the
 +2.3466 margin in declaration accounting**, so most of the headline lives in
 the channel the dialect controls — and our dialect has no out-of-turn
 declaration, which their policy routes about 3.4 declarations a game through

@@ -4162,27 +4162,29 @@ that component.
 
 | arbiter | dialect | their opponent | their wrong declarations / game |
 |---|---|---|---|
-| ours | ours (no out-of-turn) | KRAKEN | **0.844** |
-| theirs | theirs (out-of-turn on) | KRAKEN | **0.074** |
-| theirs | theirs | v0.6 | 0.125 |
-| theirs | ours (`--no-out-of-turn`) | v0.6 | 0.073 |
+| ours | ours (no out-of-turn) | KRAKEN | **0.8442** |
+| theirs | theirs (out-of-turn on) | KRAKEN | **0.1008** |
+| theirs | theirs | v0.6 | 0.1250 |
+| theirs | ours (`--no-out-of-turn`) | v0.6 | 0.0750 |
 
-Rows 3 and 4 are `scripts4/` one-liners against their built engine at 480 games
-each; rows 1 and 2 are `results/mega_match.json` (10,000 games) and
-`results/reverse_arbiter_v07.json` (1,200 games).
+Row 1 is `results/mega_match.json` (10,000 games); row 2 is
+`results/reverse_arbiter_v07.json` (1,200 games against the frozen RELEASED
+spec, not the bare base, which is a different and weaker agent); rows 3 and 4
+are `results/dialect_declaration_probe.json` (480 games a cell,
+`scripts4/dialect_declaration_probe.py`).
 
 ### What the rows rule out
 
 **Not the dialect.** Removing the out-of-turn channel does not degrade their
-declaration accuracy, it *improves* it: 0.125 wrong a game to 0.073. Their own
+declaration accuracy, it *improves* it: 0.1250 wrong a game to 0.0750. Their own
 dialect sweep agrees in direction, reporting `no-out-of-turn` as +0.52 pp to
 their edge. The paper's caveat that our dialect disadvantages their policy is
 correct about the channel being absent and wrong about the sign of its effect
 on this component.
 
 **Not the opponent.** Facing KRAKEN in their own arbiter, their error rate is
-0.074 a game — the same as facing their own v0.6. KRAKEN as an opponent does
-not, by itself, make their inference worse.
+0.1008 a game — *lower* than the 0.1250 their own v0.6 draws out of them.
+KRAKEN as an opponent does not, by itself, make their inference worse.
 
 ### What that leaves, and why it is not yet a finding
 

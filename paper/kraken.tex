@@ -126,7 +126,11 @@ for five versions), the deployed configuration beats the v0.3 champion by
 $\mathbf{+2.412}$ $[+2.088, +2.736]$ sets per pair and an independently
 developed C++ engine \citep{nguyen2026sestina} by $\mathbf{+2.347}$ sets per
 game over $10{,}000$ games, under this paper's rule dialect rather than that
-engine's.
+engine's. \textbf{Measured inside that engine's arbiter instead, the sign
+reverses} ($-0.62$ over $1{,}200$ games); the rule dialect and the opponent are
+both excluded as the cause by experiments run inside their engine, so a
+cross-engine \emph{absolute} is conditional on the host in a way we can
+demonstrate and cannot yet explain.
 
 Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
@@ -7181,10 +7185,12 @@ $1{,}200$ games against the same frozen configuration:
 & \emph{our arbiter} & \emph{their arbiter} \\
 \midrule
 games & $10{,}000$ & $1{,}200$ \\
-our margin (sets/game) & $\mathbf{+2.3466}$ & $\mathbf{-0.4600}$ \\
-our games won & $80.41\%$ & $43.50\%$ $[40.75, 46.25]$ \\
-our declaration accuracy & $96.49\%$ & $98.89\%$ \\
-their declaration accuracy & $78.87\%$ & $98.43\%$ \\
+our margin (sets/game) & $\mathbf{+2.3466}$ & $\mathbf{-0.6200}$ \\
+our games won & $80.41\%$ & $40.08\%$ $[37.33, 42.83]$ \\
+our declarations/game & $5.005$ & $4.027$ \\
+their declarations/game & $3.995$ & $4.832$ \\
+ours declared right & $96.49\%$ & $99.13\%$ \\
+theirs declared right & $78.87\%$ & $97.91\%$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -7196,8 +7202,12 @@ one.}
 
 \paragraph{Where the reversal lives, and the explanation that does not survive.}
 It is the same component the margin decomposition already identified: their
-declaration accuracy, which moves by $19.6$ points between the two columns
-while ours moves by $2.4$. Since $57\%$ of the $+2.3466$ is declaration
+declaration accuracy, which moves by $19.0$ points between the two columns
+while ours moves by $2.6$ --- and a declaration \emph{count} that reverses with
+it. In our arbiter the nine half-suits split $5.005$ to $3.995$ our way; in
+theirs, $4.027$ to $4.832$ theirs. Whoever declares a half-suit is, apart from
+the errors, the side that scores it, so this row is very nearly the scoreboard
+restated, and it is the row the reversal is made of. Since $57\%$ of the $+2.3466$ is declaration
 accounting (\S\ref{sec:res-headline}), a component that large moving that far
 is the whole reversal.
 
@@ -7216,7 +7226,7 @@ the opposite:
 their arbiter & out-of-turn/game & their wrong declarations/game \\
 \midrule
 their dialect & $3.28$ & $0.1250$ \\
-\texttt{-{}-no-out-of-turn} & $0.00$ & $\mathbf{0.0729}$ \\
+\texttt{-{}-no-out-of-turn} & $0.00$ & $\mathbf{0.0750}$ \\
 their \texttt{-{}-legacy} bundle & $0.00$ & $0.0729$ \\
 \midrule
 \emph{our arbiter, our dialect} & $0.00$ & $\mathbf{0.8442}$ \\
@@ -7227,10 +7237,12 @@ their \texttt{-{}-legacy} bundle & $0.00$ & $0.0729$ \\
 \noindent Taking the channel away makes their declarations \emph{more}
 accurate, not less; their own dialect sweep agrees in direction, pricing
 \texttt{no-out-of-turn} at $+0.52$ points of their edge. So the dialect is not
-what separates $0.073$ from $0.844$, and the caveat this paper has attached to
+what separates $0.075$ from $0.844$, and the caveat this paper has attached to
 the head-to-head since the bridge was built has the sign of this component
 backwards. Nor is it the opponent: facing our champion in their own arbiter
-their error rate is the same as facing their own v0.6.
+their error rate is $0.101$ a game, \emph{lower} than the $0.125$ they make
+against their own v0.6, so meeting this engine does not by itself degrade their
+declarations.
 
 \paragraph{What that leaves, and why it is reported as open.} Our arbiter, our
 bridge, or an interaction of the two. This paper is in a poor position to wave
@@ -8047,6 +8059,22 @@ agreement and no in-play communication is TMECor
 \citep{celli2018computational}, and nothing here approximates it. Every strength
 statement is relative to a named opponent or absolute against an exactly solved
 subgame.
+
+\paragraph{The cross-engine margin is arbiter-dependent, and we cannot yet say
+why.} The largest limitation this paper acquired late.
+\S\ref{sec:otherarbiter} reports the same two engines measured in
+\emph{their} arbiter, where our $+2.3466$ becomes a loss. Both measurements are
+real; neither is a ranking; and the two obvious reconciliations --- the rule
+dialect, and the opponent --- are ruled out by experiments inside their engine
+that involve nothing of ours. What remains is our arbiter, our bridge, or the
+pair, and $57\%$ of the margin sits in the component that moves. A reader
+should treat every cross-engine \emph{absolute} in this paper as conditional on
+the host, and should note that the paired contrasts are not affected: an
+absolute measured through a bridge is a statement about the bridge as well as
+about the engines, whereas a contrast whose arms share the bridge is not
+(Appendix~\ref{sec:bridges}). The experiments that would settle it are named
+and none is expensive; that they had not been run when this version was
+finished is a fact about the schedule and not about their difficulty.
 
 \paragraph{A rules discrepancy, stated.} The printed rules allow a set to be
 declared at any point, including during an opponent's turn. v0.3's game loop

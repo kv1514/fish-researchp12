@@ -47,6 +47,20 @@ bridge revision 2:
 **+2.3466 sets/game** [+2.2928, +2.4004] · 63.0% of decided sets · 80.4% of
 games won · zero substituted moves.
 
+**And in *their* arbiter the sign reverses: −0.62 sets/game, 40.1% of games won
+[37.3, 42.8] over 1,200 games.** Their engine has since grown an uploadable
+bot-package format, so KRAKEN can be seated in it as an ordinary player — which
+is the half of this project's own bridge design that had never been used to
+measure anything. Both numbers are real and neither is a ranking. The two
+obvious explanations are ruled out by experiments inside their engine: removing
+the out-of-turn declaration channel makes their declarations *more* accurate,
+not less, and facing KRAKEN in their own arbiter does not raise their error rate
+above what their own v0.6 draws. What is left is our arbiter, our bridge, or the
+pair — and 57% of the +2.3466 sits in the component that moves.
+That is the largest open question this project has;
+`RESEARCH_FRONTIER.md` carries it with the three experiments that would settle
+it, and the paper reports it as open rather than resolved.
+
 Four things measured since, each of which changed what the project believes:
 
 - **57% of that margin is declaration accounting**, not card acquisition. We
