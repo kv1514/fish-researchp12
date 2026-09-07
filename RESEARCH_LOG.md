@@ -751,3 +751,95 @@ errors falling, and concentration at declaration time rising -- is a
 **withdrawal condition** rather than a secondary: a margin that rises without
 them means the term is being paid for something other than the reason it was
 reinstated, and shipping it would put the wrong explanation in the paper.
+
+---
+
+## Session 2026-09-07 — the other arbiter, and three defects the trip through it found
+
+Upstream released FishBot v0.7 as **SESTINA v1.0**, and in the same window gave
+their engine an external-bot protocol (`docs/BOT_PACKAGE.md`, `extbot.hpp`,
+`botpkg.hpp`, `fish bots add`). That protocol is the thing this project's
+bridge design has been missing since it was written: the paper argues that if
+only one side can host, "our engine is stronger" and "our arbiter favours us"
+are not separable claims, and then measures every cross-engine number with our
+engine hosting, because there was no way to seat our policy in a batch run of
+theirs. There now is.
+
+### The pin moved and nothing under it did
+
+Five commits landed under our pin, one of them 124 new lines in the factory
+function our shim calls. `scripts4/v07_upstream_parity.py` captures the exact
+stdin script the bridge sends for every decision of real games and replays each
+through a binary built at each end. **6,329 decisions (5,817 asks, 472
+declarations), 0 mismatches.** Their freeze artifact is byte-identical over the
+same range. The pin moves to `f9b4743` with the published margin intact.
+
+Their full history is published now too, which retires a caveat this project
+has carried since it bridged them. `scripts4/dylan_ladder_provenance.py` builds
+THEIR engine at each release commit and at our pin and compares every field of
+the identical match: **five rungs, three seeds, 240 games a cell, zero play
+differences.** Only their bootstrap interval moved.
+
+### Their repository contains two bridges to US, and both are stale
+
+`engine/src/kv.hpp` ports "KV's sampled-world search policy" from
+`fish-researchp12 @ 0676737` — this project's **v0.1**, the pre-rebuild engine
+that shares no history with the current tree. `engine/src/kv6.hpp` bridges our
+deployed package and looks for it at `fishbot_v06/`, which is now `fishlab/`.
+Neither appears in their technical report, so nothing published rests on them.
+The consequence for us is only that a KV-versus-SESTINA number from their side
+is a number about our v0.1 unless it says otherwise.
+
+### Three defects on our side, found by their conformance check and by the trip
+
+1. **`fish bots check kraken` refused to run us.** `BeliefContradiction: player
+   0 count infeasible`. The adapter dropped a failed declaration entirely,
+   arguing that the only alternative was to pass the claimed split as revealed
+   — true, and the wrong conclusion. Six cards leave the table, a seat's dealt
+   hand is reconstructed by replaying what left it, and with the event gone the
+   reconstruction is short by however many were ours. The arbiter publishes
+   `counts`, so HOW MANY each seat surrendered is public even when which is
+   not; `ClaimEvent` now carries that as `surrendered` with
+   `revealed_known=False`.
+
+2. **KRAKEN's declaration policy was unreachable through the package.**
+   `declare_poll` used the deduction-only rule at both turn states and `ask`
+   discarded any declaration the policy returned. The tell was a number too
+   good: 4.10 declarations a game at **100.00%** accuracy. Never wrong, and two
+   thirds of a half-suit a game short. Now split by turn state.
+
+3. **The reverse ladder was playing a `v07` that was never released.** Their
+   factory builds a V07Responder with default coordinates from the bare base;
+   the frozen configuration is the long option string. In their arbiter the
+   frozen spec beats the bare base by **+0.39 sets a game** over 360 games, all
+   of it in our favour. Spec strings now come from `fish4/dylan_ladder.py`, the
+   same source the forward ladder uses.
+
+### The finding, so far
+
+Fixing (2) moved the margin by less than its own interval: −0.3950 before,
+−0.4600 after, win rate 44.42% → 43.50% on identical deals. The result did not
+depend on the defect.
+
+What does move, and by an order of magnitude, is **where each engine's
+declarations go wrong, and it moves with the dialect rather than with the
+opponent**:
+
+| wrong declarations / game | in OUR arbiter | in THEIRS |
+|---|---|---|
+| theirs | 0.844 | 0.074 |
+| ours | 0.176 | 0.047 |
+
+The gap between the two engines is 17.6 points of declaration accuracy in our
+dialect and 0.45 in theirs. The paper's own decomposition puts **57% of the
++2.3466 margin in declaration accounting**, so most of the headline lives in
+the channel the dialect controls — and our dialect has no out-of-turn
+declaration, which their policy routes about 3.4 declarations a game through
+and which our bridge therefore never polls.
+
+Neither number is a ranking. Together they bracket one, and that is the honest
+statement. **Not yet established:** that the package transmits our policy's
+strength at all. The control is the ladder — our bot against their v0.2–v0.6 in
+their arbiter, compared in SHAPE to the ladder we measured in ours. A bot
+crippled in transit loses to everything. That run is next, and no claim above
+about relative strength should be repeated until it lands.
