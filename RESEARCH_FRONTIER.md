@@ -4084,14 +4084,41 @@ noise of each other, which is exactly what their numbers say too — my ordering
 of v04 against v05 differs from theirs by about 0.1 sets against half-widths
 of 0.15, so neither of us should claim that pair either way.
 
-**Provenance, stated rather than assumed.** Their repo is present as a SINGLE
-SQUASHED COMMIT (d017fbcb), so the compiled v04/v05/v06 vectors cannot be
-checked against the ones their published results used; their manifests point
-at commits not in the snapshot and record `working_tree_dirty = True`. This
-measures their v0.N as it exists at d017fbcb — what their current tree runs —
-not a verified reproduction of their published v0.N. One thing the manifests
-do pin: v0.4's policy_spec is `v04:mgate=0.008`, not a bare `v04`, and the
-bare base would have measured a configuration they never published.
+**Provenance, stated rather than assumed — and since 2026-09-07, measured.**
+Their repo was present as a SINGLE SQUASHED COMMIT (d017fbcb), so the compiled
+v04/v05/v06 vectors could not be checked against the ones their published
+results used, and this section said so. Their full history (89 commits,
+release commits included) is now published, so the check has been run.
+
+`scripts4/dylan_ladder_provenance.py` uses THEIR reproduction protocol rather
+than ours — build their engine at the release commit and at our pin, run the
+identical `fish match` on both, compare every field of the JSON — because a
+file diff answers nothing (their v05/v06 headers were edited in later cycles)
+and our own shim will not build against their v0.4-era headers (it calls
+`isRepoll`, which that tree does not have).
+
+    rung  release   play differences   verdict
+    v02   bb3bc8a          0           PLAYS IDENTICALLY
+    v03   bb3bc8a          0           PLAYS IDENTICALLY
+    v04   bb3bc8a          0           PLAYS IDENTICALLY
+    v05   bd812fe          0           PLAYS IDENTICALLY
+    v06   60fee17          0           PLAYS IDENTICALLY
+
+Three seeds a rung, 240 games a cell. Win rate, mean sets, ask accuracy,
+declaration counts and events per game agree exactly at all fifteen cells;
+what moved is their bootstrap interval (last place, 5 of 15) and nine JSON
+fields their older builds never emitted. `results/dylan_ladder_provenance.json`.
+
+Two limits kept. A differing field would have localised a change to the
+policy-and-arbiter pair rather than the policy, since both live in one binary —
+the pass is clean, so that never had to be untangled. And this is not a check
+of their published NUMBERS: those came from their harness on their deal banks,
+their manifests still point at commits absent even from the full history and
+record `working_tree_dirty = True`, and nothing here can reach them.
+
+One thing the manifests do pin: v0.4's policy_spec is `v04:mgate=0.008`, not a
+bare `v04`, and the bare base would have measured a configuration they never
+published.
 
 ### OPEN: our own error rate doubles against v0.4 and mgate does not explain it
 
