@@ -1181,8 +1181,16 @@ WATCH = [
     ("bridge_statefulness_price.json", "their_wrong_declarations_persistent",
      "{:.4f}", "their wrong declarations, persistent bridge",
      "their wrong declarations/game, persistent &"),
-    ("bridge_statefulness_price.json", "pairs", "{:d}",
+    ("bridge_statefulness_price.json", "pairs", "{:,d}",
      "pairs in the bridge price", "The paired contrast prices it: $"),
+    # The persistent route's own game count, which is one per pairing. This
+    # went unpinned and drifted to the paired design's total across both arms,
+    # crediting the corrected figure with twice the games behind it -- an error
+    # in the direction that flatters the retraction, which is the direction
+    # that gets checked least.
+    ("bridge_statefulness_price.json", "pairs", "{:,d}",
+     "games behind the corrected margin",
+     "our arbiter, \\emph{persistent} bridge &"),
     # The mechanism decomposition. Watched arm by arm, and in both bands,
     # because the finding is which band DOESN'T move: a drift that closed the
     # declaration gate would reverse the section's conclusion, and a pooled

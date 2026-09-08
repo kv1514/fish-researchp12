@@ -56,18 +56,18 @@ of decisions, and asymmetrically: the stateless path declares where the
 persistent one asks 20 times against 2 the other way.
 
 Priced under a paired design that changes nothing but the transport
-(`results/bridge_statefulness_price.json`, 200 deals, zero fallbacks):
+(`results/bridge_statefulness_price.json`, 2,000 pairings over 1,000 deals, zero fallbacks):
 
 | | our margin |
 |---|---:|
-| our arbiter, **stateless** bridge (the published route) | +2.4500 |
-| our arbiter, **persistent** bridge | **−0.6900** |
+| our arbiter, **stateless** bridge (the published route) | +2.4800 |
+| our arbiter, **persistent** bridge | **−0.6960** |
 | their arbiter, our bot package (independent route) | **−0.6200** |
 
-The bridge was worth **+3.14 [+2.67, +3.61] sets a game to us** — more than the
-entire margin it produced — and their declaration errors fall tenfold, 0.845 to
-0.080 a game, once their engine keeps the state its own arbiter lets it keep.
-Two routes sharing no host, no rules and no code agree to within 0.07; the
+The bridge was worth **+3.18 [+3.01, +3.34] sets a game to us** — more than the
+entire margin it produced — and their declaration errors fall tenfold, 0.880 to
+0.092 a game, once their engine keeps the state its own arbiter lets it keep.
+Two routes sharing no host, no rules and no code agree to within 0.08; the
 published one is out by three.
 
 **Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.6–0.7 sets/game.**

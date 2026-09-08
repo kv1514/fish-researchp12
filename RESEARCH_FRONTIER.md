@@ -4289,26 +4289,27 @@ only for versions that have something to rebuild.
 
 ## The price, and the retraction
 
-`scripts4/bridge_statefulness_price.py` ran the paired contrast: 200 deals,
-each played twice on identical cards, identical seats and identical agent
-seeds, our champion unchanged, the only difference being whether their engine
-keeps its state between decisions.
+`scripts4/bridge_statefulness_price.py` ran the paired contrast:
+2,000 pairings — 1,000 deals at each of two seat assignments —
+with every pairing played twice on identical cards, identical seats and
+identical agent seeds, our champion unchanged, the only difference being
+whether their engine keeps its state between decisions.
 
 | | stateless | persistent |
 |---|---:|---:|
-| our margin | +2.4500 | **−0.6900** |
-| their wrong declarations/game | 0.8450 | **0.0800** |
-| their declarations/game | 4.0150 | 4.8050 |
+| our margin | +2.4800 | **−0.6960** |
+| their wrong declarations/game | 0.8800 | **0.0925** |
+| their declarations/game | 3.9910 | 4.8275 |
 
-**The bridge was worth +3.1400 [+2.6656, +3.6144] sets/game to us** — more than
+**The bridge was worth +3.1760 [+3.0142, +3.3378] sets/game to us** — more than
 the entire published margin. Zero fallbacks, zero unfinished games. The
-stateless arm reproduces the published figure on fresh deals (+2.4500 against
+stateless arm reproduces the published figure on fresh deals (+2.4800 against
 +2.3466), which is what makes the other column believable rather than a harness
 artifact.
 
 Measured independently inside *their* arbiter through their own bot-package
 protocol: **−0.6200** over 1,200 games. Two routes sharing no host, no rules
-implementation, no deal generator and no code path agree to within 0.07, where
+implementation, no deal generator and no code path agree to within 0.08, where
 the published one is out by three and has the sign wrong.
 
 **+2.3466 is retracted as a measurement of relative engine strength.** It
@@ -4375,10 +4376,10 @@ gate survive every mechanism named above. Neither an RNG nor a feature explains
 it. This is the honest residual and it is not a formality: it is the band that
 carries the price.
 
-**More games behind the price.** +3.14 rests on 200 paired deals. The effect is
-an order of magnitude past its interval, so this is bookkeeping rather than
-doubt, but it should have more games before being quoted as a headline in its
-own right.
+**More games behind the price.** Done: +3.18 now rests on 2,000 pairings
+over 1,000 deals, a tenfold extension of the original run from the same
+seed base, so the first 200 pairings are the original run and reproduce it
+exactly. That item is closed.
 
 **Whether to re-measure the head-to-head.** `fish4/dylan_v07_persistent.py`
 plays complete games with zero fallbacks, so the 10,000-game head-to-head could
@@ -4389,7 +4390,7 @@ a real cost.
 ## What does NOT follow
 
 That their engine is stronger than this one *in general*. Neither column is a
-ranking: −0.6900 was measured in our arbiter under our dialect, −0.6200 in
+ranking: −0.6960 was measured in our arbiter under our dialect, −0.6200 in
 theirs under theirs, and a cross-engine absolute is a statement about the host
 as well as about the engines. That is the same caveat this project wrote into
 its bridges appendix before any of this was measured, and then failed to apply

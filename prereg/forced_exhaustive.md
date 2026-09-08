@@ -248,8 +248,8 @@ not the same agent their own arbiter runs. It agrees exactly with their
 arbiter on their two scripted baselines (0 of 661 decisions) and diverges on
 every release from v0.4 onward, and
 `results/bridge_statefulness_price.json` prices the difference at
-**$+3.14$ $[+2.67, +3.61]$ sets a game in our favour**. Their wrong
-declarations fall from $0.845$ a game to $0.080$ once their engine is allowed
+**$+3.18$ $[+3.01, +3.34]$ sets a game in our favour**. Their wrong
+declarations fall from $0.880$ a game to $0.092$ once their engine is allowed
 to keep the state its own arbiter lets it keep.
 
 So the v0.7 population was an opponent handicapped by our own instrument. That

@@ -905,13 +905,14 @@ decision.
 
 ### The price, and it is larger than the thing it explains
 
-200 deals, each played twice on identical cards, seats and agent seeds, our
-champion unchanged, only their transport differing:
+2,000 pairings (1,000 deals at each of two seat assignments), every
+pairing played twice on identical cards, seats and agent seeds, our champion
+unchanged, only their transport differing:
 
-    our margin, stateless bridge     +2.4500
-    our margin, persistent bridge    -0.6900
-    the bridge was worth to us       +3.1400 [+2.6656, +3.6144]
-    their wrong declarations/game     0.8450 stateless -> 0.0800 persistent
+    our margin, stateless bridge     +2.4800
+    our margin, persistent bridge    -0.6960
+    the bridge was worth to us       +3.1760 [+3.0142, +3.3378]
+    their wrong declarations/game     0.8800 stateless -> 0.0925 persistent
 
 Zero fallbacks, zero unfinished. The stateless arm reproduces the published
 +2.3466 on fresh deals, which is what makes the other column believable rather
@@ -920,10 +921,10 @@ than a harness artifact.
 ### Two independent routes agree, and neither is the published one
 
     our arbiter, stateless bridge (published)   +2.3466   10,000 games
-    our arbiter, persistent bridge             -0.6900       200 games
+    our arbiter, persistent bridge             -0.6960     2,000 games
     their arbiter, our bot package             -0.6200     1,200 games
 
-The two that do not reset their engine every decision agree to within 0.07 sets
+The two that do not reset their engine every decision agree to within 0.08 sets
 a game. They share no host, no rules, no deal generator and no code path. The
 one that does reset is out by three.
 

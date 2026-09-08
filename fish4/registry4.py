@@ -163,7 +163,7 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 #: (the ii journals are rule-fingerprinted for exactly that). V04_COMBINED
 #: keeps its void-era definition and numbers; this name is the live one.
 #: The v0.7 half of that evidence went through the stateless bridge too, and
-#: here the bias runs the other way: the bridge is worth +3.14 sets/game TO US
+#: here the bias runs the other way: the bridge is worth +3.18 sets/game TO US
 #: (results/bridge_statefulness_price.json), so a correction that only managed
 #: a tie through it would be expected to do worse without it. The withdrawal
 #: does not rest on that arm in any case -- the R4 self-sibling interval
@@ -185,7 +185,7 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 #: comment was written, and the addendum of 2026-09-08 to
 #: prereg/forced_exhaustive.md says so: the v0.7 arm was played through the
 #: STATELESS bridge, which results/bridge_statefulness_price.json prices at
-#: +3.14 [+2.67, +3.61] sets/game in our favour -- an opponent handicapped by
+#: +3.18 [+3.01, +3.34] sets/game in our favour -- an opponent handicapped by
 #: our own instrument. The ship is unaffected, because the criterion this
 #: registration fixed in advance is the primary and the primary is the
 #: self-play arm, where both sides are ours and no bridge is in the loop. What

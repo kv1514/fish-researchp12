@@ -134,13 +134,13 @@ where their arbiter keeps one agent per seat alive for the deal. The two agree
 exactly on their scripted baselines ($0$ of $661$ decisions) and diverge on
 every release from v0.4, where their fitted belief arrives, by up to $40.8\%$ of
 decisions. Priced under a paired design that changes nothing but the transport,
-the bridge was worth $\mathbf{+3.14}$ $[+2.67, +3.61]$ sets a game \emph{to us}
+the bridge was worth $\mathbf{+3.18}$ $[+3.01, +3.34]$ sets a game \emph{to us}
 --- more than the entire margin it produced --- and their declaration errors
-fall tenfold, from $0.845$ a game to $0.080$, once their engine is allowed to
+fall tenfold, from $0.880$ a game to $0.092$, once their engine is allowed to
 keep the state its own arbiter lets it keep. Corrected, KRAKEN \textbf{loses} to
-that engine by $-0.69$; measured independently inside their arbiter through
+that engine by $-0.70$; measured independently inside their arbiter through
 their own bot-package protocol, by $-0.62$. Two routes sharing no host, rules or
-code agree to within $0.07$ where the published one is out by three. An absolute
+code agree to within $0.08$ where the published one is out by three. An absolute
 measured through a bridge is a statement about the bridge as well as about the
 engines, which this paper had written down in an appendix and not applied to its
 own headline.
@@ -7460,7 +7460,8 @@ and not through theirs.
 
 \paragraph{What it was worth, in sets.} A different move is not automatically a
 worse one, so the divergence above is a fact about decisions and not yet about
-the scoreboard. The paired contrast prices it: $200$ deals, each played twice on
+the scoreboard. The paired contrast prices it: $2{,}000$ pairings --- $1{,}000$ deals
+at each of two seat assignments --- with every pairing played twice on
 identical cards, identical seats and identical agent seeds, our champion
 unchanged in both arms, the \emph{only} difference being whether their engine
 keeps its state between decisions
@@ -7470,19 +7471,19 @@ keeps its state between decisions
 \small
 \begin{tabular}{lr}
 \toprule
-our margin, stateless bridge & $+2.4500$ \\
-our margin, persistent bridge & $\mathbf{-0.6900}$ \\
+our margin, stateless bridge & $+2.4800$ \\
+our margin, persistent bridge & $\mathbf{-0.6960}$ \\
 \midrule
-the bridge was worth, to us & $\mathbf{+3.1400}$ $[+2.6656, +3.6144]$ \\
+the bridge was worth, to us & $\mathbf{+3.1760}$ $[+3.0142, +3.3378]$ \\
 \midrule
-their wrong declarations/game, stateless & $0.8450$ \\
-their wrong declarations/game, persistent & $\mathbf{0.0800}$ \\
+their wrong declarations/game, stateless & $0.8800$ \\
+their wrong declarations/game, persistent & $\mathbf{0.0925}$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent Zero fallbacks and zero unfinished games in both arms. The stateless
-arm reproduces the published figure on fresh deals ($+2.4500$ against
+arm reproduces the published figure on fresh deals ($+2.4800$ against
 $+2.3466$), which is what makes the other column believable rather than a
 harness artifact.
 
@@ -7503,7 +7504,7 @@ protocol. They share no code path, no rules, no deal generator and no host:
 & our margin & games \\
 \midrule
 our arbiter, \emph{stateless} bridge (published) & $+2.3466$ & $10{,}000$ \\
-our arbiter, \emph{persistent} bridge & $-0.6900$ & $200$ \\
+our arbiter, \emph{persistent} bridge & $-0.6960$ & $2{,}000$ \\
 their arbiter, our bot package & $-0.6200$ & $1{,}200$ \\
 \bottomrule
 \end{tabular}
@@ -7511,11 +7512,11 @@ their arbiter, our bot package & $-0.6200$ & $1{,}200$ \\
 
 \noindent The counts are that route's own games, which for the persistent
 bridge is one per pairing rather than the paired design's total across both its
-arms --- an earlier version of this table gave that total, $400$, and so
+arms --- an earlier version of this table gave that total, twice over, and so
 credited the corrected figure with twice the games behind it.
 
 The two routes that do not reset their engine every decision agree to within
-$0.07$ sets a game. The one that does is the outlier, by three. They are also
+$0.08$ sets a game. The one that does is the outlier, by three. They are also
 much the smallest two: the retracted figure has the largest sample here and is
 the one that is wrong, which is the point rather than an embarrassment to it.
 

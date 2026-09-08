@@ -164,7 +164,7 @@ def report(rows: list[dict]) -> dict:
     }
 
     print(f"\n=== what the stateless bridge cost their engine ===")
-    print(f"{n:,} deals, each played under both bridges on the same cards\n")
+    print(f"{n:,} pairings, each played under both bridges on the same cards\n")
     print(f"  our margin, stateless bridge    {out['margin_stateless']:+.4f} sets/game")
     print(f"  our margin, persistent bridge   {out['margin_persistent']:+.4f}")
     print(f"  the bridge was worth            {mean:+.4f} "
@@ -191,8 +191,10 @@ def main(argv=None) -> int:
 
     jobs = a.jobs or max(1, (os.cpu_count() or 2))
     todo = [(a.seed + i, ke) for i in range(a.deals) for ke in (True, False)]
-    print(f"{len(todo):,} games ({a.deals} deals x 2 seatings x 2 arms) "
-          f"on {jobs} workers", flush=True)
+    # len(todo) is PAIRINGS, and each plays two games. Calling it "games" here
+    # is where the paper's own "200 deals" came from.
+    print(f"{len(todo):,} pairings ({a.deals:,} deals x 2 seatings), "
+          f"{2 * len(todo):,} games, on {jobs} workers", flush=True)
 
     rows = []
     t0 = time.time()

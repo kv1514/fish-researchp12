@@ -3,7 +3,7 @@
 WHAT IS ALREADY SETTLED. `scripts4/shim_statefulness_parity.py` established
 THAT our stateless bridge and their arbiter's incremental play stop being the
 same agent at their v0.4, and `scripts4/bridge_statefulness_price.py` priced it
-at +3.14 [+2.67, +3.61] sets/game in our favour -- more than the whole
+at +3.18 [+3.01, +3.34] sets/game in our favour -- more than the whole
 published margin, which is why that margin was retracted. Neither says WHICH
 piece of their per-decision state the bridge throws away.
 
@@ -219,7 +219,7 @@ def bands(by: dict[str, dict]) -> dict:
     the other asks is a GATE disagreement about whether to declare at all, and
     it is the one that shows up in the sets: a declaration made a turn early is
     a wrong declaration, and their wrong-declaration rate is what the price
-    moved (0.845 a game stateless against 0.080 persistent).
+    moved (0.880 a game stateless against 0.092 persistent).
 
     Reported separately because the ablations move one and not the other, and a
     single pooled rate hides exactly that.
@@ -324,7 +324,7 @@ def main(argv=None) -> int:
         "design": "the parity measurement at four corners of (s1, rtie), each "
                   "arm internally paired on its own game; arms share deal "
                   "seeds only, not decisions",
-        "scope": "attributes the DIVERGENCE, not the price; the +3.14 "
+        "scope": "attributes the DIVERGENCE, not the price; the +3.18 "
                  "sets/game was measured at the frozen release and no strength "
                  "number is taken at an ablated spec",
         "frozen_spec": frozen,
