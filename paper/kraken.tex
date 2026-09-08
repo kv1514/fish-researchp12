@@ -149,7 +149,7 @@ Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
 a proof that the belief-space search cannot move $99.96\%$ of the allocation
 uncertainty, and an audit of our own clustering restates every position-level
-interval and withdraws one conclusion. Across the whole project, forty-three
+interval and withdraws one conclusion. Across the whole project, forty-four
 pre-registrations produced exactly one change to the deployed engine
 (Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
 not ship, because the bar was fixed before the runs and was not amended
@@ -169,7 +169,14 @@ our ask objective avoids those half-suits \emph{better} than theirs does
 Priced at this project's own measured value of a turn, the channel is worth
 $+0.458$ $[+0.157, +0.793]$ sets a game against a deficit of $-0.5250$. The
 $p(\text{dead})$ term this analysis was written to justify is refuted by its
-own kill-check, and no pre-registration is issued.
+own kill-check. Registered and run anyway in its strongest form (P44), it is a
+significant \textbf{negative} in both populations, $-0.3233$ and $-0.2300$,
+\emph{while raising the ask hit rate it targets} ($0.5245$ against $0.5184$ on
+the same deals): under the no-bluff rule a failed ask publicly proves the asker
+holds another card of that half-suit, so an ask into a half-suit we already own
+is the engine's own way of resolving ownership, not waste. \textbf{A measured
+deficit in a metric is not necessarily a deficit to close.} Nothing ships;
+there is no v1.2.
 
 \vspace{2pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
@@ -7846,6 +7853,72 @@ answers ``is this channel big enough to be the story'', which is a smaller
 question than ``is it the cause'' --- and the smaller question is the one these
 numbers can carry.
 
+\subsubsection{P44: the two ends of the latency, and a hit rate that is not
+worth having}
+
+The analysis above is exploratory and licenses nothing. What it licensed is a
+registration (P44, Appendix~\ref{app:prereg}), and the registration found a
+defect worth attacking: \textbf{every doomed-ask mechanism in this engine} ---
+the stuck claim gate, the signalling ask, \texttt{avoid\_doomed\_asks} ---
+\textbf{is conditioned on the agent being \emph{certain} the best ask cannot
+land.} That is $1.5\%$ of decisions. On the asks that actually are dead the
+belief's own estimate averages $0.3377$, so none of it opens. The apparatus is
+aimed at the right idea through a gate that almost never fires.
+
+Two arms, each replacing that certainty test with a graded one, each
+bit-identical at its default: \textbf{D1} restricts the ask when the
+top-scoring one's half-suit is ours with probability at least $0.5$;
+\textbf{D2} declares a half-suit we are certain we own ($p_{\text{team}} \ge
+0.99$) at exactness $0.77$ rather than $0.97$, that threshold being a
+break-even from this paper's own turn price and declaration accuracy rather
+than the best of a sweep.
+
+\paragraph{D2 never reached a duel, and that is the result.} It fired on
+$0.235$ declarations a game against a futility bar of $0.250$ fixed before the
+run. It fires so rarely because it gates on knowing the set is ours, and
+\emph{we usually do not know}: the belief puts only $0.3377$ on a genuinely
+dead half-suit being entirely ours. \textbf{We sit on completed half-suits
+because we do not know we own them, not because we cannot place the split.}
+That is not what the $95.3\%$ allocation-error figure invites a reader to
+assume --- that figure counts declarations we made and got wrong, not the ones
+we never made --- and it moves the target from splitting to ownership
+inference.
+
+\paragraph{D1 reached the duel and failed in both populations.} $600$
+pairings, $1{,}800$ games, zero fallbacks:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+ & vs SESTINA & self-play \\
+\midrule
+D1 \texttt{dead\_ask\_threshold} $=0.5$ & $\mathbf{-0.3233}$ $[-0.527,
+-0.119]$ & $\mathbf{-0.2300}$ $[-0.448, -0.012]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Not a null --- a significant negative in both populations. And it
+\emph{worked}: the candidate's ask hit rate is $0.5245$ against the champion's
+$0.5184$ on the same deals. D1 did exactly what it was built to do, landed more
+asks, and cost a third of a set a game doing it.
+
+\textbf{So the ask hit rate is not a quantity to maximise.} Under the no-bluff
+rule a failed ask publicly proves the asker holds another card of that
+half-suit, which is precisely the fact a partner needs to place a split. An ask
+into a half-suit our team wholly owns is not waste: it is this engine's own
+mechanism for resolving the ownership it does not yet know it has. Removing it
+raised the metric and lowered the score.
+
+That closes a reading this section's own opening invites. The corrected
+head-to-head puts us $1.95$ points behind on ask hit rate and calls it the only
+channel in which the two engines differ; P44 shows that closing that gap
+directly makes us weaker. \textbf{A measured deficit in a metric is not
+necessarily a deficit to close}, and the one instrument that could tell the
+difference was a duel with a bar fixed in advance --- not any amount of further
+anatomy.
+
 \subsubsection{What this closes}
 
 The ask deficit is real, it is worth about half a set a game, and it is not an
@@ -7857,18 +7930,21 @@ where the team held all six and named the wrong split (\S\ref{sec:res-pathledger
 The team has the answer and no member of it does, so it waits; and while it
 waits it asks into its own half-suits.
 
-\textbf{So the programme stops here rather than producing a registration.} The
-candidate it was heading for --- a $p(\text{dead})$ penalty in the ask objective
---- is refuted by its own kill-check, and the two knobs in that family this
-study has already run are consistent with that: \texttt{avoid\_doomed\_asks}
-fires only where the posterior is \emph{certain} the ask cannot land, which is
-$1.5\%$ of decisions against the $13.79\%$ measured here, and it scored
-$-0.0933$ against SESTINA and $-0.0900$ in self-play (P43). What the analysis
-licenses instead is a registration in the declaration channel, on the latency
-rather than on the accuracy: the accuracy is already $97.59\%$, and the tail
-above says the cost is concentrated in a third of completions that sit for ten
-plies or more. We have not written that registration, and this section is not
-it.
+P44 shot down what the exploratory analysis pointed at.
+\textbf{The ask objective was not the place.} A $p(\text{dead})$ penalty is the graded form of
+\texttt{avoid\_doomed\_asks}, it fires at $4.95\%$ of decisions where the
+incumbent fires at $1.5\%$, and it is worse than the incumbent rather than
+better: $-0.3233$ and $-0.2300$ against $-0.0933$ and $-0.0900$. The channel
+did not need a bigger lever. It needed not to be pulled.
+
+What survives is the other end, and it is narrower than what this section set
+out to find. The latency is real and expensive; it is not caused by an
+inability to place a split, because the arm built on that premise could not
+find enough positions to fire in; and it is not fixable by asking differently,
+because the arm built on that premise made things worse while improving the
+metric it targeted. What is left is the ownership inference itself --- the
+$0.3377$ --- and nothing in this paper has attacked that directly. We do not
+have a candidate for it, and we say so rather than nominating one.
 
 
 \section{Discussion}
@@ -8879,11 +8955,11 @@ measurement under this paper's rules and not a ranking of two projects
 
 \textbf{And v1.1 shipped nothing.} Seven pre-registered directions at the
 residual returned no adoption; the pre-registered thresholds and outcomes for
-all forty-three registrations this project has written are in
+all forty-four registrations this project has written are in
 Appendix~\ref{app:prereg}. Two mechanisms measured there are real and positive
 and still do not ship, because the bar was fixed in advance and was not amended
 afterwards. That is the discipline this paper is actually arguing for, and it
-costs more than it looks: exactly one of the forty-three registrations
+costs more than it looks: exactly one of the forty-four registrations
 produced a change to the deployed engine.
 
 \subsection{What we would do next}

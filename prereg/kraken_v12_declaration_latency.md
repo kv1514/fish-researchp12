@@ -147,4 +147,66 @@ experiment that did not run. All three have happened in this project.
 
 ## OUTCOME
 
-*(to be completed after the runs, before any change to the registry)*
+**Nothing ships. There is no v1.2, and the champion is unchanged.**
+
+### The futility screen stopped D2
+
+400 games at seed base 9,500,000 (`results/p44_futility.json`):
+
+| arm | fired | bar | |
+|---|---|---|---|
+| D1 `dead_ask_threshold = 0.5` | 916/18,515 asks = **4.95%** | 2.00% | pass |
+| D2 `claim_owned_threshold = 0.77` | 94 in 400 games = **0.235/game** | 0.250/game | **stop** |
+
+D2 misses by 6% of its bar. The bar was fixed in advance for exactly this case,
+so D2 did not reach a duel and D3 — licensed only if both arms cleared
+independently — was not built.
+
+**Why it fires so rarely is the result, not the disappointment.** D2 gates on
+`p_team >= 0.99`: we know the set is ours and cannot place the split.
+`results/ask_deadness_signal.json` measures the belief's own probability that a
+genuinely dead half-suit is entirely ours at **0.3377** on average. We do not
+sit on completed half-suits because we know we own them and cannot split them.
+We sit on them **because we do not know we own them.** That is not what the
+95.3% allocation-error statistic invites a reader to assume — that statistic is
+about declarations we made and got wrong, not about the ones we never made —
+and it means the latency is an ownership-inference problem wearing an
+allocation problem's clothes.
+
+### D1 reached the duel and failed in both populations
+
+600 pairings, 1,800 games at seed base 9,600,000 (`results/p44_screen.json`),
+zero fallbacks, zero unfinished:
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---|---|---|
+| D1 | **−0.3233** [−0.527, −0.119] | **−0.2300** [−0.448, −0.012] | no |
+
+Not a null. A significant negative in both populations, which is a stronger
+result than a null and was predicted here with its mechanism before the run.
+
+**And it worked.** The candidate's ask hit rate is **0.5245** against the
+champion's **0.5184** on the same deals. D1 did exactly what it was built to
+do — it landed more asks — and cost a third of a set a game doing it.
+
+That is the finding worth carrying: **the ask hit rate is not a quantity to
+maximise.** Under the no-bluff rule a failed ask publicly proves the asker
+holds another card of that half-suit, which is precisely the fact a partner
+needs to place a split. An ask into a half-suit our team wholly owns is not
+waste — it is the engine's own mechanism for resolving the ownership it does
+not yet know it has. D1 removed it, the hit rate rose, and the engine got
+worse.
+
+This closes the reading the cross-engine table invites. The corrected
+head-to-head shows us 1.95 points behind on ask hit rate and calls it "the only
+channel in which the two engines actually differ"; P44 shows that closing that
+gap directly makes us weaker. **A hit-rate deficit is not necessarily a deficit
+to close.**
+
+### What was predicted, and what was not
+
+The prediction above — D1 clears futility and fails the duel, from information
+carried by the failed ask — is confirmed, including the sign and the mechanism.
+The prediction that D2 was "the one with a case" is wrong in an instructive
+way: it never got a case, because the precondition it assumed (that we know we
+own the set) is false four times out of five.

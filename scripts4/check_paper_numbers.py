@@ -1430,6 +1430,21 @@ WATCH = [
      "{:+.3f}", "priced excess, CI low", "puts the excess at"),
     ("completion_latency.json", "excess_priced_sets_per_game.ci95.1",
      "{:+.3f}", "priced excess, CI high", "puts the excess at"),
+    # P44. The duel that overturned the reading its own analysis invited, so
+    # the arm's margins AND the hit rate it improved are both pinned: quoting
+    # the margin without the hit rate loses the entire point of the result.
+    ("p44_futility.json", "d1_fire_rate", "{:.2%}",
+     "D1 firing rate", "it fires at"),
+    ("p44_futility.json", "d2_per_game", "{:.3f}",
+     "D2 firing rate", "It fired on"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.vs_sestina.mean", "{:+.4f}",
+     "D1 against SESTINA", "dead\\_ask\\_threshold} $=0.5$ &"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.self_play.mean", "{:+.4f}",
+     "D1 in self-play", "dead\\_ask\\_threshold} $=0.5$ &"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.cand_ask_hit", "{:.4f}",
+     "D1's ask hit rate", "the candidate's ask hit rate is"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.champ_ask_hit", "{:.4f}",
+     "the champion's ask hit rate", "the candidate's ask hit rate is"),
 ]
 
 

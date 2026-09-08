@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-three documents in \path{prereg/}
+no registered threshold anywhere. The forty-four documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -27,7 +27,7 @@ non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the four written after
 this appendix was first compiled (P39--P42) appended at the end, in filename
 order among themselves, so that the identifiers already cited in the text keep
-their referents. Twelve of the forty-three have \emph{no outcome recorded in the
+their referents. Twelve of the forty-four have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -700,18 +700,51 @@ wrong about an opponent's propensity beats having no opinion.
 \path{results/v12_screen_c3.json} &
 \S\ref{sec:otherarbiter} \\
 
+P44 & \path{kraken_v12_declaration_latency.md} \newline
+\emph{The deficit is a declaration latency, not an ask deficit --- can either
+end of it be reached?} &
+Same dual-population bar as P43. Two arms, each replacing a CERTAINTY test
+with a graded one: \texttt{dead\_ask\_threshold} $=0.5$ (D1) restricts the
+ask when the top-scoring one's half-suit is more likely than not already
+ours; \texttt{claim\_owned\_threshold} $=0.77$ (D2) declares a half-suit we
+are certain we own at a lower exactness. D2's $0.77$ is a break-even from this
+project's own turn price and declaration accuracy, stated with its
+approximation, not the best of a sweep. Futility screen fixed first: $2\%$ of
+ask decisions (D1), $0.25$ declarations/game (D2), at seed base
+\textbf{9,500,000}; screen $300\times2$ at \textbf{9,600,000}. D3 (both)
+licensed only if both cleared independently. &
+Yes: that D1 clears futility and fails the duel, with the mechanism named ---
+a failed ask publicly proves the asker holds another card of that half-suit,
+so D1 removes the engine's own way of resolving the allocation it is stuck on.
+D2 was predicted to be ``the one with a case''. &
+\textbf{NOTHING SHIPS.} D2 fired on $0.235$ declarations/game against its
+$0.250$ bar and never reached a duel, which is itself the result: it gates on
+$p_{\text{team}} \ge 0.99$, and the belief's probability that a genuinely
+dead half-suit is entirely ours averages $0.3377$. \emph{We sit on completed
+half-suits because we do not know we own them}, not because we cannot place
+the split. D1 reached the duel and returned a significant \textbf{negative} in
+both populations, $-0.3233$ $[-0.527, -0.119]$ and $-0.2300$ $[-0.448,
+-0.012]$ --- while raising the ask hit rate it targets, $0.5245$ against the
+champion's $0.5184$ on the same deals. It did what it was built to do and cost
+a third of a set doing it, so \textbf{the ask hit rate is not a quantity to
+maximise} and the $1.95$-point gap of \S\ref{sec:otherarbiter} is not
+necessarily a gap to close. \path{results/p44_futility.json},
+\path{results/p44_screen.json} &
+\S\ref{sec:askdeficit} \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-three resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-four resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
 \textbf{refuted} on a registered condition (P1, P4, P7, P10, P23, P28, P32,
 P36). Five returned an explicit null, an explicit \textsc{split}, or an
-explicit ``not settled'' (P8, P13, P24, P27, P35). Four were closed by a screen
-or by proof before the registered duel was paid for, saving roughly $9{,}000$
-duplicate-deal pairs (P3, P12, P29, P34). One was a set of graded predictions
+explicit ``not settled'' (P8, P13, P24, P27, P35, P43, P44). Four were closed
+by a screen or by proof before the registered duel was paid for, saving roughly
+$9{,}000$ duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's
+D2, inside a registration already counted above. One was a set of graded predictions
 rather than a threshold and scored four of five (P25). And twelve have
 \textbf{no outcome recorded in the registration at all} (P15, P19, P21, P22,
 P30, P31, P37, P38, P39, P40, P41, P42) --- ten of them run and written up
@@ -730,7 +763,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-three --- P20 --- shipped, and it is the
+\noindent Exactly one of the forty-four --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 

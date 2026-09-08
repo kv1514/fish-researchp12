@@ -1059,3 +1059,65 @@ channel aimed at the LATENCY rather than the accuracy — the accuracy is alread
 97.59% — and concentrated on the third of completions that sit ten plies or
 more. That registration is not written, and none of these three instruments
 licenses an arm on its own.
+
+## P44: both ends of the latency, and the metric that was not worth chasing
+
+The post-P43 analysis said the deficit is a declaration latency, not an ask
+problem, and explicitly licensed no arm. P44 is what it did license: a
+registration, written before anything ran, with its predicted outcome recorded.
+
+### The defect it attacks
+
+Every doomed-ask mechanism in this engine — the stuck claim gate, the
+signalling ask, `avoid_doomed_asks` — is conditioned on `p[order[0]] <= 0.0`,
+the agent being CERTAIN the best ask cannot land. That is 1.5% of decisions. On
+the asks that actually are dead the belief's estimate averages 0.3377, so none
+of it opens. The apparatus is aimed at the right idea through a gate that
+almost never fires. Both arms replace the certainty test with a graded one.
+
+### D2 was stopped by the futility screen, and that is the result
+
+Fired on 0.235 declarations/game against a 0.250 bar fixed in advance. It misses
+by 6% and does not reach a duel; D3, licensed only if both arms cleared, is not
+built. Re-running until it clears, or widening the bar now the number is
+visible, is the forking-paths failure the appendix argues against.
+
+**Why it fires so rarely matters more than the stop.** D2 gates on
+`p_team >= 0.99` — knowing the set is ours and being unable to place the split.
+The belief puts 0.3377 on a genuinely dead half-suit being entirely ours. **We
+sit on completed half-suits because we do not know we own them.** The 95.3%
+allocation-error figure counts declarations we made and got wrong, not the ones
+we never made, and reading it as the cause of the latency is a mistake this arm
+had to fire to expose.
+
+### D1 reached the duel, and improving the metric made the engine worse
+
+600 pairings, 1,800 games, zero fallbacks:
+
+    D1  dead_ask_threshold=0.5   vs SESTINA  -0.3233 [-0.527, -0.119]
+                                 self-play   -0.2300 [-0.448, -0.012]
+    ask hit rate: candidate 0.5245, champion 0.5184, same deals
+
+Not a null — a significant negative in both populations, and the candidate
+landed MORE asks than the champion. D1 did exactly what it was built to do and
+cost a third of a set a game doing it.
+
+Under the no-bluff rule a failed ask publicly proves the asker holds another
+card of that half-suit, which is the fact a partner needs to place a split. An
+ask into a half-suit our team wholly owns is not waste: it is the engine's own
+mechanism for resolving the ownership it does not yet know it has. D1 removed
+it, the hit rate rose, the score fell.
+
+**So the ask hit rate is not a quantity to maximise.** The corrected
+head-to-head puts us 1.95 points behind on it and calls it the only channel in
+which the two engines differ. Closing it directly makes us weaker. A measured
+deficit in a metric is not necessarily a deficit to close — and no amount of
+further anatomy would have said so. Only a duel with a bar fixed in advance did.
+
+### Where this leaves the engine
+
+Nothing ships. `V06_DEPLOYED` is unchanged, there is no v1.2, and KRAKEN v1.1
+still loses to SESTINA v1.0 by -0.5250 through the repaired bridge. What is
+left standing is the ownership inference itself — the 0.3377 — which no
+registration in this project has attacked, and for which we do not have a
+candidate.
