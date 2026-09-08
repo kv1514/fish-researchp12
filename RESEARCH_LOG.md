@@ -873,3 +873,77 @@ strength produces. The place to look is what their v0.4 introduced and every
 later version built on — their fitted belief — and how it fares on the event
 stream our bridge replays into it. That is now the first experiment in
 `RESEARCH_FRONTIER.md`, ahead of the two that were there before it.
+
+
+---
+
+## Session 2026-09-08 — the bridge was the finding, and the headline is withdrawn
+
+`scripts4/shim_statefulness_parity.py` and
+`scripts4/bridge_statefulness_price.py`.
+
+`external_v07/shim_decide.cpp` is stateless BY DESIGN: a fresh process per
+decision, replaying the whole public log into a freshly `reset()` agent. That
+is what the website needs and it is what every published cross-engine number
+went through. Their arbiter builds one agent per seat per deal and feeds it
+events as they happen. Those are the same thing only if their agent is a pure
+function of (reset state, event sequence).
+
+| rung | decisions | divergent | rate | DECL→ASK | ASK→DECL |
+|---|---:|---:|---:|---:|---:|
+| v0.2 | 323 | **0** | 0.00% | 0 | 0 |
+| v0.3 | 338 | **0** | 0.00% | 0 | 0 |
+| v0.4 | 415 | 81 | 19.52% | 5 | 1 |
+| v0.5 | 336 | 137 | 40.77% | 4 | 0 |
+| v0.6 | 292 | 36 | 12.33% | 2 | 1 |
+| v0.7 | 296 | 84 | 28.38% | 9 | 0 |
+
+Zero on both scripted baselines; nonzero on every release from v0.4, where
+their fitted belief arrives. Candidates: a warm-started Sinkhorn/IPF fit, and a
+determinized search (`det=12`) off an RNG a fresh process re-seeds every
+decision.
+
+### The price, and it is larger than the thing it explains
+
+200 deals, each played twice on identical cards, seats and agent seeds, our
+champion unchanged, only their transport differing:
+
+    our margin, stateless bridge     +2.4500
+    our margin, persistent bridge    -0.6900
+    the bridge was worth to us       +3.1400 [+2.6656, +3.6144]
+    their wrong declarations/game     0.8450 stateless -> 0.0800 persistent
+
+Zero fallbacks, zero unfinished. The stateless arm reproduces the published
++2.3466 on fresh deals, which is what makes the other column believable rather
+than a harness artifact.
+
+### Two independent routes agree, and neither is the published one
+
+    our arbiter, stateless bridge (published)   +2.3466   10,000 games
+    our arbiter, persistent bridge             -0.6900       400 games
+    their arbiter, our bot package             -0.6200     1,200 games
+
+The two that do not reset their engine every decision agree to within 0.07 sets
+a game. They share no host, no rules, no deal generator and no code path. The
+one that does reset is out by three.
+
+**Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.6–0.7 sets/game
+under this project's dialect.** The +2.3466 is withdrawn in the paper's
+abstract, at §"The head-to-head", and in Limitations.
+
+### What survives, and the lesson that is actually transferable
+
+Every PAIRED contrast that shares the bridge, because both arms were
+handicapped identically — a defect common to both halves of a pair is invisible
+to the pairing and also harmless to it. Every internal result that never
+crossed the bridge. And the negative results, which are contrasts against our
+own champion.
+
+The transferable part is not "we had a bug". It is that the paper's bridges
+appendix already contained the sentence that predicts this — *an absolute
+measured through a bridge is a statement about the bridge as well as about the
+engines* — written before there was any reason to think it applied here, and
+that every precaution the head-to-head did take (10,000 games, duplicate deals,
+seat rotation, zero substituted moves, a bridge revision priced and disclosed)
+was powerless against it. None of them can see a defect that is common-mode
+across both arms, and an absolute is not paired against anything.

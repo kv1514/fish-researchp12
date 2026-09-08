@@ -39,45 +39,55 @@ and kept because its findings still hold for the rung it describes.
 
 The deployed engine is **KRAKEN v1.1** (`V06_DEPLOYED` in
 `fish4/registry4.py`; it was called KV's FishBot v0.6 before 2026-08-28 and the
-identifiers did not move with the name — see `fish4/brand.py` for why). Against
-**Dylan's FishBot v0.7** (github.com/dylann4500/fishbot, a genuinely foreign
-engine sharing no code with this one), over 10,000 duplicate deals through
-bridge revision 2:
+identifiers did not move with the name — see `fish4/brand.py` for why).
 
-**+2.3466 sets/game** [+2.2928, +2.4004] · 63.0% of decided sets · 80.4% of
-games won · zero substituted moves.
+### The cross-engine headline is withdrawn
 
-**And in *their* arbiter the sign reverses: −0.62 sets/game, 40.1% of games won
-[37.3, 42.8] over 1,200 games.** Their engine has since grown an uploadable
-bot-package format, so KRAKEN can be seated in it as an ordinary player — which
-is the half of this project's own bridge design that had never been used to
-measure anything. Both numbers are real and neither is a ranking.
+> **RETRACTED.** This section previously led with **+2.3466 sets/game** against
+> Dylan's FishBot v0.7. That figure is withdrawn: it was an artifact of our own
+> bridge, not a measurement of the two engines. See below.
 
-Three explanations are ruled out by controls: removing the out-of-turn
-declaration channel makes their declarations *more* accurate, not less; facing
-KRAKEN in their own arbiter does not raise their error rate above what their own
-v0.6 draws; and our bot package is not the problem either, since it beats their
-v0.3 by +1.30 inside their own arbiter.
+**What happened.** `external_v07/shim_decide.cpp` is stateless by design — a
+fresh process per decision, replaying the whole public log into a freshly reset
+agent. Their arbiter keeps one agent per seat alive for the deal. Those agree
+exactly on their scripted v0.2 and v0.3 (0 of 661 decisions differ) and diverge
+on **every release from v0.4**, where their fitted belief arrives — up to 40.8%
+of decisions, and asymmetrically: the stateless path declares where the
+persistent one asks 20 times against 2 the other way.
 
-**What the control found instead is that their whole released ladder reverses
-order.** In their arbiter each successive release beats us by more, which is
-what a version ladder should look like (rank correlation −1.000). In ours their
-later releases do *worse*, and their declaration error climbs monotonically with
-their own version number — 4.71% at v0.3 to 20.71% at v0.7. Their v0.3 is their
-best declarer in our arbiter and their worst in their own; their v0.7 is the
-reverse. The two arbiters disagree about an *order*, not a level, and successive
-releases getting monotonically worse at the one thing this game scores — only
-through our bridge — is not a shape improving strength produces.
+Priced under a paired design that changes nothing but the transport
+(`results/bridge_statefulness_price.json`, 200 deals, zero fallbacks):
 
-57% of the +2.3466 sits in the component that moves. That is the largest open
-question this project has; `RESEARCH_FRONTIER.md` carries it with the
-experiments that would settle it, and the paper reports it as open rather than
-resolved.
+| | our margin |
+|---|---:|
+| our arbiter, **stateless** bridge (the published route) | +2.4500 |
+| our arbiter, **persistent** bridge | **−0.6900** |
+| their arbiter, our bot package (independent route) | **−0.6200** |
 
-Four things measured since, each of which changed what the project believes:
+The bridge was worth **+3.14 [+2.67, +3.61] sets a game to us** — more than the
+entire margin it produced — and their declaration errors fall tenfold, 0.845 to
+0.080 a game, once their engine keeps the state its own arbiter lets it keep.
+Two routes sharing no host, no rules and no code agree to within 0.07; the
+published one is out by three.
 
-- **57% of that margin is declaration accounting**, not card acquisition. We
-  make 0.176 wrong declarations a game against their 0.844.
+**Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.6–0.7 sets/game.**
+
+What survives: every **paired** contrast that shares the bridge, because both
+arms were handicapped identically, and every internal result that never crossed
+the bridge at all. That distinction was written into the paper's bridges
+appendix long before there was any reason to think it applied to the paper's own
+headline.
+
+### Four things measured since, each of which changed what the project believes
+
+The first of these is about the retracted run and is kept because it is how the
+retraction was eventually found — a margin whose majority component was one
+opponent's declaration errors was a margin worth being suspicious of:
+
+- **57% of that margin was declaration accounting**, not card acquisition: 0.176
+  wrong declarations a game against their 0.844. Their 0.844 is now known to be
+  the *handicapped* figure; unhandicapped it is 0.080, and the margin goes with
+  it.
 - **95% of what we get wrong is our own team's split** — allocation class,
   0.1676 a game against 0.0083 ownership errors. Once a team holds all six of
   a half-suit no opponent may legally ask in it, so the split freezes with the

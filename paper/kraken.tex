@@ -123,21 +123,27 @@ deployed policy's endgame exploitability at $+0.4405$ over $305$ positions with
 one half-suit live, against a deterministic realisation of a policy that
 mixes. Under the corrected misdeclaration rule (the engine scored it wrongly
 for five versions), the deployed configuration beats the v0.3 champion by
-$\mathbf{+2.412}$ $[+2.088, +2.736]$ sets per pair and an independently
-developed C++ engine \citep{nguyen2026sestina} by $\mathbf{+2.347}$ sets per
-game over $10{,}000$ games, under this paper's rule dialect rather than that
-engine's. \textbf{Measured inside that engine's arbiter instead, the sign
-reverses} ($-0.62$ over $1{,}200$ games), and their whole released ladder
-reverses \emph{order} with it. The cause is ours: our bridge is stateless,
-replaying the whole public log into a freshly reset agent at every decision,
-where their arbiter keeps one agent per seat alive for the deal. Those agree
-exactly on their two scripted baselines ($0$ of $661$ decisions differ) and
-diverge on every version from v0.4, the release their fitted belief arrives at
---- up to $40.8\%$ of decisions, and asymmetrically, the stateless path
-declaring where the persistent one asks twenty times against two the other way.
-A cross-engine \emph{absolute} here is therefore a statement about the bridge as
-well as the engines, which is the principle this paper had already written down
-and had not applied to itself.
+$\mathbf{+2.412}$ $[+2.088, +2.736]$ sets per pair.
+
+\textbf{An earlier version of this abstract also reported $+2.347$ sets per game
+against an independently developed C++ engine
+\citep{nguyen2026sestina} over $10{,}000$ games. That figure is
+withdrawn.} It was an artifact of our own bridge, which is stateless: it
+replayed the whole public log into a freshly reset agent at every decision,
+where their arbiter keeps one agent per seat alive for the deal. The two agree
+exactly on their scripted baselines ($0$ of $661$ decisions) and diverge on
+every release from v0.4, where their fitted belief arrives, by up to $40.8\%$ of
+decisions. Priced under a paired design that changes nothing but the transport,
+the bridge was worth $\mathbf{+3.14}$ $[+2.67, +3.61]$ sets a game \emph{to us}
+--- more than the entire margin it produced --- and their declaration errors
+fall tenfold, from $0.845$ a game to $0.080$, once their engine is allowed to
+keep the state its own arbiter lets it keep. Corrected, KRAKEN \textbf{loses} to
+that engine by $-0.69$; measured independently inside their arbiter through
+their own bot-package protocol, by $-0.62$. Two routes sharing no host, rules or
+code agree to within $0.07$ where the published one is out by three. An absolute
+measured through a bridge is a statement about the bridge as well as about the
+engines, which this paper had written down in an appendix and not applied to its
+own headline.
 
 Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
@@ -6711,15 +6717,32 @@ rather than paired, and which the corrected head-to-head below supersedes.
 
 \paragraph{The head-to-head, re-measured through the repaired bridge.}
 \label{sec:headtohead}
-This
-is the figure the paper stands behind, and the only one taken through bridge
+
+\begin{center}
+\fbox{\parbox{0.93\linewidth}{\small
+\textbf{WITHDRAWN.} The $+2.3466$ below is retracted.
+\S\ref{sec:otherarbiter} shows it to be an artifact of this bridge's
+statelessness rather than a measurement of the two engines: their agent was
+reset and its belief rebuilt before every decision it made, which cost them more
+than the whole margin. Corrected, KRAKEN \emph{loses} this match by about $0.6$
+to $0.7$ sets a game, on two independent routes that agree with each other and
+not with this table. The section is kept in full, and in place, because the
+number was published and because how it was found is the useful part; every
+figure in it should be read as describing their engine under that handicap.}}
+\end{center}
+
+\noindent This
+was the figure the paper stood behind, and the only one taken through bridge
 revision~2: $10{,}000$ games on the same deals the retracted run used, seats
 rotated so neither engine opens more often, both engines on their native
 misdeclaration rule, zero substituted moves and zero unfinished games
 (\path{scripts4/mega_match.py} $\rightarrow$ \path{results/mega_match.json}).
-Matching the withdrawn run deal for deal is deliberate: it makes the
+Matching the withdrawn run deal for deal was deliberate: it made the
 replacement a like-for-like correction rather than a differently-powered
-second opinion.
+second opinion. It is worth noticing that every one of those precautions held,
+and none of them could see this: a defect common to both arms of a paired
+design is invisible to the design, and an absolute is not paired against
+anything.
 
 \begin{center}
 \begin{tabular}{lr}
@@ -7379,21 +7402,79 @@ here against $2.09\%$ at home --- and it produces it only for the versions that
 have a belief to rebuild, which is why their ladder inverts through our bridge
 and not through theirs.
 
-\paragraph{What this does and does not settle.} It is a fact about decisions
-rather than about sets: a different move is not automatically a worse one, and
-the paired contrast that prices it in sets is a separate measurement. What it
-does settle is that our bridge has not been asking their engine the question
-their arbiter asks it, for exactly the versions the head-to-head is about. The
-paper's own principle, stated in Appendix~\ref{sec:bridges} long before this
-was measured --- \emph{an absolute measured through a bridge is a statement
-about the bridge as well as about the engines} --- turns out to have been
-describing this paper's own headline.
+\paragraph{What it was worth, in sets.} A different move is not automatically a
+worse one, so the divergence above is a fact about decisions and not yet about
+the scoreboard. The paired contrast prices it: $200$ deals, each played twice on
+identical cards, identical seats and identical agent seeds, our champion
+unchanged in both arms, the \emph{only} difference being whether their engine
+keeps its state between decisions
+(\path{scripts4/bridge_statefulness_price.py}).
 
-We are not withdrawing $+2.3466$: it is what $10{,}000$ audited games with zero
-substituted moves returned, it is reproducible, and the paired contrasts that
-share the bridge are unaffected. But it is now known to be a margin against
-their engine \emph{as our bridge runs it}, which is not the same policy their
-arbiter runs, and a reader should treat it as such.
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+our margin, stateless bridge & $+2.4500$ \\
+our margin, persistent bridge & $\mathbf{-0.6900}$ \\
+\midrule
+the bridge was worth, to us & $\mathbf{+3.1400}$ $[+2.6656, +3.6144]$ \\
+\midrule
+their wrong declarations/game, stateless & $0.8450$ \\
+their wrong declarations/game, persistent & $\mathbf{0.0800}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Zero fallbacks and zero unfinished games in both arms. The stateless
+arm reproduces the published figure on fresh deals ($+2.4500$ against
+$+2.3466$), which is what makes the other column believable rather than a
+harness artifact.
+
+\textbf{The bridge was worth more than the entire published margin.} Their
+declaration errors fall by a factor of ten when their engine is allowed to keep
+the state their own arbiter lets it keep, and the head-to-head reverses.
+
+\paragraph{Two independent routes now agree, and they agree against us.} The
+persistent-bridge figure was measured in \emph{our} arbiter under \emph{our}
+dialect over a Python transport. The reverse-arbiter figure was measured in
+\emph{their} arbiter under \emph{their} dialect through their own bot-package
+protocol. They share no code path, no rules, no deal generator and no host:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& our margin & games \\
+\midrule
+our arbiter, \emph{stateless} bridge (published) & $+2.3466$ & $10{,}000$ \\
+our arbiter, \emph{persistent} bridge & $-0.6900$ & $400$ \\
+their arbiter, our bot package & $-0.6200$ & $1{,}200$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The two routes that do not reset their engine every decision agree to
+within $0.07$ sets a game. The one that does is the outlier, by three.
+
+\paragraph{This is a retraction of \S\ref{sec:headtohead}'s headline.} The
+$+2.3466$ is not a measurement of the two engines. It is a measurement of their
+engine \emph{with its belief destroyed and rebuilt before every decision it
+makes}, which is a policy neither project has ever intended to run and which
+nobody could reproduce outside this bridge. On the evidence above the honest
+statement of the cross-engine result is:
+
+\begin{center}
+\emph{Under this paper's rule dialect, KRAKEN v1.1 \textbf{loses} to
+SESTINA v1.0 by roughly $0.6$--$0.7$ sets per game.}
+\end{center}
+
+\noindent What survives is narrower and still worth having. The paired
+contrasts that share the bridge are untouched, because both of their arms were
+handicapped identically --- which is exactly the distinction
+Appendix~\ref{sec:bridges} drew, in a sentence written long before there was any
+reason to think it applied to this paper's own headline. And the negative
+results of \S\ref{sec:negative} and \S\ref{sec:searchres}, which are internal
+contrasts against our own champion, never went through this bridge at all.
 
 \section{Discussion}
 
