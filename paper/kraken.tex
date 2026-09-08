@@ -128,12 +128,16 @@ developed C++ engine \citep{nguyen2026sestina} by $\mathbf{+2.347}$ sets per
 game over $10{,}000$ games, under this paper's rule dialect rather than that
 engine's. \textbf{Measured inside that engine's arbiter instead, the sign
 reverses} ($-0.62$ over $1{,}200$ games), and their whole released ladder
-reverses \emph{order} with it: in their arbiter each successive release beats us
-by more, while in ours their declaration errors climb monotonically with their
-own version number, from $4.7\%$ at v0.3 to $20.7\%$ at v0.7. The dialect, the
-opponent and our bot package are each excluded as the cause by controls run
-inside their engine. A cross-engine \emph{absolute} from this paper is therefore
-conditional on the host in a way we can demonstrate and cannot yet explain.
+reverses \emph{order} with it. The cause is ours: our bridge is stateless,
+replaying the whole public log into a freshly reset agent at every decision,
+where their arbiter keeps one agent per seat alive for the deal. Those agree
+exactly on their two scripted baselines ($0$ of $661$ decisions differ) and
+diverge on every version from v0.4, the release their fitted belief arrives at
+--- up to $40.8\%$ of decisions, and asymmetrically, the stateless path
+declaring where the persistent one asks twenty times against two the other way.
+A cross-engine \emph{absolute} here is therefore a statement about the bridge as
+well as the engines, which is the principle this paper had already written down
+and had not applied to itself.
 
 Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
@@ -7332,14 +7336,64 @@ their arbiter, and they are not there --- and it offers no reason why the
 effect should grow with \emph{their} version number, which is the fact that
 now most needs explaining.
 
-The experiments that would separate these are listed in
-\path{RESEARCH_FRONTIER.md}; the cheapest is a decision-level comparison of
-their own belief against itself, in their arbiter and through our shim at
-matched positions, which their repository already carries the instruments for.
-Until one lands, the claim this paper makes is the narrow one: two measurements
-exist, they disagree in sign and in order, the disagreement is concentrated in
-the component that carries most of the margin, and what produces it is not yet
-known.
+\paragraph{The mechanism, and it was in our own docstring.} The experiment that
+separates these is a decision-level comparison of their engine against itself,
+and it identifies the cause. \emph{Our shim is stateless.} It spawns a fresh
+process for every decision and replays the entire public log into a freshly
+reset agent --- the right shape for a website that reconstructs each session
+from its log, and the shape every cross-engine number in this paper was
+measured through. Their arbiter instead builds one agent per seat per deal and
+feeds it events as they happen. Those two are the same thing only if their
+agent is a pure function of (reset state, event sequence).
+
+It is not, and the boundary is exactly where the two ladders stop agreeing:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+their version & decisions & divergent & rate & \textsc{decl}$\to$\textsc{ask} & \textsc{ask}$\to$\textsc{decl} \\
+\midrule
+v0.2 & $323$ & $\mathbf{0}$ & $0.00\%$ & $0$ & $0$ \\
+v0.3 & $338$ & $\mathbf{0}$ & $0.00\%$ & $0$ & $0$ \\
+v0.4 & $415$ & $81$ & $19.52\%$ & $5$ & $1$ \\
+v0.5 & $336$ & $137$ & $40.77\%$ & $4$ & $0$ \\
+v0.6 & $292$ & $36$ & $12.33\%$ & $2$ & $1$ \\
+v0.7 & $296$ & $84$ & $28.38\%$ & $9$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Identical on both scripted baselines; divergent on every version from
+v0.4, which is the version their fitted belief arrives at. Two candidates, both
+introduced there and leaned on harder afterwards: an iterative Sinkhorn/IPF fit
+that warm-starts from the previous position and need not land where a
+from-scratch fit lands, and a determinized search ($\mathtt{det}{=}12$) drawing
+from an RNG that our fresh process re-seeds at every single decision.
+
+The \emph{direction} is what closes the loop. Across the four affected versions
+the stateless path declares where the persistent path asks twenty times, and
+asks where it declares twice. More declarations, taken on a belief rebuilt from
+scratch, is precisely the shape that produces a $20.71\%$ declaration error rate
+here against $2.09\%$ at home --- and it produces it only for the versions that
+have a belief to rebuild, which is why their ladder inverts through our bridge
+and not through theirs.
+
+\paragraph{What this does and does not settle.} It is a fact about decisions
+rather than about sets: a different move is not automatically a worse one, and
+the paired contrast that prices it in sets is a separate measurement. What it
+does settle is that our bridge has not been asking their engine the question
+their arbiter asks it, for exactly the versions the head-to-head is about. The
+paper's own principle, stated in Appendix~\ref{sec:bridges} long before this
+was measured --- \emph{an absolute measured through a bridge is a statement
+about the bridge as well as about the engines} --- turns out to have been
+describing this paper's own headline.
+
+We are not withdrawing $+2.3466$: it is what $10{,}000$ audited games with zero
+substituted moves returned, it is reproducible, and the paired contrasts that
+share the bridge are unaffected. But it is now known to be a margin against
+their engine \emph{as our bridge runs it}, which is not the same policy their
+arbiter runs, and a reader should treat it as such.
 
 \section{Discussion}
 
@@ -8131,24 +8185,25 @@ agreement and no in-play communication is TMECor
 statement is relative to a named opponent or absolute against an exactly solved
 subgame.
 
-\paragraph{The cross-engine margin is arbiter-dependent, and we cannot yet say
-why.} The largest limitation this paper acquired late, and the one a reader
-should weigh hardest. \S\ref{sec:otherarbiter} reports the same two engines
-measured in \emph{their} arbiter, where our $+2.3466$ becomes a loss --- and
-their whole released ladder reverses order with it. Three reconciliations are
-excluded by controls: the rule dialect and the opponent, by experiments inside
-their engine involving nothing of ours; and our bot package, by its beating
-their v0.3 inside their own arbiter. What remains is our arbiter, our bridge or
-the pair, and $57\%$ of the margin sits in the component that moves.
+\paragraph{The cross-engine margin is measured through a bridge that changes
+their agent.} The largest limitation this paper acquired late, and the one a
+reader should weigh hardest. \S\ref{sec:otherarbiter} reports the same two
+engines measured in \emph{their} arbiter, where our $+2.3466$ becomes a loss,
+and their whole released ladder reverses order with it. Three reconciliations
+are excluded by controls --- the dialect and the opponent, by experiments inside
+their engine involving nothing of ours, and our bot package, by its beating
+their v0.3 inside their own arbiter --- and the fourth is the answer: our shim
+is stateless and their agent is not, for every version from v0.4 on.
 
-The specific thing left unexplained is not a level but an \emph{order}: their
-successive releases misdeclare monotonically more against us and monotonically
-less at home, and improving strength does not produce that shape. A reader
-should treat every cross-engine \emph{absolute} here as conditional on the host.
-The paired contrasts are unaffected --- an absolute measured through a bridge is
-a statement about the bridge as well as about the engines, whereas a contrast
-whose arms share the bridge is not (Appendix~\ref{sec:bridges}) --- and that
-distinction is doing real work in this paper rather than being recited.
+So the honest reading of every cross-engine \emph{absolute} in this paper is
+that it is a margin against their engine \emph{as our bridge runs it}. That is a
+real opponent and an independently authored one, and it is not the opponent
+their arbiter runs. The paired contrasts are unaffected --- an absolute measured
+through a bridge is a statement about the bridge as well as about the engines,
+whereas a contrast whose arms share the bridge is not
+(Appendix~\ref{sec:bridges}) --- and this paper is now an instance of the hazard
+it wrote that sentence about, which is the most useful thing it can say about
+it.
 
 \paragraph{A rules discrepancy, stated.} The printed rules allow a set to be
 declared at any point, including during an opponent's turn. v0.3's game loop

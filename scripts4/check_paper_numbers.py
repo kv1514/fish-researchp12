@@ -1142,6 +1142,24 @@ WATCH = [
     ("ladder_shape_comparison.json", "rungs.v07.our_arbiter.their_err",
      "{:.2%}", "their v0.7 declaration error, our arbiter",
      "v0.7 & $+2.3600$ &"),
+    # The statefulness sweep, which identified the mechanism. Watched rung by
+    # rung because the ARGUMENT is that the rate is exactly zero on the two
+    # scripted baselines and nonzero from v0.4: a single row drifting does not
+    # blur that claim, it breaks it.
+    ("statefulness_dylan_v02.json", "divergent", "{:d}",
+     "v0.2 divergent decisions", "v0.2 & $323$ &"),
+    ("statefulness_dylan_v03.json", "divergent", "{:d}",
+     "v0.3 divergent decisions", "v0.3 & $338$ &"),
+    ("statefulness_dylan_v04.json", "divergence_rate", "{:.2%}",
+     "v0.4 divergence rate", "v0.4 & $415$ & $81$ &"),
+    ("statefulness_dylan_v05.json", "divergence_rate", "{:.2%}",
+     "v0.5 divergence rate", "v0.5 & $336$ & $137$ &"),
+    ("statefulness_dylan_v06.json", "divergence_rate", "{:.2%}",
+     "v0.6 divergence rate", "v0.6 & $292$ & $36$ &"),
+    ("statefulness_dylan_v07.json", "divergence_rate", "{:.2%}",
+     "v0.7 divergence rate", "v0.7 & $296$ & $84$ &"),
+    ("statefulness_dylan_v07.json", "decisions", "{:d}",
+     "v0.7 decisions compared", "v0.7 & $296$ &"),
     ("bridge_bug_price.json", "their_declare_acc_rev1", "{:.2%}",
      "their declaration accuracy, defective bridge",
      "their declaration accuracy rises from"),
