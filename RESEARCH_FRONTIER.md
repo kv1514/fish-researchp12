@@ -4279,43 +4279,123 @@ sequence).
 
 Exactly zero on both scripted baselines and nonzero on every version from v0.4,
 which is where their fitted belief arrives and where the two ladders stop
-agreeing. Two candidate causes, both introduced there and leaned on harder
-after: an iterative Sinkhorn/IPF fit that warm-starts from the previous position
-and need not land where a from-scratch fit lands, and a determinized search
-(`det=12`) drawing from an RNG a fresh process re-seeds at every decision.
+agreeing.
 
 **The direction closes the loop.** Across the four affected versions the
 stateless path declares where the persistent path asks twenty times, and asks
-where it declares twice. More declarations, taken on a belief rebuilt from
-scratch, is exactly the shape that produces a 20.71% declaration error rate here
-against 2.09% at home — and it produces it only for versions that have a belief
-to rebuild.
+where it declares twice. More declarations is exactly the shape that produces a
+20.71% declaration error rate here against 2.09% at home — and it produces it
+only for versions that have something to rebuild.
 
-### What is still open
+## The price, and the retraction
 
-**The price in sets.** The table above is a fact about decisions, and a
-different move is not automatically a worse one.
-`scripts4/bridge_statefulness_price.py` runs the paired contrast — same deals,
-same seats, same agent seeds, our champion unchanged, only their bridge
-differing — and reports what the statelessness was worth in sets. Positive means
-the published margin is inflated by the bridge.
+`scripts4/bridge_statefulness_price.py` ran the paired contrast: 200 deals,
+each played twice on identical cards, identical seats and identical agent
+seeds, our champion unchanged, the only difference being whether their engine
+keeps its state between decisions.
 
-**Which of the two causes it is.** Warm-started belief and re-seeded search are
-both consistent with the table. Separating them needs either their source read
-closely or an arm with `det=0`, and the answer changes what a fix would look
-like: a warm-start is not reproducible from a log at all, whereas a re-seeded
-search could be fixed by advancing the seed per decision.
+| | stateless | persistent |
+|---|---:|---:|
+| our margin | +2.4500 | **−0.6900** |
+| their wrong declarations/game | 0.8450 | **0.0800** |
+| their declarations/game | 4.0150 | 4.8050 |
+
+**The bridge was worth +3.1400 [+2.6656, +3.6144] sets/game to us** — more than
+the entire published margin. Zero fallbacks, zero unfinished games. The
+stateless arm reproduces the published figure on fresh deals (+2.4500 against
++2.3466), which is what makes the other column believable rather than a harness
+artifact.
+
+Measured independently inside *their* arbiter through their own bot-package
+protocol: **−0.6200** over 1,200 games. Two routes sharing no host, no rules
+implementation, no deal generator and no code path agree to within 0.07, where
+the published one is out by three and has the sign wrong.
+
+**+2.3466 is retracted as a measurement of relative engine strength.** It
+remains true as a record of what those 10,000 audited games returned *through
+that bridge*, and the paired contrasts that hold the bridge fixed on both sides
+are untouched — they were never cross-engine absolutes.
+
+## Which piece of their state, and whether it could be repaired
+
+Resolved by `scripts4/statefulness_mechanism.py`, and the answer is not the
+convenient one. Their factory gates both RNG consumers behind spec options, so
+the parity measurement re-runs at the corners. Divergences split into two bands
+that behave differently, so they are reported separately:
+
+| arm | overall | ask ordering | declaration gate |
+|---|---:|---:|---:|
+| the frozen release | 23.52% | 20.63% | 2.64% |
+| their search off (`s1=0`) | 16.61% | 13.53% | 2.71% |
+| their tie-breaking off (`rtie=0`) | 27.96% | 24.59% | 3.25% |
+| both off | 15.78% | 11.60% | 4.18% |
+| and their `lastMySet` feature off (`w12=0`) | **13.92%** | 9.74% | 4.18% |
+
+- **Their determinized search is the largest identified term**, and it lives
+  entirely in ask ordering. `V06Agent::resetV6` re-seeds `srng` from the agent
+  seed, so a fresh process per decision draws the same determinizations every
+  turn where their arbiter's stream advances.
+- **Their tie-breaking contributes nothing**, and their source says why: at
+  `rtie=1` the tie RNG is *constructed* per decision from a rolling hash of the
+  public stream and the event count, so it is replayable by construction. Only
+  `rtie=2` would not be.
+- **`lastMySet` is real and small.** Feature 12 of their scored vector asks
+  whether this is the half-suit they asked for last time. It is assigned inside
+  their `chooseAsk` and never by their `observe`, so through a stateless bridge
+  it is dead at every decision — despite weight 3.12582 in the frozen vector.
+
+Three more candidates are excluded by **reading their source** rather than by
+spending an arm on an inert code path:
+
+- Their belief consumes no randomness in the released configuration, which runs
+  `BeliefMode::Fast`. `bel.compute(k, rng, ...)` is reached only under
+  Exact/ExactDisj.
+- `Belief::sinkhornDisj` re-initialises its marginals from the constraint set on
+  entry, so it does **not** warm-start. *This file and the paper both previously
+  named a warm-started Sinkhorn/IPF fit as a leading candidate. That was wrong
+  and is withdrawn.*
+- Their dead-ask memory, which their reset does wipe, is gated behind `deadAsk`
+  (default false), `deadInSearch` (default 0) and v0.7's `dead7` (default
+  false), none set in the frozen spec.
+
+**The finding is the band that does not move.** Everything identified lives in
+ask ordering. The declaration gate — the band that costs sets, since a
+declaration taken a turn early is a wrong one — is untouched by every mechanism
+found, and 13.92% of decisions still differ with all of them off. The cheap fix
+this section was hoping for does not exist: **the bridge cannot be made honest
+by re-seeding, because the term that matters is not an RNG.** Running their
+engine as their arbiter runs it is the remedy, which is why the corrected
+figures were measured that way rather than by patching the instrument that
+produced the retracted one.
+
+## What is still open
+
+**What the declaration-gate band actually is.** 13.92% overall and 4.18% in the
+gate survive every mechanism named above. Neither an RNG nor a feature explains
+it. This is the honest residual and it is not a formality: it is the band that
+carries the price.
+
+**More games behind the price.** +3.14 rests on 200 paired deals. The effect is
+an order of magnitude past its interval, so this is bookkeeping rather than
+doubt, but it should have more games before being quoted as a headline in its
+own right.
 
 **Whether to re-measure the head-to-head.** `fish4/dylan_v07_persistent.py`
-exists and plays complete games with zero fallbacks, so the 10,000-game
-head-to-head could be re-run through it. That is a real cost and it should be
-decided on the price above, not before it.
+plays complete games with zero fallbacks, so the 10,000-game head-to-head could
+be re-run through it. Two independent routes already agree on the sign and
+roughly on the size, so this buys precision rather than a conclusion, and it is
+a real cost.
 
-### What does NOT follow
+## What does NOT follow
 
-That the published +2.3466 is wrong. It is what 10,000 audited games with zero
-substituted moves returned and it reproduces. What is now known is what it is a
-margin *against*: their engine **as our bridge runs it**, which is a real and
-independently authored opponent and is not the one their arbiter runs. The
-paired contrasts that share the bridge are unaffected either way, which is the
-distinction the paper's bridges appendix drew before any of this was measured.
+That their engine is stronger than this one *in general*. Neither column is a
+ranking: −0.6900 was measured in our arbiter under our dialect, −0.6200 in
+theirs under theirs, and a cross-engine absolute is a statement about the host
+as well as about the engines. That is the same caveat this project wrote into
+its bridges appendix before any of this was measured, and then failed to apply
+to its own headline — which is the actual lesson here, and it is a lesson about
+method rather than about either engine.
+
+That the study's internal results move. Every A-vs-B contrast in this file
+holds the bridge fixed on both sides, so the bridge cancels. What the retraction
+touches is the one number that had nothing to cancel against.

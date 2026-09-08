@@ -7388,11 +7388,67 @@ v0.7 & $296$ & $84$ & $28.38\%$ & $9$ & $0$ \\
 \end{center}
 
 \noindent Identical on both scripted baselines; divergent on every version from
-v0.4, which is the version their fitted belief arrives at. Two candidates, both
-introduced there and leaned on harder afterwards: an iterative Sinkhorn/IPF fit
-that warm-starts from the previous position and need not land where a
-from-scratch fit lands, and a determinized search ($\mathtt{det}{=}12$) drawing
-from an RNG that our fresh process re-seeds at every single decision.
+v0.4, which is the version their fitted belief arrives at.
+
+\paragraph{Which piece of their state, and whether it could be repaired.} That
+boundary names a release, not a mechanism, and the two are not the same
+question. The mechanism matters because some kinds of lost state are cheap to
+restore from outside their engine and some are not: an RNG our fresh process
+re-seeds could be handed a per-decision seed derived from the event count, and
+the streams would line up. Their factory gates the two RNG consumers behind
+spec options, so the parity measurement can be re-run at the corners
+(\path{scripts4/statefulness_mechanism.py}). Divergences are split into the
+band where both paths ask but ask differently and the band where one declares
+and the other asks, because the ablations move one and not the other:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+arm & overall & ask ordering & declaration gate \\
+\midrule
+the frozen release            & $23.52\%$ & $20.63\%$ & $2.64\%$ \\
+their search off              & $16.61\%$ & $13.53\%$ & $2.71\%$ \\
+their tie-breaking off        & $27.96\%$ & $24.59\%$ & $3.25\%$ \\
+both off                      & $15.78\%$ & $11.60\%$ & $4.18\%$ \\
+\quad and \texttt{w12}${=}0$  & $\mathbf{13.92\%}$ & $9.74\%$ & $4.18\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Their determinized search is the largest identified term and it lives
+\emph{entirely} in the ask-ordering band --- \texttt{V06Agent::resetV6}
+re-seeds \texttt{srng} from the agent seed, so a fresh process per decision
+draws the same determinizations every turn where their arbiter's stream
+advances. Their tie-breaking contributes nothing, and their own source says
+why: at $\mathtt{rtie}{=}1$ the tie RNG is \emph{constructed} per decision from
+a rolling hash of the public stream and the event count, so it is replayable by
+construction, and only $\mathtt{rtie}{=}2$ would not be. The third arm
+neutralises feature $12$ of their scored vector, which asks whether this is the
+half-suit they asked for last time: it is assigned inside their
+\texttt{chooseAsk} and never by their \texttt{observe}, so through a stateless
+bridge it is dead at every decision despite carrying weight $3.12582$ in the
+frozen vector. It is real and small.
+
+Three further candidates are excluded by reading their source rather than by
+spending an arm on an inert code path. Their belief consumes no randomness at
+all in the released configuration, which runs \texttt{BeliefMode::Fast}; and
+\texttt{Belief::sinkhornDisj} re-initialises its marginals from the constraint
+set on entry, so it does not warm-start. \emph{An earlier version of this
+section named a warm-started Sinkhorn/IPF fit as one of two candidates. That
+was wrong, and is withdrawn.} Their dead-ask memory, which their reset does
+wipe, is gated behind \texttt{deadAsk}, \texttt{deadInSearch} and v0.7's
+\texttt{dead7}, all off in the frozen spec.
+
+\textbf{The finding is the band that does not move.} Everything identified
+above lives in ask ordering. The declaration gate --- the band that actually
+costs sets, since a declaration taken a turn early is a wrong one --- is
+untouched by every mechanism found, and $13.92\%$ of decisions still differ
+with all of them switched off. So the convenient answer is not available: this
+bridge cannot be made honest by re-seeding, because the term that matters is
+not an RNG. Running their engine as their arbiter runs it is the remedy, and
+the reason the corrected figures in this section were measured that way rather
+than by patching the instrument that produced the retracted one.
 
 The \emph{direction} is what closes the loop. Across the four affected versions
 the stateless path declares where the persistent path asks twenty times, and

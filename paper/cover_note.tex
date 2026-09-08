@@ -140,18 +140,17 @@ $95.3\%$ are \emph{allocation} errors, where the team held all six of a
 half-suit and split them wrongly. Handing a seat the true deal one side at a
 time --- a ceiling obtained by cheating, never a strength figure --- prices
 teammates' cards at $+3.41$ against opponents' $+1.31$, and I had predicted the
-reverse. Exact best responses over information sets put the deployed policy's
-endgame exploitability at $+0.4405$ over $305$ one-half-suit-live positions.
+reverse.
 
 \section{How the claims are held to account}
 
-Forty-two pre-registrations, written before the runs, listing the prediction
-and the ship bar; Appendix~A tabulates every one on the same footing,
-\emph{including} the ones whose predictions failed, and a test checks that
-table against the directory in both directions. Nothing ships on a difference
-below $\pm0.15$ sets per game. Every number in the report is pinned by a script
-to the JSON artifact that produced it, and that script is verified by
-perturbing an artifact and confirming it fails. Cross-engine work is pinned to
+Forty-two pre-registrations, written before the runs, each naming its
+prediction and its ship bar; Appendix~A tabulates every one on the same
+footing, \emph{including} those whose predictions failed, and a test checks
+that table against the directory both ways. Nothing ships below $\pm0.15$ sets
+per game. Every number in the report is pinned by a script to the artifact
+that produced it, and the script is verified by perturbing an artifact and
+confirming it fails. Cross-engine work is pinned to
 an upstream commit and re-pinned only on evidence: $6{,}329$ decisions replayed
 through binaries built at both ends, zero mismatches.
 
@@ -160,13 +159,19 @@ no reason to be interesting.
 
 \section{What is open}
 
-Which piece of their per-decision state the bridge discards --- their
-determinized search's random stream, their tie-breaking stream, or genuine
-path-dependence in their belief --- is not yet separated. It matters: the first
-two are cheap to fix and would make a stateless bridge honest, and the third is
-not fixable from outside their engine at all. The $+3.14$ price rests on $200$
-paired deals; the effect is an order of magnitude past its interval, but I
-would want more games before quoting it on its own.
+Which piece of their state the bridge discards is only partly separated, and
+what I have went against the convenient reading. Their determinized search is
+the largest term I can name, and the one a fix could reach --- their reset
+re-seeds it. But sorting the divergences into disagreements about \emph{which}
+ask to make and disagreements about \emph{whether to declare at all} puts
+everything I can identify in the first, while the second --- the band that
+costs sets, since a declaration taken a turn early is a wrong one --- does not
+move at all. Two mechanisms I had believed in did not survive their source, and
+$13.92\%$ of decisions still differ with everything I found switched off. So
+the bridge cannot be repaired by re-seeding, and I do not yet know what the
+remainder is. The $+3.14$ price rests on $200$ paired deals: an order of
+magnitude past its interval, but I would want more games before quoting it
+alone.
 
 I would be glad of any reaction, and particularly of the sharpest version of
 ``that control only worked by luck.'' I think it did, and I do not yet know
