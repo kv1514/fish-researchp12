@@ -103,7 +103,7 @@ def _dead_in(hands, asks) -> bool:
     return not any(hands[a.target] >> a.card & 1 for a in asks)
 
 
-def _one(args) -> list[dict]:
+def _one(args) -> tuple[tuple, list[dict]]:
     deal_seed, kv_even = args
     from fish4.registry4 import KRAKEN_V1, make_agent
 
@@ -161,7 +161,7 @@ def _one(args) -> list[dict]:
                     "naive": {str(k): v for k, v in naive.items()},
                 })
         st.apply(mover, act)
-    return rows
+    return args, rows
 
 
 def _auc(pos, neg) -> float:
@@ -192,7 +192,7 @@ def _boot(diffs, rng, n=4000):
     return (means[int(0.025 * n)], means[int(0.975 * n)])
 
 
-def _levels(rows, label, rng, out) -> None:
+def _levels(rows, label, key, rng, out) -> None:
     """Is this side's ask objective already pricing p(dead)?
 
     A RANK would not answer that -- most available half-suits sit at
@@ -245,7 +245,10 @@ def _levels(rows, label, rng, out) -> None:
           f"{statistics.fmean(navail):.3f}")
     print(f"    AUC of p(dead) at these seats               "
           f"{_auc(pos, neg):.4f}")
-    out[label] = {"decisions": len(rows),
+    # Keyed without a dot in the name: the paper's figure-pinning manifest
+    # addresses nested values by splitting a dotted path, and "KRAKEN v1.1"
+    # would split in the middle of the version number.
+    out[key] = {"label": label, "decisions": len(rows),
                   "truth_dead_chosen": statistics.fmean(t_chosen),
                   "truth_dead_random": statistics.fmean(t_rand),
                   "truth_chosen_minus_random": statistics.fmean(td),
@@ -345,8 +348,9 @@ def report(all_rows, rng) -> dict:
     print("\n=== is either objective already pricing p(dead)? ===")
     print("  negative = the side avoids dead half-suits beyond chance;"
           "\n  zero = it chooses as if the signal were not there.")
-    _levels(rows, "KRAKEN v1.1", rng, out)
-    _levels([r for r in all_rows if not r["ours"]], "SESTINA v1.0", rng, out)
+    _levels(rows, "KRAKEN v1.1", "kraken_v11", rng, out)
+    _levels([r for r in all_rows if not r["ours"]], "SESTINA v1.0",
+            "sestina_v10", rng, out)
     return out
 
 
@@ -360,13 +364,21 @@ def main(argv=None) -> int:
     todo = [(SEED0 + i, ke) for i in range(a.deals) for ke in (True, False)]
     print(f"{len(todo):,} games, {N_WORLDS} belief samples at every ask of ours",
           flush=True)
-    rows, t0 = [], time.time()
+    # Collected keyed by game and re-assembled in the order of `todo`, not in
+    # the order the pool happens to finish. The random-alternative control
+    # draws once per row, so an artifact assembled in completion order is not
+    # reproducible from its own seeds -- the numbers would move a little on a
+    # re-run under different scheduling, which is indistinguishable from drift.
+    got, t0, n = {}, time.time(), 0
     with Pool(a.jobs) as pool:
-        for i, rs in enumerate(pool.imap_unordered(_one, todo, chunksize=1)):
-            rows.extend(rs)
+        for i, (key, rs) in enumerate(pool.imap_unordered(_one, todo,
+                                                          chunksize=1)):
+            got[key] = rs
+            n += len(rs)
             if (i + 1) % 20 == 0:
-                print(f"  {i+1}/{len(todo)} games, {len(rows):,} decisions, "
+                print(f"  {i+1}/{len(todo)} games, {n:,} decisions, "
                       f"{(time.time()-t0)/60:.1f} min", flush=True)
+    rows = [r for key in todo for r in got[key]]
     out = report(rows, random.Random(20260908))
     out["seconds"] = round(time.time() - t0, 1)
     out["exploratory"] = "decides whether the program continues; licenses no arm"

@@ -16,53 +16,55 @@
   "alt_strictly_lower": 6299,
   "alt_lower_by_05": 5867,
   "alt_lower_by_10": 5301,
-  "argmin_live": 6114,
-  "random_live": 5536,
+  "argmin_live": 6112,
+  "random_live": 5525,
   "argmin_minus_random_ci": [
-   0.08160760852891548,
-   0.09587360024543641
+   0.08298818837244976,
+   0.09710078232857801
   ]
  },
- "KRAKEN v1.1": {
+ "kraken_v11": {
+  "label": "KRAKEN v1.1",
   "decisions": 49136,
   "truth_dead_chosen": 0.132672582220775,
-  "truth_dead_random": 0.1440288179746011,
-  "truth_chosen_minus_random": -0.011356235753826115,
+  "truth_dead_random": 0.14278736567893194,
+  "truth_chosen_minus_random": -0.010114783458156952,
   "truth_chosen_minus_random_ci": [
-   -0.014958482578964507,
-   -0.007713285574731358
+   -0.013879843699120807,
+   -0.00630901986323673
   ],
   "auc_at_these_seats": 0.9518331609759928,
   "mean_menu_size": 4.265874308042982,
   "mean_p_dead_chosen": 0.08614737666883751,
-  "mean_p_dead_random": 0.07036035824039401,
+  "mean_p_dead_random": 0.06957665967925757,
   "mean_p_dead_argmin": 0.007048358128459785,
-  "chosen_minus_random": 0.015787018428443503,
+  "chosen_minus_random": 0.01657071698957994,
   "chosen_minus_random_ci": [
-   0.01416333619952784,
-   0.017389712990475415
+   0.01492318513920547,
+   0.018168800624796484
   ]
  },
- "SESTINA v1.0": {
+ "sestina_v10": {
+  "label": "SESTINA v1.0",
   "decisions": 49190,
   "truth_dead_chosen": 0.09447042081723928,
-  "truth_dead_random": 0.07399878023988615,
-  "truth_chosen_minus_random": 0.02047164057735312,
+  "truth_dead_random": 0.07464931896726977,
+  "truth_chosen_minus_random": 0.019821101849969505,
   "truth_chosen_minus_random_ci": [
-   0.017544216304126854,
-   0.023297418174425696
+   0.017076641593819882,
+   0.022626550111811344
   ],
   "auc_at_these_seats": 0.8819311822236481,
   "mean_menu_size": 4.11128278105306,
   "mean_p_dead_chosen": 0.08177252744460256,
-  "mean_p_dead_random": 0.053749650589550724,
+  "mean_p_dead_random": 0.054974810683065665,
   "mean_p_dead_argmin": 0.006282558700955479,
-  "chosen_minus_random": 0.02802287685505184,
+  "chosen_minus_random": 0.0267977167615369,
   "chosen_minus_random_ci": [
-   0.026659540811140477,
-   0.029442595039642205
+   0.025426757216914005,
+   0.028107053008741615
   ]
  },
- "seconds": 848.5,
+ "seconds": 1244.2,
  "exploratory": "decides whether the program continues; licenses no arm"
 }

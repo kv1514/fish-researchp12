@@ -948,3 +948,114 @@ that every precaution the head-to-head did take (10,000 games, duplicate deals,
 seat rotation, zero substituted moves, a bridge revision priced and disclosed)
 was powerless against it. None of them can see a defect that is common-mode
 across both arms, and an absolute is not paired against anything.
+
+## Post-P43: the ask deficit is a declaration latency, and the programme stops
+
+The corrected head-to-head leaves one channel: they hit 54.93% of their asks
+and we hit 52.98%. P43 put three registered candidates at that 1.95 points and
+moved none. What follows is the search for a fourth. It ends by withdrawing the
+candidate instead of registering it, and the sequence is worth recording
+because each instrument overturned the one before it.
+
+### Three instruments, two reversals
+
+**1. Oaxaca–Blinder on the ask hit rate** (`scripts4/ask_deficit_anatomy.py`,
+38,212 asks, 400 games). Five of six stratifiers put essentially the whole
+2.25-point gap in EXECUTION: we choose the same half-suits and are worse inside
+them. The sixth — conditioning on our own team's holding in the named half-suit
+— put two thirds of it in SELECTION, and it was the one that was right.
+
+The instrument is why that took two more runs to see. That stratifier's top
+bucket (team holds all six) has a hit rate of exactly zero on BOTH sides,
+because an ask there cannot land. A stratum with r_t = r_o = 0 contributes
+exactly zero to both terms of the identity however far apart the two shares
+are — ours 12.61%, theirs 9.52%. **The decomposition is structurally blind to
+the stratum the deficit lives in.** Not an arithmetic error: a property of
+using the opponent's rate as the reference price.
+
+**2. Miss anatomy** (`scripts4/ask_miss_anatomy.py`, 28,513 asks). Classify each
+miss by what was legally available instead. 30.64% of our misses are
+UNAVOIDABLE — nothing in that half-suit was legally askable from anyone —
+against 21.94% of theirs. Per ask, 14.5% against 10.1%: a 4.4-point gap in a
+channel whose whole size is 1.3 points in that block.
+
+**3. The kill-check** (`scripts4/ask_deadness_signal.py`, 1,200 games, 98,326
+decisions, 128 sampled worlds each). Before proposing a p(dead) term, ask
+whether the objective HAD the information.
+
+It does. p(dead) separates dead from live half-suits at AUC 0.9518, and a proxy
+costing no draws at all reaches 0.8883. On our 6,519 asks into a dead half-suit
+an alternative scored strictly lower 96.63% of the time.
+
+And that is not the finding, because the same measurement at SESTINA's seats
+says the engine beating us uses the signal LESS. In ground truth, per decision:
+
+                   chosen dead    menu      selection
+    KRAKEN v1.1       0.1327     0.1428    -0.0101 [-0.0139, -0.0063]
+    SESTINA v1.0      0.0945     0.0746    +0.0198 [+0.0171, +0.0226]
+    ours - theirs    +0.0382    +0.0682    -0.0299
+
+Our menu is 6.82 points worse; our selection from it is 2.99 points BETTER. A
+p(dead) term would push harder on the one channel where we are already ahead of
+the engine we are behind.
+
+On the BELIEF scale the sides look the other way round (+0.0166 ours, +0.0268
+theirs). That comparison is confounded: p(dead) is an estimate and the
+estimator is not equally sharp at the two sets of seats (AUC 0.9518 ours,
+0.8819 theirs), so a cross-side reading prices the estimator too. Within a side
+it is paired and sound. Adding the truth column is the whole reason the run was
+repeated, and it reversed the conclusion.
+
+### What a dead ask is
+
+Under the no-bluff rule an ask is legal only for a card of a half-suit the
+asker holds another of. So every legal ask in a half-suit misses exactly when
+no opponent holds any card of it — and the six cards of an unclaimed half-suit
+are all in someone's hand. **A half-suit is dead for us if and only if our own
+team holds all six.** A dead ask is an ask into a half-suit we have already won
+and not yet declared. The instrument asserts the equivalence at every decision
+rather than arguing it.
+
+Completion is absorbing: once a team holds all six, no opponent holds a card of
+it, so none can legally ask into it, so no card can leave. It persists until
+the owner declares. `scripts4/completion_latency.py`, 1,200 games, 10,724
+completions:
+
+                                     KRAKEN v1.1   SESTINA v1.0
+    half-suits completed per game          4.208          4.728
+    mean plies to declare it               16.80           7.84
+    median plies to declare it               3.0            1.0
+    never declared                         0.00%          0.00%
+    asks spent into it meanwhile           1.520          0.996
+    those, as a share of all asks         13.79%          9.81%
+    completions sat on 10+ plies          34.63%         20.92%
+    share of dead asks from those         87.38%         75.99%
+
+A tail, not a general slowness: a third of our completions account for seven
+eighths of our dead asks, and everything is declared eventually on both sides.
+
+**Size.** The excess is +1.689 dead asks a game. At this project's own measured
+price of one donated turn (+0.2713 [+0.0922, +0.4505]), with both
+uncertainties propagated, that is +0.458 [+0.157, +0.793] sets a game against a
+measured deficit of -0.5250 [-0.6886, -0.3614]. The deficit sits inside the
+interval. This is difference accounting, not a counterfactual — removing a dead
+ask changes every later ply, and their 4.7 a game are not zero.
+
+### The closure
+
+The ask deficit is real, worth about half a set a game, and is not an ask
+problem. It is the visible cost of a declaration latency, which puts it
+downstream of the residue this project has reported since v1.0: 95.3% of our
+wrong declarations are allocation errors, where the team held all six and named
+the wrong split. The team has the answer and no member of it does, so it waits;
+while it waits it asks into its own half-suits.
+
+**No registration is produced.** The candidate — a p(dead) penalty in the ask
+objective — is refuted by its own kill-check, and the nearest knob already run
+agrees: `avoid_doomed_asks` fires only where the posterior is CERTAIN, 1.5% of
+decisions against the 13.79% measured here, and scored -0.0933 / -0.0900 in
+P43. What the analysis licenses instead is a registration in the declaration
+channel aimed at the LATENCY rather than the accuracy — the accuracy is already
+97.59% — and concentrated on the third of completions that sit ten plies or
+more. That registration is not written, and none of these three instruments
+licenses an arm on its own.

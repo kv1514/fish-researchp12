@@ -59,7 +59,7 @@ AGENT0 = 99_000
 MAX_ACTIONS = 600
 
 
-def _one(args) -> dict:
+def _one(args) -> tuple[tuple, dict]:
     deal_seed, kv_even = args
     from fish4.registry4 import KRAKEN_V1, make_agent
 
@@ -143,7 +143,7 @@ def _one(args) -> dict:
             out["completions"].append(
                 {"hs": hs, "ours": (owner[hs] == (0 if kv_even else 1)),
                  "latency": None, "spent": spent[hs], "declared": False})
-    return out
+    return args, out
 
 
 def report(games) -> dict:
@@ -190,7 +190,9 @@ def report(games) -> dict:
         a = fmt.format(rows[0][key]) if rows[0][key] is not None else "--"
         b = fmt.format(rows[1][key]) if rows[1][key] is not None else "--"
         print(f"  {label:34s}{a:>14s}{b:>15s}")
-    out["KRAKEN v1.1"], out["SESTINA v1.0"] = rows
+    # Keyed without a dot: the figure-pinning manifest splits a dotted path.
+    rows[0]["label"], rows[1]["label"] = "KRAKEN v1.1", "SESTINA v1.0"
+    out["kraken_v11"], out["sestina_v10"] = rows
 
     # Is this channel the right SIZE to matter? The excess is denominated in
     # dead asks; this project has a measured price for exactly one thing of
@@ -242,13 +244,18 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     todo = [(SEED0 + i, ke) for i in range(a.deals) for ke in (True, False)]
     print(f"{len(todo):,} games", flush=True)
-    games, t0 = [], time.time()
+    # Re-assembled in the order of `todo` rather than of completion: the size
+    # check bootstraps per-game differences, so an artifact whose game order
+    # depends on pool scheduling is not reproducible from its own seeds.
+    got, t0 = {}, time.time()
     with Pool(a.jobs) as pool:
-        for i, g in enumerate(pool.imap_unordered(_one, todo, chunksize=1)):
-            games.append(g)
+        for i, (key, g) in enumerate(pool.imap_unordered(_one, todo,
+                                                         chunksize=1)):
+            got[key] = g
             if (i + 1) % 100 == 0:
                 print(f"  {i+1}/{len(todo)} games, "
                       f"{(time.time()-t0)/60:.1f} min", flush=True)
+    games = [got[k] for k in todo]
     out = report(games)
     out["seconds"] = round(time.time() - t0, 1)
     out["exploratory"] = "prices a mechanism; licenses no arm"

@@ -155,6 +155,22 @@ pre-registrations produced exactly one change to the deployed engine
 not ship, because the bar was fixed before the runs and was not amended
 afterwards.
 
+What survives the correction is a single channel --- we ask $1.95$ points
+worse --- and locating it \textbf{withdrew} a candidate rather than producing
+one. Under the no-bluff rule a half-suit admits no landable ask exactly when
+our own team already holds all six of it, so an ask that cannot land is an ask
+into a half-suit we have already won and not yet declared. We make
+$\mathbf{13.79\%}$ of our asks there against their $9.81\%$, and the difference
+is a declaration \emph{latency} --- $16.80$ plies from completion to
+declaration against their $7.84$, concentrated in a third of completions --- and
+not a failure of ask selection: run at their seats, the same measurement says
+our ask objective avoids those half-suits \emph{better} than theirs does
+($-0.0101$ against $+0.0198$ relative to a random draw from the same menu).
+Priced at this project's own measured value of a turn, the channel is worth
+$+0.458$ $[+0.157, +0.793]$ sets a game against a deficit of $-0.5250$. The
+$p(\text{dead})$ term this analysis was written to justify is refuted by its
+own kill-check, and no pre-registration is issued.
+
 \vspace{2pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
 \end{abstract}
@@ -7621,6 +7637,240 @@ reason to think it applied to this paper's own headline. And the negative
 results of \S\ref{sec:negative} and \S\ref{sec:searchres}, which are internal
 contrasts against our own champion, never went through this bridge at all.
 
+% =====================================================================
+\subsection{Where the ask deficit lives, and why the ask objective cannot
+reach it}
+\label{sec:askdeficit}
+
+The corrected table leaves exactly one channel in which the two engines
+differ, and it is the channel we lose: they hit $54.93\%$ of their asks and we
+hit $52.98\%$. After the v1.2 programme (P43, Appendix~\ref{app:prereg}) put
+three registered candidates at that $1.95$ points and moved none of them, the
+obvious next step was to find a fourth. What follows is the attempt, and it
+ends by withdrawing the candidate rather than registering it.
+
+\textbf{None of the three instruments here is pre-registered, and none licenses
+an arm.} They are reported because the second contradicts the first, the third
+contradicts the second, the reason it does is structural rather than
+statistical, and the conclusion is that a change this project was about to
+register would have pushed on the one part of the channel where it is already
+ahead of the engine that beats it.
+
+\subsubsection{A decomposition that says execution, and is blind where it
+matters}
+
+The gap has two possible shapes. We might choose the same asks and land them
+less often (\emph{execution}), or choose differently (\emph{selection}). The
+Oaxaca--Blinder identity separates them exactly, given a stratifier $s$:
+\[
+r_t - r_o \;=\; \underbrace{\textstyle\sum_s f_o(s)\,[r_t(s) - r_o(s)]}_{\text{execution}}
+\;+\; \underbrace{\textstyle\sum_s [f_t(s) - f_o(s)]\,r_t(s)}_{\text{selection}} .
+\]
+Over $38{,}212$ asks in $400$ games (\path{scripts4/ask_deficit_anatomy.py}),
+our hit rate is $53.06\%$ against their $55.31\%$, a gap of $2.25$ points, and
+six stratifiers agree:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+stratifier & execution & selection \\
+\midrule
+phase (half-suits resolved) & $+0.0228$ & $-0.0002$ \\
+options available & $+0.0208$ & $+0.0017$ \\
+half-suits to choose from & $+0.0238$ & $-0.0012$ \\
+our depth in the named half-suit & $+0.0273$ & $-0.0047$ \\
+\textbf{our team's cards in the named half-suit} & $+0.0077$ & $\mathbf{+0.0149}$ \\
+target's hand size & $+0.0221$ & $+0.0004$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Five of the six put essentially the whole gap in execution, with no
+unmatched mass in any of them. The reading at the time was that we choose the
+same half-suits and are worse inside them.
+
+The sixth row is the one that was right, and the instrument is the reason it
+took two more runs to see it. Conditioning on \emph{our own team's} holding in
+the named half-suit moves two thirds of the gap into selection --- and that
+stratifier's top bucket, where the team holds all six, has a hit rate of
+\textbf{exactly zero on both sides}, because an ask into such a half-suit
+cannot land. A stratum where $r_t(s) = r_o(s) = 0$ contributes exactly zero to
+\emph{both} terms of the identity, however far apart the two sides' shares of
+it are. Ours is $12.61\%$ against their $9.52\%$, and the decomposition prices
+that difference at nothing directly: it can only see it in the strata the
+displaced mass came from. \textbf{The decomposition is structurally blind to
+the one stratum the deficit lives in}, which is not a bug in the arithmetic but
+a property of using the opponent's rate as the reference price.
+
+\subsubsection{A miss anatomy that says selection}
+
+The arbiter sees every hand, so each miss can be classified by what was legally
+available instead: another opponent held the named card (wrong target); the
+named opponent held another card of that half-suit we could legally have asked
+for (wrong card); both; some other legal pair in that half-suit would have hit
+(wrong pair); or nothing in that half-suit was legally askable from anyone
+(\emph{unavoidable}). Over $28{,}513$ asks in $300$ games
+(\path{scripts4/ask_miss_anatomy.py}), $30.64\%$ of our misses are unavoidable
+against $21.94\%$ of theirs. Per ask rather than per miss that is $14.5\%$
+against $10.1\%$: a $4.4$-point gap in a channel whose whole size is $1.3$
+points in that block.
+
+So the deficit is not in which card or which opponent we name once the
+half-suit is fixed. It is in asking into half-suits that are already exhausted
+from our side. That is a hypothesis about the ask objective, and it is worth
+nothing until one prior question is settled.
+
+\subsubsection{The kill-check: did the objective have the information?}
+
+A half-suit is dead for us when every legal ask in it must miss. That is a
+joint event over card locations, so a per-card marginal cannot express it; it
+is evaluated by drawing $128$ worlds from the same \texttt{BeliefState} the
+agent samples from and taking the share in which every legal ask in that
+half-suit misses. The true deal is read only to score the estimate. Over
+$1{,}200$ games and $98{,}326$ ask decisions
+(\path{scripts4/ask_deadness_signal.py}):
+
+\textbf{The belief knows.} $p(\text{dead})$ separates dead half-suits from live
+ones at $\mathrm{AUC} = 0.9518$, and a proxy that costs no draws at all --- the
+share of the half-suit already accounted for on our own side --- reaches
+$0.8883$. On our $6{,}519$ asks into a truly dead half-suit, some alternative
+scored strictly lower $96.63\%$ of the time, and switching to the belief's
+favourite lands in a live half-suit $93.76\%$ of the time against $84.75\%$ for
+a uniformly random \emph{other} half-suit on the same menus
+($+9.00\%$ $[+8.33, +9.71]$).
+
+That is the answer the programme was built to find, and it is not the finding,
+because the same measurement run at SESTINA's seats says the engine that beats
+us does not use the signal either --- and uses it \emph{less}. Their
+$p(\text{dead})$ is not their belief, which we cannot query; it is what an agent
+with their information could have known, computed by the machinery we judge
+ourselves by. In ground truth, per ask decision:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+ & chosen was dead & \emph{menu} & \emph{selection} \\
+\midrule
+KRAKEN v1.1 & $0.1327$ & $0.1428$ & $\mathbf{-0.0101}$ $[-0.0139, -0.0063]$ \\
+SESTINA v1.0 & $0.0945$ & $0.0746$ & $\mathbf{+0.0198}$ $[+0.0171, +0.0226]$ \\
+\midrule
+ours $-$ theirs & $+0.0382$ & $+0.0682$ & $-0.0299$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The \emph{menu} column is the dead rate of a half-suit drawn at
+random from the ones that seat could legally ask into; \emph{selection} is what
+the objective does relative to that draw, paired on the same decisions. Our
+dead-ask rate is $3.82$ points worse than theirs. Our menu is $6.82$ points
+worse and our selection from it is $2.99$ points \textbf{better}: we steer away
+from dead half-suits, they steer into them, and they win. \textbf{A
+$p(\text{dead})$ term in the ask objective would push harder on the one channel
+where we are already ahead of the engine we are behind.}
+
+On the belief scale the two sides look the other way round ($+0.0166$ ours
+against $+0.0268$ theirs, both positive), and that comparison is the confounded
+one: $p(\text{dead})$ is an estimate and the estimator is not equally sharp at
+the two sets of seats ($\mathrm{AUC}$ $0.9518$ at ours, $0.8819$ at theirs), so
+a cross-side reading on that scale prices the estimator as well as the
+objective. Within a side it is paired and sound; across sides only ground truth
+settles it, and adding that column is the whole reason the run was repeated.
+
+\subsubsection{What a dead ask actually is}
+
+The menu term is not about asking at all, and the reason is structural. Under
+the no-bluff rule an ask is legal only for a card of a half-suit the asker
+holds another of, so every legal ask in a half-suit misses exactly when no
+opponent holds any card of it --- and the six cards of an unclaimed half-suit
+are all in somebody's hand. Therefore:
+
+\begin{center}
+\emph{A half-suit is dead for us if and only if our own team holds all six of
+it.}
+\end{center}
+
+\noindent A dead ask is not a badly chosen ask into a contested half-suit. It
+is an ask into a half-suit our team has already won and has not yet declared.
+The equivalence is asserted at every decision by the instrument below rather
+than argued, so a rules variant that breaks it (bluff asks, a claim rule that
+leaves cards live) fails loudly instead of quietly changing what the numbers
+mean.
+
+Completion is also \emph{absorbing}: once a team holds all six, no opponent
+holds a card of that half-suit, so no opponent can legally ask into it, so no
+card can leave it. The state persists until the owning team declares. That
+makes the interval from completion to declaration a latency rather than a
+window that can close on its own, and makes the asks spent into it meanwhile a
+clean price for the delay. Over $1{,}200$ games and $10{,}724$ completions
+(\path{scripts4/completion_latency.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+ & KRAKEN v1.1 & SESTINA v1.0 \\
+\midrule
+half-suits completed per game & $4.208$ & $4.728$ \\
+mean plies to declare it & $\mathbf{16.80}$ & $\mathbf{7.84}$ \\
+median plies to declare it & $3.0$ & $1.0$ \\
+never declared & $0.00\%$ & $0.00\%$ \\
+asks spent into it meanwhile & $1.520$ & $0.996$ \\
+those, as a share of all asks & $13.79\%$ & $9.81\%$ \\
+completions sat on $10+$ plies & $34.63\%$ & $20.92\%$ \\
+share of dead asks from those & $87.38\%$ & $75.99\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent We sit on a half-suit we already own for more than twice as long, and
+it is a tail rather than a general slowness: a third of our completions account
+for seven eighths of our dead asks. Every completion is declared eventually on
+both sides, so this is latency and not abandonment.
+
+\paragraph{Is the channel the right size?} The excess is $+1.689$ dead asks a
+game. This project has a measured price for exactly one thing of that kind ---
+\S\ref{sec:tempo}'s value of a single donated turn, $+0.2713$ $[+0.0922,
++0.4505]$ sets over $1{,}500$ paired deals --- and propagating both
+uncertainties (a paired bootstrap on the per-game difference, the standard
+error on the price) puts the excess at $\mathbf{+0.458}$ $[+0.157, +0.793]$
+sets a game against a measured deficit of $-0.5250$ $[-0.6886, -0.3614]$. The
+deficit sits inside the interval.
+
+That is an accounting of a difference and not a counterfactual. Removing a dead
+ask changes every ply after it; their $4.7$ a game are not zero and nothing
+here says ours could be; and the turn price was measured with our own engine on
+both sides at a decision chosen without reference to what the agent wanted. It
+answers ``is this channel big enough to be the story'', which is a smaller
+question than ``is it the cause'' --- and the smaller question is the one these
+numbers can carry.
+
+\subsubsection{What this closes}
+
+The ask deficit is real, it is worth about half a set a game, and it is not an
+ask problem. It is the visible cost of a declaration latency: our team completes
+half-suits and holds them, and every ask made into one while it waits is
+certain to fail. That puts it downstream of the residue this paper has reported
+since v1.0 --- $95.3\%$ of our own wrong declarations are allocation errors,
+where the team held all six and named the wrong split (\S\ref{sec:res-pathledger}).
+The team has the answer and no member of it does, so it waits; and while it
+waits it asks into its own half-suits.
+
+\textbf{So the programme stops here rather than producing a registration.} The
+candidate it was heading for --- a $p(\text{dead})$ penalty in the ask objective
+--- is refuted by its own kill-check, and the two knobs in that family this
+study has already run are consistent with that: \texttt{avoid\_doomed\_asks}
+fires only where the posterior is \emph{certain} the ask cannot land, which is
+$1.5\%$ of decisions against the $13.79\%$ measured here, and it scored
+$-0.0933$ against SESTINA and $-0.0900$ in self-play (P43). What the analysis
+licenses instead is a registration in the declaration channel, on the latency
+rather than on the accuracy: the accuracy is already $97.59\%$, and the tail
+above says the cost is concentrated in a third of completions that sit for ten
+plies or more. We have not written that registration, and this section is not
+it.
+
+
 \section{Discussion}
 
 \subsection{What this says about playing Fish}
@@ -8639,6 +8889,22 @@ produced a change to the deployed engine.
 \subsection{What we would do next}
 
 \begin{itemize}
+\item \textbf{The declaration latency, which is where the cross-engine deficit
+turned out to live.} \S\ref{sec:askdeficit} is the one item here that arrived
+with its target already measured rather than argued: we sit on a half-suit our
+own team has completed for $16.80$ plies against SESTINA's $7.84$, every ask
+made into one meanwhile is certain to fail, and the excess is the right size to
+be the whole loss. It is also the one item this study explicitly declines to
+turn into an arm on the evidence it has, because the analysis that found it is
+exploratory and the family of ask-side fixes it first suggested was refuted by
+its own kill-check. What a registration here would have to fix in advance is
+what the latency is \emph{for}: a completed half-suit is not declared because
+the team cannot place the split, so shortening the wait and declaring correctly
+are the same problem seen from two ends, and an arm that only shortens the wait
+buys wrong declarations at two sets each. The tail shape is the reason to think
+it is tractable anyway --- a third of completions carry seven eighths of the
+cost, so the question is not ``declare sooner'' but ``what is different about
+that third''.
 \item \textbf{A proper likelihood, not a proxy --- two of three steps taken.}
 This item previously read: the choice model uses depth on the initial deal, and
 the right object is the acting policy's own probability of the observed action

@@ -1364,6 +1364,72 @@ WATCH = [
      "gate deferral, margin", "so the deferral is"),
     ("stuck_gate_confirm.json", "ledger.B_defer.gate.err", "{:.3f}",
      "gate error rate once deferred", "falls from $0.281$ to"),
+    # The post-P43 ask-deficit analysis. Three exploratory instruments whose
+    # whole point is that they DISAGREE with each other, so each one's figures
+    # are pinned separately: quoting the first without the third would be the
+    # superseded reading, and that is exactly the failure mode this manifest
+    # exists for.
+    ("ask_deficit_anatomy.json", "our_hit", "{:.2%}",
+     "our ask hit rate, anatomy block", "our hit rate is"),
+    ("ask_deficit_anatomy.json", "their_hit", "{:.2%}",
+     "their ask hit rate, anatomy block", "our hit rate is"),
+    ("ask_deficit_anatomy.json", "asks", "{:,d}",
+     "asks in the anatomy block", "asks in $400$ games"),
+    ("ask_deficit_anatomy.json",
+     "strata.our team's cards in the named half-suit.selection", "{:+.4f}",
+     "the one stratifier that says selection",
+     "our team's cards in the named half-suit} &"),
+    ("ask_miss_anatomy.json", "by_side.ours.why.unavoidable in this "
+     "half-suit.share", "{:.2%}",
+     "our unavoidable share of misses", "of our misses are unavoidable"),
+    ("ask_miss_anatomy.json", "by_side.theirs.why.unavoidable in this "
+     "half-suit.share", "{:.2%}",
+     "their unavoidable share of misses", "of our misses are unavoidable"),
+    # The kill-check. The TRUTH rows are the load-bearing ones -- the
+    # belief-scale rows say the opposite and the paper says why -- so both are
+    # watched, and a swap between them cannot pass unnoticed.
+    ("ask_deadness_signal.json", "pairs.auc", "{:.4f}",
+     "AUC of p(dead) at our seats", "separates dead half-suits from live"),
+    ("ask_deadness_signal.json", "naive_auc", "{:.4f}",
+     "AUC of the no-sampling proxy",
+     "already accounted for on our own side"),
+    ("ask_deadness_signal.json", "kraken_v11.truth_dead_chosen", "{:.4f}",
+     "our dead rate, chosen half-suit", "KRAKEN v1.1 & $0.1327$"),
+    ("ask_deadness_signal.json", "kraken_v11.truth_dead_random", "{:.4f}",
+     "our dead rate, menu", "KRAKEN v1.1 & $0.1327$"),
+    ("ask_deadness_signal.json", "kraken_v11.truth_chosen_minus_random",
+     "{:+.4f}", "our selection on deadness", "KRAKEN v1.1 & $0.1327$"),
+    ("ask_deadness_signal.json", "sestina_v10.truth_dead_chosen", "{:.4f}",
+     "their dead rate, chosen half-suit", "SESTINA v1.0 & $0.0945$"),
+    ("ask_deadness_signal.json", "sestina_v10.truth_dead_random", "{:.4f}",
+     "their dead rate, menu", "SESTINA v1.0 & $0.0945$"),
+    ("ask_deadness_signal.json", "sestina_v10.truth_chosen_minus_random",
+     "{:+.4f}", "their selection on deadness", "SESTINA v1.0 & $0.0945$"),
+    ("ask_deadness_signal.json", "sestina_v10.auc_at_these_seats", "{:.4f}",
+     "AUC of p(dead) at their seats", "at ours,"),
+    ("ask_deadness_signal.json", "dead_asks.n", "{:,d}",
+     "our asks into a dead half-suit", "asks into a truly dead half-suit"),
+    # The latency, and the size check that makes it worth reporting.
+    ("completion_latency.json", "kraken_v11.mean_latency_plies", "{:.2f}",
+     "our plies from completion to declaration", "mean plies to declare it &"),
+    ("completion_latency.json", "sestina_v10.mean_latency_plies", "{:.2f}",
+     "their plies from completion to declaration",
+     "mean plies to declare it &"),
+    ("completion_latency.json", "kraken_v11.dead_ask_share_of_asks", "{:.2%}",
+     "our dead asks as a share of asks", "those, as a share of all asks &"),
+    ("completion_latency.json", "sestina_v10.dead_ask_share_of_asks",
+     "{:.2%}", "their dead asks as a share of asks",
+     "those, as a share of all asks &"),
+    ("completion_latency.json", "kraken_v11.stuck_share", "{:.2%}",
+     "our completions sat on 10+ plies", "completions sat on $10+$ plies &"),
+    ("completion_latency.json", "excess_dead_asks_per_game", "{:+.3f}",
+     "our excess dead asks per game", "The excess is"),
+    ("completion_latency.json", "excess_priced_sets_per_game.point", "{:+.3f}",
+     "that excess, priced in sets", "puts the excess at"),
+    ("completion_latency.json", "excess_priced_sets_per_game.ci95.0",
+     "{:+.3f}", "priced excess, CI low", "puts the excess at"),
+    ("completion_latency.json", "excess_priced_sets_per_game.ci95.1",
+     "{:+.3f}", "priced excess, CI high", "puts the excess at"),
 ]
 
 
