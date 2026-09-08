@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-two documents in \path{prereg/}
+no registered threshold anywhere. The forty-three documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -27,7 +27,7 @@ non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the four written after
 this appendix was first compiled (P39--P42) appended at the end, in filename
 order among themselves, so that the identifiers already cited in the text keep
-their referents. Twelve of the forty-two have \emph{no outcome recorded in the
+their referents. Twelve of the forty-three have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -670,10 +670,30 @@ outside). \path{results/matched_dose_scored.json},
 \path{results/matched_dose_calibration.json} &
 \S\ref{sec:res-signal} \\
 
+P43 & \path{kraken_v12_vs_sestina.md} \newline
+\emph{Can anything beat SESTINA v1.0 through the repaired bridge, and does it
+still hold in self-play?} &
+Ships only on $+0.15$ sets/game with the interval clear of zero in
+\emph{both} populations: against SESTINA through \texttt{BRIDGE\_REV\ 3},
+and against the v1.1 champion in self-play. Three candidates fixed in advance
+(opponent-model $\gamma$, \texttt{avoid\_doomed\_asks},
+\texttt{depth\_mode}); screen $300$ deals $\times\,2$ parities at seed base
+\textbf{9,300,000}, confirm $600 \times 2$ at \textbf{9,400,000}, never
+pooled. A candidate clearing against SESTINA and failing self-play is reported
+as opponent-specific and not shipped. &
+Yes, and stated as the expected outcome: that none of the three clears the
+$0.6$ gap and v1.2 does not beat SESTINA. Multiplicity across three candidates
+is named in the document rather than in a discussion section. &
+In flight. Baseline at rev 3 is
+\path{results/mega_match.json}; the prior exploration of this space does not
+transfer, because every earlier measurement against v0.7 ran through the
+bridge defect of \S\ref{sec:otherarbiter}. &
+--- \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-two resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-three resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
@@ -700,7 +720,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-two --- P20 --- shipped, and it is the
+\noindent Exactly one of the forty-three --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
