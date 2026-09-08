@@ -202,11 +202,33 @@ def _levels(rows, label, rng, out) -> None:
     one drawn at random from the same menu.
     """
     chosen_p = [r["p_dead"][str(r["chosen"])] for r in rows]
-    rand_p = [r["p_dead"][rng.choice(list(r["p_dead"]))] for r in rows]
+    picks = [rng.choice(list(r["p_dead"])) for r in rows]
+    rand_p = [r["p_dead"][k] for r, k in zip(rows, picks)]
     min_p = [min(r["p_dead"].values()) for r in rows]
     d = [a - b for a, b in zip(chosen_p, rand_p)]
     lo, hi = _boot(d, rng)
+    # The same split in GROUND TRUTH rather than in the belief's estimate. It
+    # is the one that settles the question, because p(dead) is an estimate and
+    # the two sides' estimates need not be equally calibrated: a side can look
+    # even on the belief scale and be uneven on the deal. Same decomposition,
+    # same decisions -- what the seat actually walked into, against what the
+    # menu it was choosing from would have given on average.
+    t_chosen = [r["dead"][str(r["chosen"])] for r in rows]
+    t_rand = [r["dead"][k] for r, k in zip(rows, picks)]
+    td = [a - b for a, b in zip(t_chosen, t_rand)]
+    tlo, thi = _boot(td, rng)
+    # And the belief's discrimination AT THIS SIDE'S SEATS, so "the belief
+    # knows" is not asserted for one side on the other's evidence.
+    pos = [v for r in rows for k, v in r["p_dead"].items() if r["dead"][k]]
+    neg = [v for r in rows for k, v in r["p_dead"].items() if not r["dead"][k]]
     print(f"\n  {label}: {len(rows):,} ask decisions")
+    print(f"    TRUTH: the half-suit chosen was dead        "
+          f"{statistics.fmean(t_chosen):.4f}")
+    print(f"    TRUTH: one drawn at random was dead         "
+          f"{statistics.fmean(t_rand):.4f}   <- the MENU")
+    print(f"    TRUTH: chosen minus random                  "
+          f"{statistics.fmean(td):+.4f}  [{tlo:+.4f}, {thi:+.4f}]"
+          "   <- the SELECTION")
     print(f"    mean p(dead) of the half-suit chosen        "
           f"{statistics.fmean(chosen_p):.4f}")
     print(f"    mean p(dead) of one drawn at random         "
@@ -221,7 +243,14 @@ def _levels(rows, label, rng, out) -> None:
     navail = [len(r["p_dead"]) for r in rows]
     print(f"    half-suits on the menu                      "
           f"{statistics.fmean(navail):.3f}")
+    print(f"    AUC of p(dead) at these seats               "
+          f"{_auc(pos, neg):.4f}")
     out[label] = {"decisions": len(rows),
+                  "truth_dead_chosen": statistics.fmean(t_chosen),
+                  "truth_dead_random": statistics.fmean(t_rand),
+                  "truth_chosen_minus_random": statistics.fmean(td),
+                  "truth_chosen_minus_random_ci": [tlo, thi],
+                  "auc_at_these_seats": _auc(pos, neg),
                   "mean_menu_size": statistics.fmean([len(r["p_dead"]) for r in rows]),
                   "mean_p_dead_chosen": statistics.fmean(chosen_p),
                   "mean_p_dead_random": statistics.fmean(rand_p),
