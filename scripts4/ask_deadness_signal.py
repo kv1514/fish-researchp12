@@ -339,6 +339,12 @@ def report(all_rows, rng) -> dict:
           f"{(argmin_live-rand_live)/n:+.2%}  [{lo:+.2%}, {hi:+.2%}]")
     out["dead_asks"] = {
         "n": len(dead_asks),
+        # Stored, not merely printed. A first draft of the paper quoted this
+        # number for a claim about EVERY dead half-suit, where the right
+        # quantity is pairs.mean_p_dead_when_dead -- and it went unnoticed
+        # because only one of the two was in the artifact.
+        "mean_p_dead_chosen": statistics.fmean(
+            [r["p_dead"][str(r["chosen"])] for r in dead_asks]),
         "mean_gap": statistics.fmean(gaps) if gaps else None,
         "alt_strictly_lower": strictly, "alt_lower_by_05": better05,
         "alt_lower_by_10": better10,

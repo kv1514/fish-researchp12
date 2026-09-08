@@ -12,6 +12,7 @@
  },
  "dead_asks": {
   "n": 6519,
+  "mean_p_dead_chosen": 0.3376500421843841,
   "mean_gap": 0.3038905506979598,
   "alt_strictly_lower": 6299,
   "alt_lower_by_05": 5867,
@@ -65,6 +66,6 @@
    0.028107053008741615
   ]
  },
- "seconds": 1244.2,
+ "seconds": 800.8,
  "exploratory": "decides whether the program continues; licenses no arm"
 }

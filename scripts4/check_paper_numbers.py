@@ -1409,6 +1409,13 @@ WATCH = [
      "AUC of p(dead) at their seats", "at ours,"),
     ("ask_deadness_signal.json", "dead_asks.n", "{:,d}",
      "our asks into a dead half-suit", "asks into a truly dead half-suit"),
+    # Two different quantities that a first draft quoted as one: the belief's
+    # estimate over EVERY dead half-suit on the menu, and over the ones we go
+    # on to ask into. Both pinned so the pair cannot silently collapse again.
+    ("ask_deadness_signal.json", "pairs.mean_p_dead_when_dead", "{:.4f}",
+     "p(dead) over all dead half-suits", "averaged over every dead half-suit"),
+    ("ask_deadness_signal.json", "dead_asks.mean_p_dead_chosen", "{:.4f}",
+     "p(dead) on the ones we ask into", "averaged over every dead half-suit"),
     # The latency, and the size check that makes it worth reporting.
     ("completion_latency.json", "kraken_v11.mean_latency_plies", "{:.2f}",
      "our plies from completion to declaration", "mean plies to declare it &"),

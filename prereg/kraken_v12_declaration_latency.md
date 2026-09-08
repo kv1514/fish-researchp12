@@ -165,7 +165,8 @@ independently — was not built.
 **Why it fires so rarely is the result, not the disappointment.** D2 gates on
 `p_team >= 0.99`: we know the set is ours and cannot place the split.
 `results/ask_deadness_signal.json` measures the belief's own probability that a
-genuinely dead half-suit is entirely ours at **0.3377** on average. We do not
+genuinely dead half-suit is entirely ours at **0.3120** on average (**0.3377**
+on the ones we go on to ask into). We do not
 sit on completed half-suits because we know we own them and cannot split them.
 We sit on them **because we do not know we own them.** That is not what the
 95.3% allocation-error statistic invites a reader to assume — that statistic is

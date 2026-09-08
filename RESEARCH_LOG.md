@@ -1084,7 +1084,8 @@ visible, is the forking-paths failure the appendix argues against.
 
 **Why it fires so rarely matters more than the stop.** D2 gates on
 `p_team >= 0.99` — knowing the set is ours and being unable to place the split.
-The belief puts 0.3377 on a genuinely dead half-suit being entirely ours. **We
+The belief puts 0.3120 on a genuinely dead half-suit being entirely ours,
+0.3377 on the ones we go on to ask into. **We
 sit on completed half-suits because we do not know we own them.** The 95.3%
 allocation-error figure counts declarations we made and got wrong, not the ones
 we never made, and reading it as the cause of the latency is a mistake this arm
@@ -1118,6 +1119,6 @@ further anatomy would have said so. Only a duel with a bar fixed in advance did.
 
 Nothing ships. `V06_DEPLOYED` is unchanged, there is no v1.2, and KRAKEN v1.1
 still loses to SESTINA v1.0 by -0.5250 through the repaired bridge. What is
-left standing is the ownership inference itself — the 0.3377 — which no
+left standing is the ownership inference itself — the 0.3120 — which no
 registration in this project has attacked, and for which we do not have a
 candidate.
