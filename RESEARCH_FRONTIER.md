@@ -4151,10 +4151,14 @@ issue: a knob that looks connected and is not.
 
 ---
 
-## OPEN, 2026-09-07: their declaration accuracy is 79% in our arbiter and 98% in theirs
+## RESOLVED 2026-09-08: their declaration accuracy is 79% in our arbiter and 98% in theirs — because our bridge is stateless
 
-The highest-value open question this project has, because 57% of the published
-+2.3466 head-to-head margin is declaration accounting
+Was the highest-value open question this project had, and it has an answer:
+our bridge is stateless and their agent is not, from their v0.4 on. The section
+is kept in the order it was found — the four cells, then what they ruled out,
+then the mechanism — because the eliminations are what made the mechanism
+findable. It matters because 57% of the published +2.3466 head-to-head margin
+is declaration accounting
 (`results/margin_decomposition.json`) and this is a measurement about exactly
 that component.
 
@@ -4251,24 +4255,67 @@ need of explaining. Either the mechanism is wrong, or the package's asking
 differs enough to stop firing it, or something in the bridge produces the
 errors the mechanism was invented to explain.
 
-### The experiments that would settle it, in order of cost
+### RESOLVED 2026-09-08: the bridge is stateless and their agent is not
 
-1. **A decision-level comparison of THEIR belief against itself** — at matched
-   positions, what their engine's own marginals say in their arbiter against
-   what they say through our shim. This is now the first experiment rather than
-   the third: the ladder inversion points at their inference specifically, and
-   `engine/src/kv_parity.hpp` with `scripts/kv_parity_*.py` upstream are built
-   for a comparison of exactly this shape.
-2. **Their arbiter, our dialect, opponent KRAKEN** (`--dialect --no-out-of-turn`
-   on `scripts4/reverse_arbiter_ladder.py`). Holds opponent and dialect fixed
-   against row 1 and varies only arbiter-and-bridge. Cheap.
-3. **Re-run the exposure analysis of the paper's certification hypothesis on
-   row 2's games.** If the 67x rate ratio is absent there, the mechanism is
-   arbiter-dependent and the hypothesis as written is wrong.
+Experiment (1) ran and it identifies the cause.
+`scripts4/shim_statefulness_parity.py`, `results/statefulness_dylan_v0*.json`.
 
-Until at least (1) lands, no sentence in the paper claims the head-to-head
-margin is or is not distorted by the bridge. What the paper now says — in the
-abstract, in §"The same pairing in their arbiter", and in Limitations — is that
-the question is open, that three explanations are excluded by controls, that
-what is left unexplained is an ORDER rather than a level, and that the
-component it bears on is the majority of the margin.
+`external_v07/shim_decide.cpp` is stateless **by design** — it spawns a fresh
+process for every decision and replays the whole public log into a freshly
+`reset()` agent, which is what the website needs, and it is what every
+published cross-engine number here was measured through. Their arbiter instead
+builds one agent per seat per deal and feeds it events as they happen. Those two
+are the same thing only if their agent is a pure function of (reset state, event
+sequence).
+
+| rung | decisions | divergent | rate | DECL→ASK | ASK→DECL |
+|---|---:|---:|---:|---:|---:|
+| v0.2 | 323 | **0** | 0.00% | 0 | 0 |
+| v0.3 | 338 | **0** | 0.00% | 0 | 0 |
+| v0.4 | 415 | 81 | 19.52% | 5 | 1 |
+| v0.5 | 336 | 137 | 40.77% | 4 | 0 |
+| v0.6 | 292 | 36 | 12.33% | 2 | 1 |
+| v0.7 | 296 | 84 | 28.38% | 9 | 0 |
+
+Exactly zero on both scripted baselines and nonzero on every version from v0.4,
+which is where their fitted belief arrives and where the two ladders stop
+agreeing. Two candidate causes, both introduced there and leaned on harder
+after: an iterative Sinkhorn/IPF fit that warm-starts from the previous position
+and need not land where a from-scratch fit lands, and a determinized search
+(`det=12`) drawing from an RNG a fresh process re-seeds at every decision.
+
+**The direction closes the loop.** Across the four affected versions the
+stateless path declares where the persistent path asks twenty times, and asks
+where it declares twice. More declarations, taken on a belief rebuilt from
+scratch, is exactly the shape that produces a 20.71% declaration error rate here
+against 2.09% at home — and it produces it only for versions that have a belief
+to rebuild.
+
+### What is still open
+
+**The price in sets.** The table above is a fact about decisions, and a
+different move is not automatically a worse one.
+`scripts4/bridge_statefulness_price.py` runs the paired contrast — same deals,
+same seats, same agent seeds, our champion unchanged, only their bridge
+differing — and reports what the statelessness was worth in sets. Positive means
+the published margin is inflated by the bridge.
+
+**Which of the two causes it is.** Warm-started belief and re-seeded search are
+both consistent with the table. Separating them needs either their source read
+closely or an arm with `det=0`, and the answer changes what a fix would look
+like: a warm-start is not reproducible from a log at all, whereas a re-seeded
+search could be fixed by advancing the seed per decision.
+
+**Whether to re-measure the head-to-head.** `fish4/dylan_v07_persistent.py`
+exists and plays complete games with zero fallbacks, so the 10,000-game
+head-to-head could be re-run through it. That is a real cost and it should be
+decided on the price above, not before it.
+
+### What does NOT follow
+
+That the published +2.3466 is wrong. It is what 10,000 audited games with zero
+substituted moves returned and it reproduces. What is now known is what it is a
+margin *against*: their engine **as our bridge runs it**, which is a real and
+independently authored opponent and is not the one their arbiter runs. The
+paired contrasts that share the bridge are unaffected either way, which is the
+distinction the paper's bridges appendix drew before any of this was measured.
