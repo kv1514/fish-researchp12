@@ -6756,13 +6756,41 @@ declaration accuracy & $\mathbf{96.49\%}$ against $\mathbf{78.87\%}$ \\
 \end{tabular}
 \end{center}
 
-\noindent The mechanism of the margin is in the last row and not the one
-above it. A $3.6$-point edge in ask accuracy is worth something, but the two
-engines find cards at broadly comparable rates; where they diverge is in
-knowing when a half-suit is \emph{finished}, and an $18$-point gap there is
-the difference between cashing a set and handing it over. That is the same
-claim \S\ref{sec:claiming} makes from the inference side, arrived at here
-from the scoreboard.
+\noindent \textbf{Every row of that table is an artifact of the bridge, and
+the paragraph this paper used to print underneath it read the artifact as a
+property of their engine.} It said that the two engines find cards at
+comparable rates and diverge in knowing when a half-suit is \emph{finished},
+and that the $18$-point declaration gap was the mechanism of the margin. What
+the same pairing gives once the bridge sends the hand their \texttt{reset}
+actually means (\S\ref{sec:otherarbiter}, bridge revision~3):
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & retracted (rev~2) & \textbf{corrected (rev~3)} \\
+\midrule
+corrected margin & $+2.3466$ & $\mathbf{-0.5250}$ $[-0.6886, -0.3614]$ \\
+ & $10{,}000$ games & $1{,}200$ games \\
+corrected ask hit rate & $51.75\%$ / $48.14\%$ & $\mathbf{52.98\%}$ /
+$\mathbf{54.93\%}$ \\
+corrected declaration accuracy & $96.49\%$ / $78.87\%$ &
+$\mathbf{97.59\%}$ / $\mathbf{96.68\%}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Both readings invert. The $18$-point declaration gap is $0.9$
+points: they declare very nearly as well as we do, and the run that said
+otherwise was scoring an opponent whose posterior we had corrupted into
+declaring half-suits its own opponents were holding. And the ask comparison
+does not merely shrink, it \emph{changes sign} --- we were never $3.6$ points
+ahead on asking, we are $1.95$ points behind it. The one row this paper
+treated as the minor term is the only channel in which the two engines
+actually differ, and it is the channel we lose.
+
+Nothing in \S\ref{sec:claiming}'s inference-side argument depended on this
+table, and it is not withdrawn with it; what is withdrawn is the claim that
+the scoreboard independently corroborated it against this opponent.
 
 \paragraph{How much of the margin is that, exactly.}
 \label{sec:res-headline} The paragraph above is a
@@ -6789,14 +6817,24 @@ everything else & --- & $+1.0100$ $[+0.9573, +1.0627]$ \\
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Fifty-seven per cent of the margin is declaration
-accounting.} The edge is real and it is nearly fivefold (we declare wrongly
+\noindent \textbf{This decomposition is withdrawn in full.} It says that
+fifty-seven per cent of the margin is declaration accounting, and it is
+arithmetically exact --- but it decomposes a margin that does not exist, and
+every term in it is a count of wrong declarations this project's own bridge
+caused. Their $0.844$ wrong declarations a game are $0.09$ at rev~3. It is
+kept here, struck, because a decomposition that was correct arithmetic on
+corrupted inputs is a better warning than a deleted section: the check that
+would have caught it is not a tighter interval on any of these rows but a
+second host for the same pairing. The prose below is the original, verbatim.
+
+\emph{Fifty-seven per cent of the margin is declaration accounting.
+The edge is real and it is nearly fivefold (we declare wrongly
 $0.176$ times a game against their $0.844$), but it is a \emph{declaration}
 edge, and
 this project has spent the large majority of its compute on the ask objective.
 The residual, everything the asking and the inference and the lookahead
 between them produce once the declarations are netted out, is $+1.010$ sets
-per game: a real margin, and a little over two fifths of the headline one.
+per game: a real margin, and a little over two fifths of the headline one.}
 
 These figures are computed on the same $10{,}000$ games the headline margin
 is, which took a correction. They were first taken from a $600$-game probe
