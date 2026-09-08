@@ -920,7 +920,7 @@ than a harness artifact.
 ### Two independent routes agree, and neither is the published one
 
     our arbiter, stateless bridge (published)   +2.3466   10,000 games
-    our arbiter, persistent bridge             -0.6900       400 games
+    our arbiter, persistent bridge             -0.6900       200 games
     their arbiter, our bot package             -0.6200     1,200 games
 
 The two that do not reset their engine every decision agree to within 0.07 sets
