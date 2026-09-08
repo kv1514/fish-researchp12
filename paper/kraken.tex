@@ -7075,13 +7075,37 @@ followed both an ask of ours and a later successful ask that took one of that
 half-suit off us, and $19.25\%$ of those were ownership-wrong; $411$ followed
 only the taking, and $3.16\%$ were.
 
-The mechanism this points at is specific, and it is a hypothesis about their
-engine formed from outside it rather than a reading of their source. Our ask
-certifies that we hold at least one \emph{other} card of the half-suit. When an
-opponent later takes one card of it off us, their inference appears to treat
-that certification as discharged, as though ``at least one'' had been
-``exactly one'', and every card it then loses is one that never moved in
-public. We are not building a feature on this. An exploit of one engine's
+\textbf{That mechanism was ours, and this paragraph had it backwards.} What
+this section originally said is quoted in the next sentence, and it is wrong.
+\emph{``Our ask certifies that we hold at least one other card of the
+half-suit. When an opponent later takes one card of it off us, their inference
+appears to treat that certification as discharged, as though `at least one' had
+been `exactly one', and every card it then loses is one that never moved in
+public.''} It was offered as a hypothesis about their engine formed from
+outside it rather than a reading of their source, and that caution was the
+right instinct pointed at the wrong party: \citet{nguyen2026bridgenotedge} read
+the source, and the certification is not discharged by anything their inference
+does. It is discharged by \emph{our bridge}, which reset their engine with the
+hand the seat held at that moment instead of the hand it was dealt
+(\S\ref{sec:otherarbiter}). A card the seat had since lost was filed as never
+its own, so when the ask at ply~$k$ was replayed that card was excluded from
+the certificate's candidate set, and a certificate with one surviving candidate
+pins a card the asker never held.
+
+Every number in this subsection is therefore a measurement of our own defect,
+and each is a signature of it rather than a coincidence: the cards are ones
+that never moved in public because those are the ones a phantom deduction lands
+on; the rate ratio concentrates in half-suits we had asked in because our ask
+is what creates the certificate; and the $19.25\%$ against $3.16\%$ split is
+the defect's own precondition, an ask of ours followed by a capture of ours,
+against the capture alone. This project measured the fingerprint of its own bug
+in four independent ways and read all four as evidence about somebody else's
+inference. The subsection is kept, in full, because the forensics were sound
+and only the attribution was not, and because the moment at which a careful
+error-analysis of an opponent should have become a suspicion of the instrument
+is exactly here.
+
+We are not building a feature on this. An exploit of one engine's
 inference is exactly the shape of the withdrawn deception ladder of
 \S\ref{sec:critic}, and a term that farmed it would grow with its dose against
 v0.7 and mean nothing anywhere else. It is reported because a margin whose
@@ -7370,15 +7394,34 @@ that through: \S\ref{sec:critic} is the record of a bridge defect destroying a
 set of results, and the head-to-head has already been re-measured once for
 another.
 
-The reader should weigh the headline accordingly. $57\%$ of $+2.3466$ is
-declaration accounting; their declarations are four times worse against us at
-v0.7 than at v0.3 while their own arbiter says the opposite; and we cannot
-currently say why. We are not withdrawing the number --- it is what
-$10{,}000$ audited games with zero substituted moves returned, and the
-paired contrasts that share the bridge are unaffected either way --- but a
-cross-engine \emph{absolute} from this paper should now be read as
-conditional on the host, and the burden of showing it is not an artifact has
-not been discharged.
+\textbf{This paragraph is superseded and is kept only to date the reasoning.}
+It read: \emph{``$57\%$ of $+2.3466$ is declaration accounting; their
+declarations are four times worse against us at v0.7 than at v0.3 while their
+own arbiter says the opposite; and we cannot currently say why. We are not
+withdrawing the number.''} The number is withdrawn (\S\ref{sec:otherarbiter}),
+and ``we cannot currently say why'' was the correct state of knowledge at the
+time and the wrong place to stop.
+
+One clause of it needs more than superseding, because it is a claim about
+method rather than a number. \emph{``The paired contrasts that share the bridge
+are unaffected either way''} is the defence this paper offered for every
+foreign-opponent result it kept, and \citet{nguyen2026bridgenotedge} is right
+that it does not hold as stated. A shared component cancels from a paired
+contrast only when its effect is \emph{additive}; a corrupted posterior in the
+opponent is not, because it changes which positions the two arms even reach.
+Their report gives the clean demonstration from this paper's own numbers: the
+README's dialect table has off-turn declaration costing us $-0.300$ sets
+against the corrupted engine, while against the native one in their arbiter the
+same rule is worth $+0.111$ to us. A gap measured against a corrupted opponent
+is not the gap against the real one, and it can invert.
+
+What survives is narrower and worth stating exactly. Contrasts in which
+\emph{both} arms are ours --- self-play, duplicate-deal pairs against our own
+champion, the ablations of \S\ref{sec:res-signal} run against
+\texttt{ev\_claim} --- never had the bridge in the loop and are untouched.
+Contrasts run against \texttt{dylan\_v07} are not rescued by their pairing and
+are withdrawn with the absolutes: R2, R6, the dialect gaps, and the
+contestation port of Table~\ref{tab:contestation}.
 
 One caveat on the reverse cells survives the control and is worth keeping.
 Our champion reaches their arbiter through a package that answers off-turn
@@ -8980,6 +9023,17 @@ Dylan Nguyen.
   contains the release commits of every rung of \S\ref{sec:res-ladder} as well.
   The frozen configuration string in \path{external_v07/v07_spec.txt}
   identifies the build we played.
+
+\bibitem[Nguyen(2026c)]{nguyen2026bridgenotedge}
+Dylan Nguyen.
+\newblock Bridge, not edge: an independent re-measurement of KRAKEN v1.1
+  against SESTINA v1.0.
+\newblock FishLab technical report, 2 September 2026. Produced at
+  \texttt{f9b4743} of \url{https://github.com/dylann4500/fishbot}; artifacts,
+  drivers and the repair patch under \path{research/kraken-check/}.
+  Received 8 September 2026, after this paper had independently withdrawn the
+  cross-engine headline on other evidence and before it had identified the
+  defect correctly.
 
 \bibitem[Nguyen(2026b)]{nguyen2026sestina}
 Dylan Nguyen.
