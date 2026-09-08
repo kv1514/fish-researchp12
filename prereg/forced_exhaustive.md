@@ -229,3 +229,60 @@ longer contains. The knob is flipped once the queue drains, and
 when it is: after shipping, "the default reproduces the champion" is a
 statement about the *new* champion, and the test that currently asserts the
 knob is off would be asserting the opposite of the truth.
+
+---
+
+## ADDENDUM, 8 September 2026: one of the two populations was measured through a bridge now known to be defective
+
+Nothing below changes the ship decision. It is recorded because the decision
+above leans on the phrase **"in both populations"**, and one of those two
+populations is no longer worth what it was worth when that sentence was
+written.
+
+The v0.7 confirm arm --- 1,000 games against `dylan_v07` through
+`BRIDGE_REV = 2`, the 87 forced positions in the table above --- was played
+through this project's **stateless** bridge: a fresh process per decision, the
+whole public log replayed into a freshly `reset()` agent. `results/`
+`shim_statefulness_parity.json` and the sweep beside it establish that this is
+not the same agent their own arbiter runs. It agrees exactly with their
+arbiter on their two scripted baselines (0 of 661 decisions) and diverges on
+every release from v0.4 onward, and
+`results/bridge_statefulness_price.json` prices the difference at
+**$+3.14$ $[+2.67, +3.61]$ sets a game in our favour**. Their wrong
+declarations fall from $0.845$ a game to $0.080$ once their engine is allowed
+to keep the state its own arbiter lets it keep.
+
+So the v0.7 population was an opponent handicapped by our own instrument. That
+is why the paper's cross-engine headline was retracted.
+
+**Why the ship still stands.** The ship criterion this registration fixed in
+advance is the **primary**, and the primary is the self-play arm: $+0.0233$
+$[+0.0133, +0.0334]$ sets/game over 2,400 games, $29.84\% \to 40.70\%$ over
+258 forced positions. Nothing in that arm touches their engine, their bridge
+or their code --- both sides are ours, on our deals, in our arbiter. It clears
+the bar on its own, and it is what the registration named as the criterion.
+The v0.7 arm was a **secondary**, required by this document to be *reported*
+before shipping rather than required to pass; see "Nothing ships until that is
+reported, even though the ship criterion is the primary and the primary
+passed" above.
+
+**What is downgraded.** The sentence "different seed blocks, different
+opponents, the same effect" claimed three independent replications. It should
+now be read as two: the screen and the self-play confirm. The v0.7 row is
+retained --- deleting a row because it became inconvenient is the failure this
+directory exists to prevent --- but it is corroboration from a handicapped
+opponent, and an effect that reproduces against a weakened opponent is weaker
+evidence than the table's layout suggests.
+
+**What is not claimed.** That the effect would vanish under a persistent
+bridge. The mechanism is a *forced* declaration at one live half-suit, chosen
+by enumerating our own team space under our own joint; it does not read their
+policy, and there is no route by which their statefulness enters it. The
+expectation is that it replicates. That expectation has not been measured, and
+this addendum does not credit it as though it had.
+
+**Re-running it would settle it**, at 1,000 games through
+`fish4/dylan_v07_persistent.py`. Not queued here: this registration's criterion
+is already met without it, and a re-run whose result cannot change the decision
+should be labelled as the curiosity it is rather than smuggled in as a
+condition.
