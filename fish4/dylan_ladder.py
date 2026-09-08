@@ -53,14 +53,33 @@ refused outright.
 
 PROVENANCE, AND WHAT IT DOES NOT ESTABLISH.
 
-Their repository is present here as a SINGLE SQUASHED COMMIT (d017fbcb), so
-there is no history against which to check whether the compiled-in v0.4, v0.5
-and v0.6 vectors are byte-identical to the ones their published results were
-generated from. Their own manifests point at commits that are not in this
-snapshot and record `working_tree_dirty = True`. What this module runs is
-therefore "their v0.N as it exists at d017fbcb" -- which is what their current
-tree would run -- and NOT a verified reproduction of their published v0.N.
-That distinction is stated here rather than discovered later.
+THE CAVEAT THIS SECTION USED TO CARRY IS DISCHARGED. Their repository was
+present here as a single squashed commit, so there was no history against which
+to check whether the compiled-in v0.4, v0.5 and v0.6 vectors were the ones
+their published results were generated from, and this module said so. Their
+full history (89 commits) is now published, including the release commits, so
+the question is answered rather than flagged.
+
+`scripts4/dylan_ladder_provenance.py` runs their own reproduction protocol:
+build THEIR engine at the release commit and at our pin, run the identical
+`fish match` on both, compare every field. Over five rungs x three seeds at 240
+games a cell:
+
+    v02  bb3bc8a   v03  bb3bc8a   v04  bb3bc8a   v05  bd812fe   v06  60fee17
+    play differences: 0 at every rung        PLAYS IDENTICALLY
+
+Win rate, mean sets, ask accuracy, declaration counts and events per game agree
+exactly at every cell. What moved is their bootstrap interval, in the last
+place at 5 of 15 cells, and nine JSON fields their older builds did not emit --
+reporting, not play. `results/dylan_ladder_provenance.json`.
+
+Two limits on what that licenses. A differing field would have localised a
+change to the policy-and-arbiter pair rather than to the policy, since both
+live in one binary; the pass is clean, so the distinction did not have to be
+made. And it does not verify their PUBLISHED numbers for a rung, which came
+from their harness on their deal banks -- their own manifests point at commits
+absent even from the full history and record `working_tree_dirty = True`.
+Nothing in this repository can check those.
 
 One thing the manifests do pin: v0.4's `policy_spec` is `v04:mgate=0.008`,
 not a bare `v04`, and that is the string used here -- their published spec,

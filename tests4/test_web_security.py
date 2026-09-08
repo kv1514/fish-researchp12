@@ -335,8 +335,25 @@ def test_the_proof_sheet_only_proves_what_the_seat_could_prove_itself():
     is something the player could have worked out, and it must also be RIGHT:
     a proof sheet that is merely probable is a lie with a confident label.
     """
-    s = new_session({"seat": 0})
-    tok, log = s.token(), list(s.wire_log)
+    # ACROSS SEVERAL DEALS, because new_session draws a fresh
+    # secrets.token_urlsafe nonce every call and the deal is derived from it.
+    # A single deal sometimes yields five proved holdings and sometimes fifty,
+    # so the vacuity guard at the bottom -- which is the point of the test --
+    # was a coin flip on the deal: it failed in CI at exactly "assert 5 > 5"
+    # while passing locally. Every assertion inside the loop is about
+    # correctness and holds on any deal; only the COUNT needed more than one.
+    checked = 0
+    for _deal in range(6):
+        if checked > 40:
+            break
+        s = new_session({"seat": 0})
+        tok, log = s.token(), list(s.wire_log)
+        checked += _proof_sheet_pass(tok, log)
+    assert checked > 5, "fixture proved almost nothing; the test is vacuous"
+
+
+def _proof_sheet_pass(tok, log) -> int:
+    """One deal's worth of the checks above. Returns how much it proved."""
     checked = 0
     for _ in range(40):
         cur = Session.restore(tok, log)
@@ -361,7 +378,7 @@ def test_the_proof_sheet_only_proves_what_the_seat_could_prove_itself():
         else:
             cur.advance(3)
         tok, log = cur.token(), list(cur.wire_log)
-    assert checked > 5, "fixture proved almost nothing; the test is vacuous"
+    return checked
 
 
 def test_the_proof_sheet_says_how_much_it_has_not_proved():

@@ -1,0 +1,31 @@
+{
+ "stage": "screen",
+ "ship_bar": 0.15,
+ "prereg": "prereg/kraken_v12_declaration_latency.md",
+ "arms": {
+  "D1_dead_ask_050": {
+   "vs_sestina": {
+    "mean": -0.3233333333333333,
+    "ci95": [
+     -0.527330662997497,
+     -0.11933600366916969
+    ],
+    "n": 600
+   },
+   "self_play": {
+    "mean": -0.23,
+    "ci95": [
+     -0.44805302546468284,
+     -0.011946974535317179
+    ],
+    "n": 600
+   },
+   "verdict": "no",
+   "fallbacks": 0,
+   "unfinished": 0,
+   "cand_ask_hit": 0.5244927248970795,
+   "champ_ask_hit": 0.5184314276144697
+  }
+ },
+ "seconds": 936.6
+}

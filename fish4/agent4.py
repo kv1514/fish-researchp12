@@ -76,6 +76,11 @@ def _load_value(path):
 _SCORE_RECORDER = None
 
 
+#: Every value `fish4/oppmodel.py` actually branches on, plus the default.
+#: Anything else is a typo, and typos here are silent.
+_DEPTH_MODES = frozenset({"initial", "attime", "current", "at_ask"})
+
+
 class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
     """The v0.4 policy. Every strategic choice is a constructor argument."""
 
@@ -124,6 +129,20 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  #: never make an ask that provably cannot land while one
                  #: that can is available. See the note at the use site.
                  avoid_doomed_asks: bool = False,
+                 #: The GRADED form of the knob above. `avoid_doomed_asks`
+                 #: fires only where the posterior is CERTAIN the best ask
+                 #: cannot land, which is 1.5% of decisions
+                 #: (results/doomed_ask_diag.json) -- while 13.79% of our asks
+                 #: go into a half-suit our own team wholly owns, where the
+                 #: belief's own estimate averages 0.3377 and the certainty
+                 #: test never opens (results/completion_latency.json,
+                 #: results/ask_deadness_signal.json). This restricts the
+                 #: choice when the top-scoring ask's half-suit is ours with
+                 #: probability at least this, and re-ranks by the SAME
+                 #: objective. At 1.01 the test can never pass and the
+                 #: champion is bit-identical.
+                 #: See prereg/kraken_v12_declaration_latency.md.
+                 dead_ask_threshold: float = 1.01,
                  # -- claiming
                  claim_threshold: float = 0.97,
                  #: refuse declarations no complete consistent deal allows
@@ -144,6 +163,11 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  #: at most this many half-suits are live. See
                  #: prereg/forced_exhaustive.md. 0 = never; bit-identical.
                  claim_forced_exhaustive: int = 0,
+                 #: Declare a half-suit we are essentially certain we own at
+                 #: this exactness rather than at claim_threshold. 1.01 can
+                 #: never pass; bit-identical. See claim4.ClaimConfig.
+                 claim_owned_threshold: float = 1.01,
+                 claim_owned_p_team: float = 0.99,
                  # -- adaptive style
                  w_retake: float = 0.0,
                  retake_window: int = 8,
@@ -251,6 +275,18 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         #: be measured apart -- a decoder with no encoder is the
         #: control that says whether the DECODER alone is harmful.
         self.convention_max_cost = convention_max_cost
+        #: An unknown mode used to fall through to "initial" in silence, so a
+        #: misspelling did not fail -- it produced an arm bit-identical to the
+        #: champion and reported it as a clean null. P43's C3 arm was written
+        #: "atask" instead of "at_ask" and returned +0.0000 with a ZERO-WIDTH
+        #: interval against SESTINA, which is the signature of an experiment
+        #: that never ran. A knob that ignores what it does not recognise
+        #: manufactures exactly the result an ablation is hoping for.
+        if depth_mode not in _DEPTH_MODES:
+            raise ValueError(
+                f"depth_mode={depth_mode!r} is not one of "
+                f"{sorted(_DEPTH_MODES)}; an unrecognised mode would silently "
+                "behave as 'initial' and report a null that was never measured")
         self.depth_mode = depth_mode
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda
@@ -277,12 +313,16 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                 f"value_keep={value_keep} has no effect with objective="
                 f"{objective!r}; it applies only to objective='value'")
         self.avoid_doomed_asks = bool(avoid_doomed_asks)
+        self.dead_ask_threshold = float(dead_ask_threshold)
         self.claim_cfg = ClaimConfig(feasibility=bool(claim_feasibility),
                                      threshold=claim_threshold,
                                      exact_candidates=claim_exact_candidates,
                                      use_exact=claim_exact,
                                      forced_exhaustive=int(
-                                         claim_forced_exhaustive))
+                                         claim_forced_exhaustive),
+                                     owned_threshold=float(
+                                         claim_owned_threshold),
+                                     owned_p_team=float(claim_owned_p_team))
         self.claim_stuck_threshold = float(claim_stuck_threshold)
         self.stuck_team_certain = float(stuck_team_certain)
         self.w_retake = w_retake
@@ -414,6 +454,36 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         return self.bel
 
     # -- policy --------------------------------------------------------------
+
+    def _filter_dead(self, order, asks, ctx):
+        """Drop asks into half-suits our own team probably already owns.
+
+        The same idea as `avoid_doomed_asks`, at a threshold that can be
+        reached. That one sits inside `if p[order[0]] <= 0.0`, so it asks
+        whether the ask is CERTAINLY doomed; this asks whether the half-suit is
+        PROBABLY already ours, which is the same event graded. Under the
+        no-bluff rule an ask can only land where an opponent holds a card, so a
+        half-suit our team wholly owns admits no landable ask at all -- and
+        13.79% of our asks go into one, where the certainty test never opens.
+
+        Returns ``order`` ITSELF when nothing is filtered, so the caller can
+        tell "unchanged" from "rebuilt identically" by identity and leave its
+        own top-of-order bookkeeping alone.
+
+        A separate method rather than four lines inline because the invariant
+        it has to satisfy -- never veto below the threshold, never empty the
+        list -- is worth testing against an injected `p_team_all` instead of
+        against whatever the sampler happened to draw in a replayed game.
+        """
+        if self.dead_ask_threshold > 1.0 or not len(order):
+            return order
+        from fish.cards import half_suit_of
+        pta = ctx.p_team_all
+        if pta[half_suit_of(asks[order[0]].card)] < self.dead_ask_threshold:
+            return order
+        alive = [i for i in order
+                 if pta[half_suit_of(asks[i].card)] < self.dead_ask_threshold]
+        return alive if alive else order
 
     def build_posterior(self, obs, n_draws: int = 0, gamma=None):
         """The posterior this seat would form at this decision.
@@ -688,6 +758,20 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                 if live:
                     order = live
                     top = scores[order[0]]
+
+        # The same idea as the block above, at a threshold that can be
+        # reached. That one is inside `if p[order[0]] <= 0.0`, so it asks
+        # whether the ask is CERTAINLY doomed; this asks whether the half-suit
+        # is PROBABLY already ours, which is the same event graded, and is
+        # outside that branch because the certainty almost never obtains.
+        # p_team_all is the independence approximation over the six cards,
+        # already computed for every half-suit, so this costs no new sampling.
+        # At the default 1.01 no half-suit can trip it and `order` is
+        # untouched.
+        order2 = self._filter_dead(order, asks, ctx)
+        if order2 is not order:
+            order = order2
+            top = scores[order[0]]
         pool = [i for i in order if scores[i] >= top - 1e-9]
         pick = int(self.rng.choice(pool))
 

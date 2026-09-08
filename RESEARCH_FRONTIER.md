@@ -4084,14 +4084,41 @@ noise of each other, which is exactly what their numbers say too — my ordering
 of v04 against v05 differs from theirs by about 0.1 sets against half-widths
 of 0.15, so neither of us should claim that pair either way.
 
-**Provenance, stated rather than assumed.** Their repo is present as a SINGLE
-SQUASHED COMMIT (d017fbcb), so the compiled v04/v05/v06 vectors cannot be
-checked against the ones their published results used; their manifests point
-at commits not in the snapshot and record `working_tree_dirty = True`. This
-measures their v0.N as it exists at d017fbcb — what their current tree runs —
-not a verified reproduction of their published v0.N. One thing the manifests
-do pin: v0.4's policy_spec is `v04:mgate=0.008`, not a bare `v04`, and the
-bare base would have measured a configuration they never published.
+**Provenance, stated rather than assumed — and since 2026-09-07, measured.**
+Their repo was present as a SINGLE SQUASHED COMMIT (d017fbcb), so the compiled
+v04/v05/v06 vectors could not be checked against the ones their published
+results used, and this section said so. Their full history (89 commits,
+release commits included) is now published, so the check has been run.
+
+`scripts4/dylan_ladder_provenance.py` uses THEIR reproduction protocol rather
+than ours — build their engine at the release commit and at our pin, run the
+identical `fish match` on both, compare every field of the JSON — because a
+file diff answers nothing (their v05/v06 headers were edited in later cycles)
+and our own shim will not build against their v0.4-era headers (it calls
+`isRepoll`, which that tree does not have).
+
+    rung  release   play differences   verdict
+    v02   bb3bc8a          0           PLAYS IDENTICALLY
+    v03   bb3bc8a          0           PLAYS IDENTICALLY
+    v04   bb3bc8a          0           PLAYS IDENTICALLY
+    v05   bd812fe          0           PLAYS IDENTICALLY
+    v06   60fee17          0           PLAYS IDENTICALLY
+
+Three seeds a rung, 240 games a cell. Win rate, mean sets, ask accuracy,
+declaration counts and events per game agree exactly at all fifteen cells;
+what moved is their bootstrap interval (last place, 5 of 15) and nine JSON
+fields their older builds never emitted. `results/dylan_ladder_provenance.json`.
+
+Two limits kept. A differing field would have localised a change to the
+policy-and-arbiter pair rather than the policy, since both live in one binary —
+the pass is clean, so that never had to be untangled. And this is not a check
+of their published NUMBERS: those came from their harness on their deal banks,
+their manifests still point at commits absent even from the full history and
+record `working_tree_dirty = True`, and nothing here can reach them.
+
+One thing the manifests do pin: v0.4's policy_spec is `v04:mgate=0.008`, not a
+bare `v04`, and the bare base would have measured a configuration they never
+published.
 
 ### OPEN: our own error rate doubles against v0.4 and mgate does not explain it
 
@@ -4121,3 +4148,255 @@ opponent does, and nothing measured so far says what.
 path. It is harmless because it equals the default, but anyone setting
 `v04:mgate=0.05` would silently get .008. Same shape as the off-turn polling
 issue: a knob that looks connected and is not.
+
+---
+
+## RESOLVED 2026-09-08: their declaration accuracy is 79% in our arbiter and 98% in theirs — because our bridge is stateless
+
+Was the highest-value open question this project had, and it has an answer:
+our bridge is stateless and their agent is not, from their v0.4 on. The section
+is kept in the order it was found — the four cells, then what they ruled out,
+then the mechanism — because the eliminations are what made the mechanism
+findable. It matters because 57% of the published +2.3466 head-to-head margin
+is declaration accounting
+(`results/margin_decomposition.json`) and this is a measurement about exactly
+that component.
+
+### The four cells
+
+| arbiter | dialect | their opponent | their wrong declarations / game |
+|---|---|---|---|
+| ours | ours (no out-of-turn) | KRAKEN | **0.8442** |
+| theirs | theirs (out-of-turn on) | KRAKEN | **0.1008** |
+| theirs | theirs | v0.6 | 0.1250 |
+| theirs | ours (`--no-out-of-turn`) | v0.6 | 0.0750 |
+
+Row 1 is `results/mega_match.json` (10,000 games); row 2 is
+`results/reverse_arbiter_v07.json` (1,200 games against the frozen RELEASED
+spec, not the bare base, which is a different and weaker agent); rows 3 and 4
+are `results/dialect_declaration_probe.json` (480 games a cell,
+`scripts4/dialect_declaration_probe.py`).
+
+### What the rows rule out
+
+**Not the dialect.** Removing the out-of-turn channel does not degrade their
+declaration accuracy, it *improves* it: 0.1250 wrong a game to 0.0750. Their own
+dialect sweep agrees in direction, reporting `no-out-of-turn` as +0.52 pp to
+their edge. The paper's caveat that our dialect disadvantages their policy is
+correct about the channel being absent and wrong about the sign of its effect
+on this component.
+
+**Not the opponent.** Facing KRAKEN in their own arbiter, their error rate is
+0.1008 a game — *lower* than the 0.1250 their own v0.6 draws out of them.
+KRAKEN as an opponent does not, by itself, make their inference worse.
+
+### Not the package either, and the control found something sharper
+
+The obvious third explanation was that the FishLab package does not carry our
+policy at all — a bot crippled in transit loses to everything. It is excluded:
+our champion beats their v0.3 by **+1.2972** inside their own arbiter.
+
+But the ladder run to check that returned more than a control.
+`scripts4/ladder_shape_comparison.py`, over
+`results/reverse_arbiter_ladder.json`:
+
+| their version | our margin (ours) | their err (ours) | our margin (theirs) | their err (theirs) |
+|---|---:|---:|---:|---:|
+| v0.2 | +1.5283 | 9.13% | — | — |
+| v0.3 | +0.6133 | **4.71%** | +1.2972 | **13.65%** |
+| v0.4 | +1.9867 | 16.36% | — | — |
+| v0.5 | +2.1233 | 15.06% | −0.3528 | 2.00% |
+| v0.6 | +1.8850 | 15.72% | −0.4806 | 1.53% |
+| v0.7 | +2.3600 | **20.71%** | −0.6200 | **2.09%** |
+
+Spearman against their version number: our margin **+0.771** in our arbiter and
+**−1.000** in theirs; their declaration error **+0.771** in ours and −0.400 in
+theirs.
+
+**The ladder inverts.** In their arbiter each successive release beats us by
+more, which is what a version ladder should look like. In ours their later
+releases do *worse*, and their declaration error climbs monotonically with
+their own version number. The rungs make it sharper than the correlations do:
+their v0.3 is their best declarer in our arbiter and their worst in their own;
+their v0.7 is their worst in ours and among their best in theirs. The two
+arbiters do not disagree about a level here — they disagree about an **order**.
+
+A project's successive releases getting monotonically worse at the one thing
+this game scores, and only through our bridge, is not a shape improving
+strength produces. The place to look is what their v0.4 introduced and every
+later version built on — their fitted belief — and how it fares on the event
+stream our bridge replays into it.
+
+### What that leaves, and why it is still OPEN
+
+Our arbiter, our bridge, or an interaction of the two. That is the branch this
+project is least entitled to wave through: §"The solver as a critic" of the
+paper is the record of a bridge defect destroying a set of results, and the
+head-to-head has already been re-measured once for one.
+
+One caveat survives the control. KRAKEN plays their arbiter through the FishLab
+package, which is not native KRAKEN: it answers off-turn declaration polls only
+on certainties, so the positions the two versions steer into diverge, and row
+2's opponent is *a* KRAKEN and not *the* KRAKEN of row 1. That is why the
+argument above rests on the **trend across their versions**, which holds our
+side fixed within each arbiter, and not on comparing levels between them.
+
+The paper already carries a specific hypothesis for row 1, and these
+measurements are in tension with it. It reports that their ownership errors concentrate in
+half-suits we have asked in — 45.4 per 1,000 plies against 0.675, a rate ratio
+of 67 — and proposes that our ask certifies "at least one other card of this
+half-suit", that a later successful take against us appears to discharge that
+certification as though it had been "exactly one", and that every card lost
+afterwards is one that never moved in public. **That mechanism is a property of
+our asking, not of our arbiter, so it predicts the same errors in row 2, and
+row 2 does not show them.** Worse for it, the mechanism offers no reason why
+the effect should grow with THEIR version number, which is now the fact most in
+need of explaining. Either the mechanism is wrong, or the package's asking
+differs enough to stop firing it, or something in the bridge produces the
+errors the mechanism was invented to explain.
+
+### RESOLVED 2026-09-08: the bridge is stateless and their agent is not
+
+Experiment (1) ran and it identifies the cause.
+`scripts4/shim_statefulness_parity.py`, `results/statefulness_dylan_v0*.json`.
+
+`external_v07/shim_decide.cpp` is stateless **by design** — it spawns a fresh
+process for every decision and replays the whole public log into a freshly
+`reset()` agent, which is what the website needs, and it is what every
+published cross-engine number here was measured through. Their arbiter instead
+builds one agent per seat per deal and feeds it events as they happen. Those two
+are the same thing only if their agent is a pure function of (reset state, event
+sequence).
+
+| rung | decisions | divergent | rate | DECL→ASK | ASK→DECL |
+|---|---:|---:|---:|---:|---:|
+| v0.2 | 323 | **0** | 0.00% | 0 | 0 |
+| v0.3 | 338 | **0** | 0.00% | 0 | 0 |
+| v0.4 | 415 | 81 | 19.52% | 5 | 1 |
+| v0.5 | 336 | 137 | 40.77% | 4 | 0 |
+| v0.6 | 292 | 36 | 12.33% | 2 | 1 |
+| v0.7 | 296 | 84 | 28.38% | 9 | 0 |
+
+Exactly zero on both scripted baselines and nonzero on every version from v0.4,
+which is where their fitted belief arrives and where the two ladders stop
+agreeing.
+
+**The direction closes the loop.** Across the four affected versions the
+stateless path declares where the persistent path asks twenty times, and asks
+where it declares twice. More declarations is exactly the shape that produces a
+20.71% declaration error rate here against 2.09% at home — and it produces it
+only for versions that have something to rebuild.
+
+## The price, and the retraction
+
+`scripts4/bridge_statefulness_price.py` ran the paired contrast:
+2,000 pairings — 1,000 deals at each of two seat assignments —
+with every pairing played twice on identical cards, identical seats and
+identical agent seeds, our champion unchanged, the only difference being
+whether their engine keeps its state between decisions.
+
+| | stateless | persistent |
+|---|---:|---:|
+| our margin | +2.4800 | **−0.6960** |
+| their wrong declarations/game | 0.8800 | **0.0925** |
+| their declarations/game | 3.9910 | 4.8275 |
+
+**The bridge was worth +3.1760 [+3.0142, +3.3378] sets/game to us** — more than
+the entire published margin. Zero fallbacks, zero unfinished games. The
+stateless arm reproduces the published figure on fresh deals (+2.4800 against
++2.3466), which is what makes the other column believable rather than a harness
+artifact.
+
+Measured independently inside *their* arbiter through their own bot-package
+protocol: **−0.6200** over 1,200 games. Two routes sharing no host, no rules
+implementation, no deal generator and no code path agree to within 0.08, where
+the published one is out by three and has the sign wrong.
+
+**+2.3466 is retracted as a measurement of relative engine strength.** It
+remains true as a record of what those 10,000 audited games returned *through
+that bridge*, and the paired contrasts that hold the bridge fixed on both sides
+are untouched — they were never cross-engine absolutes.
+
+## Which piece of their state, and whether it could be repaired
+
+Resolved by `scripts4/statefulness_mechanism.py`, and the answer is not the
+convenient one. Their factory gates both RNG consumers behind spec options, so
+the parity measurement re-runs at the corners. Divergences split into two bands
+that behave differently, so they are reported separately:
+
+| arm | overall | ask ordering | declaration gate |
+|---|---:|---:|---:|
+| the frozen release | 23.52% | 20.63% | 2.64% |
+| their search off (`s1=0`) | 16.61% | 13.53% | 2.71% |
+| their tie-breaking off (`rtie=0`) | 27.96% | 24.59% | 3.25% |
+| both off | 15.78% | 11.60% | 4.18% |
+| and their `lastMySet` feature off (`w12=0`) | **13.92%** | 9.74% | 4.18% |
+
+- **Their determinized search is the largest identified term**, and it lives
+  entirely in ask ordering. `V06Agent::resetV6` re-seeds `srng` from the agent
+  seed, so a fresh process per decision draws the same determinizations every
+  turn where their arbiter's stream advances.
+- **Their tie-breaking contributes nothing**, and their source says why: at
+  `rtie=1` the tie RNG is *constructed* per decision from a rolling hash of the
+  public stream and the event count, so it is replayable by construction. Only
+  `rtie=2` would not be.
+- **`lastMySet` is real and small.** Feature 12 of their scored vector asks
+  whether this is the half-suit they asked for last time. It is assigned inside
+  their `chooseAsk` and never by their `observe`, so through a stateless bridge
+  it is dead at every decision — despite weight 3.12582 in the frozen vector.
+
+Three more candidates are excluded by **reading their source** rather than by
+spending an arm on an inert code path:
+
+- Their belief consumes no randomness in the released configuration, which runs
+  `BeliefMode::Fast`. `bel.compute(k, rng, ...)` is reached only under
+  Exact/ExactDisj.
+- `Belief::sinkhornDisj` re-initialises its marginals from the constraint set on
+  entry, so it does **not** warm-start. *This file and the paper both previously
+  named a warm-started Sinkhorn/IPF fit as a leading candidate. That was wrong
+  and is withdrawn.*
+- Their dead-ask memory, which their reset does wipe, is gated behind `deadAsk`
+  (default false), `deadInSearch` (default 0) and v0.7's `dead7` (default
+  false), none set in the frozen spec.
+
+**The finding is the band that does not move.** Everything identified lives in
+ask ordering. The declaration gate — the band that costs sets, since a
+declaration taken a turn early is a wrong one — is untouched by every mechanism
+found, and 13.92% of decisions still differ with all of them off. The cheap fix
+this section was hoping for does not exist: **the bridge cannot be made honest
+by re-seeding, because the term that matters is not an RNG.** Running their
+engine as their arbiter runs it is the remedy, which is why the corrected
+figures were measured that way rather than by patching the instrument that
+produced the retracted one.
+
+## What is still open
+
+**What the declaration-gate band actually is.** 13.92% overall and 4.18% in the
+gate survive every mechanism named above. Neither an RNG nor a feature explains
+it. This is the honest residual and it is not a formality: it is the band that
+carries the price.
+
+**More games behind the price.** Done: +3.18 now rests on 2,000 pairings
+over 1,000 deals, a tenfold extension of the original run from the same
+seed base, so the first 200 pairings are the original run and reproduce it
+exactly. That item is closed.
+
+**Whether to re-measure the head-to-head.** `fish4/dylan_v07_persistent.py`
+plays complete games with zero fallbacks, so the 10,000-game head-to-head could
+be re-run through it. Two independent routes already agree on the sign and
+roughly on the size, so this buys precision rather than a conclusion, and it is
+a real cost.
+
+## What does NOT follow
+
+That their engine is stronger than this one *in general*. Neither column is a
+ranking: −0.6960 was measured in our arbiter under our dialect, −0.6200 in
+theirs under theirs, and a cross-engine absolute is a statement about the host
+as well as about the engines. That is the same caveat this project wrote into
+its bridges appendix before any of this was measured, and then failed to apply
+to its own headline — which is the actual lesson here, and it is a lesson about
+method rather than about either engine.
+
+That the study's internal results move. Every A-vs-B contrast in this file
+holds the bridge fixed on both sides, so the bridge cancels. What the retraction
+touches is the one number that had nothing to cancel against.

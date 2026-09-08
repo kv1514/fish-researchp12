@@ -1,0 +1,486 @@
+{
+ "question": "does each rung we measure play as the released rung did",
+ "method": "their own reproduction protocol: build their engine at the release commit and at our pin, run the identical match, compare every field",
+ "scope": "a differing field localises a change to the policy-and-arbiter pair, not to the policy alone; and this checks neither their published numbers nor their deal banks",
+ "pin": "https://github.com/dylann4500/fishbot @ f9b4743dc5662eaf663478b52dbd769adf376334",
+ "rungs": [
+  {
+   "rung": "v02",
+   "release_commit": "bb3bc8a",
+   "opponent": "v03",
+   "deals": 40,
+   "rotations": 6,
+   "seeds": [
+    90210,
+    4242,
+    7
+   ],
+   "cells": [
+    {
+     "seed": 90210,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.483333,
+     "winRateA_pinned": 0.483333,
+     "meanSetsA_release": 4.39583,
+     "meanSetsA_pinned": 4.39583
+    },
+    {
+     "seed": 4242,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.508333,
+     "winRateA_pinned": 0.508333,
+     "meanSetsA_release": 4.54167,
+     "meanSetsA_pinned": 4.54167
+    },
+    {
+     "seed": 7,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.525,
+     "winRateA_pinned": 0.525,
+     "meanSetsA_release": 4.6375,
+     "meanSetsA_pinned": 4.6375
+    }
+   ],
+   "play_differences": [],
+   "resampled_differences": [],
+   "fields_absent_from_one_build": [
+    "allocErrRateA",
+    "allocErrRateB",
+    "asksPerGameA",
+    "asksPerGameB",
+    "nAsksA",
+    "nAsksB",
+    "nDeclA",
+    "nDeclB",
+    "power"
+   ],
+   "verdict": "PLAYS IDENTICALLY",
+   "seconds": 6.4
+  },
+  {
+   "rung": "v03",
+   "release_commit": "bb3bc8a",
+   "opponent": "v03",
+   "deals": 40,
+   "rotations": 6,
+   "seeds": [
+    90210,
+    4242,
+    7
+   ],
+   "cells": [
+    {
+     "seed": 90210,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.5,
+     "winRateA_pinned": 0.5,
+     "meanSetsA_release": 4.5,
+     "meanSetsA_pinned": 4.5
+    },
+    {
+     "seed": 4242,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.5,
+     "winRateA_pinned": 0.5,
+     "meanSetsA_release": 4.5,
+     "meanSetsA_pinned": 4.5
+    },
+    {
+     "seed": 7,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.5,
+     "winRateA_pinned": 0.5,
+     "meanSetsA_release": 4.5,
+     "meanSetsA_pinned": 4.5
+    }
+   ],
+   "play_differences": [],
+   "resampled_differences": [],
+   "fields_absent_from_one_build": [
+    "allocErrRateA",
+    "allocErrRateB",
+    "asksPerGameA",
+    "asksPerGameB",
+    "nAsksA",
+    "nAsksB",
+    "nDeclA",
+    "nDeclB",
+    "power"
+   ],
+   "verdict": "PLAYS IDENTICALLY",
+   "seconds": 7.1
+  },
+  {
+   "rung": "v04",
+   "release_commit": "bb3bc8a",
+   "opponent": "v03",
+   "deals": 40,
+   "rotations": 6,
+   "seeds": [
+    90210,
+    4242,
+    7
+   ],
+   "cells": [
+    {
+     "seed": 90210,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [
+      "ci: [0.708333, 0.833333] vs [0.7125, 0.833333]"
+     ],
+     "play": [],
+     "winRateA_release": 0.775,
+     "winRateA_pinned": 0.775,
+     "meanSetsA_release": 5.52917,
+     "meanSetsA_pinned": 5.52917
+    },
+    {
+     "seed": 4242,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [
+      "ci: [0.679167, 0.783333] vs [0.683333, 0.783333]"
+     ],
+     "play": [],
+     "winRateA_release": 0.733333,
+     "winRateA_pinned": 0.733333,
+     "meanSetsA_release": 5.3,
+     "meanSetsA_pinned": 5.3
+    },
+    {
+     "seed": 7,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.733333,
+     "winRateA_pinned": 0.733333,
+     "meanSetsA_release": 5.39167,
+     "meanSetsA_pinned": 5.39167
+    }
+   ],
+   "play_differences": [],
+   "resampled_differences": [
+    "seed 90210: ci: [0.708333, 0.833333] vs [0.7125, 0.833333]",
+    "seed 4242: ci: [0.679167, 0.783333] vs [0.683333, 0.783333]"
+   ],
+   "fields_absent_from_one_build": [
+    "allocErrRateA",
+    "allocErrRateB",
+    "asksPerGameA",
+    "asksPerGameB",
+    "nAsksA",
+    "nAsksB",
+    "nDeclA",
+    "nDeclB",
+    "power"
+   ],
+   "verdict": "PLAYS IDENTICALLY",
+   "seconds": 66.9
+  },
+  {
+   "rung": "v05",
+   "release_commit": "bd812fe",
+   "opponent": "v03",
+   "deals": 40,
+   "rotations": 6,
+   "seeds": [
+    90210,
+    4242,
+    7
+   ],
+   "cells": [
+    {
+     "seed": 90210,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [
+      "ci: [0.720833, 0.833333] vs [0.725, 0.833333]"
+     ],
+     "play": [],
+     "winRateA_release": 0.779167,
+     "winRateA_pinned": 0.779167,
+     "meanSetsA_release": 5.45833,
+     "meanSetsA_pinned": 5.45833
+    },
+    {
+     "seed": 4242,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.758333,
+     "winRateA_pinned": 0.758333,
+     "meanSetsA_release": 5.47083,
+     "meanSetsA_pinned": 5.47083
+    },
+    {
+     "seed": 7,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [
+      "ci: [0.65, 0.779167] vs [0.654167, 0.779167]"
+     ],
+     "play": [],
+     "winRateA_release": 0.716667,
+     "winRateA_pinned": 0.716667,
+     "meanSetsA_release": 5.3,
+     "meanSetsA_pinned": 5.3
+    }
+   ],
+   "play_differences": [],
+   "resampled_differences": [
+    "seed 90210: ci: [0.720833, 0.833333] vs [0.725, 0.833333]",
+    "seed 7: ci: [0.65, 0.779167] vs [0.654167, 0.779167]"
+   ],
+   "fields_absent_from_one_build": [
+    "allocErrRateA",
+    "allocErrRateB",
+    "asksPerGameA",
+    "asksPerGameB",
+    "nAsksA",
+    "nAsksB",
+    "nDeclA",
+    "nDeclB",
+    "power"
+   ],
+   "verdict": "PLAYS IDENTICALLY",
+   "seconds": 67.8
+  },
+  {
+   "rung": "v06",
+   "release_commit": "60fee17",
+   "opponent": "v03",
+   "deals": 40,
+   "rotations": 6,
+   "seeds": [
+    90210,
+    4242,
+    7
+   ],
+   "cells": [
+    {
+     "seed": 90210,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.741667,
+     "winRateA_pinned": 0.741667,
+     "meanSetsA_release": 5.37917,
+     "meanSetsA_pinned": 5.37917
+    },
+    {
+     "seed": 4242,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [
+      "ci: [0.7125, 0.816667] vs [0.7125, 0.820833]"
+     ],
+     "play": [],
+     "winRateA_release": 0.766667,
+     "winRateA_pinned": 0.766667,
+     "meanSetsA_release": 5.35833,
+     "meanSetsA_pinned": 5.35833
+    },
+    {
+     "seed": 7,
+     "fields_compared": 27,
+     "schema": [
+      "allocErrRateA",
+      "allocErrRateB",
+      "asksPerGameA",
+      "asksPerGameB",
+      "nAsksA",
+      "nAsksB",
+      "nDeclA",
+      "nDeclB",
+      "power"
+     ],
+     "resampled": [],
+     "play": [],
+     "winRateA_release": 0.791667,
+     "winRateA_pinned": 0.791667,
+     "meanSetsA_release": 5.55833,
+     "meanSetsA_pinned": 5.55833
+    }
+   ],
+   "play_differences": [],
+   "resampled_differences": [
+    "seed 4242: ci: [0.7125, 0.816667] vs [0.7125, 0.820833]"
+   ],
+   "fields_absent_from_one_build": [
+    "allocErrRateA",
+    "allocErrRateB",
+    "asksPerGameA",
+    "asksPerGameB",
+    "nAsksA",
+    "nAsksB",
+    "nDeclA",
+    "nDeclB",
+    "power"
+   ],
+   "verdict": "PLAYS IDENTICALLY",
+   "seconds": 48.6
+  }
+ ]
+}
