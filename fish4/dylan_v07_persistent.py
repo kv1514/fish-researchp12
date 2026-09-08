@@ -14,7 +14,8 @@ thing as their arbiter's incremental play, and established WHERE:
     their v0.3   0 of 338                      scripted baseline
     their v0.4   81 of 415   (19.5%)           the fitted belief arrives
     their v0.5   137 of 336  (40.8%)
-    their v0.7   57 of 198   (28.8%)
+    their v0.6   36 of 292   (12.3%)
+    their v0.7   84 of 296   (28.4%)
 
 Zero for both scripted baselines and large for everything from v0.4 on. That is
 the version their fitted belief was introduced at, and it is the same boundary
