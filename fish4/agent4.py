@@ -76,6 +76,11 @@ def _load_value(path):
 _SCORE_RECORDER = None
 
 
+#: Every value `fish4/oppmodel.py` actually branches on, plus the default.
+#: Anything else is a typo, and typos here are silent.
+_DEPTH_MODES = frozenset({"initial", "attime", "current", "at_ask"})
+
+
 class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
     """The v0.4 policy. Every strategic choice is a constructor argument."""
 
@@ -251,6 +256,18 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         #: be measured apart -- a decoder with no encoder is the
         #: control that says whether the DECODER alone is harmful.
         self.convention_max_cost = convention_max_cost
+        #: An unknown mode used to fall through to "initial" in silence, so a
+        #: misspelling did not fail -- it produced an arm bit-identical to the
+        #: champion and reported it as a clean null. P43's C3 arm was written
+        #: "atask" instead of "at_ask" and returned +0.0000 with a ZERO-WIDTH
+        #: interval against SESTINA, which is the signature of an experiment
+        #: that never ran. A knob that ignores what it does not recognise
+        #: manufactures exactly the result an ablation is hoping for.
+        if depth_mode not in _DEPTH_MODES:
+            raise ValueError(
+                f"depth_mode={depth_mode!r} is not one of "
+                f"{sorted(_DEPTH_MODES)}; an unrecognised mode would silently "
+                "behave as 'initial' and report a null that was never measured")
         self.depth_mode = depth_mode
         self.count_mode = count_mode
         self.opp_lambda = opp_lambda

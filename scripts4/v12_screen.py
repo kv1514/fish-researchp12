@@ -65,7 +65,7 @@ ARMS = {
     "C1b_gamma_off": {"opponent_gamma": 0.0},
     "C1c_gamma_fitted": {"opponent_gamma": ALPHA_HAT, "gamma_team": 0.35},
     "C2_avoid_doomed": {"avoid_doomed_asks": True},
-    "C3_depth_atask": {"depth_mode": "atask"},
+    "C3_depth_at_ask": {"depth_mode": "at_ask"},
 }
 
 
