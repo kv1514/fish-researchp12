@@ -1113,14 +1113,14 @@ WATCH = [
     ("mega_match.json", "n_games", "{:,d}",
      "games in the corrected head-to-head", "corrected margin &"),
     ("mega_match.json", "ask_hit_kv", "{:.2%}",
-     "our ask hit rate at rev 3", "corrected ask hit rate &"),
+     "our ask hit rate at rev 3", "hit rate, ours / theirs &"),
     ("mega_match.json", "ask_hit_dylan", "{:.2%}",
-     "their ask hit rate at rev 3", "corrected ask hit rate &"),
+     "their ask hit rate at rev 3", "hit rate, ours / theirs &"),
     ("mega_match.json", "declare_right_kv", "{:.2%}",
-     "our declaration accuracy at rev 3", "corrected declaration accuracy &"),
+     "our declaration accuracy at rev 3", "declaring right, ours / theirs &"),
     ("mega_match.json", "declare_right_dylan", "{:.2%}",
      "their declaration accuracy at rev 3",
-     "corrected declaration accuracy &"),
+     "declaring right, ours / theirs &"),
     # The same pairing measured in THEIR arbiter. Watched for the same reason
     # every other cross-engine figure is: it is the counterweight to the
     # headline, and a counterweight that drifts is worse than none.
