@@ -684,11 +684,21 @@ as opponent-specific and not shipped. &
 Yes, and stated as the expected outcome: that none of the three clears the
 $0.6$ gap and v1.2 does not beat SESTINA. Multiplicity across three candidates
 is named in the document rather than in a discussion section. &
-In flight. Baseline at rev 3 is
-\path{results/mega_match.json}; the prior exploration of this space does not
-transfer, because every earlier measurement against v0.7 ran through the
-bridge defect of \S\ref{sec:otherarbiter}. &
---- \\
+\textbf{NOTHING SHIPS}, as predicted. No arm clears either half of the
+bar, so none reaches confirm and the stacking arm is not licensed:
+$\gamma{=}0$ at $-0.5867$ / $-1.0667$, $\gamma{=}\hat\alpha$ at
+$-0.9033$ / $-2.0033$, \texttt{avoid\_doomed\_asks} at $-0.0933$ /
+$-0.0900$, \texttt{depth\_mode} at $-0.0033$ / $-0.0867$ (vs SESTINA /
+self-play). Two lessons outrank the nulls. R0's re-measured exponent
+survives the bridge repair ($-1.1055$ against $-1.0041$), and acting on
+it is the worst arm in the study --- a correct measurement of an
+opponent does not license a change to us, and only the self-play half of
+the bar separates those. And removing the opponent model entirely costs
+$-0.59$ / $-1.07$, so the mis-signed model is an \emph{asset}: being
+wrong about an opponent's propensity beats having no opinion.
+\path{results/v12_screen.json},
+\path{results/v12_screen_c3.json} &
+\S\ref{sec:otherarbiter} \\
 
 \end{longtable}
 }
