@@ -58,6 +58,30 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_file(self, path: Path, ctype: str, cache: str):
+        """Stream a file from the deployment bundle.
+
+        Vercel serves public/ statically and everything else only through this
+        function, so a file that must stay in ONE place in the repository -- the
+        paper, which paper/build.sh writes next to its own sources -- can still
+        be served without committing a second copy that drifts. vercel.json's
+        includeFiles has to name it or it is not in the bundle at all; the
+        smoke test in tests4/test_paper_route.py is what notices if it stops
+        being.
+        """
+        try:
+            data = path.read_bytes()
+        except OSError:
+            return self._send({"error": "not found"}, 404)
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Content-Disposition",
+                         f'inline; filename="{path.name}"')
+        self.send_header("Cache-Control", cache)
+        self.end_headers()
+        self.wfile.write(data)
+
     def _body(self) -> dict:
         n = int(self.headers.get("Content-Length") or 0)
         if n <= 0:
@@ -80,6 +104,17 @@ class handler(BaseHTTPRequestHandler):
                      "cards": [{"id": c, "name": card_name(c), "red": is_red(c)}
                                for c in half_suit_cards(h)]}
                     for h in range(len(HALF_SUIT_NAMES))]})
+            if op == "paper":
+                # The paper itself, at /paper.pdf via vercel.json's rewrite.
+                # Cached at the edge rather than in the browser: a deploy
+                # purges the CDN, so a reader gets the new build the first
+                # time anyone asks for it after a push, and max-age=0 keeps a
+                # browser from holding a stale copy past that.
+                return self._send_file(
+                    ROOT / "paper" / "kraken.pdf", "application/pdf",
+                    "public, max-age=0, s-maxage=3600, "
+                    "stale-while-revalidate=86400")
+
             if op == "health":
                 # room_backend is reported because the difference matters and
                 # is otherwise invisible: on "memory" a room works for exactly

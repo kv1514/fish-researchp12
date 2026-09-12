@@ -3,10 +3,14 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
-      "includeFiles": "{fish,fish4,api,external_v07}/**"
+      "includeFiles": "{fish/**,fish4/**,api/**,external_v07/**,paper/kraken.pdf}"
     }
   },
   "rewrites": [
+    {
+      "source": "/paper.pdf",
+      "destination": "/api/index?op=paper"
+    },
     {
       "source": "/api/(.*)",
       "destination": "/api/index?op=$1"
@@ -23,5 +27,5 @@
       ]
     }
   ],
-  "ignoreCommand": "if [ -z \"$VERCEL_GIT_PREVIOUS_SHA\" ]; then exit 1; fi; git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- api public vercel.json requirements.txt fish fish4 external_v07 2>/dev/null && exit 0; exit 1"
+  "ignoreCommand": "if [ -z \"$VERCEL_GIT_PREVIOUS_SHA\" ]; then exit 1; fi; git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- api public vercel.json requirements.txt fish fish4 external_v07 paper/kraken.pdf 2>/dev/null && exit 0; exit 1"
 }
