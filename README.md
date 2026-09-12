@@ -49,17 +49,18 @@ toward understanding what near-optimal Fish actually looks like.
 > correction then over-read a single recovery as a rule. Three passes over four
 > sentences, each one shorter on evidence than it sounded.
 
-**Play it:**
-[fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
---- six-player Literature against KRAKEN v1.1, with the engine's own posterior
+**Play it:** [fish-engine.vercel.app](https://fish-engine.vercel.app/) ---
+six-player Literature against KRAKEN v1.1, with the engine's own posterior
 visible while you play. Public, no sign-in, nothing stored; a game lives in the
 browser tab. The paper is served from the same site at
-[`/paper.pdf`](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/paper.pdf),
-out of `paper/kraken.pdf` itself rather than a second copy that could go stale.
-The link is Vercel's stable per-branch URL, so it follows this branch rather
-than any one deployment. The project's *production* URL tracks `main`, which
-carries none of `api/`, `public/` or `fish4/`, so it 404s until this work
-merges.
+[`/paper.pdf`](https://fish-engine.vercel.app/paper.pdf), out of
+`paper/kraken.pdf` itself rather than a second copy that could go stale.
+
+That is the *production* URL and it tracks `main`. This branch also has a
+stable per-branch preview at
+`fish-engine-git-claude-fishnbot-work-access-g7ciey-sidespace.vercel.app`,
+which follows the branch rather than any one deployment --- useful while work
+is in flight, and not the link to give anybody.
 
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
 - Research log, v0.3: [RESEARCH_LOG.md](RESEARCH_LOG.md) (v0.4 keeps its record in
