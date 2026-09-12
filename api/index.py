@@ -120,8 +120,17 @@ class handler(BaseHTTPRequestHandler):
                 # is otherwise invisible: on "memory" a room works for exactly
                 # one player, which looks like a bug in the game rather than a
                 # deployment that has no shared store configured.
+                #
+                # `paper` is here for the same reason and was learnt the same
+                # way. Whether the PDF reached the bundle depends on
+                # vercel.json's includeFiles AND on .vercelignore, neither of
+                # which fails at build time -- the first deploy of the route
+                # 404ed on the live site while every local check passed. One
+                # boolean here says which side of that a deployment is on.
                 return self._send({"ok": True,
-                                   "room_backend": _rooms.backend_name()})
+                                   "room_backend": _rooms.backend_name(),
+                                   "paper": (ROOT / "paper"
+                                             / "kraken.pdf").exists()})
             return self._send({"error": "not found"}, 404)
         except Exception:                            # pragma: no cover
             traceback.print_exc()

@@ -94,6 +94,32 @@ def test_the_paper_is_in_the_function_bundle():
         assert _matches(inc, need), f"includeFiles no longer ships {need}"
 
 
+def test_vercelignore_lets_the_paper_through():
+    """includeFiles cannot include a file the upload never carried.
+
+    `.vercelignore` kept `paper/`, so the whole directory was stripped before
+    the build and includeFiles had nothing to match. Nothing failed: the build
+    succeeded, the route deployed, and /paper.pdf returned the route's own 404
+    on the live site while every check here passed.
+
+    The two lines have to be exactly this shape. A bare `paper/` excludes the
+    DIRECTORY, and gitignore semantics never descend into an excluded
+    directory, so the negation below it would be unreachable -- which reads as
+    correct and is not.
+    """
+    lines = [l.strip() for l in (ROOT / ".vercelignore").read_text().splitlines()
+             if l.strip() and not l.strip().startswith("#")]
+    assert "paper/" not in lines, (
+        ".vercelignore excludes the directory `paper/`, which makes any "
+        "`!paper/kraken.pdf` below it unreachable. Use `paper/*`.")
+    assert "!paper/kraken.pdf" in lines, (
+        ".vercelignore does not re-include paper/kraken.pdf, so it is stripped "
+        "from the upload and /paper.pdf 404s in production.")
+    assert "paper/*" in lines, (
+        ".vercelignore no longer excludes the rest of paper/; the function "
+        "bundle does not need the sources, the figures or the build logs.")
+
+
 def test_a_paper_change_redeploys_the_site():
     """The ignoreCommand skips a build when no watched path changed.
 
