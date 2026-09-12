@@ -55,18 +55,43 @@ def _brace_expand(pattern: str) -> list[str]:
     return out
 
 
+def _glob_re(pattern: str) -> re.Pattern:
+    """A glob alternative as a regex: `**` crosses directories, `*` does not."""
+    out, i = [], 0
+    while i < len(pattern):
+        if pattern.startswith("**", i):
+            out.append(".*")
+            i += 2
+        elif pattern[i] == "*":
+            out.append("[^/]*")
+            i += 1
+        else:
+            out.append(re.escape(pattern[i]))
+            i += 1
+    return re.compile("".join(out) + r"\Z")
+
+
+def _matches(pattern: str, path: str) -> bool:
+    return any(_glob_re(alt).match(path) for alt in _brace_expand(pattern))
+
+
 def test_the_paper_is_in_the_function_bundle():
-    """Vercel ships only what includeFiles names, and public/ is not it."""
+    """Vercel ships only what includeFiles names, and public/ is not it.
+
+    MATCHED, not merely NAMED. The first attempt at this wrote
+    `{fish/**,...,paper/kraken.pdf}` -- every alternative a full sub-pattern --
+    and a substring check on the file name passed happily while the deployed
+    function returned 404 for /paper.pdf, because that is not a form Vercel's
+    glob expands. So the check is the match.
+    """
     inc = _vercel()["functions"]["api/index.py"]["includeFiles"]
-    alts = _brace_expand(inc)
-    assert "paper/kraken.pdf" in alts, (
-        f"includeFiles {inc!r} expands to {alts} and none of them is exactly "
-        f"paper/kraken.pdf. The /paper.pdf route reads that file at request "
-        f"time; without it in the bundle the link 404s in production and "
-        f"nowhere else.")
-    # And the expansion did not quietly drop the code the function needs.
-    for need in ("api/**", "fish/**", "fish4/**"):
-        assert need in alts, f"includeFiles no longer ships {need}"
+    assert _matches(inc, "paper/kraken.pdf"), (
+        f"includeFiles {inc!r} does not match paper/kraken.pdf. The "
+        f"/paper.pdf route reads that file at request time; without it in the "
+        f"bundle the link 404s in production and nowhere else.")
+    # And the pattern did not quietly stop shipping the code the function needs.
+    for need in ("api/index.py", "fish/engine.py", "fish4/agent4.py"):
+        assert _matches(inc, need), f"includeFiles no longer ships {need}"
 
 
 def test_a_paper_change_redeploys_the_site():

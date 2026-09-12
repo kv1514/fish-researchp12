@@ -3,7 +3,7 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
-      "includeFiles": "{fish/**,fish4/**,api/**,external_v07/**,paper/kraken.pdf}"
+      "includeFiles": "{fish,fish4,api,external_v07,paper}/**"
     }
   },
   "rewrites": [
