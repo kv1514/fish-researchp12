@@ -733,6 +733,19 @@ WATCH = [
      "ladder, the instrument check", "across those three is"),
     ("dylan_ladder_sweep.json", "opponents.dylan_v04.our_err", "{:.2%}",
      "ladder, our error rate against v04", "rate is $8.38\\%$ against their"),
+    # The web livelock (scripts4/web_termination.py), both seeding arms on the
+    # same deals. The claim in the paper is a CONTRAST, so both halves are
+    # watched: a drift in either would leave "56 against 0" standing on a pair
+    # of runs that no longer show it.
+    ("web_termination_r1_frozen_1000.json", "n_hung", "{:d}",
+     "web livelock, games that never ended with the stream reset",
+     "\\textbf{$56$ of $2{,}000$ games never ended with the stream reset before every"),
+    ("web_termination_r1_ply_1000.json", "n_hung", "{:d}",
+     "web livelock, games that never ended with the stream advancing",
+     "move, against $0$ of $2{,}000$ with it advancing}. Every one of the $56$ had"),
+    ("web_termination_r1_frozen_1000.json", "max_terminating_actions", "{:d}",
+     "web livelock, the longest game that did finish",
+     "longest game that did finish ran $329$ actions, against a median of about"),
     # The dose-linearity run (prereg/signal_dose_linearity.md). The verdict is
     # NEITHER, which rests on ONE interval excluding two predictions, so the
     # interval, both predictions and the power limit it had to clear are all

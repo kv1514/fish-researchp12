@@ -3959,60 +3959,85 @@ tested. What is dead is the pair of readings this project wrote down.
 
 Nothing ships. The deployed configuration still has signalling off.
 
-## OPEN DEFECT: about one web game in a hundred never ends
+## CLOSED: the web livelock was the deployment freezing the engine's dice
 
-Found 2026-09-04 by chasing a CI failure rather than by looking for it.
-`tests4/test_web_session.py::test_both_modes_reveal_the_same_shape_at_game_over`
-went red on 5db64ab with "play fixture never finished". The diff it failed on
-touched signalling analysis and the paper and nothing near the web session, so
-the first question was whether the bound was simply too tight. It is not.
+Found 2026-09-04 by chasing a CI failure; diagnosed and fixed 2026-09-12.
+The earlier record of this defect is superseded by what follows, including its
+rate: "about one game in a hundred" was measured on a protocol that is not the
+one the site runs.
 
-**Counts, and they are counts rather than a rate to two decimals.** On the
-SHIPPED path (`new_session`, 54-card, champion gamma, `WEB_DRAWS` draws),
-playing until either the game ends or the action log reaches the engine's own
-MAX_LOG ceiling of 1,200:
+**What the site does that no measured run does.** Every request rebuilds the
+`Session` from its sealed token and replays the log, which rebuilds all six
+agents and re-seeds each one from the deal. A paced client asks for ONE engine
+move per request. So on the deployed path every engine move was decided by a
+freshly seeded agent -- and this policy is stochastic: `fish4/agent4.py` draws
+from `self.rng` for the posterior's sampler and for the tie-break among
+equal-scoring asks, and `fish4/tablebase4.py` draws from it again when the
+endgame is pinned and solved exactly.
 
-    play mode       4 of 260 fixtures never terminated
-    spectate mode   1 of 260 fixtures never terminated
+A reset stream makes the engine's move a pure function of the position. A
+position that recurs therefore produces the move that produced it. That is the
+whole mechanism, and it is a property of the deployment rather than of the
+policy.
 
-A median game is about 105 actions. These reach 1,190 and are not finished.
-A first sample of 60 gave 3 hangs and suggested 5%; a further 200 gave 1. The
-honest reading is "on the order of one game in a hundred", and the first
-estimate was an unlucky draw quoted too confidently.
+**The measurement that isolates it**, `scripts4/web_termination.py`, 1,000
+deals a mode, both modes, the deployed protocol (a restore per move), the two
+seeding arms on IDENTICAL deals:
 
-**It is a livelock, not a long game.** A captured hang had 7 of 9 half-suits
-resolved, 12 cards left across the six seats, and our seat on turn. Its last
-200 actions are a single 8-action cycle repeated 25 times:
+    seeding   games   never ended   median actions   longest that ended
+    frozen     2000            56          104-107                     329
+    ply        2000             0          103-107                     289
 
-    ask 3 for 15 | ask 2 for 30 | ask 5 for 13 | ask 0 for 35
-    ask 3 for 15 | ask 2 for 30 | ask 3 for 12 | ask 4 for 30
+`frozen` is what shipped: `Session.seed_at(0)` on every restore. `ply` is what
+ships now: the seed mixes in the number of actions already played, so the
+stream advances the way it does in every measured run. The switch is
+`api/_engine.SEED_ADVANCES_WITH_PLY`, kept so the defect stays re-runnable
+rather than living only in git history.
 
-Two live half-suits passed back and forth between the same seats, every ask
-succeeding, nobody ever declaring. Nothing is stuck in the sense of having no
-legal move; the position simply cycles.
+**The signature, and it is sharp.** Every livelocked game in the frozen arm had
+exactly SEVEN of nine half-suits resolved: 51 of 51 in play mode and 5 of 5 in
+spectate, no exceptions. Two live half-suits, twelve cards, passed back and
+forth between the teams, with neither side ever holding all six of either.
 
-**Why this matters beyond CI.** This is the configuration the public site
-serves. A visitor at fish-engine.vercel.app can be dealt a game that never
-ends, and would sit watching six bots trade two half-suits until they gave up.
-It is not a research artifact.
+**Why the engine's own stall breaker did not fire.** It was never reached.
+`fish4/agent4.py` forces a declaration after `stall_window = 80` actions with
+nothing resolved, but `act` consults the tablebase FIRST, and at twelve live
+cards the public record pins every one of them -- so `tablebase_action` returned
+a move on every ply of the cycle and the stall check below it was dead code for
+that position. A probe at the hang: `pinned=True`, `stalled=True`,
+`claimable=[3, 4]`, and the agent playing an ask the exact solver handed it.
+Two fixtures that ran to the 1,200-action ceiling under frozen seeding
+(`term-play-000009`, `term-play-000047`, at 284 and 310 actions with nothing
+resolved) finish in 92 and 94 actions under ply seeding.
 
-**What was done and what deliberately was not.** The test's fixture is pinned
-to a fixed nonce, so CI stops being a coin flip that comes up tails about once
-in fifty runs; that test asserts the SHAPE of the reveal payload at game over,
-which does not depend on the deal. THE ENGINE IS UNCHANGED. Making the
-champion declare or concede out of a cycle is a change to shipped play
-behaviour, it would move numbers this paper reports, and it is not a thing to
-do while chasing a red build.
+**And the arbiter now has the rule the rest of this project always had.**
+`fish4/match.py::play_capped` caps every measured game and scores it on the
+half-suits actually resolved, unresolved ones counting for nobody -- the
+semantics `fish4/exact_ii.py` gives an unbroken cycle. `api/_engine.py` carries
+`WEB_MAX_ACTIONS` (600) and the tighter `WEB_MAX_IDLE` (200), both clear of
+anything either arm measured -- the longest game that ever finished ran 329
+actions and the longest silence inside one was 81 -- and neither visible to any
+agent. That last part is checked rather than argued:
+`scripts4/web_cap_check.py` replays both arms on the same deals and compares
+ACTION LOGS instead of means, because an arbiter rule that no agent can see
+either changes a game or does not, exactly, and one counterexample would
+settle it. **300 of 300 games identical**
+(`results/web_cap_check_r1_150.json`). They are a guarantee, not the fix: after
+the seeding change they should never fire, and they exist because "should
+never" is not "cannot".
 
-**What a fix would have to decide.** The cycle is individually rational -- each
-ask succeeds and each is a legal, sensible move -- so a cure has to come from
-somewhere outside the per-ask objective: a repetition rule in the arbiter, a
-declaration forced by exhaustion, or a term that prices the position's own
-recurrence. All three change measured play. Prior art in this project: the
-same "trading a card back and forth" pattern is noted for the public-information
-heuristic, where it needed 181 plies on average to terminate.
+**Why 81 is the interesting number there.** `fish4/agent4.py` forces a
+declaration after `stall_window = 80` actions with nothing resolved. In both
+arms and both modes, the longest a game that DID finish went without resolving
+anything is 81 -- so the stall breaker is not merely present, it is the thing
+that ends the quiet stretches, and it does so on the ply after its own window.
+It failed only where the tablebase pre-empted it.
 
-This is recorded as OPEN. Nothing about it is fixed.
+**Nothing in the paper moves.** Every measured number is taken through
+`fish4/match.py` or `fish4/evalx/harness.py`, neither of which goes anywhere
+near `api/_engine.py`, and the policy tuple `V06_DEPLOYED` is untouched
+(`CONFIG_FINGERPRINT` unchanged). What changed is which random stream the
+deployed session hands its agents.
 
 ## Dylan's whole ladder: our margin is his misdeclaration rate, r = 0.95
 

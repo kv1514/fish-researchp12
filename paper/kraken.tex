@@ -8390,6 +8390,41 @@ not what the site runs. Signalling and the pre-play convention are off
 (\texttt{signal\_mode} defaults to \texttt{"off"}), so nothing in
 \S\ref{sec:v11} changes the deployed engine.
 
+\paragraph{A stochastic policy, re-seeded on every move.} The deployed session
+is stateless by construction: the client carries the game and every request
+rebuilds it from a sealed token plus the public action log. Rebuilding the game
+rebuilds the six agents, and until this release it re-seeded each of them from
+the deal --- so a paced client, which asks for one engine move per request, took
+every move from a freshly seeded agent. The same observation appears above in a
+narrower setting, where a stateless bridge cannot share an RNG stream with a
+long-lived one (\S\ref{sec:bridges}); this is what it costs when the stateless
+thing is the engine itself.
+
+It costs something because this policy is not deterministic. The posterior's
+sampler draws from the agent's stream, the tie-break among equal-scoring asks
+draws from it, and the exact endgame solver draws from it again once the public
+record pins every live card. Reset that stream before each move and the
+engine's answer becomes a pure function of the position --- so a position that
+recurs produces the move that produced it, and two sides both playing well can
+pass the last two half-suits back and forth without end.
+
+The size of it is measurable on the deployed path, holding the deal fixed and
+changing only the seeding. Over $1{,}000$ deals in each of two modes:
+\textbf{$56$ of $2{,}000$ games never ended with the stream reset before every
+move, against $0$ of $2{,}000$ with it advancing}. Every one of the $56$ had
+exactly seven of nine half-suits resolved --- two live half-suits, twelve cards,
+passed back and forth with neither side ever holding all six of either. The
+longest game that did finish ran $329$ actions, against a median of about
+$105$.
+
+Nothing measured in this paper is affected. Every figure here is taken through
+\path{fish4/match.py} or \path{fish4/evalx/harness.py}, both of which play a
+whole game with one agent and therefore always had the advancing stream, and the
+deployed policy tuple is unchanged. What changed is the harness the site wraps
+around it. It is recorded here because \emph{the policy is stochastic} is an
+assumption every evaluation in this paper makes silently, and one deployment
+quietly violated it.
+
 Everything else is at its default, and the defaults are deliberately v0.3's own
 ask objective ($w_{\mathrm{suit}} = 0.06$, $w_{\mathrm{turn}} = 0.60$,
 $w_{\mathrm{scarce}} = 0.20$). The improvement reported here comes from

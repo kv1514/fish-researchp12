@@ -1392,18 +1392,40 @@ function drawLedger(box, s) {
   box.appendChild(t);
 }
 
+// How many half-suits nobody ever settled. Only ever non-zero in a stopped
+// game: a game that ends on the cards has every set resolved by definition.
+function unresolvedSets(s) {
+  return (s.set_winner || []).filter((w) => w === null).length;
+}
+
+// Two teams that both play well can cycle a half-suit back and forth forever,
+// every ask succeeding and neither side ever holding all six. The server stops
+// such a game at its action cap and scores what was resolved. Saying "game
+// over" on a board with live sets and no explanation reads as a broken site,
+// so the ending gets its own words.
+const STOPPED_WHY =
+  "Neither team could finish: the last sets were being passed back and "
+  + "forth with nobody ever able to declare them. The table stops a game "
+  + "that has stopped making progress, and the unresolved sets score for "
+  + "nobody.";
+
 function renderAction() {
   const s = S.snap;
   const box = $("t-action");
   box.innerHTML = "";
 
   if (s.terminal) {
-    $("t-actionhead").textContent = "Game over";
+    $("t-actionhead").textContent = s.stopped ? "Stopped" : "Game over";
     const you = s.score.you, them = s.score.them;
     box.appendChild(el("p", "big",
       you > them ? `You win, ${you}–${them}.`
         : you < them ? `You lose, ${you}–${them}.`
           : `Tied, ${you}–${them}.`));
+    if (s.stopped) {
+      const left = unresolvedSets(s);
+      box.appendChild(el("p", "note",
+        `${left} set${left === 1 ? "" : "s"} never resolved. ${STOPPED_WHY}`));
+    }
     if (s.reveal) {
       const r = el("div", "reveal");
       s.reveal.forEach((h, p) => {
@@ -1413,7 +1435,9 @@ function renderAction() {
       // Not "every hand": a card's holder is only ever established when its set
       // is declared, and a set is stripped from every hand as it resolves. What
       // can honestly be shown is where each card sat at the moment it resolved.
-      box.appendChild(el("h4", null, "Where the cards were as each set resolved"));
+      box.appendChild(el("h4", null, s.stopped
+        ? "Where the cards were when the table stopped"
+        : "Where the cards were as each set resolved"));
       box.appendChild(r);
     }
     if (s.declarations && s.declarations.length) {
@@ -1964,7 +1988,8 @@ function render() {
   $("t-think").hidden = !!s.spectate;
   $("t-auto").parentElement.hidden = !!s.spectate;
   $("t-void").textContent = s.score.nulled ? `${s.score.nulled} void` : "";
-  $("t-turn").textContent = s.terminal ? "Game over"
+  $("t-turn").textContent = s.terminal
+    ? (s.stopped ? "Stopped — no progress left" : "Game over")
     : s.your_turn ? "Your turn." : `${nm(s.turn)} to move.`;
   $("t-turn").className = "turnline" + (s.your_turn && !s.terminal ? " you" : "");
   digestLog();
@@ -2141,9 +2166,12 @@ function watchGameOver() {
   S.series.d += s.score.you;
   S.series.k += s.score.them;
   S.series.games += 1;
+  const left = unresolvedSets(s);
   $("t-turn").textContent =
-    `Game over — Dylan ${s.score.you}, KRAKEN ${s.score.them}` +
+    `${s.stopped ? "Stopped" : "Game over"} — Dylan ${s.score.you}, `
+    + `KRAKEN ${s.score.them}` +
     (s.score.nulled ? ` (${s.score.nulled} void)` : "") +
+    (left ? ` (${left} unresolved)` : "") +
     ` · ${watchTally()} · next deal in a moment…`;
   announce(`Game over. Dylan's FishBot ${s.score.you}, `
     + `KRAKEN ${s.score.them}. `

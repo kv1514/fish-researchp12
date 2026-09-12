@@ -220,6 +220,66 @@ MAX_ADVANCE = 400
 #: arbitrarily expensive by an oversized request body.
 MAX_LOG = 1200
 
+#: WHERE A GAME ON THIS PATH ENDS EVEN IF THE CARDS DO NOT.
+#:
+#: Two teams that both play well can cycle: a half-suit passes back and forth,
+#: every ask succeeding, neither side ever holding all six, and nobody able to
+#: declare. Nothing is stuck -- there are legal moves throughout -- the position
+#: simply recurs. RESEARCH_FRONTIER.md has a captured one whose last 200 actions
+#: are a single 8-action cycle repeated 25 times.
+#:
+#: THIS IS NOT A NEW RULE FOR THIS PROJECT, it is the rule the rest of it has
+#: always used. `fish4/match.py::play_capped` caps every measured game and
+#: scores it on the half-suits actually resolved, with the unresolved ones
+#: counting for nobody -- the same semantics `fish4/exact_ii.py` gives an
+#: unbroken cycle ("if play never progresses, neither side scores again"). The
+#: web was the one surface that never got it, which is why the web was the one
+#: surface where a game could run forever.
+#:
+#: IT IS NOT A POLICY CHANGE. No agent sees this number and no decision depends
+#: on it; the arbiter stops the game, the bots play exactly as they did. Every
+#: game that used to finish finishes identically, and that is checked rather
+#: than argued: `scripts4/web_cap_check.py` replays both arms on the same deals
+#: and compares ACTION LOGS, not means. 300 of 300 games identical
+#: (`results/web_cap_check_r1_150.json`).
+#:
+#: WHY 600. Measured over 4,000 games on this exact path, both modes, the
+#: deployed protocol, both seeding arms
+#: (`results/web_termination_r1_ply_1000.json`, `..._frozen_1000.json`): the
+#: longest game that ever terminated ran 329 actions, against a median of about
+#: 105. 600 is 1.8x that longest game and about six times the median, so no game
+#: either study saw would have been stopped. It is also half of MAX_LOG, so a
+#: stopped game ends with a score and a reveal rather than dying on "action log
+#: too long", which is what a player used to get instead.
+WEB_MAX_ACTIONS = 600
+
+#: ACTIONS ALLOWED WITH NO HALF-SUIT RESOLVING, which is the rule that actually
+#: rescues the player. WEB_MAX_ACTIONS guarantees the game ENDS; it does not
+#: guarantee it ends soon. The table's default pace is twelve seconds an engine
+#: move, so six hundred actions is about two hours -- correct, and useless to
+#: somebody sitting there.
+#:
+#: A cycle makes no progress by definition, so the thing to watch is progress.
+#: Every ClaimEvent resolves its half-suit (to the declaring team, or under the
+#: award rule to the other one), and no ask ever does, so "actions since the
+#: last ClaimEvent" is exactly how long the game has been going nowhere.
+#:
+#: WHY 200. On the same 4,000 games the longest a game that DID finish ever went
+#: without resolving anything is 81 actions, in both arms and both modes. That
+#: number is not a coincidence: `fish4/agent4.py` forces a declaration after
+#: `stall_window = 80` actions with nothing resolved, so 80 is where a real game
+#: is made to break its own deadlock and 81 is the ply that follows. 200 is two
+#: and a half times it, and more than the whole median game is long.
+WEB_MAX_IDLE = 200
+
+#: Whether the six agents' random streams advance with the game, which is what
+#: `Session.seed_at` is for and where the argument for it is written out. True
+#: is what ships. It is a module switch rather than a constructor argument so
+#: that `scripts4/web_termination.py` can measure BOTH arms on the same deals
+#: and the defect stays reproducible after it is fixed -- a before/after that
+#: only exists in git history is one nobody can re-run.
+SEED_ADVANCES_WITH_PLY = True
+
 
 #: Used when FISH_SECRET is unset. Random per process, deliberately: the
 #: obvious fallbacks are all things an attacker can read. VERCEL_URL is in the
@@ -463,7 +523,6 @@ class Session:
         self.gamma = gamma
         self.draws = draws
         self.state = GameState.deal(rules, seed=seed)
-        rng = random.Random(seed ^ 0x9E3779B9)
         spec = dict(WEB_SPEC, opponent_gamma=gamma, n_draws=draws)
         self.bots = {}
         for p in range(NUM_PLAYERS):
@@ -483,9 +542,8 @@ class Session:
                 self.bots[p] = make_agent(
                     ("fishbot4", dict(spec, **({"trace": True}
                                                if mode == "spectate" else {}))))
-            self.bots[p].begin_game(p, rules, rng.getrandbits(64))
-        self._helper_seed = rng.getrandbits(64)
         self._helper = None
+        self.seed_at(0)
         self.log: list = []
         #: card -> the seat that held it, learned as claims resolve. The end of
         #: game cannot be reconstructed from ``state.hands``: terminal means
@@ -503,6 +561,84 @@ class Session:
         #: The wire form of every action so far, in order. What the token
         #: commits to, and what the client is expected to send back verbatim.
         self.wire_log: list = []
+
+    # -- randomness -----------------------------------------------------------
+
+    def seed_at(self, ply: int) -> None:
+        """Seed the six agents for a game that is `ply` actions old.
+
+        WHY THE PLY IS IN HERE, and it is the fix for the livelock rather than
+        a refinement of it.
+
+        This engine's policy is stochastic: `fish4/agent4.py` draws from
+        `self.rng` for the posterior's sampler and for the tie-break among
+        equal-scoring asks, and `fish4/tablebase4.py` draws from it again when
+        the endgame is pinned and solved exactly. Every measurement in this
+        project plays a whole game with one agent, so that stream ADVANCES: the
+        same position reached twice is not decided the same way twice.
+
+        The web is stateless. Every request rebuilds the Session from the token
+        and re-seeds all six agents from the deal, and a paced client asks for
+        one move per request -- so on the deployed path the stream was RESET
+        before every single move, and the engine's answer became a pure
+        function of the position. A position that recurs then produces the move
+        that produced it, forever. That is the livelock, and it is a property
+        of the deployment rather than of the policy: measured on identical
+        deals, 0 of 2,000 games failed to end with one Session per game and 56
+        of 2,000 failed with one Session per move
+        (`results/web_termination_r0_1000.json`, `..._r1_1000.json`).
+
+        Mixing the ply into the seed restores what every measured run has: a
+        stream that moves on. It is still fully deterministic -- the same token
+        and the same log reseed identically, so a repeated or lost request
+        still costs nothing -- and at ply 0 it is bit-identical to what came
+        before, so a fresh deal is unchanged.
+        """
+        if not SEED_ADVANCES_WITH_PLY:
+            ply = 0
+        # XOR rather than add so that ply 0 is exactly the old constant.
+        rng = random.Random(self.seed ^ 0x9E3779B9 ^ (ply * 0x9E3779B97F4A7C15))
+        for q in sorted(self.bots):
+            self.bots[q].begin_game(q, self.rules, rng.getrandbits(64))
+        self._helper_seed = rng.getrandbits(64)
+        # The suggestion helper carries the same stream, so "what would the
+        # engine do here" moves on with the game too.
+        self._helper = None
+
+    # -- when the game is over ------------------------------------------------
+
+    @property
+    def idle(self) -> int:
+        """Actions since a half-suit last resolved.
+
+        Read off `state.history` rather than counted as the game goes, because
+        every request rebuilds this object from the log: a counter kept on the
+        instance would reset to zero on each restore, and the rule would never
+        fire on the one path it exists for.
+        """
+        gap = 0
+        for ev in reversed(self.state.history):
+            if isinstance(ev, ClaimEvent):
+                return gap
+            gap += 1
+        return gap
+
+    @property
+    def stopped(self) -> bool:
+        """Ended with half-suits still live, by either arbiter rule.
+
+        Distinct from terminal so the table can SAY so. A player who is shown
+        "game over" on a board with two unresolved sets and no explanation
+        reasonably concludes the site is broken.
+        """
+        return (not self.state.is_terminal
+                and (len(self.wire_log) >= WEB_MAX_ACTIONS
+                     or self.idle >= WEB_MAX_IDLE))
+
+    @property
+    def over(self) -> bool:
+        """No further move will be made in this game, for either reason."""
+        return self.state.is_terminal or self.stopped
 
     # -- reconstruction -------------------------------------------------------
 
@@ -553,6 +689,9 @@ class Session:
                 # cards actually were came back empty on any refresh, which is
                 # the one moment a player most wants to check their reading.
                 s.note_reveal(ev)
+        # AFTER the replay, because the ply is what the seeding depends on and
+        # the ply is not known until the log has been applied. See seed_at.
+        s.seed_at(len(s.wire_log))
         return s
 
     def token(self) -> str:
@@ -579,7 +718,7 @@ class Session:
         played = []
         n = 0
         cap = min(int(max_moves), MAX_ADVANCE)
-        while (not self.state.is_terminal and self.state.turn != self.seat
+        while (not self.over and self.state.turn != self.seat
                and n < cap):
             p = self.state.turn
             action = self.bots[p].act(Observation.from_state(self.state, p))
@@ -632,8 +771,19 @@ class Session:
         empty dict -- and since `{}` is truthy in JS the client walked it as an
         array and threw at every game over.
         """
-        return [[card_name(c) for c in sorted(self.revealed)
-                 if self.revealed[c] == p] for p in range(NUM_PLAYERS)]
+        known = self.revealed
+        if self.stopped:
+            # A stopped game leaves live cards in hands, and those never
+            # entered `revealed` because nothing resolved them. The game is
+            # over, so there is nothing left to protect and every card can be
+            # shown -- which is also what keeps this list 54 cards long in both
+            # endings, the invariant the client walks.
+            known = dict(known)
+            for q in range(NUM_PLAYERS):
+                for c in mask_to_cards(self.state.hands[q]):
+                    known.setdefault(c, q)
+        return [[card_name(c) for c in sorted(known)
+                 if known[c] == p] for p in range(NUM_PLAYERS)]
 
     def _declarations(self) -> list:
         """Every declaration in the game, in order, whatever the log tail is.
@@ -709,7 +859,8 @@ class Session:
             snap = {
                 "token": self.token(),
                 "seat": -1, "team": None, "spectate": True,
-                "turn": st.turn, "terminal": st.is_terminal,
+                "turn": st.turn, "terminal": self.over,
+                "stopped": self.stopped,
                 "your_turn": False,
                 "score": {"you": a, "them": b, "nulled": nulls},
                 "hand_counts": list(st.hand_counts()),
@@ -734,7 +885,7 @@ class Session:
                 "log": self.log[-LOG_TAIL:],
                 "must_pass": False,
             }
-            if st.is_terminal:
+            if self.over:
                 # The SAME shape play mode sends: six lists, one per seat.
                 # This was an empty dict, and `{}` is truthy in JS, so the
                 # client's `if (s.reveal) s.reveal.forEach(...)` threw at every
@@ -752,8 +903,9 @@ class Session:
         return {
             "token": self.token(),
             "seat": self.seat, "team": mine,
-            "turn": st.turn, "terminal": st.is_terminal,
-            "your_turn": (not st.is_terminal) and st.turn == self.seat,
+            "turn": st.turn, "terminal": self.over,
+            "stopped": self.stopped,
+            "your_turn": (not self.over) and st.turn == self.seat,
             "score": {"you": a if mine == 0 else b,
                       "them": b if mine == 0 else a, "nulled": nulls},
             "hand_counts": list(st.hand_counts()),
@@ -772,14 +924,14 @@ class Session:
                       "hs": c // 6} for c in mask_to_cards(hand)],
             "log": self.log[-LOG_TAIL:],
             "must_pass": bool(st.turn == self.seat and hand == 0
-                              and not st.is_terminal),
+                              and not self.over),
             # Revealed only once every card is public anyway. Before that the
             # server has the layout and the client does not, which is the whole
             # point of sealing the seed.
-            "reveal": self._reveal_rows() if st.is_terminal else None,
+            "reveal": self._reveal_rows() if self.over else None,
             "declarations": (self._declarations()
-                             if st.is_terminal else None),
-            "ask_tally": self._ask_tally() if st.is_terminal else None,
+                             if self.over else None),
+            "ask_tally": self._ask_tally() if self.over else None,
         }
 
     def deductions(self) -> dict:
@@ -859,7 +1011,7 @@ class Session:
         """
         if self.mode == "spectate":
             raise ValueError("no claim check in spectate mode")
-        if self.state.is_terminal:
+        if self.over:
             return {"terminal": True}
         hs = int(half_suit)
         obs = self.obs()
@@ -964,7 +1116,7 @@ class Session:
             # There is no "you" to analyse for, and obs() at seat -1 would
             # quietly build seat 5's view.
             raise ValueError("no analysis in spectate mode")
-        if self.state.is_terminal:
+        if self.over:
             return {"terminal": True}
         from fish4.analyse import Analyser
         an = Analyser(self.rules, self.seat, value_model=None,
