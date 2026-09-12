@@ -9,7 +9,7 @@
   "rewrites": [
     {
       "source": "/paper.pdf",
-      "destination": "/api/index?op=paper"
+      "destination": "/api/paper"
     },
     {
       "source": "/api/(.*)",

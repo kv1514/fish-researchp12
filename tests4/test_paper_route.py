@@ -134,7 +134,18 @@ def test_a_paper_change_redeploys_the_site():
 
 
 def test_the_rewrite_reaches_the_route():
-    assert rewrite("/paper.pdf") == "/api/index?op=paper"
+    """/paper.pdf goes to /api/paper, NOT straight to /api/index?op=paper.
+
+    Measured on the deployment, one variant at a time: /paper, /paper.xyz,
+    /paper.pdfx, /paper.PDF and /foo/paper.pdf all returned the PDF, and
+    /paper.pdf alone returned 404 -- the single path with a rewrite rule
+    pointing at `/api/index?op=paper`. A destination of /api/index is then
+    re-matched by the /api/(.*) rule below it, which rebuilds the query as
+    op=index, and the op the first rule set is gone. Pointing at /api/paper
+    instead lets that second rule do the work it already does correctly for
+    every other route.
+    """
+    assert rewrite("/paper.pdf") == "/api/paper"
     # And the ordinary API routing still works: a rewrite table read from the
     # real file is only useful if it did not shadow what was already there.
     assert rewrite("/api/state") == "/api/index?op=state"
@@ -154,6 +165,7 @@ def test_both_shapes_of_the_request_route_to_the_paper():
     """
     from api.index import route_of
     assert route_of("/paper.pdf", "") == "paper"
+    assert route_of("/api/paper", "") == "paper"
     assert route_of("/api/index", "op=paper") == "paper"
     assert route_of("/paper.pdf", "op=paper") == "paper"
     # and the routes that were already working still resolve
