@@ -1,0 +1,9769 @@
+{
+ "engine": {
+  "digest": "f44749c5dc14",
+  "files": {
+   "fish4/agent4.py": "1c8b5355a4cd",
+   "fish4/adaptive.py": "c4a790573857",
+   "fish4/askfeat.py": "1a9cceb2613f",
+   "fish4/posterior.py": "2bb422b1ca7e",
+   "fish4/lookahead.py": "b3e226a1a941",
+   "fish4/claim4.py": "30925c85eb41",
+   "fish4/oppmodel.py": "81225d4f2518",
+   "fish4/hsvalue.py": "5a56aa5443fc",
+   "fish4/registry4.py": "f80979d9da90",
+   "fish/beliefs.py": "5a9dd46a02db",
+   "fish/engine.py": "a121f20f7004"
+  }
+ },
+ "prereg": "prereg/signal_generality.md",
+ "primary": {
+  "mean": 0.02,
+  "half_width": 0.0432060594884006,
+  "ci95": [
+   -0.023206059488400602,
+   0.0632060594884006
+  ],
+  "n_clusters": 800,
+  "verdict": "NULL AT POWER: covers zero, and at this width that retires the arm rather than leaving it open"
+ },
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 2,
+ "n_games": 1600,
+ "vs": "self",
+ "seed_deal": 12100000,
+ "seed_agent": 121000,
+ "arms": {
+  "A_shipped": {},
+  "B_signal": {
+   "signal_mode": "stuck",
+   "signal_max_p": 0.5
+  }
+ },
+ "margins": {
+  "A_shipped": {
+   "mean": 0.0,
+   "half_width": 0.0,
+   "n_clusters": 800
+  },
+  "B_signal": {
+   "mean": 0.02,
+   "half_width": 0.0432060594884006,
+   "n_clusters": 800
+  }
+ },
+ "effects": {
+  "B_signal": {
+   "mean": 0.02,
+   "half_width": 0.0432060594884006,
+   "ci95": [
+    -0.023206059488400602,
+    0.0632060594884006
+   ],
+   "n_clusters": 800
+  }
+ },
+ "interaction": {
+  "verdict": "NULL AT POWER: covers zero, and at this width that retires the arm rather than leaving it open"
+ },
+ "ledger": {
+  "A_shipped": {
+   "exact": {
+    "n": 894,
+    "per_game": 0.5587,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 5701,
+    "per_game": 3.5631,
+    "wrong": 1,
+    "err": 0.0002
+   },
+   "gate": {
+    "n": 335,
+    "per_game": 0.2094,
+    "wrong": 61,
+    "err": 0.1821
+   },
+   "forced": {
+    "n": 270,
+    "per_game": 0.1688,
+    "wrong": 114,
+    "err": 0.4222
+   },
+   "_wrong_per_game": 0.11
+  },
+  "B_signal": {
+   "exact": {
+    "n": 913,
+    "per_game": 0.5706,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 5751,
+    "per_game": 3.5944,
+    "wrong": 1,
+    "err": 0.0002
+   },
+   "gate": {
+    "n": 206,
+    "per_game": 0.1288,
+    "wrong": 29,
+    "err": 0.1408
+   },
+   "forced": {
+    "n": 304,
+    "per_game": 0.19,
+    "wrong": 115,
+    "err": 0.3783
+   },
+   "_wrong_per_game": 0.0906
+  }
+ },
+ "both_sides": {
+  "A_shipped": {
+   "ours_wrong_per_game": 0.11,
+   "their_declares": 7200,
+   "their_wrong": 176,
+   "their_wrong_per_game": 0.11,
+   "their_err": 0.0244
+  },
+  "B_signal": {
+   "ours_wrong_per_game": 0.0906,
+   "their_declares": 7226,
+   "their_wrong": 187,
+   "their_wrong_per_game": 0.1169,
+   "their_err": 0.0259
+  }
+ },
+ "their_wrong_effects": {
+  "B_signal": {
+   "mean": 0.006875,
+   "half_width": 0.007845984938897285,
+   "ci95": [
+    -0.0009709849388972848,
+    0.014720984938897286
+   ],
+   "n_clusters": 800
+  }
+ },
+ "signal_turns_per_game": {
+  "A_shipped": 0.0,
+  "B_signal": 0.487
+ },
+ "games": [
+  {
+   "deal": 12100000,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100000,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100001,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100001,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100002,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100002,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100003,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100003,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100004,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100004,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100005,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100005,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100006,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100006,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100007,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100007,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100008,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100008,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100009,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100009,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100010,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100010,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100011,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100011,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100012,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100012,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100013,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100013,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100014,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100014,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100015,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100015,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100016,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100016,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100017,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100017,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100018,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100018,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100019,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100019,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100020,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100020,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100021,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100021,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100022,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100022,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100023,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100023,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100024,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100024,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100025,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100025,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100026,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100026,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100027,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100027,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100028,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100028,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100029,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100029,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100030,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100030,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100031,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100031,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100032,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100032,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100033,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100033,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100034,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100034,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100035,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100035,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100036,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100036,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100037,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100037,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100038,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100038,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100039,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100039,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100040,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100040,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100041,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100041,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100042,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100042,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100043,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100043,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100044,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100044,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100045,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100045,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100046,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100046,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100047,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100047,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100048,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100048,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100049,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100049,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100050,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100050,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100051,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100051,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100052,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100052,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100053,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100053,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100054,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100054,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100055,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100055,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100056,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100056,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100057,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100057,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100058,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100058,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100059,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100059,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100060,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100060,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100061,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100061,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100062,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100062,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100063,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100063,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100064,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100064,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100065,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100065,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100066,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100066,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100067,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100067,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100068,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100068,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100069,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100069,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100070,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100070,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100071,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100071,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100072,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100072,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100073,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100073,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100074,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100074,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100075,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100075,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100076,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100076,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100077,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100077,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100078,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100078,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100079,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100079,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100080,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100080,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100081,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100081,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100082,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100082,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100083,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100083,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100084,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100084,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100085,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100085,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100086,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100086,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100087,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100087,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100088,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100088,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100089,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100089,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100090,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100090,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100091,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100091,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100092,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100092,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100093,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100093,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100094,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100094,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100095,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100095,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100096,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100096,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100097,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100097,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100098,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100098,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100099,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100099,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100100,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100100,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100101,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100101,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100102,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100102,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100103,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100103,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100104,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100104,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100105,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100105,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100106,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100106,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100107,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100107,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100108,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100108,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100109,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100109,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100110,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100110,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100111,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100111,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100112,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100112,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100113,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100113,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100114,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100114,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100115,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100115,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100116,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100116,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100117,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100117,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100118,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100118,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100119,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100119,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100120,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100120,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100121,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100121,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100122,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100122,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100123,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100123,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100124,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100124,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100125,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100125,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100126,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100126,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100127,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100127,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100128,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100128,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100129,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100129,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100130,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100130,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100131,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100131,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100132,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100132,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100133,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100133,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100134,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100134,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100135,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100135,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100136,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100136,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100137,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100137,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100138,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100138,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100139,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100139,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100140,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100140,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100141,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100141,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100142,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100142,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100143,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100143,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100144,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100144,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100145,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100145,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100146,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100146,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100147,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100147,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100148,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100148,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100149,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100149,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100150,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100150,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100151,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100151,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100152,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100152,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100153,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100153,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100154,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100154,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100155,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100155,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100156,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100156,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100157,
+   "kv_even": 0,
+   "A_shipped": 9,
+   "B_signal": 9
+  },
+  {
+   "deal": 12100157,
+   "kv_even": 1,
+   "A_shipped": -9,
+   "B_signal": -9
+  },
+  {
+   "deal": 12100158,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100158,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100159,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100159,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100160,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100160,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100161,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100161,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100162,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100162,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100163,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100163,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100164,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100164,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100165,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100165,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100166,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100166,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100167,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100167,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100168,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100168,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100169,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100169,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100170,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100170,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100171,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100171,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100172,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100172,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100173,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100173,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100174,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100174,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100175,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100175,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100176,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100176,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100177,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100177,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100178,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100178,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100179,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100179,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100180,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100180,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100181,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100181,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100182,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100182,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100183,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100183,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100184,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100184,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100185,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100185,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100186,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100186,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100187,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100187,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100188,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100188,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100189,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100189,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100190,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100190,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100191,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100191,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100192,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100192,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100193,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100193,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100194,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100194,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100195,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100195,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100196,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100196,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100197,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100197,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100198,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100198,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100199,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100199,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100200,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100200,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100201,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100201,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100202,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100202,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100203,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100203,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100204,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100204,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100205,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100205,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100206,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100206,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100207,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100207,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100208,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100208,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100209,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100209,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100210,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100210,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100211,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100211,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100212,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100212,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100213,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100213,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100214,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100214,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100215,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100215,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100216,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100216,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100217,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100217,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100218,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100218,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100219,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100219,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100220,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100220,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100221,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100221,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100222,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100222,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100223,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100223,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100224,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100224,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100225,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100225,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100226,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100226,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100227,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100227,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100228,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100228,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100229,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100229,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100230,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100230,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100231,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100231,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100232,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100232,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100233,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100233,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100234,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100234,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100235,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100235,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100236,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100236,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100237,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100237,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100238,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100238,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100239,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100239,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100240,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100240,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100241,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100241,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100242,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100242,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100243,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100243,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100244,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100244,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100245,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100245,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100246,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100246,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100247,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100247,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100248,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100248,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100249,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100249,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100250,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100250,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100251,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100251,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100252,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100252,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100253,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100253,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100254,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100254,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100255,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100255,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100256,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100256,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100257,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100257,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100258,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100258,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100259,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100259,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100260,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100260,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100261,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100261,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100262,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100262,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100263,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100263,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100264,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100264,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100265,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100265,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100266,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100266,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100267,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100267,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100268,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100268,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100269,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100269,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100270,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100270,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100271,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100271,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100272,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100272,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100273,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100273,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100274,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100274,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100275,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100275,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100276,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100276,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100277,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100277,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100278,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100278,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100279,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100279,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100280,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100280,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100281,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100281,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100282,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100282,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100283,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100283,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100284,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100284,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100285,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100285,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100286,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100286,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100287,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100287,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100288,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100288,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100289,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100289,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100290,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100290,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100291,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100291,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100292,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100292,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100293,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100293,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100294,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100294,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100295,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100295,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100296,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100296,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100297,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100297,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100298,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100298,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100299,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100299,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100300,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100300,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100301,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100301,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100302,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100302,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100303,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100303,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100304,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100304,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100305,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100305,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100306,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100306,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100307,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100307,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100308,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100308,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100309,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100309,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100310,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100310,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100311,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100311,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100312,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100312,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100313,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100313,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100314,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100314,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100315,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100315,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100316,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100316,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100317,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100317,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100318,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100318,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100319,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100319,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100320,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100320,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100321,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100321,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100322,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100322,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100323,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100323,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100324,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100324,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100325,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100325,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100326,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100326,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100327,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100327,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100328,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100328,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100329,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100329,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100330,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100330,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100331,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100331,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100332,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100332,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100333,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100333,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100334,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100334,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100335,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100335,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100336,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100336,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100337,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100337,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100338,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100338,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100339,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100339,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100340,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100340,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100341,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100341,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100342,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100342,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100343,
+   "kv_even": 0,
+   "A_shipped": -9,
+   "B_signal": -9
+  },
+  {
+   "deal": 12100343,
+   "kv_even": 1,
+   "A_shipped": 9,
+   "B_signal": 9
+  },
+  {
+   "deal": 12100344,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100344,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100345,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100345,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100346,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100346,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100347,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100347,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100348,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100348,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100349,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100349,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100350,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100350,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100351,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100351,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100352,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100352,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100353,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100353,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100354,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100354,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100355,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100355,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100356,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100356,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100357,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100357,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100358,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100358,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100359,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100359,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100360,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100360,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100361,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100361,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100362,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100362,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100363,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100363,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100364,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100364,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100365,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100365,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100366,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100366,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100367,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100367,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100368,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100368,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100369,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100369,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100370,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100370,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100371,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100371,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100372,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100372,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100373,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100373,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100374,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100374,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100375,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100375,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100376,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100376,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100377,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100377,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100378,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100378,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100379,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100379,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100380,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100380,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100381,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100381,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100382,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100382,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100383,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100383,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100384,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100384,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100385,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100385,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100386,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100386,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100387,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100387,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100388,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100388,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100389,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100389,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100390,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100390,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100391,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100391,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100392,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100392,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100393,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100393,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100394,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100394,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100395,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100395,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100396,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100396,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100397,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100397,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100398,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100398,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100399,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100399,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100400,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100400,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100401,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100401,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100402,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100402,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100403,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100403,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100404,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100404,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100405,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100405,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100406,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100406,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100407,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100407,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100408,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100408,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100409,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100409,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100410,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100410,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100411,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100411,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100412,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100412,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100413,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100413,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100414,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100414,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100415,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100415,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100416,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100416,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100417,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100417,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100418,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100418,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100419,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100419,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100420,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100420,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100421,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100421,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100422,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100422,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100423,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100423,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100424,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100424,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100425,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100425,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100426,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100426,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100427,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100427,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100428,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100428,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100429,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100429,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100430,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100430,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100431,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100431,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100432,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100432,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100433,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100433,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100434,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100434,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100435,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100435,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100436,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100436,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100437,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100437,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100438,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100438,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100439,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100439,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100440,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100440,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100441,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100441,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100442,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100442,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100443,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100443,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100444,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100444,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100445,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100445,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100446,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100446,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100447,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100447,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100448,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100448,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100449,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100449,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100450,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100450,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100451,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100451,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100452,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100452,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100453,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100453,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100454,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100454,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100455,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100455,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100456,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100456,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100457,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100457,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100458,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100458,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100459,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100459,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100460,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100460,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100461,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100461,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100462,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100462,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100463,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100463,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100464,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100464,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100465,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100465,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100466,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100466,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100467,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100467,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100468,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100468,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100469,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100469,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100470,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100470,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100471,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100471,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100472,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100472,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100473,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100473,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100474,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100474,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100475,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100475,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100476,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100476,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100477,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100477,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100478,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100478,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100479,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100479,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100480,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100480,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100481,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100481,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100482,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100482,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100483,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100483,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100484,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100484,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100485,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100485,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100486,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100486,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100487,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100487,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100488,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100488,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100489,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100489,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100490,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100490,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100491,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100491,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100492,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100492,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100493,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100493,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100494,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100494,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100495,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100495,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100496,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100496,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100497,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100497,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100498,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100498,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100499,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100499,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100500,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100500,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100501,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100501,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100502,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100502,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100503,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100503,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100504,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100504,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100505,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100505,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100506,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100506,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100507,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100507,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100508,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100508,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100509,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100509,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100510,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100510,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100511,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100511,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100512,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100512,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100513,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100513,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100514,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100514,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100515,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100515,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100516,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100516,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100517,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100517,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100518,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100518,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100519,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100519,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100520,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100520,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100521,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100521,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100522,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100522,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100523,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100523,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100524,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100524,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100525,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100525,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100526,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100526,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100527,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100527,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100528,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100528,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100529,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100529,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100530,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100530,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100531,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100531,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100532,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100532,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100533,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100533,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100534,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100534,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100535,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100535,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100536,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100536,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100537,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100537,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100538,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100538,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100539,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100539,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100540,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100540,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100541,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100541,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100542,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100542,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100543,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100543,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100544,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100544,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100545,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100545,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100546,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100546,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100547,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100547,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100548,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100548,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100549,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100549,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100550,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100550,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100551,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100551,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100552,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100552,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100553,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100553,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100554,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100554,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100555,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100555,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100556,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100556,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100557,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100557,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100558,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100558,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100559,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100559,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100560,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100560,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100561,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100561,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100562,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100562,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100563,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100563,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100564,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100564,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100565,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100565,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100566,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100566,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100567,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100567,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100568,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100568,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100569,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100569,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100570,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100570,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100571,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100571,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100572,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100572,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100573,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100573,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100574,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100574,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100575,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100575,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100576,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100576,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100577,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100577,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100578,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100578,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100579,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100579,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100580,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100580,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100581,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100581,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100582,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100582,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100583,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100583,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100584,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100584,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100585,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100585,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100586,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100586,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100587,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100587,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100588,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100588,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100589,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100589,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100590,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100590,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100591,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100591,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100592,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100592,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100593,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100593,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100594,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100594,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100595,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100595,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100596,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100596,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100597,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100597,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100598,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100598,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100599,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100599,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100600,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100600,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100601,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100601,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100602,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100602,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100603,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100603,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100604,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100604,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100605,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100605,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100606,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100606,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100607,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100607,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100608,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100608,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100609,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100609,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100610,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100610,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100611,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100611,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100612,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100612,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100613,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100613,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100614,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100614,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100615,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100615,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100616,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100616,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100617,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100617,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100618,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100618,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100619,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100619,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100620,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100620,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100621,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100621,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100622,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100622,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100623,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100623,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100624,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100624,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100625,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100625,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100626,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100626,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100627,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100627,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100628,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100628,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100629,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100629,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100630,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100630,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100631,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100631,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100632,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100632,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100633,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100633,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100634,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100634,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100635,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100635,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100636,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100636,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100637,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100637,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100638,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100638,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100639,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100639,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100640,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100640,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100641,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100641,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100642,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100642,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100643,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100643,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100644,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100644,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100645,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100645,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100646,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100646,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100647,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100647,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100648,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100648,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100649,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100649,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100650,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100650,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100651,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100651,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100652,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100652,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100653,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100653,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100654,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100654,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100655,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100655,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100656,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100656,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100657,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100657,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100658,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100658,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100659,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100659,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100660,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100660,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100661,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100661,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100662,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100662,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100663,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100663,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100664,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100664,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100665,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100665,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100666,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100666,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100667,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100667,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100668,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100668,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100669,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100669,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100670,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100670,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100671,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100671,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100672,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100672,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100673,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100673,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100674,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100674,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100675,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100675,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100676,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100676,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100677,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100677,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100678,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100678,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100679,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100679,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100680,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100680,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100681,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100681,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100682,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100682,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100683,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100683,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100684,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100684,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100685,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100685,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100686,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100686,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100687,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100687,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100688,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100688,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100689,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100689,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100690,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100690,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100691,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100691,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100692,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100692,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100693,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100693,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100694,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100694,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100695,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100695,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100696,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100696,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100697,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100697,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100698,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100698,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100699,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100699,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100700,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100700,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100701,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100701,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100702,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100702,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100703,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100703,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100704,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100704,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100705,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100705,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100706,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100706,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100707,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100707,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100708,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100708,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100709,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100709,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100710,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100710,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100711,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100711,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100712,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100712,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100713,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100713,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100714,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100714,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100715,
+   "kv_even": 0,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100715,
+   "kv_even": 1,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100716,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100716,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100717,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100717,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100718,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100718,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100719,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100719,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100720,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100720,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100721,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100721,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100722,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100722,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100723,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100723,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100724,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100724,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100725,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100725,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100726,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100726,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100727,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100727,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100728,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100728,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100729,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100729,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100730,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100730,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100731,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100731,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100732,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100732,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100733,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100733,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100734,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100734,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100735,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100735,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100736,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100736,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100737,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100737,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100738,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100738,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100739,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100739,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100740,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100740,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100741,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100741,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100742,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100742,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100743,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100743,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100744,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100744,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100745,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100745,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100746,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100746,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100747,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100747,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100748,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100748,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100749,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100749,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100750,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100750,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100751,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100751,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100752,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100752,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100753,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100753,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100754,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100754,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100755,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100755,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100756,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100756,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100757,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100757,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100758,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100758,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100759,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100759,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100760,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100760,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100761,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100761,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100762,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100762,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100763,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100763,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100764,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100764,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100765,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100765,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100766,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100766,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100767,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100767,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100768,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100768,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100769,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100769,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100770,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100770,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100771,
+   "kv_even": 0,
+   "A_shipped": -7,
+   "B_signal": -7
+  },
+  {
+   "deal": 12100771,
+   "kv_even": 1,
+   "A_shipped": 7,
+   "B_signal": 7
+  },
+  {
+   "deal": 12100772,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100772,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100773,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100773,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100774,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100774,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100775,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100775,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100776,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100776,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100777,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100777,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100778,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100778,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100779,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100779,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100780,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100780,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100781,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100781,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100782,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100782,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100783,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100783,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100784,
+   "kv_even": 0,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100784,
+   "kv_even": 1,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100785,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100785,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100786,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100786,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100787,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100787,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100788,
+   "kv_even": 0,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100788,
+   "kv_even": 1,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100789,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100789,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100790,
+   "kv_even": 0,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100790,
+   "kv_even": 1,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100791,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100791,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100792,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100792,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  },
+  {
+   "deal": 12100793,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100793,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100794,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100794,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100795,
+   "kv_even": 0,
+   "A_shipped": -5,
+   "B_signal": -5
+  },
+  {
+   "deal": 12100795,
+   "kv_even": 1,
+   "A_shipped": 5,
+   "B_signal": 5
+  },
+  {
+   "deal": 12100796,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100796,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100797,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100797,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100798,
+   "kv_even": 0,
+   "A_shipped": 1,
+   "B_signal": 1
+  },
+  {
+   "deal": 12100798,
+   "kv_even": 1,
+   "A_shipped": -1,
+   "B_signal": -1
+  },
+  {
+   "deal": 12100799,
+   "kv_even": 0,
+   "A_shipped": -3,
+   "B_signal": -3
+  },
+  {
+   "deal": 12100799,
+   "kv_even": 1,
+   "A_shipped": 3,
+   "B_signal": 3
+  }
+ ],
+ "bridge_fallbacks": 0,
+ "unfinished": 0,
+ "identity": {
+  "passes": true,
+  "problems": []
+ },
+ "n_deals": 800,
+ "registered_n_deals": 800,
+ "smoke": false,
+ "minutes": 26.8
+}

@@ -200,9 +200,13 @@ WATCH = [
     ("target_feature_fit.json", "multivariate.p_success.coef", "{:+.3f}",
      "P(success) multivariate coefficient", "turns \\emph{negative}, at"),
     ("target_feature_fit.json", "p_success_abscorr.deplete", "{:.3f}",
-     "corr with deplete", "correlates with"),
+     #: NOT the bare phrase "correlates with". That is common enough English
+     #: that a later section using it made both of these ambiguous, which the
+     #: guard caught as "(anchor x2)" before the value could be checked
+     #: against the wrong sentence.
+     "corr with deplete", "\\texttt{deplete} at"),
     ("target_feature_fit.json", "p_success_abscorr.certain", "{:.3f}",
-     "corr with certain", "correlates with"),
+     "corr with certain", "\\texttt{certain} at"),
     ("target_feature_fit.json", "within_r2", "{:.1%}", "within R^2 of the fit",
      "The whole eleven-term fit explains"),
     # `turn` is the control on the collinearity story: the paragraph's point is
@@ -307,27 +311,70 @@ WATCH = [
     # none did. One of them was then consumed downstream as a decision bar in
     # scripts4/stuck_claim_value.py. Re-measured, the ratio is four times what
     # was claimed and the share of nulls is 73% against a quoted 27%.
-    ("perpetual_study.json", "normal.half_suits", "{:d}",
+    ("perpetual_study_void.json", "normal.half_suits", "{:d}",
      "half-suits measured", "Over the $1800$ half-suits of"),
-    ("perpetual_study.json", "normal.stuck_half_suits", "{:d}",
+    ("perpetual_study_void.json", "normal.stuck_half_suits", "{:d}",
      "half-suits that get stuck", "Over the $1800$ half-suits of"),
-    ("perpetual_study.json", "normal.share_of_half_suits_stuck", "{:.1%}",
+    ("perpetual_study_void.json", "normal.share_of_half_suits_stuck", "{:.1%}",
      "share of half-suits stuck", "Over the $1800$ half-suits of"),
-    ("perpetual_study.json", "normal.null_rate_when_stuck", "{:.1%}",
+    ("perpetual_study_void.json", "normal.misdeclare_rate_when_stuck", "{:.1%}",
      "null rate when stuck", "and they are nulled"),
-    ("perpetual_study.json", "normal.null_rate_when_not_stuck", "{:.2%}",
+    ("perpetual_study_void.json", "normal.misdeclare_rate_when_not_stuck", "{:.2%}",
      "null rate when not stuck", "half-suits that never get stuck"),
-    ("perpetual_study.json", "normal.null_rate_ratio", "{:.0f}",
+    ("perpetual_study_void.json", "normal.misdeclare_rate_ratio", "{:.0f}",
      "ratio between the two", "half-suits that never get stuck"),
-    ("perpetual_study.json", "normal.stuck_share_of_all_nulls", "{:.0%}",
+    ("perpetual_study_void.json", "normal.stuck_share_of_all_misdeclares", "{:.0%}",
      "stuck share of all nulls", "so they account for"),
-    # The signalling contrast is the one place a null rate is quoted as a
+    # The signalling contrast is the one place this rate is quoted as a
     # BEFORE and an AFTER, so the two have to move together or the 20%
     # reduction stops being one.
-    ("perpetual_study.json", "normal.nulls_per_game", "{:.3f}",
+    #
+    # The file is now ``perpetual_study_void.json`` and the keys say
+    # "misdeclare" rather than "null": the study was pinned to the void rule
+    # and counted NULL_TEAM outcomes, which read zero under the opponent-award
+    # baseline. It counts the EVENT now -- a team held all six and named the
+    # wrong split -- which means the same thing under both rules. The fresh
+    # void run reproduces the archived file on every field, so these figures
+    # are unchanged; only their label is.
+    # v1.1, section sec:v11. Every one of these was bolded in the paper with
+    # nothing behind it -- caught by unwatched_claims, not by a reader. The
+    # deal-clustered declaration figures now live in results/cluster_audit.json
+    # (scripts4/cluster_audit.py persists them) and the ceiling interaction in
+    # results/declaration_timing.json (scripts4/derive_ceiling_interaction.py),
+    # rather than being computed in the prose.
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked.mean", "{:.4f}",
+     "best claim minus best ask, deal-clustered", "best claim minus best ask"),
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked.half_width_by_deal",
+     "{:.4f}", "its deal-clustered half-width", "best claim minus best ask"),
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked.n_positions",
+     "{:d}", "positions where it asked", "beat the best ask in"),
+    ("cluster_audit.json",
+     "declare_regret.best_claim_minus_best_ask_when_asked."
+     "positions_where_claim_beat_ask", "{:d}",
+     "positions where the best claim beat the best ask",
+     "beat the best ask in"),
+    ("declaration_timing.json", "derived.interaction", "{:.2f}",
+     "the ceiling interaction, T - (D+K)", "together are worth"),
+    ("declaration_timing.json", "derived.interaction_share_of_T", "{:.0%}",
+     "the interaction as a share of the teammate ceiling",
+     "of the\nteammate ceiling is in neither channel alone"),
+    ("perpetual_study_void.json", "normal.misdeclares_per_game", "{:.3f}",
      "nulls per game", "cuts nulls from"),
-    ("perpetual_study.json", "signalling.nulls_per_game", "{:.3f}",
+    ("perpetual_study_void.json", "signalling.misdeclares_per_game", "{:.3f}",
      "nulls per game, signalling on", "cuts nulls from"),
+    # The same three rows under the baseline rule. #50 item (3) asked whether
+    # the award flip re-prices this table; measured on the same 200 seeds it
+    # does not move at all, so these must equal their void twins above. If
+    # they ever diverge, one of the two runs has gone stale.
+    ("perpetual_study_award.json", "normal.misdeclares_per_game", "{:.3f}",
+     "misdeclarations per game, award rule", "cuts nulls from"),
+    ("perpetual_study_award.json", "signalling.misdeclares_per_game", "{:.3f}",
+     "misdeclarations per game, award rule, signalling on", "cuts nulls from"),
+    ("perpetual_study_award.json", "normal.misdeclare_rate_when_stuck", "{:.1%}",
+     "misdeclaration rate when stuck, award rule", "and they are nulled"),
     # The claim-threshold confirmation. Its point is that the SCREEN and the
     # confirmatory run disagree, so both have to be quoted and both have to
     # stay true -- writing one without the other is how the screen got counted
@@ -447,17 +494,17 @@ WATCH = [
     # learned to read the duel pool it was unwatchable -- the most-quoted
     # figure in the paper, outside every drift check, because it lives in a
     # JSONL and everything else lives in JSON.
-    ("duel:FINAL: v04 champion vs v03 champion", "diff_mean", "{:.2f}",
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_mean", "{:.3f}",
      "margin over the v0.3 champion",
-     "explicit one-parameter model recovers the loss"),
+     "champion (\\texttt{tuned})"),
     ("duel:FINAL: v04 champion vs v03 champion", "n_pairs", "{:d}",
      "pairs behind the headline", "champion (\\texttt{tuned})"),
-    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.0", "{:.2f}",
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.0", "{:.3f}",
      "headline interval, low",
-     "explicit one-parameter model recovers the loss"),
-    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.1", "{:.2f}",
+     "champion (\\texttt{tuned})"),
+    ("duel:FINAL: v04 champion vs v03 champion", "diff_ci.1", "{:.3f}",
      "headline interval, high",
-     "explicit one-parameter model recovers the loss"),
+     "champion (\\texttt{tuned})"),
     # The absolute-strength table. Its rates were computed in the LaTeX and
     # stored nowhere, so the table carrying this paper's independent
     # confirmation of the opponent model -- including the contrast the
@@ -497,7 +544,7 @@ WATCH = [
      "median distinct candidate sets", "\\textbf{distinct candidate sets}"),
     ("infer_position_stats.json", "mask_groups.p90", "{:d}",
      "p90 distinct candidate sets", "\\textbf{distinct candidate sets}"),
-    ("perpetual_study.json", "normal.games", "{:d}",
+    ("perpetual_study_void.json", "normal.games", "{:d}",
      "games in the perpetual study", "games in which a position repeated"),
     # The A/A per-pair standard deviation. Every MDE and every power statement
     # in this paper divides by it, so it is the most reused number in the
@@ -614,10 +661,215 @@ WATCH = [
      "m<=2 effect vs Dylan v0.7", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "ci95.0", "{:+.4f}",
      "m<=2 vs v0.7, CI low", "at a power sized for\ndeception-scale flips"),
+    # The dose law (prereg/signal_dose_law.md). The verdict rests on one
+    # interval covering one prediction and excluding the other, so all three
+    # numbers are watched.
+    ("signal_dose_law.json", "their_wrong_effect.mean", "{:+.4f}",
+     "dose law, heuristic observed", "lands at\n$+0.0178$"),
+    ("signal_dose_law.json", "their_wrong_effect.ci95.1", "{:+.4f}",
+     "dose law, interval high", "$[+0.0048, +0.0308]$"),
+    ("signal_dose_law.json", "predictions.multiplicative", "{:+.4f}",
+     "dose law, the excluded prediction", "predicts $+0.0426$ against"),
+    ("signal_dose_law.json", "dose_off_by", "{:.1%}",
+     "dose law, how far the dose missed D", "the dose lands"),
+    ("signal_dose_law.json", "their_wrong_effect.half_width", "{:.4f}",
+     "dose law, realised half-width", "half-width of $0.0130$"),
+    # The dose screen's uncertainties, added after an audit found the paper
+    # printing $4.150$ for a quantity whose recorded half-width is 1.238 and
+    # quoting two ratio columns that had no interval at all.
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.shipped.stuck_turns_half_width", "{:.3f}",
+     "dylan_v07 stuck turns, half-width", "$4.150 \\pm 1.238$"),
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.stuck_turns_ratio_ci95.1", "{:.2f}",
+     "dylan_v07 amplification, interval high", "$[2.32, 4.16]$"),
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.fires_per_stuck_turn_ci95.0", "{:.3f}",
+     "dylan_v07 second gate, interval low", "$[0.868, 0.916]$"),
+    ("signal_dose_arms.json",
+     "opponents.ev_claim.fires_per_stuck_turn_ci95.1", "{:.3f}",
+     "ev_claim second gate, interval high", "$[0.428, 0.497]$"),
+    ("signal_dose_arms.json",
+     "opponents.memory.ambiguous_cards_half_width", "{:.2f}",
+     "memory ambiguity, half-width", "$26.02 \\pm 0.21$"),
+    ("signal_dose_arms.json",
+     "opponents.ev_claim.shipped.their_hits_half_width", "{:.2f}",
+     "ev_claim ask-hits, half-width", "$27.94 \\pm 0.74$"),
+    # Dylan's released ladder (scripts4/dylan_ladder_sweep.py). Six rungs, and
+    # the paper's claim is that the ORDERING is his declaration error rate, so
+    # each rung's margin and each rung's error rate are watched together --
+    # a drift in either half would leave the correlation claim standing on a
+    # table that no longer shows it.
+    ("dylan_ladder_sweep.json", "opponents.dylan_v02.margin", "{:+.4f}",
+     "ladder, v02 margin", "$+1.5283$ $[+1.3735, +1.6832]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v03.margin", "{:+.4f}",
+     "ladder, v03 margin", "$+0.6133$ $[+0.4597, +0.7670]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v04.margin", "{:+.4f}",
+     "ladder, v04 margin", "$+1.9867$ $[+1.8371, +2.1362]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v05.margin", "{:+.4f}",
+     "ladder, v05 margin", "$+2.1233$ $[+1.9663, +2.2803]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v06.margin", "{:+.4f}",
+     "ladder, v06 margin", "$+1.8850$ $[+1.7333, +2.0367]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v07.margin", "{:+.4f}",
+     "ladder, v07 margin", "$+2.3600$ $[+2.2017, +2.5183]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v03.their_err", "{:.2%}",
+     "ladder, v03 error rate", "$+0.6133$ $[+0.4597, +0.7670]$"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v07.their_err", "{:.2%}",
+     "ladder, v07 error rate", "$+2.3600$ $[+2.2017, +2.5183]$"),
+    # The ladder's headline statistic and the one that does NOT survive, both
+    # derived by scripts4/dylan_ladder_sweep.py corr. The r = 0.95 was a shell
+    # command until the bolded-claim guard refused it, which is the same
+    # failure this manifest exists for, caught one layer up.
+    ("dylan_ladder_correlation.json", "corr_margin_their_error", "{:.2f}",
+     #: one line only -- the paper wraps between "at" and the maths, and an
+     #: anchor spanning that break is absent from the file it is searched in.
+     "ladder, margin against their error rate", "$r = 0.95$"),
+    ("dylan_ladder_correlation.json", "corr_our_error_our_declares", "{:.2f}",
+     "ladder, our error against our volume", "declaration count at $+0.71$"),
+    ("dylan_ladder_correlation.json",
+     "corr_our_error_our_declares_without_v04", "{:.2f}",
+     "ladder, the same with v04 dropped", "collapses that to $+0.10$"),
+    ("dylan_ladder_sweep.json", "v04_v06_spread", "{:.3f}",
+     "ladder, the instrument check", "across those three is"),
+    ("dylan_ladder_sweep.json", "opponents.dylan_v04.our_err", "{:.2%}",
+     "ladder, our error rate against v04", "rate is $8.38\\%$ against their"),
+    # The web livelock (scripts4/web_termination.py), both seeding arms on the
+    # same deals. The claim in the paper is a CONTRAST, so both halves are
+    # watched: a drift in either would leave "56 against 0" standing on a pair
+    # of runs that no longer show it.
+    ("web_termination_r1_frozen_1000.json", "n_hung", "{:d}",
+     "web livelock, games that never ended with the stream reset",
+     "$2{,}000$ games an arm: \\textbf{$56$ never ended with the stream reset before"),
+    ("web_termination_r1_ply_1000.json", "n_hung", "{:d}",
+     "web livelock, games that never ended with the stream advancing",
+     "every move, against $0$ with it advancing}. Every one of the $56$ had exactly"),
+    ("web_termination_r1_frozen_1000.json", "max_terminating_actions", "{:d}",
+     "web livelock, the longest game that did finish",
+     "game that did finish ran $329$ actions, against a median of about $105$."),
+    # The dose-linearity run (prereg/signal_dose_linearity.md). The verdict is
+    # NEITHER, which rests on ONE interval excluding two predictions, so the
+    # interval, both predictions and the power limit it had to clear are all
+    # watched -- and so is the realised dose, because the prediction is a
+    # formula evaluated at it.
+    ("signal_dose_linearity.json", "their_wrong_effect.mean", "{:+.4f}",
+     "dose linearity, observed", "their extra wrong declarations & $+0.0088$"),
+    ("signal_dose_linearity.json", "their_wrong_effect.ci95.0", "{:+.4f}",
+     "dose linearity, interval low", "their extra wrong declarations & $+0.0088$"),
+    ("signal_dose_linearity.json", "predictions.linear", "{:+.4f}",
+     "dose linearity, the linear prediction", "linear predicts & $+0.0201$"),
+    ("signal_dose_linearity.json", "dose", "{:.3f}",
+     "dose linearity, realised dose", "realised dose & $1.381$"),
+    ("signal_dose_linearity.json", "dose_off_by", "{:.1%}",
+     "dose linearity, how far off the replicated arm", "from the arm being"),
+    ("signal_dose_linearity.json", "their_wrong_effect.half_width", "{:.4f}",
+     "dose linearity, realised half-width", "the half-width of $0.0081$"),
+    ("dose_linearity_points.json", "rows.1.shift_per_signal", "{:+.4f}",
+     "the low-dose shift per signal", "shift is $+0.0095$ here"),
+    ("dose_linearity_points.json", "constant_window_width", "{:.5f}",
+     "how wide one constant's window still is", "a window $0.00003$ wide"),
+    # The transfer law's supporting table (scripts4/dose_law_table.py). Every
+    # figure here was hand arithmetic in the first draft of that paragraph and
+    # two of the four were wrong in the last digit, which is the exact failure
+    # this module exists for -- so the whole table is watched, including the
+    # baseline that both registered predictions were derived from.
+    ("heuristic_baseline.json", "both_sides.A_shipped.their_err", "{:.2%}",
+     "heuristic's measured baseline", "the rate is $62.01\\%$"),
+    ("heuristic_baseline.json", "both_sides.A_shipped.their_declares", "{:,d}",
+     "heuristic's declarations, counted", "games and $1{,}166$ declarations"),
+    ("heuristic_baseline.json", "n_games", "{:,d}",
+     "the baseline bank's games", "bank of $1{,}000$ games"),
+    ("dose_law_table.json", "shift_reference_fit", "{:+.4f}",
+     "the shift fitted to the reference", "a log-odds shift of $+0.0669$"),
+    ("dose_law_table.json", "shift_refit_all", "{:+.4f}",
+     "the shift refitted on all three", "moves the shift to"),
+    ("dose_law_table.json", "refit_moves_shift_by", "{:.1%}",
+     "how far the refit moves it", "a change of $1.4\\%$"),
+    ("dose_law_table.json", "rows.0.predicted_reference_fit", "{:+.4f}",
+     "law table, ev_claim predicted", "$3.728$ & $+0.0172$"),
+    ("dose_law_table.json", "rows.1.predicted_reference_fit", "{:+.4f}",
+     "law table, dylan_v07 predicted", "$3.998$ & $+0.0454$"),
+    ("dose_law_table.json", "rows.2.predicted_reference_fit", "{:+.4f}",
+     "law table, heuristic predicted", "$1.166$ & $+0.0178$"),
+    ("dose_law_table.json", "rows.2.baseline", "{:.2%}",
+     "law table, heuristic baseline", "$1.166$ & $+0.0178$"),
+    ("dose_law_table.json", "rows.0.declares_per_game", "{:.3f}",
+     "law table, ev_claim declarations", "$7.96\\%$  & $3.728$"),
+    ("dose_law_table.json", "rows.1.declares_per_game", "{:.3f}",
+     "law table, dylan_v07 declarations", "$21.08\\%$ & $3.998$"),
+    # The matched-dose study (prereg/signal_matched_dose.md). The first
+    # positive generality result in this line, so the two intervals that
+    # carry it and the doses that make them comparable are all watched.
+    # These two anchors carry their intervals. The bare means were ambiguous
+    # once the dose-law table quoted the same two observed effects a page
+    # later, and widening them to the whole table cell fixes that while also
+    # putting the interval bounds -- which nothing else watches, and on which
+    # "both clear zero" rests -- under the drift check.
+    ("matched_dose_scored.json",
+     "opponents.dylan_v07.their_wrong_effect.mean", "{:+.4f}",
+     "matched dose, reference channel", "$+0.0454$ $[+0.0326, +0.0582]$"),
+    ("matched_dose_scored.json",
+     "opponents.ev_claim.their_wrong_effect.mean", "{:+.4f}",
+     "matched dose, test channel", "$+0.0172$ $[+0.0048, +0.0296]$"),
+    ("matched_dose_scored.json", "opponents.dylan_v07.dose", "{:.3f}",
+     "matched dose, reference dose", "dose tolerance at"),
+    ("matched_dose_scored.json", "opponents.ev_claim.dose", "{:.3f}",
+     "matched dose, test dose", "$2.766$ and"),
+    ("matched_dose_calibration.json", "gate.mean", "{:+.4f}",
+     "feasibility gate at D", "It cleared, at"),
+    ("matched_dose_calibration.json", "common_dose_D", "{:.1f}",
+     "the common dose D", "highest dose both reach is $D = "),
+    # Why the dose differs (scripts4/signal_dose_screen.py). Watched because
+    # the paper's claim is that the dose FACTORS, and a factorisation whose
+    # terms drift stops being one.
+    ("signal_dose_arms.json", "opponents.dylan_v07.shipped.stuck_turns_per_game",
+     "{:.3f}", "dylan_v07 stuck turns, protocol off", "$4.150 \\pm 1.238$"),
+    ("signal_dose_arms.json", "opponents.dylan_v07.fires_per_stuck_turn",
+     "{:.3f}", "dylan_v07 second-gate pass rate", "$0.896$"),
+    ("signal_dose_arms.json", "opponents.ev_claim.fires_per_stuck_turn",
+     "{:.3f}", "ev_claim second-gate pass rate", "$0.462$"),
+    ("signal_dose_arms.json",
+     "opponents.dylan_v07.stuck_turns_ratio_signal_over_shipped",
+     "{:.2f}", "dylan_v07 amplification", "$3.02$ $[2.32, 4.16]$"),
+    ("signal_dose_arms.json", "opponents.dylan_v07.shipped.episodes_per_game",
+     "{:.3f}", "dylan_v07 episodes a game", "$0.517 \\pm 0.065$ episodes a"),
+    ("signal_dose_arms.json", "opponents.memory.shipped.episodes_per_game",
+     "{:.3f}", "memory episodes a game", "$0.812 \\pm 0.082$"),
+    # The generality run (prereg/signal_generality.md). Watched because the
+    # conclusion is that the run does NOT answer its question, and the reason
+    # is a comparison of doses -- so the doses are the numbers that carry it.
+    ("signal_generality_self_12100000.json", "primary.mean", "{:+.4f}",
+     "control against self, margin", "against\nitself the arm is"),
+    ("signal_generality_ev_claim_12100000.json", "primary.mean", "{:+.4f}",
+     "ev_claim, margin", "in the margin at"),
+    ("signal_generality_ev_claim_12100000.json",
+     "their_wrong_effects.B_signal.mean", "{:+.4f}",
+     "ev_claim, opponent channel", "mechanism works through, at"),
+    ("signal_generality_ev_claim_12100000.json",
+     "signal_turns_per_game.B_signal", "{:.3f}",
+     "ev_claim, signals a game", "$2.171$"),
+    ("signal_generality_self_12100000.json",
+     "signal_turns_per_game.B_signal", "{:.3f}",
+     "self, signals a game", "$0.487$"),
+    # The signalling budget (prereg/signal_budget.md). Watched because it is
+    # a REFUTATION with three passing gates: the numbers that carry it are the
+    # primary, the channel split it rests on, and the replication that lets
+    # the primary be read at all.
+    ("signal_budget_11700000.json", "primary.mean", "{:+.4f}",
+     "budget 6 against uncapped, primary", "per-game budget of six is"),
+    ("signal_budget_11700000.json", "effects.B_uncapped.mean", "{:+.4f}",
+     "uncapped against shipped", "replicates a third time at"),
+    ("signal_budget_11700000.json", "replication.z", "{:+.2f}",
+     "replication z, both uncertainties", "a two-sample $z$ of"),
+    ("signal_budget_11700000.json", "their_wrong_effects.C_budget6.mean",
+     "{:+.4f}", "their extra wrong declarations under a budget of 6",
+     "extra wrong declarations are"),
+    ("signal_budget_11700000.json", "signal_turns_per_game.C_budget6",
+     "{:.2f}", "signals a game under a budget of 6",
+     "signals a game the opponents"),
     ("foreign_m2_check.json", "ci95.1", "{:+.4f}",
      "m<=2 vs v0.7, CI high", "at a power sized for\ndeception-scale flips"),
     ("foreign_m2_check.json", "n_pairs", "{:d}",
-     "foreign-opponent paired games", "rotations --- $500$ games per arm"),
+     "foreign-opponent paired games", "games per arm, the statistic being"),
     ("foreign_m2_check.json", "kv_margin_on", "{:+.3f}",
      "margin over v0.7, correction on", "beats v0.7 by"),
     ("foreign_m2_check.json", "kv_margin_off", "{:+.3f}",
@@ -755,12 +1007,18 @@ WATCH = [
     # R3/R4: the threshold sanity and the correction's re-pricing. R4 is the
     # number that withdrew a shipped knob, which makes it the figure whose
     # silent drift would be most misleading in either direction.
+    # The anchor is "correction scores", not "against the same". The latter
+    # is an ordinary three-word English phrase, and a paragraph added
+    # elsewhere in the paper wrote it a second time -- which
+    # test_no_watched_anchor_is_ambiguous caught, correctly, because a
+    # duplicated anchor lets a drifted figure pass off a coincidental match
+    # beside the first occurrence. An anchor has to name its own sentence.
     ("r4_award_check.json", "estimate", "{:+.4f}",
-     "correction stack under award rule", "against the same"),
+     "correction stack under award rule", "correction scores"),
     ("r4_award_check.json", "ci.0", "{:+.4f}",
-     "correction stack CI low", "against the same"),
+     "correction stack CI low", "correction scores"),
     ("r4_award_check.json", "ci.1", "{:+.4f}",
-     "correction stack CI high", "against the same"),
+     "correction stack CI high", "correction scores"),
     ("r4_award_check.json", "x_misdeclares", "{:d}",
      "correction-arm misdeclares", "misdeclares \\emph{more}"),
     ("r4_award_check.json", "y_misdeclares", "{:d}",
@@ -781,9 +1039,9 @@ WATCH = [
     ("r5_signal_check.json", "ci.1", "{:+.4f}",
      "signalling CI high", "the effect moves to"),
     ("r5_signal_check.json", "x_misdeclares", "{:d}",
-     "misdeclares with signalling on", "cuts misdeclarations ---"),
+     "misdeclares with signalling on", "cuts misdeclarations"),
     ("r5_signal_check.json", "y_misdeclares", "{:d}",
-     "misdeclares with signalling off", "cuts misdeclarations ---"),
+     "misdeclares with signalling off", "cuts misdeclarations"),
     # R6: the ported contestation term and the silence prior, both measured
     # against Dylan and both rejected. Watched because a negative result is
     # exactly the kind of number that rots quietly -- and because the

@@ -687,7 +687,9 @@ def fit_mlp(blocks: Sequence[PositionBlock], hidden: int = 32,
     try:
         import torch
         from torch import nn
-    except ImportError:  # pragma: no cover - torch is a declared dependency
+    except ImportError:  # pragma: no cover - torch is OPTIONAL, see
+                         # requirements-learn.txt; this path is the reason the
+                         # rest of the pipeline still runs without it
         return {"available": False, "reason": "torch not installed"}
 
     # One thread, deliberately. This machine has 8 cores shared with other

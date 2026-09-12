@@ -83,16 +83,71 @@ from fish.cards import NUM_PLAYERS, team_of
 from fish.engine import Ask, GameState, IllegalAction, NULL_TEAM
 from fish.observation import Observation
 from fish4.askfeat import AskWeights, DecisionContext, score_asks
+from fish4.match import _t_critical
 from fish4.posterior import Posterior
 from fish4.registry4 import make_agent
 
-SPEC = {"opponent_gamma": 0.35}
+#: WHICH POLICY IS BEING MEASURED, and it is not the champion by default.
+#:
+#: `SPEC` fills THREE distinct roles and they were one knob until the 2x2 below
+#: needed them apart:
+#:
+#:   harvest    the agents whose self-play produces the positions
+#:   rollout    the agents who play each candidate action out
+#:   incumbent  the agent whose choice the regret is measured against
+#:
+#: The default is the ask objective in ISOLATION -- no belief-space lookahead,
+#: 160 draws. V06_DEPLOYED carries w_lookahead 0.25 at depth 3 beam 4 and 480
+#: draws, so it is a different policy making different choices, and a regret
+#: measured under one does not bound the other.
+#:
+#: WHY THE ROLES HAD TO SPLIT. The champion measured on champion turf gives
+#: +0.1365 [+0.0705, +0.2026] pooled, and scripts4/actor_compare.py has twice
+#: shown the ask CHOICE is not the cause. So the regret belongs to the "turf" --
+#: but "turf" bundled the POSITION DISTRIBUTION with the CONTINUATION POLICY,
+#: because one SPEC drove both. Crossing them separates the two:
+#:
+#:            rollout=objective   rollout=champion
+#:   harvest=objective   -0.014         ?
+#:   harvest=champion      ?          +0.137
+#:
+#: Set ASK_REGRET_SPEC=champion for all three roles, or override one at a time
+#: with ASK_REGRET_HARVEST_SPEC / ASK_REGRET_ROLLOUT_SPEC /
+#: ASK_REGRET_INCUMBENT_SPEC. Values are "champion" or "objective".
+#:
+#: tests4/test_regret_specs.py asserts the three resolve independently, because
+#: a knob that silently does nothing is how this project has lost results
+#: before -- three instruments in one session merged experimental arms by
+#: keying on less than the experiment varied.
+def _spec(role: str = ""):
+    import os
+    want = os.environ.get(f"ASK_REGRET_{role.upper()}_SPEC", "") if role else ""
+    if not want:
+        want = os.environ.get("ASK_REGRET_SPEC", "")
+    if want.lower() == "champion":
+        from fish4.registry4 import V06_DEPLOYED
+        return dict(V06_DEPLOYED[1])
+    return {"opponent_gamma": 0.35}
+
+
+#: Kept as the incumbent's spec so existing importers keep their meaning.
+SPEC = _spec("incumbent")
+HARVEST_SPEC = _spec("harvest")
+ROLLOUT_SPEC = _spec("rollout")
+
+
+def spec_banner() -> str:
+    """One line naming every role, printed by every run that uses these."""
+    def _n(d):
+        return "champion" if d.get("w_lookahead") else "objective-only"
+    return (f"harvest={_n(HARVEST_SPEC)}  rollout={_n(ROLLOUT_SPEC)}  "
+            f"incumbent={_n(SPEC)}")
 GAMMA = 0.35
 MAX_ACTIONS = 400
 
 
 def harvest(n_games: int, min_resolved: int, max_positions: int,
-            seed0: int = 31337):
+            seed0: int = 31337, games_out: list | None = None):
     """On-policy decision points from the second half of real games.
 
     Two reasons this does not reuse ``collect_positions``. It harvests every
@@ -113,7 +168,8 @@ def harvest(n_games: int, min_resolved: int, max_positions: int,
     rules = RuleConfig()
     out = []
     for g in range(n_games):
-        agents = [make_agent(("fishbot4", SPEC)) for _ in range(NUM_PLAYERS)]
+        agents = [make_agent(("fishbot4", HARVEST_SPEC))
+                  for _ in range(NUM_PLAYERS)]
         ar = random.Random(seed0 + g)
         st = GameState.deal(rules, seed=seed0 + 977 * g)
         for p, a in enumerate(agents):
@@ -126,6 +182,15 @@ def harvest(n_games: int, min_resolved: int, max_positions: int,
                 out.append((rules, [h for h in st.hands],
                             list(st.set_winner), st.turn,
                             tuple(st.history), p))
+                # Which DEAL this position came from. The deal is
+                # ``seed0 + 977*g``, identical across harvest policies, so two
+                # turfs walk the same deals and differ only in the positions
+                # their policies reach inside them. Recording g is what lets a
+                # turf comparison be paired by deal instead of unpaired -- and
+                # it is an out-parameter rather than a wider return tuple so
+                # every existing caller is untouched.
+                if games_out is not None:
+                    games_out.append(g)
                 if len(out) >= max_positions:
                     return out
             st.apply(p, agents[p].act(Observation.from_state(st, p)))
@@ -149,7 +214,7 @@ def _rollout(rules, world, turn, set_winner, history, root_action, root_seat,
     state.history = list(history)
     agents = []
     for p in range(NUM_PLAYERS):
-        a = make_agent(("fishbot4", SPEC))
+        a = make_agent(("fishbot4", ROLLOUT_SPEC))
         a.begin_game(p, rules, seat_seeds[p])
         agents.append(a)
     try:
@@ -274,8 +339,26 @@ def attenuation(n_actions: int, n_worlds: int, noise: float,
 
 
 def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
-            seed0: int = 4242):
-    positions = harvest(60, min_resolved, n_positions)
+            seed0: int = 4242, n_games: int = 0):
+    # The harvest game count used to be hardcoded at 60, which silently capped
+    # this instrument: asking for 400 positions returned the ~37 that 60 games
+    # happen to contain, and the run reported 37 as though that were the
+    # requested sample. The published mean_regret of -0.0968 [-0.302, +0.109]
+    # was measured on exactly that cap. Default now scales with the request.
+    # WHICH DEAL each position came from. `harvest` walks games in order and
+    # emits every qualifying ply, so a run of "162 positions" is a handful of
+    # deals sampled 20-40 plies deep -- 8 deals, in the case of
+    # results/ask_regret_champion_wide.json. Treating those plies as
+    # independent understates every interval this instrument reports; the
+    # champion's own +0.1641 [+0.0797, +0.2484] is [+0.0046, +0.3236] once
+    # clustered on 8 deals with t at 7 df, 1.89x wider. The deal index makes
+    # that correction exact rather than approximate.
+    deals: list[int] = []
+    positions = harvest(n_games or max(60, n_positions // 2), min_resolved,
+                        n_positions, games_out=deals)
+    if len(positions) < n_positions:
+        print(f"  harvest returned {len(positions)} of {n_positions} asked "
+              f"for; raise n_games if that is the binding constraint")
     rows = []
     missed = [0]
     t0 = time.time()
@@ -383,7 +466,8 @@ def measure(n_positions: int, n_worlds: int, min_resolved: int = 5,
             "world_sd": float(np.mean(within)) if within else float("nan"),
             "paired_sd": paired_sd,
             "random_regret": rnd_regret,
-            "position": pi, "seat": seat, "history": len(hist),
+            "position": pi, "deal": deals[pi], "seat": seat,
+            "history": len(hist),
             "n_asks": len(per), "n_worlds": nw,
             "q_chosen": q_all[chosen], "q_best": naive_best,
             "naive_regret": naive_regret,
@@ -409,9 +493,15 @@ def main(argv):   # noqa: C901
     min_resolved = int(argv[2]) if len(argv) > 2 else 5
     dest = Path(argv[3]) if len(argv) > 3 else ROOT / "results" / "ask_regret.json"
 
+    import os
+    which = ("V06_DEPLOYED (champion)"
+             if os.environ.get("ASK_REGRET_SPEC", "").lower() == "champion"
+             else "the ask objective in isolation, no lookahead, 160 draws")
     print(f"one-step policy-improvement regret | {n_positions} positions "
-          f"| {n_worlds} worlds/action | >= {min_resolved} half-suits resolved\n")
-    rows = measure(n_positions, n_worlds, min_resolved)
+          f"| {n_worlds} worlds/action | >= {min_resolved} half-suits resolved")
+    print(f"POLICY MEASURED: {which}\n  {spec_banner()}\n")
+    rows = measure(n_positions, n_worlds, min_resolved,
+                   n_games=int(argv[4]) if len(argv) > 4 else 0)
     if not rows:
         print("no usable positions")
         return
@@ -421,10 +511,26 @@ def main(argv):   # noqa: C901
     rank = np.array([r["rank"] for r in rows], dtype=float)
     nask = np.array([r["n_asks"] for r in rows], dtype=float)
     se = float(reg.std(ddof=1) / np.sqrt(reg.size))
+    # Clustered by DEAL, which is the independent unit here. Positions inside
+    # one deal are consecutive plies of one game -- they share the hands, the
+    # history and every earlier decision -- so the iid standard error above
+    # divides by a count that is not the sample size. It is kept and reported
+    # beside the clustered one rather than replaced, so the two are visible
+    # together and the older files stay comparable.
+    from fish4.clustered import cluster_ci
+    mu, hw_d, k = cluster_ci([r["regret"] for r in rows],
+                             [r.get("deal", r["position"]) for r in rows])
+    # `cluster_ci` pairs the clustered standard error with a t critical value
+    # at k-1 degrees of freedom, not 1.96. With four to ten deals that is the
+    # difference between a 31% and a 62% understatement and the right number.
+    se_d = None if hw_d is None else hw_d / _t_critical(k - 1, 0.95)
     summary = {
-        "positions": len(rows), "n_worlds": n_worlds,
-        "mean_regret": float(reg.mean()), "se_regret": se,
+        "positions": len(rows), "n_deals": k, "n_worlds": n_worlds,
+        "mean_regret": mu, "se_regret": se,
         "ci95": [float(reg.mean() - 1.96 * se), float(reg.mean() + 1.96 * se)],
+        "se_regret_by_deal": se_d,
+        "ci95_by_deal": (None if hw_d is None
+                         else [mu - hw_d, mu + hw_d]),
         "median_regret": float(np.median(reg)),
         "mean_naive_regret": float(naive.mean()),
         "selection_bias": float(naive.mean() - reg.mean()),
@@ -435,9 +541,18 @@ def main(argv):   # noqa: C901
     }
     print(f"\npositions                {summary['positions']}")
     print(f"legal asks per position  {summary['mean_asks']:.1f}")
+    print(f"deals they came from     {summary['n_deals']}")
     print(f"CROSS-FITTED regret      {summary['mean_regret']:+.4f} "
           f"+/- {se:.4f}  95% [{summary['ci95'][0]:+.4f}, "
-          f"{summary['ci95'][1]:+.4f}] sets")
+          f"{summary['ci95'][1]:+.4f}] sets   (positions as iid)")
+    if hw_d is None:
+        print(f"  clustered by deal      all {summary['positions']} positions "
+              f"came from ONE deal; no interval is available at this design")
+    else:
+        print(f"  clustered by deal      {summary['mean_regret']:+.4f} "
+              f"+/- {hw_d:.4f}  95% [{summary['ci95_by_deal'][0]:+.4f}, "
+              f"{summary['ci95_by_deal'][1]:+.4f}] sets   <- the honest one "
+              f"(t at {k - 1} df)")
     print(f"naive max-over-actions   {summary['mean_naive_regret']:+.4f}"
           f"   <- inflated by selection")
     print(f"selection bias measured  {summary['selection_bias']:+.4f} sets")

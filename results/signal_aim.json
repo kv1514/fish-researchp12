@@ -1,0 +1,37 @@
+{
+ "engine": {
+  "digest": "0d8a11f549a5",
+  "files": {
+   "fish4/agent4.py": "f5c50da97e65",
+   "fish4/adaptive.py": "c4a790573857",
+   "fish4/askfeat.py": "1a9cceb2613f",
+   "fish4/posterior.py": "2bb422b1ca7e",
+   "fish4/lookahead.py": "b3e226a1a941",
+   "fish4/claim4.py": "30925c85eb41",
+   "fish4/oppmodel.py": "81225d4f2518",
+   "fish4/hsvalue.py": "7f5261b1ad8d",
+   "fish4/registry4.py": "f80979d9da90",
+   "fish/beliefs.py": "5a9dd46a02db",
+   "fish/engine.py": "a121f20f7004"
+  }
+ },
+ "what": "Does the signalling ask point at a stuck half-suit? RESEARCH_FRONTIER.md Direction 2 proposed aiming it.",
+ "n_games": 60,
+ "seed_deal": 910000,
+ "seed_agent": 920000,
+ "opportunities": 208,
+ "on_stuck": 208,
+ "on_stuck_rate": 1.0,
+ "mean_stuck_available": 1.0432692307692308,
+ "cheap_gate_applied": false,
+ "spec": {
+  "opponent_gamma": 0.35,
+  "n_draws": 480,
+  "w_lookahead": 0.25,
+  "lookahead_depth": 3,
+  "lookahead_beam": 4,
+  "endgame_m": 0,
+  "claim_forced_exhaustive": 1,
+  "signal_mode": "stuck"
+ }
+}

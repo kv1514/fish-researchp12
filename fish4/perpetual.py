@@ -135,7 +135,8 @@ def unplaceable(obs, bel, ctx, hs: int) -> bool:
 # The signalling protocol
 # ---------------------------------------------------------------------------
 
-def signalling_ask(obs, bel, ctx, require_dead: bool = True):
+def signalling_ask(obs, bel, ctx, require_dead: bool = True,
+                   exclude: frozenset = frozenset()):
     """A deliberately doomed ask that tells our partners where a card is not.
 
     The ask is placed in a half-suit our team provably owns, so it cannot land -
@@ -151,6 +152,14 @@ def signalling_ask(obs, bel, ctx, require_dead: bool = True):
     Measured motivation: a half-suit that is at some point provably ours but
     unplaceable is nulled 17.5% of the time, against 2.8% for one that never
     gets stuck, and such half-suits account for 27% of all nulls.
+
+    ``exclude`` names cards this seat has already signalled. Proving *this seat
+    does not hold X* removes only OUR bit from X's holder mask, so with two
+    teammates left X keeps two bits and can stay the top pick forever, saying
+    nothing new after the first time -- measured at 40.8 of 42.5 asks per
+    episode in results/signal_deadline.json. Empty by default, which is
+    bit-identical to the behaviour every published figure was taken on. See
+    prereg/signal_no_repeat.md.
     """
     asks = obs.legal_asks()
     if not asks:
@@ -162,6 +171,8 @@ def signalling_ask(obs, bel, ctx, require_dead: bool = True):
     best, best_gain = None, 0.0
     for a in asks:
         hs = a.card // 6
+        if a.card in exclude:
+            continue                       # already proved; says nothing new
         if half_suit_owner_team(bel, hs) != ctx.my_team:
             continue                       # only worth signalling about ours
         m = bel.current_holder_mask(a.card)

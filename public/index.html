@@ -2,8 +2,21 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Fish — play KRAKEN v1.0</title>
-<meta name="description" content="Play six-player Literature against KRAKEN v1.0, a research engine with exact combinatorial belief tracking. Play solo against five bots, watch it battle Dylan's FishBot v0.7, or play with friends in a room.">
+<title>Fish — play KRAKEN v1.1</title>
+<meta name="description" content="Play six-player Literature against KRAKEN v1.1, a research engine with exact combinatorial belief tracking. Play solo against five bots, watch it battle Dylan's FishBot v0.7, or play with friends in a room.">
+<!-- Share card. The image path is RELATIVE on purpose: this page is served
+     from a per-branch preview URL as well as from production, and an absolute
+     og:image would point a preview's link preview at a host that 404s until
+     the branch merges. Scrapers resolve a relative og:image against the page.
+     For the same reason there is no canonical and no og:url. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Fish — play KRAKEN v1.1">
+<meta property="og:description" content="Six-player Literature against a research engine with exact combinatorial belief tracking. Play it, watch it fight another engine, or read the 118-page paper behind it.">
+<meta property="og:image" content="/share.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fish — play KRAKEN v1.1">
+<meta name="twitter:description" content="Six-player Literature against a research engine with exact combinatorial belief tracking. Play it, watch it, or read the paper.">
+<meta name="twitter:image" content="/share.png">
 <link rel="stylesheet" href="/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127183;</text></svg>">
 
@@ -11,10 +24,23 @@
 
 <!-- ------------------------------------------------------------- start -->
 <section id="start" class="screen on">
+  <nav class="topbar">
+    <span class="brandmark">Fish <b>KRAKEN v1.1</b></span>
+    <div class="spacer"></div>
+    <a class="toplink paper" href="/paper.pdf" target="_blank"
+       rel="noopener">Read the paper<span class="pgs">118&nbsp;pages,
+       PDF</span></a>
+    <a class="toplink" href="https://github.com/kv1514/fish-researchp12"
+       target="_blank" rel="noopener">Source</a>
+  </nav>
+
   <header class="hero">
     <h1>Fish</h1>
     <p class="tagline">Six-player Literature against an engine that reads the
       table properly.</p>
+    <p class="blurb">Every card that moves in this game moves in public, so a
+      seat that tracks the record carefully knows a great deal it was never
+      told. This one tracks it exactly.</p>
   </header>
 
   <div class="startgrid">
@@ -122,11 +148,39 @@
       <p class="note">One engine, the strongest one measured: 480-draw exact
         belief tracking plus depth-3 search over the posterior. Nothing is
         stored; a solo game lives in your browser tab.</p>
+
+      <h2 class="sub">Where this came from</h2>
+      <p class="note">This engine is the subject of a research project rather
+        than a demo. Every candidate change to it was written down with a
+        threshold <em>before</em> the data existed, and most of them missed
+        that threshold and were not shipped. The paper records both kinds, and
+        the failures at the same length as the successes.</p>
+      <p class="note">While you play, the table will show you what the public
+        record <em>proves</em> — a derivation you could have made yourself from
+        moves everyone saw — separately from what the engine merely believes.
+        The two are never mixed.</p>
     </div>
   </div>
 
+  <section class="paperstrip">
+    <div class="papertext">
+      <h2>The paper</h2>
+      <p>Everything the engine does, why, and what was measured rather than
+        assumed &mdash; including the results that <em>failed</em> their own
+        pre-registered thresholds and were not shipped. 118 pages, with the
+        pre-registrations and the corrections in full.</p>
+    </div>
+    <a class="paperbtn" href="/paper.pdf" target="_blank"
+       rel="noopener">Read the paper &rarr;</a>
+  </section>
+
   <footer class="foot">
-    <a href="https://github.com/kv1514/fish-researchp12" rel="noopener">The engine and the paper</a>
+    <a href="/paper.pdf" target="_blank" rel="noopener">Paper</a>
+    <span class="fsep">&middot;</span>
+    <a href="https://github.com/kv1514/fish-researchp12" rel="noopener">Source</a>
+    <span class="fsep">&middot;</span>
+    <a href="https://github.com/dylann4500/fishbot" target="_blank"
+       rel="noopener">The opponent</a>
   </footer>
 </section>
 

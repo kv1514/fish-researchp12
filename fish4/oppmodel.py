@@ -170,10 +170,53 @@ def schedule_factor(resolved: int, n_half_suits: int, s: float) -> float:
     return v if v > 0.0 else 0.0
 
 
+def _snapshot(bel, where, asker, lo):
+    """The asker's holding of one half-suit at one ask: what is fixed, what the
+    draw decides.
+
+    Three cases per card, and only the third is world-dependent:
+
+      publicly moved            the log says where it is; held iff that is us
+      never moved, pinned       never publicly moved means it is still with
+                                whoever was dealt it, and the propagator has
+                                DEDUCED who that is -- so it is fixed too
+      never moved, not pinned   the draw decides
+
+    The middle case is the one worth spelling out. A first version of this
+    lumped every never-publicly-moved card the asker could hold into the free
+    list, including the ones the propagator had already pinned to them. Those
+    cards are not in the sampler's column map -- it only carries cards with more
+    than one candidate -- so the consumer skipped them and the holding came out
+    SHORT by exactly the cards we were surest about. Under the unaimed code book
+    that shifts a depth; under the aimed one it corrupts the payload, and the
+    round-trip check showed sender and receiver disagreeing about a message they
+    had in fact both computed correctly.
+    """
+    const_mask = 0
+    free_cards = []
+    for c in range(lo, lo + 6):
+        w = where.get(c)
+        if w is not None:
+            if w == asker:
+                const_mask |= 1 << c
+            continue
+        cand = bel.candidates[c]
+        if cand & (cand - 1) == 0:          # a single candidate: deduced
+            if cand.bit_length() - 1 == asker:
+                const_mask |= 1 << c
+        elif cand >> asker & 1:
+            free_cards.append(c)
+    return const_mask, tuple(free_cards)
+
+
 def build(bel, obs, gamma: float, include_self: bool = False,
           depth_mode: str = "initial", count_mode: str = "linear",
+          w_unlocated: float = 0.0,
           opp_lambda: float = 0.0, order=None,
-          gamma_schedule: float = 0.0, sis_tilt: float = 0.0):
+          gamma_schedule: float = 0.0, sis_tilt: float = 0.0,
+          gamma_team: float | None = None, convention_beta: float = 0.0,
+          convention_q: float = 0.0, convention_aim: bool = False,
+          convention_book: str = "depth"):
     """Build an ``(OpponentModel, card_slot)`` pair, or ``(None, None)``.
 
     ``card_slot`` maps ``(player, card)`` to the model slot for that player and
@@ -241,7 +284,16 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     """
     # See the note in posterior.py: a negative gamma is a real setting (tilt
     # toward shallow), not a synonym for off. Only exactly zero is off.
-    if gamma == 0.0 and opp_lambda <= 0.0:
+    #
+    # gamma_team has to be in this guard too. "Believe nothing about opponents,
+    # something about teammates" is a coherent configuration and one the sweep
+    # in scripts4/gamma_split.py visits; without the extra clause it returned
+    # the uniform posterior for EVERY gamma_team at gamma == 0, so a whole row
+    # of the grid reported bit-identical numbers that looked like a measured
+    # null. Exactly the collapse the `> 0` guard on gamma caused before it.
+    off_team = gamma_team is None or gamma_team == 0.0
+    if (gamma == 0.0 and off_team and opp_lambda <= 0.0
+            and convention_beta == 0.0 and convention_q == 0.0):
         return None, None
     counts: dict[tuple[int, int], int] = {}
     #: Sum of per-ask schedule factors per slot, for gamma_schedule. Left equal
@@ -254,6 +306,29 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     pub: dict[tuple[int, int], int] = {}
     #: Per slot, the value of `pub` at each of that slot's asks.
     deltas: dict[tuple[int, int], list] = {}
+    #: (asker, half_suit, card, const_mask, free_cards) for every ask by our
+    #: own side, when the convention is live. See fish4/convention.py.
+    conv_asks: list = []
+    #: Cards the public record can place, for the aimed code book's target.
+    #: A successful ask locates one card; a declaration resolves six. A FAILED
+    #: ask locates nothing -- it proves the target does not hold the card and
+    #: that the asker holds SOME other card of the half-suit, both of which are
+    #: constraints and neither of which is a location.
+    located: set = set()
+    #: Publicly-known current location of each card, or absent when the card
+    #: has never been publicly moved and so is still wherever it was dealt.
+    #: THE CONVENTION NEEDS THIS AND THE DEPTH MODEL DOES NOT, which is the
+    #: whole reason it is here. The sampler works in INITIAL-DEAL space --
+    #: `bel.candidates[c]` is the set of players who may have initially held c
+    #: -- but the code book is a function of the hand the asker held AT THE
+    #: MOMENT OF THE ASK. Cards move. A teammate who asked in a half-suit
+    #: twenty moves ago and has since been given three of its cards would be
+    #: decoded against a holding they never had, and the further back the ask,
+    #: the more wrong the test. Measured: the number of distinct half-suit
+    #: holdings the sampler entertains for an asker falls from 4.97 at the most
+    #: recent of our asks to 1.30 by fifteen asks back, so the stale end of the
+    #: ledger is where the term is both least informative and most misread.
+    where: dict[int, int] = {}
     me = obs.player
     n_hs = len(obs.set_winner)
     resolved = 0
@@ -262,6 +337,9 @@ def build(bel, obs, gamma: float, include_self: bool = False,
             # The game clock: how much of the deck is already decided. Public,
             # and recoverable from the log alone.
             resolved += 1
+            hsc = getattr(ev, "half_suit", None)
+            if hsc is not None:
+                located.update(range(hsc * 6, hsc * 6 + 6))
             continue
         if not isinstance(ev, AskEvent):
             continue
@@ -273,8 +351,53 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                 h = half_suit_of(ev.card)
                 pub[(ev.asker, h)] = pub.get((ev.asker, h), 0) + 1
                 pub[(ev.target, h)] = pub.get((ev.target, h), 0) - 1
+                where[ev.card] = ev.asker
+                located.add(ev.card)
             continue
         hs = half_suit_of(ev.card)
+        # The convention reads only OUR OWN side's asks. It is an agreement
+        # between us and our partners about how to name a card; an opponent
+        # never agreed to it and reading their asks through it would be
+        # inventing a message nobody sent.
+        if (convention_beta or convention_q) and \
+                (ev.asker % 2) == (me % 2):
+            # The aimed target, computed from the public record AS OF THIS ASK.
+            # Both sides must name the same half-suit without communicating, so
+            # it can only be a function of common knowledge -- and it must be
+            # the common knowledge the SENDER had, not the receiver's later
+            # view, which is why it is snapshotted here rather than derived at
+            # the end. See fish4/convention.py.
+            g_hs = g_const = None
+            g_free: tuple = ()
+            targets: tuple = ()
+            if convention_aim or convention_book == "locate":
+                best, g_hs = -1, 0
+                for h in range(n_hs):
+                    u = sum(1 for c in range(h * 6, h * 6 + 6)
+                            if c not in located)
+                    if u > best:
+                        best, g_hs = u, h
+                g_const, g_free = _snapshot(bel, where, ev.asker, g_hs * 6)
+                if convention_book == "locate":
+                    # U: the unlocated cards of the target half-suit, in index
+                    # order, AS OF THIS ASK. Public on both sides, so no part
+                    # of the message has to carry it.
+                    targets = tuple(c for c in range(g_hs * 6, g_hs * 6 + 6)
+                                    if c not in located)
+            # Snapshot the asked half-suit as of THIS ask, before its own
+            # transfer is applied. Three cases per card, and only the third is
+            # world-dependent:
+            #   publicly with the asker      -> definitely held, constant
+            #   publicly with someone else   -> definitely not held
+            #   never publicly moved         -> held iff dealt to the asker
+            lo = hs * 6
+            const_mask, free_cards = _snapshot(bel, where, ev.asker, lo)
+            conv_asks.append((ev.asker, hs, ev.card, const_mask,
+                              tuple(free_cards), g_hs, g_const, g_free,
+                              targets))
+        if ev.success:
+            where[ev.card] = ev.asker
+            located.add(ev.card)
         key = (ev.asker, hs)
         counts[key] = counts.get(key, 0) + 1
         sched[key] = sched.get(key, 0.0) + schedule_factor(
@@ -293,6 +416,35 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     slots = {key: i for i, key in enumerate(counts)}
     weight = [0.0] * len(slots)
     base = [0] * len(slots)
+
+    # ---- opportunity, per prereg/unlocated_belief.md -----------------------
+    # How many cards of the half-suit still sit with nobody the PUBLIC record
+    # can name. `public_loc` and not `candidates`: candidates is narrowed by
+    # the observing seat's own hand, so it is this seat's private view, while
+    # the choice model is a claim about what the ASKER was looking at. The fit
+    # in scripts4/choice_curve.py recorded `bel.public_loc[c] is None` for
+    # exactly that reason -- it is common knowledge, identical for every
+    # observer and under every candidate world. Scoring the belief against a
+    # differently-defined covariate would be the transfer error that closed
+    # the w_expose direction without a single game being played.
+    #
+    # max(u, 1): the fitted exponent is NEGATIVE, u = 0 is legal (hold a card,
+    # know where all six are), and 0 ** -3.96 is unbounded. The fit clamps at
+    # 1e-12, which is harmless in a log-likelihood and would hand one half-suit
+    # a weight near 1e47 here. Fixed in the pre-registration, not after.
+    #
+    # At the default this loop does not run and `weight[i]` keeps its exact
+    # incumbent value -- bit-identical, like w_contest=0.0 and endgame_m=0,
+    # and tests4/test_unlocated_inert.py asserts it rather than trusting it.
+    unloc_factor: dict[int, float] = {}
+    if w_unlocated:
+        for _key in slots:
+            hs_ = _key[1]
+            if hs_ not in unloc_factor:
+                lo_ = hs_ * 6
+                u = sum(1 for c_ in range(lo_, lo_ + 6)
+                        if bel.public_loc[c_] is None)
+                unloc_factor[hs_] = float(max(u, 1)) ** w_unlocated
     for key, i in slots.items():
         n = counts[key]
         # The schedule enters as the MEAN factor over that slot's asks, so it
@@ -302,7 +454,24 @@ def build(bel, obs, gamma: float, include_self: bool = False,
             n = math.sqrt(n)
         elif count_mode == "capped":
             n = 1.0
-        weight[i] = gamma * n * mean_f
+        # One gamma per SIDE. The choice model is a property of the asker's
+        # policy and is the same for everyone; gamma is not the model, it is
+        # how sharply the model is believed as a likelihood weight, and the two
+        # sides are believed for different jobs. Teammate evidence is what
+        # resolves an allocation -- which of our own seats holds which card of
+        # a half-suit our team already owns outright -- and 95.3% of this
+        # engine's residual errors are of exactly that kind. Opponent evidence
+        # is what picks the next ask. A single gamma forces one compromise
+        # between two jobs whose returns were measured to differ by 2.6x
+        # (prereg/information_ceiling_split.md). gamma_team=None keeps one
+        # number for both and is bit-identical to the incumbent.
+        g = gamma
+        if gamma_team is not None and (key[0] % 2) == (me % 2):
+            g = gamma_team
+        w = g * n * mean_f
+        if w_unlocated:
+            w *= unloc_factor[key[1]]
+        weight[i] = w
     # base[i] = cards of that half-suit already pinned to that player by the
     # propagator, i.e. depth contributed by cards the sampler will not re-draw
     if depth_mode == "attime":
@@ -385,9 +554,25 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                     tot += math.log(v if v > 0 else 1e-9)
                 row.append(gamma * scale * tot)
             table.append(tuple(row))
+    # ---- the convention ----------------------------------------------------
+    # Per ask by our own side, everything the receiver's forward test needs:
+    # which cards of that half-suit are already PINNED to the asker (the same
+    # in every world, so precomputed once), and which are still free and could
+    # fall to them (so the test can be finished per draw). The test itself is
+    # fish4.convention.is_encoded, which asks the forward question -- would
+    # this hypothesised hand have named this card? -- and so never has to
+    # invert an encoding whose modulus depends on the answer.
+    # Built inline above, at each ask, because the holding it needs is the one
+    # that existed then and cannot be reconstructed from the final belief.
+    conv = tuple(conv_asks) if conv_asks else None
+
     return (OpponentModel(weight, base, set_cards=set_cards,
                           opp_lambda=opp_lambda, my_team=obs.player & 1,
-                          tilt_strength=sis_tilt, depth_table=table),
+                          tilt_strength=sis_tilt, depth_table=table,
+                          convention=conv, convention_beta=convention_beta,
+                          convention_q=convention_q,
+                          convention_aim=convention_aim,
+                          convention_book=convention_book),
             card_slot)
 
 

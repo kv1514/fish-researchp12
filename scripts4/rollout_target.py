@@ -135,7 +135,12 @@ def gather(n_pos: int, n_worlds: int, min_resolved: int, seed0: int = 8821,
     roll = {"v04": _rollout, "public": _public_rollout,
             "public-seeded": _public_seeded_rollout}[continuation]
     rows = []
-    positions = harvest(80, min_resolved, n_pos)
+    # The DEAL each position came from. `harvest` emits consecutive plies, so
+    # 113 positions here came from FOUR deals -- clustering the slope by
+    # position treats 110 clusters as independent when there are four, and
+    # widens the published half-width 2.33x once corrected.
+    deals: list[int] = []
+    positions = harvest(80, min_resolved, n_pos, games_out=deals)
     t0 = time.time()
     for pi, (rules, hands, sw, turn, hist, seat) in enumerate(positions):
         obs = Observation(player=seat, rules=rules, hand=hands[seat], turn=turn,
@@ -163,7 +168,8 @@ def gather(n_pos: int, n_worlds: int, min_resolved: int, seed0: int = 8821,
                     vals.append(v)
             if not vals:
                 continue
-            rows.append({"position": pi, "p_success": float(p[ai]),
+            rows.append({"position": pi, "deal": deals[pi],
+                         "p_success": float(p[ai]),
                          "q": float(np.mean(vals)), "n_worlds": len(vals),
                          "features": F[ai].tolist()})
         print(f"  pos {pi:>3}  asks={len(asks):>2}  "
@@ -179,11 +185,21 @@ def centred_slope(rows, key="p_success"):
     for every ask, and that between-position variation says nothing about
     whether the ask mattered.
     """
+    # Cluster on the DEAL where the rows carry one. Asks within a position
+    # share worlds and seeds, and positions within a deal share the hands and
+    # the whole history before them -- clustering on the position stops one
+    # level short. Files written before the `deal` field fall back to the
+    # position and say so, rather than silently reporting the tighter number.
+    if rows and "deal" not in rows[0]:
+        import sys as _sys
+        print("  NOTE: rows carry no deal index; clustering on the POSITION, "
+              "which understates the interval (see fish4/clustered.py)",
+              file=_sys.stderr)
     by = {}
     for r in rows:
         by.setdefault(r["position"], []).append(r)
-    xs, ys = [], []
-    for _, group in by.items():
+    xs, ys, cl = [], [], []
+    for pi, group in by.items():
         if len(group) < 2:
             continue
         x = np.array([g[key] for g in group], dtype=float)
@@ -192,23 +208,35 @@ def centred_slope(rows, key="p_success"):
             continue                       # no contrast to learn from
         xs.append(x - x.mean())
         ys.append(y - y.mean())
+        cl.append(group[0].get("deal", pi))
     if not xs:
         return None
     X = np.concatenate(xs)
     Y = np.concatenate(ys)
     b = float(np.sum(X * Y) / np.sum(X * X))
     resid = Y - b * X
-    # clustered by position, since asks within one share worlds and seeds
-    num = 0.0
+    # CR1 on whatever unit `cl` names -- the deal where the rows carry one,
+    # the position otherwise. Scores are summed WITHIN a cluster before being
+    # squared, which is the whole point: two positions in the same deal that
+    # both push the slope up must not each get counted as evidence.
+    from fish4.match import _t_critical
+    acc: dict[object, float] = {}
     i = 0
-    for x in xs:
+    for x, c in zip(xs, cl):
         k = len(x)
-        e = resid[i:i + k]
-        num += float(np.sum(x * e)) ** 2
+        acc[c] = acc.get(c, 0.0) + float(np.sum(x * resid[i:i + k]))
         i += k
-    se = float(np.sqrt(num) / np.sum(X * X))
+    n_cl = len(acc)
+    num = sum(v * v for v in acc.values())
+    corr = n_cl / (n_cl - 1.0) if n_cl > 1 else 1.0
+    se = float(np.sqrt(num * corr) / np.sum(X * X))
+    t = _t_critical(n_cl - 1, 0.95) if n_cl > 1 else float("inf")
     return {"slope": b, "se_clustered": se, "n_points": int(X.size),
-            "n_positions": len(xs),
+            "n_positions": len(xs), "n_clusters": n_cl,
+            "clustered_on": "deal" if any("deal" in g[0] for g in by.values())
+                            else "position",
+            "t_crit": t,
+            "ci95": [b - t * se, b + t * se],
             "range": float(max(r[key] for r in rows)
                            - min(r[key] for r in rows))}
 

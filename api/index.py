@@ -40,9 +40,19 @@ def route_of(path: str, query: str) -> str:
     than a dev-only branch.
     """
     op = parse_qs(query or "").get("op", [None])[0]
-    if op:
-        return op.strip("/").split("/")[-1]
-    return path.strip("/").split("/")[-1]
+    if not op:
+        op = path
+    op = op.strip("/").split("/")[-1]
+    # AND THE EXTENSION COMES OFF, because the deployed platform routes on the
+    # PATH and not on the ?op= this file asks it to carry. /api/health works
+    # either way -- with or without the query, the last segment is "health" --
+    # so nothing revealed the difference until a rewrite whose SOURCE has an
+    # extension arrived: /paper.pdf reached the function as "paper.pdf", missed
+    # every route, and returned a 404 that looked like a missing file rather
+    # than a missing route. Dropping it here keeps the dev server and the
+    # deployment agreeing on one spelling instead of the route carrying two.
+    # No route name contains a dot.
+    return op.rsplit(".", 1)[0] if "." in op else op
 
 
 class handler(BaseHTTPRequestHandler):
@@ -57,6 +67,30 @@ class handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_file(self, path: Path, ctype: str, cache: str):
+        """Stream a file from the deployment bundle.
+
+        Vercel serves public/ statically and everything else only through this
+        function, so a file that must stay in ONE place in the repository -- the
+        paper, which paper/build.sh writes next to its own sources -- can still
+        be served without committing a second copy that drifts. vercel.json's
+        includeFiles has to name it or it is not in the bundle at all; the
+        smoke test in tests4/test_paper_route.py is what notices if it stops
+        being.
+        """
+        try:
+            data = path.read_bytes()
+        except OSError:
+            return self._send({"error": "not found"}, 404)
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Content-Disposition",
+                         f'inline; filename="{path.name}"')
+        self.send_header("Cache-Control", cache)
+        self.end_headers()
+        self.wfile.write(data)
 
     def _body(self) -> dict:
         n = int(self.headers.get("Content-Length") or 0)
@@ -80,13 +114,33 @@ class handler(BaseHTTPRequestHandler):
                      "cards": [{"id": c, "name": card_name(c), "red": is_red(c)}
                                for c in half_suit_cards(h)]}
                     for h in range(len(HALF_SUIT_NAMES))]})
+            if op == "paper":
+                # The paper itself, at /paper.pdf via vercel.json's rewrite.
+                # Cached at the edge rather than in the browser: a deploy
+                # purges the CDN, so a reader gets the new build the first
+                # time anyone asks for it after a push, and max-age=0 keeps a
+                # browser from holding a stale copy past that.
+                return self._send_file(
+                    ROOT / "paper" / "kraken.pdf", "application/pdf",
+                    "public, max-age=0, s-maxage=3600, "
+                    "stale-while-revalidate=86400")
+
             if op == "health":
                 # room_backend is reported because the difference matters and
                 # is otherwise invisible: on "memory" a room works for exactly
                 # one player, which looks like a bug in the game rather than a
                 # deployment that has no shared store configured.
+                #
+                # `paper` is here for the same reason and was learnt the same
+                # way. Whether the PDF reached the bundle depends on
+                # vercel.json's includeFiles AND on .vercelignore, neither of
+                # which fails at build time -- the first deploy of the route
+                # 404ed on the live site while every local check passed. One
+                # boolean here says which side of that a deployment is on.
                 return self._send({"ok": True,
-                                   "room_backend": _rooms.backend_name()})
+                                   "room_backend": _rooms.backend_name(),
+                                   "paper": (ROOT / "paper"
+                                             / "kraken.pdf").exists()})
             return self._send({"error": "not found"}, 404)
         except Exception:                            # pragma: no cover
             traceback.print_exc()

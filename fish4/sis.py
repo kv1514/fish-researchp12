@@ -62,14 +62,16 @@ class SISFailure(Exception):
 class OpponentModel:
     """Likelihood of the observed asks under a depth-proportional choice model.
 
-    ``pair_index`` maps ``(player, half_suit)`` to a slot; ``weight[slot]`` is
+    ``weight[slot]`` is
     ``gamma`` times the number of times that player asked in that half-suit, and
     ``base[slot]`` is the number of cards of the half-suit already pinned to that
     player (so only the free cards need counting per draw).
     """
 
     __slots__ = ("weight", "base", "n_slots", "set_cards", "opp_lambda",
-                 "my_team", "tilt", "depth_table")
+                 "my_team", "tilt", "depth_table", "convention",
+                 "convention_beta", "convention_q", "convention_aim",
+                 "convention_book")
 
     #: Cap on a single step's twist factor. The depth-0 term of the likelihood
     #: is ``log(1e-9)``, so the 0 -> 1 ratio is ``1e9 ** w`` and would otherwise
@@ -84,9 +86,32 @@ class OpponentModel:
 
     def __init__(self, weight, base, set_cards=None, opp_lambda: float = 0.0,
                  my_team: int = 0, tilt_strength: float = 0.0,
-                 depth_table=None):
+                 depth_table=None, convention=None,
+                 convention_beta: float = 0.0,
+                 convention_q: float = 0.0,
+                 convention_aim: bool = False,
+                 convention_book: str = "depth"):
         self.weight = list(weight)
         self.base = list(base)
+        #: (asker, half_suit, card_asked, const_mask, free_cards) per ask by
+        #: our own side, where const_mask is the cards publicly known to be
+        #: with the asker AT THAT ASK and free_cards are the ones the draw
+        #: decides. See fish4/convention.py for why this is a soft weight
+        #: rather than a constraint: the receiver cannot know whether a given
+        #: ask was carrying a message, so a hard decode would let one
+        #: unencoded ask eliminate the true world.
+        self.convention = convention
+        self.convention_beta = convention_beta
+        #: Sender carry rate for the mixture likelihood; 0 means
+        #: no agreement exists and the term is skipped entirely.
+        self.convention_q = convention_q
+        #: Aim the code book at the most-unlocated half-suit
+        #: rather than at the one asked in. See
+        #: fish4/convention.py: 4.03x the entropy, same cost.
+        self.convention_aim = convention_aim
+        #: 'depth' | 'locate'. See fish4/convention.py: a count
+        #: constrains the joint, only a location pins a card.
+        self.convention_book = convention_book
         self.n_slots = len(self.weight)
         #: Per-slot, per-sampled-depth log terms, already scaled. Present only
         #: for the at-ask-time model, where each ask carries its own public
@@ -147,6 +172,63 @@ class OpponentModel:
                 row.append(f if f < cap else cap)
             table.append(tuple(row))
         return table
+
+    def log_convention(self, deal) -> float:
+        """Log weight from the pre-play naming agreement, given one drawn deal.
+
+        ``deal`` maps each free card id to the player it was assigned, in
+        INITIAL-DEAL space. The holding the code book depends on is the one the
+        asker had at the moment of the ask, so each ask carries a precomputed
+        ``const_mask`` of the cards publicly known to be with them then, and
+        only the never-publicly-moved cards are decided by the draw.
+
+        A world in which the asker would have named the card they DID name is
+        multiplied by exp(beta); one in which they would have named something
+        else is left alone. beta = 0 returns 0.0 and the model is the incumbent
+        exactly.
+        """
+        conv = self.convention
+        q = self.convention_q
+        if not conv or not (self.convention_beta or q):
+            return 0.0
+        from .convention import (depth_in, encoded_position, is_encoded,
+                                 legal_cards, locate_payload,
+                                 mixture_logp)
+        total = 0.0
+        for (asker, hs, card, const_mask, free_cards,
+             g_hs, g_const, g_free, targets) in conv:
+            hand = const_mask
+            for c in free_cards:
+                if deal.get(c) == asker:
+                    hand |= 1 << c
+            if self.convention_book == "locate" and targets:
+                free = legal_cards(hand, hs)
+                hand_all = const_mask
+                for c in free_cards:
+                    if deal.get(c) == asker:
+                        hand_all |= 1 << c
+                gh = g_const
+                for c in g_free:
+                    if deal.get(c) == asker:
+                        gh |= 1 << c
+                tg = targets[:len(free)]
+                match = bool(free) and card == free[
+                    locate_payload(hand_all | gh, tg) % len(free)]
+            elif self.convention_aim and g_hs is not None:
+                gh = g_const
+                for c in g_free:
+                    if deal.get(c) == asker:
+                        gh |= 1 << c
+                free = legal_cards(hand, hs)
+                match = bool(free) and card == free[
+                    encoded_position(depth_in(gh, g_hs), len(free))]
+            else:
+                match = is_encoded(hand, hs, card)
+            if q > 0.0:
+                total += mixture_logp(6 - depth_in(hand, hs), match, q)
+            elif match:
+                total += self.convention_beta
+        return total
 
     def log_likelihood_from_depths(self, depth) -> float:
         table = self.depth_table
@@ -364,8 +446,13 @@ class SISSampler:
             deal[order[i]] = picks[i]
         logq = math.log(prodq) if prodq > 0.0 else -1e300
         logl = 0.0
-        if depth is not None and self.opponent_model is not None:
-            logl = self.opponent_model.log_likelihood_from_depths(depth)
+        if self.opponent_model is not None:
+            if depth is not None:
+                logl = self.opponent_model.log_likelihood_from_depths(depth)
+            # The convention needs the ASSIGNMENT, not the depth counts: which
+            # card was named depends on which cards of the half-suit the asker
+            # holds, not merely how many.
+            logl += self.opponent_model.log_convention(deal)
         return deal, logq, logl
 
 

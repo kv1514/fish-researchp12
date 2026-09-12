@@ -1,9 +1,9 @@
-# KRAKEN v1.0 — drop-in integration
+# KRAKEN v1.1 — drop-in integration
 
 One bot. One entry point. No knobs.
 
 This directory is everything another project needs to play **KRAKEN
-v1.0** (the engine this project called KV's FishBot v0.6 until 2026-08-28)
+v1.1** (the engine this project called KV's FishBot v0.6 until 2026-08-28)
 on its own site or in its own engine, without reading the research
 code. It is the mirror of the bridge this project built to run
 [dylann4500/fishbot](https://github.com/dylann4500/fishbot) v0.7 inside our
@@ -14,7 +14,7 @@ one question at a time.
 
 | | |
 |---|---|
-| name | **KRAKEN v1.0** |
+| name | **KRAKEN v1.1** |
 | configuration | `opponent_gamma 0.35 · n_draws 480 · lookahead 0.25 / depth 3 / beam 4 · endgame_m 0 · claim_forced_exhaustive 1` |
 | defined in | `fish4/registry4.py` as `V06_DEPLOYED` (the self-test asserts this file matches it) |
 | requires | Python 3.11+, `numpy`. Nothing else. No network, no model files, no GPU. |
@@ -198,6 +198,12 @@ up in §21 of our paper, with the table.
 ## Licence and attribution
 
 Research code, published for interoperability and comparison. If you run it,
-please call it **KRAKEN v1.0** so results stay attributable to a
+please call it **KRAKEN v1.1** so results stay attributable to a
 specific configuration, and cite the repository. We labelled your bot the
 same way on our site.
+
+If you already have results recorded against **v1.0**, they are
+directly comparable: v1.1 took seven pre-registered directions at the errors
+v1.0 left and shipped none of them, so the two releases play the identical
+configuration tuple. The version names the release, not the policy. There is
+nothing to re-run.

@@ -27,6 +27,7 @@ to be legal for both seats.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -36,8 +37,85 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+#: THE NONCE ALONE PINS NOTHING, and the fixture below was pinned by a nonce
+#: alone for a while. `api._engine.seed_from_nonce` is
+#: HMAC(FISH_SECRET, nonce), and with FISH_SECRET unset the key is
+#: `_EPHEMERAL_SECRET` -- `secrets.token_bytes(32)`, drawn fresh PER PROCESS.
+#: So "fixture-play-0" named a different deal in every pytest run, and the
+#: livelock this fixture exists to avoid was still reachable: the test was
+#: still a coin flip, only a differently-shaped one. Measured directly: the
+#: same fixture ran 115, 129, 202 and 103 actions in four separate processes.
+#:
+#: It was ALSO order-dependent, which is worse than random. tests4/
+#: test_web_security.py does `os.environ.setdefault("FISH_SECRET", ...)` at
+#: import, so whenever that module happened to be collected first the deal
+#: became stable -- and whenever it did not, it was not. A test whose
+#: determinism depends on collection order is a test that passes locally and
+#: fails in CI.
+#:
+#: Set unconditionally rather than with setdefault, for exactly that reason:
+#: this module needs ONE known key, not whichever key arrived first. The other
+#: two modules that touch FISH_SECRET both use setdefault and assert nothing
+#: about its value, so overriding them costs nothing.
+FIXTURE_SECRET = "fixture-secret-for-web-session-tests-0000"
+os.environ["FISH_SECRET"] = FIXTURE_SECRET
+
 from fish.cards import NUM_PLAYERS                              # noqa: E402
-from api._engine import CHAMPION_GAMMA, Session, new_session    # noqa: E402
+from fish.rules import RuleConfig                                # noqa: E402
+from api._engine import (CHAMPION_GAMMA, MAX_LOG, Session,      # noqa: E402
+                         new_session)
+
+#: A FIXED fixture for the one test that needs a game played to its end.
+#:
+#: new_session() derives the deal from secrets.token_urlsafe(12) and ignores
+#: any seed, deliberately, so nobody can pick a deal they solved offline. That
+#: makes it a fresh random game every run -- and about 1.5% of play-mode games
+#: on the shipped path do not terminate at all. They livelock: a captured hang
+#: had 7 of 9 half-suits resolved, 12 cards left, and its last 200 actions were
+#: one 8-action cycle repeating 25 times, cards passed between the same seats
+#: with nobody ever declaring. See RESEARCH_FRONTIER.md.
+#:
+#: So the test below used to be a coin flip that came up tails in CI roughly
+#: once in fifty runs. Pinning the deal is not hiding that: what the test
+#: asserts is the SHAPE of the reveal payload at game over, which does not
+#: depend on which deal was dealt, and reaching game over is a precondition of
+#: the assertion rather than the thing being measured. The livelock is a real
+#: defect, it is recorded as one, and it is not this test's job to find it.
+#:
+#: The nonces are the FIRST candidates of a fixed enumeration -- "fixture-
+#: <mode>-0", "-1", and so on -- and both index 0 terminate under
+#: FIXTURE_SECRET, so nothing was skipped and no deal was selected for its
+#: outcome.
+FIXTURE_NONCE = {"spectate": "fixture-spectate-0", "play": "fixture-play-0"}
+
+#: What (FIXTURE_SECRET, nonce) actually deals, as a hand bitmask for seat 0.
+#: Recorded so the pin is self-checking: if the derivation ever changes, the
+#: fixture silently becomes a different game and every "this terminates"
+#: assumption above it becomes unfounded -- which is precisely the failure
+#: this file just had. test_the_fixture_deal_is_pinned is what notices.
+FIXTURE_SEAT0_HAND = {"spectate": 0xC99008009000,
+                      "play": 0xA807020008004}
+
+
+def _fixture(mode: str) -> Session:
+    rules = RuleConfig(variant="54", starting_player=0,
+                       wrong_distribution_outcome="opponent")
+    if mode == "spectate":
+        return Session(-1, FIXTURE_NONCE[mode], rules, CHAMPION_GAMMA,
+                       mode="spectate")
+    return Session(0, FIXTURE_NONCE[mode], rules, CHAMPION_GAMMA)
+
+
+def test_the_fixture_deal_is_pinned():
+    """A fixture that is not actually fixed is worse than an unfixed one."""
+    for mode in ("spectate", "play"):
+        got = _fixture(mode).state.hands[0]
+        assert got == FIXTURE_SEAT0_HAND[mode], (
+            f"{mode} fixture deals seat 0 {got:#x}, not "
+            f"{FIXTURE_SEAT0_HAND[mode]:#x}. Either FISH_SECRET is not the "
+            f"one this module sets -- something else in the process changed "
+            f"it after import -- or seed_from_nonce changed. Either way the "
+            f"fixture is no longer the game it was checked on.")
 
 
 def test_the_human_is_on_the_move_at_the_deal():
@@ -215,11 +293,29 @@ def test_both_modes_reveal_the_same_shape_at_game_over():
     tally froze and the next deal never started.
     """
     shapes = {}
-    for mode, body in (("spectate", {"mode": "spectate", "step": 1}),
-                       ("play", {"seat": 0})):
-        s = new_session(body)
+    for mode in ("spectate", "play"):
+        s = _fixture(mode)
         tok, log = s.token(), list(s.wire_log)
-        for _ in range(250):
+        # THE BOUND IS DERIVED FROM MAX_LOG, and that is the point of it.
+        # At six actions an iteration a 250-iteration loop can build a
+        # 1,500-action log, and Session.restore refuses anything past
+        # MAX_LOG = 1,200. So a game that failed to finish did not fail on
+        # this test's own "fixture never finished" -- it failed one loop
+        # earlier, inside the engine, with "action log too long", which is a
+        # far worse error for exactly the same bug. It happened once in CI.
+        #
+        # MAX_LOG // 6 caps the log at 1,194 at the last restore, so the
+        # engine can no longer be the thing that complains, and the
+        # assertion below is what fires. It is not a smaller test: 1,200
+        # actions is about ten times a real game. Measured over 100 fresh
+        # fixtures (40 spectate, 60 play, all terminating): median 105,
+        # max 191.
+        #
+        # WHAT PRODUCED THOSE LONG GAMES IS NOW EXPLAINED, and it was not
+        # a long game: it is a livelock. See FIXTURE_NONCE above. The deal
+        # is pinned now, so this loop terminates in about 95 actions and the
+        # bound is slack rather than load-bearing.
+        for _ in range(MAX_LOG // 6):
             cur = Session.restore(tok, log)
             if cur.state.is_terminal:
                 break
@@ -398,24 +494,47 @@ def test_the_declaration_ledger_survives_the_log_tail():
     """
     from api._engine import LOG_TAIL
 
-    s = new_session({"seat": 0})
-    s.advance(600)
-    while not s.state.is_terminal:
-        s.play(s.suggest())
-    snap = s.snapshot()
-    assert snap["terminal"]
-    led = snap["declarations"]
+    # new_session IGNORES any seed on purpose -- letting a client choose the
+    # deal is exactly what the nonce prevents -- so this test cannot pin the
+    # game and has to search for one that can actually discriminate. A game
+    # whose declarations all happen to land inside the last LOG_TAIL actions
+    # proves nothing about where the ledger was built from, and roughly one
+    # game in forty is like that. Hoping is not a test design: play until a
+    # game with a declaration OUTSIDE the tail turns up, and assert on that.
+    discriminating = None
+    for _ in range(40):
+        s = new_session({"seat": 0})
+        s.advance(600)
+        while not s.state.is_terminal:
+            s.play(s.suggest())
+        snap = s.snapshot()
+        assert snap["terminal"]
+        led = snap["declarations"]
 
-    # every set that resolved has exactly one declaration behind it
-    resolved = sum(1 for w in s.state.set_winner if w is not None)
-    assert len(led) == resolved, (
-        f"{len(led)} ledger rows for {resolved} resolved sets")
-    assert len(s.log) > LOG_TAIL, (
-        "this game was short enough that the tail could not have trimmed "
-        "anything, so the test proves nothing -- pick a longer one")
-    in_tail = [r for r in snap["log"] if r.get("t") == "claim"]
-    assert len(led) >= len(in_tail)
-    assert len(led) > len(in_tail) or len(s.log) - LOG_TAIL < 1
+        # This one holds for EVERY game and is the property that matters:
+        # every set that resolved has exactly one declaration behind it.
+        resolved = sum(1 for w in s.state.set_winner if w is not None)
+        assert len(led) == resolved, (
+            f"{len(led)} ledger rows for {resolved} resolved sets")
+
+        in_tail = [r for r in snap["log"] if r.get("t") == "claim"]
+        assert len(led) >= len(in_tail), (
+            "the ledger has fewer rows than the tail alone shows, which means "
+            "it is not built from the whole history")
+        if len(s.log) > LOG_TAIL and len(led) > len(in_tail):
+            discriminating = (len(led), len(in_tail), len(s.log))
+            break
+
+    assert discriminating is not None, (
+        "40 games and not one had a declaration outside the last "
+        f"{LOG_TAIL} actions, so the tail-trimming case was never exercised. "
+        "That is a real signal, not a flake: either games got much shorter or "
+        "declarations moved much later.")
+    n_led, n_tail, n_log = discriminating
+    assert n_led > n_tail, (
+        f"ledger {n_led} rows against {n_tail} claims visible in the "
+        f"{LOG_TAIL}-action tail of a {n_log}-action game -- a ledger filtered "
+        f"from the slice would have lost the earlier half-suits")
 
 
 def test_every_declaration_is_classified_and_the_classes_are_exclusive():

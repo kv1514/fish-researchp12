@@ -1,0 +1,62 @@
+{
+ "opponents": {
+  "dylan_v07": {
+   "params": {
+    "signal_mode": "stuck",
+    "signal_max_p": 0.5,
+    "signal_budget": 16
+   },
+   "dose": 2.766,
+   "dose_off_by": 0.1077,
+   "their_wrong_effect": {
+    "mean": 0.0454,
+    "half_width": 0.0128,
+    "ci95": [
+     0.0326,
+     0.0582
+    ],
+    "n_clusters": 2500
+   },
+   "margin_effect": {
+    "mean": 0.076,
+    "half_width": 0.0393
+   },
+   "unfinished": 0,
+   "fallbacks": 0
+  },
+  "ev_claim": {
+   "params": {
+    "signal_mode": "stuck",
+    "signal_max_p": 1.0
+   },
+   "dose": 2.872,
+   "dose_off_by": 0.0735,
+   "their_wrong_effect": {
+    "mean": 0.0172,
+    "half_width": 0.0124,
+    "ci95": [
+     0.0048,
+     0.0296
+    ],
+    "n_clusters": 2500
+   },
+   "margin_effect": {
+    "mean": -0.1372,
+    "half_width": 0.0529
+   },
+   "unfinished": 0,
+   "fallbacks": 0
+  }
+ },
+ "withdrawn": [],
+ "prereg": "signal_matched_dose",
+ "seed_deal": 14300000,
+ "seed_agent": 143000,
+ "n_deals": 2500,
+ "n_games": 20000,
+ "vs": "dylan_v07|ev_claim",
+ "common_dose_D": 3.1,
+ "amendment": "n raised 800 -> 2500 after calibration",
+ "smoke": false,
+ "minutes": 90.3
+}

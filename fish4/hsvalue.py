@@ -206,7 +206,21 @@ def fit_multinomial(X: np.ndarray, y: np.ndarray, l2: float = 1.0,
     adaptive optimiser fixes it. Convergence is not assumed: the caller compares
     against the class prior and a one-feature baseline on games held out whole.
     """
-    import torch
+    try:
+        import torch
+    except ImportError as e:                      # pragma: no cover
+        #: Not a declared runtime dependency: the engine, every duel and every
+        #: figure in the strength ladder run on numpy alone, and torch is
+        #: needed only to FIT the half-suit value model. A bare
+        #: ModuleNotFoundError here sent a reader of the paper's reproduction
+        #: section looking for a missing file.
+        raise ImportError(
+            "fitting the half-suit value model needs PyTorch, which is an "
+            "OPTIONAL dependency of this project:\n"
+            "    pip install -r requirements-learn.txt\n"
+            "Nothing else in the repository requires it -- the engine, the "
+            "duels and the strength results all run on numpy."
+        ) from e
 
     mu = X.mean(axis=0)
     sd = X.std(axis=0)

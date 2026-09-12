@@ -1,4 +1,4 @@
-"""KRAKEN v1.0 as a language-neutral decision service.
+"""KRAKEN v1.1 as a language-neutral decision service.
 
 This is the mirror image of the bridge this project built to run dylann4500's
 FishBot v0.7 inside our engine: it lets ANY host -- a C++ engine, a
@@ -95,7 +95,7 @@ from fish.rules import RuleConfig
 SPEC = {"opponent_gamma": 0.35, "n_draws": 480, "w_lookahead": 0.25,
         "lookahead_depth": 3, "lookahead_beam": 4, "endgame_m": 0,
         "claim_forced_exhaustive": 1}
-VERSION = "1.0"
+VERSION = "1.1"
 
 
 def _card_id(x) -> int:

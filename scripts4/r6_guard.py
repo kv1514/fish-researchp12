@@ -20,6 +20,36 @@ points by giving away general strength.
     py scripts4/r6_guard.py <arm> --pool   # pools the finished blocks
 
 ``arm`` is a key of scripts4.r6_contest_sweep.ARMS, e.g. "c+1.0".
+
+WHY THIS HAS NEVER RUN, which is a different thing from having been skipped.
+
+R6 died at stage 1. The screen in ``results/r6_screen.json`` put all seven
+arms BELOW the base at 500 pairs each -- c-1.0 -0.420 [-0.714, -0.126],
+c-0.3 -0.240 [-0.509, +0.029], c+0.3 -0.320 [-0.579, -0.061], c+1.0 -0.292
+[-0.626, +0.042], c+3.0 -1.124 [-1.473, -0.775], d0.7 -0.196 [-0.477,
++0.085], d0.9 -0.288 [-0.488, -0.088]. Four exclude zero on the losing side
+and not one point estimate is positive, so nothing was ever nominated for
+stage 2, let alone stage 3. Both knobs sit at their neutral defaults in the
+engine (``w_contest=0.0``, ``silence_delta=1.0``), bit-identical, the same
+discipline as ``endgame_m=0``.
+
+None of that is an oversight, and the note exists because it LOOKS like one.
+Nothing in the repository names this file -- though that alone means little,
+since a dozen one-shot scripts under ``scripts4/`` are named by nothing either
+and are simply finished. What makes this one worth a paragraph is that it
+implements a numbered STAGE of a protocol whose earlier stage did run, so a
+reader who finds stage 1's results and no stage 3 has real cause to wonder
+whether stage 3 was skipped. It was not.
+``prereg/rules_award_baseline.md`` sets out all three R6 stages before any pair
+was played, gates stage 2 on the screen CI clearing zero, and commits in
+advance to the branch that fired:
+"no screening arm clears -> both knobs stay at defaults and the negative is
+reported". The knobs stayed at defaults and the negative is reported, in
+the paper's contestation table (``tab:contestation``) -- all seven arms,
+every interval above, and the dose-response called out.
+
+So stage 3 is unrun because stage 1 said stop, which is the protocol working.
+If an R6 arm is ever revived, stage 3 is still required and this still runs it.
 """
 
 from __future__ import annotations

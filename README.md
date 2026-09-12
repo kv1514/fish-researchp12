@@ -51,11 +51,14 @@ toward understanding what near-optimal Fish actually looks like.
 
 **Play it:**
 [fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/)
---- six-player Literature against v0.4, with the engine's own posterior visible
-while you play. Public, no sign-in, nothing stored; a game lives in the browser
-tab. The link is Vercel's stable per-branch URL, so it follows this branch
-rather than any one deployment. The project's *production* URL tracks `main`,
-which carries none of `api/`, `public/` or `fish4/`, so it 404s until this work
+--- six-player Literature against KRAKEN v1.1, with the engine's own posterior
+visible while you play. Public, no sign-in, nothing stored; a game lives in the
+browser tab. The paper is served from the same site at
+[`/paper.pdf`](https://fish-engine-git-claude-fishnbot-work-access-g7ciey-side-space.vercel.app/paper.pdf),
+out of `paper/kraken.pdf` itself rather than a second copy that could go stale.
+The link is Vercel's stable per-branch URL, so it follows this branch rather
+than any one deployment. The project's *production* URL tracks `main`, which
+carries none of `api/`, `public/` or `fish4/`, so it 404s until this work
 merges.
 
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
@@ -65,7 +68,7 @@ merges.
   [fish4/evalx/README.md](fish4/evalx/README.md), and in the raw duel records at
   `results/v04_duels.jsonl`)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
-- Research paper (current): [paper/kraken.tex](paper/kraken.tex) — KRAKEN v1.0
+- Research paper (current): [paper/kraken.tex](paper/kraken.tex) — KRAKEN v1.1
 - Research paper, v0.3 (superseded, kept because its results still reproduce):
   [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
@@ -76,7 +79,7 @@ The front of this file described `tuned-v1` as the current champion for two
 versions after it stopped being one. It is not; that section is retitled below
 and kept because its findings still hold for the rung it describes.
 
-The deployed engine is **KRAKEN v1.0** (`V06_DEPLOYED` in
+The deployed engine is **KRAKEN v1.1** (`V06_DEPLOYED` in
 `fish4/registry4.py`; it was called KV's FishBot v0.6 before 2026-08-28 and the
 identifiers did not move with the name — see `fish4/brand.py` for why). Against
 **Dylan's FishBot v0.7** (github.com/dylann4500/fishbot, a genuinely foreign
@@ -164,7 +167,7 @@ py -m fish4 serve --public
 That opens a temporary public URL through a third-party SSH relay. There is no
 password on the table: anyone with the link can sit down.
 
-## FishBot v0.4 on the web
+## KRAKEN on the web
 
 `api/` and `public/` are a deployed, always-on version of the single-player
 table. It is a separate front end rather than the lobby above, because a
@@ -195,8 +198,30 @@ engine's honest answer, which is every card's true holder. Binding the log costs
 one hash and no storage, because the token round-trips on every response, and it
 closes the take-back too: a truncated log no longer verifies.
 
+### The table stops a game that has stopped
+
+Two teams that both play well can cycle: a half-suit passes back and forth,
+every ask succeeding, neither side ever holding all six, and nobody able to
+declare. Nothing is stuck -- every move in the cycle is legal and sensible --
+the position simply recurs. Measured on the shipped path over 4,000 games, in
+`results/web_termination_r*.json`: it happens, and it happens far more often
+when each move is decided by a freshly restored session, which is what the
+deployed site does on every request.
+
+So `api/_engine.py` carries the rule the rest of this project has used since
+v0.3. `fish4/match.py::play_capped` caps every measured game and scores it on
+the half-suits actually resolved, unresolved ones counting for nobody -- the
+same semantics `fish4/exact_ii.py` gives an unbroken cycle. The web was the one
+surface without it, which is why the web was the one surface where a game could
+run forever. There are two arbiter rules, `WEB_MAX_ACTIONS` and the tighter
+`WEB_MAX_IDLE`, and neither is visible to any agent: nothing plays differently
+because of them, which `scripts4/web_cap_check.py` checks by replaying both arms
+and comparing action logs rather than by comparing means.
+
 ```bash
 py scripts4/devserve.py         # serve public/ + api/ exactly as deployed
+py scripts4/web_termination.py 1000 1   # how long a web game runs, and if it ends
+py scripts4/web_cap_check.py 200 1      # the cap changes no game that finishes
 ```
 
 **Set `FISH_SECRET` in the deployment environment** (at least 16 bytes; a
@@ -269,13 +294,24 @@ Every one of these was written after the failure it now catches.
 ```bash
 py scripts4/check_seeds.py             # two experiments sharing deals they should not
 py scripts4/check_paper_numbers.py     # a figure the paper quotes that its file no longer holds
-py scripts4/check_tex.py               # structure, and doubled backslashes from an editing script
+py scripts4/check_tex.py               # structure, fragile commands in captions, doubled backslashes
+bash paper/build.sh                    # THE one that actually decides: three passes, 0 undefined refs
 py scripts4/recheck_mdes.py            # does per-cell noise revise any published verdict?
 py scripts4/heterogeneity_across_runs.py  # is block disagreement the harness or one effect?
 py scripts4/rollout_target_robust.py   # is a headline slope carried by a few positions?
 py scripts4/pair_sd_model.py           # what actually sets a paired experiment's noise
 py scripts4/index_results.py           # regenerate results/README.md, and find orphans
 ```
+
+`check_tex.py` is cheap and worth running first, but it is **not** a substitute
+for `paper/build.sh`. On 2026-08-30 it reported "no structural problems found"
+on a `kraken.tex` that `pdflatex` then refused to compile — a rewritten caption
+used `\path`, which expands to `\url` and is fragile in the moving argument a
+caption becomes. It now catches that specific case, and the general point
+stands: the build is the check, and this machine has `pdflatex`. The same run
+found `build.sh` still naming `fishbot_v06.tex` from before the KRAKEN rename,
+and `kraken.pdf` committed a day stale — neither would have survived one
+invocation of the script.
 
 Two of them exist because a natural way to measure something here is wrong:
 
@@ -306,7 +342,7 @@ Then open two pages:
   holding 2C, so you could not have said no to P1").
 
 ```bash
-py -m pytest tests -q
+py -m pytest tests -q     # the v0.3 tests only; `py -m pytest -q` runs all of them
 ```
 
 Other entry points:

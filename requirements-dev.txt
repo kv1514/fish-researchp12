@@ -1,0 +1,10 @@
+# What running this project's own tests requires, beyond requirements.txt.
+#
+# Nothing recorded this until 2026-08-31, when CI failed on its first run with
+# "No module named pytest". Every machine that had ever run the suite happened
+# to have pytest already, so the omission was invisible: a fresh clone could
+# not run the tests and nothing said which package was missing.
+#
+# Upper bound because a major pytest release is a breaking change and the
+# suite should fail on a real defect, not on a new collector.
+pytest>=8,<10
