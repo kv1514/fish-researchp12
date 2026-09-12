@@ -141,6 +141,27 @@ def test_the_rewrite_reaches_the_route():
     assert rewrite("/style.css") == "/style.css"
 
 
+def test_both_shapes_of_the_request_route_to_the_paper():
+    """The deployment and the dev server hand the function different things.
+
+    Vercel routes on the PATH: /paper.pdf arrives as /paper.pdf, and the ?op=
+    that vercel.json asks it to carry is not what decides the route. The dev
+    server applies the rewrite itself and hands over ?op=paper. Nothing
+    revealed the difference for the /api/ routes -- with or without the query,
+    the last segment of /api/health is "health" -- and it cost a deploy to find
+    out, because /paper.pdf reached the function as the route name "paper.pdf",
+    matched nothing, and 404ed as though the file were missing.
+    """
+    from api.index import route_of
+    assert route_of("/paper.pdf", "") == "paper"
+    assert route_of("/api/index", "op=paper") == "paper"
+    assert route_of("/paper.pdf", "op=paper") == "paper"
+    # and the routes that were already working still resolve
+    assert route_of("/api/health", "") == "health"
+    assert route_of("/api/index", "op=health") == "health"
+    assert route_of("/api/index", "op=room_join") == "room_join"
+
+
 def test_the_route_serves_the_bytes_on_disk():
     """Exercise the deployed handler's own code, not a reimplementation."""
     from api.index import handler

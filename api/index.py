@@ -40,9 +40,19 @@ def route_of(path: str, query: str) -> str:
     than a dev-only branch.
     """
     op = parse_qs(query or "").get("op", [None])[0]
-    if op:
-        return op.strip("/").split("/")[-1]
-    return path.strip("/").split("/")[-1]
+    if not op:
+        op = path
+    op = op.strip("/").split("/")[-1]
+    # AND THE EXTENSION COMES OFF, because the deployed platform routes on the
+    # PATH and not on the ?op= this file asks it to carry. /api/health works
+    # either way -- with or without the query, the last segment is "health" --
+    # so nothing revealed the difference until a rewrite whose SOURCE has an
+    # extension arrived: /paper.pdf reached the function as "paper.pdf", missed
+    # every route, and returned a 404 that looked like a missing file rather
+    # than a missing route. Dropping it here keeps the dev server and the
+    # deployment agreeing on one spelling instead of the route carrying two.
+    # No route name contains a dot.
+    return op.rsplit(".", 1)[0] if "." in op else op
 
 
 class handler(BaseHTTPRequestHandler):
