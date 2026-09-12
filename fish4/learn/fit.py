@@ -60,7 +60,7 @@ from typing import Iterable, Optional, Sequence
 
 import numpy as np
 
-from ..askfeat import TERM_NAMES, AskWeights
+from ..askfeat import TERM_NAMES, AskWeights, stale_terms
 
 N_TERMS = len(TERM_NAMES)
 
@@ -115,10 +115,31 @@ class PositionBlock:
         return got
 
 
-def build_blocks(positions: Iterable[dict], rollouts: dict) -> list[PositionBlock]:
-    """Join harvested positions with their rollout matrices."""
+def build_blocks(positions: Iterable[dict], rollouts: dict,
+                 zero_terms: Sequence[str] = ()) -> list[PositionBlock]:
+    """Join harvested positions with their rollout matrices.
+
+    ``zero_terms`` names columns whose stored values are known to have been
+    computed by a formula the engine no longer uses. Their columns are set to
+    zero rather than trusted, which makes a ridge fit return exactly 0.0 for
+    them. That is not the same statement as "fitted and came out at zero", so
+    the caller is required to NAME them -- there is no automatic fallback --
+    and is expected to say so in whatever it writes out.
+
+    The alternative, dropping the column from the basis, changes the width of
+    the weight vector and every consumer of it. Zeroing keeps the shape and
+    costs one term's worth of information, which is the right trade when the
+    term is one of eleven and the champion weights it at 0.0 anyway.
+    """
     from .rollout import ILLEGAL_VALUE
 
+    # Validated once, before anything is read: a typo in zero_terms would
+    # otherwise leave the stale column in the fit and raise -- or not raise --
+    # depending on what else happened to be stale.
+    for t in zero_terms:
+        if t not in TERM_NAMES:
+            raise ValueError(f"zero_terms names {t!r}, which is not one of "
+                             f"{tuple(TERM_NAMES)}")
     out: list[PositionBlock] = []
     for rec in positions:
         V = rollouts.get(rec["pid"])
@@ -144,9 +165,25 @@ def build_blocks(positions: Iterable[dict], rollouts: dict) -> list[PositionBloc
                 f"{rec['pid']}: harvested with basis {tuple(stored)} but "
                 f"fish4.askfeat.TERM_NAMES is now {tuple(TERM_NAMES)}; "
                 f"re-harvest before fitting")
+        # The names matching is only half the check. A term whose FORMULA
+        # changed while its name stayed put produces a column that no longer
+        # means what the fitted weight would claim, and the name check cannot
+        # see it. `claim` has already been corrected this way, after this
+        # dataset was harvested.
+        bad = [t for t in stale_terms(rec.get("tv")) if t not in zero_terms]
+        if bad:
+            raise ValueError(
+                f"{rec['pid']}: harvested with definition version(s) "
+                f"{ {n: (rec.get('tv') or [1] * len(TERM_NAMES))[TERM_NAMES.index(n)] for n in bad} } "
+                f"for {bad}, which fish4/askfeat.py has since changed. A "
+                f"weight fitted on that column would describe a feature the "
+                f"engine no longer computes. Re-harvest, or drop the term "
+                f"from the basis deliberately -- not by ignoring this.")
         if F_all.shape[1] != N_TERMS:
             raise ValueError(f"{rec['pid']}: feature width {F_all.shape[1]} "
                              f"!= {N_TERMS}; TERM_NAMES changed under the data")
+        for t in zero_terms:
+            F_all[:, TERM_NAMES.index(t)] = 0.0
         p = p_all[idx]
         F = F_all[idx]
         # Incumbent ranking, recomputed from the stored features so the
@@ -231,19 +268,57 @@ def _scales(X: np.ndarray) -> np.ndarray:
     Not centred: the rows are antisymmetric differences and centring them would
     reintroduce the intercept that differencing just removed. A column that is
     identically zero (for instance ``certain`` in a batch where no candidate is
-    a provable steal) gets scale 1 and will simply receive weight 0.
+    a provable steal) gets scale 1 here -- but see :func:`dead_columns`. This
+    docstring used to go on to say such a column "will simply receive weight
+    0", which was an assertion, was never tested, and is FALSE at ``lam = 0``:
+    a zero column makes the Gram matrix singular and ``np.linalg.solve``
+    raises. The lambda grid starts at 0.0, so that path is reachable. It is
+    now handled explicitly by the two callers rather than asserted here.
     """
     s = np.sqrt((X ** 2).mean(axis=0))
     s[s < 1e-12] = 1.0
     return s
 
 
+def dead_columns(X: np.ndarray) -> np.ndarray:
+    """Boolean mask of columns that are identically zero.
+
+    Such a column carries no information and must be held out of the solve:
+    with ``lam = 0`` it makes ``Z'Z`` singular, and with ``lam > 0`` the
+    penalty hides that by returning a coefficient that is zero anyway. Holding
+    it out and writing 0 into its slot gives the same answer everywhere the
+    solve succeeded before, and an answer instead of an exception where it did
+    not.
+    """
+    return np.sqrt((X ** 2).mean(axis=0)) < 1e-12
+
+
 def ridge(X: np.ndarray, y: np.ndarray, lam: float) -> np.ndarray:
-    """Ridge coefficients, no intercept, penalty applied in scaled space."""
+    """Ridge coefficients, no intercept, penalty applied in scaled space.
+
+    Identically-zero columns are held out of the solve and receive exactly
+    zero. With no such column the original expression is evaluated unchanged,
+    so every previously recorded coefficient is reproduced to the bit -- an
+    equivalent-but-resliced expression is not good enough here, because BLAS
+    rounds a differently-laid-out matrix differently and "only zero columns are
+    affected" then stops being exactly true.
+    """
     s = _scales(X)
     Z = X / s
-    G = Z.T @ Z + lam * np.eye(Z.shape[1])
-    w_s = np.linalg.solve(G, Z.T @ y)
+    live = ~dead_columns(X)
+    if live.all():
+        # The overwhelmingly common case, and taken by the ORIGINAL code path
+        # rather than by an equivalent one. Boolean-mask indexing would copy Z
+        # into a different memory layout, and BLAS then rounds differently --
+        # enough to move a recorded coefficient in its last bits. "Only zero
+        # columns are affected" has to be exactly true, not nearly.
+        G = Z.T @ Z + lam * np.eye(Z.shape[1])
+        return np.linalg.solve(G, Z.T @ y) / s
+    w_s = np.zeros(Z.shape[1], dtype=np.float64)
+    if live.any():
+        Zl = Z[:, live]
+        G = Zl.T @ Zl + lam * np.eye(Zl.shape[1])
+        w_s[live] = np.linalg.solve(G, Zl.T @ y)
     return w_s / s
 
 
@@ -259,10 +334,18 @@ def _sandwich(X: np.ndarray, y: np.ndarray, w: np.ndarray, lam: float,
     and is stated in the report rather than hidden.
     """
     s = _scales(X)
-    Z = X / s
+    Z_full = X / s
+    live = ~dead_columns(X)
+    # A dead column has zero variance, so its coefficient is not estimated and
+    # its variance is zero. Inverting the full Gram would raise at lam = 0.
+    # With nothing dead the full matrix is used unsliced, so the arithmetic is
+    # identical to what it was rather than merely equivalent.
+    Z = Z_full if live.all() else Z_full[:, live]
     n, k = Z.shape
+    if k == 0:
+        return np.zeros((Z_full.shape[1], Z_full.shape[1]))
     A = np.linalg.inv(Z.T @ Z + lam * np.eye(k))
-    e = y - Z @ (w * s)
+    e = y - Z @ ((w * s) if live.all() else (w * s)[live])
     if g is None:
         dof = max(1, n - k)
         sigma2 = float(e @ e) / dof
@@ -279,6 +362,13 @@ def _sandwich(X: np.ndarray, y: np.ndarray, w: np.ndarray, lam: float,
         corr = (G / max(1, G - 1)) * ((n - 1) / max(1, n - k))
         meat *= corr
     V_s = A @ meat @ A
+    if not live.all():
+        # Scatter back to full width with zero rows and columns for dead terms,
+        # so every caller keeps indexing by TERM_NAMES position.
+        V_full = np.zeros((Z_full.shape[1], Z_full.shape[1]))
+        idx = np.flatnonzero(live)
+        V_full[np.ix_(idx, idx)] = V_s
+        V_s = V_full
     S = np.diag(1.0 / s)
     return S @ V_s @ S
 
@@ -597,7 +687,9 @@ def fit_mlp(blocks: Sequence[PositionBlock], hidden: int = 32,
     try:
         import torch
         from torch import nn
-    except ImportError:  # pragma: no cover - torch is a declared dependency
+    except ImportError:  # pragma: no cover - torch is OPTIONAL, see
+                         # requirements-learn.txt; this path is the reason the
+                         # rest of the pipeline still runs without it
         return {"available": False, "reason": "torch not installed"}
 
     # One thread, deliberately. This machine has 8 cores shared with other

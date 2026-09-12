@@ -1,0 +1,32 @@
+{
+  "schema": "askobj-positions/2",
+  "config": {
+    "n_games": 200,
+    "n_worlds": 16,
+    "n_eval": 6,
+    "n_top": 3,
+    "sample_rate": 0.05,
+    "max_per_game": 8,
+    "seed": 20260821,
+    "base_deal_seed": 4100000,
+    "agent_seed_base": 771,
+    "variant": "54"
+  },
+  "terms": [
+    "suit",
+    "turn",
+    "scarce",
+    "reveal",
+    "deplete",
+    "expose",
+    "claim",
+    "info",
+    "certain",
+    "concent",
+    "signal"
+  ],
+  "agent": [
+    "fishbot4",
+    {}
+  ]
+}

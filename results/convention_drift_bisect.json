@@ -1,0 +1,97 @@
+{
+ "what": "Bisect of the apparent drift in the aimed code book's paired NLL.",
+ "method": "A git worktree per candidate commit with TODAY'S instrument (scripts4/convention_posterior.py + gamma_split.py) copied in, so the ENGINE is the only variable. Run 40 games, stride 4, sender '0.05:aimed', seed base 560,000 -- the configuration that produced results/convention_posterior.json.",
+ "validation": "The probe at 1a96689 reproduces that file exactly: 1074 decisions, base 1.3995, flat 0.8 -0.0712. Without that the bisect would be measuring something else.",
+ "finding": "The entire change is commit 6d75ec4 and it is NOT drift. That commit re-priced the sender's gate: convention_max_cost=0.05 meant 0.05 of SUCCESS PROBABILITY before it and 0.05 in the ASK OBJECTIVE'S OWN UNITS after. The same label denotes two different senders, so the two numbers were never measurements of one configuration. Ten further engine commits move it by nothing.",
+ "seed_base": 560000,
+ "n_games": 40,
+ "stride": 4,
+ "sender": "0.05 aimed",
+ "arm": "flat 0.8",
+ "probes": [
+  {
+   "commit": "1a96689",
+   "subject": "origin; the commit that produced results/convention_posterior.json",
+   "decisions": 1074,
+   "base_team_nll": 1.3995234927270106,
+   "flat_0.8_paired_team_nll": [
+    -0.07119848323044256,
+    -0.08033508485947562,
+    -0.062061881601409505
+   ],
+   "v1_carry_rate": 0.7195581220185789,
+   "v1_our_asks": 3983,
+   "v1_carried": 2866
+  },
+  {
+   "commit": "6d75ec4",
+   "subject": "the sender's gate re-priced into the objective's own units",
+   "decisions": 1023,
+   "base_team_nll": 1.3567295797428751,
+   "flat_0.8_paired_team_nll": [
+    -0.04027643705912238,
+    -0.04851374742352057,
+    -0.03203912669472419
+   ],
+   "v1_carry_rate": 0.5779203421545042,
+   "v1_our_asks": 3741,
+   "v1_carried": 2162
+  },
+  {
+   "commit": "5c0b4c1",
+   "subject": "decompose the teammate ceiling",
+   "decisions": 1023,
+   "base_team_nll": 1.3567295797428751,
+   "flat_0.8_paired_team_nll": [
+    -0.04027643705912238,
+    -0.04851374742352057,
+    -0.03203912669472419
+   ],
+   "v1_carry_rate": 0.5779203421545042,
+   "v1_our_asks": 3741,
+   "v1_carried": 2162
+  },
+  {
+   "commit": "5936bf6",
+   "subject": "the locate term",
+   "decisions": 1023,
+   "base_team_nll": 1.3567295797428751,
+   "flat_0.8_paired_team_nll": [
+    -0.04027643705912238,
+    -0.04851374742352057,
+    -0.03203912669472419
+   ],
+   "v1_carry_rate": 0.5779203421545042,
+   "v1_our_asks": 3741,
+   "v1_carried": 2162
+  },
+  {
+   "commit": "f383516",
+   "subject": "the calibration gap",
+   "decisions": 1023,
+   "base_team_nll": 1.3567295797428751,
+   "flat_0.8_paired_team_nll": [
+    -0.04027643705912238,
+    -0.04851374742352057,
+    -0.03203912669472419
+   ],
+   "v1_carry_rate": 0.5779203421545042,
+   "v1_our_asks": 3741,
+   "v1_carried": 2162
+  },
+  {
+   "commit": "9cf986d",
+   "subject": "one version, and a guard",
+   "decisions": 1023,
+   "base_team_nll": 1.3567295797428751,
+   "flat_0.8_paired_team_nll": [
+    -0.04027643705912238,
+    -0.04851374742352057,
+    -0.03203912669472419
+   ],
+   "v1_carry_rate": 0.5779203421545042,
+   "v1_our_asks": 3741,
+   "v1_carried": 2162
+  }
+ ]
+}

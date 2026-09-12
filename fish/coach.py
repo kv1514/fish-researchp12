@@ -147,11 +147,16 @@ class CoachSession:
 
         ``winner`` should be given when known, because it cannot always be
         derived: if every card was within the claiming team but the claimer
-        named the wrong teammate for one of them, the half-suit is NULLED and
-        nobody scores, which looks identical from the holders alone. Pass
-        ``nulled=True`` (or ``winner=-1``) for that case. Getting this wrong
-        would silently credit a set to a team that did not score it, and the
-        scoreboard drives claim decisions later in the game.
+        named the wrong teammate for one of them, the outcome depends on the
+        table's misdeclaration rule -- under the baseline the OPPONENTS score
+        it (pass ``winner=1 - claimer's team``), and under the legacy null
+        variant it is voided (pass ``nulled=True`` or ``winner=-1``) -- and
+        either looks identical from the holders alone. The ``winner=None``
+        default credits the claiming team whenever all six were theirs, i.e.
+        it records the claim as exact; if the split was actually misdeclared,
+        say so explicitly. Getting this wrong would silently credit a set to
+        a team that did not score it, and the scoreboard drives claim
+        decisions later in the game.
         """
         if not 0 <= claimer < 6:
             raise CoachError("The claimer must be a seat from 0 to 5.")

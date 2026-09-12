@@ -1,0 +1,53 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "vs": "self",
+ "n_games": 500,
+ "n_forced": 192,
+ "per_game": 0.384,
+ "err": 0.6042,
+ "p_named": {
+  "median": 0.518149,
+  "mean": 0.431147
+ },
+ "p_true": {
+  "median": 0.471888,
+  "mean": 0.467601
+ },
+ "truth_beats_ours": 42,
+ "by_live": {
+  "1": {
+   "n": 104,
+   "wrong": 86
+  },
+  "2": {
+   "n": 76,
+   "wrong": 28
+  },
+  "3": {
+   "n": 8,
+   "wrong": 2
+  },
+  "7": {
+   "n": 2,
+   "wrong": 0
+  },
+  "8": {
+   "n": 2,
+   "wrong": 0
+  }
+ },
+ "all_opponents_cardless": 188,
+ "by_why_forced": {
+  "no card in any live half-suit": {
+   "n": 4,
+   "wrong": 0
+  },
+  "opponents cardless": {
+   "n": 188,
+   "wrong": 116
+  }
+ },
+ "named_true_but_scored_wrong": 0
+}

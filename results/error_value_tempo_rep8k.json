@@ -1,0 +1,127 @@
+{
+ "n_games": 8000,
+ "assumed_value": 2.0,
+ "arms": {
+  "B_free": {
+   "cuts": {
+    "no error avoided": {
+     "n": 6072,
+     "mean": -0.05237154150197629,
+     "ci95": [
+      -0.14375527156030107,
+      0.0390121885563485
+     ]
+    },
+    "one avoided": {
+     "n": 868,
+     "mean": 1.619815668202765,
+     "ci95": [
+      1.3888460296822496,
+      1.8507853067232802
+     ]
+    },
+    "two or more avoided": {
+     "n": 88,
+     "mean": 2.7045454545454546,
+     "ci95": [
+      2.06818507232237,
+      3.340905836768539
+     ]
+    },
+    "errors ADDED": {
+     "n": 972,
+     "mean": -1.4979423868312758,
+     "ci95": [
+      -1.727101399536282,
+      -1.2687833741262695
+     ]
+    }
+   },
+   "arm": "B_free",
+   "n_games": 8000,
+   "value_per_avoided_error": {
+    "est": 1.4391033786051406,
+    "ci95": [
+     1.299019805887573,
+     1.5791869513227081
+    ],
+    "assumed": 2.0,
+    "excludes_assumed": true
+   },
+   "cost_when_it_avoids_nothing": {
+    "est": -0.011932689864184578,
+    "ci95": [
+     -0.09102100184086212,
+     0.06715562211249296
+    ]
+   },
+   "errors_avoided_per_game": -0.003,
+   "declarations_deferred_per_game": 0.026125,
+   "deferred_per_game_where_no_error_avoided": 0.029973649538866932,
+   "cost_per_deferral": -0.39810600469960855,
+   "margin": -0.01625,
+   "reconstructed": -0.01625
+  },
+  "C_half": {
+   "cuts": {
+    "no error avoided": {
+     "n": 6145,
+     "mean": -0.08299430431244914,
+     "ci95": [
+      -0.16711332702440207,
+      0.001124718399503788
+     ]
+    },
+    "one avoided": {
+     "n": 828,
+     "mean": 1.565217391304348,
+     "ci95": [
+      1.3366497662046095,
+      1.7937850164040863
+     ]
+    },
+    "two or more avoided": {
+     "n": 77,
+     "mean": 2.5974025974025974,
+     "ci95": [
+      1.9141391154829073,
+      3.2806660793222875
+     ]
+    },
+    "errors ADDED": {
+     "n": 950,
+     "mean": -1.8673684210526316,
+     "ci95": [
+      -2.085354389236374,
+      -1.649382452868889
+     ]
+    }
+   },
+   "arm": "C_half",
+   "n_games": 8000,
+   "value_per_avoided_error": {
+    "est": 1.595605653821875,
+    "ci95": [
+     1.4619757321498028,
+     1.7292355754939472
+    ],
+    "assumed": 2.0,
+    "excludes_assumed": true
+   },
+   "cost_when_it_avoids_nothing": {
+    "est": -0.085735154769425,
+    "ci95": [
+     -0.15941360897205809,
+     -0.012056700566791936
+    ]
+   },
+   "errors_avoided_per_game": -0.008,
+   "declarations_deferred_per_game": 0.024875,
+   "deferred_per_game_where_no_error_avoided": 0.024572823433685925,
+   "cost_per_deferral": -3.489023351378256,
+   "margin": -0.0985,
+   "reconstructed": -0.0985
+  }
+ },
+ "journal": "tempo_rep8k_journal.jsonl"
+}

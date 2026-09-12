@@ -1,0 +1,21 @@
+[
+ {"label": "lookahead d3 w0.25 vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 1610000, "agent_seed": 7301},
+
+ {"label": "lookahead d3 w0.25 NO coupling vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4, "lookahead_couple": false}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 1620000, "agent_seed": 7302},
+
+ {"label": "lookahead d2 w0.25 vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 2, "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 1630000, "agent_seed": 7303},
+
+ {"label": "lookahead d3 w0.60 vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.60, "lookahead_depth": 3, "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 1640000, "agent_seed": 7304}
+]

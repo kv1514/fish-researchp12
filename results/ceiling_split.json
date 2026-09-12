@@ -1,0 +1,65 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 2,
+ "n_games": 600,
+ "is_a_ceiling_study": true,
+ "margin_A": 2.3033333333333332,
+ "arms": {
+  "T_team": {
+   "side": "team",
+   "ceiling": 3.41,
+   "ci95": [
+    3.1624929671999693,
+    3.657507032800031
+   ],
+   "margin": 5.713333333333333,
+   "pinned_by_cheat_per_game": 40.69833333333333
+  },
+  "O_opp": {
+   "side": "opp",
+   "ceiling": 1.3066666666666666,
+   "ci95": [
+    1.0070295232936521,
+    1.6063038100396811
+   ],
+   "margin": 3.61,
+   "pinned_by_cheat_per_game": 40.43333333333333
+  },
+  "F_all": {
+   "side": "all",
+   "ceiling": 6.6066666666666665,
+   "ci95": [
+    6.400431147775139,
+    6.812902185558194
+   ],
+   "margin": 8.91,
+   "pinned_by_cheat_per_game": 59.806666666666665
+  }
+ },
+ "sum_is_not_the_whole": {
+  "T_plus_O": 4.716666666666667,
+  "F": 6.6066666666666665
+ },
+ "mechanism": {
+  "A_honest": {
+   "allocation_per_game": 0.15333333333333332,
+   "ownership_per_game": 0.008333333333333333
+  },
+  "T_team": {
+   "allocation_per_game": 0.0,
+   "ownership_per_game": 0.0
+  },
+  "O_opp": {
+   "allocation_per_game": 2.495,
+   "ownership_per_game": 0.0
+  },
+  "F_all": {
+   "allocation_per_game": 0.0,
+   "ownership_per_game": 0.0
+  }
+ },
+ "bridge_fallbacks": 0,
+ "unfinished": 0
+}

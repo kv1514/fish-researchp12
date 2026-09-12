@@ -1,0 +1,57 @@
+{
+ "name": "gamma_schedule",
+ "complete": true,
+ "question": "does correcting the opponent model's dilution pay in play?",
+ "prereg": "jobs/PREREGISTRATION_gamma_schedule.md",
+ "blocks": [
+  {
+   "label": "GAMMA_SCHEDULE s1.0 vs champion block 0",
+   "est": -0.26,
+   "se": 0.11476746739199037,
+   "n": 1000
+  },
+  {
+   "label": "GAMMA_SCHEDULE s1.0 vs champion block 1",
+   "est": -0.104,
+   "se": 0.11608902041390763,
+   "n": 1000
+  },
+  {
+   "label": "GAMMA_SCHEDULE s1.0 vs champion block 2",
+   "est": -0.016,
+   "se": 0.1146511617424302,
+   "n": 1000
+  },
+  {
+   "label": "GAMMA_SCHEDULE s1.0 vs champion block 3",
+   "est": -0.07,
+   "se": 0.12167129449423929,
+   "n": 1000
+  },
+  {
+   "label": "GAMMA_SCHEDULE s1.0 vs champion block 4",
+   "est": 0.093,
+   "se": 0.11620608785625156,
+   "n": 1000
+  },
+  {
+   "label": "GAMMA_SCHEDULE s1.0 vs champion block 5",
+   "est": -0.024,
+   "se": 0.11841218453117672,
+   "n": 1000
+  }
+ ],
+ "n_pairs": 6000,
+ "estimate": -0.06428063647271083,
+ "se": 0.047720839435873755,
+ "ci": [
+  -0.1578117638168037,
+  0.02925049087138204
+ ],
+ "q": 5.152424174491918,
+ "df": 5,
+ "i2": 0.029583001967602617,
+ "rule": "above",
+ "bar": 0.05,
+ "decision": "do_not_adopt"
+}

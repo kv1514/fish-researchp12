@@ -1,0 +1,13 @@
+{
+  "format": "fishlab-bot/1",
+  "id": "kraken",
+  "name": "KRAKEN",
+  "version": "1.1",
+  "author": "Kausthubh Veldanda",
+  "description": "Exact combinatorial inference, an opponent model, and belief-space lookahead.",
+  "protocol": "fishlab-json-v1",
+  "run": ["python3", "bot.py"],
+  "env": { "OMP_NUM_THREADS": "1" },
+  "timeout_ms": 20000,
+  "poll_off_turn": true
+}

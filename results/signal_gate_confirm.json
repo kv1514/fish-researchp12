@@ -1,0 +1,122 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 2,
+ "n_games": 1000,
+ "min_interesting": 0.15,
+ "conditional": 0.05,
+ "margin_A": 2.476,
+ "arms": {
+  "B_incumbent": {
+   "params": {
+    "signal_mode": "stuck"
+   },
+   "effect": 0.118,
+   "ci95": [
+    0.032476146654332586,
+    0.20352385334566742
+   ],
+   "margin": 2.594,
+   "verdict": "positive but under the conditional floor -- does not ship"
+  },
+  "C_measured": {
+   "params": {
+    "signal_mode": "stuck",
+    "signal_max_p": 0.5
+   },
+   "effect": 0.122,
+   "ci95": [
+    0.029083526236211896,
+    0.21491647376378809
+   ],
+   "margin": 2.598,
+   "verdict": "positive but under the conditional floor -- does not ship"
+  }
+ },
+ "ledger": {
+  "A_shipped": {
+   "exact": {
+    "n": 792,
+    "per_game": 0.792,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 3746,
+    "per_game": 3.746,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "gate": {
+    "n": 288,
+    "per_game": 0.288,
+    "wrong": 77,
+    "err": 0.2674
+   },
+   "forced": {
+    "n": 178,
+    "per_game": 0.178,
+    "wrong": 93,
+    "err": 0.5225
+   },
+   "_wrong_per_game": 0.17
+  },
+  "B_incumbent": {
+   "exact": {
+    "n": 805,
+    "per_game": 0.805,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 3714,
+    "per_game": 3.714,
+    "wrong": 3,
+    "err": 0.0008
+   },
+   "gate": {
+    "n": 75,
+    "per_game": 0.075,
+    "wrong": 7,
+    "err": 0.0933
+   },
+   "forced": {
+    "n": 323,
+    "per_game": 0.323,
+    "wrong": 146,
+    "err": 0.452
+   },
+   "_wrong_per_game": 0.156
+  },
+  "C_measured": {
+   "exact": {
+    "n": 796,
+    "per_game": 0.796,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 3692,
+    "per_game": 3.692,
+    "wrong": 2,
+    "err": 0.0005
+   },
+   "gate": {
+    "n": 78,
+    "per_game": 0.078,
+    "wrong": 8,
+    "err": 0.1026
+   },
+   "forced": {
+    "n": 307,
+    "per_game": 0.307,
+    "wrong": 142,
+    "err": 0.4625
+   },
+   "_wrong_per_game": 0.152
+  }
+ },
+ "bridge_fallbacks": 0,
+ "unfinished": 0
+}

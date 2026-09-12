@@ -1,0 +1,150 @@
+{
+ "fingerprint": "91fd72e97a7d",
+ "n": 764,
+ "n_games": 156,
+ "n_train": 364,
+ "n_test": 400,
+ "champion_train": 0.16820858756948973,
+ "champion_test": 0.1363039321789322,
+ "fitted_train": 0.25910816418335225,
+ "fitted_test": 0.16366796726665142,
+ "oracle_train": 0.568507161176334,
+ "oracle_test": 0.5220499639249637,
+ "ladder": [
+  {
+   "model": "1: scale k=1.0",
+   "weights": {
+    "suit": 0.06,
+    "turn": 0.6,
+    "scarce": 0.2,
+    "reveal": 0.0,
+    "deplete": 0.0,
+    "expose": 0.0,
+    "claim": 0.0,
+    "info": 0.0,
+    "certain": 0.0,
+    "concent": 0.0,
+    "signal": 0.0,
+    "locate": 0.0,
+    "reach": 0.0
+   },
+   "train": 0.16820858756948973,
+   "test": 0.1363039321789322
+  },
+  {
+   "model": "1: info=+0.10",
+   "weights": {
+    "suit": 0.06,
+    "turn": 0.6,
+    "scarce": 0.2,
+    "reveal": 0.0,
+    "deplete": 0.0,
+    "expose": 0.0,
+    "claim": 0.0,
+    "info": 0.1,
+    "certain": 0.0,
+    "concent": 0.0,
+    "signal": 0.0,
+    "locate": 0.0,
+    "reach": 0.0
+   },
+   "train": 0.1718715912324934,
+   "test": 0.1351928210678211
+  },
+  {
+   "model": "1: certain=-0.50",
+   "weights": {
+    "suit": 0.06,
+    "turn": 0.6,
+    "scarce": 0.2,
+    "reveal": 0.0,
+    "deplete": 0.0,
+    "expose": 0.0,
+    "claim": 0.0,
+    "info": 0.0,
+    "certain": -0.5,
+    "concent": 0.0,
+    "signal": 0.0,
+    "locate": 0.0,
+    "reach": 0.0
+   },
+   "train": 0.17877678920912002,
+   "test": 0.14347853535353539
+  },
+  {
+   "model": "2: scale + info",
+   "weights": {
+    "suit": 0.06,
+    "turn": 0.6,
+    "scarce": 0.2,
+    "reveal": 0.0,
+    "deplete": 0.0,
+    "expose": 0.0,
+    "claim": 0.0,
+    "info": 0.1,
+    "certain": 0.0,
+    "concent": 0.0,
+    "signal": 0.0,
+    "locate": 0.0,
+    "reach": 0.0
+   },
+   "train": 0.1718715912324934,
+   "test": 0.1351928210678211
+  },
+  {
+   "model": "11: full search",
+   "weights": {
+    "suit": 2.0,
+    "turn": -0.5,
+    "scarce": -0.1,
+    "reveal": 1.0,
+    "deplete": -0.25,
+    "expose": 0.25,
+    "claim": -1.0,
+    "info": 0.1,
+    "certain": -0.5,
+    "concent": -2.0,
+    "signal": 4.0,
+    "locate": -1.0,
+    "reach": -2.0
+   },
+   "train": 0.25910816418335225,
+   "test": 0.16366796726665142
+  }
+ ],
+ "cv_choice": "certain",
+ "cv_scores": {
+  "info": 0.11150616300992243,
+  "certain": 0.17877678920912005
+ },
+ "weights": {
+  "suit": 2.0,
+  "turn": -0.5,
+  "scarce": -0.1,
+  "reveal": 1.0,
+  "deplete": -0.25,
+  "expose": 0.25,
+  "claim": -1.0,
+  "info": 0.1,
+  "certain": -0.5,
+  "concent": -2.0,
+  "signal": 4.0,
+  "locate": -1.0,
+  "reach": -2.0
+ },
+ "champion_weights": {
+  "suit": 0.06,
+  "turn": 0.6,
+  "scarce": 0.2,
+  "reveal": 0.0,
+  "deplete": 0.0,
+  "expose": 0.0,
+  "claim": 0.0,
+  "info": 0.0,
+  "certain": 0.0,
+  "concent": 0.0,
+  "signal": 0.0,
+  "locate": 0.0,
+  "reach": 0.0
+ }
+}

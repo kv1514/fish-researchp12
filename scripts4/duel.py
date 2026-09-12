@@ -45,12 +45,50 @@ def run_job(job: dict, n_jobs: int) -> dict:
     rec = res.to_dict()
     rec.update({"label": label, "timestamp": time.time(),
                 "base_seed": base_seed, "agent_seed_base": agent_seed,
-                "rules": rules.to_dict()})
+                "rules": rules.to_dict(), "engine": engine_fingerprint()})
     out = ROOT / "results" / "v04_duels.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(rec) + "\n")
     return rec
+
+
+#: Modules whose contents decide what the agents actually do. A block's result
+#: is a measurement of THESE, and until now nothing recorded which version of
+#: them produced it.
+FINGERPRINTED = ("fish4/agent4.py", "fish4/adaptive.py", "fish4/askfeat.py",
+                 "fish4/posterior.py", "fish4/lookahead.py", "fish4/claim4.py",
+                 "fish4/oppmodel.py", "fish4/hsvalue.py",
+                 "fish4/registry4.py", "fish/beliefs.py", "fish/engine.py")
+
+
+def engine_fingerprint() -> dict:
+    """A short digest of the agent code this block ran under.
+
+    Written after an afternoon spent reconstructing, from process start times
+    and log line numbers, whether one pre-registered block had been played
+    before or after a statistic it depends on was corrected. The answer was
+    "after", but the reconstruction was archaeology: the results file recorded
+    the seeds, the specs and the rules, and nothing at all about the code. A
+    pre-registration that says "this run tests the hypothesis" is a claim about
+    an implementation, so the implementation belongs in the record beside the
+    seeds.
+
+    Files that are missing are recorded as missing rather than skipped, so a
+    rename cannot quietly shrink what is being fingerprinted.
+    """
+    import hashlib
+    parts = {}
+    for rel in FINGERPRINTED:
+        f = ROOT / rel
+        if not f.exists():
+            parts[rel] = "MISSING"
+            continue
+        parts[rel] = hashlib.sha256(f.read_bytes()).hexdigest()[:12]
+    joint = hashlib.sha256(
+        "".join(f"{k}={v};" for k, v in sorted(parts.items()))
+        .encode()).hexdigest()[:12]
+    return {"digest": joint, "files": parts}
 
 
 def main() -> None:

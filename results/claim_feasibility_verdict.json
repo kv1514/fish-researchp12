@@ -1,0 +1,57 @@
+{
+ "name": "claim_feasibility",
+ "complete": true,
+ "question": "does refusing a declaration no complete deal allows beat the champion?",
+ "prereg": "jobs/PREREGISTRATION_claim_feasibility.md",
+ "blocks": [
+  {
+   "label": "CLAIMFEAS feasibility filter vs champion block 0",
+   "est": 0.027,
+   "se": 0.005128089049275305,
+   "n": 1000
+  },
+  {
+   "label": "CLAIMFEAS feasibility filter vs champion block 1",
+   "est": 0.019,
+   "se": 0.004319451082910612,
+   "n": 1000
+  },
+  {
+   "label": "CLAIMFEAS feasibility filter vs champion block 2",
+   "est": 0.035,
+   "se": 0.005814534272734903,
+   "n": 1000
+  },
+  {
+   "label": "CLAIMFEAS feasibility filter vs champion block 3",
+   "est": 0.03,
+   "se": 0.0053971408290991564,
+   "n": 1000
+  },
+  {
+   "label": "CLAIMFEAS feasibility filter vs champion block 4",
+   "est": 0.043,
+   "se": 0.006418114379799739,
+   "n": 1000
+  },
+  {
+   "label": "CLAIMFEAS feasibility filter vs champion block 5",
+   "est": 0.027,
+   "se": 0.005128089049275305,
+   "n": 1000
+  }
+ ],
+ "n_pairs": 6000,
+ "estimate": 0.028373787197951337,
+ "se": 0.0021425748318301737,
+ "ci": [
+  0.024174417660258143,
+  0.03257315673564453
+ ],
+ "q": 11.4358453721895,
+ "df": 5,
+ "i2": 0.5627782785381695,
+ "rule": "above",
+ "bar": 0.05,
+ "decision": "do_not_adopt"
+}

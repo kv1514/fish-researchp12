@@ -1,0 +1,57 @@
+{
+ "n_games": 25,
+ "n_decisions": 2582,
+ "pinned_share": 0.025948876839659178,
+ "solvable_share": 0.025948876839659178,
+ "games_with_any": 20,
+ "games_with_none": 5,
+ "first_arrival_step_mean": 100.15,
+ "first_arrival_cards_left_mean": 8.1,
+ "by_live": {
+  "1": {
+   "n": 91,
+   "pinned": 0.5274725274725275,
+   "solvable": 0.5274725274725275
+  },
+  "2": {
+   "n": 157,
+   "pinned": 0.12101910828025478,
+   "solvable": 0.12101910828025478
+  },
+  "3": {
+   "n": 188,
+   "pinned": 0.0,
+   "solvable": 0.0
+  },
+  "4": {
+   "n": 218,
+   "pinned": 0.0,
+   "solvable": 0.0
+  },
+  "5": {
+   "n": 292,
+   "pinned": 0.0,
+   "solvable": 0.0
+  },
+  "6": {
+   "n": 330,
+   "pinned": 0.0,
+   "solvable": 0.0
+  },
+  "7": {
+   "n": 434,
+   "pinned": 0.0,
+   "solvable": 0.0
+  },
+  "8": {
+   "n": 386,
+   "pinned": 0.0,
+   "solvable": 0.0
+  },
+  "9": {
+   "n": 486,
+   "pinned": 0.0,
+   "solvable": 0.0
+  }
+ }
+}

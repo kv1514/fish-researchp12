@@ -1,0 +1,733 @@
+{
+ "n_deals": 40,
+ "n_games": 80,
+ "oracle_first": 40,
+ "exact": 40,
+ "under": 0,
+ "over": 0,
+ "mean_footholds": 8.9375,
+ "closed_form_mean_footholds": 8.8968,
+ "premise_c_holds": true,
+ "rows": [
+  {
+   "deal": 0,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 0,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 1,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 1,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 2,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 8,
+   "oracle_sets": 8,
+   "nulls": 1,
+   "timed_out": false
+  },
+  {
+   "deal": 2,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 3,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 3,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 4,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 4,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 5,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 5,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 6,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 6,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 7,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 7,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 8,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 8,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 8,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 9,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 9,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 10,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 10,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 11,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 11,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 12,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 12,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 13,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 13,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 14,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 14,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 8,
+   "oracle_sets": 8,
+   "nulls": 1,
+   "timed_out": false
+  },
+  {
+   "deal": 15,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 15,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 16,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 8,
+   "oracle_sets": 8,
+   "nulls": 1,
+   "timed_out": false
+  },
+  {
+   "deal": 16,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 17,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 17,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 18,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 18,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 19,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 19,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 20,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 20,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 21,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 21,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 22,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 22,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 23,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 23,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 24,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 24,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 25,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 25,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 26,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 26,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 27,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 27,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 28,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 8,
+   "oracle_sets": 8,
+   "nulls": 1,
+   "timed_out": false
+  },
+  {
+   "deal": 28,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 29,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 29,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 30,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 30,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 31,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 31,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 8,
+   "oracle_sets": 8,
+   "nulls": 1,
+   "timed_out": false
+  },
+  {
+   "deal": 32,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 32,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 33,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 33,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 34,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 34,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 35,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 35,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 36,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 36,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 37,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 37,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 38,
+   "swap": 0,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 38,
+   "swap": 1,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 39,
+   "swap": 0,
+   "oracle_moves_first": false,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  },
+  {
+   "deal": 39,
+   "swap": 1,
+   "oracle_moves_first": true,
+   "footholds": 9,
+   "oracle_sets": 9,
+   "nulls": 0,
+   "timed_out": false
+  }
+ ]
+}

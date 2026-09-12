@@ -1,0 +1,66 @@
+{
+ "source": "/home/user/fish-researchp12/results/rollout_target.json",
+ "n_positions": 113,
+ "n_asks": 3076,
+ "vifs": {
+  "p_success": 13.46382090730298,
+  "suit": 3.0559059030251627,
+  "turn": 1.4447890956881466,
+  "scarce": 3.023470415226867,
+  "reveal": 3.0725723776970244,
+  "deplete": 4.620564096506335,
+  "expose": 1.2366216318506653,
+  "claim": 2.9621846331032105,
+  "info": 7.092890388425741,
+  "certain": 8.044873449723982,
+  "concent": 2.5232014206528817,
+  "signal": 2.5148540295463593
+ },
+ "drop_vif_kept": [
+  "suit",
+  "turn",
+  "scarce",
+  "reveal",
+  "deplete",
+  "expose",
+  "claim",
+  "info",
+  "certain",
+  "concent",
+  "signal"
+ ],
+ "drop_vif_dropped": [
+  "p_success"
+ ],
+ "strongest_full_fit": [
+  "expose",
+  "deplete",
+  "certain"
+ ],
+ "cv": {
+  "full (11 terms + p)": 0.09592253676427509,
+  "drop-vif": 0.09637644240890209,
+  "p_success alone": 0.042969047348322964,
+  "top2 per fold": 0.07311300642933538,
+  "top3 per fold": 0.10296478955744326,
+  "top4 per fold": 0.1011817777986388,
+  "top6 per fold": 0.09714268614591981,
+  "ridge lam=0.01": 0.09593716341780911,
+  "ridge lam=0.1": 0.09606171698264832,
+  "ridge lam=1": 0.09679399318643678,
+  "ridge lam=10": 0.09335112551385893,
+  "ridge lam=100": 0.06453962776263333,
+  "ridge lam=1000": 0.018588450542276425,
+  "pca k=2": 0.010825062003139596,
+  "pca k=3": 0.01216889931770393,
+  "pca k=4": 0.014998086776955355,
+  "pca k=6": 0.0733781038059762,
+  "pca k=8": 0.07383358991783462
+ },
+ "best": "top3 per fold",
+ "best_cv_r2": 0.10296478955744326,
+ "full_cv_r2": 0.09592253676427509,
+ "gain_over_full": 0.007042252793168303,
+ "gain_se": 0.0037565305042833023,
+ "gain_excludes_zero": false
+}

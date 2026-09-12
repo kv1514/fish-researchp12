@@ -1,0 +1,112 @@
+% =====================================================================
+% appendix_corrections.tex --- \input after \appendix.
+% Self-contained: needs only booktabs and hyperref, both already loaded.
+% =====================================================================
+
+\section{Corrections this revision makes to its own record}
+\label{app:corrections}
+
+Every entry below was in a previous draft of this paper and is wrong. They are
+collected because a correction that appears only where the error was is a
+correction most readers never see, and because the count itself is
+information: a paper that reports no corrections to itself has either not been
+checked or is not saying.
+
+Nine were found by an adversarial audit of this document against the results
+files, the registrations and the source, run in September 2026. The audit is
+not part of the paper's method and its findings are not a result; it is
+recorded here because the alternative is to present the corrected text as
+though it had always read that way.
+
+\paragraph{C1. Three claims about the other project, withdrawn.} The paper
+described that engine's policy as ``frozen upstream after self-play tuning'',
+quoted its author as reporting that its advantage ``does not transfer'', stated
+that a ``feint'' deception feature of theirs cost $-2.2$ on replication, and
+said their attribution study credited one coordinate with essentially the whole
+gain of a cycle. \citet{nguyen2026sestina} gives that policy's fit objective as
+minimax regret over an opponent panel and argues in \S12.1 that the advantage is
+\emph{not} an artefact of self-play coordination; contains no such quotation;
+lists \texttt{feint} as a member of its opponent \emph{panel}, which it beats by
+$+6.07$ percentage points; and puts the coordinate's leave-one-out contribution
+at $+1.69$ $[+0.80, +2.57]$ of a $+4.73$ whole while stating that the stronger
+claim is not supported at its power. All four are withdrawn.
+
+\paragraph{C2. The deployed configuration was described three ways, one false.}
+The paper said the public table ``has been playing \texttt{V04\_COMBINED} all
+along''. It has not: the site runs \texttt{V06\_DEPLOYED}, which differs in
+carrying the endgame correction at $\texttt{endgame\_m} = 0$ --- that is, not at
+all --- after this paper withdrew it. A reader could have finished the document
+believing a withdrawn arm was live. Both configurations are now given verbatim
+in Appendix~\ref{app:champion}.
+
+\paragraph{C3. ``Pre-registered and replicated'' for a figure run once.} The
+$+0.1220$ endgame correction was replicated against the champion at $+0.0907$
+$[+0.0555, +0.1260]$; the $+0.1220$ itself, on the stronger base, is a single
+$2{,}000$-pair run. The word ``replicated'' was attached to the wrong one.
+
+\paragraph{C4. Two mixed engine pools, undisclosed.}
+\path{scripts4/check_engine_provenance.py} finds two duel pools whose blocks
+did not execute the same program, both quoted in this paper as primary results,
+and the paper cited the checker's own $Q$ statistic as ordinary evidence that
+the blocks agreed. One of the offending builds is not in the repository's
+history, so those cells cannot be re-run. Disclosed in
+\S\ref{sec:res-claimthreshold}.
+
+\paragraph{C5. A table backed by its own numbers.} The four turn-price bands
+are not recoverable from any results file: \path{scripts4/turn_price.py} does
+not persist the per-decision values the bands are cut on, and
+\path{scripts4/tempo_regime.py} carries the four prices as a constant copied
+from this paper. The file that appears to back the table contains the table.
+Disclosed in \S\ref{sec:tempo}.
+
+\paragraph{C6. A selective table.} Table~\ref{tab:posterior} showed ten of the
+fourteen configurations its campaign scored, and the omissions included the one
+weight at which the opponent model is worse than switching it off. Two further
+campaigns scored 21 more. The caption now says so.
+
+\paragraph{C7. $\pm$ meant two things.} The symbol denoted a one-standard-error
+figure in some places and a $95\%$ half-width in others, in the same document,
+with no convention stated. \S\ref{sec:eval} now fixes it and the violating
+sites are converted. One overclaim went with it: two turn-price bands described
+as ``free, twice over'' carry $95\%$ intervals of $[-0.374, +0.288]$ and
+$[-0.276, +0.284]$.
+
+\paragraph{C8. Same model, two calibration verdicts.} The half-suit value model
+was described as ``reliable in every decile'' in one section and as
+miscalibrated in five of ten in another. The second is correct.
+
+\paragraph{C9. A wrong file, a wrong percentage, and a mechanism claim beyond
+its instrument.} The no-repeat result cited a results file that a later
+registered run had overwritten; the repeats are $92.7\%$ of fires, not
+``ninety-six percent''; and the paragraph concluded that signalling is ``a
+stall that happens to communicate'', which reads one team's declaration ledger
+as the whole scoreboard. The instrument counts what our three seats declare and
+discards what the opposing three do. The conclusion is withdrawn.
+
+\paragraph{C10. Two nulls that were not nulls.} The signalling protocol and the
+deferred gate were both filed as ``a real reduction that buys no sets''. Both
+have since been re-run at power and both buy sets: $+0.1180$ and $+0.1220$ for
+signalling, $+0.0455$ $[+0.0134, +0.0776]$ for the gate. Neither clears the
+$+0.15$ bar, so neither ships, and that was always the reason --- but ``buys no
+sets'' was a claim the thousand-game runs could not support.
+
+\paragraph{C11. Smaller corrections.} The introduction said three iterations
+where the paper covers four. A margin-decomposition table was introduced as
+$600$ games when every row is the $10{,}000$-game block. An avoided
+misdeclaration was priced at $+1.7898$, the deferral gate's exchange rate,
+where the signalling arms' own is $+1.2784$ $[+1.0642, +1.4926]$ and excludes
+it. The volume and conversion halves of the acquisition gap were reported as
+two contributions of equal size; a landed ask retains the turn, so the measured
+hit rates alone predict the observed ask-count edge and the volume term is what
+the conversion term implies. The conclusions covered only the first of four
+development cycles. The reproduction section said v0.3's code was untouched,
+after fifteen commits including the award-rule correction, and gave no
+repository URL. An earlier draft asserted that a half-suit's split is
+frozen once a team holds all six, which does not follow from the rule
+that makes it tempting, and an interpretation of the depth-decay term
+was stated behaviourally where the evidence supports only a dilution
+correction.
+
+Corrections to individual figures are recorded inline, beside the
+number each one corrects, rather than gathered here: a reader holding
+an earlier version finds the correction where the disagreement is.

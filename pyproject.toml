@@ -1,8 +1,32 @@
 [project]
 name = "fish-engine"
-version = "0.2.0"
+# Kept equal to fish4.brand.VERSION_NUMBER, which tests4/test_brand.py
+# enforces. It read 0.2.0 while the engine shipped v1.1 -- a number that
+# matched no release the project has ever made.
+version = "1.1"
 description = "Research engine for Literature (Fish / Canadian Fish)"
 requires-python = ">=3.11"
+# numpy has always been a hard runtime dependency - the posterior, the ask
+# objective and the exact solver are all array code - but it was only ever
+# installed by hand. Declaring it is what lets an environment that builds from
+# this file alone, such as the serverless deployment in api/, actually import
+# the engine.
+dependencies = ["numpy>=1.26"]
+
+# OPTIONAL. Only the learned-model fits need this; see requirements-learn.txt.
+# The engine and every strength figure run on numpy alone.
+[project.optional-dependencies]
+learn = ["torch>=2"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+# tests4/ MUST be here. This said ["tests"] from the first rebuild commit,
+# written before tests4/ existed, and nobody moved it afterwards -- so a bare
+# `pytest` from the repo root collected 193 of 852 tests, silently skipped
+# every guard in tests4/, and printed "193 passed". It looks exactly like a
+# green suite. The whole second generation of this project -- the award rule,
+# the exact solver, the cluster-robust intervals, the brand and package
+# guards -- lives in tests4/ and was invisible to the default command.
+#
+# It costs ~17 minutes instead of ~3. That is the correct price: the failure
+# mode it replaces is reading a pass that never ran the tests you meant.
+testpaths = ["tests", "tests4"]

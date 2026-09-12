@@ -1,0 +1,545 @@
+"""The invariants that make the imperfect-information solver checkable.
+
+There is one bound that holds for every position, needs no ground truth, and
+is cheap to state: THE BEST RESPONSE CANNOT SCORE BELOW THE CHAMPION. It may
+copy the champion at every information set, so its optimum is at least the
+champion's value. Five m = 2 positions violated it, and the cause was a memo
+key that omitted the history -- the champion opponents' policy is a function of
+their whole observation, so merging two nodes that differ only in history
+returned one branch's value for the other, and the maximisation read it.
+
+Three things are asserted here, all on real positions taken from real play:
+
+  1. the tree and the rollout agree when they evaluate the SAME strategy
+     (``champion_tree_value`` vs ``champion_value``);
+  2. the best response is never below the champion;
+  3. the champion's own root move, when the search prices it, is never above
+     the maximum the search reports over all moves.
+
+(2) and (3) are the same bound seen from the whole continuation and from one
+decision. (1) is what says WHERE a violation comes from, and it is the only one
+of the three that a broken tree can fail while still looking self-consistent.
+
+Run: py -m pytest tests4/test_exact_ii.py -q
+"""
+
+import json
+import os
+import random
+import sys
+import time
+
+import pytest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+
+from fish.cards import NUM_PLAYERS
+from fish.engine import (AskEvent, ClaimEvent, GameState, PassEvent)
+from fish.observation import Observation
+from fish.rules import RuleConfig
+from fish4.exact_ii import (ExactII, SolveTimeout, _champion_action,
+                            _clone, _info_key,
+                            consistent_deals)
+from fish4.registry4 import make_agent
+
+SPEC = ("fishbot4", {"opponent_gamma": 0.35})
+#: Small enough that a whole game's positions solve in seconds, and large
+#: enough that the information set has more than one deal in it -- the bug
+#: needed several, which is exactly why the pinned control could not see it.
+MAX_SUPPORT = 6
+BUDGET = 20.0
+
+
+def m1_positions(seed: int, limit: int = 6):
+    """Real m = 1 positions with genuinely hidden cards, from one played game."""
+    rules = RuleConfig()
+    agents = [make_agent(SPEC) for _ in range(NUM_PLAYERS)]
+    st = GameState.deal(rules, seed=seed)
+    ar = random.Random(seed + 1)
+    for p, a in enumerate(agents):
+        a.begin_game(p, rules, ar.getrandbits(64))
+    out = []
+    for _ in range(600):
+        if st.is_terminal or len(out) >= limit:
+            break
+        p = st.turn
+        obs = Observation.from_state(st, p)
+        live = [h for h, w in enumerate(obs.set_winner) if w is None]
+        if len(live) == 1:
+            agents[p].bel.update(obs)
+            deals = consistent_deals(obs, agents[p].bel, live[0])
+            if 1 < len(deals) <= MAX_SUPPORT:
+                states = []
+                for hands in deals:
+                    t = GameState.from_components(
+                        rules, list(hands), st.turn, list(st.set_winner))
+                    t.history = list(st.history)
+                    states.append(t)
+                out.append((live[0], p, states))
+        st.apply(p, agents[p].act(obs))
+    return rules, out
+
+
+@pytest.fixture(scope="module")
+def positions():
+    rules, out = m1_positions(4_242_000)
+    if not out:
+        pytest.skip("no hidden m=1 position in the sampled game")
+    return rules, out
+
+
+def _solved(rules, hs, seat, states):
+    w = [1.0 / len(states)] * len(states)
+    sv = ExactII(rules, hs, seat, SPEC)
+    sv.deadline = time.monotonic() + BUDGET
+    v = sv.solve([_clone(s) for s in states], list(w))
+    cv = sv.champion_value([_clone(s) for s in states], list(w))
+    return sv, v, cv, w
+
+
+def test_best_response_never_below_the_champion(positions):
+    rules, out = positions
+    checked = 0
+    for hs, seat, states in out:
+        try:
+            sv, v, cv, _ = _solved(rules, hs, seat, states)
+        except SolveTimeout:
+            continue
+        checked += 1
+        assert v - cv >= -1e-9, (
+            f"support {len(states)}: best response {v:+.6f} is below the "
+            f"champion {cv:+.6f}, which it may freely copy")
+    assert checked, "every position timed out; the bound was never exercised"
+
+
+def test_tree_and_rollout_agree_about_the_champion(positions):
+    rules, out = positions
+    checked = 0
+    for hs, seat, states in out:
+        w = [1.0 / len(states)] * len(states)
+        sv = ExactII(rules, hs, seat, SPEC)
+        sv.deadline = time.monotonic() + BUDGET
+        try:
+            tree = sv.champion_tree_value([_clone(s) for s in states], list(w))
+        except SolveTimeout:
+            continue
+        roll = sv.champion_value([_clone(s) for s in states], list(w))
+        checked += 1
+        assert abs(tree - roll) < 1e-9, (
+            f"support {len(states)}: the same champion strategy scores "
+            f"{tree:+.6f} in the tree and {roll:+.6f} in the rollout")
+    assert checked, "every position timed out; the agreement was never tested"
+
+
+def test_the_control_does_not_read_the_search_back(positions):
+    """``champion_tree_value`` after ``solve``, on the SAME instance.
+
+    That is how scripts4/ii_endgame.py uses it, and it is the order that
+    matters: a node's value depends on the deviator's policy below it, so the
+    maximising search and the copying search assign DIFFERENT values to the
+    same key. Sharing one memo between them had the control return the search's
+    own optimum -- +0.8333 where the rollout was +0.1667 -- so it agreed with
+    the search by construction and could not have failed.
+
+    The other tests here do not catch it, because they build a fresh solver and
+    call the control first. Only a position where the champion is suboptimal
+    can show it at all: where the champion already plays the optimum, the max
+    and the copy coincide at every node and the contaminated answer is right.
+    """
+    rules, out = positions
+    checked = 0
+    for hs, seat, states in out:
+        w = [1.0 / len(states)] * len(states)
+        sv = ExactII(rules, hs, seat, SPEC)
+        sv.deadline = time.monotonic() + BUDGET
+        try:
+            v = sv.solve([_clone(s) for s in states], list(w))
+        except SolveTimeout:
+            continue
+        roll = sv.champion_value([_clone(s) for s in states], list(w))
+        if abs(v - roll) < 1e-9:
+            continue          # champion is already optimal here; nothing to see
+        try:
+            tree = sv.champion_tree_value([_clone(s) for s in states], list(w))
+        except SolveTimeout:
+            continue
+        checked += 1
+        assert abs(tree - roll) < 1e-9, (
+            f"the control reports {tree:+.6f} where the rollout of the same "
+            f"strategy gives {roll:+.6f}")
+        assert abs(tree - v) > 1e-9, (
+            f"the control returned the search's own optimum {v:+.6f}; it is "
+            f"reading the memo back rather than evaluating the champion")
+    assert checked, ("no position where the champion was suboptimal, so the "
+                     "contamination could not have shown either way")
+
+
+def test_champion_root_move_never_beats_the_maximum(positions):
+    rules, out = positions
+    priced = 0
+    for hs, seat, states in out:
+        try:
+            sv, v, _cv, _w = _solved(rules, hs, seat, states)
+        except SolveTimeout:
+            continue
+        champ = _champion_action(SPEC, rules, seat, states[0])
+        if champ is None:
+            continue
+        cv = sv.action_values.get(repr(champ))
+        if cv is None:
+            continue          # the search did not price that move; not a claim
+        priced += 1
+        assert v - cv >= -1e-9, (
+            f"support {len(states)}: the champion's own move scores {cv:+.6f}, "
+            f"above the reported maximum {v:+.6f} over all moves")
+    assert priced, "the champion's move was never priced; nothing was tested"
+
+
+def test_the_cutoff_changes_no_value(positions):
+    """The exact cutoff must be exactly that: same value, fewer nodes.
+
+    ``_upper`` bounds what a node can still pay, and an action attaining it
+    ends the action loop. That is only sound because nothing partial is ever
+    written to the memo -- a pruned underestimate stored as a value would be
+    indistinguishable from a real one on the next lookup, which is the shape of
+    the bug this whole file exists for.
+
+    The root is exempt and that is checked too: ``action_values`` must price
+    every action with the cutoff on, because ii_action_diff.py looks the
+    champion's move up there and reports it as unpriced if it is missing.
+    """
+    rules, out = positions
+    checked = 0
+    saved = kept = 0
+    for hs, seat, states in out:
+        w = [1.0 / len(states)] * len(states)
+        vals = {}
+        for flag in (False, True):
+            sv = ExactII(rules, hs, seat, SPEC)
+            sv.prune = flag
+            sv.deadline = time.monotonic() + BUDGET
+            try:
+                v = sv.solve([_clone(s) for s in states], list(w))
+            except SolveTimeout:
+                vals = {}
+                break
+            vals[flag] = (v, sv.nodes, dict(sv.action_values),
+                          repr(sv.best_action))
+        if len(vals) != 2:
+            continue
+        checked += 1
+        (v0, n0, av0, ba0), (v1, n1, av1, ba1) = vals[False], vals[True]
+        saved += n0
+        kept += n1
+        assert abs(v0 - v1) < 1e-9, (
+            f"support {len(states)}: cutoff changed the value, "
+            f"{v0:+.6f} without and {v1:+.6f} with")
+        assert set(av0) == set(av1), (
+            f"support {len(states)}: the cutoff left "
+            f"{sorted(set(av0) ^ set(av1))} unpriced at the root")
+        for k in av0:
+            assert abs(av0[k] - av1[k]) < 1e-9, (
+                f"support {len(states)}: root value of {k} moved from "
+                f"{av0[k]:+.6f} to {av1[k]:+.6f}")
+        assert ba0 == ba1, (
+            f"support {len(states)}: the reported optimum changed from {ba0} "
+            f"to {ba1}, which reclassifies a disagreement")
+    assert checked, "every position timed out; the cutoff was never compared"
+    assert kept <= saved, "the cutoff searched MORE nodes than it saved"
+
+
+def test_the_memo_distinguishes_histories():
+    """The specific fault, stated as a property rather than a position.
+
+    Two nodes that differ only in how they were reached must not share a memo
+    entry. Keying on the path since the root is what makes that true; a test
+    that only checked values would pass on a solver that got lucky.
+    """
+    rules = RuleConfig()
+    sv = ExactII(rules, 0, 0, SPEC)
+    st = GameState.deal(rules, seed=7)
+    a = sv.solve.__code__
+    assert "path" in a.co_varnames, "solve no longer threads a history key"
+    # the key must change when only the path changes
+    keys = set()
+    for path in ((), ("A",), ("B",)):
+        keys.add((0, path, ((tuple(st.hands), st.turn,
+                             tuple(st.set_winner), 1.0),)))
+    assert len(keys) == 3
+
+
+# ---------------------------------------------------------------------------
+# The position the bug was found on, frozen.
+#
+# The three tests above pass on the BROKEN solver: their inputs are m = 1 with
+# support at most six, and the memo never merges two nodes that differ only in
+# history there. A regression test that cannot fail on the fault it was written
+# for is decoration, so the position that did fail is stored and replayed. It
+# is the first m = 2 position of game 20 of scripts4/ii_endgame.py, support 4,
+# where the broken key returned +0.2500 against a rollout of +0.7500.
+# ---------------------------------------------------------------------------
+
+FIXTURE = os.path.join(ROOT, "tests4", "fixtures", "ii_memo_position.json")
+
+
+def _decode_event(row):
+    tag = row[0]
+    if tag == "ask":
+        return AskEvent(row[1], row[2], row[3], row[4])
+    if tag == "claim":
+        return ClaimEvent(row[1], row[2], tuple(row[3]), tuple(row[4]), row[5])
+    return PassEvent(row[1], row[2])
+
+
+def _load_fixture():
+    with open(FIXTURE) as fh:
+        d = json.load(fh)
+    rules = RuleConfig()
+    hist = [_decode_event(r) for r in d["history"]]
+    states = []
+    for hands in d["deals"]:
+        t = GameState.from_components(rules, list(hands), d["turn"],
+                                      list(d["set_winner"]))
+        t.history = list(hist)
+        states.append(t)
+    return rules, d["live"], d["seat"], states
+
+
+@pytest.mark.parametrize("use_memo", [True, False])
+def test_the_position_the_memo_got_wrong(use_memo):
+    """Both bounds, on the position that actually violated them.
+
+    Roughly ten seconds: the correct search visits about 12,000 nodes here
+    where the broken one visited 154, which is the size of the merge that was
+    happening.
+
+    Run BOTH ways on purpose. The memo now ships off, and with it off this
+    position cannot exercise the key at all -- the test would pass because the
+    code it guards never runs, which is the failure mode the fixture exists to
+    prevent. The ``True`` arm keeps the key under test; the ``False`` arm
+    tests what actually ships.
+    """
+    rules, live, seat, states = _load_fixture()
+    w = [1.0 / len(states)] * len(states)
+    sv = ExactII(rules, list(live), seat, SPEC)
+    sv.use_memo = use_memo
+    sv.deadline = time.monotonic() + 120.0
+    v = sv.solve([_clone(s) for s in states], list(w))
+    cv = sv.champion_value([_clone(s) for s in states], list(w))
+    assert v - cv >= -1e-9, (
+        f"best response {v:+.6f} below the champion {cv:+.6f} on the position "
+        f"the history-less memo key got wrong (memo {use_memo})")
+
+    sv2 = ExactII(rules, list(live), seat, SPEC)
+    sv2.use_memo = use_memo
+    sv2.deadline = time.monotonic() + 120.0
+    tree = sv2.champion_tree_value([_clone(s) for s in states], list(w))
+    assert abs(tree - cv) < 1e-9, (
+        f"the same champion strategy scores {tree:+.6f} in the tree and "
+        f"{cv:+.6f} in the rollout")
+
+
+def test_the_memo_changes_no_value():
+    """Turning the memo off must be invisible to the answer.
+
+    This is what licenses the default. The memo hits about one lookup in ten
+    thousand once the key carries the path, so it buys nothing and stores one
+    large entry per node; removing it is only a speedup if the number that
+    comes out is the same one. If this ever fails, the memo was doing something
+    other than remembering and the default should go back.
+    """
+    rules, live, seat, states = _load_fixture()
+    w = [1.0 / len(states)] * len(states)
+    vals = []
+    for flag in (True, False):
+        sv = ExactII(rules, list(live), seat, SPEC)
+        sv.use_memo = flag
+        sv.deadline = time.monotonic() + 120.0
+        vals.append(sv.solve([_clone(s) for s in states], list(w)))
+    assert vals[0] == vals[1], (
+        f"memo on gives {vals[0]:+.9f}, memo off gives {vals[1]:+.9f}")
+
+
+# ---------------------------------------------------------------------------
+# The position where the champion gets STUCK in one of the deals.
+#
+# _opponent used to drop such a state and renormalise the survivors, which
+# asserts the world does not exist and inflates every other deal's weight,
+# while champion_value stopped that deal's rollout and scored it in place. The
+# two therefore disagreed about the same strategy. The m = 2 tree/rollout
+# control caught it at 105/106 -- one position in a hundred -- so a test that
+# waits for it to happen by chance is a test that usually does not run.
+# ---------------------------------------------------------------------------
+
+STUCK_FIXTURE = os.path.join(ROOT, "tests4", "fixtures",
+                             "ii_stuck_position.json")
+
+
+def _load_stuck():
+    with open(STUCK_FIXTURE) as fh:
+        d = json.load(fh)
+    rules = RuleConfig()
+    hist = [_decode_event(r) for r in d["history"]]
+    states = []
+    for hands in d["deals"]:
+        t = GameState.from_components(rules, list(hands), d["turn"],
+                                      list(d["set_winner"]))
+        t.history = list(hist)
+        states.append(t)
+    return rules, d["live"], d["seat"], states
+
+
+def test_a_stuck_deal_keeps_its_weight():
+    """Tree and rollout must agree where the champion cannot move.
+
+    The assertion that the drop actually happened is not decoration: if a
+    future change stops the champion getting stuck here, this test would pass
+    without exercising anything, and would go on passing while the bug it was
+    written for came back somewhere else.
+    """
+    rules, live, seat, states = _load_stuck()
+    w = [1.0 / len(states)] * len(states)
+
+    sv = ExactII(rules, list(live), seat, SPEC)
+    sv.max_nodes = 300_000
+    tree = sv.champion_tree_value([_clone(s) for s in states], list(w))
+    assert sv.opp_dropped > 0, (
+        "the champion no longer gets stuck in this position, so the test is "
+        "not exercising the fault it was written for")
+
+    roll = ExactII(rules, list(live), seat, SPEC).champion_value(
+        [_clone(s) for s in states], list(w))
+    assert abs(tree - roll) < 1e-9, (
+        f"a stuck deal is being reweighted away: tree {tree:+.6f} against a "
+        f"rollout of {roll:+.6f} with {sv.opp_dropped} state(s) stuck")
+
+
+# ---------------------------------------------------------------------------
+# The identity the champion oracle's fast cache key rests on.
+#
+# _opponent assembles that key as root_history + path rather than walking the
+# history again, which is only correct if every applied move appends exactly
+# one event AND the signature the search stores for it is that event's repr.
+# Both are true of the engine today. Neither is enforced by anything else, and
+# if either stopped being true the champion would be answering from another
+# information set's cache entry -- the same class of fault as the memo bug,
+# and just as invisible in the output.
+# ---------------------------------------------------------------------------
+
+
+def test_apply_returns_exactly_the_event_it_appends():
+    """Every move type, on real games rather than a random walk.
+
+    A random walk from a fresh deal produced 720 asks and not one claim or
+    pass, which is the move space this test least needs to check -- a claim is
+    the move most likely to append something unusual. Champion agents playing
+    games out reach all three, because a game ENDS by claiming.
+    """
+    rules = RuleConfig()
+    counts = {"AskEvent": 0, "ClaimEvent": 0, "PassEvent": 0}
+    for seed in range(6):
+        agents = [make_agent(SPEC) for _ in range(NUM_PLAYERS)]
+        st = GameState.deal(rules, seed=4_000 + seed)
+        rng = random.Random(seed)
+        for p, a in enumerate(agents):
+            a.begin_game(p, rules, rng.getrandbits(64))
+        for _ in range(400):
+            if st.is_terminal:
+                break
+            p = st.turn
+            act = agents[p].act(Observation.from_state(st, p))
+            before = len(st.history)
+            ev = st.apply(p, act)
+            assert len(st.history) == before + 1, (
+                f"{act!r} appended {len(st.history) - before} events, not "
+                f"one; the concatenated cache key would fall out of step")
+            assert repr(ev) == repr(st.history[-1]), (
+                "apply returned something other than the event it appended, "
+                "so path signatures are not the history")
+            counts[type(ev).__name__] = counts.get(type(ev).__name__, 0) + 1
+    assert counts["AskEvent"] > 50, counts
+    assert counts["ClaimEvent"] > 10, (
+        f"no claims reached, so the move most likely to append something "
+        f"unusual went unchecked: {counts}")
+
+
+def test_the_fast_history_key_matches_the_slow_one():
+    """The assembled key and the walked key must be the same bytes.
+
+    Not "the same value" -- the same bytes. The first eight of them seed the
+    champion's RNG, so a key that differed anywhere would change what the
+    champion plays rather than merely how long it takes to ask.
+    """
+    rules, live, seat, states = _load_fixture()
+    for st in states:
+        obs = Observation.from_state(st, seat)
+        walked = tuple(repr(e) for e in obs.history)
+        assert _info_key(seat, obs) == _info_key(seat, obs, walked)
+    # and every deal at the node really does share the public history
+    first = tuple(repr(e) for e in states[0].history)
+    for st in states[1:]:
+        assert tuple(repr(e) for e in st.history) == first, (
+            "deals at one information set disagree about the public history")
+
+
+# ---------------------------------------------------------------------------
+# The champion oracle's cache is keyed by information set AND by policy.
+#
+# It was keyed by information set alone. Every script here solves with one spec
+# per process so nothing published was wrong, but the first run that used two --
+# the same positions against the champion and against a corrected policy -- got
+# byte-identical answers for both on all 290 positions, because the second was
+# reading the first one's cached moves. Same fault as the memo key that omitted
+# the history, and caught the same way: by a result that could not have happened
+# if the code were right.
+# ---------------------------------------------------------------------------
+
+
+def test_two_policies_do_not_share_cached_moves():
+    rules = RuleConfig()
+    other = ("fishbot4", {"opponent_gamma": 0.35, "endgame_m": 9,
+                          "endgame_d_info": 8.0, "endgame_d_certain": -8.0})
+    differ = same = 0
+    rng = random.Random(3)
+    for seed in range(5):
+        st = GameState.deal(rules, seed=5_000 + seed)
+        for _ in range(90):
+            if st.is_terminal:
+                break
+            p = st.turn
+            # Ask the champion FIRST, so a spec-blind cache would hand the
+            # champion's move back for the second policy.
+            a = _champion_action(SPEC, rules, p, st)
+            b = _champion_action(other, rules, p, st)
+            if a is None or b is None:
+                break
+            if repr(a) == repr(b):
+                same += 1
+            else:
+                differ += 1
+            st.apply(p, a)
+    assert differ > 0, (
+        f"two policies with very different ask weights agreed on all "
+        f"{same} decisions, which means the cache is handing one policy's "
+        f"moves to the other")
+
+
+def test_the_info_key_does_not_carry_the_spec():
+    """The fix must be a separate bucket, not a longer key.
+
+    The first eight bytes of the info key seed the champion's own RNG. Folding
+    the spec into the digest would have fixed the sharing and changed what the
+    champion plays, repricing every number measured against it -- so the key
+    must still be a function of the information set alone.
+    """
+    import inspect
+
+    from fish4 import exact_ii
+
+    src = inspect.getsource(exact_ii._info_key)
+    assert "spec" not in src, (
+        "the spec leaked into _info_key, which changes the champion's seed")
+    assert "repr(spec)" in inspect.getsource(exact_ii._champion_action), (
+        "the cache is no longer bucketed by spec")

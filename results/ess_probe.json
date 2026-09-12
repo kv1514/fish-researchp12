@@ -1,0 +1,58 @@
+[
+ {
+  "gamma": 0.35,
+  "n_draws": 160,
+  "deals": 6,
+  "sis_tilt": 0.0,
+  "seats": 36,
+  "sis_decisions": 632,
+  "exact_decisions": 9,
+  "mean_ess": 83.68229826392016,
+  "p10_ess": 64.80743917613711,
+  "median_ess": 86.96999978260948,
+  "p90_ess": 99.98609697197455,
+  "efficiency": 0.523014364149501
+ },
+ {
+  "gamma": 0.35,
+  "n_draws": 160,
+  "deals": 6,
+  "sis_tilt": 0.25,
+  "seats": 36,
+  "sis_decisions": 605,
+  "exact_decisions": 9,
+  "mean_ess": 31.628760623945976,
+  "p10_ess": 10.365238964393175,
+  "median_ess": 23.74572625929535,
+  "p90_ess": 64.68815516083406,
+  "efficiency": 0.19767975389966236
+ },
+ {
+  "gamma": 0.35,
+  "n_draws": 160,
+  "deals": 6,
+  "sis_tilt": 0.5,
+  "seats": 36,
+  "sis_decisions": 616,
+  "exact_decisions": 9,
+  "mean_ess": 59.323635796255076,
+  "p10_ess": 20.861378581340112,
+  "median_ess": 56.6536696883486,
+  "p90_ess": 98.49153921652322,
+  "efficiency": 0.3707727237265942
+ },
+ {
+  "gamma": 0.35,
+  "n_draws": 160,
+  "deals": 6,
+  "sis_tilt": 1.0,
+  "seats": 36,
+  "sis_decisions": 593,
+  "exact_decisions": 9,
+  "mean_ess": 105.83534863801141,
+  "p10_ess": 72.41554284585497,
+  "median_ess": 106.77875252909065,
+  "p90_ess": 135.93570537693103,
+  "efficiency": 0.6614709289875713
+ }
+]

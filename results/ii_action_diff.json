@@ -1,0 +1,1822 @@
+{
+ "n_games": 200,
+ "n_decisions": 263,
+ "n_agree": 78,
+ "timed_out": 10,
+ "node_budget": 300000,
+ "n_differ": 185,
+ "n_free_ties": 78,
+ "n_costly": 94,
+ "mean_cost_when_error": 0.5609338061465722,
+ "cost_per_decision": 0.20048584706379385,
+ "by_kind": {
+  "champion ask -> optimum ask": 93,
+  "champion pass -> optimum pass": 1
+ },
+ "rows": [
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": -0.3333333333333333,
+   "cost": 0.6666666666666666,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 24,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": 0.3333333333333332,
+   "cost": 1.1102230246251565e-16,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.41666666666666663,
+   "champ_value": 0.25,
+   "cost": 0.16666666666666663,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.25,
+   "champ_value": 0.25,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.0,
+   "cost": 0.6666666666666666,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.0,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 9,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.7777777777777779,
+   "champ_value": 0.1111111111111111,
+   "cost": 0.6666666666666667,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.0,
+   "cost": 0.6666666666666666,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.5,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.5,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.0,
+   "cost": 0.5,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.49999999999999994,
+   "cost": 0.16666666666666669,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": -0.3333333333333333,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 24,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.4166666666666666,
+   "champ_value": -0.08333333333333333,
+   "cost": 0.4999999999999999,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 8,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.375,
+   "cost": 0.125,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": -0.25,
+   "cost": 0.75,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.16666666666666666,
+   "champ_value": 0.16666666666666666,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 24,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.7499999999999997,
+   "champ_value": 0.5416666666666666,
+   "cost": 0.20833333333333304,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 18,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.7777777777777781,
+   "champ_value": 0.6666666666666667,
+   "cost": 0.11111111111111138,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333335,
+   "champ_value": 0.6666666666666666,
+   "cost": 0.16666666666666685,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.5833333333333334,
+   "cost": 0.08333333333333326,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.6666666666666666,
+   "cost": 0.33333333333333337,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.6666666666666666,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.0,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.6666666666666666,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.5,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": -0.5,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 18,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6111111111111115,
+   "champ_value": 0.16666666666666666,
+   "cost": 0.44444444444444486,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.0,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.25,
+   "cost": 0.75,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.25,
+   "champ_value": -0.25,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333334,
+   "champ_value": 0.6666666666666665,
+   "cost": 0.16666666666666685,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.0,
+   "cost": 0.6666666666666666,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.0,
+   "cost": 0.5,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.6666666666666667,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": -0.3333333333333333,
+   "cost": 0.6666666666666666,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.6666666666666667,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.8333333333333333,
+   "cost": 0.16666666666666674,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333333,
+   "champ_value": 0.49999999999999994,
+   "cost": 0.3333333333333333,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.6666666666666666,
+   "cost": 0.33333333333333337,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 4,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.25,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333335,
+   "champ_value": 0.08333333333333334,
+   "cost": 0.7500000000000001,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.16666666666666666,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.25,
+   "cost": 0.25,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.3333333333333333,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.6666666666666667,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.5,
+   "cost": 0.5,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.0,
+   "cost": 0.5,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.3333333333333333,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": 0.0,
+   "cost": 0.3333333333333333,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.25,
+   "cost": 0.25,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.25,
+   "cost": 0.25,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": -0.08333333333333331,
+   "champ_value": -0.16666666666666663,
+   "cost": 0.08333333333333331,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": -0.16666666666666666,
+   "champ_value": -0.3333333333333333,
+   "cost": 0.16666666666666666,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.25,
+   "cost": 0.25,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333333,
+   "champ_value": 0.6666666666666666,
+   "cost": 0.16666666666666663,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 18,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.7222222222222223,
+   "champ_value": 0.5555555555555556,
+   "cost": 0.16666666666666674,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333334,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": 0.0,
+   "cost": 0.5,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333333,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.49999999999999994,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.3333333333333333,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.3333333333333333,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333331,
+   "champ_value": 0.6666666666666666,
+   "cost": 0.16666666666666652,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 2,
+   "champ_kind": "pass",
+   "opt_kind": "pass",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.9166666666666666,
+   "champ_value": 0.33333333333333326,
+   "cost": 0.5833333333333334,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 9,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0000000000000002,
+   "champ_value": 0.5555555555555556,
+   "cost": 0.44444444444444464,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": -0.3333333333333333,
+   "cost": 0.6666666666666666,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": -0.3333333333333333,
+   "cost": 1.3333333333333333,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 10,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8,
+   "champ_value": 0.8,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.9999999999999999,
+   "champ_value": 0.3333333333333333,
+   "cost": 0.6666666666666665,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": -0.5,
+   "cost": 0.5,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.25,
+   "champ_value": -0.08333333333333331,
+   "cost": 0.3333333333333333,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 12,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": -0.08333333333333331,
+   "champ_value": -0.16666666666666663,
+   "cost": 0.08333333333333331,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": -0.16666666666666666,
+   "champ_value": -0.3333333333333333,
+   "cost": 0.16666666666666666,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.25,
+   "champ_value": 0.25,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.25,
+   "champ_value": 0.25,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 18,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.8333333333333339,
+   "champ_value": -0.05555555555555558,
+   "cost": 0.8888888888888895,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 5,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 5,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.6000000000000001,
+   "cost": 0.3999999999999999,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 1.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 3,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.3333333333333333,
+   "champ_value": -0.3333333333333333,
+   "cost": 0.6666666666666666,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 4,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.25,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.5,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.5,
+   "champ_value": -0.5,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 5,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6000000000000001,
+   "champ_value": 0.2,
+   "cost": 0.4000000000000001,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 5,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.2,
+   "champ_value": -0.2,
+   "cost": 0.4,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 1.0,
+   "champ_value": 0.0,
+   "cost": 1.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 3,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.3333333333333333,
+   "champ_value": null,
+   "cost": null
+  },
+  {
+   "support": 9,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.4444444444444446,
+   "champ_value": 0.2222222222222222,
+   "cost": 0.22222222222222238,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 6,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.6666666666666666,
+   "champ_value": 0.16666666666666666,
+   "cost": 0.5,
+   "same_target": false,
+   "same_card": true
+  },
+  {
+   "support": 4,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.25,
+   "champ_value": -0.25,
+   "cost": 0.5,
+   "same_target": true,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "ask",
+   "opt_kind": "ask",
+   "opt_value": 0.0,
+   "champ_value": 0.0,
+   "cost": 0.0,
+   "same_target": false,
+   "same_card": false
+  },
+  {
+   "support": 2,
+   "champ_kind": "claim",
+   "opt_kind": "claim",
+   "opt_value": 0.5,
+   "champ_value": 0.5,
+   "cost": 0.0
+  }
+ ]
+}
