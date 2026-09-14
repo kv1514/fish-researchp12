@@ -1,0 +1,121 @@
+{
+ "asks": 28513,
+ "by_side": {
+  "ours": {
+   "asks": 14085,
+   "misses": 6657,
+   "why": {
+    "unavoidable in this half-suit": {
+     "n": 2040,
+     "share": 0.3064443442992339
+    },
+    "wrong card": {
+     "n": 1396,
+     "share": 0.20970407090280907
+    },
+    "wrong target": {
+     "n": 1203,
+     "share": 0.18071203244704823
+    },
+    "both": {
+     "n": 1099,
+     "share": 0.1650893796004206
+    },
+    "wrong pair": {
+     "n": 919,
+     "share": 0.1380501727504882
+    }
+   }
+  },
+  "theirs": {
+   "asks": 14428,
+   "misses": 6626,
+   "why": {
+    "wrong card": {
+     "n": 1537,
+     "share": 0.23196498641714458
+    },
+    "unavoidable in this half-suit": {
+     "n": 1454,
+     "share": 0.21943857530938726
+    },
+    "wrong target": {
+     "n": 1263,
+     "share": 0.1906127376999698
+    },
+    "wrong pair": {
+     "n": 1195,
+     "share": 0.1803501358285542
+    },
+    "both": {
+     "n": 1177,
+     "share": 0.17763356474494416
+    }
+   }
+  }
+ },
+ "by_depth": {
+  "1": {
+   "ours": {
+    "misses": 1155,
+    "recoverable": 854,
+    "share": 0.7393939393939394
+   },
+   "theirs": {
+    "misses": 2423,
+    "recoverable": 2086,
+    "share": 0.8609162195625258
+   }
+  },
+  "2": {
+   "ours": {
+    "misses": 2332,
+    "recoverable": 1791,
+    "share": 0.7680102915951973
+   },
+   "theirs": {
+    "misses": 2069,
+    "recoverable": 1653,
+    "share": 0.7989366843885936
+   }
+  },
+  "3": {
+   "ours": {
+    "misses": 1678,
+    "recoverable": 1225,
+    "share": 0.7300357568533969
+   },
+   "theirs": {
+    "misses": 1176,
+    "recoverable": 866,
+    "share": 0.7363945578231292
+   }
+  },
+  "4": {
+   "ours": {
+    "misses": 988,
+    "recoverable": 586,
+    "share": 0.5931174089068826
+   },
+   "theirs": {
+    "misses": 602,
+    "recoverable": 406,
+    "share": 0.6744186046511628
+   }
+  },
+  "5": {
+   "ours": {
+    "misses": 504,
+    "recoverable": 161,
+    "share": 0.3194444444444444
+   },
+   "theirs": {
+    "misses": 356,
+    "recoverable": 161,
+    "share": 0.45224719101123595
+   }
+  }
+ },
+ "seconds": 145.3,
+ "exploratory": "hypothesis-generating only"
+}

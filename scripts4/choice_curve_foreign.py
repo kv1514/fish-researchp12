@@ -131,13 +131,34 @@ def collect(n_games: int):
 
 
 def main(n_games: int = 60) -> int:
+    # The journal is keyed to the BRIDGE REVISION that produced it. Without
+    # this, re-running after a bridge change silently re-fits the old records
+    # and prints the old answer: this file cached 6,090 asks taken through the
+    # rev-2 bridge, which reset their engine with the wrong hand, and a
+    # "re-measurement" after the rev-3 repair returned alpha = -1.0041 to four
+    # decimals without playing a single game. A cache that survives a change to
+    # the thing being measured is not a cache, it is a way of never noticing.
+    from fish4.dylan_v07 import BRIDGE_REV
+    records = None
     if JOURNAL.exists():
-        records = json.loads(JOURNAL.read_text())
-        print(f"{len(records)} records loaded from {JOURNAL.name}")
-    else:
+        blob = json.loads(JOURNAL.read_text())
+        if isinstance(blob, dict) and blob.get("bridge_rev") == BRIDGE_REV:
+            records = blob["records"]
+            print(f"{len(records)} records loaded from {JOURNAL.name} "
+                  f"(bridge rev {BRIDGE_REV})")
+        else:
+            was = blob.get("bridge_rev", "unstamped") if isinstance(blob, dict) \
+                else "unstamped"
+            print(f"ignoring {JOURNAL.name}: bridge rev {was}, this bridge is "
+                  f"rev {BRIDGE_REV}; their asks are not comparable across "
+                  f"that change, so they are re-collected")
+    if records is None:
         records = collect(n_games)
-        JOURNAL.write_text(json.dumps(records))
-        print(f"collected {len(records)} of their asks over {n_games} games")
+        JOURNAL.write_text(json.dumps(
+            {"bridge_rev": BRIDGE_REV, "n_games": n_games,
+             "records": records}))
+        print(f"collected {len(records)} of their asks over {n_games} games "
+              f"through bridge rev {BRIDGE_REV}")
 
     if len(records) < 200:
         print("too few records to fit")
@@ -169,6 +190,7 @@ def main(n_games: int = 60) -> int:
     print(f"  VERDICT: {verdict}")
 
     out = {"rules": RULES_D, "n_games": n_games, "n_records": len(records),
+           "bridge_rev": BRIDGE_REV,
            "alpha": alpha, "ci95": [lo, hi], "se_clustered": se,
            "nll": fit["nll"], "clustered": bool(boot),
            "assumed_gamma": 0.35, "verdict": verdict,

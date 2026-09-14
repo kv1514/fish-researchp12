@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The thirty-eight documents in \path{prereg/}
+no registered threshold anywhere. The forty-four documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -24,10 +24,13 @@ what the run returned, and where in this paper the verdict appears.
 
 The registrations that returned nulls, refutations, withdrawals and
 non-results are listed on exactly the same footing as the ones that returned
-effects, in the same table, in filename order. Eight of the thirty-eight
-have \emph{no outcome recorded in the registration document itself}; six of
-those eight were nonetheless run and are reported in this paper or in
-\path{RESEARCH_FRONTIER.md}, and two have not been run at all. Both facts are
+effects, in the same table, in filename order --- with the four written after
+this appendix was first compiled (P39--P42) appended at the end, in filename
+order among themselves, so that the identifiers already cited in the text keep
+their referents. Twelve of the forty-four have \emph{no outcome recorded in the
+registration document itself}; ten of those twelve were nonetheless run and are
+reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
+been run at all. Both facts are
 marked in the table rather than smoothed over, because a registration that is
 written and never resolved is the file-drawer risk this appendix exists to
 expose. Anything that could not be verified against a committed results file
@@ -602,24 +605,165 @@ $+0.13$ a game, and clear of zero.'' ``If the opponent's error rate does not mov
 document was committed. &
 \textbf{Not in the paper} \\
 
+P39 & \path{signal_dose_law.md} \newline
+\emph{Is the transfer across opponents multiplicative or logistic?} &
+``\textbf{MULTIPLICATIVE} --- the interval covers $+0.0426$ and excludes
+$+0.0143$''; \textbf{LOGISTIC} the reverse; \textbf{NEITHER} if it excludes
+both, named in advance as ``the outcome that would matter most''. Both
+predictions fitted before the run to \texttt{dylan\_v07}'s measured rise;
+\texttt{heuristic} at $2{,}500$ paired deals, seed base \textbf{14,900,000}. &
+Yes: \textsc{underpowered} if the half-width exceeds $0.0142$. &
+\textbf{LOGISTIC.} $+0.0178$ $[+0.0048, +0.0308]$, covering the logistic
+prediction and excluding the multiplicative one; realised half-width $0.0130$.
+One registered input was later found to be a screen figure good to $\pm4$
+points; the verdict survives recomputation at the measured baseline.
+\path{results/signal_dose_law.json} &
+\S\ref{sec:res-signal} \\
+
+P40 & \path{signal_dose_linearity.md} \newline
+\emph{Is the log-odds shift linear in the dose, or is there a dead zone below
+three signals a game?} &
+``\textbf{LINEAR} --- the interval covers the linear prediction and excludes
+zero''; \textbf{THRESHOLD} the reverse; \textbf{NEITHER} if it excludes both,
+named as ``the outcome that would hurt most''. A direct replication at power of
+the $1.477$-dose arm, $5{,}000$ paired deals, seed base \textbf{15,700,000}. &
+Yes: \textsc{underpowered} if the half-width exceeds $0.0095$. &
+\textbf{NEITHER.} $+0.0088$ $[+0.0007, +0.0169]$ at a realised dose of
+$1.381$: excludes zero, so there is no dead zone, and excludes the linear
+prediction of $+0.0201$, so the shift is not proportional to the dose either.
+\path{results/signal_dose_linearity.json} &
+\S\ref{sec:res-signal} \\
+
+P41 & \path{signal_generality.md} \newline
+\emph{Is the signalling effect a property of the convention or an exploit of
+one opponent's declaration policy?} &
+``\textbf{GENERAL} --- the margin effect clears zero and the declaration error
+rate rises outside its Wilson interval''; \textbf{DYLAN-SPECIFIC} if both cover
+zero at a half-width at or below $0.0734$; \textbf{CONTROL VIOLATED} overrides
+everything if \texttt{self} shows an effect. $800$ paired deals per opponent,
+seed \textbf{12,100,000}. &
+Yes: half-width $0.0734$, with \textsc{underpowered} named. &
+\textbf{ANSWERS NEITHER --- the design is dose-confounded.} The control holds
+($+0.0200$ $[-0.0232, +0.0632]$) and \texttt{ev\_claim} does not move
+($-0.0525$ $[-0.1415, +0.0365]$), but the two arms fired at $8.94$ and $2.17$
+signals a game, so opponent and dose are not separated and the registered
+verdicts are not read. Superseded by P42.
+\path{results/signal_generality_ev_claim_12100000.json},
+\path{results/signal_generality_self_12100000.json} &
+\S\ref{sec:res-signal} \\
+
+P42 & \path{signal_matched_dose.md} \newline
+\emph{The same question with the dose held equal by construction.} &
+``\textbf{GENERAL} --- \texttt{ev\_claim}'s opponent channel clears zero at
+matched dose''; \textbf{DYLAN-SPECIFIC} if it covers zero at a half-width at
+or below $0.0209$; \textbf{INFEASIBLE} if the calibration gate finds no common
+dose. Calibration bank scores nothing; scored bank $2{,}500$ paired deals,
+seed base \textbf{14,300,000}, dose tolerance $\pm15\%$. &
+Yes: \textsc{underpowered} above a half-width of $0.0414$; re-sized from the
+calibration bank before any scored deal was played, and the change recorded in
+the document. &
+\textbf{GENERAL.} Both opponents inside tolerance at $2.766$ and $2.872$;
+\texttt{dylan\_v07} $+0.0454$ $[+0.0326, +0.0582]$ and \texttt{ev\_claim}
+$+0.0172$ $[+0.0048, +0.0296]$. The effect transfers as a rate \emph{factor}
+($+0.0160$ predicted, inside) and not as a fixed rise in points ($+0.0423$,
+outside). \path{results/matched_dose_scored.json},
+\path{results/matched_dose_calibration.json} &
+\S\ref{sec:res-signal} \\
+
+P43 & \path{kraken_v12_vs_sestina.md} \newline
+\emph{Can anything beat SESTINA v1.0 through the repaired bridge, and does it
+still hold in self-play?} &
+Ships only on $+0.15$ sets/game with the interval clear of zero in
+\emph{both} populations: against SESTINA through \texttt{BRIDGE\_REV\ 3},
+and against the v1.1 champion in self-play. Three candidates fixed in advance
+(opponent-model $\gamma$, \texttt{avoid\_doomed\_asks},
+\texttt{depth\_mode}); screen $300$ deals $\times\,2$ parities at seed base
+\textbf{9,300,000}, confirm $600 \times 2$ at \textbf{9,400,000}, never
+pooled. A candidate clearing against SESTINA and failing self-play is reported
+as opponent-specific and not shipped. &
+Yes, and stated as the expected outcome: that none of the three clears the
+$0.6$ gap and v1.2 does not beat SESTINA. Multiplicity across three candidates
+is named in the document rather than in a discussion section. &
+\textbf{NOTHING SHIPS}, as predicted. No arm clears either half of the
+bar, so none reaches confirm and the stacking arm is not licensed:
+$\gamma{=}0$ at $-0.5867$ / $-1.0667$, $\gamma{=}\hat\alpha$ at
+$-0.9033$ / $-2.0033$, \texttt{avoid\_doomed\_asks} at $-0.0933$ /
+$-0.0900$, \texttt{depth\_mode} at $-0.0033$ / $-0.0867$ (vs SESTINA /
+self-play). Two lessons outrank the nulls. R0's re-measured exponent
+survives the bridge repair ($-1.1055$ against $-1.0041$), and acting on
+it is the worst arm in the study --- a correct measurement of an
+opponent does not license a change to us, and only the self-play half of
+the bar separates those. And removing the opponent model entirely costs
+$-0.59$ / $-1.07$, so the mis-signed model is an \emph{asset}: being
+wrong about an opponent's propensity beats having no opinion.
+\path{results/v12_screen.json},
+\path{results/v12_screen_c3.json} &
+\S\ref{sec:otherarbiter} \\
+
+P44 & \path{kraken_v12_declaration_latency.md} \newline
+\emph{The deficit is a declaration latency, not an ask deficit --- can either
+end of it be reached?} &
+Same dual-population bar as P43. Two arms, each replacing a CERTAINTY test
+with a graded one: \texttt{dead\_ask\_threshold} $=0.5$ (D1) restricts the
+ask when the top-scoring one's half-suit is more likely than not already
+ours; \texttt{claim\_owned\_threshold} $=0.77$ (D2) declares a half-suit we
+are certain we own at a lower exactness. D2's $0.77$ is a break-even from this
+project's own turn price and declaration accuracy, stated with its
+approximation, not the best of a sweep. Futility screen fixed first: $2\%$ of
+ask decisions (D1), $0.25$ declarations/game (D2), at seed base
+\textbf{9,500,000}; screen $300\times2$ at \textbf{9,600,000}. D3 (both)
+licensed only if both cleared independently. &
+Yes: that D1 clears futility and fails the duel, with the mechanism named ---
+a failed ask publicly proves the asker holds another card of that half-suit,
+so D1 removes the engine's own way of resolving the allocation it is stuck on.
+D2 was predicted to be ``the one with a case''. &
+\textbf{NOTHING SHIPS.} D2 fired on $0.235$ declarations/game against its
+$0.250$ bar and never reached a duel, which is itself the result: it gates on
+$p_{\text{team}} \ge 0.99$, and the belief's probability that a genuinely
+dead half-suit is entirely ours averages $0.3120$. \emph{We sit on completed
+half-suits because we do not know we own them}, not because we cannot place
+the split. D1 reached the duel and returned a significant \textbf{negative} in
+both populations, $-0.3233$ $[-0.527, -0.119]$ and $-0.2300$ $[-0.448,
+-0.012]$ --- while raising the ask hit rate it targets, $0.5245$ against the
+champion's $0.5184$ on the same deals. It did what it was built to do and cost
+a third of a set doing it, so \textbf{the ask hit rate is not a quantity to
+maximise} and the $1.95$-point gap of \S\ref{sec:otherarbiter} is not
+necessarily a gap to close. \path{results/p44_futility.json},
+\path{results/p44_screen.json} &
+\S\ref{sec:askdeficit} \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the thirty-eight resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-four resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
 \textbf{refuted} on a registered condition (P1, P4, P7, P10, P23, P28, P32,
 P36). Five returned an explicit null, an explicit \textsc{split}, or an
-explicit ``not settled'' (P8, P13, P24, P27, P35). Four were closed by a screen
-or by proof before the registered duel was paid for, saving roughly $9{,}000$
-duplicate-deal pairs (P3, P12, P29, P34). One was a set of graded predictions
-rather than a threshold and scored four of five (P25). And eight have
+explicit ``not settled'' (P8, P13, P24, P27, P35, P43, P44). Four were closed
+by a screen or by proof before the registered duel was paid for, saving roughly
+$9{,}000$ duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's
+D2, inside a registration already counted above. One was a set of graded predictions
+rather than a threshold and scored four of five (P25). And twelve have
 \textbf{no outcome recorded in the registration at all} (P15, P19, P21, P22,
-P30, P31, P37, P38) --- six of them run and written up elsewhere, two of them
-never run.
+P30, P31, P37, P38, P39, P40, P41, P42) --- ten of them run and written up
+elsewhere, two of them never run.
 
-\noindent Exactly one of the thirty-eight --- P20 --- shipped, and it is the
+\noindent The last four of those are the ones added after this appendix was
+first compiled, and they resolved on their own registered verdicts rather than
+on the ship bar, because none of them was a candidate for shipping: P39
+returned \textsc{logistic}, separating two laws of transfer and refuting the
+multiplicative one; P42 returned \textsc{general}, the first result in this
+line to hold at a dose matched by construction across two engines; P40 returned
+\textsc{neither}, which its own document had named in advance as the outcome
+that would hurt most, killing both the dead-zone reading and the proportional
+one at once; and P41 answered neither of its verdicts, because its two arms
+fired at $8.94$ and $2.17$ signals a game and the design could not separate
+opponent from dose --- a confound that was in the registration rather than in
+the run, and the reason P42 exists.
+
+\noindent Exactly one of the forty-four --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 

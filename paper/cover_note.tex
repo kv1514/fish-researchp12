@@ -1,0 +1,187 @@
+% =====================================================================
+% Cover note for paper/kraken.pdf.
+%
+% WHY THIS FILE EXISTS. The report is 132 pages. That length is defensible --
+% it is four development cycles with the failed arms left in -- but it is the
+% wrong first object to put in front of someone who has not asked for it. This
+% is the two pages that go in the email body's place, and it leads with the
+% retraction rather than the result, because the retraction is the better
+% evidence about how the work was done.
+%
+% Build:  pdflatex -interaction=nonstopmode cover_note.tex   (one pass; no
+% refs, no citations, nothing to settle).
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage[margin=1in,top=1in,bottom=1in]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+\titlespacing*{\section}{0pt}{1.9ex plus .5ex minus .2ex}{0.9ex plus .2ex}
+\titleformat{\section}{\normalfont\bfseries\normalsize}{}{0pt}{}
+\setlist[itemize]{itemsep=2pt,topsep=4pt,parsep=0pt,leftmargin=1.3em}
+\pagestyle{empty}
+\setlength{\parskip}{0.55em}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+{\bfseries\large Exact Inference Is Not Enough}\\[0.15em]
+{\normalsize Opponent models and endgames in six-player Literature ---
+KRAKEN v1.1}\\[0.35em]
+{\small Kausthubh Veldanda \quad$\cdot$\quad accompanying
+\texttt{kraken.pdf}, 132 pages}
+
+\vspace{0.4em}
+\hrule
+\vspace{0.2em}
+
+Literature (also Fish, or Canadian Fish) is a six-player, two-team,
+imperfect-information card game. Players interrogate opponents for named cards
+and score by declaring exactly how a six-card half-suit is split among their
+own team. Every action is public, so the whole hidden state is the deal --- and
+there is no legal communication channel, which puts the game outside both the
+two-player zero-sum machinery that solved poker and the fully cooperative
+machinery built for Hanabi. This report is four development cycles on an engine
+for it, written with the arms that failed left in.
+
+I am writing because I would value criticism of the method, and because one
+episode in it seems worth more than the engine is.
+
+\section{The result I retracted, and how}
+
+An earlier version of this work reported that KRAKEN beat an independently
+developed C++ engine by $+2.347$ sets per game over $10{,}000$ audited games.
+\textbf{That figure is withdrawn.} It measured my bridge, not my engine.
+
+The bridge was stateless: it replayed the entire public log into a freshly
+reset copy of their agent at every decision, where their own arbiter keeps one
+agent per seat alive for the whole deal. Those are the same thing only if their
+agent is a pure function of (reset state, event sequence). It is not.
+
+What made this findable was not suspicion of the number. It was a control. To
+check that their engine had not simply got weaker, I ran their whole released
+ladder, v0.2 through v0.7, and the ladder came out \emph{backwards}: in my
+arbiter their later releases scored worse, and their declaration error climbed
+monotonically with their own version number (Spearman $-1.000$ against $+0.771$
+the other way). A project's successive releases getting steadily worse at the
+one thing the game scores is not a shape that improving strength produces. So
+the ladder was the instrument, not the finding.
+
+Localising it took a decision-level parity test --- the same game put to both
+transports, decision by decision:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+their version & decisions & divergent & rate \\
+\midrule
+v0.2 (scripted) & $323$ & $\mathbf{0}$ & $0.00\%$ \\
+v0.3 (scripted) & $338$ & $\mathbf{0}$ & $0.00\%$ \\
+v0.4 & $415$ & $81$ & $19.52\%$ \\
+v0.5 & $336$ & $137$ & $40.77\%$ \\
+v0.6 & $292$ & $36$ & $12.33\%$ \\
+v0.7 & $296$ & $84$ & $28.38\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Exactly zero on both of their scripted baselines, and large on every release
+from v0.4 --- the version their fitted belief arrives at. A clean boundary, and
+the same rung at which the two arbiters' ladders stop agreeing.
+
+Then it was priced, under a paired design that holds the deal, the seats, the
+agent seeds and my own engine fixed and changes only whether their process
+survives between decisions. \textbf{The bridge was worth $+3.18$ $[+3.01,
++3.34]$ sets a game to me} --- more than the entire margin it produced. Their
+declaration errors fall roughly tenfold, from $0.880$ a game to $0.092$, once
+their engine is allowed to keep the state its own arbiter lets it keep.
+
+Corrected, KRAKEN \textbf{loses} to that engine by $-0.70$. Measured
+independently inside \emph{their} arbiter, through a bot-package protocol they
+published, by $-0.62$. Two routes that share no host, no rules implementation,
+no deal generator and no line of code agree to within $0.08$ --- where the
+published number was out by three and had the sign wrong.
+
+The general lesson is one the report had already written down in an appendix
+and then not applied to its own headline: \emph{an absolute measured through a
+bridge is a statement about the bridge as well as about the engines.} Paired
+contrasts that hold the bridge fixed on both sides were unaffected, and are
+what the rest of the report rests on.
+
+\section{The central result is also negative}
+
+Hidden-state inference here reduces to counting assignments in a
+degree-constrained bipartite system. That is $\#P$-complete in general, but
+real positions carry only $4.1$ distinct candidate sets across $25.1$ unlocated
+cards, so a dynamic program returns the exact partition function, marginals,
+uniform samples and joint probabilities --- validated against exhaustive
+enumeration.
+
+Making the posterior exactly correct \textbf{changed nothing in play}
+($-0.008$ sets per duplicate deal-pair over $250$ pairs) and made it a
+\emph{worse} predictor of where cards actually sit than the biased sampler it
+replaced ($1.3618$ against $1.3408$ mean negative log-likelihood). A uniform
+posterior is a correct theorem about a false hypothesis: it assumes choices
+carry no information beyond legality. The old sampler's bias had accidentally
+encoded an opponent model, and removing the bias removed the model. Replacing
+that accident with an explicit one-parameter choice model is worth $+1.92$
+$[+1.48, +2.36]$ sets per pair --- the largest single gain in the study.
+
+Two of the results that follow. Residual errors are not failures to \emph{find} cards:
+$95.3\%$ are \emph{allocation} errors, where the team held all six of a
+half-suit and split them wrongly. Handing a seat the true deal one side at a
+time --- a ceiling obtained by cheating, never a strength figure --- prices
+teammates' cards at $+3.41$ against opponents' $+1.31$, and I had predicted the
+reverse.
+
+\section{How the claims are held to account}
+
+Forty-four pre-registrations, written before the runs, each naming its
+prediction and its ship bar; Appendix~A tabulates every one on the same
+footing, \emph{including} those whose predictions failed, and a test checks
+that table against the directory both ways. Nothing ships below $\pm0.15$ sets
+per game. Every number in the report is pinned by a script to the artifact
+that produced it, and the script is verified by perturbing an artifact and
+confirming it fails. Cross-engine work is pinned to
+an upstream commit and re-pinned only on evidence: $6{,}329$ decisions replayed
+through binaries built at both ends, zero mismatches.
+
+None of that caught the bridge. What caught it was running a control that had
+no reason to be interesting.
+
+\section{What is open}
+
+Which piece of their state the bridge discards is only partly separated, and
+what I have went against the convenient reading. Their determinized search is
+the largest term I can name, and the one a fix could reach --- their reset
+re-seeds it. But sorting the divergences into disagreements about \emph{which}
+ask to make and disagreements about \emph{whether to declare at all} puts
+everything I can identify in the first, while the second --- the band that
+costs sets, since a declaration taken a turn early is a wrong one --- does not
+move at all. Two mechanisms I had believed in did not survive their source, and
+$13.92\%$ of decisions still differ with everything I found switched off. So
+the bridge cannot be repaired by re-seeding, and I do not yet know what the
+remainder is. The $+3.18$ price rests on $2{,}000$ pairings: an order of
+magnitude past its interval, but I would want more games before quoting it
+alone.
+
+I would be glad of any reaction, and particularly of the sharpest version of
+``that control only worked by luck.'' I think it did, and I do not yet know
+what to put in its place.
+
+\vspace{0.4em}
+\hrule
+\vspace{0.1em}
+
+{\small Report, code, pre-registrations and result artifacts:
+\url{https://github.com/kv1514/fish-researchp12}}
+
+\end{document}

@@ -273,6 +273,40 @@ often. The long tail is real though: a p90 of 55 actions means even good
 agents sometimes sit on a completed set, usually because they hold the cards
 but cannot yet prove *which teammate* holds what.
 
+### PROMISING - Being allowed to declare out of turn made one engine WORSE at it
+
+Measured on somebody else's engine rather than ours, which is both the reason
+it is only PROMISING and the reason it is worth recording: it is the one
+declaration finding here that is not about this codebase.
+
+Dylan's FishBot v0.7 (SESTINA v1.0) plays a dialect in which any seat may
+declare at any moment, and it uses the channel heavily -- about 3.3
+out-of-turn declarations a game. Its own arbiter takes a flag to switch the
+channel off. With everything else identical -- its policy, its arbiter, its
+deals, its opponent -- turning the channel off makes its declarations *more*
+accurate:
+
+| | out-of-turn/game | wrong declarations/game |
+|---|---|---|
+| with the channel | 3.28 | 0.1250 |
+| without it | 0.00 | **0.0729** |
+
+480 games a cell. Its own published dialect sweep agrees in direction, pricing
+`no-out-of-turn` at +0.52 points of its edge over its v0.6.
+
+The reading, offered as a hypothesis rather than a mechanism: the channel does
+not add information, it only adds *occasions*. A seat that becomes able to
+declare between its own turns can act on a belief that would have been better a
+few actions later, and under the award rule a wrong declaration hands the
+half-suit over. More chances to act on an unripe belief is not the same as more
+chances to score.
+
+Why it is not DEMONSTRATED: one engine, one policy, and no equivalent
+measurement on ours -- this project's dialect has no out-of-turn channel in its
+evaluated configuration, so the arm does not exist here to run. It would be a
+mistake to read it as "declaring out of turn is bad in Fish". What it does say
+is that a rule which looks like a pure addition of options is not one.
+
 ### DEMONSTRATED - Do not claim early. Claim confidence is effectively bimodal.
 
 A direct sweep of the claim-confidence threshold, 150 paired deals per cell,
