@@ -191,7 +191,11 @@ def is_bot_turn(doc: dict) -> bool:
     if doc.get("phase") != "playing":
         return False
     s = session_for(doc, 0)
-    if s.state.is_terminal:
+    # `over`, not `state.is_terminal`: a room game runs through the same
+    # Session and can cycle the same way, and `advance` stops at the action
+    # cap. Asking only about the cards would leave every client polling a
+    # table whose bots will never move again.
+    if s.over:
         return False
     return doc["seats"][s.state.turn]["kind"] == "bot"
 
@@ -210,7 +214,7 @@ def step_bot(doc: dict) -> int:
         return 0
     seat = int(doc["start_seat"])
     s = session_for(doc, seat)
-    if s.state.is_terminal or doc["seats"][s.state.turn]["kind"] != "bot":
+    if s.over or doc["seats"][s.state.turn]["kind"] != "bot":
         return 0
     played = s.advance(1)
     if not played:
@@ -226,7 +230,7 @@ def apply_action(doc: dict, seat: int, action) -> None:
     if doc.get("phase") != "playing":
         raise ValueError("that table has not started")
     s = session_for(doc, seat)
-    if s.state.is_terminal:
+    if s.over:
         raise ValueError("that game is over")
     if s.state.turn != seat:
         raise ValueError("not your turn")

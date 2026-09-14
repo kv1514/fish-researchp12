@@ -27,6 +27,7 @@ to be legal for both seats.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -35,6 +36,29 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+#: THE NONCE ALONE PINS NOTHING, and the fixture below was pinned by a nonce
+#: alone for a while. `api._engine.seed_from_nonce` is
+#: HMAC(FISH_SECRET, nonce), and with FISH_SECRET unset the key is
+#: `_EPHEMERAL_SECRET` -- `secrets.token_bytes(32)`, drawn fresh PER PROCESS.
+#: So "fixture-play-0" named a different deal in every pytest run, and the
+#: livelock this fixture exists to avoid was still reachable: the test was
+#: still a coin flip, only a differently-shaped one. Measured directly: the
+#: same fixture ran 115, 129, 202 and 103 actions in four separate processes.
+#:
+#: It was ALSO order-dependent, which is worse than random. tests4/
+#: test_web_security.py does `os.environ.setdefault("FISH_SECRET", ...)` at
+#: import, so whenever that module happened to be collected first the deal
+#: became stable -- and whenever it did not, it was not. A test whose
+#: determinism depends on collection order is a test that passes locally and
+#: fails in CI.
+#:
+#: Set unconditionally rather than with setdefault, for exactly that reason:
+#: this module needs ONE known key, not whichever key arrived first. The other
+#: two modules that touch FISH_SECRET both use setdefault and assert nothing
+#: about its value, so overriding them costs nothing.
+FIXTURE_SECRET = "fixture-secret-for-web-session-tests-0000"
+os.environ["FISH_SECRET"] = FIXTURE_SECRET
 
 from fish.cards import NUM_PLAYERS                              # noqa: E402
 from fish.rules import RuleConfig                                # noqa: E402
@@ -59,9 +83,18 @@ from api._engine import (CHAMPION_GAMMA, MAX_LOG, Session,      # noqa: E402
 #: defect, it is recorded as one, and it is not this test's job to find it.
 #:
 #: The nonces are the FIRST candidates of a fixed enumeration -- "fixture-
-#: <mode>-0", "-1", and so on -- and both index 0 terminate, so nothing was
-#: skipped and no deal was selected for its outcome.
+#: <mode>-0", "-1", and so on -- and both index 0 terminate under
+#: FIXTURE_SECRET, so nothing was skipped and no deal was selected for its
+#: outcome.
 FIXTURE_NONCE = {"spectate": "fixture-spectate-0", "play": "fixture-play-0"}
+
+#: What (FIXTURE_SECRET, nonce) actually deals, as a hand bitmask for seat 0.
+#: Recorded so the pin is self-checking: if the derivation ever changes, the
+#: fixture silently becomes a different game and every "this terminates"
+#: assumption above it becomes unfounded -- which is precisely the failure
+#: this file just had. test_the_fixture_deal_is_pinned is what notices.
+FIXTURE_SEAT0_HAND = {"spectate": 0xC99008009000,
+                      "play": 0xA807020008004}
 
 
 def _fixture(mode: str) -> Session:
@@ -71,6 +104,18 @@ def _fixture(mode: str) -> Session:
         return Session(-1, FIXTURE_NONCE[mode], rules, CHAMPION_GAMMA,
                        mode="spectate")
     return Session(0, FIXTURE_NONCE[mode], rules, CHAMPION_GAMMA)
+
+
+def test_the_fixture_deal_is_pinned():
+    """A fixture that is not actually fixed is worse than an unfixed one."""
+    for mode in ("spectate", "play"):
+        got = _fixture(mode).state.hands[0]
+        assert got == FIXTURE_SEAT0_HAND[mode], (
+            f"{mode} fixture deals seat 0 {got:#x}, not "
+            f"{FIXTURE_SEAT0_HAND[mode]:#x}. Either FISH_SECRET is not the "
+            f"one this module sets -- something else in the process changed "
+            f"it after import -- or seed_from_nonce changed. Either way the "
+            f"fixture is no longer the game it was checked on.")
 
 
 def test_the_human_is_on_the_move_at_the_deal():

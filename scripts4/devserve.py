@@ -7,6 +7,8 @@ live.
 """
 from __future__ import annotations
 
+import json
+import re
 import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -16,6 +18,46 @@ sys.path.insert(0, str(ROOT))
 from api.index import handler as ApiHandler  # noqa: E402
 
 PUBLIC = ROOT / "public"
+
+
+def _rewrites():
+    """vercel.json's rewrites, compiled, so this server cannot drift from it.
+
+    A hand-kept copy of the rules is the thing that goes wrong: `/paper.pdf`
+    is a rewrite to the function and nothing about the path says so, so a dev
+    server that only special-cases `/api/` serves a 404 for a link that works
+    in production -- or, worse, the reverse. Reading the real file means a
+    route added to vercel.json is live here with no edit at all.
+
+    Vercel's `source` is a path-to-regexp pattern. Only the two forms this
+    project uses are translated: a literal path, and a trailing `(.*)` capture.
+    Anything else raises rather than silently not matching.
+    """
+    out = []
+    cfg = json.loads((ROOT / "vercel.json").read_text())
+    for r in cfg.get("rewrites", []):
+        src = r["source"]
+        if "(" not in src:
+            out.append((re.compile(re.escape(src) + r"$"), r["destination"]))
+        elif src.endswith("(.*)"):
+            out.append((re.compile(re.escape(src[:-4]) + r"(.*)$"),
+                        r["destination"]))
+        else:
+            raise SystemExit(f"devserve cannot translate rewrite {src!r}")
+    return out
+
+
+REWRITES = _rewrites()
+
+
+def rewrite(path: str) -> str:
+    """The destination Vercel would route `path` to, or `path` unchanged."""
+    for pat, dest in REWRITES:
+        m = pat.match(path)
+        if m:
+            groups = m.groups()
+            return (dest.replace("$1", groups[0]) if groups else dest)
+    return path
 
 
 class Dev(SimpleHTTPRequestHandler):
@@ -60,11 +102,13 @@ class Dev(SimpleHTTPRequestHandler):
         return fn(self)
 
     def do_GET(self):
+        self.path = rewrite(self.path)
         if self.path.startswith("/api/"):
             return self._api("do_GET")
         return super().do_GET()
 
     def do_POST(self):
+        self.path = rewrite(self.path)
         if self.path.startswith("/api/"):
             return self._api("do_POST")
         self.send_error(405)

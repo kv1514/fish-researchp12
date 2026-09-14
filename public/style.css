@@ -16,6 +16,13 @@
   --ours: #1f6f4a;
   --theirs: #9a3b2f;
   --accent: #1b4f8f;
+  /* Ink for text sitting ON --accent. It is a token rather than a literal
+     #fff because the dark theme lightens the accent to stay legible against a
+     dark page -- and white on that lighter blue is about 2.3:1, which fails
+     WCAG AA for any text size. The two themes need opposite ink here. */
+  --on-accent: #ffffff;
+  /* Same problem on the team colours: --ours lightens in the dark theme. */
+  --on-team: #ffffff;
   --hit: #1f6f4a;
   --miss: #9a3b2f;
   --shadow: 0 1px 2px rgba(0,0,0,.10), 0 6px 18px rgba(0,0,0,.06);
@@ -38,6 +45,8 @@
     --ours: #4bbd85;
     --theirs: #e0705c;
     --accent: #74a8ea;
+    --on-accent: #10131a;
+    --on-team: #0f1512;
     --hit: #4bbd85;
     --miss: #e0705c;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
@@ -82,8 +91,31 @@ p { margin: 0 0 .75rem; }
 
 /* ------------------------------------------------------------------ start */
 
+/* The start screen carries its own bar. The table has `.bar`, which is a set
+   of CONTROLS for a game in progress; this is navigation, and the two must not
+   look like each other -- a visitor who has not started a game should not be
+   presented with a strip that reads like a game toolbar. */
+.topbar {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  padding: .7rem 1.25rem; border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.brandmark { font-size: .95rem; color: var(--dim); letter-spacing: .01em; }
+.brandmark b { color: var(--ink); font-weight: 650; }
+.toplink {
+  color: var(--ink); text-decoration: none; font-size: .9rem; font-weight: 600;
+  padding: .35rem .7rem; border: 1px solid var(--line); border-radius: 8px;
+  white-space: nowrap;
+}
+.toplink:hover { border-color: var(--accent); color: var(--accent); }
+.toplink.paper { border-color: var(--accent); color: var(--accent); }
+.toplink.paper:hover { background: var(--accent); color: var(--on-accent); }
+.toplink.paper:hover .pgs { color: var(--on-accent); opacity: .75; }
+.pgs { color: var(--dim); font-weight: 400; margin-left: .45rem;
+       font-size: .8rem; }
+
 .hero {
-  max-width: 62ch; margin: 0 auto; padding: 4rem 1.25rem 1.5rem;
+  max-width: 62ch; margin: 0 auto; padding: 2.6rem 1.25rem 1.5rem;
   text-align: center;
 }
 .tagline { font-size: 1.15rem; color: var(--ink); }
@@ -94,7 +126,12 @@ p { margin: 0 0 .75rem; }
   margin: 0 auto; padding: 0 1.25rem 2rem;
   grid-template-columns: 1fr;
 }
-@media (min-width: 820px) { .startgrid { grid-template-columns: 1fr 1fr; } }
+/* `align-items: start` so the shorter column hugs its content. Stretched, the
+   rules panel grew a third of a screen of empty card under the last line. */
+@media (min-width: 820px) {
+  .startgrid { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+.sub { font-size: .95rem; margin-top: 1.1rem; }
 
 .panel {
   background: var(--panel); border: 1px solid var(--line);
@@ -114,9 +151,10 @@ label:first-of-type { margin-top: 0; }
 .seg.wide button { flex: 1 1 45%; }
 .seg button:hover { border-color: var(--accent); }
 .seg button.on {
-  background: var(--accent); border-color: var(--accent); color: #fff;
+  background: var(--accent); border-color: var(--accent);
+  color: var(--on-accent);
 }
-.seg button.on .dim { color: rgba(255,255,255,.75); }
+.seg button.on .dim { color: var(--on-accent); opacity: .75; }
 
 button.primary, button.ghost, .btnrow button {
   font: inherit; cursor: pointer; border-radius: 10px;
@@ -124,7 +162,8 @@ button.primary, button.ghost, .btnrow button {
   background: var(--panel); color: var(--ink);
 }
 button.primary {
-  background: var(--accent); border-color: var(--accent); color: #fff;
+  background: var(--accent); border-color: var(--accent);
+  color: var(--on-accent);
   font-weight: 600; width: 100%; margin-top: 1rem;
 }
 button.primary:disabled { opacity: .45; cursor: not-allowed; }
@@ -134,8 +173,34 @@ button:hover:not(:disabled) { border-color: var(--accent); }
 .rules { margin: 0; padding-left: 1.1rem; font-size: .92rem; }
 .rules li { margin-bottom: .5rem; }
 
+/* The paper is the thing this site is evidence for, so it gets a strip of its
+   own rather than a line in the footer where nobody looks. */
+.paperstrip {
+  display: grid; gap: 1rem; align-items: center;
+  max-width: 62rem; margin: 0 auto 2rem; padding: 1.2rem 1.25rem;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+@media (min-width: 700px) {
+  .paperstrip {
+    grid-template-columns: 1fr auto;
+    margin: 0 1.25rem 2rem; padding: 1.35rem 1.5rem;
+  }
+}
+@media (min-width: 65.5rem) { .paperstrip { margin: 0 auto 2rem; } }
+.papertext p { margin: 0; font-size: .92rem; color: var(--dim); max-width: 62ch; }
+.paperbtn {
+  display: inline-block; text-align: center; text-decoration: none;
+  background: var(--accent); border: 1px solid var(--accent);
+  color: var(--on-accent);
+  font-weight: 600; border-radius: 10px; padding: .75rem 1.4rem;
+  white-space: nowrap;
+}
+.paperbtn:hover { filter: brightness(1.1); }
+
 .foot { text-align: center; padding: 0 1rem 3rem; font-size: .85rem; }
 .foot a { color: var(--dim); }
+.fsep { color: var(--line); margin: 0 .5rem; }
 
 /* ------------------------------------------------------------------ table */
 
@@ -218,7 +283,7 @@ button:hover:not(:disabled) { border-color: var(--accent); }
   border: 1px solid var(--line); border-radius: 4px; color: var(--dim);
 }
 .pips .pip.mine {
-  background: var(--ours); border-color: var(--ours); color: #fff;
+  background: var(--ours); border-color: var(--ours); color: var(--on-team);
 }
 .verdict { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
 .setrow.ours .verdict { color: var(--ours); }
@@ -304,7 +369,8 @@ button:hover:not(:disabled) { border-color: var(--accent); }
 }
 .postbar .seg {
   font-style: normal; font-size: .62rem; line-height: 1.15rem;
-  text-align: center; color: #fff; overflow: hidden; min-width: 0;
+  text-align: center; color: var(--on-team); overflow: hidden;
+  min-width: 0;
 }
 .postbar .seg.ours { background: var(--ours); }
 .postbar .seg.theirs { background: var(--theirs); }
@@ -343,7 +409,8 @@ button:hover:not(:disabled) { border-color: var(--accent); }
   border: 1px solid var(--line); background: var(--bg); color: var(--ink);
 }
 button.ghost.on {
-  background: var(--accent); border-color: var(--accent); color: #fff;
+  background: var(--accent); border-color: var(--accent);
+  color: var(--on-accent);
 }
 
 /* The move just played, sized to be read from across the room. This is what
@@ -951,7 +1018,7 @@ button.sm { padding: 5px 9px; font-size: 13px; }
 
 #t-voice.on {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 
