@@ -167,3 +167,97 @@ If the realised carry rate differs from the **40.1%** that
 `prereg/convention_duel.md` measured for this gate by more than 10 points, the
 duel population is not the one that table describes and the comparison is
 reported as such rather than read straight.
+
+---
+
+# OUTCOME, recorded 2026-09-16
+
+**Nothing ships. There is no v1.2, and the champion is unchanged.**
+
+600 pairings, 1,800 games at seed base 10,200,000
+(`results/p45_screen.json`), **zero fallbacks, zero unfinished**, so no
+withdrawal condition fires and the numbers are read as they stand.
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| F1 free-message | **−0.3067** [−0.607, −0.006] | **−0.8567** [−1.069, −0.645] | no |
+
+The pre-registered rule fires unambiguously: the bar wants +0.15 with the
+interval clear of zero in both populations, and both intervals are clear of
+zero on the **other side**. The confirm stage at 10,300,000 is not run, for the
+reason P44 did not run it for D1: the confirm exists to harden a clearing arm,
+not to re-establish a decisive negative at twice the compute.
+
+## The prediction was right about the verdict and wrong about the size
+
+This document predicted "a null in both populations … centred near zero … in
+the neighbourhood of the free read's −0.002 [−0.127, +0.123]". That is wrong.
+F1 is not a null; it is a **significant negative in both populations**, and in
+self-play it is nearly seven times the size of the free read's point estimate.
+
+Writing the prediction down is what makes that visible. The reasoning behind it
+— F1 is the free read plus 4.8 points of carry, so it should land near the free
+read — was sound and still produced the wrong number, which means the extra
+carry is not a small perturbation of the same channel. **Sending changes the
+game in a way that receiving does not**, and the free read's null does not
+bound it.
+
+## The dual population earned its place, in the direction nobody guarded for
+
+The registration added the SESTINA population because every convention duel to
+date had been self-play only, and said in advance: *"If F1 does clear, the thing
+to be suspicious of is the self-play arm, where our own seats share a code book
+and the opponent does not."*
+
+The opposite happened. **Self-play is where F1 loses most** — −0.8567 against
+−0.3067, a factor of 2.8 — so the population added as a check on optimism is
+the one that was optimistic. Had this been run self-play only, as every earlier
+convention duel was, the arm would have been rejected roughly three times
+harder than the engine's actual opponent justifies. The guard fired; it just
+fired the other way.
+
+## A free message is not free, and the objective is why
+
+F1 costs **nothing in the objective's own units by construction** — it swaps
+only when the agreed card ties the card already chosen — and it loses 0.86
+sets a game in self-play. Whatever it is paying, `scores` cannot see it.
+
+Offered as a hypothesis and not a finding, because nothing here separates them:
+the gate replaces a **random** tie-break with a **deterministic** one, and all
+three of our seats resolve ties the same way. The champion's uniform draw from
+the tied pool is not obviously a placeholder — it decorrelates three seats that
+share an objective — and the free-message gate removes it at every tie. That is
+a real change to the policy that the one-step score is structurally blind to,
+which is the same shape of error as the mis-priced gate this arm was written to
+avoid: a cost that is genuinely zero in the quantity being measured and
+non-zero in the game.
+
+## The ask hit rate goes up again, and loses again
+
+| arm | candidate ask hit | champion ask hit | vs SESTINA |
+|---|---:|---:|---:|
+| P44 D1 `dead_ask_threshold = 0.5` | 0.5245 | 0.5184 | −0.3233 |
+| **P45 F1 free-message** | **0.5287** | **0.5136** | **−0.3067** |
+
+Two arms, two registrations, two different channels — one filters asks by
+ownership, the other renames the card on a tie — and both **raise the ask hit
+rate by one to one and a half points and lose about a third of a set a game
+against SESTINA**. P44 concluded from one instance that "the ask hit rate is
+not a quantity to maximise, and the 1.95-point gap is not necessarily a gap to
+close." That was a single arm and could have been the arm. It has now
+replicated on an independent channel, an independent seed block and an
+independent registration, and it is the most durable finding either programme
+has produced.
+
+## What this closes
+
+The convention channel. `prereg/convention_duel.md` found the gate priced in
+the wrong currency and re-registered the free-message gate as the specification
+worth running; this is that run, and it loses. Together with the free read's
+null at 3,000 pairs, both halves of the channel are now measured in play:
+**receiving is worth nothing and sending costs, at every gate ever tried.**
+The 1.72 bits an ask remains a true fact about the rules and remains
+unrealisable by this engine.
+
+`V06_DEPLOYED` is byte-for-byte unchanged. KRAKEN v1.1 still loses to
+SESTINA v1.0 by −0.5250.
