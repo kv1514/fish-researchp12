@@ -4425,3 +4425,94 @@ method rather than about either engine.
 That the study's internal results move. Every A-vs-B contrast in this file
 holds the bridge fixed on both sides, so the bridge cancels. What the retraction
 touches is the one number that had nothing to cancel against.
+
+## CLOSED 2026-09-16: the ownership inference is not an estimator problem, and the declaration gate is not an ownership problem
+
+The paper's Left-open section reduces P43 and P44 to one number — the **0.3120**
+in `results/ask_deadness_signal.json`, the mean probability our belief assigns
+to a half-suit that is genuinely, entirely ours — and says no registration has
+attacked it and that we do not nominate a candidate. This closes it, with a
+measurement rather than an arm. `scripts4/ownership_estimators.py`,
+`results/ownership_estimators.json`: 500 deals × 2 parities at seed base
+**10,000,000**, `BRIDGE_REV 3`, 178,354 half-suit cells over 41,512 decisions,
+base rate entirely-ours 0.1152.
+
+### There are three estimators of that event and nobody had compared them
+
+A half-suit admits no landable ask exactly when our own team holds all six, so
+"dead" and "entirely ours" are the same event. This repository estimates it
+three different ways, and the published 0.3120 is **not** the one the engine
+gates on:
+
+| | what it is | who reads it | mean when genuinely ours | AUC | Brier |
+|---|---|---|---:|---:|---:|
+| (a) product | `prod(sum of team marginals)`, `fish4/askfeat.py` | D1's `dead_ask_threshold` | **0.4035** | **0.9704** | **0.0525** |
+| (b) uniform joint | MC over the constraint-feasible set, unweighted | `ask_deadness_signal.py` | 0.3230 | 0.9549 | 0.0639 |
+| (c) weighted joint | `Posterior.prob_all_with`, weighted/exact | nothing shipped | 0.3523 | 0.9641 | 0.0592 |
+
+(b) reproduces the published 0.3120 at **0.3230** on an independent deal block,
+which is the check that makes the other two rows comparable rather than merely
+adjacent.
+
+**The sharpest available estimator is the worst of the three at this job.**
+Paired and clustered by decision, (c) − (a) = **−0.0512 [−0.0517, −0.0506]**.
+That is not a defect in `prob_all_with`: the six cards of a half-suit compete
+for the same quota slots, so their team-membership events are *negatively*
+correlated, the independence product is therefore an over-estimate of the true
+joint, and over-estimating is rewarded by any score that only asks how high you
+go on positives. The product is over-confident and beats the correct object
+because the metric pays for over-confidence.
+
+**None of it matters for the gate**: all three cross 0.99 on **4.17%** of
+genuinely-owned half-suits. Reading a different number cannot rescue D2.
+
+### And the gate was never starved by ownership in the first place
+
+`claim4.unprompted_claim`'s second disjunct fires on
+`p_team >= owned_p_team` **and** `p_exact >= owned_threshold`. P44 set the
+exactness knob to 0.77 from a break-even, left ownership at 0.99, measured
+0.235 declarations a game against a 0.250 futility bar, and concluded the arm
+was starved because we do not know we own the set. Sweeping the **other** knob,
+on the quantity the gate really reads (a mixture: the product when tier 2
+screens, the weighted joint when tier 3 runs), holding P44's registered 0.77
+exactness and excluding declarations the champion already makes:
+
+| `owned_p_team` | flagged | precision | new declarations/game |
+|---:|---:|---:|---:|
+| 0.99 (P44's) | 14 | 1.0000 | 0.0140 |
+| 0.90 | 37 | 0.9730 | 0.0370 |
+| 0.85 | 60 | 0.9667 | 0.0600 |
+| **0.77 down to 0.20** | **103** | **0.9223** | **0.1030** |
+
+**Flat below 0.77.** Relaxing the ownership test all the way to "more likely
+than not it is *not* ours" buys 0.1030 new declarations a game — **under half
+the 0.250 futility bar P44 fixed in advance**, and the bar is not widened. The
+binding constraint is not ownership. It is the exactness band: we are almost
+never 77–97% sure of an exact split. Either we are at 0.97 and already
+declaring, or we are far below 0.77.
+
+So P44's recorded explanation — "we sit on completed half-suits because we do
+not know we own them" — is **half right and points the wrong way**. We do
+often fail to know we own them, and that is real; but supplying the knowledge
+does not open the gate, because the split is what the gate is actually waiting
+on. The declarations the relaxed gate would add are good ones (precision
+0.9223, a naive +0.0870 sets a game on the declarations alone), and there are
+too few of them to reach a duel at any threshold.
+
+### What this rules out, and what it leaves
+
+Ruled out, without a registration and without a duel game: **swapping the
+ownership estimator** (all three are equivalent at the gate) and
+**recalibrating the ownership cut** (flat, and 2.4× under the futility bar).
+Two candidate arms stopped for ~25 minutes of compute instead of two
+registrations and roughly 7,000 pairings.
+
+Left standing, and now the only lever the measurement points at: the **split**.
+0.1676 of our 0.1759 wrong declarations a game are allocation class — we held
+all six and named the wrong split — and the exactness band being empty is the
+same fact seen from the gate's side. The engine's one mechanism aimed at it,
+the locating convention, clears its information gate (teammate top-1
+**+0.0408**, `prereg/convention_locate.md`) and is **off in the champion**
+because `prereg/convention_duel.md` dueled it and lost +1.750 to a
+mis-specified gate. That is where a P45 would have to go, and it is a
+convention problem rather than an inference one. No arm is nominated here.
