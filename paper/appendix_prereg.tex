@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-four documents in \path{prereg/}
+no registered threshold anywhere. The forty-five documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -27,7 +27,7 @@ non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the four written after
 this appendix was first compiled (P39--P42) appended at the end, in filename
 order among themselves, so that the identifiers already cited in the text keep
-their referents. Twelve of the forty-four have \emph{no outcome recorded in the
+their referents. Twelve of the forty-five have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -732,16 +732,47 @@ necessarily a gap to close. \path{results/p44_futility.json},
 \path{results/p44_screen.json} &
 \S\ref{sec:askdeficit} \\
 
+P45 & \path{kraken_v12_free_message.md} \newline
+\emph{The convention's gate was priced in the wrong currency --- does the
+channel win once the price is right?} &
+Same dual-population bar as P43 and P44. One arm, F1, the \textbf{free-message}
+gate: \texttt{convention\_max\_cost} $=10^{-9}$ in the \emph{re-priced}
+objective units, so the agreed card is named only when it \emph{ties} the card
+the objective already chose and the message costs nothing in the currency the
+old gate mis-read --- a median $0.3596$ objective units out of a range of
+$1.5$. Book \texttt{locate}, $q=0.5$, neither swept. The decoder half is not
+re-run: the free read settled it at $3{,}000$ pairs, $-0.002$ $[-0.127,
++0.123]$. Futility screen fixed first --- the arm must raise the carry rate by
+$2$ points over the champion on the same deals, seed base
+\textbf{10,150,000}; screen $300\times2$ at \textbf{10,200,000}. &
+A null in both populations, near the free read's, because F1 is that same
+channel plus $4.8$ points of carry. Stated as \emph{not expected to clear}. &
+\textbf{NOTHING SHIPS.} The screen passed at $+5.80\%$ carry gain, arm carry
+$39.5\%$ against the $40.1\%$ the earlier document predicts for this gate. The
+duel then returned a significant \textbf{negative} in \emph{both} populations,
+$-0.3067$ $[-0.607, -0.006]$ against SESTINA and $-0.8567$ $[-1.069, -0.645]$
+in self-play, so the confirm stage was not paid for. \textbf{The prediction was
+wrong about the size}: sending changes the game in a way receiving does not,
+and the free read's null does not bound it. Self-play is where F1 loses
+\emph{most}, the opposite of the opponent-specific shape the dual population
+was added to catch. A gate costing nothing in the objective's own units costs
+$0.86$ sets a game --- it replaces a \emph{random} tie-break with a
+\emph{deterministic} one, and the uniform draw it removes is what decorrelates
+three seats sharing an objective. And the ask hit rate rose again, $0.5287$
+against $0.5136$, \textbf{replicating P44's finding on an independent channel}.
+\path{results/p45_futility.json}, \path{results/p45_screen.json} &
+\S\ref{sec:askdeficit} \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-four resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-five resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
 \textbf{refuted} on a registered condition (P1, P4, P7, P10, P23, P28, P32,
-P36). Five returned an explicit null, an explicit \textsc{split}, or an
-explicit ``not settled'' (P8, P13, P24, P27, P35, P43, P44). Four were closed
+P36). Eight returned an explicit null, an explicit \textsc{split}, or an
+explicit ``not settled'' (P8, P13, P24, P27, P35, P43, P44, P45). Four were closed
 by a screen or by proof before the registered duel was paid for, saving roughly
 $9{,}000$ duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's
 D2, inside a registration already counted above. One was a set of graded predictions
@@ -763,7 +794,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-four --- P20 --- shipped, and it is the
+\noindent Exactly one of the forty-five --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
