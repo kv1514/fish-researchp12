@@ -1,0 +1,827 @@
+{
+ "question": "which piece of their per-decision state does our stateless bridge throw away",
+ "design": "the parity measurement at four corners of (s1, rtie), each arm internally paired on its own game; arms share deal seeds only, not decisions",
+ "scope": "attributes the DIVERGENCE, not the price; the +3.14 sets/game was measured at the frozen release and no strength number is taken at an ablated spec",
+ "frozen_spec": "v07:rtie=1,pool=-1,oppfloor=-1,force=1000000,askfloor=-1,stall=12,s1=1,det=12,cand=4,kappa=2.5,rbelief=indep,depth=12,maxq=26,allparams=11.26561|4.18288|3.05733|3.80008|4.35318|6.42340|1.36441|-0.38185|-0.81545|-6.24532|-2.62967|1.49745|3.12582|3.96890|1.06205|-1.62528|4.04349|1.01429|1.21342|-0.79873|0.84218|0.76534|0.26573|4.77343|2.99879|7.12192|0.78874|0.84929|-0.02068|0.37062|0.14525|5.89200|3.27319|3.76581|0.17133|-0.47667|-0.77680|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|25.00000|0.00000|0.00000|0.00000|0.00000|0.00000",
+ "games_per_arm": 16,
+ "arms": {
+  "s1=1,rtie=1": {
+   "arm": "s1=1,rtie=1",
+   "spec": "v07:rtie=1,pool=-1,oppfloor=-1,force=1000000,askfloor=-1,stall=12,s1=1,det=12,cand=4,kappa=2.5,rbelief=indep,depth=12,maxq=26,allparams=11.26561|4.18288|3.05733|3.80008|4.35318|6.42340|1.36441|-0.38185|-0.81545|-6.24532|-2.62967|1.49745|3.12582|3.96890|1.06205|-1.62528|4.04349|1.01429|1.21342|-0.79873|0.84218|0.76534|0.26573|4.77343|2.99879|7.12192|0.78874|0.84929|-0.02068|0.37062|0.14525|5.89200|3.27319|3.76581|0.17133|-0.47667|-0.77680|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|25.00000|0.00000|0.00000|0.00000|0.00000|0.00000",
+   "games": 16,
+   "decisions": 795,
+   "divergent": 187,
+   "divergence_rate": 0.23522012578616353,
+   "kind_changes": {
+    "ASK->ASK": 164,
+    "DECL->ASK": 17,
+    "ASK->DECL": 4,
+    "DECL->DECL": 2
+   },
+   "per_game": [
+    {
+     "deal": 7400000,
+     "kv_even": true,
+     "decisions": 49,
+     "divergent": 12,
+     "first_divergence": 8
+    },
+    {
+     "deal": 7400000,
+     "kv_even": false,
+     "decisions": 47,
+     "divergent": 8,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400001,
+     "kv_even": true,
+     "decisions": 55,
+     "divergent": 22,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400001,
+     "kv_even": false,
+     "decisions": 47,
+     "divergent": 15,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400002,
+     "kv_even": true,
+     "decisions": 50,
+     "divergent": 13,
+     "first_divergence": 12
+    },
+    {
+     "deal": 7400002,
+     "kv_even": false,
+     "decisions": 48,
+     "divergent": 14,
+     "first_divergence": 21
+    },
+    {
+     "deal": 7400003,
+     "kv_even": true,
+     "decisions": 40,
+     "divergent": 9,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400003,
+     "kv_even": false,
+     "decisions": 52,
+     "divergent": 12,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400004,
+     "kv_even": true,
+     "decisions": 49,
+     "divergent": 13,
+     "first_divergence": 5
+    },
+    {
+     "deal": 7400004,
+     "kv_even": false,
+     "decisions": 41,
+     "divergent": 9,
+     "first_divergence": 18
+    },
+    {
+     "deal": 7400005,
+     "kv_even": true,
+     "decisions": 31,
+     "divergent": 7,
+     "first_divergence": 10
+    },
+    {
+     "deal": 7400005,
+     "kv_even": false,
+     "decisions": 56,
+     "divergent": 9,
+     "first_divergence": 19
+    },
+    {
+     "deal": 7400006,
+     "kv_even": true,
+     "decisions": 60,
+     "divergent": 19,
+     "first_divergence": 4
+    },
+    {
+     "deal": 7400006,
+     "kv_even": false,
+     "decisions": 52,
+     "divergent": 6,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400007,
+     "kv_even": true,
+     "decisions": 60,
+     "divergent": 6,
+     "first_divergence": 28
+    },
+    {
+     "deal": 7400007,
+     "kv_even": false,
+     "decisions": 58,
+     "divergent": 13,
+     "first_divergence": 3
+    }
+   ],
+   "why": "the frozen release, for the baseline rate"
+  },
+  "s1=0,rtie=1": {
+   "arm": "s1=0,rtie=1",
+   "spec": "v07:rtie=1,pool=-1,oppfloor=-1,force=1000000,askfloor=-1,stall=12,s1=0,det=12,cand=4,kappa=2.5,rbelief=indep,depth=12,maxq=26,allparams=11.26561|4.18288|3.05733|3.80008|4.35318|6.42340|1.36441|-0.38185|-0.81545|-6.24532|-2.62967|1.49745|3.12582|3.96890|1.06205|-1.62528|4.04349|1.01429|1.21342|-0.79873|0.84218|0.76534|0.26573|4.77343|2.99879|7.12192|0.78874|0.84929|-0.02068|0.37062|0.14525|5.89200|3.27319|3.76581|0.17133|-0.47667|-0.77680|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|25.00000|0.00000|0.00000|0.00000|0.00000|0.00000",
+   "games": 16,
+   "decisions": 813,
+   "divergent": 135,
+   "divergence_rate": 0.16605166051660517,
+   "kind_changes": {
+    "ASK->ASK": 110,
+    "DECL->ASK": 16,
+    "DECL->DECL": 3,
+    "ASK->DECL": 6
+   },
+   "per_game": [
+    {
+     "deal": 7400000,
+     "kv_even": true,
+     "decisions": 55,
+     "divergent": 10,
+     "first_divergence": 8
+    },
+    {
+     "deal": 7400000,
+     "kv_even": false,
+     "decisions": 55,
+     "divergent": 4,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400001,
+     "kv_even": true,
+     "decisions": 51,
+     "divergent": 7,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400001,
+     "kv_even": false,
+     "decisions": 43,
+     "divergent": 8,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400002,
+     "kv_even": true,
+     "decisions": 45,
+     "divergent": 9,
+     "first_divergence": 12
+    },
+    {
+     "deal": 7400002,
+     "kv_even": false,
+     "decisions": 54,
+     "divergent": 9,
+     "first_divergence": 21
+    },
+    {
+     "deal": 7400003,
+     "kv_even": true,
+     "decisions": 52,
+     "divergent": 7,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400003,
+     "kv_even": false,
+     "decisions": 63,
+     "divergent": 13,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400004,
+     "kv_even": true,
+     "decisions": 40,
+     "divergent": 7,
+     "first_divergence": 5
+    },
+    {
+     "deal": 7400004,
+     "kv_even": false,
+     "decisions": 53,
+     "divergent": 9,
+     "first_divergence": 18
+    },
+    {
+     "deal": 7400005,
+     "kv_even": true,
+     "decisions": 33,
+     "divergent": 6,
+     "first_divergence": 10
+    },
+    {
+     "deal": 7400005,
+     "kv_even": false,
+     "decisions": 46,
+     "divergent": 3,
+     "first_divergence": 19
+    },
+    {
+     "deal": 7400006,
+     "kv_even": true,
+     "decisions": 64,
+     "divergent": 14,
+     "first_divergence": 4
+    },
+    {
+     "deal": 7400006,
+     "kv_even": false,
+     "decisions": 46,
+     "divergent": 9,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400007,
+     "kv_even": true,
+     "decisions": 53,
+     "divergent": 9,
+     "first_divergence": 28
+    },
+    {
+     "deal": 7400007,
+     "kv_even": false,
+     "decisions": 60,
+     "divergent": 11,
+     "first_divergence": 3
+    }
+   ],
+   "why": "determinized search off"
+  },
+  "s1=1,rtie=0": {
+   "arm": "s1=1,rtie=0",
+   "spec": "v07:rtie=0,pool=-1,oppfloor=-1,force=1000000,askfloor=-1,stall=12,s1=1,det=12,cand=4,kappa=2.5,rbelief=indep,depth=12,maxq=26,allparams=11.26561|4.18288|3.05733|3.80008|4.35318|6.42340|1.36441|-0.38185|-0.81545|-6.24532|-2.62967|1.49745|3.12582|3.96890|1.06205|-1.62528|4.04349|1.01429|1.21342|-0.79873|0.84218|0.76534|0.26573|4.77343|2.99879|7.12192|0.78874|0.84929|-0.02068|0.37062|0.14525|5.89200|3.27319|3.76581|0.17133|-0.47667|-0.77680|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|25.00000|0.00000|0.00000|0.00000|0.00000|0.00000",
+   "games": 16,
+   "decisions": 862,
+   "divergent": 241,
+   "divergence_rate": 0.27958236658932717,
+   "kind_changes": {
+    "ASK->ASK": 212,
+    "DECL->ASK": 20,
+    "ASK->DECL": 8,
+    "PASS->PASS": 1
+   },
+   "per_game": [
+    {
+     "deal": 7400000,
+     "kv_even": true,
+     "decisions": 56,
+     "divergent": 17,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400000,
+     "kv_even": false,
+     "decisions": 49,
+     "divergent": 11,
+     "first_divergence": 15
+    },
+    {
+     "deal": 7400001,
+     "kv_even": true,
+     "decisions": 37,
+     "divergent": 8,
+     "first_divergence": 7
+    },
+    {
+     "deal": 7400001,
+     "kv_even": false,
+     "decisions": 96,
+     "divergent": 47,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400002,
+     "kv_even": true,
+     "decisions": 51,
+     "divergent": 18,
+     "first_divergence": 10
+    },
+    {
+     "deal": 7400002,
+     "kv_even": false,
+     "decisions": 46,
+     "divergent": 10,
+     "first_divergence": 30
+    },
+    {
+     "deal": 7400003,
+     "kv_even": true,
+     "decisions": 51,
+     "divergent": 9,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400003,
+     "kv_even": false,
+     "decisions": 52,
+     "divergent": 14,
+     "first_divergence": 13
+    },
+    {
+     "deal": 7400004,
+     "kv_even": true,
+     "decisions": 46,
+     "divergent": 14,
+     "first_divergence": 14
+    },
+    {
+     "deal": 7400004,
+     "kv_even": false,
+     "decisions": 63,
+     "divergent": 11,
+     "first_divergence": 4
+    },
+    {
+     "deal": 7400005,
+     "kv_even": true,
+     "decisions": 57,
+     "divergent": 7,
+     "first_divergence": 21
+    },
+    {
+     "deal": 7400005,
+     "kv_even": false,
+     "decisions": 44,
+     "divergent": 10,
+     "first_divergence": 13
+    },
+    {
+     "deal": 7400006,
+     "kv_even": true,
+     "decisions": 56,
+     "divergent": 14,
+     "first_divergence": 14
+    },
+    {
+     "deal": 7400006,
+     "kv_even": false,
+     "decisions": 50,
+     "divergent": 18,
+     "first_divergence": 5
+    },
+    {
+     "deal": 7400007,
+     "kv_even": true,
+     "decisions": 53,
+     "divergent": 14,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400007,
+     "kv_even": false,
+     "decisions": 55,
+     "divergent": 19,
+     "first_divergence": 5
+    }
+   ],
+   "why": "random tie-breaking off"
+  },
+  "s1=0,rtie=0": {
+   "arm": "s1=0,rtie=0",
+   "spec": "v07:rtie=0,pool=-1,oppfloor=-1,force=1000000,askfloor=-1,stall=12,s1=0,det=12,cand=4,kappa=2.5,rbelief=indep,depth=12,maxq=26,allparams=11.26561|4.18288|3.05733|3.80008|4.35318|6.42340|1.36441|-0.38185|-0.81545|-6.24532|-2.62967|1.49745|3.12582|3.96890|1.06205|-1.62528|4.04349|1.01429|1.21342|-0.79873|0.84218|0.76534|0.26573|4.77343|2.99879|7.12192|0.78874|0.84929|-0.02068|0.37062|0.14525|5.89200|3.27319|3.76581|0.17133|-0.47667|-0.77680|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|25.00000|0.00000|0.00000|0.00000|0.00000|0.00000",
+   "games": 16,
+   "decisions": 862,
+   "divergent": 136,
+   "divergence_rate": 0.15777262180974477,
+   "kind_changes": {
+    "ASK->ASK": 100,
+    "DECL->ASK": 23,
+    "ASK->DECL": 13
+   },
+   "per_game": [
+    {
+     "deal": 7400000,
+     "kv_even": true,
+     "decisions": 59,
+     "divergent": 11,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400000,
+     "kv_even": false,
+     "decisions": 55,
+     "divergent": 8,
+     "first_divergence": 15
+    },
+    {
+     "deal": 7400001,
+     "kv_even": true,
+     "decisions": 40,
+     "divergent": 4,
+     "first_divergence": 7
+    },
+    {
+     "deal": 7400001,
+     "kv_even": false,
+     "decisions": 54,
+     "divergent": 6,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400002,
+     "kv_even": true,
+     "decisions": 44,
+     "divergent": 6,
+     "first_divergence": 10
+    },
+    {
+     "deal": 7400002,
+     "kv_even": false,
+     "decisions": 50,
+     "divergent": 9,
+     "first_divergence": 34
+    },
+    {
+     "deal": 7400003,
+     "kv_even": true,
+     "decisions": 51,
+     "divergent": 6,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400003,
+     "kv_even": false,
+     "decisions": 43,
+     "divergent": 8,
+     "first_divergence": 13
+    },
+    {
+     "deal": 7400004,
+     "kv_even": true,
+     "decisions": 50,
+     "divergent": 10,
+     "first_divergence": 14
+    },
+    {
+     "deal": 7400004,
+     "kv_even": false,
+     "decisions": 62,
+     "divergent": 9,
+     "first_divergence": 4
+    },
+    {
+     "deal": 7400005,
+     "kv_even": true,
+     "decisions": 53,
+     "divergent": 5,
+     "first_divergence": 21
+    },
+    {
+     "deal": 7400005,
+     "kv_even": false,
+     "decisions": 51,
+     "divergent": 6,
+     "first_divergence": 13
+    },
+    {
+     "deal": 7400006,
+     "kv_even": true,
+     "decisions": 66,
+     "divergent": 6,
+     "first_divergence": 14
+    },
+    {
+     "deal": 7400006,
+     "kv_even": false,
+     "decisions": 56,
+     "divergent": 12,
+     "first_divergence": 5
+    },
+    {
+     "deal": 7400007,
+     "kv_even": true,
+     "decisions": 63,
+     "divergent": 13,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400007,
+     "kv_even": false,
+     "decisions": 65,
+     "divergent": 17,
+     "first_divergence": 5
+    }
+   ],
+   "why": "both RNG consumers off"
+  },
+  "+w12=0": {
+   "arm": "+w12=0",
+   "spec": "v07:rtie=0,pool=-1,oppfloor=-1,force=1000000,askfloor=-1,stall=12,s1=0,det=12,cand=4,kappa=2.5,rbelief=indep,depth=12,maxq=26,w12=0,allparams=11.26561|4.18288|3.05733|3.80008|4.35318|6.42340|1.36441|-0.38185|-0.81545|-6.24532|-2.62967|1.49745|3.12582|3.96890|1.06205|-1.62528|4.04349|1.01429|1.21342|-0.79873|0.84218|0.76534|0.26573|4.77343|2.99879|7.12192|0.78874|0.84929|-0.02068|0.37062|0.14525|5.89200|3.27319|3.76581|0.17133|-0.47667|-0.77680|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|25.00000|0.00000|0.00000|0.00000|0.00000|0.00000",
+   "games": 16,
+   "decisions": 862,
+   "divergent": 120,
+   "divergence_rate": 0.13921113689095127,
+   "kind_changes": {
+    "ASK->ASK": 84,
+    "DECL->ASK": 23,
+    "ASK->DECL": 13
+   },
+   "per_game": [
+    {
+     "deal": 7400000,
+     "kv_even": true,
+     "decisions": 59,
+     "divergent": 11,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400000,
+     "kv_even": false,
+     "decisions": 55,
+     "divergent": 7,
+     "first_divergence": 15
+    },
+    {
+     "deal": 7400001,
+     "kv_even": true,
+     "decisions": 40,
+     "divergent": 4,
+     "first_divergence": 7
+    },
+    {
+     "deal": 7400001,
+     "kv_even": false,
+     "decisions": 54,
+     "divergent": 6,
+     "first_divergence": 22
+    },
+    {
+     "deal": 7400002,
+     "kv_even": true,
+     "decisions": 44,
+     "divergent": 6,
+     "first_divergence": 10
+    },
+    {
+     "deal": 7400002,
+     "kv_even": false,
+     "decisions": 50,
+     "divergent": 7,
+     "first_divergence": 38
+    },
+    {
+     "deal": 7400003,
+     "kv_even": true,
+     "decisions": 51,
+     "divergent": 6,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400003,
+     "kv_even": false,
+     "decisions": 43,
+     "divergent": 7,
+     "first_divergence": 14
+    },
+    {
+     "deal": 7400004,
+     "kv_even": true,
+     "decisions": 50,
+     "divergent": 8,
+     "first_divergence": 14
+    },
+    {
+     "deal": 7400004,
+     "kv_even": false,
+     "decisions": 62,
+     "divergent": 7,
+     "first_divergence": 4
+    },
+    {
+     "deal": 7400005,
+     "kv_even": true,
+     "decisions": 53,
+     "divergent": 5,
+     "first_divergence": 11
+    },
+    {
+     "deal": 7400005,
+     "kv_even": false,
+     "decisions": 51,
+     "divergent": 6,
+     "first_divergence": 13
+    },
+    {
+     "deal": 7400006,
+     "kv_even": true,
+     "decisions": 66,
+     "divergent": 5,
+     "first_divergence": 14
+    },
+    {
+     "deal": 7400006,
+     "kv_even": false,
+     "decisions": 56,
+     "divergent": 11,
+     "first_divergence": 5
+    },
+    {
+     "deal": 7400007,
+     "kv_even": true,
+     "decisions": 63,
+     "divergent": 10,
+     "first_divergence": 3
+    },
+    {
+     "deal": 7400007,
+     "kv_even": false,
+     "decisions": 65,
+     "divergent": 14,
+     "first_divergence": 11
+    }
+   ],
+   "why": "and their 'same half-suit as my last ask' feature neutralised"
+  },
+  "w12=0 only": {
+   "arm": "w12=0 only",
+   "spec": "v07:rtie=1,pool=-1,oppfloor=-1,force=1000000,askfloor=-1,stall=12,s1=1,det=12,cand=4,kappa=2.5,rbelief=indep,depth=12,maxq=26,w12=0,allparams=11.26561|4.18288|3.05733|3.80008|4.35318|6.42340|1.36441|-0.38185|-0.81545|-6.24532|-2.62967|1.49745|3.12582|3.96890|1.06205|-1.62528|4.04349|1.01429|1.21342|-0.79873|0.84218|0.76534|0.26573|4.77343|2.99879|7.12192|0.78874|0.84929|-0.02068|0.37062|0.14525|5.89200|3.27319|3.76581|0.17133|-0.47667|-0.77680|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|0.00000|25.00000|0.00000|0.00000|0.00000|0.00000|0.00000",
+   "games": 16,
+   "decisions": 795,
+   "divergent": 167,
+   "divergence_rate": 0.21006289308176102,
+   "kind_changes": {
+    "ASK->ASK": 144,
+    "DECL->ASK": 17,
+    "ASK->DECL": 4,
+    "DECL->DECL": 2
+   },
+   "per_game": [
+    {
+     "deal": 7400000,
+     "kv_even": true,
+     "decisions": 49,
+     "divergent": 9,
+     "first_divergence": 8
+    },
+    {
+     "deal": 7400000,
+     "kv_even": false,
+     "decisions": 47,
+     "divergent": 8,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400001,
+     "kv_even": true,
+     "decisions": 55,
+     "divergent": 19,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400001,
+     "kv_even": false,
+     "decisions": 47,
+     "divergent": 14,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400002,
+     "kv_even": true,
+     "decisions": 50,
+     "divergent": 13,
+     "first_divergence": 12
+    },
+    {
+     "deal": 7400002,
+     "kv_even": false,
+     "decisions": 48,
+     "divergent": 12,
+     "first_divergence": 24
+    },
+    {
+     "deal": 7400003,
+     "kv_even": true,
+     "decisions": 40,
+     "divergent": 7,
+     "first_divergence": 11
+    },
+    {
+     "deal": 7400003,
+     "kv_even": false,
+     "decisions": 52,
+     "divergent": 12,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400004,
+     "kv_even": true,
+     "decisions": 49,
+     "divergent": 12,
+     "first_divergence": 5
+    },
+    {
+     "deal": 7400004,
+     "kv_even": false,
+     "decisions": 41,
+     "divergent": 9,
+     "first_divergence": 18
+    },
+    {
+     "deal": 7400005,
+     "kv_even": true,
+     "decisions": 31,
+     "divergent": 6,
+     "first_divergence": 10
+    },
+    {
+     "deal": 7400005,
+     "kv_even": false,
+     "decisions": 56,
+     "divergent": 8,
+     "first_divergence": 24
+    },
+    {
+     "deal": 7400006,
+     "kv_even": true,
+     "decisions": 60,
+     "divergent": 18,
+     "first_divergence": 4
+    },
+    {
+     "deal": 7400006,
+     "kv_even": false,
+     "decisions": 52,
+     "divergent": 4,
+     "first_divergence": 6
+    },
+    {
+     "deal": 7400007,
+     "kv_even": true,
+     "decisions": 60,
+     "divergent": 6,
+     "first_divergence": 28
+    },
+    {
+     "deal": 7400007,
+     "kv_even": false,
+     "decisions": 58,
+     "divergent": 10,
+     "first_divergence": 3
+    }
+   ],
+   "why": "that feature neutralised at the release configuration"
+  }
+ },
+ "bands": {
+  "s1=1,rtie=1": {
+   "ask_ordering": 164,
+   "ask_ordering_rate": 0.20628930817610064,
+   "declaration_gate": 21,
+   "declaration_gate_rate": 0.026415094339622643,
+   "other": 2
+  },
+  "s1=0,rtie=1": {
+   "ask_ordering": 110,
+   "ask_ordering_rate": 0.13530135301353013,
+   "declaration_gate": 22,
+   "declaration_gate_rate": 0.02706027060270603,
+   "other": 3
+  },
+  "s1=1,rtie=0": {
+   "ask_ordering": 212,
+   "ask_ordering_rate": 0.2459396751740139,
+   "declaration_gate": 28,
+   "declaration_gate_rate": 0.03248259860788863,
+   "other": 1
+  },
+  "s1=0,rtie=0": {
+   "ask_ordering": 100,
+   "ask_ordering_rate": 0.11600928074245939,
+   "declaration_gate": 36,
+   "declaration_gate_rate": 0.04176334106728538,
+   "other": 0
+  },
+  "+w12=0": {
+   "ask_ordering": 84,
+   "ask_ordering_rate": 0.09744779582366589,
+   "declaration_gate": 36,
+   "declaration_gate_rate": 0.04176334106728538,
+   "other": 0
+  },
+  "w12=0 only": {
+   "ask_ordering": 144,
+   "ask_ordering_rate": 0.1811320754716981,
+   "declaration_gate": 21,
+   "declaration_gate_rate": 0.026415094339622643,
+   "other": 2
+  }
+ },
+ "verdict": "PARTLY ATTRIBUTED, AND THE TWO BANDS DIFFER. Overall 23.52% at the release, 13.92% with everything testable switched off. ASK ORDERING falls 20.63% -> 9.74%: their determinized search carries most of it, which is expected -- `V06Agent::resetV6` re-seeds `srng` from the agent seed, so a fresh process per decision draws the same determinizations every turn where their arbiter's stream advances. DECLARATION GATE barely moves, 2.64% -> 4.18%, and it is the band that costs sets. Their tie-breaking contributes nothing (27.96% with it off, against 23.52%), and their own code says why: at rtie=1 the tie RNG is CONSTRUCTED per decision from the public hash and the event count, so it is replayable by construction and only rtie=2 would not be. Ruled out by reading rather than by an arm: their belief consumes no RNG in the released `Fast` mode and `sinkhornDisj` re-initialises from the Knowledge rather than warm-starting; `deadAsk`, `deadInSearch` and `dead7` are all off in the frozen spec, so the dead-ask memory is inert. WHAT THIS MEANS FOR A FIX: the search term would yield to a per-decision seed derived from the event count, but the declaration band would not, and no re-seeding reaches it. A stateless bridge cannot be made honest against this engine by seeding alone (baseline 23.52%, search off 16.61%, ties off 27.96%, both off 15.78%, and their lastMySet feature off too 13.92%).",
+ "seconds": 157.0
+}

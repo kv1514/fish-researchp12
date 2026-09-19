@@ -123,20 +123,64 @@ deployed policy's endgame exploitability at $+0.4405$ over $305$ positions with
 one half-suit live, against a deterministic realisation of a policy that
 mixes. Under the corrected misdeclaration rule (the engine scored it wrongly
 for five versions), the deployed configuration beats the v0.3 champion by
-$\mathbf{+2.412}$ $[+2.088, +2.736]$ sets per pair and an independently
-developed C++ engine \citep{nguyen2026sestina} by $\mathbf{+2.347}$ sets per
-game over $10{,}000$ games, under this paper's rule dialect rather than that
-engine's.
+$\mathbf{+2.412}$ $[+2.088, +2.736]$ sets per pair.
+
+\textbf{An earlier version of this abstract also reported $+2.347$ sets per game
+against an independently developed C++ engine
+\citep{nguyen2026sestina} over $10{,}000$ games. That figure is
+withdrawn.} It was an artifact of our own bridge, which is stateless: it
+replayed the whole public log into a freshly reset agent at every decision,
+where their arbiter keeps one agent per seat alive for the deal. The two agree
+exactly on their scripted baselines ($0$ of $661$ decisions) and diverge on
+every release from v0.4, where their fitted belief arrives, by up to $40.8\%$ of
+decisions. Priced under a paired design that changes nothing but the transport,
+the bridge was worth $\mathbf{+3.18}$ $[+3.01, +3.34]$ sets a game \emph{to us}
+--- more than the entire margin it produced --- and their declaration errors
+fall tenfold, from $0.880$ a game to $0.092$, once their engine is allowed to
+keep the state its own arbiter lets it keep. Corrected, KRAKEN \textbf{loses} to
+that engine by $-0.70$; measured independently inside their arbiter through
+their own bot-package protocol, by $-0.62$. Two routes sharing no host, rules or
+code agree to within $0.08$ where the published one is out by three. An absolute
+measured through a bridge is a statement about the bridge as well as about the
+engines, which this paper had written down in an appendix and not applied to its
+own headline.
 
 Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
 a proof that the belief-space search cannot move $99.96\%$ of the allocation
 uncertainty, and an audit of our own clustering restates every position-level
-interval and withdraws one conclusion. Across the whole project, thirty-eight
+interval and withdraws one conclusion. Across the whole project, forty-seven
 pre-registrations produced exactly one change to the deployed engine
 (Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
 not ship, because the bar was fixed before the runs and was not amended
 afterwards.
+
+What survives the correction is a single channel --- we ask $1.95$ points
+worse --- and locating it \textbf{withdrew} a candidate rather than producing
+one. Under the no-bluff rule a half-suit admits no landable ask exactly when
+our own team already holds all six of it, so an ask that cannot land is an ask
+into a half-suit we have already won and not yet declared. We make
+$\mathbf{13.79\%}$ of our asks there against their $9.81\%$, and the difference
+is a declaration \emph{latency} --- $16.80$ plies from completion to
+declaration against their $7.84$, concentrated in a third of completions --- and
+not a failure of ask selection: run at their seats, the same measurement says
+our ask objective avoids those half-suits \emph{better} than theirs does
+($-0.0101$ against $+0.0198$ relative to a random draw from the same menu).
+Priced at this project's own measured value of a turn, the channel is worth
+$+0.458$ $[+0.157, +0.793]$ sets a game against a deficit of $-0.5250$. The
+$p(\text{dead})$ term this analysis was written to justify is refuted by its
+own kill-check. Registered and run anyway in its strongest form (P44), it is a
+significant \textbf{negative} in both populations, $-0.3233$ and $-0.2300$,
+\emph{while raising the ask hit rate it targets} ($0.5245$ against $0.5184$ on
+the same deals): under the no-bluff rule a failed ask publicly proves the asker
+holds another card of that half-suit, so an ask into a half-suit we already own
+is the engine's own way of resolving ownership, not waste. The finding
+replicated on an independent channel (P45): a free-message convention gate
+raised the hit rate again, $0.5287$ against $0.5136$, and lost $-0.3067$ and
+$-0.8567$. The ownership inference the latency was then blamed on is measured
+and is not the constraint; the split is. \textbf{A measured
+deficit in a metric is not necessarily a deficit to close.} Nothing ships;
+there is no v1.2.
 
 \vspace{2pt}
 \noindent\textbf{Keywords:} imperfect-information games; exact inference; opponent modelling; endgame solving.
@@ -227,10 +271,14 @@ champion.
 \item[Cross-engine strength] The same configuration against a frozen build of
 an independently developed engine \citep{nguyen2026sestina}, through a
 process bridge, under \emph{this} paper's rule dialect rather than that
-engine's. This is measured but narrower than it looks: the two dialects differ
-on out-of-turn declaration, which that project's own sweep shows moves its edge
-by about half a percentage point, and it is one opponent rather than a
-population.
+engine's. This is measured but narrower than it looks, and narrower than
+earlier revisions of this paper said. It is one opponent rather than a
+population; the two dialects differ on out-of-turn declaration, which that
+project's own sweep prices at about half a percentage point of its edge; and,
+newly, \S\ref{sec:otherarbiter} reports the same pairing measured in
+\emph{their} arbiter, where the sign reverses. Both numbers are real and
+neither is a ranking. What separates them is not settled, and the component it
+turns on is the majority of the margin.
 \item[Global standing] How good this engine is at Fish. \textbf{Not claimed.}
 No equilibrium is computed, no upper bound on exploitability exists for any
 class, and the phrase ``near-optimal'' does not appear in this paper about any
@@ -2296,7 +2344,11 @@ observed / expected & $1.258$ & $0.762$ & $0.548$ & $0.656$ \\
 
 \noindent and a fitted $\alpha = \mathbf{-1.0041}$, 95\%
 $[-1.1434, -0.8648]$, against this engine's own $+1.2071$ on the same
-estimator. The signs are opposite and the exponents lie $2.21$ apart. A
+estimator. The signs are opposite and the exponents lie $2.21$ apart.
+Re-measured through the repaired bridge (P43, R0) the exponent is $-1.1055$
+$[-1.2531, -0.9578]$ over $6{,}281$ asks; the intervals overlap and the sign
+is unchanged. Applying that exponent to their seats is the worst arm in the
+study ($-0.90$ against them, $-2.00$ in self-play; \S\ref{sec:askdeficit}). A
 sampler applying $\gamma = +0.35$ to that seat is not merely mis-scaled; it
 re-weights the world set in the wrong direction on every one of that seat's
 asks, and every marginal the ask objective and the declaration gate read is
@@ -3261,7 +3313,13 @@ only if you can also act on it.
 
 Table~\ref{tab:nulls} is the rest of the study. It is mostly nulls, and it is
 reported in full because a table of only the things that worked would
-misrepresent how much was tried. Each cell is a duplicate-deal duel against the
+misrepresent how much was tried. The ten arms of the v1.2 programme
+(P43--P45) are not in this table: each was registered against a
+dual-population bar (vs SESTINA through \texttt{BRIDGE\_REV} 3 and in
+self-play against the v1.1 champion) rather than as a self-play cell, and each
+is accounted for in \S\ref{sec:askdeficit} and Appendix~\ref{app:prereg},
+the six that reached a duel with their intervals; none cleared either half of
+the $+0.15$ bar. Each cell here is a duplicate-deal duel against the
 champion with exactly one thing changed, and the last column is the smallest
 effect that cell could have resolved at 80\% power given a per-pair standard
 deviation of 3.869 sets.
@@ -6696,20 +6754,37 @@ rather than paired, and which the corrected head-to-head below supersedes.
 
 \paragraph{The head-to-head, re-measured through the repaired bridge.}
 \label{sec:headtohead}
-This
-is the figure the paper stands behind, and the only one taken through bridge
+
+\begin{center}
+\fbox{\parbox{0.93\linewidth}{\small
+\textbf{WITHDRAWN.} The $+2.3466$ below is retracted.
+\S\ref{sec:otherarbiter} shows it to be an artifact of this bridge's
+statelessness rather than a measurement of the two engines: their agent was
+reset and its belief rebuilt before every decision it made, which cost them more
+than the whole margin. Corrected, KRAKEN \emph{loses} this match by about $0.6$
+to $0.7$ sets a game, on two independent routes that agree with each other and
+not with this table. The section is kept in full, and in place, because the
+number was published and because how it was found is the useful part; every
+figure in it should be read as describing their engine under that handicap.}}
+\end{center}
+
+\noindent This
+was the figure the paper stood behind, and the only one taken through bridge
 revision~2: $10{,}000$ games on the same deals the retracted run used, seats
 rotated so neither engine opens more often, both engines on their native
 misdeclaration rule, zero substituted moves and zero unfinished games
 (\path{scripts4/mega_match.py} $\rightarrow$ \path{results/mega_match.json}).
-Matching the withdrawn run deal for deal is deliberate: it makes the
+Matching the withdrawn run deal for deal was deliberate: it made the
 replacement a like-for-like correction rather than a differently-powered
-second opinion.
+second opinion. It is worth noticing that every one of those precautions held,
+and none of them could see this: a defect common to both arms of a paired
+design is invisible to the design, and an absolute is not paired against
+anything.
 
 \begin{center}
 \begin{tabular}{lr}
 \toprule
-margin & $\mathbf{+2.3466}$ $[+2.2928, +2.4004]$ sets/game \\
+margin (withdrawn, \S\ref{sec:otherarbiter}) & $+2.3466$ $[+2.2928, +2.4004]$ sets/game \\
 sets & $56{,}733$ to $33{,}267$ ($63.04\%$ of decided) \\
 games won & $80.41\% \pm 0.78$ ($8{,}041$W / $0$T / $1{,}959$L) \\
 ask hit rate & $51.75\%$ against $48.14\%$ \\
@@ -6718,13 +6793,44 @@ declaration accuracy & $\mathbf{96.49\%}$ against $\mathbf{78.87\%}$ \\
 \end{tabular}
 \end{center}
 
-\noindent The mechanism of the margin is in the last row and not the one
-above it. A $3.6$-point edge in ask accuracy is worth something, but the two
-engines find cards at broadly comparable rates; where they diverge is in
-knowing when a half-suit is \emph{finished}, and an $18$-point gap there is
-the difference between cashing a set and handing it over. That is the same
-claim \S\ref{sec:claiming} makes from the inference side, arrived at here
-from the scoreboard.
+\noindent \textbf{Every row of that table is an artifact of the bridge, and
+the paragraph this paper used to print underneath it read the artifact as a
+property of their engine.} It said that the two engines find cards at
+comparable rates and diverge in knowing when a half-suit is \emph{finished},
+and that the $18$-point declaration gap was the mechanism of the margin. What
+the same pairing gives once the bridge sends the hand their \texttt{reset}
+actually means (\S\ref{sec:otherarbiter}, bridge revision~3):
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & retracted (rev~2) & \textbf{corrected (rev~3)} \\
+\midrule
+corrected margin & $+2.3466$ & $\mathbf{-0.5250}$ $[-0.6886, -0.3614]$ \\
+ & $10{,}000$ games & $1{,}200$ games \\
+hit rate, ours / theirs & $51.75\%$ / $48.14\%$ & $\mathbf{52.98\%}$ /
+$\mathbf{54.93\%}$ \\
+declaring right, ours / theirs & $96.49\%$ / $78.87\%$ &
+$\mathbf{97.59\%}$ / $\mathbf{96.68\%}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Both readings invert. The $18$-point declaration gap is $0.9$
+points: they declare very nearly as well as we do, and the run that said
+otherwise was scoring an opponent whose posterior we had corrupted into
+declaring half-suits its own opponents were holding. And the ask comparison
+does not merely shrink, it \emph{changes sign} --- we were never $3.6$ points
+ahead on asking, we are $1.95$ points behind it. The one row this paper
+treated as the minor term is the only channel in which the two engines
+actually differ, and it is the channel we lose. (Two registered arms have
+since closed that gap by more than half and lost by a third of a set each
+doing it, \S\ref{sec:askdeficit}; a deficit in the metric is not a deficit to
+close.)
+
+Nothing in \S\ref{sec:claiming}'s inference-side argument depended on this
+table, and it is not withdrawn with it; what is withdrawn is the claim that
+the scoreboard independently corroborated it against this opponent.
 
 \paragraph{How much of the margin is that, exactly.}
 \label{sec:res-headline} The paragraph above is a
@@ -6751,14 +6857,24 @@ everything else & --- & $+1.0100$ $[+0.9573, +1.0627]$ \\
 \end{tabular}
 \end{center}
 
-\noindent \textbf{Fifty-seven per cent of the margin is declaration
-accounting.} The edge is real and it is nearly fivefold (we declare wrongly
+\noindent \textbf{This decomposition is withdrawn in full.} It says that
+fifty-seven per cent of the margin is declaration accounting, and it is
+arithmetically exact --- but it decomposes a margin that does not exist, and
+every term in it is a count of wrong declarations this project's own bridge
+caused. Their $0.844$ wrong declarations a game are $0.09$ at rev~3. It is
+kept here, struck, because a decomposition that was correct arithmetic on
+corrupted inputs is a better warning than a deleted section: the check that
+would have caught it is not a tighter interval on any of these rows but a
+second host for the same pairing. The prose below is the original, verbatim.
+
+\emph{Fifty-seven per cent of the margin is declaration accounting.
+The edge is real and it is nearly fivefold (we declare wrongly
 $0.176$ times a game against their $0.844$), but it is a \emph{declaration}
 edge, and
 this project has spent the large majority of its compute on the ask objective.
 The residual, everything the asking and the inference and the lookahead
 between them produce once the declarations are netted out, is $+1.010$ sets
-per game: a real margin, and a little over two fifths of the headline one.
+per game: a real margin, and a little over two fifths of the headline one.}
 
 These figures are computed on the same $10{,}000$ games the headline margin
 is, which took a correction. They were first taken from a $600$-game probe
@@ -6804,7 +6920,7 @@ opponent & margin, sets a game & their error rate & their wrong/game \\
 
 \noindent The v0.7 row is an unplanned replication of the headline. It is a
 different bank, a different harness and a fortieth of the games, and its
-interval covers the $+2.3466$ above.
+interval covers the withdrawn $+2.3466$ above.
 
 \textbf{Across six opponents the margin tracks their declaration error rate at
 $r = 0.95$.} Declarations a game are similar throughout, $3.66$ to $4.22$ for
@@ -6846,13 +6962,29 @@ further bases are excluded as instruments rather than releases: one carries an
 online model of its opponent's policy, one requires the opponent's source to
 invert its transcript, one is an identity control.
 
-The provenance is weaker than we would like and is stated rather than assumed.
-Their repository is available to us as a single squashed commit, so the
-parameter vectors compiled into v0.4, v0.5 and v0.6 cannot be checked against
-the ones their published results were generated from; their own manifests cite
-commits absent from the snapshot and record a dirty working tree. This
-measures their v0.N as their current tree runs it, which is not the same
-statement as reproducing their published v0.N.
+The provenance was weaker than we would like, and has since been checked rather
+than stated. Their repository was available to us only as a single squashed
+commit, so the parameter vectors compiled into v0.4, v0.5 and v0.6 could not be
+checked against the ones their published results were generated from, and
+earlier versions of this paragraph said so. Their full history is now published,
+which turns the caveat into a measurement.
+
+The instrument is their own reproduction protocol rather than ours: build
+\emph{their} engine at each release commit and at the commit we measure
+against, run the identical match on both, and compare every field of the
+result. Across five rungs at three seeds and $240$ games a cell, win rate, mean
+sets, ask accuracy, declaration counts and events per game agree \emph{exactly}
+at every cell; the play differences number zero. What moved is their bootstrap
+interval, in the last place at $5$ of $15$ cells, and nine JSON fields their
+older builds did not emit --- reporting rather than play. The rungs we measure
+are the rungs they released.
+
+Two limits survive. A differing field would have localised a change to the
+policy and the arbiter jointly, since both live in one binary; the pass is
+clean, so that distinction never had to be drawn. And this verifies neither
+their published \emph{numbers} for a rung nor the deal banks that produced them
+--- their manifests cite commits absent even from the full history and record a
+dirty working tree, and nothing on our side can reach those.
 
 What does not resolve is a hole in the table above rather than beside it.
 \emph{Our} declaration error rate is $8.38\%$ against their v0.4 where every
@@ -6983,13 +7115,37 @@ followed both an ask of ours and a later successful ask that took one of that
 half-suit off us, and $19.25\%$ of those were ownership-wrong; $411$ followed
 only the taking, and $3.16\%$ were.
 
-The mechanism this points at is specific, and it is a hypothesis about their
-engine formed from outside it rather than a reading of their source. Our ask
-certifies that we hold at least one \emph{other} card of the half-suit. When an
-opponent later takes one card of it off us, their inference appears to treat
-that certification as discharged, as though ``at least one'' had been
-``exactly one'', and every card it then loses is one that never moved in
-public. We are not building a feature on this. An exploit of one engine's
+\textbf{That mechanism was ours, and this paragraph had it backwards.} What
+this section originally said is quoted in the next sentence, and it is wrong.
+\emph{``Our ask certifies that we hold at least one other card of the
+half-suit. When an opponent later takes one card of it off us, their inference
+appears to treat that certification as discharged, as though `at least one' had
+been `exactly one', and every card it then loses is one that never moved in
+public.''} It was offered as a hypothesis about their engine formed from
+outside it rather than a reading of their source, and that caution was the
+right instinct pointed at the wrong party: \citet{nguyen2026bridgenotedge} read
+the source, and the certification is not discharged by anything their inference
+does. It is discharged by \emph{our bridge}, which reset their engine with the
+hand the seat held at that moment instead of the hand it was dealt
+(\S\ref{sec:otherarbiter}). A card the seat had since lost was filed as never
+its own, so when the ask at ply~$k$ was replayed that card was excluded from
+the certificate's candidate set, and a certificate with one surviving candidate
+pins a card the asker never held.
+
+Every number in this subsection is therefore a measurement of our own defect,
+and each is a signature of it rather than a coincidence: the cards are ones
+that never moved in public because those are the ones a phantom deduction lands
+on; the rate ratio concentrates in half-suits we had asked in because our ask
+is what creates the certificate; and the $19.25\%$ against $3.16\%$ split is
+the defect's own precondition, an ask of ours followed by a capture of ours,
+against the capture alone. This project measured the fingerprint of its own bug
+in four independent ways and read all four as evidence about somebody else's
+inference. The subsection is kept, in full, because the forensics were sound
+and only the attribution was not, and because the moment at which a careful
+error-analysis of an opponent should have become a suspicion of the instrument
+is exactly here.
+
+We are not building a feature on this. An exploit of one engine's
 inference is exactly the shape of the withdrawn deception ladder of
 \S\ref{sec:critic}, and a term that farmed it would grow with its dose against
 v0.7 and mean nothing anywhere else. It is reported because a margin whose
@@ -7008,13 +7164,26 @@ comparative claim to this project's own lineage'', and lists an
 independently authored opponent first among the things a comparative claim
 beyond that lineage would require \citep{dylan2026fishbot}.
 
-That ingredient now exists in both directions, and it is worth being
+\begin{center}
+\fbox{\parbox{0.93\linewidth}{\small
+\textbf{WITHDRAWN.} The $+2.347$ in the paragraph below is the retracted figure
+of \S\ref{sec:headtohead}, and the bridge it credits with one known defect
+found, priced and repaired had a second, the statelessness that
+\S\ref{sec:otherarbiter} prices. Corrected, KRAKEN \emph{loses} this match:
+$-0.6960$ through a persistent bridge, $-0.6200$ inside their arbiter, and
+$-0.5250$ $[-0.6886, -0.3614]$ through the repaired bridge at
+\texttt{BRIDGE\_REV} 3. The paragraph is kept because the scope argument in
+it survives the change of sign; the number does not.}}
+\end{center}
+
+\noindent That ingredient now exists in both directions, and it is worth being
 precise about what each side may therefore say. We can report a margin
 against an engine nobody here wrote, which is a stronger kind of evidence
 than either project's internal ladders: $+2.347$ $[+2.293, +2.400]$ sets per
-game, $63.0\%$ of decided sets, over $10{,}000$ games under rules both engines
+game (the figure since withdrawn), $63.0\%$ of decided sets, over $10{,}000$ games under rules both engines
 implement natively, with zero substituted moves and a bridge whose one known
-defect has been found, priced and repaired. What that does \emph{not} establish
+defect had, we then believed, been found, priced and repaired. What that does
+\emph{not} establish
 is a global ranking of the two projects, and this paper declines that claim
 for the same reasons theirs does: one opponent is not a population, their
 engine was frozen before ours had the exhibition bridge to test against,
@@ -7134,6 +7303,1174 @@ paragraph's, and the registry's, record). A test requires whole games to
 be \emph{bit-identical} when the knob is off, and requires the first divergence
 to fall at two live half-suits or fewer when it is on --- checked by replaying
 the shared prefix, not by asking the agent where it was.
+
+% =====================================================================
+\subsection{The same pairing in their arbiter, where the sign reverses}
+\label{sec:otherarbiter}
+
+Appendix~\ref{sec:bridges} argues that a bridge is asymmetric: whoever owns the
+game loop owns the rules, the RNG and every tie-break, so if only one side can
+host, ``our engine is stronger'' and ``our arbiter favours us'' are not
+separable claims. That argument has been in this paper since the bridge was
+built, and until now it was only an argument. Both directions existed, but only
+one of them ever measured anything: every cross-engine number above was taken
+with our engine hosting, because there was no way to seat our policy in a batch
+run of theirs.
+
+There is now. That project's engine has acquired an external-bot protocol, so
+our champion can be packaged, installed into their engine, and played from
+their command line as an ordinary seat. It passes their own conformance check.
+Under their arbiter, their deals, their seat rotation and their dialect, over
+$1{,}200$ games against the same frozen configuration:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& \emph{our arbiter} & \emph{their arbiter} \\
+\midrule
+games & $10{,}000$ & $1{,}200$ \\
+our margin (sets/game; the left figure is the withdrawn one) & $+2.3466$ & $-0.6200$ \\
+our games won & $80.41\%$ & $40.08\%$ $[37.33, 42.83]$ \\
+our declarations/game & $5.005$ & $4.027$ \\
+their declarations/game & $3.995$ & $4.832$ \\
+ours declared right & $96.49\%$ & $99.13\%$ \\
+theirs declared right & $78.87\%$ & $97.91\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The interval on the second column excludes $50\%$, so the reversal is
+not sampling noise at this size. \textbf{Neither column is a ranking of the two
+engines, and the honest reading of the pair is that this paper cannot supply
+one.}
+
+\paragraph{Where the reversal lives, and the explanation that does not survive.}
+It is the same component the margin decomposition already identified: their
+declaration accuracy, which moves by $19.0$ points between the two columns
+while ours moves by $2.6$ --- and a declaration \emph{count} that reverses with
+it. In our arbiter the nine half-suits split $5.005$ to $3.995$ our way; in
+theirs, $4.027$ to $4.832$ theirs. Whoever declares a half-suit is, apart from
+the errors, the side that scores it, so this row is very nearly the scoreboard
+restated, and it is the row the reversal is made of. Since $57\%$ of the withdrawn $+2.3466$ is declaration
+accounting (\S\ref{sec:res-headline}), a component that large moving that far
+is the whole reversal.
+
+The standing explanation for their high error rate here was the dialect. Their
+policy routes about $3.4$ declarations a game through an out-of-turn channel
+our rules do not have and our bridge therefore never polls, and a policy leaning
+on a channel it is denied should play worse. That is testable inside their own
+engine, which takes a flag for it, with nothing of ours involved --- their
+policy, their arbiter, their deals, their opponent, one flag changed. It returns
+the opposite:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+their arbiter & out-of-turn/game & their wrong declarations/game \\
+\midrule
+their dialect & $3.28$ & $0.1250$ \\
+\texttt{-{}-no-out-of-turn} & $0.00$ & $\mathbf{0.0750}$ \\
+their \texttt{-{}-legacy} bundle & $0.00$ & $0.0729$ \\
+\midrule
+\emph{our arbiter, our dialect} & $0.00$ & $\mathbf{0.8442}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Taking the channel away makes their declarations \emph{more}
+accurate, not less; their own dialect sweep agrees in direction, pricing
+\texttt{no-out-of-turn} at $+0.52$ points of their edge. So the dialect is not
+what separates $0.075$ from $0.844$, and the caveat this paper has attached to
+the head-to-head since the bridge was built has the sign of this component
+backwards. Nor is it the opponent: facing our champion in their own arbiter
+their error rate is $0.101$ a game, \emph{lower} than the $0.125$ they make
+against their own v0.6, so meeting this engine does not by itself degrade their
+declarations.
+
+\paragraph{The control that had to run first, and the shape it found.} Before
+any of that can mean something about strength, one alternative has to be
+excluded: that the package simply does not carry our policy, and we lose there
+because we arrive weakened. A bot crippled in transit loses to everything. So
+our champion was run against their \emph{whole} released ladder in their
+arbiter, and the shape compared against the same ladder measured in ours.
+
+It is not crippled --- it beats their v0.3 by $+1.2972$ inside their own
+arbiter. But the two ladders do not merely differ in level. \textbf{They run in
+opposite directions, and so does the quantity underneath them.}
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+& \multicolumn{2}{c}{\emph{our arbiter}} & \multicolumn{2}{c}{\emph{their arbiter}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+their version & our margin & their decl.\ error & our margin & their decl.\ error \\
+\midrule
+v0.2 & $+1.5283$ & $9.13\%$  & --- & --- \\
+v0.3 & $+0.6133$ & $\mathbf{4.71\%}$  & $+1.2972$ & $\mathbf{13.65\%}$ \\
+v0.4 & $+1.9867$ & $16.36\%$ & --- & --- \\
+v0.5 & $+2.1233$ & $15.06\%$ & $-0.3528$ & $2.00\%$ \\
+v0.6 & $+1.8850$ & $15.72\%$ & $-0.4806$ & $1.53\%$ \\
+v0.7 & $+2.3600$ & $\mathbf{20.71\%}$ & $-0.6200$ & $\mathbf{2.09\%}$ \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Spearman rank correlation against their version number}} \\
+our margin & \multicolumn{2}{r}{$+0.771$} & \multicolumn{2}{r}{$-1.000$} \\
+their decl.\ error & \multicolumn{2}{r}{$+0.771$} & \multicolumn{2}{r}{$-0.400$} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent In \emph{their} arbiter their ladder behaves as a version ladder
+should: each release beats us by more than the last, perfectly monotone over
+the four rungs measured. In \emph{ours} it is inverted --- their later releases
+do \emph{worse} against us --- and their declaration error rate climbs
+monotonically with their own version number, from $4.71\%$ at v0.3 to
+$20.71\%$ at v0.7.
+
+The individual rungs make the inversion sharper than the correlations do. Their
+v0.3 is their \emph{best} declarer in our arbiter and their \emph{worst} in
+their own; their v0.7 is their worst in ours and among their best in theirs.
+The two arbiters do not disagree about the level of a quantity here. They
+disagree about its order.
+
+\textbf{A project's successive releases getting monotonically worse at the one
+thing this game scores, and only when played through our bridge, is not a shape
+that improving strength produces.} The natural place to look is what their v0.4
+introduced and every later version built on --- their fitted belief --- and how
+it fares on the event stream our bridge replays into it.
+
+\paragraph{What that leaves, and why it is reported as open.} Our arbiter, our
+bridge, or an interaction of the two. This paper is in a poor position to wave
+that through: \S\ref{sec:critic} is the record of a bridge defect destroying a
+set of results, and the head-to-head has already been re-measured once for
+another.
+
+\textbf{This paragraph is superseded and is kept only to date the reasoning.}
+It read: \emph{``$57\%$ of $+2.3466$ is declaration accounting; their
+declarations are four times worse against us at v0.7 than at v0.3 while their
+own arbiter says the opposite; and we cannot currently say why. We are not
+withdrawing the number.''} The number is withdrawn (\S\ref{sec:otherarbiter}),
+and ``we cannot currently say why'' was the correct state of knowledge at the
+time and the wrong place to stop.
+
+One clause of it needs more than superseding, because it is a claim about
+method rather than a number. \emph{``The paired contrasts that share the bridge
+are unaffected either way''} is the defence this paper offered for every
+foreign-opponent result it kept, and \citet{nguyen2026bridgenotedge} is right
+that it does not hold as stated. A shared component cancels from a paired
+contrast only when its effect is \emph{additive}; a corrupted posterior in the
+opponent is not, because it changes which positions the two arms even reach.
+Their report gives the clean demonstration from this paper's own numbers: the
+README's dialect table has off-turn declaration costing us $-0.300$ sets
+against the corrupted engine, while against the native one in their arbiter the
+same rule is worth $+0.111$ to us. A gap measured against a corrupted opponent
+is not the gap against the real one, and it can invert.
+
+What survives is narrower and worth stating exactly. Contrasts in which
+\emph{both} arms are ours --- self-play, duplicate-deal pairs against our own
+champion, the ablations of \S\ref{sec:res-signal} run against
+\texttt{ev\_claim} --- never had the bridge in the loop and are untouched.
+Contrasts run against \texttt{dylan\_v07} are not rescued by their pairing and
+are withdrawn with the absolutes: R2, R6, the dialect gaps, and the
+contestation port of Table~\ref{tab:contestation}.
+
+One caveat on the reverse cells survives the control and is worth keeping.
+Our champion reaches their arbiter through a package that answers off-turn
+declaration polls only on certainties --- our policy has no out-of-turn
+behaviour to offer, having never been developed against the channel --- so our
+side in the right-hand columns is \emph{a} realisation of our champion rather
+than the one in the left. That is why the argument above rests on the
+\emph{trend across their versions}, which holds our side fixed within each
+arbiter, rather than on comparing levels between them.
+
+The measurement is also in tension with the mechanism proposed earlier in this
+section, that our ask certifies ``at least one other card of this half-suit''
+and a later take against us discharges it. That is a property of our
+\emph{asking} rather than of our arbiter, so it predicts the same errors in
+their arbiter, and they are not there --- and it offers no reason why the
+effect should grow with \emph{their} version number, which is the fact that
+now most needs explaining.
+
+\paragraph{The mechanism, and it was in our own docstring.} The experiment that
+separates these is a decision-level comparison of their engine against itself,
+and it identifies the cause. \emph{Our shim is stateless.} It spawns a fresh
+process for every decision and replays the entire public log into a freshly
+reset agent --- the right shape for a website that reconstructs each session
+from its log, and the shape every cross-engine number in this paper was
+measured through. Their arbiter instead builds one agent per seat per deal and
+feeds it events as they happen. Those two are the same thing only if their
+agent is a pure function of (reset state, event sequence).
+
+It is not, and the boundary is exactly where the two ladders stop agreeing:
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+their version & decisions & divergent & rate & \textsc{decl}$\to$\textsc{ask} & \textsc{ask}$\to$\textsc{decl} \\
+\midrule
+v0.2 & $323$ & $\mathbf{0}$ & $0.00\%$ & $0$ & $0$ \\
+v0.3 & $338$ & $\mathbf{0}$ & $0.00\%$ & $0$ & $0$ \\
+v0.4 & $415$ & $81$ & $19.52\%$ & $5$ & $1$ \\
+v0.5 & $336$ & $137$ & $40.77\%$ & $4$ & $0$ \\
+v0.6 & $292$ & $36$ & $12.33\%$ & $2$ & $1$ \\
+v0.7 & $296$ & $84$ & $28.38\%$ & $9$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Identical on both scripted baselines; divergent on every version from
+v0.4, which is the version their fitted belief arrives at.
+
+\paragraph{Which piece of their state, and whether it could be repaired.} That
+boundary names a release, not a mechanism, and the two are not the same
+question. The mechanism matters because some kinds of lost state are cheap to
+restore from outside their engine and some are not: an RNG our fresh process
+re-seeds could be handed a per-decision seed derived from the event count, and
+the streams would line up. Their factory gates the two RNG consumers behind
+spec options, so the parity measurement can be re-run at the corners
+(\path{scripts4/statefulness_mechanism.py}). Divergences are split into the
+band where both paths ask but ask differently and the band where one declares
+and the other asks, because the ablations move one and not the other:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+arm & overall & ask ordering & declaration gate \\
+\midrule
+the frozen release            & $23.52\%$ & $20.63\%$ & $2.64\%$ \\
+their search off              & $16.61\%$ & $13.53\%$ & $2.71\%$ \\
+their tie-breaking off        & $27.96\%$ & $24.59\%$ & $3.25\%$ \\
+both off                      & $15.78\%$ & $11.60\%$ & $4.18\%$ \\
+\quad and \texttt{w12}${=}0$  & $\mathbf{13.92\%}$ & $9.74\%$ & $4.18\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Their determinized search is the largest identified term and it lives
+\emph{entirely} in the ask-ordering band --- \texttt{V06Agent::resetV6}
+re-seeds \texttt{srng} from the agent seed, so a fresh process per decision
+draws the same determinizations every turn where their arbiter's stream
+advances. Their tie-breaking contributes nothing, and their own source says
+why: at $\mathtt{rtie}{=}1$ the tie RNG is \emph{constructed} per decision from
+a rolling hash of the public stream and the event count, so it is replayable by
+construction, and only $\mathtt{rtie}{=}2$ would not be. The third arm
+neutralises feature $12$ of their scored vector, which asks whether this is the
+half-suit they asked for last time: it is assigned inside their
+\texttt{chooseAsk} and never by their \texttt{observe}, so through a stateless
+bridge it is dead at every decision despite carrying weight $3.12582$ in the
+frozen vector. It is real and small.
+
+Three further candidates are excluded by reading their source rather than by
+spending an arm on an inert code path. Their belief consumes no randomness at
+all in the released configuration, which runs \texttt{BeliefMode::Fast}; and
+\texttt{Belief::sinkhornDisj} re-initialises its marginals from the constraint
+set on entry, so it does not warm-start. \emph{An earlier version of this
+section named a warm-started Sinkhorn/IPF fit as one of two candidates. That
+was wrong, and is withdrawn.} Their dead-ask memory, which their reset does
+wipe, is gated behind \texttt{deadAsk}, \texttt{deadInSearch} and v0.7's
+\texttt{dead7}, all off in the frozen spec.
+
+\textbf{The finding is the band that does not move.} Everything identified
+above lives in ask ordering. The declaration gate --- the band that actually
+costs sets, since a declaration taken a turn early is a wrong one --- is
+untouched by every mechanism found, and $13.92\%$ of decisions still differ
+with all of them switched off. So the convenient answer is not available: this
+bridge cannot be made honest by re-seeding, because the term that matters is
+not an RNG. Running their engine as their arbiter runs it is the remedy, and
+the reason the corrected figures in this section were measured that way rather
+than by patching the instrument that produced the retracted one.
+
+The \emph{direction} is what closes the loop. Across the four affected versions
+the stateless path declares where the persistent path asks twenty times, and
+asks where it declares twice. More declarations, taken on a belief rebuilt from
+scratch, is precisely the shape that produces a $20.71\%$ declaration error rate
+here against $2.09\%$ at home --- and it produces it only for the versions that
+have a belief to rebuild, which is why their ladder inverts through our bridge
+and not through theirs.
+
+\paragraph{What it was worth, in sets.} A different move is not automatically a
+worse one, so the divergence above is a fact about decisions and not yet about
+the scoreboard. The paired contrast prices it: $2{,}000$ pairings --- $1{,}000$ deals
+at each of two seat assignments --- with every pairing played twice on
+identical cards, identical seats and identical agent seeds, our champion
+unchanged in both arms, the \emph{only} difference being whether their engine
+keeps its state between decisions
+(\path{scripts4/bridge_statefulness_price.py}).
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+our margin, stateless bridge & $+2.4800$ \\
+our margin, persistent bridge & $\mathbf{-0.6960}$ \\
+\midrule
+the bridge was worth, to us & $\mathbf{+3.1760}$ $[+3.0142, +3.3378]$ \\
+\midrule
+their wrong declarations/game, stateless & $0.8800$ \\
+their wrong declarations/game, persistent & $\mathbf{0.0925}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Zero fallbacks and zero unfinished games in both arms. The stateless
+arm reproduces the published figure on fresh deals ($+2.4800$ against
+the withdrawn $+2.3466$), which is what makes the other column believable rather than a
+harness artifact.
+
+\textbf{The bridge was worth more than the entire published margin.} Their
+declaration errors fall by a factor of ten when their engine is allowed to keep
+the state their own arbiter lets it keep, and the head-to-head reverses.
+
+\paragraph{Two independent routes now agree, and they agree against us.} The
+persistent-bridge figure was measured in \emph{our} arbiter under \emph{our}
+dialect over a Python transport. The reverse-arbiter figure was measured in
+\emph{their} arbiter under \emph{their} dialect through their own bot-package
+protocol. They share no code path, no rules, no deal generator and no host:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& our margin & games \\
+\midrule
+our arbiter, \emph{stateless} bridge (published, withdrawn) & $+2.3466$ & $10{,}000$ \\
+our arbiter, \emph{persistent} bridge & $-0.6960$ & $2{,}000$ \\
+their arbiter, our bot package & $-0.6200$ & $1{,}200$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The counts are that route's own games, which for the persistent
+bridge is one per pairing rather than the paired design's total across both its
+arms --- an earlier version of this table gave that total, twice over, and so
+credited the corrected figure with twice the games behind it.
+
+The two routes that do not reset their engine every decision agree to within
+$0.08$ sets a game. The one that does is the outlier, by three. They are also
+much the smallest two: the retracted figure has the largest sample here and is
+the one that is wrong, which is the point rather than an embarrassment to it.
+
+\paragraph{This is a retraction of \S\ref{sec:headtohead}'s headline.} The
+$+2.3466$ is not a measurement of the two engines. It is a measurement of their
+engine \emph{with its belief destroyed and rebuilt before every decision it
+makes}, which is a policy neither project has ever intended to run and which
+nobody could reproduce outside this bridge. On the evidence above the honest
+statement of the cross-engine result is:
+
+\begin{center}
+\emph{Under this paper's rule dialect, KRAKEN v1.1 \textbf{loses} to
+SESTINA v1.0 by roughly $0.6$--$0.7$ sets per game.}
+\end{center}
+
+\noindent What survives is narrower and still worth having. The paired
+contrasts that share the bridge are untouched, because both of their arms were
+handicapped identically --- which is exactly the distinction
+Appendix~\ref{sec:bridges} drew, in a sentence written long before there was any
+reason to think it applied to this paper's own headline. And the negative
+results of \S\ref{sec:negative} and \S\ref{sec:searchres}, which are internal
+contrasts against our own champion, never went through this bridge at all.
+
+% =====================================================================
+\subsection{Where the ask deficit lives, and why the ask objective cannot
+reach it}
+\label{sec:askdeficit}
+
+The corrected table leaves exactly one channel in which the two engines
+differ, and it is the channel we lose: they hit $54.93\%$ of their asks and we
+hit $52.98\%$. After the first registration of the v1.2 programme (P43,
+Appendix~\ref{app:prereg}) put three candidates at that $1.95$ points and
+moved none of them --- the worst, the opponent's own fitted exponent applied
+to its seats, cost $-0.90$ against them and $-2.00$ in self-play; removing
+the model entirely cost $-0.59$ and $-1.07$ --- the obvious next step was to
+find a fourth. The programme ran to three registrations and ten arms,
+P43--P45, and this section reports the last two. P43's screen, on the
+dual-population design every later arm used ($300$ deals on both parities per
+population; candidate minus champion, sets a game, vs SESTINA through
+\texttt{BRIDGE\_REV} 3 and in self-play against the v1.1 champion):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+arm & vs SESTINA & self-play \\
+\midrule
+\texttt{opponent\_gamma} $=0.0$ (model off, their seats and ours) & $-0.5867$ $[-0.891, -0.283]$ & $-1.0667$ $[-1.286, -0.847]$ \\
+\texttt{opponent\_gamma} $=\hat\alpha$ (their fitted exponent, their seats) & $-0.9033$ $[-1.207, -0.600]$ & $-2.0033$ $[-2.212, -1.794]$ \\
+\texttt{avoid\_doomed\_asks} & $-0.0933$ $[-0.196, +0.010]$ & $-0.0900$ $[-0.317, +0.137]$ \\
+\texttt{depth\_mode} $=$ \texttt{at\_ask} & $-0.0033$ $[-0.228, +0.221]$ & $-0.0867$ $[-0.313, +0.140]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent No arm clears either half of the bar. Two lessons outrank the
+nulls. The exponent the second arm applied is R0's re-measurement of
+\S\ref{sec:res-choicecurve}'s fit through the repaired bridge, $-1.1055$
+$[-1.2531, -0.9578]$ over $6{,}281$ asks, so the opposite-sign finding
+survives its instrument and acting on it is still the worst arm in the study:
+a correct measurement of an opponent does not license a change to us. And
+removing the model entirely costs $-0.59$ and $-1.07$, so the mis-signed model
+is an asset --- though the first arm switched it off on our two teammates as
+well as on their three seats, because \texttt{gamma\_team} defaults to
+\texttt{opponent\_gamma}, and the fourth registration (P46, \S\ref{sec:p46})
+separated the two: the part on their seats, teammates held, costs $-0.25$
+$[-0.536, +0.036]$ against SESTINA when removed, consistent with a small asset
+and with zero at that power, and the part on our two teammates costs nothing
+measurable, so ``being wrong about an opponent's propensity beats having no
+opinion'' is weakened to that by the reading rule P46 fixed in advance. The
+\texttt{depth\_mode} row is also the defect that taught this paper to read a
+zero-width interval as the signature of an experiment that never ran: on its
+first run the value fell through silently to the default, the arm was the
+champion, and \path{fish4/agent4.py} now raises on an unrecognised value.
+What follows is the attempt at a fourth arm, and it ends by withdrawing the
+candidate rather than registering it.
+
+\textbf{None of the three instruments here is pre-registered, and none licenses
+an arm.} They are reported because the second contradicts the first, the third
+contradicts the second, the reason it does is structural rather than
+statistical, and the conclusion is that a change this project was about to
+register would have pushed on the one part of the channel where it is already
+ahead of the engine that beats it.
+
+\subsubsection{A decomposition that says execution, and is blind where it
+matters}
+
+The gap has two possible shapes. We might choose the same asks and land them
+less often (\emph{execution}), or choose differently (\emph{selection}). The
+Oaxaca--Blinder identity separates them exactly, given a stratifier $s$:
+\[
+r_t - r_o \;=\; \underbrace{\textstyle\sum_s f_o(s)\,[r_t(s) - r_o(s)]}_{\text{execution}}
+\;+\; \underbrace{\textstyle\sum_s [f_t(s) - f_o(s)]\,r_t(s)}_{\text{selection}} .
+\]
+Over $38{,}212$ asks in $400$ games (\path{scripts4/ask_deficit_anatomy.py}),
+our hit rate is $53.06\%$ against their $55.31\%$, a gap of $2.25$ points, and
+six stratifiers agree:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+stratifier & execution & selection \\
+\midrule
+phase (half-suits resolved) & $+0.0228$ & $-0.0002$ \\
+options available & $+0.0208$ & $+0.0017$ \\
+half-suits to choose from & $+0.0238$ & $-0.0012$ \\
+our depth in the named half-suit & $+0.0273$ & $-0.0047$ \\
+\textbf{our team's cards in the named half-suit} & $+0.0077$ & $\mathbf{+0.0149}$ \\
+target's hand size & $+0.0221$ & $+0.0004$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Five of the six put essentially the whole gap in execution, with no
+unmatched mass in any of them. The reading at the time was that we choose the
+same half-suits and are worse inside them.
+
+The sixth row is the one that was right, and the instrument is the reason it
+took two more runs to see it. Conditioning on \emph{our own team's} holding in
+the named half-suit moves two thirds of the gap into selection --- and that
+stratifier's top bucket, where the team holds all six, has a hit rate of
+\textbf{exactly zero on both sides}, because an ask into such a half-suit
+cannot land. A stratum where $r_t(s) = r_o(s) = 0$ contributes exactly zero to
+\emph{both} terms of the identity, however far apart the two sides' shares of
+it are. Ours is $12.61\%$ against their $9.52\%$, and the decomposition prices
+that difference at nothing directly: it can only see it in the strata the
+displaced mass came from. \textbf{The decomposition is structurally blind to
+the one stratum the deficit lives in}, which is not a bug in the arithmetic but
+a property of using the opponent's rate as the reference price.
+
+\subsubsection{A miss anatomy that says selection}
+
+The arbiter sees every hand, so each miss can be classified by what was legally
+available instead: another opponent held the named card (wrong target); the
+named opponent held another card of that half-suit we could legally have asked
+for (wrong card); both; some other legal pair in that half-suit would have hit
+(wrong pair); or nothing in that half-suit was legally askable from anyone
+(\emph{unavoidable}). Over $28{,}513$ asks in $300$ games
+(\path{scripts4/ask_miss_anatomy.py}), $30.64\%$ of our misses are unavoidable
+against $21.94\%$ of theirs. Per ask rather than per miss that is $14.5\%$
+against $10.1\%$: a $4.4$-point gap in a channel whose whole size is $1.3$
+points in that block.
+
+So the deficit is not in which card or which opponent we name once the
+half-suit is fixed. It is in asking into half-suits that are already exhausted
+from our side. That is a hypothesis about the ask objective, and it is worth
+nothing until one prior question is settled.
+
+\subsubsection{The kill-check: did the objective have the information?}
+
+A half-suit is dead for us when every legal ask in it must miss. That is a
+joint event over card locations, so a per-card marginal cannot express it; it
+is evaluated by drawing $128$ worlds from the same \texttt{BeliefState} the
+agent samples from and taking the share in which every legal ask in that
+half-suit misses. The true deal is read only to score the estimate. Over
+$1{,}200$ games and $98{,}326$ ask decisions
+(\path{scripts4/ask_deadness_signal.py}):
+
+\textbf{The belief knows.} $p(\text{dead})$ separates dead half-suits from live
+ones at $\mathrm{AUC} = 0.9518$, and a proxy that costs no draws at all --- the
+share of the half-suit already accounted for on our own side --- reaches
+$0.8883$. On our $6{,}519$ asks into a truly dead half-suit, some alternative
+scored strictly lower $96.63\%$ of the time, and switching to the belief's
+favourite lands in a live half-suit $93.76\%$ of the time against $84.75\%$ for
+a uniformly random \emph{other} half-suit on the same menus
+($+9.00\%$ $[+8.33, +9.71]$).
+
+That is the answer the programme was built to find, and it is not the finding,
+because the same measurement run at SESTINA's seats says the engine that beats
+us does not use the signal either --- and uses it \emph{less}. Their
+$p(\text{dead})$ is not their belief, which we cannot query; it is what an agent
+with their information could have known, computed by the machinery we judge
+ourselves by. In ground truth, per ask decision:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+ & chosen was dead & \emph{menu} & \emph{selection} \\
+\midrule
+KRAKEN v1.1 & $0.1327$ & $0.1428$ & $\mathbf{-0.0101}$ $[-0.0139, -0.0063]$ \\
+SESTINA v1.0 & $0.0945$ & $0.0746$ & $\mathbf{+0.0198}$ $[+0.0171, +0.0226]$ \\
+\midrule
+ours $-$ theirs & $+0.0382$ & $+0.0682$ & $-0.0299$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The \emph{menu} column is the dead rate of a half-suit drawn at
+random from the ones that seat could legally ask into; \emph{selection} is what
+the objective does relative to that draw, paired on the same decisions. Our
+dead-ask rate is $3.82$ points worse than theirs. Our menu is $6.82$ points
+worse and our selection from it is $2.99$ points \textbf{better}: we steer away
+from dead half-suits, they steer into them, and they win. \textbf{A
+$p(\text{dead})$ term in the ask objective would push harder on the one channel
+where we are already ahead of the engine we are behind.}
+
+On the belief scale the two sides look the other way round ($+0.0166$ ours
+against $+0.0268$ theirs, both positive), and that comparison is the confounded
+one: $p(\text{dead})$ is an estimate and the estimator is not equally sharp at
+the two sets of seats ($\mathrm{AUC}$ $0.9518$ at ours, $0.8819$ at theirs), so
+a cross-side reading on that scale prices the estimator as well as the
+objective. Within a side it is paired and sound; across sides only ground truth
+settles it, and adding that column is the whole reason the run was repeated.
+
+\subsubsection{What a dead ask actually is}
+
+The menu term is not about asking at all, and the reason is structural. Under
+the no-bluff rule an ask is legal only for a card of a half-suit the asker
+holds another of, so every legal ask in a half-suit misses exactly when no
+opponent holds any card of it --- and the six cards of an unclaimed half-suit
+are all in somebody's hand. Therefore:
+
+\begin{center}
+\emph{A half-suit is dead for us if and only if our own team holds all six of
+it.}
+\end{center}
+
+\noindent A dead ask is not a badly chosen ask into a contested half-suit. It
+is an ask into a half-suit our team has already won and has not yet declared.
+The equivalence is asserted at every decision by the instrument below rather
+than argued, so a rules variant that breaks it (bluff asks, a claim rule that
+leaves cards live) fails loudly instead of quietly changing what the numbers
+mean.
+
+Completion is also \emph{absorbing}: once a team holds all six, no opponent
+holds a card of that half-suit, so no opponent can legally ask into it, so no
+card can leave it. The state persists until the owning team declares. That
+makes the interval from completion to declaration a latency rather than a
+window that can close on its own, and makes the asks spent into it meanwhile a
+clean price for the delay. Over $1{,}200$ games and $10{,}724$ completions
+(\path{scripts4/completion_latency.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+ & KRAKEN v1.1 & SESTINA v1.0 \\
+\midrule
+half-suits completed per game & $4.208$ & $4.728$ \\
+mean plies to declare it & $\mathbf{16.80}$ & $\mathbf{7.84}$ \\
+median plies to declare it & $3.0$ & $1.0$ \\
+never declared & $0.00\%$ & $0.00\%$ \\
+asks spent into it meanwhile & $1.520$ & $0.996$ \\
+those, as a share of all asks & $13.79\%$ & $9.81\%$ \\
+completions sat on $10+$ plies & $34.63\%$ & $20.92\%$ \\
+share of dead asks from those & $87.38\%$ & $75.99\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent We sit on a half-suit we already own for more than twice as long, and
+it is a tail rather than a general slowness: a third of our completions account
+for seven eighths of our dead asks. Every completion is declared eventually on
+both sides, so this is latency and not abandonment.
+
+\paragraph{Is the channel the right size?} The excess is $+1.689$ dead asks a
+game. This project has a measured price for exactly one thing of that kind ---
+\S\ref{sec:tempo}'s value of a single donated turn, $+0.2713$ $[+0.0922,
++0.4505]$ sets over $1{,}500$ paired deals --- and propagating both
+uncertainties (a paired bootstrap on the per-game difference, the standard
+error on the price) puts the excess at $\mathbf{+0.458}$ $[+0.157, +0.793]$
+sets a game against a measured deficit of $-0.5250$ $[-0.6886, -0.3614]$. The
+deficit sits inside the interval.
+
+That is an accounting of a difference and not a counterfactual. Removing a dead
+ask changes every ply after it; their $4.7$ a game are not zero and nothing
+here says ours could be; and the turn price was measured with our own engine on
+both sides at a decision chosen without reference to what the agent wanted. It
+answers ``is this channel big enough to be the story'', which is a smaller
+question than ``is it the cause'' --- and the smaller question is the one these
+numbers can carry.
+
+\subsubsection{P44: the two ends of the latency, and a hit rate that is not
+worth having}
+
+The analysis above is exploratory and licenses nothing. What it licensed is a
+registration (P44, Appendix~\ref{app:prereg}), and the registration found a
+defect worth attacking: \textbf{every doomed-ask mechanism in this engine} ---
+the stuck claim gate, the signalling ask, \texttt{avoid\_doomed\_asks} ---
+\textbf{is conditioned on the agent being \emph{certain} the best ask cannot
+land.} That is $1.5\%$ of decisions. On the asks that actually are dead the
+belief's own estimate averages $0.3377$, so none of it opens. The apparatus is
+aimed at the right idea through a gate that almost never fires.
+
+Two arms, each replacing that certainty test with a graded one, each
+bit-identical at its default: \textbf{D1} restricts the ask when the
+top-scoring one's half-suit is ours with probability at least $0.5$;
+\textbf{D2} declares a half-suit we are certain we own ($p_{\text{team}} \ge
+0.99$) at exactness $0.77$ rather than $0.97$, that threshold being a
+break-even from this paper's own turn price and declaration accuracy rather
+than the best of a sweep.
+
+\paragraph{D2 never reached a duel, and that is the result.} It fired on
+$0.235$ declarations a game against a futility bar of $0.250$ fixed before the
+run. It fires so rarely because it gates on knowing the set is ours, and
+\emph{we usually do not know}: averaged over every dead half-suit on the menu,
+the belief puts only $0.3120$ on it being entirely ours (and $0.3377$ on the
+ones we go on to ask into). We often do not know we own them (the belief puts $0.3120$ on it), and that
+is real; but supplying the knowledge does not open the gate. Relaxing the
+ownership test from $0.99$ all the way to $0.20$ at the same $0.77$ exactness
+adds $0.103$ declarations a game, flat below $0.77$ and under half the
+futility bar (\S\ref{sec:ownership-closure}). The gate is waiting on the
+split. That is not what the $95.3\%$ allocation-error figure invites a reader
+to assume --- that figure counts declarations we made and got wrong, not the
+ones we never made --- and it moved the target, briefly, from splitting to
+ownership inference. The measurement that followed moved it back: ownership
+is not the binding constraint of the gate, the split is.
+
+\paragraph{D1 reached the duel and failed in both populations.} $600$
+pairings, $1{,}800$ games, zero fallbacks:
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+ & vs SESTINA & self-play \\
+\midrule
+D1 \texttt{dead\_ask\_threshold} $=0.5$ & $\mathbf{-0.3233}$ $[-0.527,
+-0.119]$ & $\mathbf{-0.2300}$ $[-0.448, -0.012]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Not a null --- a significant negative in both populations. And it
+\emph{worked}: the candidate's ask hit rate is $0.5245$ against the champion's
+$0.5184$ on the same deals. D1 did exactly what it was built to do, landed more
+asks, and cost a third of a set a game doing it.
+
+\textbf{So the ask hit rate is not a quantity to maximise.} Under the no-bluff
+rule a failed ask publicly proves the asker holds another card of that
+half-suit, which is precisely the fact a partner needs to place a split. An ask
+into a half-suit our team wholly owns is not waste: it is this engine's own
+mechanism for resolving the ownership it does not yet know it has. Removing it
+raised the metric and lowered the score.
+
+That closes a reading this section's own opening invites. The corrected
+head-to-head puts us $1.95$ points behind on ask hit rate and calls it the only
+channel in which the two engines differ; P44 shows that closing that gap
+directly makes us weaker. \textbf{A measured deficit in a metric is not
+necessarily a deficit to close}, and the one instrument that could tell the
+difference was a duel with a bar fixed in advance --- not any amount of further
+anatomy.
+
+\subsubsection{What this closes}
+
+The ask deficit is real, it is worth about half a set a game, and it is not an
+ask problem. It is the visible cost of a declaration latency: our team completes
+half-suits and holds them, and every ask made into one while it waits is
+certain to fail. That puts it downstream of the residue this paper has reported
+since v1.0 --- $95.3\%$ of our own wrong declarations are allocation errors,
+where the team held all six and named the wrong split (\S\ref{sec:res-pathledger}).
+The team has the answer and no member of it does, so it waits; and while it
+waits it asks into its own half-suits.
+
+P44 shot down what the exploratory analysis pointed at, and P45 replicated
+it on an independent channel (\S\ref{sec:p45}): two arms, two registrations,
+two mechanisms, both raising the ask hit rate by one to one and a half points
+and both losing about a third of a set against SESTINA.
+\textbf{The ask objective was not the place.} A $p(\text{dead})$ penalty is the graded form of
+\texttt{avoid\_doomed\_asks}, it fires at $4.95\%$ of decisions where the
+incumbent fires at $1.5\%$, and it is worse than the incumbent rather than
+better: $-0.3233$ and $-0.2300$ against $-0.0933$ and $-0.0900$. The channel
+did not need a bigger lever. It needed not to be pulled.
+
+What survives is the other end, and it is narrower than what this section set
+out to find. The latency is real and expensive; it is caused by the split:
+relaxing the gate's ownership test all the way to $0.20$ adds only $0.103$
+declarations a game, so the positions D2 could not find are missing because
+the exactness band $0.77$--$0.97$ is empty, not because ownership is unknown;
+and it is not fixable by asking differently, because the arm built on that
+premise made things worse while improving the metric it targeted. The
+ownership inference itself --- the $0.3120$ --- was the natural next target,
+and the two subsections that follow report what happened when it was measured
+rather than argued about. Three estimators of it were put at the same
+$178{,}354$ half-suit cells against the dealt truth; the sharpest of them
+scores worst; all three cross $0.99$ on the same $4.17\%$ of owned
+half-suits; and the gate is flat in ownership from $0.77$ to $0.20$. Neither
+an estimator swap nor an ownership recalibration survives that, so the
+ownership inference is not an estimator problem and the gate is not an
+ownership problem. The one mechanism aimed at the split --- the locating
+convention --- was then nominated as P45 and lost in both populations.
+
+\subsubsection{The ownership inference, measured --- and it was never the
+constraint}
+\label{sec:ownership-closure}
+
+P44's reading --- that we sit on completed half-suits because we do not know
+we own them --- sent the next step at the ownership inference, and the honest
+first move was to measure it rather than to register an arm against it. Under
+the no-bluff rule a half-suit admits no landable ask exactly when our own team
+holds all six, so ``dead'' and ``entirely ours'' are one event, and this
+repository estimates it three different ways: the independence product over
+per-card team marginals that the ask features compute and D1 gated on
+(\path{fish4/askfeat.py}); an unweighted Monte Carlo over the
+constraint-feasible set, which is what produced the published $0.3120$; and the
+weighted joint \texttt{Posterior.prob\_all\_with}, which the engine has
+implemented and tested all along and nothing shipped reads, at $0.20$~ms a
+decision. The instrument
+(\path{scripts4/ownership_estimators.py}, \path{results/ownership_estimators.json})
+puts all three at the same decisions against the dealt truth: $1{,}000$ games
+at \texttt{BRIDGE\_REV} 3 on an independent seed block, $41{,}512$ decisions,
+$178{,}354$ live half-suit cells.
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+estimator & mean when genuinely ours & AUC & Brier \\
+\midrule
+independence product & $\mathbf{0.4035}$ & $\mathbf{0.9704}$ & $\mathbf{0.0525}$ \\
+uniform joint & $0.3230$ & $0.9549$ & $0.0639$ \\
+weighted joint & $0.3523$ & $0.9641$ & $0.0592$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The uniform joint reproduces the published $0.3120$ at $0.3230$ on
+an independent block, which is the check that makes the other two rows
+comparable rather than merely adjacent. Then the surprise: \textbf{the sharpest
+available estimator is the worst of the three at this job.} Paired and clustered
+by decision, the weighted joint against the product is
+$\mathbf{-0.0512}$ $[-0.0517, -0.0506]$. That is not a defect in
+\texttt{prob\_all\_with}. The six
+cards of a half-suit compete for the same quota slots, so their team-membership
+events are \emph{negatively} correlated; the independence product is therefore
+an over-estimate of the true joint, and over-estimating is rewarded by any score
+that only asks how high the estimator goes on positives. The product is
+over-confident, and it beats the correct object because the metric pays for
+over-confidence.
+
+None of it matters for the gate. All three cross $0.99$ on $\mathbf{4.17\%}$ of
+genuinely owned half-suits, so no declaration gate is rescued by reading a
+different number. And the gate was never starved by ownership in the first
+place. \texttt{claim4}'s voluntary gate fires on $p_{\text{team}} \ge$
+\texttt{owned\_p\_team} \emph{and} $p_{\text{exact}} \ge$
+\texttt{owned\_threshold}; P44 set the exactness knob to $0.77$, left
+ownership at $0.99$, and measured $0.235$ declarations a game against its
+$0.250$ bar. Sweeping the \emph{other} knob on the quantity the gate really
+reads, holding the registered $0.77$ and excluding declarations the champion
+already makes:
+
+\begin{center}
+\small
+\begin{tabular}{rrrr}
+\toprule
+\texttt{owned\_p\_team} & flagged & precision & new declarations/game \\
+\midrule
+$0.99$ (P44's) & $14$ & $1.0000$ & $0.0140$ \\
+$0.95$ & $19$ & $1.0000$ & $0.0190$ \\
+$0.90$ & $37$ & $0.9730$ & $0.0370$ \\
+$0.85$ & $60$ & $0.9667$ & $0.0600$ \\
+$0.77$ down to $0.20$ & $103$ & $0.9223$ & $\mathbf{0.1030}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{Flat below the registered exactness.} Relaxing the ownership
+test all the way to ``more likely than not it is \emph{not} ours'' buys $0.1030$ new declarations
+a game --- under half the futility bar P44 fixed in advance, and the bar was not
+widened. The binding constraint is not ownership. It is the exactness band: we
+are almost never $77$--$97\%$ sure of an exact split. Either we are at $0.97$
+and already declaring, or we are far below $0.77$. So P44's recorded
+explanation is half right and points the wrong way: we do often fail to know we
+own a completed half-suit, and that is real, but supplying the knowledge does
+not open the gate, because the split is what the gate is actually waiting on.
+Two candidate arms --- swapping the estimator, recalibrating the ownership cut
+--- were stopped for about twenty-five minutes of compute instead of two
+registrations and roughly $7{,}000$ pairings.
+
+\subsubsection{P45: the free message, and a channel closed from both ends}
+\label{sec:p45}
+
+What that measurement leaves standing is the split, and the engine's one
+mechanism aimed at the split is the pre-play convention
+(row 3 of the closures in \S\ref{sec:v11}; P5--P10 in Appendix~\ref{app:prereg}). Its record is mostly bad,
+and one entry in it is a specification error: the aimed convention lost
+$+1.750$ to the champion (its encoder-only ablation $+1.467$ $[+0.818,
++2.116]$ over $120$ pairs) through a gate that compared \emph{probability of
+success} while the agent ranks asks by the objective's \texttt{scores}, so a
+gate of ``$0.05$'' was routinely paying a median $0.3596$ objective units out
+of a range of about $1.5$. The gate now reads the same currency the pick was
+made from, and the one specification that document fixed and never executed
+is the \textbf{free-message gate}: \texttt{convention\_max\_cost} $=10^{-9}$ in
+the re-priced units, so the agreed card is named only when it \emph{ties} the
+card the objective already chose and the message costs literally nothing in the
+objective's own terms. The decoder half was not re-run, because the free read
+--- listen to the $35.3\%$ of asks that name the agreed card by coincidence,
+send nothing --- had already settled at $3{,}000$ pairs, $-0.002$ $[-0.127,
++0.123]$. Anything F1 won had to come from the sender.
+
+P45 registered that one arm (\path{prereg/kraken_v12_free_message.md}), with
+the prior stated against it and a futility screen on \emph{carry} rather than on
+decisions changed: a free-message gate swaps only on ties, and on a tie the
+champion picks uniformly from the tied pool, so a replay comparison counts RNG
+tie-breaking as gate firing --- a ten-game probe read $16.45\%$ by that route
+against a true carry gain of $0.7$ points. The screen passed
+with a carry gain of $\mathbf{+5.80\%}$ over the champion on the same deals ($39.5\%$ against $33.7\%$),
+reproducing within a point the $40.1\%$ the earlier document had
+predicted for this gate on a harness it was not fitted to. The duel then lost,
+in both populations: $600$ pairings, $1{,}800$ games, zero fallbacks.
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+ & vs SESTINA & self-play \\
+\midrule
+F1 \texttt{convention\_max\_cost} $=10^{-9}$ & $\mathbf{-0.3067}$ $[-0.607, -0.006]$ & $\mathbf{-0.8567}$ $[-1.069, -0.645]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Three things in that table were not predicted, and writing the
+prediction down first is what makes each visible.
+
+\paragraph{Wrong about the size, not the verdict.} The registration predicted a
+null in both populations, centred near the free read's $-0.002$, on the
+reasoning that F1 is that same channel plus $4.8$ points of carry. F1 is not a
+null; in self-play it is nearly seven times the free read's point estimate.
+Sending changes the game in a way that receiving does not, and the free read's
+null does not bound it.
+
+\paragraph{The dual population fired the other way.} P45 added the SESTINA
+population because every convention duel to date had been self-play only, and
+said in advance that a clearing arm should be distrusted in self-play, where our
+seats share a code book and the opponent does not. The opposite happened:
+\textbf{self-play is where the arm loses most}, by a factor of $2.8$. The population
+added as a check on optimism was the optimistic one.
+
+\paragraph{A free message is not free, and the objective is why.} F1 costs
+nothing in the objective's own units by construction and loses $0.86$ sets a
+game in self-play, so whatever it pays, \texttt{scores} cannot see it. Offered
+as a hypothesis: the gate replaces a \emph{random} tie-break with a
+\emph{deterministic} one, and all three of our seats resolve ties the same way.
+The champion's uniform draw from the tied pool is not a placeholder --- it
+decorrelates three seats that share an objective --- and the free-message gate
+removes it at every tie. That is the same shape of error as the mis-priced gate
+this arm was written to avoid: a cost genuinely zero in the quantity being
+measured and non-zero in the game.
+
+\paragraph{And the ask hit rate rose again, and lost again.}
+F1's ask hit rate is $\mathbf{0.5287}$ against the champion's $0.5136$ on the same deals;
+D1's was $0.5245$ against $0.5184$. Two registrations, two channels --- one filters asks
+by ownership, the other renames the card on a tie --- and both raise the hit
+rate by one to one and a half points and lose about a third of a set a game
+against SESTINA. P44's ``the ask hit rate is not a quantity to maximise'' was a
+single arm and could have been the arm. It has now replicated on an independent
+channel, seed block and registration, and it is the most durable finding either
+programme has produced. Side by side (hit rate on the same deals; margin vs
+SESTINA in sets a game, $600$ pairings each):
+
+\begin{center}
+\small
+\begin{tabular}{llrrr}
+\toprule
+registration & arm & arm & champion & vs SESTINA \\
+\midrule
+P44 & D1 (\texttt{dead\_ask\_threshold} $=0.5$) & $0.5245$ & $0.5184$ & $-0.3233$ \\
+P45 & F1 (\texttt{convention\_max\_cost} $=10^{-9}$) & $0.5287$ & $0.5136$ & $-0.3067$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What this closes.} The convention channel. With the free read's null
+at $3{,}000$ pairs, both halves are now measured in play: \textbf{receiving is
+worth nothing and sending costs, at every gate ever tried.} The $1.72$ bits an
+ask carries remains a true fact about the rules and remains unrealisable by this
+engine. \texttt{V06\_DEPLOYED} is byte-for-byte unchanged, and KRAKEN v1.1 still
+loses to SESTINA v1.0 by $-0.5250$. Ten arms across three registrations have
+now been put at that deficit, and the two channels a reader would reach for
+next --- the ownership inference and the convention --- are closed by
+measurement rather than by argument.
+
+
+\subsubsection{P46: the belief itself, measured --- and a cell licensed}
+\label{sec:p46}
+
+Three programmes had put ten arms at the deficit and none had measured the
+thing every P43 sentence about the opponent model rests on: the belief about
+SESTINA's cards. P46 (\path{prereg/kraken_v12_belief_grid.md}) scores it
+first, and Stage~0 is an instrument that ships nothing. The champion's own
+games are frozen after \texttt{act()} at every fourth scored decision, and
+the acting seat's belief is re-read under twenty cells of the model exponent
+--- $\gamma_{\text{opp}} \in \{-1.1055, -0.5, 0, 0.35, 0.7, 1.0\}$ on their
+seats against $\gamma_{\text{team}} \in \{0, 0.35, 0.7\}$ on ours, plus two
+silence weights at the incumbent --- and scored against the dealt truth on the
+cards the propagator has not pinned, in two pools by who really holds them,
+paired against the incumbent cell $(0.35, 0.35)$ on the same decisions and
+clustered by game, at two budgets, $720$ and $2{,}880$ draws, with the Kish
+ESS recorded per row. At \texttt{sis\_tilt} $=0$ the model enters the
+importance weights only, so cells at one budget share particles and differ
+only in weights. A decision at which the incumbent has no non-self ask on
+record and takes the exact DP is excluded from every paired contrast, because
+a cell with a live model there is a different inference method and not the
+same particles re-weighted. $120$ games against SESTINA and $60$ in self-play
+gave $\mathbf{1{,}657}$ and $\mathbf{868}$ frozen decisions, of which $106$
+and $77$ were excluded. The validity check held --- the incumbent at $480$
+draws reproduces the live champion's mean ESS$/n$, $\mathbf{0.628}$ against
+$\mathbf{0.617}$, a gap of $\mathbf{1.9\%}$ under the $10\%$ tolerance --- no
+withdrawal condition fired, and the calibration clause fixed against P43's
+dueled cells was satisfied: the belief twins of C1b and C1c both read worse
+than the incumbent, the second with its interval clear of zero at every budget
+in both blocks. Opp-pool NLL paired against the incumbent, lower being a
+better belief about their cards:
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{rrrrrrrrrrrrr}
+\toprule
+ & \multicolumn{3}{c}{block A, $2{,}880$} & \multicolumn{3}{c}{block B, $2{,}880$} & \multicolumn{3}{c}{block A, $720$} & \multicolumn{3}{c}{block B, $720$} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
+$\gamma_{\text{opp}}$ & $0$ & $0.35$ & $0.7$ & $0$ & $0.35$ & $0.7$ & $0$ & $0.35$ & $0.7$ & $0$ & $0.35$ & $0.7$ \\
+\midrule
+$-1.1055$ & $+0.0737$ & $+0.0602$ & $+0.0485$ & $+0.1165$ & $+0.1037$ & $+0.0943$ & $+0.0751$ & $+0.0620$ & $+0.0533$ & $+0.1174$ & $+0.1063$ & $+0.1043$ \\
+$-0.5$ & $+0.0468$ & $+0.0333$ & $+0.0218$ & $+0.0814$ & $+0.0675$ & $+0.0559$ & $+0.0470$ & $+0.0337$ & $+0.0245$ & $+0.0799$ & $+0.0672$ & $+0.0617$ \\
+$0$ & ref. & $+0.0125$ & $+0.0014$ & ref. & $+0.0285$ & $+0.0164$ & ref. & $+0.0121$ & $+0.0031$ & ref. & $+0.0268$ & $+0.0206$ \\
+$0.35$ & $+0.0130$ & --- & $-0.0108$ & $+0.0152$ & --- & $-0.0111$ & $+0.0127$ & --- & $-0.0083$ & $+0.0134$ & --- & $-0.0045$ \\
+$0.7$ & $+0.0045$ & $-0.0082$ & $\mathbf{-0.0185}$ & $-0.0044$ & $-0.0186$ & $\mathbf{-0.0271}$ & $+0.0056$ & $-0.0064$ & $\mathbf{-0.0131}$ & $-0.0003$ & $-0.0115$ & $\mathbf{-0.0128}$ \\
+$1.0$ & $+0.0019$ & $-0.0102$ & $-0.0199$ & $-0.0089$ & $-0.0217$ & $-0.0271$ & $+0.0058$ & $-0.0053$ & $-0.0104$ & $+0.0063$ & $-0.0030$ & $-0.0010$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Columns are $\gamma_{\text{team}}$; the dash is the incumbent and
+``ref.'' the $(0, 0)$ reference row, which takes the DP at every decision and
+is never paired. Every game-clustered interval is in the registration's
+outcome section and in \path{results/p46_belief_grid.json}.
+
+\paragraph{The prediction was wrong about the direction.} The registration
+predicted that the opp-pool NLL would \emph{rise} with the exponent above
+$0.35$, that $(0.7, 0.7)$ would fail the licensing rule on the opp pool, and
+that the upward arm would not be played. \textbf{The belief about their cards
+improves monotonically with $\gamma_{\text{opp}}$ at every
+$\gamma_{\text{team}}$, at both budgets, in both blocks}, from $-1.1055$
+through $1.0$ at $2{,}880$ draws. The incumbent's $0.35$ is not the sharpest
+belief about SESTINA's cards this engine can hold. The C1c twin,
+$(-1.1055, 0.35)$, was predicted at $+0.015$ with an ESS ratio near $0.55$ ---
+a worse belief \emph{and} a thinner sample. It reads $\mathbf{+0.0620}$
+$[+0.0476, +0.0764]$ at $720$, four times the prediction, with an ESS ratio of
+$\mathbf{0.86}$, above the degeneracy bar: the fitted exponent is not thin, it
+is wrong. The exponent that best describes how SESTINA \emph{asks} is the worst
+belief in the grid about what SESTINA \emph{holds}, in both populations, and
+that is the belief-level twin of P43's lesson that a correct measurement of an
+opponent does not license a change to us, now with a mechanism: their choice
+curve is a fact about their asks, and their asks are not their hand. The
+model switched off on their three seats alone, $(0, 0.35)$, was predicted a
+null; it reads $\mathbf{+0.0121}$ $[+0.0096, +0.0146]$, clear of zero, so
+having no opinion about their seats is a measurably worse belief about their
+cards than the incumbent's mis-signed one. The silence term went as predicted:
+$\lambda = 0.9$ is $\mathbf{+0.0014}$ $[+0.0003, +0.0026]$, a hair worse, and
+the incumbent's calibration mean on half-suits that are \emph{not} all with the
+opponents is $\mathbf{0.068}$, under the $0.10$ bar, so the knob closes at the
+belief level and no \texttt{opp\_lambda} duel is played.
+
+\paragraph{Why exactly one cell licenses.} $(0.35, 0.7)$ and $(0.7, 0.35)$
+both read below zero on the opp pool at all four readings and both fail the
+rule on its top-1 guard: sharpening one side alone lowers top-1 on the
+\emph{other} pool, and the guard exists because a belief can win NLL by
+spreading mass while naming the holder less often. Raising both exponents
+together keeps every top-1 interval off the negative side, and $(0.7, 0.7)$ is
+the one cell the registration allowed to become an arm: opp-pool NLL
+$\mathbf{-0.0131}$ $[-0.0163, -0.0100]$ at $720$ and $\mathbf{-0.0185}$
+$[-0.0215, -0.0155]$ at $2{,}880$ against SESTINA, $\mathbf{-0.0128}$
+$[-0.0208, -0.0048]$ and $\mathbf{-0.0271}$ $[-0.0327, -0.0216]$ in self-play,
+the team pool better by a similar amount, the sign agreeing across budgets and
+larger at the high one. Its price is the sample: an ESS ratio of
+$\mathbf{0.68}$ in block A and $\mathbf{0.64}$ in block B, under the $0.70$
+bar, so sample degeneracy is live at the licensed cell --- part of what a
+sharper model buys in belief it pays back in effective draws, and at
+$\gamma_{\text{opp}} = 1.0$ the account overdraws: $(1.0, 0.7)$ at an ESS
+ratio of $0.59$ crosses zero in self-play at $720$ and reads $-0.0271$ at
+$2{,}880$, and $(1.0, 0)$ changes sign between the budgets, which the
+registration's fifth bar records as a statement about a budget rather than
+about a belief. So arm~G, \texttt{opponent\_gamma} $=0.7$ on their seats and
+ours, was licensed by a rule fixed before a position was scored, and was
+played.
+\paragraph{Stage~1: the two halves of C1b, and where the cost lives.} Four
+arms, $600$ pairings each on the same $300$ deals in both populations,
+$7{,}200$ games, zero fallbacks, zero unfinished; every figure is candidate
+minus champion within a deal, and the two contrasts are taken within
+(deal, parity):
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+arm & change from \texttt{V06\_DEPLOYED} & vs SESTINA & self-play \\
+\midrule
+E0 & \texttt{opponent\_gamma} $=0$, their seats and ours & $-0.4400$ $[-0.730, -0.150]$ & $-1.0200$ $[-1.247, -0.793]$ \\
+E1 & off on their three seats only & $\mathbf{-0.2500}$ $[-0.536, +0.036]$ & $-1.0000$ $[-1.226, -0.774]$ \\
+E2 & off on our two teammates only & $\mathbf{-0.0500}$ $[-0.297, +0.197]$ & $\mathbf{-0.0967}$ $[-0.328, +0.135]$ \\
+G & \texttt{opponent\_gamma} $=0.7$, their seats and ours & $\mathbf{+0.2433}$ $[-0.051, +0.537]$ & $\mathbf{+0.1567}$ $[-0.055, +0.368]$ \\
+\midrule
+E1 $-$ E0 & our teammates' model, theirs off & $+0.1900$ $[-0.098, +0.478]$ & $+0.0200$ $[-0.255, +0.295]$ \\
+E2 $-$ E0 & their seats' model, ours off & $\mathbf{+0.3900}$ $[+0.095, +0.685]$ & $\mathbf{+0.9233}$ $[+0.606, +1.241]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent C1b replicates: the model off on all five seats costs $-0.44$
+against SESTINA and $-1.02$ in self-play on this block, against P43's $-0.59$
+and $-1.07$. The registration predicted the split would fall mostly on our
+side of the table --- E1 $-$ E0 at $+0.30$, E2 $-$ E0 at $+0.15$ --- and it
+fell the other way. \textbf{Switching the model off on our two teammates alone
+costs nothing measurable}: E2 is a null in both populations. Switching it off
+on their seats alone reproduces the whole two-knob loss in self-play
+($-1.00$ against $-1.02$) and most of it against SESTINA ($-0.25$ against
+$-0.44$). The model's value is a fact about their seats: with ours off,
+keeping theirs is worth $+0.39$ against SESTINA and $+0.92$ in self-play,
+both clear of zero; with theirs off, keeping ours is worth $+0.02$ in
+self-play and $+0.19$ $[-0.098, +0.478]$ against SESTINA. So the cost P43
+could not place belongs to their side, and P43's two-knob number was, in
+effect, a one-knob number. A belief about a teammate's cards is one the
+teammate will shortly make moot by asking; a belief about an opponent's cards
+is what our next ask is priced on. The belief-level grid cannot see that
+asymmetry --- every cell that sharpens their side moves our pool too, through
+the quota coupling --- and only play can.
+
+The registration fixed a reading rule for the P43 sentence ``being wrong about
+an opponent's propensity beats having no opinion'': retained only if E1's
+vs-SESTINA interval lay entirely below $-0.15$. It is $-0.25$
+$[-0.536, +0.036]$, so the sentence is weakened, in \S\ref{sec:askdeficit}
+and in Appendix~\ref{app:prereg}, to the registered form: the model on all
+five seats is an asset against SESTINA; the part on their seats, teammates
+held, costs $-0.25$ $[-0.536, +0.036]$ when removed, consistent with a small
+asset and with zero at this power. The other registered contrast puts the same
+quantity with our model off at $+0.39$, clear of zero, and the two readings
+agree in size; the registered one decides the sentence.
+
+\paragraph{The licensed arm is the first to read positive in both
+populations.} G --- \texttt{opponent\_gamma} $=0.7$ on their seats and ours,
+the one cell Stage~0 licensed --- reads $+0.2433$ $[-0.051, +0.537]$ against
+SESTINA and $+0.1567$ $[-0.055, +0.368]$ in self-play. Across four programmes
+and fourteen dueled arms it is the first whose point estimate is positive in
+both populations, and the first above the $+0.15$ bar in both; and at $600$
+pairings neither interval clears zero, so under the bar as registered it does
+not clear, the confirm is not run under this registration, nothing ships, and
+\texttt{V06\_DEPLOYED} is unchanged. The registration made no prediction
+about G's play value, because it predicted G would not be played, and the
+record says so rather than retrofitting one. G's ask hit rate is
+$\mathbf{0.5289}$ against the champion's $\mathbf{0.5173}$ on the same deals:
+the third arm to raise the hit rate by about a point, after P44's D1 and P45's
+F1, and the first of the three not to lose. Whether the hit rate has anything
+to do with G's margin is not a question $600$ pairings can answer, and no rule
+was attached to it.
+
+\paragraph{What this closes, and what it opens.} P46 set out to close the
+belief: to put on the record that the belief about SESTINA's cards cannot be
+improved by re-weighting the depth heuristic at any exponent, at any budget,
+so that this paper could conclude that the residual half set is not reachable
+by any single knob the engine exposes. \textbf{It cannot conclude that.} The
+belief improves at $0.7$ on both sides, the rule fixed before the run licensed
+the cell it was written for, and the arm it licensed is the first to read
+positive in both populations. Closed: the fitted exponent at the belief level
+(a worse belief, not a thinner sample, at every budget in both populations);
+the silence term; the one-sided cells, on the top-1 guard; and the question
+of which side of the table C1b's cost belongs to. Open, at that point: one arm. What happened to G was a decision for a new
+registration rather than an amendment to this one.
+
+\paragraph{P47: the confirm, and the half that cleared.} P47
+(\path{prereg/kraken_v12_g_confirm.md}), written after P46's Stage~1 was on
+disk and before any of its games, put G and only G at confirm scale --- $600$
+deals on both parities, $1{,}200$ pairings, $3{,}600$ games, on the fresh
+block $11{,}100{,}000$, never pooled with the screen --- with the prediction
+on record that it would not clear both halves: $+0.18$ $[-0.03, +0.39]$
+against SESTINA, failing on the interval, and $+0.11$ $[-0.04, +0.26]$ in
+self-play, failing on the mean as well. Zero fallbacks, zero unfinished.
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+arm & & vs SESTINA & self-play \\
+\midrule
+G & \texttt{opponent\_gamma} $=0.7$, their seats and ours, at confirm & $\mathbf{+0.0017}$ $[-0.204, +0.208]$ & $\mathbf{+0.1667}$ $[+0.009, +0.325]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The verdict was predicted right and both halves wrong, in opposite
+directions. Against SESTINA, G is a null to three decimals; in self-play it
+clears the bar --- the first half of the dual bar any arm has cleared in
+five registrations, and the half the bar was added to distrust. By the rule
+standing since P43, an arm that clears one population only is
+opponent-specific and does not ship. The screen and the confirm are
+consistent with each other and with a small positive effect against SESTINA
+or none (pooled over the $1{,}800$ pairings, which is not the verdict,
+$+0.08$ $[-0.09, +0.25]$), and a point estimate under the bar would not ship
+at any block size. The Stage~1 rise in the ask hit rate did not replicate:
+$\mathbf{0.5261}$ against $\mathbf{0.5249}$, so the hit-rate finding of P44
+and P45 stands as it was. What the two programmes together say is exact and
+small: the belief about SESTINA's cards can be sharpened, by about one
+percent of its NLL at every budget in both populations, and the sharpened
+belief plays $+0.17$ better against KRAKEN and not measurably better against
+SESTINA at $1{,}200$ pairings. The same belief improvement in both
+populations; a margin in one. In self-play the opponents are KRAKEN seats,
+whose asks the depth heuristic at $0.7$ describes better than at $0.35$;
+against SESTINA the belief is better by the same amount and the asks it
+prices are SESTINA's, whose choice curve is not KRAKEN's. P43's lesson ---
+a correct measurement of an opponent does not license a change to us --- now
+has its belief-level form: a \emph{better} belief about an opponent does not
+either. Run self-play only, as every convention duel before P45 was, G would
+have shipped, and KRAKEN v1.2 would have gone to the exhibition with a change
+that does nothing against the engine it plays there.
+
+\paragraph{What this closes.} The programme. With P47, every one-knob lever
+the engine's own diagnostics nominated has been registered and has lost, been
+stopped, or cleared the wrong half: the ask channel (P43), the declaration
+gate (P44 and the ownership closure of \S\ref{sec:ownership-closure}), the
+convention (P45), the belief (P46 and P47). Fifteen duels of fourteen arms
+across five registrations. The conclusion P46 withheld is drawn with P47's
+caveat attached: the residual half set against SESTINA is not reachable by
+any single knob this engine exposes, at the power this project can buy, and
+the next attempt would have to change what the engine computes rather than
+what it is told. \texttt{V06\_DEPLOYED} is byte-for-byte unchanged, and
+KRAKEN v1.1 still loses to SESTINA v1.0 by $-0.5250$.
+
 
 \section{Discussion}
 
@@ -7339,7 +8676,9 @@ everything else is a tie-break.
 \label{sec:failures}
 
 Recorded deliberately, because in this project the negative results have
-repeatedly been the informative ones.
+repeatedly been the informative ones. The v1.2 programme's ten registered arms
+(P43--P45), none of which cleared its bar, are catalogued in
+\S\ref{sec:askdeficit} and Appendix~\ref{app:prereg} rather than here.
 
 \begin{figure}[t]
 \centering
@@ -7590,7 +8929,10 @@ none had been sized for it. Its lesson is separate and is the one worth
 carrying: it is worth $+3{,}143$ held-out nats at predicting \emph{which
 half-suit a teammate asks in}, and makes the posterior over \emph{where the
 cards are} worse at every weight tested. A better model of the ask is not a
-better model of the deal.
+better model of the deal. The dual-population rule added later cuts both ways:
+P45's one arm lost $2.8\times$ more in self-play than against SESTINA
+(\S\ref{sec:p45}), so the population added as the check on self-play optimism
+was the optimistic one.
 
 This matters for reading the table below. A direction marked ``no duel'' is not
 untested; it is a direction whose own pre-registered condition for deserving a
@@ -7604,7 +8946,7 @@ duel came back false.
 \midrule
 1 & one $\gamma$ per side of the table & \textbf{refuted} on a co-primary; withdrawn, no duel \\
 2 & the choice model's covariate & \texttt{unlocated\_now} beats depth by $+3{,}143$ nats on the \emph{ask} and is \textbf{refuted in the belief}: worse at every weight, monotone in it \\
-3 & a pre-play convention in the rules & belief says yes three times, the duel says no; \emph{speaking} is the entire cost \\
+3 & a pre-play convention in the rules & belief says yes three times, the duel says no twice: at the mis-priced gate ($+1.750$) and, re-priced to a free message that changes only tie-breaks (P45), $-0.31$ / $-0.86$; the price is not the message but the deterministic tie-break that decorrelates three seats \\
 4 & decompose the teammate ceiling & \textbf{46\% is interaction}: $D+K = 1.84$ against $T = 3.41$ \\
 5 & \texttt{locate}: price an ask by the declaration it enables & \textbf{null}, $+0.047$ $[-0.075, +0.168]$, diagnosed \\
 6 & declarability inside the possession search & \textbf{closed by proof}, no duel \\
@@ -7830,8 +9172,10 @@ The four slopes in \S\ref{sec:res-learn} are restated with deal-clustered
 standard errors; none reverses. \textbf{Duplicate-deal duels are unaffected}:
 the duel harness pairs on the deal and treats the pair as the independent unit,
 and already used a $t$ critical value at the pair count. Every headline duel
-figure in this paper (including $+2.3466$ against v0.7 and the $+0.104$
-lookahead result) stands exactly as written.
+figure in this paper (including the $+2.3466$ against v0.7, since withdrawn
+for a bridge defect and not a clustering one, \S\ref{sec:otherarbiter}, and
+the $+0.104$ lookahead result) stands exactly as written with respect to
+clustering.
 
 \subsubsection{What v1.1 leaves}
 
@@ -7845,9 +9189,15 @@ rather than against the one we have.
 What that leaves is a channel this engine does not have: something that couples
 the ask and the declaration rather than improving either. Direction~3 built the
 one such mechanism the rules permit (a pre-play convention), and the duel
-refused it, at a cost the belief-space instrument could not see because
-\emph{speaking} is itself the price. We do not have a candidate that survives
-both the theorem and that duel, and we say so rather than nominating one.
+refused it twice: at a gate later found mis-priced, and (P45,
+\S\ref{sec:p45}) at a free-message gate that costs nothing in the objective's
+own units and still loses $-0.31$ against SESTINA and $-0.86$ in self-play, a
+cost the belief-space instrument could not see because the price is the
+deterministic tie-break and not the message. Both halves of the channel are
+now measured in play: receiving is worth nothing (the free read, $-0.002$
+$[-0.127, +0.123]$ at $3{,}000$ pairs) and sending costs at every gate tried.
+We do not have a candidate that survives both the theorem and those duels,
+and we say so rather than nominating one.
 
 % =====================================================================
 \subsection{Limitations}
@@ -7924,6 +9274,26 @@ agreement and no in-play communication is TMECor
 \citep{celli2018computational}, and nothing here approximates it. Every strength
 statement is relative to a named opponent or absolute against an exactly solved
 subgame.
+
+\paragraph{The cross-engine margin is measured through a bridge that changes
+their agent.} The largest limitation this paper acquired late, and the one a
+reader should weigh hardest. \S\ref{sec:otherarbiter} reports the same two
+engines measured in \emph{their} arbiter, where our withdrawn $+2.3466$ becomes a loss,
+and their whole released ladder reverses order with it. Three reconciliations
+are excluded by controls --- the dialect and the opponent, by experiments inside
+their engine involving nothing of ours, and our bot package, by its beating
+their v0.3 inside their own arbiter --- and the fourth is the answer: our shim
+is stateless and their agent is not, for every version from v0.4 on.
+
+So the honest reading of every cross-engine \emph{absolute} in this paper is
+that it is a margin against their engine \emph{as our bridge runs it}. That is a
+real opponent and an independently authored one, and it is not the opponent
+their arbiter runs. The paired contrasts are unaffected --- an absolute measured
+through a bridge is a statement about the bridge as well as about the engines,
+whereas a contrast whose arms share the bridge is not
+(Appendix~\ref{sec:bridges}) --- and this paper is now an instance of the hazard
+it wrote that sentence about, which is the most useful thing it can say about
+it.
 
 \paragraph{A rules discrepancy, stated.} The printed rules allow a set to be
 declared at any point, including during an opponent's turn. v0.3's game loop
@@ -8113,26 +9483,61 @@ exploitability at $+0.4405$ over $305$ one-half-suit positions
 at most of these decisions --- a real limitation, and still an exact
 computation where the alternative is a search's lower bound.
 
-\textbf{The engine was measured against one from outside the project.} Against
-a frozen build of an independently developed C++ engine
-\citep{nguyen2026sestina}, over $10{,}000$ games, $+2.3466$ sets a game. The
-two systems play different rule dialects on the one clause their author's own
-sweep shows matters (out-of-turn declaration), so that figure is a
-measurement under this paper's rules and not a ranking of two projects
-(\S\ref{sec:res-headline}).
+\textbf{The engine was measured against one from outside the project, and
+the first number was wrong.} The published $+2.3466$ over $10{,}000$ games
+against a frozen build of an independently developed C++ engine
+\citep{nguyen2026sestina} measured our stateless bridge, which rebuilt their
+belief before every decision they made; it is withdrawn. Corrected through a
+persistent bridge KRAKEN loses by $-0.6960$, by $-0.6200$ measured inside
+their arbiter, and by $-0.5250$ $[-0.6886, -0.3614]$ through the repaired
+bridge at \texttt{BRIDGE\_REV} 3 (\S\ref{sec:res-headline},
+\S\ref{sec:otherarbiter}). The two systems play different rule dialects on
+the one clause their author's own sweep shows matters (out-of-turn
+declaration), so even the corrected figure is a measurement under this
+paper's rules and not a ranking of two projects.
 
 \textbf{And v1.1 shipped nothing.} Seven pre-registered directions at the
-residual returned no adoption; the pre-registered thresholds and outcomes for
-all thirty-eight registrations this project has written are in
-Appendix~\ref{app:prereg}. Two mechanisms measured there are real and positive
-and still do not ship, because the bar was fixed in advance and was not amended
-afterwards. That is the discipline this paper is actually arguing for, and it
-costs more than it looks: exactly one of the thirty-eight registrations
-produced a change to the deployed engine.
+residual returned no adoption, and five registrations of the v1.2 programme
+(fifteen duels of fourteen arms, each required to clear $+0.15$ against
+SESTINA and in self-play) returned none either; two of those arms raised the
+ask hit rate the cross-engine table said we lack and lost by a third of a set
+doing it, and the one arm a belief-level rule licensed read positive in both
+populations at its screen and, at confirm scale, cleared the self-play half
+alone --- a null against SESTINA, and the first half of the dual bar anything
+has cleared. The pre-registered thresholds and outcomes for all forty-seven
+registrations this project has written are in Appendix~\ref{app:prereg}. Two
+mechanisms measured there are real and positive and still do not ship,
+because the bar was fixed in advance and was not amended afterwards. That is
+the discipline this paper is actually arguing for, and it costs more than it
+looks: exactly one of the forty-seven registrations produced a change to the
+deployed engine.
 
 \subsection{What we would do next}
+\label{sec:next}
 
 \begin{itemize}
+\item \textbf{The declaration latency, which is where the cross-engine deficit
+turned out to live.} \S\ref{sec:askdeficit} is the one item here that arrived
+with its target already measured rather than argued: we sit on a half-suit our
+own team has completed for $16.80$ plies against SESTINA's $7.84$, every ask
+made into one meanwhile is certain to fail, and the excess is the right size to
+be the whole loss. It is also the item this study has now attacked twice by
+registration and closed at both ends: the ask end (P44 D1, P45 F1: both raised
+the hit rate and lost about a third of a set against SESTINA) and the
+declaration end (P44 D2 stopped by futility; the ownership sweep flat from
+$0.77$ to $0.20$). What a registration here would have to fix in advance is
+the split itself, which is what the latency is \emph{for}: a completed
+half-suit is not declared because the team cannot place the split (the
+ownership sweep confirms it: relaxing the ownership test adds $0.103$ good
+declarations a game, precision $0.92$, and no more). An arm that shortens the
+wait is not starved by wrong declarations but by too few positions where the
+split is placeable at all: $0.1676$ of the $0.1759$ wrong declarations a game
+are allocation class, the exactness band $0.77$--$0.97$ is empty, and the
+locating convention clears its information gate at $+0.0408$ and loses in
+play at every gate tried. The tail shape is the reason to think it is
+tractable anyway --- a third of completions carry seven eighths of the
+cost, so the question is not ``declare sooner'' but ``what is different about
+that third''.
 \item \textbf{A proper likelihood, not a proxy --- two of three steps taken.}
 This item previously read: the choice model uses depth on the initial deal, and
 the right object is the acting policy's own probability of the observed action
@@ -8203,6 +9608,45 @@ other than banked cards, a converged rather than single-sweep coupling, and a
 horizon that does not stop at the end of one possession, and, now that the
 one tested point is known to be worth something, whether any of those is worth
 more.
+\item \textbf{What the fourth registration measured, what the fifth
+confirmed, and what is closed without one.} P46 (\path{prereg/kraken_v12_belief_grid.md},
+\S\ref{sec:p46}) measured the one thing three programmes never measured: the
+belief about SESTINA's cards. It predicted that the belief was already as
+sharp as the engine could hold and that nothing would clear for a fourth
+time, and it was wrong in the direction: the belief improves monotonically
+with the model exponent on both sides of the table, the rule fixed before the
+run licensed the one cell it was allowed to, and that cell reads $+0.24$
+against SESTINA and $+0.16$ in self-play at $600$ pairings --- the first arm
+in fourteen to read positive in both populations, clearing neither interval.
+It also placed C1b's cost: on their seats, not ours. P47
+(\path{prereg/kraken_v12_g_confirm.md}) put that one arm at confirm scale on
+a fresh seed block, $1{,}200$ pairings: a null against SESTINA, $+0.0017$
+$[-0.204, +0.208]$, and $+0.1667$ $[+0.009, +0.325]$ in self-play --- the
+first half of the dual bar any arm has cleared, and the half it exists to
+distrust. G does not ship. Four doors are closed without a registration, and the record behind
+each is written into P46 so that the omission is a decision and not an
+oversight. The draws budget: the self-play
+half of the dual bar is already measured --- $480$ to $1{,}440$ draws is
+$+0.0945$ $[-0.002, +0.191]$ at $6{,}000$ pre-registered pairs, not
+demonstrated, and the located deficit is flat in draws on the champion's own
+decisions --- so no draws arm can ship whatever SESTINA returns.
+\texttt{n\_worlds}: inert on the act path by construction ---
+\texttt{Posterior.worlds()} has no caller in the agent, the ask features, the
+claim logic or the lookahead, and the knob reaches play only through the
+SIS-failure fallback, so the games reproduced byte for byte at $64$ and $128$ worlds are
+a no-op and not a null. A joint-scored split for voluntary claims: closed by
+proof --- the shortlist's first entry is the per-card marginal argmax and is
+always joint-scored, and $P_{\text{joint}}(A) \le \min_c M[c, A_c]$ holds
+exactly because both come from the same weighted batch, so any split with
+joint above $0.5$ has every marginal above $0.5$, is the shortlist head, and is
+already scored. Swapping or recalibrating the ownership estimator: closed by
+the measurement of \S\ref{sec:ownership-closure}. P46 was to license the
+conclusion that the residual half set is not reachable by any single knob
+this engine exposes. It returned the opposite of what it predicted, and P47
+then measured the one arm it licensed as a null against SESTINA; the
+conclusion is drawn in \S\ref{sec:p46} with that caveat attached, and the
+next attempt would have to change what the engine computes rather than what
+it is told.
 \end{itemize}
 
 % =====================================================================
@@ -8216,30 +9660,37 @@ more.
 \section{Interoperating with a foreign engine}
 \label{sec:bridges}
 
-Every cross-engine number in this paper --- the $+2.3466$ headline, the
-declaration decomposition, the transfer failures --- exists only because two
+Every cross-engine number in this paper --- the retracted $+2.3466$ headline
+and the $-0.6960$ that replaced it, the declaration decomposition, the transfer failures --- exists only because two
 independently written engines can be made to play one game. That is an
 artifact in its own right, and it has a failure mode severe enough to have
 already destroyed one set of results (\S\ref{sec:critic}), so it is documented
 here rather than left in the code.
 
-\paragraph{Two directions, deliberately.} A bridge is asymmetric: whoever owns
-the game loop owns the rules, the RNG, and every tie-break. If only one side
-can host, every published number is measured through that side's arbiter and
-the two claims ``our engine is stronger'' and ``our arbiter favours us'' are not
-separable. This project therefore ships both directions.
+\paragraph{Three directions, and only the third settled anything.} A bridge is
+asymmetric: whoever owns the game loop owns the rules, the RNG, and every
+tie-break. If only one side can host, every published number is measured
+through that side's arbiter and the two claims ``our engine is stronger'' and
+``our arbiter favours us'' are not separable. This project therefore ships
+every direction it can, which for most of its life was two --- and neither of
+those two could put our champion in \emph{their} arbiter, so the argument stood
+unmeasured until the third arrived.
 
 \begin{center}
 \small
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-& \emph{their engine inside ours} & \emph{our engine inside theirs} \\
+& \emph{their engine} & \emph{our engine} & \emph{our engine as} \\
+& \emph{inside ours} & \emph{driven by a host} & \emph{their bot package} \\
 \midrule
-entry point & \path{external_v07/shim_decide.cpp} & \path{fish4/decide.py} \\
-host owns & our arbiter & their arbiter \\
-transport & one decision per process & one decision per line \\
-cards identified by & integer id & \textbf{card name} \\
-state supplied by caller & hand counts, scores & \textbf{nothing derived} \\
+entry point & \path{external_v07/} & \path{fish4/decide.py} & \path{fishlab/} \\
+ & \path{shim_decide.cpp} & & \path{bot.py} \\
+host owns & our arbiter & the caller's & their arbiter \\
+transport & one decision & one decision & one decision \\
+ & per process & per line & per line \\
+cards identified by & integer id & \textbf{card name} & \textbf{card name} \\
+state from caller & counts, scores & \textbf{nothing derived} & counts, scores \\
+dialect spoken & ours & ours & \textbf{theirs} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -8281,6 +9732,76 @@ bridge cannot share an RNG stream with a long-lived one. Over two games this
 compares $150+$ decisions and exercises both the ask and the declaration path.
 The JSON-transport handout runs the same comparison at a larger scale as its
 self-test: $329$ decisions, $0$ mismatches, plus $520$ off-turn polls.
+
+\paragraph{A third direction, and the one that finally measured something.} The
+two bridges above are both \emph{ours}: we wrote the shim that runs their policy
+here, and we wrote the service that lets a host drive ours. Neither could seat
+our champion in a batch run of \emph{their} arbiter, which is why the
+separability argument at the head of this appendix went eleven months without a
+number attached to it. That project has since published an uploadable
+bot-package format, so our champion now installs into their engine as an
+ordinary seat and is matched from their command line
+(\path{fishlab/}, built by \path{fishlab/build.py}; \S\ref{sec:otherarbiter}
+reports what it found).
+
+Two things about it are worth recording, because both are the same lesson this
+appendix already teaches from the other side. Their format offers a bridge to
+\emph{our} JSON dialect, which would have been one line of manifest, and taking
+it is not safe for this bot: our \texttt{ClaimEvent} wants the true holders at
+resolution and their arbiter publishes none on a wrong declaration --- correctly,
+since that is what a person at the table sees. So the package speaks their
+dialect natively. And the first version of it made our declaration policy
+\emph{unreachable}: it answered their pre-move poll with certainties only at
+both turn states, and the ask path then discarded any declaration the policy
+returned. The tell was a figure that looked like a triumph --- $100.00\%$
+declaration accuracy over $1{,}200$ games --- and was in fact the signature of a
+policy that had been prevented from deciding. A bot that is never wrong about
+anything is not evidence of strength; it is evidence that something upstream is
+answering for it.
+
+\paragraph{The opponent moved under the pin, and that is a measurement too.}
+Every game reported here was played against their tree at commit
+\texttt{d017fbc}. That project subsequently released the identical
+configuration under a new name, SESTINA v1.0 \citep{nguyen2026sestina}, and put
+five commits under our pin --- among them $124$ new lines in the factory
+function this bridge calls to construct their agent. A margin against ``their
+v0.7'' is a claim about a policy, so a change beneath it threatens the claim;
+and their release note saying that nothing measured changed is their assertion,
+not our measurement.
+
+Rerunning the head-to-head would have been the wrong instrument: it answers a
+noisy question expensively, and a null there is equally consistent with a real
+behavioural change too small for $10{,}000$ games to resolve. The shim is a
+\emph{pure function} of the script fed to it --- it boots, replays the public
+record, answers one decision and exits --- so the two builds can be compared
+exactly instead. We captured the stdin script the bridge sends for every
+decision of real games and replayed each one through a binary built from the
+old pin and one built from the release:
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+decisions compared & $6{,}329$ \\
+\quad asks & $5{,}817$ \\
+\quad declarations & $472$ \\
+mismatches & $\mathbf{0}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Their freeze artifact is byte-identical across the same range, so the
+configuration is unchanged as well as the play, and the pin moves with the
+published margin intact. The limit is worth stating precisely: this exercises
+the decision distribution \emph{our games reach}, which is the distribution our
+claim is about, and says nothing about positions our policy never creates.
+
+The same question, asked of the rest of their ladder, is
+\S\ref{sec:res-ladder}'s provenance check, and it is answered by a different
+instrument for a mechanical reason --- this shim calls a function their v0.4
+tree did not have, so it cannot be built against those headers, and editing it
+to compile would mean verifying a shim other than the one our measurements run
+through.
 
 \section{Reproducing this work}
 \label{sec:repro}
@@ -8464,11 +9985,27 @@ the deal, for a seated player and for an anonymous visitor alike.
 Dylan Nguyen.
 \newblock FishBot: an engine for six-player Literature, versions 0.2--0.7.
 \newblock Software repository and technical reports,
-  \url{https://github.com/dylann4500/fishbot}, 2026. Version 0.7 pinned at
-  commit \texttt{d017fbc} for every game reported here. That commit may no
-  longer resolve: \citet{nguyen2026sestina} records that the repository's
-  history was rewritten after its evaluation. The frozen configuration string
-  in \path{external_v07/v07_spec.txt} identifies the build we played.
+  \url{https://github.com/dylann4500/fishbot}, 2026. Version 0.7 was pinned at
+  commit \texttt{d017fbc} for every game reported here, and the pin has since
+  moved to \texttt{f9b4743} (the SESTINA v1.0 release) on the evidence of
+  \S\ref{sec:bridges}: the two builds answer all $6{,}329$ of our decisions
+  identically. \citet{nguyen2026sestina} records a history rewrite during that
+  project's evaluation, so an earlier version of this entry warned that
+  \texttt{d017fbc} might not resolve; the published history contains it, and
+  contains the release commits of every rung of \S\ref{sec:res-ladder} as well.
+  The frozen configuration string in \path{external_v07/v07_spec.txt}
+  identifies the build we played.
+
+\bibitem[Nguyen(2026c)]{nguyen2026bridgenotedge}
+Dylan Nguyen.
+\newblock Bridge, not edge: an independent re-measurement of KRAKEN v1.1
+  against SESTINA v1.0.
+\newblock FishLab technical report, 2 September 2026. Produced at
+  \texttt{f9b4743} of \url{https://github.com/dylann4500/fishbot}; artifacts,
+  drivers and the repair patch under \path{research/kraken-check/}.
+  Received 8 September 2026, after this paper had independently withdrawn the
+  cross-engine headline on other evidence and before it had identified the
+  defect correctly.
 
 \bibitem[Nguyen(2026b)]{nguyen2026sestina}
 Dylan Nguyen.

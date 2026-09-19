@@ -76,6 +76,23 @@ class ClaimConfig:
     #: jobs/PREREGISTRATION_claim_feasibility.md. Off by default; the shipped
     #: champion is unchanged.
     feasibility: bool = False
+    #: The exactness bar for a VOLUNTARY declaration of a half-suit we are
+    #: already essentially certain we own. The module docstring above justifies
+    #: the single 0.97 bar with "waiting is nearly free while our team holds
+    #: the set", and that argument has one hole: waiting is paid for in every
+    #: ask the owning team spends into that half-suit meanwhile, each of which
+    #: surrenders the turn for certain. Under the no-bluff rule an ask can only
+    #: land where an opponent holds a card, so a half-suit our team wholly owns
+    #: admits no landable ask at all -- and results/completion_latency.json
+    #: measures 1.520 such asks per completion, 13.79% of everything we ask.
+    #: At 1.01 the test can never pass and the champion is bit-identical.
+    #: See prereg/kraken_v12_declaration_latency.md for the break-even that
+    #: sets 0.77, and for why it is one point rather than a sweep.
+    owned_threshold: float = 1.01
+    #: How certain "already essentially certain we own it" has to be. The
+    #: candidate's p_team, not its p_exact: the whole point is to separate
+    #: knowing the set is ours from knowing how it is split.
+    owned_p_team: float = 0.99
     #: half-suits this evaluator refuses to claim, for counterfactual studies
     #: only. ``scripts4/null_recoverability.py`` needs to replay a game with ONE
     #: claim deleted; suppressing claims wholesale (by lifting ``threshold``)
@@ -264,7 +281,25 @@ class ClaimEvaluator:
         unprompted are the ones we are essentially sure of.
         """
         best = self.best_candidate()
-        if best is not None and best[0] >= self.cfg.threshold:
+        if best is None:
+            return None
+        # Two bars, not one, and the second is lower rather than higher. The
+        # incumbent bar prices the risk of declaring wrongly and nothing else,
+        # because the docstring above believes the alternative to declaring is
+        # free. Where p_team is at the ceiling the alternative is not free: no
+        # opponent can hold a card of this half-suit, so no ask into it can
+        # land, and every one we make while waiting hands over the turn. That
+        # is the only case where the two differ, and at the default
+        # owned_threshold = 1.01 the test can never pass.
+        # Written as a DISJUNCTION rather than as a swapped bar. Swapping it
+        # would make the default 1.01 raise the bar above 0.97 wherever p_team
+        # is high, suppressing declarations the champion makes -- an "off"
+        # setting that changes play is exactly the withdrawal condition this
+        # arm's registration lists first.
+        if best[0] >= self.cfg.threshold:
+            return best[2]
+        if (best[1] >= self.cfg.owned_p_team
+                and best[0] >= self.cfg.owned_threshold):
             return best[2]
         return None
 

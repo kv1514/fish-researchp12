@@ -4,51 +4,6 @@ A research engine for **Literature** (a.k.a. **Fish** / **Canadian Fish**),
 working toward the strongest practical engine for six-player Literature and
 toward understanding what near-optimal Fish actually looks like.
 
-> **Deploying:** `vercel.json`'s `ignoreCommand` cancels the *build* for pushes
-> that touch nothing the site serves, but Vercel still creates a *deployment*
-> for every push and the free tier caps those at 100/day
-> (`api-deployments-free-per-day`). Every push after that posts a failing
-> Vercel status on the open PR while the last successful deployment keeps
-> serving the site normally.
->
-> That used to be an inference from the error message. It is now measured: over
-> one 4.3-hour window the project recorded **40 deployments — 9.4 per hour —
-> of which 27 (68%) were `CANCELED` by the ignore command**, and the daily cap
-> was still reached. A cancelled deployment saves build minutes and costs a
-> deployment slot exactly like a real one.
->
-> The Vercel docs were then checked for a way to skip deployment *creation*:
-> `git.deploymentEnabled` can disable a whole branch, and `ignoreCommand` is
-> the only path-aware mechanism — and it runs after the deployment record
-> exists. There is no per-path way to stop the record being created, so **the
-> fix is fewer pushes**, not a cleverer ignore command. Batch commits locally
-> and push once per group of work.
->
-> **The error message's "retry in 24 hours" is not the recovery time, and the
-> limit is intermittent rather than a window.** Five consecutive pushes, UTC:
->
-> ```
-> 03:41:06  deployment created, cancelled by ignoreCommand   -> success
-> 03:47:13  refused: "retry in 24 hours"
-> 03:51:16  refused
-> 03:56:02  deployment created, cancelled by ignoreCommand   -> success
-> 03:57:52  refused
-> ```
->
-> Two of five got through, and one arrived less than two minutes after a
-> refusal. So it behaves like a bucket that refills continuously, not a door
-> that shuts for a day — and *not* like something that "releases" and stays
-> released, which is what a first reading of the 03:51→03:56 gap suggested.
-> A refused push also creates **no deployment record at all**, so it costs a
-> red status and nothing else.
->
-> All of that came from the deployment API rather than the message, which is
-> the point of the paragraph: the note above replaced one
-> inference-from-an-error-string with a measurement, then repeated a *different*
-> claim from the same error string without measuring it, and the first
-> correction then over-read a single recovery as a rule. Three passes over four
-> sentences, each one shorter on evidence than it sounded.
-
 **Play it:** [fish-engine.vercel.app](https://fish-engine.vercel.app/) ---
 six-player Literature against KRAKEN v1.1, with the engine's own posterior
 visible while you play. Public, no sign-in, nothing stored; a game lives in the
@@ -69,10 +24,16 @@ is in flight, and not the link to give anybody.
   [fish4/evalx/README.md](fish4/evalx/README.md), and in the raw duel records at
   `results/v04_duels.jsonl`)
 - Strategy findings: [STRATEGY_BOOK.md](STRATEGY_BOOK.md)
-- Research paper (current): [paper/kraken.tex](paper/kraken.tex) — KRAKEN v1.1
+- **Research paper (current): [paper/kraken.pdf](paper/kraken.pdf)** — KRAKEN
+  v1.1, built from [paper/kraken.tex](paper/kraken.tex) by
+  [paper/build.sh](paper/build.sh). Start here.
 - Research paper, v0.3 (superseded, kept because its results still reproduce):
   [PAPER.md](PAPER.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
+- Running this bot somewhere else: [kraken/README.md](kraken/README.md) (JSON
+  decision service, any host) or [fishlab/README.md](fishlab/README.md) (an
+  uploadable package for FishLab's own engine)
+- Running *their* bot here: [external_v07/README.md](external_v07/README.md)
 
 ## Where the engine is now
 
@@ -82,18 +43,59 @@ and kept because its findings still hold for the rung it describes.
 
 The deployed engine is **KRAKEN v1.1** (`V06_DEPLOYED` in
 `fish4/registry4.py`; it was called KV's FishBot v0.6 before 2026-08-28 and the
-identifiers did not move with the name — see `fish4/brand.py` for why). Against
-**Dylan's FishBot v0.7** (github.com/dylann4500/fishbot, a genuinely foreign
-engine sharing no code with this one), over 10,000 duplicate deals through
-bridge revision 2:
+identifiers did not move with the name — see `fish4/brand.py` for why).
 
-**+2.3466 sets/game** [+2.2928, +2.4004] · 63.0% of decided sets · 80.4% of
-games won · zero substituted moves.
+### The cross-engine headline is withdrawn
 
-Four things measured since, each of which changed what the project believes:
+> **RETRACTED.** This section previously led with **+2.3466 sets/game** against
+> Dylan's FishBot v0.7. That figure is withdrawn: it was an artifact of our own
+> bridge, not a measurement of the two engines. See below.
 
-- **57% of that margin is declaration accounting**, not card acquisition. We
-  make 0.176 wrong declarations a game against their 0.844.
+**What happened.** `external_v07/shim_decide.cpp` is stateless by design — a
+fresh process per decision, replaying the whole public log into a freshly reset
+agent. Their arbiter keeps one agent per seat alive for the deal. Those agree
+exactly on their scripted v0.2 and v0.3 (0 of 661 decisions differ) and diverge
+on **every release from v0.4**, where their fitted belief arrives — up to 40.8%
+of decisions, and asymmetrically: the stateless path declares where the
+persistent one asks 20 times against 2 the other way.
+
+Priced under a paired design that changes nothing but the transport
+(`results/bridge_statefulness_price.json`, 2,000 pairings over 1,000 deals, zero fallbacks):
+
+| | our margin |
+|---|---:|
+| our arbiter, **stateless** bridge (the published route) | +2.4800 |
+| our arbiter, **persistent** bridge | **−0.6960** |
+| their arbiter, our bot package (independent route) | **−0.6200** |
+
+The bridge was worth **+3.18 [+3.01, +3.34] sets a game to us** — more than the
+entire margin it produced — and their declaration errors fall tenfold, 0.880 to
+0.092 a game, once their engine keeps the state its own arbiter lets it keep.
+Two routes sharing no host, no rules and no code agree to within 0.08; the
+published one is out by three.
+
+**Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.5–0.7 sets/game
+depending on route** (−0.5250 [−0.6886, −0.3614] through the repaired bridge,
+`results/mega_match.json`, the baseline P43–P47 were measured against; −0.70
+through the persistent bridge; −0.62 inside their own arbiter). Three
+pre-registered programmes since have not moved it.
+
+What survives: every **paired** contrast that shares the bridge, because both
+arms were handicapped identically, and every internal result that never crossed
+the bridge at all. That distinction was written into the paper's bridges
+appendix long before there was any reason to think it applied to the paper's own
+headline.
+
+### Six things measured since, each of which changed what the project believes
+
+The first of these is about the retracted run and is kept because it is how the
+retraction was eventually found — a margin whose majority component was one
+opponent's declaration errors was a margin worth being suspicious of:
+
+- **57% of that margin was declaration accounting**, not card acquisition: 0.176
+  wrong declarations a game against their 0.844. Their 0.844 is now known to be
+  the *handicapped* figure; unhandicapped it is 0.080, and the margin goes with
+  it.
 - **95% of what we get wrong is our own team's split** — allocation class,
   0.1676 a game against 0.0083 ownership errors. Once a team holds all six of
   a half-suit no opponent may legally ask in it, so the split freezes with the
@@ -106,8 +108,30 @@ Four things measured since, each of which changed what the project believes:
 - **Pairing is worth between 1.1× and 414× the games, and how often a knob
   changes a decision is what decides which.** Not the effect size. This is now
   how runs here are sized.
+- **Three pre-registered attempts to beat SESTINA through the repaired bridge
+  (P43–P47 in `prereg/`, fourteen arms) and none cleared +0.15 in both
+  populations.** Two of the arms raised our ask hit rate — the one metric the
+  cross-engine table says we trail on — by one to one and a half points
+  (0.5245 vs 0.5184; 0.5287 vs 0.5136) and each lost about a third of a set
+  a game against SESTINA doing it. A gap in a metric is not necessarily a gap
+  to close; that is now replicated on two independent channels. The fourth
+  programme, P46, measured the belief itself and found it sharper at a higher
+  exponent than the champion's; the one arm its rule licensed,
+  `opponent_gamma = 0.7`, is the first to read positive in both populations
+  (+0.24 / +0.16 at 600 pairings) and clears neither interval; the fifth,
+  P47, confirmed it at 1,200 pairings as a null against SESTINA (+0.0017
+  [−0.204, +0.208]) that clears the self-play half (+0.1667 [+0.009,
+  +0.325]) — the first half of the dual bar anything has cleared, and the
+  half it exists to distrust. Nothing ships.
+- **The ownership inference is measured and is not what stops us declaring:
+  the split is.** All three estimators of "we hold all six" cross 0.99 on
+  4.17% of genuinely owned half-suits, and relaxing the gate's ownership test
+  from 0.77 to 0.20 adds only 0.103 declarations a game, under half the
+  futility bar (`results/ownership_estimators.json`). The "team has the
+  answer and no member of it does" problem above is the measured constraint.
 
-`PAPER.md` and `paper/kraken.tex` carry the full argument;
+`paper/kraken.tex` carries the full argument (`PAPER.md` is the superseded
+v0.4-era paper, kept for its arguments and not its numbers);
 `prereg/` holds the registrations, each with its outcome recorded against the
 conditions fixed before the run.
 
@@ -513,3 +537,50 @@ predicted. An intermittent room reads as a bug in the game rather than as a
 missing environment variable, so rooms now fail closed wherever each request
 may get a different process. Locally, where there is one process, the in-memory
 store is genuinely shared and rooms work with no setup at all.
+
+## Deploying, and the rate limit that shapes how you push
+
+`vercel.json`'s `ignoreCommand` cancels the *build* for pushes
+that touch nothing the site serves, but Vercel still creates a *deployment*
+for every push and the free tier caps those at 100/day
+(`api-deployments-free-per-day`). Every push after that posts a failing
+Vercel status on the open PR while the last successful deployment keeps
+serving the site normally.
+
+That used to be an inference from the error message. It is now measured: over
+one 4.3-hour window the project recorded **40 deployments — 9.4 per hour —
+of which 27 (68%) were `CANCELED` by the ignore command**, and the daily cap
+was still reached. A cancelled deployment saves build minutes and costs a
+deployment slot exactly like a real one.
+
+The Vercel docs were then checked for a way to skip deployment *creation*:
+`git.deploymentEnabled` can disable a whole branch, and `ignoreCommand` is
+the only path-aware mechanism — and it runs after the deployment record
+exists. There is no per-path way to stop the record being created, so **the
+fix is fewer pushes**, not a cleverer ignore command. Batch commits locally
+and push once per group of work.
+
+**The error message's "retry in 24 hours" is not the recovery time, and the
+limit is intermittent rather than a window.** Five consecutive pushes, UTC:
+
+```
+03:41:06  deployment created, cancelled by ignoreCommand   -> success
+03:47:13  refused: "retry in 24 hours"
+03:51:16  refused
+03:56:02  deployment created, cancelled by ignoreCommand   -> success
+03:57:52  refused
+```
+
+Two of five got through, and one arrived less than two minutes after a
+refusal. So it behaves like a bucket that refills continuously, not a door
+that shuts for a day — and *not* like something that "releases" and stays
+released, which is what a first reading of the 03:51→03:56 gap suggested.
+A refused push also creates **no deployment record at all**, so it costs a
+red status and nothing else.
+
+All of that came from the deployment API rather than the message, which is
+the point of the section: its first version replaced one
+inference-from-an-error-string with a measurement, then repeated a *different*
+claim from the same error string without measuring it, and the first
+correction then over-read a single recovery as a rule. Three passes over four
+sentences, each one shorter on evidence than it sounded.

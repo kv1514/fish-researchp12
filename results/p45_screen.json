@@ -1,0 +1,31 @@
+{
+ "stage": "screen",
+ "ship_bar": 0.15,
+ "prereg": "prereg/kraken_v12_free_message.md",
+ "arms": {
+  "F1_free_message": {
+   "vs_sestina": {
+    "mean": -0.30666666666666664,
+    "ci95": [
+     -0.6071587399999792,
+     -0.006174593333354128
+    ],
+    "n": 600
+   },
+   "self_play": {
+    "mean": -0.8566666666666667,
+    "ci95": [
+     -1.068740966949988,
+     -0.6445923663833453
+    ],
+    "n": 600
+   },
+   "verdict": "no",
+   "fallbacks": 0,
+   "unfinished": 0,
+   "cand_ask_hit": 0.5286723315141131,
+   "champ_ask_hit": 0.5135667464705894
+  }
+ },
+ "seconds": 425.8
+}

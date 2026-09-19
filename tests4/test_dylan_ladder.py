@@ -100,13 +100,28 @@ def test_v07_still_resolves_to_the_frozen_spec_file():
     assert "allparams=" in L.spec_for("dylan_v07")
 
 
-def test_the_docstring_states_what_provenance_does_not_establish():
-    """Their repo is here as one squashed commit, so the compiled v04/v05/v06
+def test_the_docstring_states_what_provenance_does_and_does_not_establish():
+    """The caveat that used to sit here is discharged, and the module has to say
+    both halves of that.
+
+    It said: their repo is one squashed commit, so the compiled v04/v05/v06
     vectors cannot be checked against the ones their published results used.
-    That limit is stated in the module, not discovered by a reader."""
+    Their full history is now published and the check has been run
+    (`scripts4/dylan_ladder_provenance.py`), so the module must state the
+    RESULT -- and must still state the two things a pass does not buy, because
+    an over-read of it is the failure this test now guards.
+    """
     doc = " ".join(L.__doc__.split())
-    assert "SINGLE SQUASHED COMMIT" in doc
-    assert "NOT a verified reproduction" in doc
+    assert "PLAYS IDENTICALLY" in doc, "the outcome of the check is not stated"
+    assert "dylan_ladder_provenance" in doc, "the reader cannot find the check"
+    assert "does not verify their PUBLISHED numbers" in doc, (
+        "a provenance pass on the binary is not a check of their numbers, and "
+        "the module has to keep saying so")
+    assert "policy-and-arbiter pair" in doc, (
+        "a differing field would not have localised to the policy alone; "
+        "dropping that caveat overstates what the instrument can see")
+    assert "SINGLE SQUASHED COMMIT" not in doc, (
+        "the squashed-snapshot caveat is stale: the history is published")
 
 
 def test_the_upstream_pin_is_recorded():
