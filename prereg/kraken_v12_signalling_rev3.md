@@ -145,3 +145,126 @@ champion at their defaults; it is byte-identical to the champion on every
 deal (the mechanism never fired); any interval is zero-width; any fallback or
 unfinished game occurs; either side raises `IllegalAction`; the identity
 fails to close on any terminal game.
+
+---
+
+# OUTCOME, recorded 2026-09-19
+
+**Nothing clears. Nothing ships. The champion is unchanged. The first bullet
+of the reading rule fires: the signalling line's gain was the bridge defect,
+measured from the other side.**
+
+`results/p48_screen.json`: 1,200 pairings, 3,600 games at seed base
+11,400,000, agent base 114,000, 1,074 s at four workers; **zero fallbacks,
+zero unfinished, the identity closes on every one of the 3,600 games**, no
+zero-width interval, no `IllegalAction`; both arms fired (S1 signalled in
+one game in five against SESTINA, 112 of 600). No withdrawal condition fires and the
+numbers are read as they stand.
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| S1 `signal_mode = "stuck"`, `signal_max_p = 0.5` | **+0.0033 [−0.078, +0.085]** | **+0.0267 [−0.205, +0.258]** | no |
+| S2 = S1 + `signal_budget = 6` | **−0.0233 [−0.109, +0.063]** | +0.0100 [−0.223, +0.243] | no |
+
+## The registered secondary: where the effect lives, through the repaired bridge
+
+Against SESTINA, paired within deal, in margin units (two sets a
+declaration), with the rev-2 reading of the same arm beside it:
+
+| channel | S1 at rev 3 | S1 at rev 2 (`results/signal_budget_11700000.json`) |
+|---|---:|---:|
+| race (half-suits we get to declare) | −0.0733 [−0.152, +0.005] | −0.1585 |
+| ours (our wrong declarations, sign flipped) | **+0.0600 [+0.020, +0.100]** | +0.0465 |
+| theirs (their wrong declarations) | **+0.0167 [−0.010, +0.044]** | **+0.2725 [+0.2270, +0.3180]** |
+| effect | +0.0033 | +0.1605 |
+
+Signals a game: **0.623** against SESTINA, 0.467 in self-play (rev 2: 8.94
+against `dylan_v07`, 0.49 in self-play). Their declaration error rate with S1
+on the table: **3.58%** against **3.43%** with the champion (rev 2: 24.02%
+against 21.08%). Our own: **1.46%** against **2.17%**. Ask hit rate 0.5199
+against 0.5242 — a signal is a deliberately failed ask.
+
+In self-play the identity reads differently (one game, two sides:
+race = D_us − D_them, and the two error counters collapse into one channel,
+2·(W_them − W_us), because a symmetric game cannot separate "we declared
+better" from "they declared worse"): race −0.0267 [−0.255, +0.202], errors
++0.0533 [−0.021, +0.128], summing to +0.0267.
+
+**The theirs channel is gone.** Its rev-3 interval, [−0.010, +0.044], lies
+entirely below the rev-2 lower bound of +0.2270 and covers zero. The channel
+that was most of the gross gain at rev 2 — the opponent's extra wrong
+declarations, +0.1363 a game, their error rate lifted from 21.08% to 24.02% —
+does not exist against an opponent whose posterior we are not corrupting.
+"Volume is the whole of what it buys" was right about rev 2 and wrong about
+the mechanism: the volume was the defect's. Through the repaired bridge the
+protocol fires 0.62 times a game, not 8.94, because "89.6% of stuck turns
+clear the cheapness bar against `dylan_v07`" was a property of an opponent
+whose corrupted posterior left us with nothing worth asking; against the
+real one we are stuck less and, when stuck, usually have an ask worth
+making.
+
+**The ours channel survives, and it is the whole of what the mechanism was
+built to do.** A signal proves to a partner which card this seat does not
+hold, and partners then place splits they would otherwise get wrong: our
+wrong declarations fall from 2.17% to 1.46% of the ones we make, +0.0600
+[+0.020, +0.100] in margin, clear of zero, replicating the rev-2 +0.0465
+through the repaired bridge. And each signal is a conceded turn: race
+−0.0733 [−0.152, +0.005]. The two cancel to +0.0033. The protocol does
+exactly what it says and pays exactly what it buys.
+
+## The prediction got the verdict right, the direction of every channel right, and the dose wrong by five
+
+Predicted: S1 −0.10 [−0.40, +0.20] against SESTINA and +0.02 [−0.20, +0.24]
+in self-play; theirs +0.01 [−0.05, +0.07]; race −0.15; ours +0.04; about 3
+signals a game against SESTINA; S2 +0.05 / 0.00. Found: +0.0033 and +0.0267;
+theirs +0.0167; race −0.0733; ours +0.0600; 0.62 signals a game; S2 −0.0233
+/ +0.0100. The verdict, the sign of every channel and the vanishing of the
+opponent channel were predicted. Two things were not. The vs-SESTINA
+interval is three and a half times narrower than predicted — ±0.08, where
+every earlier arm in this programme read ±0.29 — because a mechanism that
+touches 0.6 decisions a game leaves most pairings identical, and **the
+result is a null whose interval excludes the ship bar itself** (upper bound
++0.085 against +0.15), the first arm in six registrations for which that is
+true. And the dose collapsed fourteen-fold, not three-fold: the prediction
+kept a third of the rev-2 volume for the mechanism, and the mechanism owns
+a fourteenth of it.
+
+**S2 is S1.** At 0.57 signals a game the six-signal budget almost never
+binds; the two arms differ on a handful of pairings and their contrasts are
+the same reading twice. The prediction that a budget would keep the own-error
+channel and return the race was a rev-2 prediction about a rev-2 dose.
+
+## What this closes, and what it withdraws
+
+The signalling line. Its registered confirmation (+0.1180, +0.1220), its
+replications (+0.1435, +0.1605), its identity run (+0.119) and its dose
+studies were all `bridge_rev: 2` duels against `dylan_v07`, and the paper's
+sentences that the mechanism's "value is established and positive" and that
+it is off "not because it does nothing" are withdrawn by the rule fixed
+above: through the repaired bridge the protocol is +0.0033 [−0.078, +0.085]
+against SESTINA and +0.0267 [−0.205, +0.258] in self-play, and its rev-2 gain
+was the bridge defect, measured from the other side. The confirmations join
+the paper's withdrawn list beside R2, R6, the dialect gaps and the
+contestation port. What survives is smaller and exact: the mechanism cuts our
+own wrong declarations by a third of their rate and pays for it in turns.
+
+Not registered next, and why: `signal_max_p` above 0.5 (the gate was never
+the binding constraint: 0.15 and 0.50 moved three declarations in a thousand
+games apart, and at 0.62 fires a game there is no volume to widen into); a
+per-opponent dose (the dose is set by how often we get stuck, which the real
+opponent makes rare); the deferred gate (`C_defer`, +0.0455 [+0.0134,
++0.0776]) — also a `bridge_rev: 2` duel against `dylan_v07`, recorded here
+as unre-read rather than as withdrawn, because its channel split at rev 2
+was ours-dominated (its value was our own errors halved) and nothing in P48
+measures it.
+
+Seventeen duels of sixteen arms across six registrations. `V06_DEPLOYED` is
+byte-for-byte unchanged. KRAKEN v1.1 still loses to SESTINA v1.0 by −0.5250.
+
+*Recorded with the outcome:* the harness's self-play channel split, as first
+written, applied the two-game coefficients to one-game counters and
+double-counted every self-play channel; the residual exposed it (9, not 0)
+and the vs-SESTINA split, which the reading rule keys on, was exact
+throughout. The split was corrected and the results file's summary was
+rebuilt from its own per-pairing rows (`--rescore`), with no game replayed;
+the file carries `rescored: true` and the rows are unchanged.

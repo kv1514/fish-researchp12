@@ -126,33 +126,50 @@ def _mean_ci(values) -> dict:
 
 
 def channels(rows, cand_key, champ_key) -> dict:
-    """The arm's effect split into race / ours / theirs, paired within deal.
+    """The arm's effect split into the identity's channels, paired within deal.
 
-    For self-play `champ_key` is None: the candidate's team and the
-    champion's are the two sides of ONE game, so the counters are read
-    against a symmetric zero (a champion-versus-champion game has an
-    expected margin of zero and identical expected counters on both sides).
+    Against SESTINA the candidate's game and the champion's are two games on
+    the same deal, and the split is the identity's: race = 2 dD_us,
+    ours = -2 dW_us, theirs = +2 dW_them, summing to the effect exactly.
+
+    In self-play (`champ_key` None) the candidate's team and the champion's
+    are the two sides of ONE game, and the identity reads differently:
+    with D_us + D_them = 9, margin = (D_us - D_them) - 2 W_us + 2 W_them, so
+    race = D_us - D_them and the two error counters collapse into ONE
+    channel, errors = 2 (W_them - W_us). A symmetric game cannot separate
+    "we declared better" from "they declared worse" -- both are the same
+    difference -- so no ours/theirs split is reported there. The first
+    version of this function applied the two-game coefficients to the one-
+    game counters and double-counted every channel, which the residual
+    exposed (9, not 0); the residual is asserted zero for both cases now.
     """
-    eff, race, ours, theirs, resid = [], [], [], [], []
+    eff, race, ours, theirs, errors, resid = [], [], [], [], [], []
     for r in rows:
         a = r[cand_key]
         if champ_key is None:
-            b = {"margin": 0, "d_us": (9 - 0) / 2, "w_us": 0, "w_them": 0}
-            # a symmetric game: the only well-defined contrast is the raw
-            # counter on the candidate's side minus its mirror on the other
-            b = {"margin": 0, "d_us": a["d_them"], "w_us": a["w_them"],
-                 "w_them": a["w_us"]}
+            e = a["margin"]
+            rc = a["d_us"] - a["d_them"]
+            er = 2 * (a["w_them"] - a["w_us"])
+            eff.append(e); race.append(rc); errors.append(er)
+            resid.append(e - (rc + er))
         else:
             b = r[champ_key]
-        e = a["margin"] - b["margin"]
-        rc = 2 * (a["d_us"] - b["d_us"])
-        ou = -2 * (a["w_us"] - b["w_us"])
-        th = 2 * (a["w_them"] - b["w_them"])
-        eff.append(e); race.append(rc); ours.append(ou); theirs.append(th)
-        resid.append(e - (rc + ou + th))
-    return {"effect": _mean_ci(eff), "race": _mean_ci(race),
-            "ours": _mean_ci(ours), "theirs": _mean_ci(theirs),
-            "max_abs_residual": max(abs(x) for x in resid) if resid else None}
+            e = a["margin"] - b["margin"]
+            rc = 2 * (a["d_us"] - b["d_us"])
+            ou = -2 * (a["w_us"] - b["w_us"])
+            th = 2 * (a["w_them"] - b["w_them"])
+            eff.append(e); race.append(rc); ours.append(ou); theirs.append(th)
+            resid.append(e - (rc + ou + th))
+    out = {"effect": _mean_ci(eff), "race": _mean_ci(race),
+           "max_abs_residual": max(abs(x) for x in resid) if resid else None}
+    if champ_key is None:
+        out["errors"] = _mean_ci(errors)
+        out["note"] = ("one game, two sides: race = D_us - D_them, errors = "
+                       "2 (W_them - W_us); ours/theirs are not separable")
+    else:
+        out["ours"] = _mean_ci(ours)
+        out["theirs"] = _mean_ci(theirs)
+    return out
 
 
 def _fmt(x) -> str:
@@ -225,8 +242,8 @@ def report(rows_by_arm, stage) -> dict:
               f"{_fmt(ch['ours'])}  theirs {_fmt(ch['theirs'])}  "
               f"max|resid| {ch['max_abs_residual']}")
         chs = arm["channels"]["self_play"]
-        print(f"    self-play channels   race {_fmt(chs['race'])}  ours "
-              f"{_fmt(chs['ours'])}  theirs {_fmt(chs['theirs'])}")
+        print(f"    self-play channels   race {_fmt(chs['race'])}  errors "
+              f"{_fmt(chs['errors'])}  max|resid| {chs['max_abs_residual']}")
         sg = arm["signals_per_game"]
         er = arm["error_rates"]["vs_sestina"]
         print(f"    signals/game vs SESTINA {sg['vs_sestina']:.3f}  self-play "
@@ -244,11 +261,29 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--arms", default=",".join(DEFAULT_ARMS))
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--rescore", default=None, metavar="RESULTS",
+                    help="rebuild the report from an existing results file's "
+                         "per-pairing rows without replaying a game; the "
+                         "rows are the data, the report is a summary of them")
     return ap
+
+
+def rescore(path: str) -> int:
+    d = json.loads(Path(path).read_text())
+    rows_by_arm = {l: rows for l, rows in d["per_pair"].items()}
+    out = report(rows_by_arm, d.get("stage", "screen"))
+    for k in ("seconds", "seed_base", "agent0", "deals", "per_pair"):
+        out[k] = d[k]
+    out["rescored"] = True
+    Path(path).write_text(json.dumps(out, indent=1) + "\n")
+    print(f"\nrescored {path}")
+    return 0
 
 
 def main(argv=None) -> int:
     a = build_parser().parse_args(argv)
+    if a.rescore:
+        return rescore(a.rescore)
     labels = [x for x in a.arms.split(",") if x]
     for l in labels:
         if l not in ARMS:

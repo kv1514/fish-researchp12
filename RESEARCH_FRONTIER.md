@@ -4771,3 +4771,58 @@ reachable by any single knob this engine exposes at the power this project
 can buy; the next attempt would have to change what the engine computes.
 `V06_DEPLOYED` is byte-for-byte unchanged; KRAKEN v1.1 still loses to
 SESTINA v1.0 by −0.5250.
+
+## REGISTERED 2026-09-19: P48, the signalling protocol through the repaired bridge
+
+`prereg/kraken_v12_signalling_rev3.md`, written after P47 was on disk and
+before any P48 game. Every margin the signalling line ever reported against
+an opponent — the confirmation +0.1220 [+0.0291, +0.2149], the replications
++0.1435 and +0.1605, the identity run +0.119 — was a `bridge_rev: 2` duel
+against `dylan_v07`, through the bridge later found to be corrupting that
+opponent's posterior; the line's own identity put most of the gain in
+*their* extra wrong declarations (race −0.1585, ours +0.0465, theirs
++0.2725), the counter the defect inflated (their declaration accuracy 78.87%
+through the corrupted bridge, 96.68% through the repaired one), and the
+self-play control, which never had the bridge in the loop, was +0.0200
+[−0.0232, +0.0632]. The paper withdrew contrasts against `dylan_v07` with the
+absolutes and still calls the protocol's value "established and positive".
+P48 plays S1 (`signal_mode = "stuck"`, `signal_max_p = 0.5`, arm C verbatim)
+and S2 (S1 + `signal_budget = 6`) through `BRIDGE_REV 3` in both populations
+on the fresh block 11,400,000 (agent base 114,000), 300 deals × 2 parities
+each, with the margin identity's three channels read off every game as the
+registered secondary and a reading rule for the paper's sentences fixed in
+advance. Prediction: nothing clears; S1 vs SESTINA −0.10 [−0.40, +0.20],
+self-play +0.02 [−0.20, +0.24]; S1's theirs channel against SESTINA +0.01
+[−0.05, +0.07], the opponent channel gone; about 3 signals a game against
+SESTINA, down from 8.94; S2 +0.05 / 0.00. Result lands in
+`results/p48_screen.json`.
+
+## OUTCOME 2026-09-19: P48 — the signalling gain was the bridge defect, measured from the other side
+
+`results/p48_screen.json`: 1,200 pairings on 11,400,000, 3,600 games, zero
+fallbacks, the identity closing on every game.
+
+| arm | vs SESTINA | self-play |
+|---|---:|---:|
+| S1 `signal_mode = "stuck"`, `signal_max_p = 0.5` | **+0.0033 [−0.078, +0.085]** | +0.0267 [−0.205, +0.258] |
+| S2 = S1 + `signal_budget = 6` | −0.0233 [−0.109, +0.063] | +0.0100 [−0.223, +0.243] |
+
+S1 against SESTINA, by the identity, rev 3 against rev 2: race −0.0733
+[−0.152, +0.005] vs −0.1585; ours **+0.0600 [+0.020, +0.100]** vs +0.0465;
+theirs **+0.0167 [−0.010, +0.044]** vs **+0.2725 [+0.2270, +0.3180]**. Their
+error rate 3.58% vs 3.43% (rev 2: 24.02% vs 21.08%); ours 1.46% vs 2.17%.
+Signals a game **0.623** (rev 2: 8.94). The reading rule fires: the theirs
+channel is gone, the volume was the defect's, and the paper's "established
+and positive" sentences are withdrawn; the confirmations join the withdrawn
+list. What survives is what the mechanism was built to do — our own wrong
+declarations fall by a third of their rate — and the race cancels it exactly.
+The vs-SESTINA interval is ±0.08 (a mechanism that touches 0.6 decisions a
+game leaves most pairings identical): the first arm in six registrations
+whose interval excludes the bar itself. S2 is S1 (the budget binds on 8 of
+600 pairings). Prediction: verdict and every channel's sign right, dose
+wrong by five (predicted 3, found 0.62). The harness's self-play channel
+split double-counted as first written (residual 9); corrected, the file
+rescored from its own rows with no game replayed, a test added.
+
+Seventeen duels of sixteen arms across six registrations. `V06_DEPLOYED`
+unchanged; KRAKEN v1.1 still loses to SESTINA v1.0 by −0.5250.

@@ -22,7 +22,7 @@ from fish.rules import RuleConfig                        # noqa: E402
 from fish4.registry4 import KRAKEN_V1, make_agent        # noqa: E402
 from scripts4 import p48_screen                          # noqa: E402
 from scripts4.p48_screen import (ARMS, DEFAULT_ARMS, build_parser,  # noqa: E402
-                                 score)
+                                 channels, score)
 
 RULES = RuleConfig(wrong_distribution_outcome="opponent")
 
@@ -120,3 +120,23 @@ def test_unregistered_arm_is_refused(tmp_path, capsys):
                           "--jobs", "1", "--out", str(tmp_path / "x.json")])
     assert rc == 2
     assert "not a registered arm" in capsys.readouterr().err
+
+
+def test_both_channel_splits_close_on_every_game(games):
+    """The vs-SESTINA split is the two-game identity and the self-play split
+    the one-game identity; each has to sum to the effect on every pairing.
+    The first version double-counted the self-play channels and the
+    residual said so (9, not 0)."""
+    for label, played in games.items():
+        rows = []
+        for st, agents in played:
+            s_even = score(st, 0, agents)
+            s_odd = score(st, 1, agents)
+            rows.append({"self": s_even, "sestina_cand": s_even,
+                         "sestina_champ": s_odd})
+        sp = channels(rows, "self", None)
+        assert sp["max_abs_residual"] == 0, (label, sp)
+        assert "errors" in sp and "ours" not in sp
+        vs = channels(rows, "sestina_cand", "sestina_champ")
+        assert vs["max_abs_residual"] == 0, (label, vs)
+        assert "ours" in vs and "theirs" in vs

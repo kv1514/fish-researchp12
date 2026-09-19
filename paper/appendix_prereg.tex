@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-seven documents in \path{prereg/}
+no registered threshold anywhere. The forty-eight documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -27,7 +27,7 @@ non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the four written after
 this appendix was first compiled (P39--P42) appended at the end, in filename
 order among themselves, so that the identifiers already cited in the text keep
-their referents. Twelve of the forty-seven have \emph{no outcome recorded in the
+their referents. Twelve of the forty-eight have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -199,7 +199,9 @@ arm}; ``fresh seed block''; withdrawal 1: B must reproduce $+0.068$ within its
 interval. &
 Yes: ``paired SD of $\approx 1.15$ \ldots at about $\pm 0.071$.'' &
 \textbf{REAL, SUB-BAR.} ``C is $+0.1220$ \ldots \textbf{It does not ship}, and
-the bar is not amended after seeing the number.''
+the bar is not amended after seeing the number.'' A bridge-revision-2 duel;
+re-read through the repaired bridge under P48, the arm is $+0.0033$
+$[-0.078, +0.085]$ and the gain was the defect.
 \path{results/signal_gate_confirm.json} &
 \S\ref{sec:res-perpetual} \\
 
@@ -523,7 +525,8 @@ margin(B\_incumbent) $-$ margin(A\_shipped). Seed base \textbf{10,100,000};
 Yes, explicitly: ``This run is \textbf{powered to answer GONE, and is not
 powered to distinguish SURVIVES from SHRUNK} when both are positive.'' &
 \textbf{SURVIVES.} ``$+0.1435$ $[+0.0971, +0.1899]$, 2,000 deal clusters.''
-Still below the $+0.15$ bar, ``which is not amended now either''.
+Still below the $+0.15$ bar, ``which is not amended now either''. A
+bridge-revision-2 duel; withdrawn with the line under P48.
 \path{results/signal_no_repeat.json} &
 \textbf{Not in the paper} \\
 
@@ -839,21 +842,56 @@ prediction got the verdict right and both halves wrong in opposite
 directions. Ask hit rate $0.5261$ against $0.5249$: the Stage~1 rise did not
 replicate. \path{results/p47_confirm.json} &
 \S\ref{sec:p46} \\
+P48 & \path{kraken_v12_signalling_rev3.md} \newline
+\emph{Does the signalling protocol's gain survive the bridge repair, or was
+it the defect measured from the other side?} &
+Written after P47 was on disk and before any P48 game. Every margin the
+signalling line reported against an opponent was a \texttt{BRIDGE\_REV}~2
+duel against \texttt{dylan\_v07}, and its own identity put most of the gain
+in \emph{their} extra wrong declarations, the counter the defect inflated;
+the self-play control was a null. Two arms on the fresh block
+\textbf{11,400,000} (agent base $114{,}000$), $300$ deals $\times$ 2
+parities each, the P43--P47 dual-population design: \textbf{S1}
+\texttt{signal\_mode} $=$ \texttt{stuck}, \texttt{signal\_max\_p} $=0.5$
+(arm C of the line, verbatim) and \textbf{S2} $=$ S1 $+$
+\texttt{signal\_budget} $=6$. Registered secondary: the margin identity's
+three channels (race / ours / theirs) per arm and population, paired within
+deal, the residual asserted zero on every game; signals a game. Reading rule
+for the paper's ``value established and positive'' sentences keyed on S1's
+theirs channel against SESTINA against its rev-2 value $+0.2725$
+$[+0.2270, +0.3180]$. Bar: $+0.15$ clear of zero in both populations. &
+Nothing clears. S1 vs SESTINA $-0.10$ $[-0.40, +0.20]$, self-play $+0.02$
+$[-0.20, +0.24]$; S1's theirs channel against SESTINA $+0.01$ $[-0.05,
++0.07]$, the opponent channel gone; about $3$ signals a game against SESTINA
+(from $8.94$). S2 vs SESTINA $+0.05$ $[-0.25, +0.35]$, self-play $0.00$. &
+\textbf{NOTHING CLEARS; THE GAIN WAS THE DEFECT.} $1{,}200$ pairings,
+$3{,}600$ games, zero fallbacks, the identity closing on every game. S1 vs
+SESTINA $+0.0033$ $[-0.078, +0.085]$ --- a null whose interval excludes the
+bar --- and $+0.0267$ $[-0.205, +0.258]$ in self-play; S2 is S1 (the budget
+binds on eight pairings in six hundred). S1's theirs channel against SESTINA
+$+0.0167$ $[-0.010, +0.044]$ against $+0.2725$ at rev~2, their error rate
+$3.58\%$ against $3.43\%$; $0.623$ signals a game, from $8.94$. The ours
+channel survives, $+0.0600$ $[+0.020, +0.100]$, and the race cancels it,
+$-0.0733$. The reading rule fires: the paper's ``established and positive''
+sentences are withdrawn and the confirmations join the withdrawn list.
+\path{results/p48_screen.json} &
+\S\ref{sec:p48} \\
 
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-seven resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-eight resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
 \textbf{refuted} on a registered condition (P1, P4, P7, P10, P23, P28, P32,
 P36). Five returned an explicit null, an explicit \textsc{split}, or an
-explicit ``not settled'' (P8, P13, P24, P27, P35), and five (P43, P44, P45,
-P46, P47) returned no arm clearing a dual-population ship bar, two of them
-with significant negatives in both populations, the fourth with the first arm
-positive in both, and the fifth with that arm clearing the self-play half
-alone. Four were closed by a screen or by
+explicit ``not settled'' (P8, P13, P24, P27, P35), and six (P43, P44, P45,
+P46, P47, P48) returned no arm clearing a dual-population ship bar, two of
+them with significant negatives in both populations, the fourth with the
+first arm positive in both, the fifth with that arm clearing the self-play
+half alone, and the sixth with a null that traced an earlier mechanism's
+gain to the bridge defect. Four were closed by a screen or by
 proof before the registered duel was paid for, saving roughly $9{,}000$
 duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's D2,
 inside a registration already counted above. One was a set of graded
@@ -875,7 +913,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-seven --- P20 --- shipped, and it is the
+\noindent Exactly one of the forty-eight --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 

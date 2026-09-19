@@ -149,7 +149,7 @@ Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
 a proof that the belief-space search cannot move $99.96\%$ of the allocation
 uncertainty, and an audit of our own clustering restates every position-level
-interval and withdraws one conclusion. Across the whole project, forty-seven
+interval and withdraws one conclusion. Across the whole project, forty-eight
 pre-registrations produced exactly one change to the deployed engine
 (Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
 not ship, because the bar was fixed before the runs and was not amended
@@ -3039,9 +3039,16 @@ confirmation is $+0.1180$ $[+0.0325, +0.2035]$ and $+0.1220$ $[+0.0291,
 +0.2149]$, and the deferred gate was re-run at power on the current engine
 under \path{prereg/defer_gate_at_power.md}: over $2{,}000$ deal clusters it
 returns $+0.0455$ $[+0.0134, +0.0776]$, clear of zero
-(\path{results/signal_vs_defer.json}). Both buy sets. Neither clears the
-$+0.15$ bar, which is the reason neither ships, and the thousand-game runs that
-produced the original filings could not have separated ``buys nothing'' from
+(\path{results/signal_vs_defer.json}). Both figures are bridge-revision-2
+duels against \texttt{dylan\_v07}, and the signalling one has since been
+re-read through the repaired bridge (P48, \S\ref{sec:p48}): its own ledger
+put the gain in the opponent's extra wrong declarations, the counter the
+bridge defect inflated, and through the repaired bridge the protocol is
+$+0.0033$ $[-0.078, +0.085]$ against SESTINA, a null whose interval excludes
+the bar. The deferred gate's figure has not been re-read and stands as a
+measurement of the corrupted-bridge game. Neither clears the $+0.15$ bar,
+and the thousand-game runs that produced the original filings could not have
+separated ``buys nothing'' from
 ``buys a twentieth of a set''.
 
 A paired margin is a \emph{net}. An arm that defers declarations avoids some
@@ -4962,8 +4969,9 @@ $-0.0715$ $[-0.1068, -0.0362]$ sets a game
 fresh seed base replicated it at $-0.1075$ $[-0.1429, -0.0721]$
 (\path{results/signal_no_repeat.json}), and measured the mechanism's own value
 on the current engine at $+0.1435$ $[+0.0971, +0.1899]$ --- consistent with the
-$+0.1220$ above, and the figure to quote for signalling after the
-exhaustive-search change.
+$+0.1220$ above. Both are bridge-revision-2 duels against \texttt{dylan\_v07};
+the figure to quote for signalling through the repaired bridge is P48's,
+$+0.0033$ $[-0.078, +0.085]$ (\S\ref{sec:p48}).
 The two arms are level on declaration errors, $0.1383$ a game against
 $0.1388$, so nothing is paid in mistakes. What the repeats buy is
 postponement. The engine reaches the signalling branch before the gated
@@ -5088,6 +5096,11 @@ this project is built to avoid. Pooled on both uncertainties they are $+0.1519$
 $[+0.1188, +0.1849]$, a point estimate sitting on the bar with an interval
 spanning it. Nothing ships on that, and this registration fixed no ship
 criterion; the deployed configuration still has \texttt{signal\_mode="off"}.
+Every figure in this passage is a bridge-revision-2 duel against
+\texttt{dylan\_v07}, and the channel that carried the gain, their extra wrong
+declarations, is the one the bridge defect inflated; re-read through the
+repaired bridge under P48 that channel is $+0.0167$ $[-0.010, +0.044]$, the
+dose is $0.62$ signals a game, and the arm is a null (\S\ref{sec:p48}).
 
 \paragraph{Two limits, stated with it.} The three channels are an
 \emph{accounting} and they co-move --- a half-suit we stop declaring leaves
@@ -7075,9 +7088,14 @@ already answered a version of it, though not in the negative. The void-era
 duel of \S\ref{sec:perpetual}'s signalling protocol returned $+0.002$
 $[-0.086, +0.090]$ sets per pair; the registered confirmation under the award
 rule returned $+0.1180$ $[+0.0325, +0.2035]$ and $+0.1220$ $[+0.0291,
-+0.2149]$, both clear of zero (\S\ref{sec:res-signal}). The protocol is
-switched \emph{off} in the deployed configuration because it misses a ship bar
-fixed in advance, not because it does nothing. What the measurements above add is not a new mechanism but a
++0.2149]$, both clear of zero (\S\ref{sec:res-signal}) --- and both, it
+later turned out, duels through the corrupted bridge against the opponent it
+corrupted: through the repaired bridge the protocol is $+0.0033$
+$[-0.078, +0.085]$ against SESTINA (P48, \S\ref{sec:p48}). The protocol is
+switched \emph{off} in the deployed configuration because, against the real
+opponent, it does nothing that its turn cost does not undo: it cuts our own
+wrong declarations ($+0.060$ $[+0.020, +0.100]$ in margin) and pays the same
+in conceded turns. What the measurements above add is not a new mechanism but a
 different \emph{trigger}: that protocol fires when the current turn is cheap,
 and the errors are concentrated in half-suits identifiable a median of $25$
 turns before the turn gets cheap. Whether a deadline-priced trigger changes
@@ -7473,8 +7491,11 @@ What survives is narrower and worth stating exactly. Contrasts in which
 champion, the ablations of \S\ref{sec:res-signal} run against
 \texttt{ev\_claim} --- never had the bridge in the loop and are untouched.
 Contrasts run against \texttt{dylan\_v07} are not rescued by their pairing and
-are withdrawn with the absolutes: R2, R6, the dialect gaps, and the
-contestation port of Table~\ref{tab:contestation}.
+are withdrawn with the absolutes: R2, R6, the dialect gaps, the
+contestation port of Table~\ref{tab:contestation}, and --- once P48 had
+re-read it through the repaired bridge (\S\ref{sec:p48}) --- the signalling
+line's confirmations and replications of \S\ref{sec:res-signal}, whose gain
+decomposed to the opponent's extra wrong declarations.
 
 One caveat on the reverse cells survives the control and is worth keeping.
 Our champion reaches their arbiter through a package that answers off-turn
@@ -8471,6 +8492,112 @@ the next attempt would have to change what the engine computes rather than
 what it is told. \texttt{V06\_DEPLOYED} is byte-for-byte unchanged, and
 KRAKEN v1.1 still loses to SESTINA v1.0 by $-0.5250$.
 
+\subsubsection{P48: the signalling protocol through the repaired bridge}
+\label{sec:p48}
+
+Every margin the signalling line of \S\ref{sec:res-signal} ever reported
+against an opponent --- the registered confirmation ($+0.1180$, $+0.1220$),
+the replications ($+0.1435$, $+0.1605$), the identity run ($+0.119$) and the
+dose studies --- was a bridge-revision-2 duel against \texttt{dylan\_v07}: a
+duel through the bridge that \S\ref{sec:otherarbiter} found to be corrupting
+that opponent's posterior, against the opponent it corrupted. The retraction
+withdrew contrasts against \texttt{dylan\_v07} with the absolutes and kept the
+self-play controls and the \texttt{ev\_claim} ablations; the signalling
+confirmations were never added to the withdrawn list, and until this
+registration the paper still said of the protocol that its value was
+``established and positive''. The line's own ledger said where to look. The
+margin identity split the uncapped arm's $+0.1605$ into race $-0.1585$, ours
+$+0.0465$ and theirs $+0.2725$: most of the gross gain was \emph{their} extra
+wrong declarations, $+0.1363$ a game, their error rate lifted from $21.08\%$
+to $24.02\%$ --- and their declaration accuracy is $78.87\%$ through the
+corrupted bridge and $96.68\%$ through the repaired one. The self-play
+control, which never had the bridge in the loop, was $+0.0200$
+$[-0.0232, +0.0632]$. P48 (\path{prereg/kraken_v12_signalling_rev3.md})
+plays the registered arm and its six-signal budget through the repaired
+bridge in both populations, $300$ deals on both parities each on a fresh
+block, $3{,}600$ games, zero fallbacks, zero unfinished, the identity closing
+on every game, with the identity's three counters read off every game as the
+registered secondary and a reading rule for those sentences fixed in advance:
+they are withdrawn if S1's theirs channel against SESTINA is consistent with
+zero and lies below the rev-2 lower bound of $+0.2270$.
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+arm & change from \texttt{V06\_DEPLOYED} & vs SESTINA & self-play \\
+\midrule
+S1 & \texttt{signal\_mode} $=$ \texttt{stuck}, \texttt{signal\_max\_p} $=0.5$ & $\mathbf{+0.0033}$ $[-0.078, +0.085]$ & $\mathbf{+0.0267}$ $[-0.205, +0.258]$ \\
+S2 & S1 $+$ \texttt{signal\_budget} $=6$ & $\mathbf{-0.0233}$ $[-0.109, +0.063]$ & $+0.0100$ $[-0.223, +0.243]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent S1's effect against SESTINA, split by the identity and set beside
+the same arm's split at revision 2 (margin units, two sets a declaration):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+channel & revision 3 (P48) & revision 2 \\
+\midrule
+race (half-suits we get to declare) & $-0.0733$ $[-0.152, +0.005]$ & $-0.1585$ \\
+ours (our wrong declarations, sign flipped) & $\mathbf{+0.0600}$ $[+0.020, +0.100]$ & $+0.0465$ \\
+theirs (their wrong declarations) & $\mathbf{+0.0167}$ $[-0.010, +0.044]$ & $+0.2725$ $[+0.2270, +0.3180]$ \\
+\midrule
+effect & $+0.0033$ & $+0.1605$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{The gain was the defect.} The theirs channel is gone: its
+revision-3 interval lies entirely below the revision-2 lower bound and covers
+zero, so the rule fires and the sentences are withdrawn. The channel that was
+most of the gross gain --- the opponent's extra wrong declarations --- does not
+exist against an opponent whose posterior we are not corrupting: their error
+rate with S1 on the table is $3.58\%$ against $3.43\%$ with the champion, where
+at revision 2 it was $24.02\%$ against $21.08\%$. The dose went with it. The
+protocol fires $\mathbf{0.623}$ signals a game against SESTINA, not $8.94$,
+because ``$89.6\%$ of stuck turns clear the cheapness bar against
+\texttt{dylan\_v07}'' was a property of an opponent whose corrupted posterior
+left us with nothing worth asking; against the real one we are stuck less and,
+when stuck, usually have an ask worth making. The line's conclusion that
+``volume is the whole of what it buys'' was right about revision 2 and wrong
+about the mechanism: the volume was the defect's.
+
+\paragraph{What survives is exactly what the mechanism was built to do.} A
+signal proves to a partner which card this seat does not hold, and partners
+then place splits they would otherwise get wrong: our own wrong declarations
+fall from $2.17\%$ to $1.46\%$ of the ones we make, $+0.0600$
+$[+0.020, +0.100]$ in margin, clear of zero and replicating the revision-2
+$+0.0465$ through the repaired bridge. And each signal is a conceded turn,
+$-0.0733$ $[-0.152, +0.005]$. The two cancel to $+0.0033$. The protocol does
+what it says and pays what it buys; and because it touches $0.6$ decisions a
+game it leaves most pairings identical, so its interval against SESTINA is
+$\pm 0.08$ where every earlier arm in this programme read $\pm 0.29$ --- a
+null whose interval excludes the ship bar itself, the first arm in six
+registrations for which that is true. In self-play the one-game identity
+reads race $-0.0267$ $[-0.255, +0.202]$ and errors $+0.0533$
+$[-0.021, +0.128]$, summing to $+0.0267$, consistent with the revision-2
+control. S2 is S1: at $0.57$ signals a game the budget binds on eight
+pairings in six hundred.
+
+\paragraph{The prediction, and what this withdraws.} The registration
+predicted the verdict, the sign of every channel and the vanishing of the
+opponent channel, and was wrong about the dose by a factor of five (it kept a
+third of the revision-2 volume for the mechanism; the mechanism owns a
+fourteenth) and about S2 (a revision-2 prediction about a revision-2 dose).
+Withdrawn: the signalling line's confirmations and replications, which join
+R2, R6, the dialect gaps and the contestation port in
+\S\ref{sec:otherarbiter}'s list; and the sentences in \S\ref{sec:res-signal},
+\S\ref{sec:perpetual} and \S\ref{sec:strategy} that read the mechanism's
+value as established. Retained, and smaller: the mechanism cuts our own wrong
+declarations by a third of their rate and pays for it in turns. Seventeen
+duels of sixteen arms across six registrations; \texttt{V06\_DEPLOYED} is
+byte-for-byte unchanged, and KRAKEN v1.1 still loses to SESTINA v1.0 by
+$-0.5250$.
+
 
 \section{Discussion}
 
@@ -8541,14 +8668,16 @@ where a card is not. Use it when you are stuck on a split. (Our engine cut
 its misdeclarations about 20\% doing this in void-era measurement and it did
 not gain games there; re-measured under the award rule, where each save is
 worth two points of differential instead of one, the cut persists --- $109$
-misdeclarations against $138$. The $500$-pair \emph{screen} put the value at
-$+0.0680$ $[-0.0326, +0.1686]$, which does not clear zero; the registered
-confirmation that followed does, at $+0.1180$ $[+0.0325, +0.2035]$ and
-$+0.1220$ $[+0.0291, +0.2149]$ (\S\ref{sec:res-signal}). So the mechanism's
-value is established and positive. It stays off in the engine because that
-registration's ship bar was a point estimate at or above $+0.15$, and the bar
-was not amended after the fact, not because the effect is unproven. For a human, who is far more likely to misplace a split than an
-engine is, the trade is almost certainly worth it.)
+misdeclarations against $138$ --- and through the repaired bridge it still
+persists: our wrong declarations fall from $2.17\%$ to $1.46\%$ of the ones we
+make (P48, \S\ref{sec:p48}). The registered confirmations that read the
+mechanism as $+0.1180$ and $+0.1220$ were duels through the corrupted bridge,
+and their gain lived in the opponent's extra wrong declarations; through the
+repaired bridge the protocol is $+0.0033$ $[-0.078, +0.085]$: the errors it
+saves are paid for exactly by the turns it concedes. It stays off in the
+engine because it buys nothing net against a real opponent, not because it
+does not do what it says. For a human, who is far more likely to misplace a
+split than an engine is, the trade is almost certainly worth it.)
 
 \paragraph{Spend your effort on card-tracking, not on cleverness about which ask
 to make.} Three measurements in this study point the same way and none of them
@@ -9497,19 +9626,22 @@ declaration), so even the corrected figure is a measurement under this
 paper's rules and not a ranking of two projects.
 
 \textbf{And v1.1 shipped nothing.} Seven pre-registered directions at the
-residual returned no adoption, and five registrations of the v1.2 programme
-(fifteen duels of fourteen arms, each required to clear $+0.15$ against
+residual returned no adoption, and six registrations of the v1.2 programme
+(seventeen duels of sixteen arms, each required to clear $+0.15$ against
 SESTINA and in self-play) returned none either; two of those arms raised the
 ask hit rate the cross-engine table said we lack and lost by a third of a set
-doing it, and the one arm a belief-level rule licensed read positive in both
+doing it, the one arm a belief-level rule licensed read positive in both
 populations at its screen and, at confirm scale, cleared the self-play half
 alone --- a null against SESTINA, and the first half of the dual bar anything
-has cleared. The pre-registered thresholds and outcomes for all forty-seven
+has cleared --- and the sixth registration re-read the one earlier mechanism
+with a positive value on the record through the repaired bridge and found
+that the value was the bridge defect, measured from the other side
+(\S\ref{sec:p48}). The pre-registered thresholds and outcomes for all forty-eight
 registrations this project has written are in Appendix~\ref{app:prereg}. Two
 mechanisms measured there are real and positive and still do not ship,
 because the bar was fixed in advance and was not amended afterwards. That is
 the discipline this paper is actually arguing for, and it costs more than it
-looks: exactly one of the forty-seven registrations produced a change to the
+looks: exactly one of the forty-eight registrations produced a change to the
 deployed engine.
 
 \subsection{What we would do next}
@@ -9646,7 +9778,10 @@ this engine exposes. It returned the opposite of what it predicted, and P47
 then measured the one arm it licensed as a null against SESTINA; the
 conclusion is drawn in \S\ref{sec:p46} with that caveat attached, and the
 next attempt would have to change what the engine computes rather than what
-it is told.
+it is told. P48 (\S\ref{sec:p48}) then re-read the signalling protocol, the
+last mechanism with a positive value on the record, through the repaired
+bridge: a null whose interval excludes the bar, with the revision-2 gain
+traced to the opponent's corrupted declarations.
 \end{itemize}
 
 % =====================================================================

@@ -130,7 +130,8 @@ def test_cover_note_counts_the_preregistrations():
     """'Forty-two pre-registrations' has to be however many there are."""
     words = {38: "thirty-eight", 39: "thirty-nine", 40: "forty", 41: "forty-one",
              42: "forty-two", 43: "forty-three", 44: "forty-four",
-             45: "forty-five", 46: "forty-six", 47: "forty-seven"}
+             45: "forty-five", 46: "forty-six", 47: "forty-seven",
+             48: "forty-eight"}
     n = len(list((ROOT / "prereg").glob("*")))
     assert n in words, (
         f"{n} pre-registrations; add the word for it to this test")

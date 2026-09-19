@@ -1635,6 +1635,23 @@ WATCH = [
      "G's ask hit rate at confirm", "did not replicate:"),
     ("p47_confirm.json", "arms.G_gamma_07.champ_ask_hit", "{:.4f}",
      "the champion's ask hit rate against G at confirm", "did not replicate:"),
+    # P48, the signalling protocol through the repaired bridge
+    # (results/p48_screen.json): the bold rows of the two tables and the dose.
+    ("p48_screen.json", "arms.S1_signal_stuck_05.vs_sestina.mean", "{:+.4f}",
+     "S1 against SESTINA at rev 3", "\\texttt{signal\\_max\\_p} $=0.5$ &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.self_play.mean", "{:+.4f}",
+     "S1 in self-play at rev 3", "\\texttt{signal\\_max\\_p} $=0.5$ &"),
+    ("p48_screen.json", "arms.S2_signal_budget6.vs_sestina.mean", "{:+.4f}",
+     "S2 against SESTINA at rev 3", "S1 $+$ \\texttt{signal\\_budget} $=6$ &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.channels.vs_sestina.ours.mean",
+     "{:+.4f}", "S1's ours channel against SESTINA",
+     "our wrong declarations, sign flipped) &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.channels.vs_sestina.theirs.mean",
+     "{:+.4f}", "S1's theirs channel against SESTINA",
+     "their wrong declarations) &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.signals_per_game.vs_sestina",
+     "{:.3f}", "S1's signals a game against SESTINA",
+     "signals a game against SESTINA, not"),
 ]
 
 
