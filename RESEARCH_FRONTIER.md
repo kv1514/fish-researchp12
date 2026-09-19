@@ -4736,3 +4736,38 @@ more draws (a two-knob arm; the draws door was closed on the self-play
 half), the one-sided and γ = 1.0 cells (closed by P46's rule), `sis_tilt` or
 `depth_mode` variants, and a third population. Result lands in
 `results/p47_confirm.json`.
+
+## OUTCOME 2026-09-19: P47 — a null against SESTINA, the self-play half clears, nothing ships
+
+`results/p47_confirm.json`: 1,200 pairings on 11,100,000, 3,600 games, zero
+fallbacks, zero unfinished.
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| G `opponent_gamma = 0.7` | **+0.0017 [−0.204, +0.208]** | **+0.1667 [+0.009, +0.325]** | does not ship: clears the self-play half alone |
+
+Ask hit rates 0.5261 / 0.5249: the Stage 1 rise did not replicate. The
+prediction (+0.18 / +0.11, self-play failing on the mean) got the verdict
+right and both halves wrong in opposite directions. Screen and confirm are
+consistent with a small positive effect against SESTINA or none (pooled
+1,800 pairings +0.08 [−0.09, +0.25], not the verdict); the self-play
+readings agree to a hundredth. By the rule standing since P43, an arm
+clearing one population only is opponent-specific and does not ship — and
+this is the first half of the dual bar any arm has cleared, the half it
+exists to distrust. Run self-play only, G would have shipped.
+
+**What P46 and P47 together say:** the belief about SESTINA's cards can be
+sharpened (about one percent of NLL at every budget, both populations), and
+the sharpened belief plays +0.17 better against KRAKEN and not measurably
+better against SESTINA. A better belief about an opponent does not license a
+change to us, any more than a correct measurement of one did (P43).
+
+**The programme closes.** Every one-knob lever the engine's diagnostics
+nominated has been registered and lost, been stopped, or cleared the wrong
+half: the ask channel (P43), the declaration gate (P44, ownership closure),
+the convention (P45), the belief (P46, P47). Fifteen duels of fourteen arms
+across five registrations. The residual half set against SESTINA is not
+reachable by any single knob this engine exposes at the power this project
+can buy; the next attempt would have to change what the engine computes.
+`V06_DEPLOYED` is byte-for-byte unchanged; KRAKEN v1.1 still loses to
+SESTINA v1.0 by −0.5250.

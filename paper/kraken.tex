@@ -8410,12 +8410,66 @@ the cell it was written for, and the arm it licensed is the first to read
 positive in both populations. Closed: the fitted exponent at the belief level
 (a worse belief, not a thinner sample, at every budget in both populations);
 the silence term; the one-sided cells, on the top-1 guard; and the question
-of which side of the table C1b's cost belongs to. Open: one arm. What happens
-to G is a decision for a new registration rather than an amendment to this
-one, and P47 (\path{prereg/kraken_v12_g_confirm.md}) puts G, and only G, at
-confirm scale on a fresh seed block with its own prediction, never pooled with
-the $600$ pairings here. It was written before any of its games was played,
-and no result of it appears in this paper.
+of which side of the table C1b's cost belongs to. Open, at that point: one arm. What happened to G was a decision for a new
+registration rather than an amendment to this one.
+
+\paragraph{P47: the confirm, and the half that cleared.} P47
+(\path{prereg/kraken_v12_g_confirm.md}), written after P46's Stage~1 was on
+disk and before any of its games, put G and only G at confirm scale --- $600$
+deals on both parities, $1{,}200$ pairings, $3{,}600$ games, on the fresh
+block $11{,}100{,}000$, never pooled with the screen --- with the prediction
+on record that it would not clear both halves: $+0.18$ $[-0.03, +0.39]$
+against SESTINA, failing on the interval, and $+0.11$ $[-0.04, +0.26]$ in
+self-play, failing on the mean as well. Zero fallbacks, zero unfinished.
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+arm & & vs SESTINA & self-play \\
+\midrule
+G & \texttt{opponent\_gamma} $=0.7$, their seats and ours, at confirm & $\mathbf{+0.0017}$ $[-0.204, +0.208]$ & $\mathbf{+0.1667}$ $[+0.009, +0.325]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The verdict was predicted right and both halves wrong, in opposite
+directions. Against SESTINA, G is a null to three decimals; in self-play it
+clears the bar --- the first half of the dual bar any arm has cleared in
+five registrations, and the half the bar was added to distrust. By the rule
+standing since P43, an arm that clears one population only is
+opponent-specific and does not ship. The screen and the confirm are
+consistent with each other and with a small positive effect against SESTINA
+or none (pooled over the $1{,}800$ pairings, which is not the verdict,
+$+0.08$ $[-0.09, +0.25]$), and a point estimate under the bar would not ship
+at any block size. The Stage~1 rise in the ask hit rate did not replicate:
+$\mathbf{0.5261}$ against $\mathbf{0.5249}$, so the hit-rate finding of P44
+and P45 stands as it was. What the two programmes together say is exact and
+small: the belief about SESTINA's cards can be sharpened, by about one
+percent of its NLL at every budget in both populations, and the sharpened
+belief plays $+0.17$ better against KRAKEN and not measurably better against
+SESTINA at $1{,}200$ pairings. The same belief improvement in both
+populations; a margin in one. In self-play the opponents are KRAKEN seats,
+whose asks the depth heuristic at $0.7$ describes better than at $0.35$;
+against SESTINA the belief is better by the same amount and the asks it
+prices are SESTINA's, whose choice curve is not KRAKEN's. P43's lesson ---
+a correct measurement of an opponent does not license a change to us --- now
+has its belief-level form: a \emph{better} belief about an opponent does not
+either. Run self-play only, as every convention duel before P45 was, G would
+have shipped, and KRAKEN v1.2 would have gone to the exhibition with a change
+that does nothing against the engine it plays there.
+
+\paragraph{What this closes.} The programme. With P47, every one-knob lever
+the engine's own diagnostics nominated has been registered and has lost, been
+stopped, or cleared the wrong half: the ask channel (P43), the declaration
+gate (P44 and the ownership closure of \S\ref{sec:ownership-closure}), the
+convention (P45), the belief (P46 and P47). Fifteen duels of fourteen arms
+across five registrations. The conclusion P46 withheld is drawn with P47's
+caveat attached: the residual half set against SESTINA is not reachable by
+any single knob this engine exposes, at the power this project can buy, and
+the next attempt would have to change what the engine computes rather than
+what it is told. \texttt{V06\_DEPLOYED} is byte-for-byte unchanged, and
+KRAKEN v1.1 still loses to SESTINA v1.0 by $-0.5250$.
 
 
 \section{Discussion}
@@ -9443,15 +9497,15 @@ declaration), so even the corrected figure is a measurement under this
 paper's rules and not a ranking of two projects.
 
 \textbf{And v1.1 shipped nothing.} Seven pre-registered directions at the
-residual returned no adoption, and four registrations of the v1.2 programme
-(fourteen arms, each required to clear $+0.15$ against SESTINA and in
-self-play) returned none either; three of those arms raised the ask hit rate
-the cross-engine table said we lack, two lost by a third of a set doing it,
-and the third --- the one arm a belief-level rule licensed --- is the first
-to read positive in both populations and clears neither interval.
-The pre-registered thresholds and outcomes for all forty-seven registrations
-this project has written are in Appendix~\ref{app:prereg}; the forty-seventh
-(P47) is registered and not yet run, and no result of it appears here. Two
+residual returned no adoption, and five registrations of the v1.2 programme
+(fifteen duels of fourteen arms, each required to clear $+0.15$ against
+SESTINA and in self-play) returned none either; two of those arms raised the
+ask hit rate the cross-engine table said we lack and lost by a third of a set
+doing it, and the one arm a belief-level rule licensed read positive in both
+populations at its screen and, at confirm scale, cleared the self-play half
+alone --- a null against SESTINA, and the first half of the dual bar anything
+has cleared. The pre-registered thresholds and outcomes for all forty-seven
+registrations this project has written are in Appendix~\ref{app:prereg}. Two
 mechanisms measured there are real and positive and still do not ship,
 because the bar was fixed in advance and was not amended afterwards. That is
 the discipline this paper is actually arguing for, and it costs more than it
@@ -9554,8 +9608,8 @@ other than banked cards, a converged rather than single-sweep coupling, and a
 horizon that does not stop at the end of one possession, and, now that the
 one tested point is known to be worth something, whether any of those is worth
 more.
-\item \textbf{What the fourth registration measured, what a fifth measures,
-and what is closed without one.} P46 (\path{prereg/kraken_v12_belief_grid.md},
+\item \textbf{What the fourth registration measured, what the fifth
+confirmed, and what is closed without one.} P46 (\path{prereg/kraken_v12_belief_grid.md},
 \S\ref{sec:p46}) measured the one thing three programmes never measured: the
 belief about SESTINA's cards. It predicted that the belief was already as
 sharp as the engine could hold and that nothing would clear for a fourth
@@ -9565,10 +9619,11 @@ run licensed the one cell it was allowed to, and that cell reads $+0.24$
 against SESTINA and $+0.16$ in self-play at $600$ pairings --- the first arm
 in fourteen to read positive in both populations, clearing neither interval.
 It also placed C1b's cost: on their seats, not ours. P47
-(\path{prereg/kraken_v12_g_confirm.md}) puts that one arm at confirm scale on
-a fresh seed block, with the prediction on record that it does not clear
-both halves; it is registered and not yet run, and no result of it appears
-here. Four doors are closed without a registration, and the record behind
+(\path{prereg/kraken_v12_g_confirm.md}) put that one arm at confirm scale on
+a fresh seed block, $1{,}200$ pairings: a null against SESTINA, $+0.0017$
+$[-0.204, +0.208]$, and $+0.1667$ $[+0.009, +0.325]$ in self-play --- the
+first half of the dual bar any arm has cleared, and the half it exists to
+distrust. G does not ship. Four doors are closed without a registration, and the record behind
 each is written into P46 so that the omission is a decision and not an
 oversight. The draws budget: the self-play
 half of the dual bar is already measured --- $480$ to $1{,}440$ draws is
@@ -9587,8 +9642,11 @@ joint above $0.5$ has every marginal above $0.5$, is the shortlist head, and is
 already scored. Swapping or recalibrating the ownership estimator: closed by
 the measurement of \S\ref{sec:ownership-closure}. P46 was to license the
 conclusion that the residual half set is not reachable by any single knob
-this engine exposes. It returned the opposite of what it predicted, so that
-conclusion is not drawn here; it waits on P47.
+this engine exposes. It returned the opposite of what it predicted, and P47
+then measured the one arm it licensed as a null against SESTINA; the
+conclusion is drawn in \S\ref{sec:p46} with that caveat attached, and the
+next attempt would have to change what the engine computes rather than what
+it is told.
 \end{itemize}
 
 % =====================================================================

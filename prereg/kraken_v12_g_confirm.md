@@ -121,3 +121,105 @@ The arm is void, not reported, if: `opponent_gamma = 0.7` is not the
 licensed cell (0.7, 0.7) — i.e. `gamma_team` does not follow it; the arm is
 byte-identical to the champion on any deal; any interval is zero-width; any
 fallback or unfinished game occurs; either side raises `IllegalAction`.
+
+---
+
+# OUTCOME, recorded 2026-09-19
+
+**G does not ship. There is no v1.2, and the champion is unchanged.**
+
+`results/p47_confirm.json`: 1,200 pairings, 3,600 games at seed base
+11,100,000, agent base 111,000, 1,333 s at three workers; **zero fallbacks,
+zero unfinished**, no zero-width interval, no `IllegalAction`, and
+`opponent_gamma = 0.7` is the licensed cell (`gamma_team` follows it, as
+`tests4/test_gamma_team.py` asserts). No withdrawal condition fires and the
+numbers are read as they stand.
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| G `opponent_gamma = 0.7` | **+0.0017 [−0.204, +0.208]** | **+0.1667 [+0.009, +0.325]** | does not ship: clears the self-play half alone |
+
+Deal-clustered intervals: [−0.211, +0.214] and [+0.016, +0.317]. Ask hit
+rates on the same deals: G 0.5261, champion 0.5249.
+
+The bar wants +0.15 with the interval clear of zero in **both** populations.
+Self-play clears it — +0.1667, lower bound above zero on both intervals.
+Against SESTINA, G is a null to three decimals. By the rule standing since
+P43, *an arm clearing one population only is opponent-specific and does not
+ship*. This is the first half of the dual bar any arm has cleared in five
+registrations, and it is the half the bar was added to distrust.
+
+## The prediction got the verdict right and both halves wrong, in opposite directions
+
+This document predicted vs SESTINA **+0.18 [−0.03, +0.39]**, failing on the
+interval alone, and self-play **+0.11 [−0.04, +0.26]**, failing on the mean
+as well. The verdict — does not ship — is right. Both halves are wrong, and
+they are wrong in opposite directions: the half predicted to fail on its
+mean cleared, and the half predicted positive is zero. The reasoning behind
+the self-play prediction — that the sharper belief is bought with a thinner
+sample (ESS ratio 0.68) which self-play pays on all six seats — was wrong as
+a mechanism: self-play is where G is worth something. And the ask hit rate
+did not rise: 0.5261 against 0.5249. The Stage 1 rise (0.5289 against 0.5173)
+did not replicate, so the "third arm to raise the hit rate" reading of P46
+was noise on a 600-pairing block, and the hit-rate finding of P44–P45 (two
+arms raised it and lost) stands as it was.
+
+## The screen and the confirm, read together — informational, not the verdict
+
+| | screen, 10,700,000 | confirm, 11,100,000 | pooled 1,800 pairings |
+|---|---:|---:|---:|
+| vs SESTINA | +0.2433 [−0.051, +0.537] | +0.0017 [−0.204, +0.208] | +0.0822 [−0.087, +0.251] |
+| self-play | +0.1567 [−0.055, +0.368] | +0.1667 [+0.009, +0.325] | +0.1633 [+0.037, +0.290] |
+
+The two SESTINA readings are consistent with each other (they differ by 0.24
+with a standard error near 0.18) and with a small positive effect or none.
+The pooled point estimate is under the bar, so no larger block would ship G
+even if it made the interval clear of zero. The two self-play readings agree
+to a hundredth of a set. The verdict is the confirm block alone, as
+registered.
+
+## What the two programmes together say
+
+P46 measured the belief and P47 measured the play, and together they are
+exact and small. **The belief about SESTINA's cards can be sharpened** — at
+`gamma = 0.7` on both sides, by about one percent of its NLL at every budget
+in both populations, clear of zero (P46 Stage 0: −0.0131 [−0.0163, −0.0100]
+at 720 draws against SESTINA; −0.0128 [−0.0208, −0.0048] in self-play).
+**The sharpened belief plays +0.17 better against KRAKEN and not measurably
+better against SESTINA at 1,200 pairings.** The same belief improvement in
+both populations; a margin in one. In self-play the opponents are KRAKEN
+seats, whose asks the depth heuristic at 0.7 describes better than at 0.35;
+against SESTINA the belief is better by the same amount and the asks it
+prices are SESTINA's, whose choice curve is not KRAKEN's. P43's lesson — a
+correct measurement of an opponent does not license a change to us — now has
+its belief-level form: **a better belief about an opponent does not either.**
+
+That is the dual bar's reason for existing, fired in the direction it was
+designed for. Run self-play only, as every convention duel before P45 was, G
+would have shipped: +0.1667 [+0.009, +0.325] clears, and KRAKEN v1.2 would
+have gone to the exhibition with a change that does nothing against the
+engine it plays there.
+
+## What this closes
+
+The programme. With P47, every one-knob lever the engine's own diagnostics
+nominated has been registered and has lost, been stopped, or cleared the
+wrong half: the ask channel (P43), the declaration gate (P44 and the
+ownership closure), the convention (P45), the belief (P46 and P47). Fifteen
+duels of fourteen arms across five registrations. This document keyed the
+paper's closing paragraph to "clears neither"; G cleared one, so the
+paragraph is written with that on the record rather than as if it had
+cleared neither: **the residual half set against SESTINA is not reachable by
+any single knob this engine exposes, at the power this project can buy, and
+the next attempt would have to change what the engine computes rather than
+what it is told.**
+
+Not registered next, and why: G at more draws (P46 closed the draws door on
+the self-play half, and the self-play half is the one G already clears, so
+the arm could only widen the population-specific half); a per-opponent
+exponent (P43's C1c is the fitted exponent and the worst arm in the study;
+P46 measured it as the worst belief in the grid); a third population (moving
+the bar after a near-miss).
+
+`V06_DEPLOYED` is byte-for-byte unchanged. KRAKEN v1.1 still loses to
+SESTINA v1.0 by −0.5250.

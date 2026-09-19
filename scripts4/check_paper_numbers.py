@@ -1626,6 +1626,15 @@ WATCH = [
      "G's ask hit rate", "G's ask hit rate is"),
     ("p46_screen_G.json", "arms.G_gamma_07.champ_ask_hit", "{:.4f}",
      "the champion's ask hit rate against G", "G's ask hit rate is"),
+    # P47, the confirm of G (results/p47_confirm.json).
+    ("p47_confirm.json", "arms.G_gamma_07.vs_sestina.mean", "{:+.4f}",
+     "G at confirm against SESTINA", "their seats and ours, at confirm &"),
+    ("p47_confirm.json", "arms.G_gamma_07.self_play.mean", "{:+.4f}",
+     "G at confirm in self-play", "their seats and ours, at confirm &"),
+    ("p47_confirm.json", "arms.G_gamma_07.cand_ask_hit", "{:.4f}",
+     "G's ask hit rate at confirm", "did not replicate:"),
+    ("p47_confirm.json", "arms.G_gamma_07.champ_ask_hit", "{:.4f}",
+     "the champion's ask hit rate against G at confirm", "did not replicate:"),
 ]
 
 

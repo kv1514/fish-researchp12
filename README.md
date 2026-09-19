@@ -76,7 +76,7 @@ published one is out by three.
 
 **Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.5–0.7 sets/game
 depending on route** (−0.5250 [−0.6886, −0.3614] through the repaired bridge,
-`results/mega_match.json`, the baseline P43–P46 were measured against; −0.70
+`results/mega_match.json`, the baseline P43–P47 were measured against; −0.70
 through the persistent bridge; −0.62 inside their own arbiter). Three
 pre-registered programmes since have not moved it.
 
@@ -109,7 +109,7 @@ opponent's declaration errors was a margin worth being suspicious of:
   changes a decision is what decides which.** Not the effect size. This is now
   how runs here are sized.
 - **Three pre-registered attempts to beat SESTINA through the repaired bridge
-  (P43–P46 in `prereg/`, fourteen arms) and none cleared +0.15 in both
+  (P43–P47 in `prereg/`, fourteen arms) and none cleared +0.15 in both
   populations.** Two of the arms raised our ask hit rate — the one metric the
   cross-engine table says we trail on — by one to one and a half points
   (0.5245 vs 0.5184; 0.5287 vs 0.5136) and each lost about a third of a set
@@ -118,8 +118,11 @@ opponent's declaration errors was a margin worth being suspicious of:
   programme, P46, measured the belief itself and found it sharper at a higher
   exponent than the champion's; the one arm its rule licensed,
   `opponent_gamma = 0.7`, is the first to read positive in both populations
-  (+0.24 / +0.16 at 600 pairings) and clears neither interval, so nothing
-  ships and a fifth registration, P47, puts it to a confirm.
+  (+0.24 / +0.16 at 600 pairings) and clears neither interval; the fifth,
+  P47, confirmed it at 1,200 pairings as a null against SESTINA (+0.0017
+  [−0.204, +0.208]) that clears the self-play half (+0.1667 [+0.009,
+  +0.325]) — the first half of the dual bar anything has cleared, and the
+  half it exists to distrust. Nothing ships.
 - **The ownership inference is measured and is not what stops us declaring:
   the split is.** All three estimators of "we hold all six" cross 0.99 on
   4.17% of genuinely owned half-suits, and relaxing the gate's ownership test
