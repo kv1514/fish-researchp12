@@ -149,7 +149,7 @@ Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
 a proof that the belief-space search cannot move $99.96\%$ of the allocation
 uncertainty, and an audit of our own clustering restates every position-level
-interval and withdraws one conclusion. Across the whole project, forty-six
+interval and withdraws one conclusion. Across the whole project, forty-seven
 pre-registrations produced exactly one change to the deployed engine
 (Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
 not ship, because the bar was fixed before the runs and was not amended
@@ -7715,9 +7715,12 @@ a correct measurement of an opponent does not license a change to us. And
 removing the model entirely costs $-0.59$ and $-1.07$, so the mis-signed model
 is an asset --- though the first arm switched it off on our two teammates as
 well as on their three seats, because \texttt{gamma\_team} defaults to
-\texttt{opponent\_gamma}, and which side of the table that cost belongs to is
-what the fourth registration (P46, registered and running as this is
-written, \S\ref{sec:next}) separates. The
+\texttt{opponent\_gamma}, and the fourth registration (P46, \S\ref{sec:p46})
+separated the two: the part on their seats, teammates held, costs $-0.25$
+$[-0.536, +0.036]$ against SESTINA when removed, consistent with a small asset
+and with zero at that power, and the part on our two teammates costs nothing
+measurable, so ``being wrong about an opponent's propensity beats having no
+opinion'' is weakened to that by the reading rule P46 fixed in advance. The
 \texttt{depth\_mode} row is also the defect that taught this paper to read a
 zero-width interval as the signature of an experiment that never ran: on its
 first run the value fell through silently to the default, the arm was the
@@ -8222,6 +8225,197 @@ loses to SESTINA v1.0 by $-0.5250$. Ten arms across three registrations have
 now been put at that deficit, and the two channels a reader would reach for
 next --- the ownership inference and the convention --- are closed by
 measurement rather than by argument.
+
+
+\subsubsection{P46: the belief itself, measured --- and a cell licensed}
+\label{sec:p46}
+
+Three programmes had put ten arms at the deficit and none had measured the
+thing every P43 sentence about the opponent model rests on: the belief about
+SESTINA's cards. P46 (\path{prereg/kraken_v12_belief_grid.md}) scores it
+first, and Stage~0 is an instrument that ships nothing. The champion's own
+games are frozen after \texttt{act()} at every fourth scored decision, and
+the acting seat's belief is re-read under twenty cells of the model exponent
+--- $\gamma_{\text{opp}} \in \{-1.1055, -0.5, 0, 0.35, 0.7, 1.0\}$ on their
+seats against $\gamma_{\text{team}} \in \{0, 0.35, 0.7\}$ on ours, plus two
+silence weights at the incumbent --- and scored against the dealt truth on the
+cards the propagator has not pinned, in two pools by who really holds them,
+paired against the incumbent cell $(0.35, 0.35)$ on the same decisions and
+clustered by game, at two budgets, $720$ and $2{,}880$ draws, with the Kish
+ESS recorded per row. At \texttt{sis\_tilt} $=0$ the model enters the
+importance weights only, so cells at one budget share particles and differ
+only in weights. A decision at which the incumbent has no non-self ask on
+record and takes the exact DP is excluded from every paired contrast, because
+a cell with a live model there is a different inference method and not the
+same particles re-weighted. $120$ games against SESTINA and $60$ in self-play
+gave $\mathbf{1{,}657}$ and $\mathbf{868}$ frozen decisions, of which $106$
+and $77$ were excluded. The validity check held --- the incumbent at $480$
+draws reproduces the live champion's mean ESS$/n$, $\mathbf{0.628}$ against
+$\mathbf{0.617}$, a gap of $\mathbf{1.9\%}$ under the $10\%$ tolerance --- no
+withdrawal condition fired, and the calibration clause fixed against P43's
+dueled cells was satisfied: the belief twins of C1b and C1c both read worse
+than the incumbent, the second with its interval clear of zero at every budget
+in both blocks. Opp-pool NLL paired against the incumbent, lower being a
+better belief about their cards:
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{rrrrrrrrrrrrr}
+\toprule
+ & \multicolumn{3}{c}{block A, $2{,}880$} & \multicolumn{3}{c}{block B, $2{,}880$} & \multicolumn{3}{c}{block A, $720$} & \multicolumn{3}{c}{block B, $720$} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
+$\gamma_{\text{opp}}$ & $0$ & $0.35$ & $0.7$ & $0$ & $0.35$ & $0.7$ & $0$ & $0.35$ & $0.7$ & $0$ & $0.35$ & $0.7$ \\
+\midrule
+$-1.1055$ & $+0.0737$ & $+0.0602$ & $+0.0485$ & $+0.1165$ & $+0.1037$ & $+0.0943$ & $+0.0751$ & $+0.0620$ & $+0.0533$ & $+0.1174$ & $+0.1063$ & $+0.1043$ \\
+$-0.5$ & $+0.0468$ & $+0.0333$ & $+0.0218$ & $+0.0814$ & $+0.0675$ & $+0.0559$ & $+0.0470$ & $+0.0337$ & $+0.0245$ & $+0.0799$ & $+0.0672$ & $+0.0617$ \\
+$0$ & ref. & $+0.0125$ & $+0.0014$ & ref. & $+0.0285$ & $+0.0164$ & ref. & $+0.0121$ & $+0.0031$ & ref. & $+0.0268$ & $+0.0206$ \\
+$0.35$ & $+0.0130$ & --- & $-0.0108$ & $+0.0152$ & --- & $-0.0111$ & $+0.0127$ & --- & $-0.0083$ & $+0.0134$ & --- & $-0.0045$ \\
+$0.7$ & $+0.0045$ & $-0.0082$ & $\mathbf{-0.0185}$ & $-0.0044$ & $-0.0186$ & $\mathbf{-0.0271}$ & $+0.0056$ & $-0.0064$ & $\mathbf{-0.0131}$ & $-0.0003$ & $-0.0115$ & $\mathbf{-0.0128}$ \\
+$1.0$ & $+0.0019$ & $-0.0102$ & $-0.0199$ & $-0.0089$ & $-0.0217$ & $-0.0271$ & $+0.0058$ & $-0.0053$ & $-0.0104$ & $+0.0063$ & $-0.0030$ & $-0.0010$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Columns are $\gamma_{\text{team}}$; the dash is the incumbent and
+``ref.'' the $(0, 0)$ reference row, which takes the DP at every decision and
+is never paired. Every game-clustered interval is in the registration's
+outcome section and in \path{results/p46_belief_grid.json}.
+
+\paragraph{The prediction was wrong about the direction.} The registration
+predicted that the opp-pool NLL would \emph{rise} with the exponent above
+$0.35$, that $(0.7, 0.7)$ would fail the licensing rule on the opp pool, and
+that the upward arm would not be played. \textbf{The belief about their cards
+improves monotonically with $\gamma_{\text{opp}}$ at every
+$\gamma_{\text{team}}$, at both budgets, in both blocks}, from $-1.1055$
+through $1.0$ at $2{,}880$ draws. The incumbent's $0.35$ is not the sharpest
+belief about SESTINA's cards this engine can hold. The C1c twin,
+$(-1.1055, 0.35)$, was predicted at $+0.015$ with an ESS ratio near $0.55$ ---
+a worse belief \emph{and} a thinner sample. It reads $\mathbf{+0.0620}$
+$[+0.0476, +0.0764]$ at $720$, four times the prediction, with an ESS ratio of
+$\mathbf{0.86}$, above the degeneracy bar: the fitted exponent is not thin, it
+is wrong. The exponent that best describes how SESTINA \emph{asks} is the worst
+belief in the grid about what SESTINA \emph{holds}, in both populations, and
+that is the belief-level twin of P43's lesson that a correct measurement of an
+opponent does not license a change to us, now with a mechanism: their choice
+curve is a fact about their asks, and their asks are not their hand. The
+model switched off on their three seats alone, $(0, 0.35)$, was predicted a
+null; it reads $\mathbf{+0.0121}$ $[+0.0096, +0.0146]$, clear of zero, so
+having no opinion about their seats is a measurably worse belief about their
+cards than the incumbent's mis-signed one. The silence term went as predicted:
+$\lambda = 0.9$ is $\mathbf{+0.0014}$ $[+0.0003, +0.0026]$, a hair worse, and
+the incumbent's calibration mean on half-suits that are \emph{not} all with the
+opponents is $\mathbf{0.068}$, under the $0.10$ bar, so the knob closes at the
+belief level and no \texttt{opp\_lambda} duel is played.
+
+\paragraph{Why exactly one cell licenses.} $(0.35, 0.7)$ and $(0.7, 0.35)$
+both read below zero on the opp pool at all four readings and both fail the
+rule on its top-1 guard: sharpening one side alone lowers top-1 on the
+\emph{other} pool, and the guard exists because a belief can win NLL by
+spreading mass while naming the holder less often. Raising both exponents
+together keeps every top-1 interval off the negative side, and $(0.7, 0.7)$ is
+the one cell the registration allowed to become an arm: opp-pool NLL
+$\mathbf{-0.0131}$ $[-0.0163, -0.0100]$ at $720$ and $\mathbf{-0.0185}$
+$[-0.0215, -0.0155]$ at $2{,}880$ against SESTINA, $\mathbf{-0.0128}$
+$[-0.0208, -0.0048]$ and $\mathbf{-0.0271}$ $[-0.0327, -0.0216]$ in self-play,
+the team pool better by a similar amount, the sign agreeing across budgets and
+larger at the high one. Its price is the sample: an ESS ratio of
+$\mathbf{0.68}$ in block A and $\mathbf{0.64}$ in block B, under the $0.70$
+bar, so sample degeneracy is live at the licensed cell --- part of what a
+sharper model buys in belief it pays back in effective draws, and at
+$\gamma_{\text{opp}} = 1.0$ the account overdraws: $(1.0, 0.7)$ at an ESS
+ratio of $0.59$ crosses zero in self-play at $720$ and reads $-0.0271$ at
+$2{,}880$, and $(1.0, 0)$ changes sign between the budgets, which the
+registration's fifth bar records as a statement about a budget rather than
+about a belief. So arm~G, \texttt{opponent\_gamma} $=0.7$ on their seats and
+ours, was licensed by a rule fixed before a position was scored, and was
+played.
+\paragraph{Stage~1: the two halves of C1b, and where the cost lives.} Four
+arms, $600$ pairings each on the same $300$ deals in both populations,
+$7{,}200$ games, zero fallbacks, zero unfinished; every figure is candidate
+minus champion within a deal, and the two contrasts are taken within
+(deal, parity):
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+arm & change from \texttt{V06\_DEPLOYED} & vs SESTINA & self-play \\
+\midrule
+E0 & \texttt{opponent\_gamma} $=0$, their seats and ours & $-0.4400$ $[-0.730, -0.150]$ & $-1.0200$ $[-1.247, -0.793]$ \\
+E1 & off on their three seats only & $\mathbf{-0.2500}$ $[-0.536, +0.036]$ & $-1.0000$ $[-1.226, -0.774]$ \\
+E2 & off on our two teammates only & $\mathbf{-0.0500}$ $[-0.297, +0.197]$ & $\mathbf{-0.0967}$ $[-0.328, +0.135]$ \\
+G & \texttt{opponent\_gamma} $=0.7$, their seats and ours & $\mathbf{+0.2433}$ $[-0.051, +0.537]$ & $\mathbf{+0.1567}$ $[-0.055, +0.368]$ \\
+\midrule
+E1 $-$ E0 & our teammates' model, theirs off & $+0.1900$ $[-0.098, +0.478]$ & $+0.0200$ $[-0.255, +0.295]$ \\
+E2 $-$ E0 & their seats' model, ours off & $\mathbf{+0.3900}$ $[+0.095, +0.685]$ & $\mathbf{+0.9233}$ $[+0.606, +1.241]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent C1b replicates: the model off on all five seats costs $-0.44$
+against SESTINA and $-1.02$ in self-play on this block, against P43's $-0.59$
+and $-1.07$. The registration predicted the split would fall mostly on our
+side of the table --- E1 $-$ E0 at $+0.30$, E2 $-$ E0 at $+0.15$ --- and it
+fell the other way. \textbf{Switching the model off on our two teammates alone
+costs nothing measurable}: E2 is a null in both populations. Switching it off
+on their seats alone reproduces the whole two-knob loss in self-play
+($-1.00$ against $-1.02$) and most of it against SESTINA ($-0.25$ against
+$-0.44$). The model's value is a fact about their seats: with ours off,
+keeping theirs is worth $+0.39$ against SESTINA and $+0.92$ in self-play,
+both clear of zero; with theirs off, keeping ours is worth $+0.02$ in
+self-play and $+0.19$ $[-0.098, +0.478]$ against SESTINA. So the cost P43
+could not place belongs to their side, and P43's two-knob number was, in
+effect, a one-knob number. A belief about a teammate's cards is one the
+teammate will shortly make moot by asking; a belief about an opponent's cards
+is what our next ask is priced on. The belief-level grid cannot see that
+asymmetry --- every cell that sharpens their side moves our pool too, through
+the quota coupling --- and only play can.
+
+The registration fixed a reading rule for the P43 sentence ``being wrong about
+an opponent's propensity beats having no opinion'': retained only if E1's
+vs-SESTINA interval lay entirely below $-0.15$. It is $-0.25$
+$[-0.536, +0.036]$, so the sentence is weakened, in \S\ref{sec:askdeficit}
+and in Appendix~\ref{app:prereg}, to the registered form: the model on all
+five seats is an asset against SESTINA; the part on their seats, teammates
+held, costs $-0.25$ $[-0.536, +0.036]$ when removed, consistent with a small
+asset and with zero at this power. The other registered contrast puts the same
+quantity with our model off at $+0.39$, clear of zero, and the two readings
+agree in size; the registered one decides the sentence.
+
+\paragraph{The licensed arm is the first to read positive in both
+populations.} G --- \texttt{opponent\_gamma} $=0.7$ on their seats and ours,
+the one cell Stage~0 licensed --- reads $+0.2433$ $[-0.051, +0.537]$ against
+SESTINA and $+0.1567$ $[-0.055, +0.368]$ in self-play. Across four programmes
+and fourteen dueled arms it is the first whose point estimate is positive in
+both populations, and the first above the $+0.15$ bar in both; and at $600$
+pairings neither interval clears zero, so under the bar as registered it does
+not clear, the confirm is not run under this registration, nothing ships, and
+\texttt{V06\_DEPLOYED} is unchanged. The registration made no prediction
+about G's play value, because it predicted G would not be played, and the
+record says so rather than retrofitting one. G's ask hit rate is
+$\mathbf{0.5289}$ against the champion's $\mathbf{0.5173}$ on the same deals:
+the third arm to raise the hit rate by about a point, after P44's D1 and P45's
+F1, and the first of the three not to lose. Whether the hit rate has anything
+to do with G's margin is not a question $600$ pairings can answer, and no rule
+was attached to it.
+
+\paragraph{What this closes, and what it opens.} P46 set out to close the
+belief: to put on the record that the belief about SESTINA's cards cannot be
+improved by re-weighting the depth heuristic at any exponent, at any budget,
+so that this paper could conclude that the residual half set is not reachable
+by any single knob the engine exposes. \textbf{It cannot conclude that.} The
+belief improves at $0.7$ on both sides, the rule fixed before the run licensed
+the cell it was written for, and the arm it licensed is the first to read
+positive in both populations. Closed: the fitted exponent at the belief level
+(a worse belief, not a thinner sample, at every budget in both populations);
+the silence term; the one-sided cells, on the top-1 guard; and the question
+of which side of the table C1b's cost belongs to. Open: one arm. What happens
+to G is a decision for a new registration rather than an amendment to this
+one, and P47 (\path{prereg/kraken_v12_g_confirm.md}) puts G, and only G, at
+confirm scale on a fresh seed block with its own prediction, never pooled with
+the $600$ pairings here. It was written before any of its games was played,
+and no result of it appears in this paper.
 
 
 \section{Discussion}
@@ -9249,17 +9443,19 @@ declaration), so even the corrected figure is a measurement under this
 paper's rules and not a ranking of two projects.
 
 \textbf{And v1.1 shipped nothing.} Seven pre-registered directions at the
-residual returned no adoption, and three registrations of the v1.2 programme
-(ten arms, each required to clear $+0.15$ against SESTINA and in self-play)
-returned none either; two of those arms raised the ask hit rate the
-cross-engine table said we lack, and both lost by a third of a set doing it.
-The pre-registered thresholds and outcomes for all forty-six registrations
-this project has written are in Appendix~\ref{app:prereg}; the forty-sixth
-(P46) is registered and running, and no result of it appears here. Two
+residual returned no adoption, and four registrations of the v1.2 programme
+(fourteen arms, each required to clear $+0.15$ against SESTINA and in
+self-play) returned none either; three of those arms raised the ask hit rate
+the cross-engine table said we lack, two lost by a third of a set doing it,
+and the third --- the one arm a belief-level rule licensed --- is the first
+to read positive in both populations and clears neither interval.
+The pre-registered thresholds and outcomes for all forty-seven registrations
+this project has written are in Appendix~\ref{app:prereg}; the forty-seventh
+(P47) is registered and not yet run, and no result of it appears here. Two
 mechanisms measured there are real and positive and still do not ship,
 because the bar was fixed in advance and was not amended afterwards. That is
 the discipline this paper is actually arguing for, and it costs more than it
-looks: exactly one of the forty-six registrations produced a change to the
+looks: exactly one of the forty-seven registrations produced a change to the
 deployed engine.
 
 \subsection{What we would do next}
@@ -9358,24 +9554,23 @@ other than banked cards, a converged rather than single-sweep coupling, and a
 horizon that does not stop at the end of one possession, and, now that the
 one tested point is known to be worth something, whether any of those is worth
 more.
-\item \textbf{What a fourth registration measures, and what is closed without
-one.} P46 (\path{prereg/kraken_v12_belief_grid.md}) is registered and running
-as this is written, and no result of it appears in this paper. It measures the
-one thing three programmes never measured: the belief about SESTINA's cards.
-Every P43 sentence about the opponent model rests on a two-knob difference,
-because \texttt{gamma\_team} defaults to \texttt{opponent\_gamma}, so
-switching the model off on their three seats also switched it off on our two
-teammates. Stage~0 scores twenty cells of the model exponent, on their seats
-and on ours, against the dealt truth on frozen champion decisions at two
-budgets ($720$ and $2{,}880$ draws), with the Kish ESS recorded per row and
-intervals clustered by game; it ships nothing. Stage~1 plays the single-knob
-decomposition of P43's model-off arm (off on their seats only; off on ours
-only) at $300$ deals on both parities in both populations, plus one upward
-cell licensed only by a rule fixed before Stage~0 was run. The registered
-prediction is that nothing clears either half of the bar, for a fourth time,
-and that the value is the table. Four doors are closed without a registration,
-and the record behind each is written into the registration so that the
-omission is a decision and not an oversight. The draws budget: the self-play
+\item \textbf{What the fourth registration measured, what a fifth measures,
+and what is closed without one.} P46 (\path{prereg/kraken_v12_belief_grid.md},
+\S\ref{sec:p46}) measured the one thing three programmes never measured: the
+belief about SESTINA's cards. It predicted that the belief was already as
+sharp as the engine could hold and that nothing would clear for a fourth
+time, and it was wrong in the direction: the belief improves monotonically
+with the model exponent on both sides of the table, the rule fixed before the
+run licensed the one cell it was allowed to, and that cell reads $+0.24$
+against SESTINA and $+0.16$ in self-play at $600$ pairings --- the first arm
+in fourteen to read positive in both populations, clearing neither interval.
+It also placed C1b's cost: on their seats, not ours. P47
+(\path{prereg/kraken_v12_g_confirm.md}) puts that one arm at confirm scale on
+a fresh seed block, with the prediction on record that it does not clear
+both halves; it is registered and not yet run, and no result of it appears
+here. Four doors are closed without a registration, and the record behind
+each is written into P46 so that the omission is a decision and not an
+oversight. The draws budget: the self-play
 half of the dual bar is already measured --- $480$ to $1{,}440$ draws is
 $+0.0945$ $[-0.002, +0.191]$ at $6{,}000$ pre-registered pairs, not
 demonstrated, and the located deficit is flat in draws on the champion's own
@@ -9390,10 +9585,10 @@ always joint-scored, and $P_{\text{joint}}(A) \le \min_c M[c, A_c]$ holds
 exactly because both come from the same weighted batch, so any split with
 joint above $0.5$ has every marginal above $0.5$, is the shortlist head, and is
 already scored. Swapping or recalibrating the ownership estimator: closed by
-the measurement of \S\ref{sec:ownership-closure}. If P46 returns what it
-predicts, the residual half set is not reachable by any single knob this
-engine exposes, and the next attempt would have to change what the engine
-computes rather than what it is told.
+the measurement of \S\ref{sec:ownership-closure}. P46 was to license the
+conclusion that the residual half set is not reachable by any single knob
+this engine exposes. It returned the opposite of what it predicted, so that
+conclusion is not drawn here; it waits on P47.
 \end{itemize}
 
 % =====================================================================

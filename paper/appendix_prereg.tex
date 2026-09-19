@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-six documents in \path{prereg/}
+no registered threshold anywhere. The forty-seven documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -27,11 +27,11 @@ non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the four written after
 this appendix was first compiled (P39--P42) appended at the end, in filename
 order among themselves, so that the identifiers already cited in the text keep
-their referents. Twelve of the forty-six have \emph{no outcome recorded in the
+their referents. Twelve of the forty-seven have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
-been run at all. A forty-sixth (P46) is registered and running at the time of
-writing, and is listed with its prediction and no verdict. Both facts are
+been run at all. A forty-seventh (P47) is registered and not yet run at the
+time of writing, and is listed with its prediction and no verdict. Both facts are
 marked in the table rather than smoothed over, because a registration that is
 written and never resolved is the file-drawer risk this appendix exists to
 expose. Anything that could not be verified against a committed results file
@@ -695,8 +695,11 @@ survives the bridge repair ($-1.1055$ against $-1.0041$), and acting on
 it is the worst arm in the study --- a correct measurement of an
 opponent does not license a change to us, and only the self-play half of
 the bar separates those. And removing the opponent model entirely costs
-$-0.59$ / $-1.07$, so the mis-signed model is an \emph{asset}: being
-wrong about an opponent's propensity beats having no opinion.
+$-0.59$ / $-1.07$, so the model on all five seats is an \emph{asset}
+against SESTINA; P46 separated the halves, and its reading rule weakened
+``being wrong about an opponent's propensity beats having no opinion'' to:
+the part on their seats, teammates held, costs $-0.25$ $[-0.536, +0.036]$
+when removed, consistent with a small asset and with zero at that power.
 \path{results/v12_screen.json},
 \path{results/v12_screen_c3.json} &
 \S\ref{sec:otherarbiter} \\
@@ -800,30 +803,59 @@ Stage~1: C1b decomposes, E1~$-$~E0 $= +0.30$ $[+0.02, +0.58]$, and the
 sentence ``being wrong about an opponent's propensity beats having no
 opinion'' is retained only if E1's vs-SESTINA interval lies entirely below
 $-0.15$. &
-\textbf{REGISTERED; RUNNING.} Stage 0 and Stage 1 results are recorded in
-the document and in \path{results/p46_belief_grid.json},
-\path{results/p46_screen.json} when complete. &
+\textbf{NO ARM CLEARS; THE PREDICTION WAS WRONG IN THE DIRECTION.}
+Stage~0: the belief improves monotonically with the exponent on both sides;
+the rule licensed $(0.7, 0.7)$ in both blocks at both budgets (opp-pool NLL
+$-0.0131$ / $-0.0185$ against SESTINA at $720$ / $2{,}880$ draws, $-0.0128$
+/ $-0.0271$ in self-play); the C1c twin is a worse belief and not a thinner
+sample ($+0.0620$, ESS ratio $0.86$); the silence term closes at the belief
+level. Stage~1: E2 (off on our teammates only) is a null in both populations,
+$-0.05$ / $-0.10$, so C1b's cost belongs to their seats; E1 reads $-0.25$
+$[-0.536, +0.036]$ and the reading rule weakens the P43 sentence; G reads
+$+0.2433$ $[-0.051, +0.537]$ / $+0.1567$ $[-0.055, +0.368]$, positive in both
+populations for the first time in fourteen arms and clear of zero in neither.
+Nothing ships; the confirm is a new registration (P47).
+\path{results/p46_belief_grid.json}, \path{results/p46_screen.json},
+\path{results/p46_screen_G.json} &
+\S\ref{sec:p46} \\
+
+P47 & \path{kraken_v12_g_confirm.md} \newline
+\emph{Does the one arm P46's belief-level rule licensed clear the dual bar
+at confirm scale?} &
+Written after P46's Stage~1 was on disk and before any P47 game. One arm, G
+(\texttt{opponent\_gamma} $=0.7$, their seats and ours), $600$ deals
+$\times$ 2 parities on the fresh block \textbf{11,100,000} (agent base
+$111{,}000$), the P43--P46 dual-population design imported from P46's
+harness, no futility screen (P46's Stage~1 was the screen), never pooled
+with it. Bar: $+0.15$ with the interval clear of zero in both populations;
+clears both $\Rightarrow$ ships as v1.2. &
+G does not clear both halves: vs SESTINA $+0.18$ $[-0.03, +0.39]$, self-play
+$+0.11$ $[-0.04, +0.26]$ --- the self-play half fails on the mean as well as
+the interval; ask hit rate up by about a point again. &
+\textbf{REGISTERED; NOT YET RUN.} Its outcome will be recorded in the
+document and in \path{results/p47_confirm.json}. &
 \S\ref{sec:next} \\
 
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-six resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-seven resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
 \textbf{refuted} on a registered condition (P1, P4, P7, P10, P23, P28, P32,
 P36). Five returned an explicit null, an explicit \textsc{split}, or an
-explicit ``not settled'' (P8, P13, P24, P27, P35), and three (P43, P44, P45)
-returned no arm clearing a dual-population ship bar, two of them with
-significant negatives in both populations. Four were closed by a screen or by
+explicit ``not settled'' (P8, P13, P24, P27, P35), and four (P43, P44, P45,
+P46) returned no arm clearing a dual-population ship bar, two of them with
+significant negatives in both populations and the fourth with the first arm
+positive in both. Four were closed by a screen or by
 proof before the registered duel was paid for, saving roughly $9{,}000$
 duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's D2,
 inside a registration already counted above. One was a set of graded
 predictions rather than a threshold and scored four of five (P25). Twelve have
 \textbf{no outcome recorded in the registration at all} (P15, P19, P21, P22,
 P30, P31, P37, P38, P39, P40, P41, P42) --- ten of them run and written up
-elsewhere, two of them never run. And one (P46) is registered and running,
+elsewhere, two of them never run. And one (P47) is registered and not yet run,
 with its prediction on record and no verdict yet.
 
 \noindent The last four of those are the ones added after this appendix was
@@ -839,7 +871,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-six --- P20 --- shipped, and it is the
+\noindent Exactly one of the forty-seven --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 

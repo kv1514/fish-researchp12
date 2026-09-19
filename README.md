@@ -76,7 +76,7 @@ published one is out by three.
 
 **Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.5–0.7 sets/game
 depending on route** (−0.5250 [−0.6886, −0.3614] through the repaired bridge,
-`results/mega_match.json`, the baseline P43–P45 were measured against; −0.70
+`results/mega_match.json`, the baseline P43–P46 were measured against; −0.70
 through the persistent bridge; −0.62 inside their own arbiter). Three
 pre-registered programmes since have not moved it.
 
@@ -109,13 +109,17 @@ opponent's declaration errors was a margin worth being suspicious of:
   changes a decision is what decides which.** Not the effect size. This is now
   how runs here are sized.
 - **Three pre-registered attempts to beat SESTINA through the repaired bridge
-  (P43–P45 in `prereg/`, ten arms) and none cleared +0.15 in both
+  (P43–P46 in `prereg/`, fourteen arms) and none cleared +0.15 in both
   populations.** Two of the arms raised our ask hit rate — the one metric the
   cross-engine table says we trail on — by one to one and a half points
   (0.5245 vs 0.5184; 0.5287 vs 0.5136) and each lost about a third of a set
   a game against SESTINA doing it. A gap in a metric is not necessarily a gap
-  to close; that is now replicated on two independent channels. A fourth
-  programme, P46, measures the belief itself and is registered and running.
+  to close; that is now replicated on two independent channels. The fourth
+  programme, P46, measured the belief itself and found it sharper at a higher
+  exponent than the champion's; the one arm its rule licensed,
+  `opponent_gamma = 0.7`, is the first to read positive in both populations
+  (+0.24 / +0.16 at 600 pairings) and clears neither interval, so nothing
+  ships and a fifth registration, P47, puts it to a confirm.
 - **The ownership inference is measured and is not what stops us declaring:
   the split is.** All three estimators of "we hold all six" cross 0.99 on
   4.17% of genuinely owned half-suits, and relaxing the gate's ownership test

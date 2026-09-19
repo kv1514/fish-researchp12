@@ -4629,3 +4629,110 @@ If P46 returns what it predicts, the paper is allowed to conclude that the
 residual half set is not reachable by any single knob this engine exposes, and
 that the next attempt would have to change what the engine computes rather
 than what it is told.
+
+## OUTCOME 2026-09-19: P46 Stage 0 — the belief improves at 0.7, and the rule licensed the arm it was written for
+
+`results/p46_belief_grid.json`: 120 games against SESTINA and 60 in self-play,
+1,657 and 868 frozen decisions (106 and 77 excluded where the incumbent took
+the exact DP), 197,704 scored rows, no withdrawal condition, validity within
+1.9% (incumbent ESS/n at 480: 0.628 against the live champion's 0.617),
+calibration clause satisfied (the C1b twin (0, 0) reads worse than the
+incumbent everywhere; the C1c twin (−1.1055, 0.35) is worse with its
+interval clear of zero at every budget in both blocks).
+
+**The prediction was wrong about the direction.** It said the opp-pool NLL
+rises with the exponent above 0.35. It falls — monotonically in `gamma_opp`
+at every `gamma_team`, at both budgets, in both blocks, from −1.1055 through
+1.0 at 2,880 draws. The incumbent's 0.35 is not the sharpest belief about
+SESTINA's cards the engine can hold. Cell (0.7, 0.7) satisfies the licensing
+rule in both blocks at both budgets: opp-pool NLL −0.0131 [−0.0163, −0.0100]
+at 720 and −0.0185 [−0.0215, −0.0155] at 2,880 against SESTINA, −0.0128
+[−0.0208, −0.0048] and −0.0271 [−0.0327, −0.0216] in self-play, team pool
+better by a similar amount, no top-1 interval below zero. The two one-sided
+cells (0.35, 0.7) and (0.7, 0.35) read below zero on the opp pool everywhere
+and fail on the top-1 guard — sharpening one side lowers top-1 on the other
+pool — so exactly one cell licenses, and it is the one the registration
+allowed. Its price: ESS ratio 0.68 (A) and 0.64 (B), under the 0.70 bar, so
+degeneracy is live at the licensed cell; at `gamma_opp = 1.0` the account
+overdraws ((1.0, 0.7) at 0.59 crosses zero in self-play at 720; (1.0, 0)
+flips sign between budgets, bar 5's "statement about a budget").
+
+**H1 true, H2 false.** The C1c twin was predicted at +0.015 with an ESS ratio
+near 0.55. It reads +0.0620 [+0.0476, +0.0764] with an ESS ratio of 0.86: the
+fitted exponent is not a thinner sample, it is a worse belief, four times
+worse than predicted — the exponent that best describes how SESTINA asks is
+the worst belief in the grid about what SESTINA holds. (0, 0.35), the model
+off on their seats only, was predicted a null and reads +0.0121 [+0.0096,
++0.0146]. The silence term went as predicted: λ = 0.9 is +0.0014 [+0.0003,
++0.0026], calibration mean on truth-"no" half-suits 0.068 < 0.10, closed at
+the belief level. Block B reproduces `results/gamma_split.json`'s signs at
+(0.7, 0.35) and (0.7, 0.7) with intervals about 1.8× wider.
+
+**Arm G was therefore played**, at 10,700,000, after the grid was on disk.
+
+## OUTCOME 2026-09-19: P46 Stage 1 — C1b's cost is on their side, and the licensed arm is the first to read positive in both populations
+
+`results/p46_screen.json` (E0, E1, E2) and `results/p46_screen_G.json` (G):
+600 pairings per arm on the same 300 deals at 10,700,000, 7,200 games, zero
+fallbacks, zero unfinished.
+
+| arm | change | vs SESTINA | self-play |
+|---|---|---:|---:|
+| E0 | model off, their seats and ours | −0.4400 [−0.730, −0.150] | −1.0200 [−1.247, −0.793] |
+| E1 | off on their three seats only | −0.2500 [−0.536, +0.036] | −1.0000 [−1.226, −0.774] |
+| E2 | off on our two teammates only | −0.0500 [−0.297, +0.197] | −0.0967 [−0.328, +0.135] |
+| G | `opponent_gamma = 0.7`, their seats and ours | **+0.2433 [−0.051, +0.537]** | **+0.1567 [−0.055, +0.368]** |
+| E1 − E0 | our teammates' model, theirs off | +0.1900 [−0.098, +0.478] | +0.0200 [−0.255, +0.295] |
+| E2 − E0 | their seats' model, ours off | +0.3900 [+0.095, +0.685] | +0.9233 [+0.606, +1.241] |
+
+**Nothing ships.** G's point estimate is above +0.15 in both populations and
+neither interval clears zero; P46's Stage 2 was allowed only for a clearing
+arm and is not run. `V06_DEPLOYED` is unchanged.
+
+**C1b replicates (−0.44 / −1.02 against P43's −0.59 / −1.07) and its cost
+belongs to their seats.** The prediction had the split the wrong way round
+(E1 − E0 = +0.30, E2 − E0 = +0.15). Switching the model off on our two
+teammates alone costs nothing measurable — E2 is a null in both
+populations — and switching it off on their seats alone reproduces the whole
+two-knob loss in self-play and most of it against SESTINA. With our model
+off, keeping theirs is worth +0.39 [+0.095, +0.685] / +0.92 [+0.606,
++1.241], both clear of zero. P43's two-knob number was, in effect, a
+one-knob number.
+
+**The reading rule fires.** E1's vs-SESTINA interval [−0.536, +0.036] is not
+entirely below −0.15, so "being wrong about an opponent's propensity beats
+having no opinion" is weakened, in the paper's P43 section and appendix row,
+to: the model on all five seats is an asset against SESTINA; the part on
+their seats, teammates held, costs −0.25 [−0.536, +0.036] when removed,
+consistent with a small asset and with zero at this power.
+
+**The hit rate rose again — 0.5289 against 0.5173 — and for the first time
+the arm did not lose.** Third arm to raise it by about a point (P44's D1 and
+P45's F1 each lost a third of a set); no rule was attached to it and none is
+added.
+
+**What P46 cannot conclude.** It set out to show the belief cannot be
+improved at any exponent so that the paper could conclude the residual half
+set is unreachable by any single knob. The belief improves at 0.7, the rule
+licensed the cell it was written for, and the arm is the first positive in
+both populations. That conclusion is not drawn; it waits on P47.
+
+## REGISTERED 2026-09-19: P47, the licensed arm at confirm scale
+
+`prereg/kraken_v12_g_confirm.md`, written after P46's Stage 1 was on disk and
+before any P47 game. One arm — G, `opponent_gamma = 0.7` on their seats and
+ours — at 600 deals × 2 parities on the fresh block **11,100,000** (agent
+base 111,000), the same dual-population design imported from P46's harness
+(`scripts4/p47_confirm.py`), no futility screen (P46's Stage 1 was the
+screen), never pooled with it. Bar: +0.15 with the interval clear of zero in
+both populations; clears both → ships as KRAKEN v1.2 with the bit-identity
+tests moved to the new default. The prediction on record: **G does not clear
+both halves** — vs SESTINA +0.18 [−0.03, +0.39], self-play +0.11 [−0.04,
++0.26], the self-play half failing on the mean as well as the interval — on
+the reasoning that one 600-pairing reading shrinks by about a quarter and
+that the sharper belief is bought with a thinner sample (ESS ratio 0.68)
+which self-play pays on all six seats. Not registered, on the record: G at
+more draws (a two-knob arm; the draws door was closed on the self-play
+half), the one-sided and γ = 1.0 cells (closed by P46's rule), `sis_tilt` or
+`depth_mode` variants, and a third population. Result lands in
+`results/p47_confirm.json`.
