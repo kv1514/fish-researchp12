@@ -33,10 +33,29 @@ PAPER = ROOT / "paper" / "kraken.tex"
 
 
 def _get(d, path):
-    for k in path.split("."):
+    """Walk a dotted key path; list indices are integers.
+
+    A key may itself contain a dot -- ``ownership_estimators.json`` names
+    its thresholds ``share_over_0.99_when_ours`` -- and a plain split then
+    asks a dict for ``share_over_0`` and reports the key gone, which reads
+    exactly like a results file that no longer holds the figure. So when a
+    segment is not a key, the following segments are joined back on to it
+    one at a time until one is; only if none is does the lookup fail.
+    """
+    parts = path.split(".")
+    i = 0
+    while i < len(parts):
         if isinstance(d, list):
-            k = int(k)
+            d = d[int(parts[i])]
+            i += 1
+            continue
+        j = i
+        k = parts[i]
+        while k not in d and j + 1 < len(parts):
+            j += 1
+            k = k + "." + parts[j]
         d = d[k]
+        i = j + 1
     return d
 
 
@@ -1094,11 +1113,11 @@ WATCH = [
     # The corrected head-to-head itself -- the one figure in this paper taken
     # through bridge revision 2, and the one the abstract now leads with.
     ("mega_match_rev2_retracted.json", "margin", "{:+.4f}",
-     "corrected margin over v0.7", "margin & $\\mathbf{+2.3466}$"),
+     "corrected margin over v0.7", "margin (withdrawn, \\S\\ref{sec:otherarbiter}) &"),
     ("mega_match_rev2_retracted.json", "ci95.0", "{:+.4f}",
-     "corrected margin CI low", "margin & $\\mathbf{+2.3466}$"),
+     "corrected margin CI low", "margin (withdrawn, \\S\\ref{sec:otherarbiter}) &"),
     ("mega_match_rev2_retracted.json", "ci95.1", "{:+.4f}",
-     "corrected margin CI high", "margin & $\\mathbf{+2.3466}$"),
+     "corrected margin CI high", "margin (withdrawn, \\S\\ref{sec:otherarbiter}) &"),
     ("mega_match_rev2_retracted.json", "n_games", "{:,d}",
      "games in the corrected head-to-head", "games on the same deals the retracted"),
     ("mega_match_rev2_retracted.json", "kv_set_share", "{:.2%}",
@@ -1465,6 +1484,77 @@ WATCH = [
      "D1's ask hit rate", "the candidate's ask hit rate is"),
     ("p44_screen.json", "arms.D1_dead_ask_050.champ_ask_hit", "{:.4f}",
      "the champion's ask hit rate", "the candidate's ask hit rate is"),
+    # The ownership closure. P44 explained D2's starvation as "we do not know
+    # we own them"; the sweep in this file says the opposite -- the gate is
+    # flat from 0.77 down to 0.20 and bound by the exactness band, not by
+    # ownership. That reading depends on every row of the sweep table
+    # standing together (a single relaxed cell would read as a trend), and on
+    # the three estimators agreeing at 0.99, so the table, the 4.17% and the
+    # weighted-versus-product contrast that names the sharpest estimator the
+    # worst are all pinned. A paper that kept the sweep and lost the 4.17%
+    # would be arguing from half the closure.
+    ("ownership_estimators.json", "prod.mean_when_ours", "{:.4f}",
+     "product, mean when ours", "independence product &"),
+    ("ownership_estimators.json", "prod.auc", "{:.4f}",
+     "product AUC", "independence product &"),
+    ("ownership_estimators.json", "prod.brier", "{:.4f}",
+     "product Brier", "independence product &"),
+    ("ownership_estimators.json", "joint_u.mean_when_ours", "{:.4f}",
+     "uniform joint, mean when ours", "uniform joint &"),
+    ("ownership_estimators.json", "joint_w.mean_when_ours", "{:.4f}",
+     "weighted joint, mean when ours", "weighted joint &"),
+    ("ownership_estimators.json", "contrasts.weighted_minus_product.delta",
+     "{:+.4f}", "weighted minus product",
+     "the weighted joint against the product is"),
+    ("ownership_estimators.json", "contrasts.weighted_minus_product.lo",
+     "{:+.4f}", "weighted minus product, CI low",
+     "the weighted joint against the product is"),
+    ("ownership_estimators.json", "contrasts.weighted_minus_product.hi",
+     "{:+.4f}", "weighted minus product, CI high",
+     "the weighted joint against the product is"),
+    ("ownership_estimators.json", "prod.share_over_0.99_when_ours", "{:.2%}",
+     "owned half-suits crossing 0.99", "All three cross"),
+    # ``gate`` is a list ordered by owned_p_team: index 6 is 0.77, 7 is 0.85,
+    # 8 is 0.90, 10 is 0.99. Indices 0--6 hold the same row, which is the
+    # finding -- the paper collapses them into "0.77 down to 0.20".
+    ("ownership_estimators.json", "gate.6.new_per_game", "{:.4f}",
+     "new declarations/game, 0.77 down to 0.20", "down to $0.20$ &"),
+    ("ownership_estimators.json", "gate.6.precision", "{:.4f}",
+     "precision at 0.77", "down to $0.20$ &"),
+    ("ownership_estimators.json", "gate.10.new_per_game", "{:.4f}",
+     "new declarations/game at 0.99", "(P44's) &"),
+    ("ownership_estimators.json", "gate.8.new_per_game", "{:.4f}",
+     "new declarations/game at 0.90", "$0.90$ &"),
+    ("ownership_estimators.json", "gate.7.new_per_game", "{:.4f}",
+     "new declarations/game at 0.85", "$0.85$ &"),
+    # P45. The same shape as P44 and pinned for the same reason: the arm's
+    # margins and the hit rate it raised are one finding, not two. F1 loses in
+    # both populations WHILE raising the ask hit rate, which is what makes it
+    # a replication of P44's D1 on an independent channel rather than one more
+    # negative. Quoting the margins alone would leave the replication
+    # unpinned, and quoting the hit rate alone would read as a success. The
+    # futility screen's carry figures are pinned too, because the duel is only
+    # a duel of THIS gate if the encoder reached the code path, and the
+    # +5.80 points is the evidence that it did.
+    ("p45_futility.json", "carry_gain", "{:+.2%}",
+     "F1 carry gain", "with a carry gain of"),
+    ("p45_futility.json", "arm_carry_rate", "{:.1%}",
+     "F1 carry rate", "with a carry gain of"),
+    ("p45_futility.json", "champion_carry_rate", "{:.1%}",
+     "champion carry rate", "with a carry gain of"),
+    # The arm's row in the verdict table. ``convention\_max\_cost} $=10^{-9}$
+    # &`` alone recurs in the hit-rate table further down, so the row is
+    # anchored with its arm label, which is unique to the verdict table.
+    ("p45_screen.json", "arms.F1_free_message.vs_sestina.mean", "{:+.4f}",
+     "F1 against SESTINA",
+     "F1 \\texttt{convention\\_max\\_cost} $=10^{-9}$ &"),
+    ("p45_screen.json", "arms.F1_free_message.self_play.mean", "{:+.4f}",
+     "F1 in self-play",
+     "F1 \\texttt{convention\\_max\\_cost} $=10^{-9}$ &"),
+    ("p45_screen.json", "arms.F1_free_message.cand_ask_hit", "{:.4f}",
+     "F1's ask hit rate", "F1's ask hit rate is"),
+    ("p45_screen.json", "arms.F1_free_message.champ_ask_hit", "{:.4f}",
+     "the champion's ask hit rate against F1", "F1's ask hit rate is"),
 ]
 
 

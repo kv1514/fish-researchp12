@@ -6,7 +6,10 @@
 > `paper/kraken.tex`, which is where every result since v0.4 lives --
 > among them the opponent-award rule change, the bridge-revision retraction,
 > the 10,000-game head-to-head against Dylan's FishBot v0.7 (+2.3466
-> [+2.2928, +2.4004] sets/game), the declaration path ledger, and the finding
+> [+2.2928, +2.4004] sets/game — **withdrawn**: it measured a stateless
+> bridge, and the corrected figures are -0.5250 [-0.6886, -0.3614] through
+> the repaired bridge, -0.70 through the persistent bridge and -0.62 inside
+> their own arbiter), the declaration path ledger, and the finding
 > that the deal contributes -1.3% [-4.0%, +1.5%] of a game's outcome variance.
 >
 > This file is kept because its arguments about exact belief tracking and the

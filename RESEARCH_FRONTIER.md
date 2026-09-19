@@ -374,7 +374,10 @@ if weak signal sitting on the wire today, unread, at zero cost and zero risk.
 
 It also reframes what the encoder buys: from 35.3% to 40.1% at the
 free-message gate, i.e. **about five points**, not the sixty-plus the
-mis-priced gate appeared to deliver.
+mis-priced gate appeared to deliver. Confirmed on 400 games in P45's futility
+screen (`results/p45_futility.json`): 39.5% against 33.7%, +5.80 points — and
+the duel then lost in both populations (the P45 closure at the end of this
+file).
 
 ## A necessary qualification to "can refute, never license"
 
@@ -4428,7 +4431,8 @@ touches is the one number that had nothing to cancel against.
 
 ## CLOSED 2026-09-16: the ownership inference is not an estimator problem, and the declaration gate is not an ownership problem
 
-The paper's Left-open section reduces P43 and P44 to one number — the **0.3120**
+The paper's Left-open section (as of a657b28; the paragraph is rewritten in
+the P45 update) reduces P43 and P44 to one number — the **0.3120**
 in `results/ask_deadness_signal.json`, the mean probability our belief assigns
 to a half-suit that is genuinely, entirely ours — and says no registration has
 attacked it and that we do not nominate a candidate. This closes it, with a
@@ -4516,3 +4520,112 @@ the locating convention, clears its information gate (teammate top-1
 because `prereg/convention_duel.md` dueled it and lost +1.750 to a
 mis-specified gate. That is where a P45 would have to go, and it is a
 convention problem rather than an inference one. No arm is nominated here.
+
+## CLOSED 2026-09-16: P45, the free-message gate
+
+The section above ends "that is where a P45 would have to go". It went there,
+and it lost. `prereg/kraken_v12_free_message.md` registered one arm, F1: the
+locating convention (`convention_book = "locate"`, `convention_q = 0.5`) behind
+a gate of `convention_max_cost = 1e-9` in the **re-priced** objective units, so
+the agreed card is named only when it *ties* the card the objective already
+chose. The message costs nothing in the currency the old gate mis-read, which
+is why this was the arm and not a swept threshold. Same dual-population bar as
+P43 and P44: +0.15 with the interval clear of zero against SESTINA v1.0 through
+`BRIDGE_REV 3` *and* in self-play, paired within deal.
+
+**Futility, cleared.** 400 games at seed base 10,150,000
+(`results/p45_futility.json`): the arm carries the agreed card on **39.5%** of
+its asks against the champion's **33.7%** on the same deals, **+5.80 points**
+over a 2-point bar, and within a point of the 40.1% the corrected carry table
+predicted for this gate. The encoder reached the code path.
+
+**Duel, lost in both populations.** 600 pairings, 1,800 games at
+10,200,000 (`results/p45_screen.json`), zero fallbacks, zero unfinished:
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| F1 free-message | **−0.3067** [−0.607, −0.006] | **−0.8567** [−1.069, −0.645] | no |
+
+Both intervals are clear of zero on the wrong side. The confirm stage at
+10,300,000 was not run, for P44's reason: a confirm hardens a clearing arm, it
+does not re-establish a decisive negative at twice the compute.
+
+Three findings, each the registration did not predict:
+
+1. **The prediction was right about the verdict and wrong about the size.**
+   The document predicted a null near the free read's −0.002 [−0.127, +0.123],
+   reasoning that F1 is the same channel plus 4.8 points of carry. It is not a
+   null; in self-play it is nearly seven times the free read's point estimate.
+   Sending changes the game in a way receiving does not, and the receiving
+   null does not bound it.
+2. **The dual population fired the other way.** The SESTINA population was
+   added because a code book shared by our seats and unknown to the opponent
+   looked like the opponent-specific shape to guard against in *self-play*.
+   Self-play is where F1 loses most, by a factor of 2.8. Run self-play only,
+   as every earlier convention duel was, the arm would have been rejected
+   three times harder than the actual opponent justifies.
+3. **A free message is not free, and `scores` is why.** F1 pays nothing in
+   the objective's own units by construction and loses 0.86 sets a game. The
+   hypothesis on record, not separated from anything: the gate replaces a
+   *random* tie-break with a *deterministic* one at every tie, on all three of
+   our seats at once, and the uniform draw it removes is what decorrelates
+   three seats that share an objective — a cost that is zero in the quantity
+   measured and non-zero in the game, the same shape of error the arm was
+   written to avoid.
+
+And the finding that replicated: **the ask hit rate went up again and lost
+again.** F1 0.5287 against the champion's 0.5136, beside P44 D1's 0.5245
+against 0.5184. Two channels, two seed blocks, two registrations, and both
+raise the hit rate by one to one and a half points and cost about a third of a
+set against SESTINA. P44's "not a quantity to maximise" was one arm; it is now
+the most durable finding either programme has produced.
+
+**What this closes.** The convention channel, both halves, measured in play:
+receiving is a null at 3,000 pairs (`prereg/convention_freeread.md`) and
+sending loses at every gate ever tried, including one that costs nothing. The
+1.72 bits an ask carries remains a fact about the rules and remains
+unrealisable by this engine. `V06_DEPLOYED` is byte-for-byte unchanged; KRAKEN
+v1.1 still loses to SESTINA v1.0 by −0.5250.
+
+## REGISTERED 2026-09-18: P46, the belief grid and the two halves of C1b
+
+`prereg/kraken_v12_belief_grid.md`, written before any instrument position was
+scored or candidate game played. Three programmes have put ten arms at the
+−0.5250 [−0.6886, −0.3614] deficit and every lever the engine's diagnostics
+nominated has been registered and lost or stopped; what has never been
+measured against SESTINA at `BRIDGE_REV 3` is the **belief itself** — no value
+of the opponent-model exponent has been scored on SESTINA-held cards against
+the dealt truth, no Kish ESS recorded off `gamma = 0.35`, and P43's C1b
+(`opponent_gamma = 0.0`, −0.59 / −1.07) switched the model off on SESTINA's
+seats *and* on our two teammates at once, because `gamma_team` defaults to
+`opponent_gamma`. P46 scores the belief first (Stage 0: 20 cells of
+`gamma_opp` × `gamma_team` plus two `opp_lambda` values, at 720 and 2,880
+draws, cross-engine and self-play blocks, NLL/Brier/top-1 per truth pool paired
+against the incumbent, game-clustered, ESS per row, a dual licensing rule and a
+calibration clause keyed to P43's dueled C1b and C1c), then plays the
+single-knob decomposition (Stage 1: E0 = C1b replicated within deal, E1 = off
+on their seats only, E2 = off on ours only, and G = `opponent_gamma = 0.7`
+*only* if Stage 0 licenses cell (0.7, 0.7) in both blocks at both budgets).
+Seeds 10,600,000 / 10,700,000 / 10,800,000, all new. The prediction on record:
+nothing ships for the fourth time; C1b decomposes with E1 − E0 = +0.30
+[+0.02, +0.58]; the fitted exponent (−1.1055, 0.35) is both a worse belief
+about their cards and a thinner sample; G is not licensed and not played; the
+P43 sentence "being wrong about an opponent's propensity beats having no
+opinion" is weakened unless E1's vs-SESTINA interval lies entirely below −0.15.
+Results land in `results/p46_belief_grid.json` and `results/p46_screen.json`.
+
+What P46 deliberately does not register, so the omission is a decision:
+
+| candidate | why not | record |
+|---|---|---|
+| the draws budget (`n_draws = 1920`) against SESTINA | an arm's only ship route is the dual bar, and the self-play half is already measured: 480 → 1440 is **+0.0945 [−0.002, +0.191]** at 6,000 pre-registered pairs, *not demonstrated*, with log-linearity broken at z = −3.54. A 600-pairing half cannot overturn that, so the arm's verdict is null-or-opponent-specific before a game is played. The located deficit is flat in draws on the champion's own decisions: split-joint bias −0.219 / −0.244 / −0.237 at 480 / 1920 / 5760. | `jobs/PREREGISTRATION_precision2.md`, `results/precision2_verdict.json`, `results/split_why.json` |
+| `n_worlds` | **inert on the act path by construction**: `Posterior.worlds()` has no caller in `agent4.py`, `askfeat.py`, `claim4.py` or `lookahead.py`; `n_worlds` reaches play only through the SIS-failure fallback. A 3-game probe at 64 and 128 worlds reproduced the champion's games byte for byte. Not a null — a no-op. | `fish4/posterior.py` |
+| `lookahead_depth = 4`, `lookahead_beam = 8` | changed no decision in a 320-decision probe against SESTINA at 2.0× and 1.15× the cost. Not closed, but not the place to spend 1,800 games either. | the registration |
+| a joint-scored split for **voluntary** claims (extending `claim_forced_exhaustive`) | closed by proof: the shortlist's first entry is the per-card marginal argmax and is always joint-scored, and P_joint(A) ≤ min_c M[c, A_c] holds exactly because both come from the same weighted batch; so any split with joint above 0.5 has every marginal above 0.5, *is* the shortlist head, and is already scored. | `fish4/claim4.py`, `fish4/posterior.py` |
+| swapping or recalibrating the ownership estimator | closed by measurement: all three cross 0.99 on 4.17% of owned half-suits; the gate is flat in ownership from 0.77 to 0.20. | `results/ownership_estimators.json` |
+| the convention, either half | closed in play: receiving is a null at 3,000 pairs; sending loses at every gate ever tried. | P8, P45 |
+
+If P46 returns what it predicts, the paper is allowed to conclude that the
+residual half set is not reachable by any single knob this engine exposes, and
+that the next attempt would have to change what the engine computes rather
+than what it is told.

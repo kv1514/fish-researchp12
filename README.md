@@ -74,7 +74,11 @@ entire margin it produced — and their declaration errors fall tenfold, 0.880 t
 Two routes sharing no host, no rules and no code agree to within 0.08; the
 published one is out by three.
 
-**Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.6–0.7 sets/game.**
+**Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.5–0.7 sets/game
+depending on route** (−0.5250 [−0.6886, −0.3614] through the repaired bridge,
+`results/mega_match.json`, the baseline P43–P45 were measured against; −0.70
+through the persistent bridge; −0.62 inside their own arbiter). Three
+pre-registered programmes since have not moved it.
 
 What survives: every **paired** contrast that shares the bridge, because both
 arms were handicapped identically, and every internal result that never crossed
@@ -82,7 +86,7 @@ the bridge at all. That distinction was written into the paper's bridges
 appendix long before there was any reason to think it applied to the paper's own
 headline.
 
-### Four things measured since, each of which changed what the project believes
+### Six things measured since, each of which changed what the project believes
 
 The first of these is about the retracted run and is kept because it is how the
 retraction was eventually found — a margin whose majority component was one
@@ -104,8 +108,23 @@ opponent's declaration errors was a margin worth being suspicious of:
 - **Pairing is worth between 1.1× and 414× the games, and how often a knob
   changes a decision is what decides which.** Not the effect size. This is now
   how runs here are sized.
+- **Three pre-registered attempts to beat SESTINA through the repaired bridge
+  (P43–P45 in `prereg/`, ten arms) and none cleared +0.15 in both
+  populations.** Two of the arms raised our ask hit rate — the one metric the
+  cross-engine table says we trail on — by one to one and a half points
+  (0.5245 vs 0.5184; 0.5287 vs 0.5136) and each lost about a third of a set
+  a game against SESTINA doing it. A gap in a metric is not necessarily a gap
+  to close; that is now replicated on two independent channels. A fourth
+  programme, P46, measures the belief itself and is registered and running.
+- **The ownership inference is measured and is not what stops us declaring:
+  the split is.** All three estimators of "we hold all six" cross 0.99 on
+  4.17% of genuinely owned half-suits, and relaxing the gate's ownership test
+  from 0.77 to 0.20 adds only 0.103 declarations a game, under half the
+  futility bar (`results/ownership_estimators.json`). The "team has the
+  answer and no member of it does" problem above is the measured constraint.
 
-`PAPER.md` and `paper/kraken.tex` carry the full argument;
+`paper/kraken.tex` carries the full argument (`PAPER.md` is the superseded
+v0.4-era paper, kept for its arguments and not its numbers);
 `prereg/` holds the registrations, each with its outcome recorded against the
 conditions fixed before the run.
 

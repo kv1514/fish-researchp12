@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-five documents in \path{prereg/}
+no registered threshold anywhere. The forty-six documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -27,10 +27,11 @@ non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the four written after
 this appendix was first compiled (P39--P42) appended at the end, in filename
 order among themselves, so that the identifiers already cited in the text keep
-their referents. Twelve of the forty-five have \emph{no outcome recorded in the
+their referents. Twelve of the forty-six have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
-been run at all. Both facts are
+been run at all. A forty-sixth (P46) is registered and running at the time of
+writing, and is listed with its prediction and no verdict. Both facts are
 marked in the table rather than smoothed over, because a registration that is
 written and never resolved is the file-drawer risk this appendix exists to
 expose. Anything that could not be verified against a committed results file
@@ -719,10 +720,10 @@ so D1 removes the engine's own way of resolving the allocation it is stuck on.
 D2 was predicted to be ``the one with a case''. &
 \textbf{NOTHING SHIPS.} D2 fired on $0.235$ declarations/game against its
 $0.250$ bar and never reached a duel, which is itself the result: it gates on
-$p_{\text{team}} \ge 0.99$, and the belief's probability that a genuinely
-dead half-suit is entirely ours averages $0.3120$. \emph{We sit on completed
-half-suits because we do not know we own them}, not because we cannot place
-the split. D1 reached the duel and returned a significant \textbf{negative} in
+$p_{\text{team}} \ge 0.99$, and the belief puts $0.3120$ on a genuinely dead
+half-suit being ours; a later sweep (\path{results/ownership_estimators.json})
+shows relaxing that test to $0.20$ adds only $0.103$ declarations a game, so
+the gate is bound by the exactness band, not ownership. D1 reached the duel and returned a significant \textbf{negative} in
 both populations, $-0.3233$ $[-0.527, -0.119]$ and $-0.2300$ $[-0.448,
 -0.012]$ --- while raising the ask hit rate it targets, $0.5245$ against the
 champion's $0.5184$ on the same deals. It did what it was built to do and cost
@@ -761,25 +762,69 @@ $0.86$ sets a game --- it replaces a \emph{random} tie-break with a
 three seats sharing an objective. And the ask hit rate rose again, $0.5287$
 against $0.5136$, \textbf{replicating P44's finding on an independent channel}.
 \path{results/p45_futility.json}, \path{results/p45_screen.json} &
-\S\ref{sec:askdeficit} \\
+\S\ref{sec:p45} \\
+
+P46 & \path{kraken_v12_belief_grid.md} \newline
+\emph{Is the belief about SESTINA's cards improvable at any exponent, on
+either side, at any budget --- and which half of P43's C1b loss is about
+them and which is about us?} &
+Written before any instrument position was scored or candidate game played.
+Stage~0 is an instrument that ships nothing: the champion's own games, frozen
+after \texttt{act()} at every fourth scored decision, re-weighted at
+\textbf{20 cells} --- $\gamma_{\text{opp}} \in \{-1.1055, -0.5, 0.0, 0.35,
+0.7, 1.0\} \times \gamma_{\text{team}} \in \{0.0, 0.35, 0.7\}$, plus
+\texttt{opp\_lambda} $\in \{0.3, 0.9\}$ at the incumbent $(0.35, 0.35)$ ---
+at \textbf{two budgets}, $720$ and $2{,}880$ draws, block~A cross-engine
+against SESTINA and block~B self-play, NLL/Brier/top-1 per truth pool paired
+against the incumbent cell, intervals clustered by game, Kish ESS per row.
+Decisions where the incumbent takes the exact DP are excluded from every
+paired contrast. \textbf{Licensing rule}, dual like the ship bar: a cell
+licenses a play arm only if its opp-pool NLL interval lies entirely below
+zero at both budgets in both blocks and no top-1 interval lies entirely below
+zero; only $(0.7, 0.7)$ can be promoted. \textbf{Calibration clause}: if the
+rule licenses $(0.0, 0.0)$ or $(-1.1055, 0.35)$ --- the belief twins of P43's
+dueled C1b and C1c --- or fails to fail the latter, the rule is recorded as
+uncalibrated and the grid closes nothing. Stage~1, the same dual-population
+design as P43--P45: \textbf{E0} \texttt{opponent\_gamma} $=0.0$ (C1b
+replicated within deal), \textbf{E1} off on SESTINA's seats only,
+\textbf{E2} off on our teammates only, and \textbf{G}
+\texttt{opponent\_gamma} $=0.7$ played only if Stage~0 licenses it. Seeds
+\textbf{10,600,000} (instrument), \textbf{10,700,000} (screen, $300\times2$
+per arm), \textbf{10,800,000} (confirm, $600\times2$, never pooled). &
+Yes: nothing ships, for the fourth time. Stage~0: no cell with
+$\gamma_{\text{opp}}$ outside $\{0.0, 0.35\}$ licenses; the fitted exponent
+$(-1.1055, 0.35)$ is both a worse belief about their cards and a thinner
+sample (opp-pool NLL $+0.015$ $[+0.005, +0.025]$ at $720$, ESS ratio about
+$0.55$); $(0.7, 0.7)$ fails the licensing rule, so G is \emph{not} played.
+Stage~1: C1b decomposes, E1~$-$~E0 $= +0.30$ $[+0.02, +0.58]$, and the
+sentence ``being wrong about an opponent's propensity beats having no
+opinion'' is retained only if E1's vs-SESTINA interval lies entirely below
+$-0.15$. &
+\textbf{REGISTERED; RUNNING.} Stage 0 and Stage 1 results are recorded in
+the document and in \path{results/p46_belief_grid.json},
+\path{results/p46_screen.json} when complete. &
+\S\ref{sec:next} \\
 
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-five resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-six resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
 \textbf{refuted} on a registered condition (P1, P4, P7, P10, P23, P28, P32,
-P36). Eight returned an explicit null, an explicit \textsc{split}, or an
-explicit ``not settled'' (P8, P13, P24, P27, P35, P43, P44, P45). Four were closed
-by a screen or by proof before the registered duel was paid for, saving roughly
-$9{,}000$ duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's
-D2, inside a registration already counted above. One was a set of graded predictions
-rather than a threshold and scored four of five (P25). And twelve have
+P36). Five returned an explicit null, an explicit \textsc{split}, or an
+explicit ``not settled'' (P8, P13, P24, P27, P35), and three (P43, P44, P45)
+returned no arm clearing a dual-population ship bar, two of them with
+significant negatives in both populations. Four were closed by a screen or by
+proof before the registered duel was paid for, saving roughly $9{,}000$
+duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's D2,
+inside a registration already counted above. One was a set of graded
+predictions rather than a threshold and scored four of five (P25). Twelve have
 \textbf{no outcome recorded in the registration at all} (P15, P19, P21, P22,
 P30, P31, P37, P38, P39, P40, P41, P42) --- ten of them run and written up
-elsewhere, two of them never run.
+elsewhere, two of them never run. And one (P46) is registered and running,
+with its prediction on record and no verdict yet.
 
 \noindent The last four of those are the ones added after this appendix was
 first compiled, and they resolved on their own registered verdicts rather than
@@ -794,7 +839,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-five --- P20 --- shipped, and it is the
+\noindent Exactly one of the forty-six --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
