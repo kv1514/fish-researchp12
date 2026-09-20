@@ -275,3 +275,102 @@ scoring run), never over decisions — rows inside one game share a hand and a
 decision-level interval on this population is roughly an order of magnitude too
 narrow. Every runner pins `wrong_distribution_outcome="opponent"` and records the
 engine digest and `BRIDGE_REV`. No arm is inspected before its block completes.
+
+---
+
+# CORRECTION, before any candidate game was played
+
+Written the same day, after checking a premise of the document above against
+`fish/engine.py` rather than against my own summary of it. **The central claim
+of the section "Why the RACE channel was never searched" is wrong, and the N0
+screen rule above cannot do what it says.** The decomposition is unaffected;
+the inference drawn from it was not checked.
+
+## What is wrong
+
+`GameState._apply_claim` (fish/engine.py:327) awards a half-suit to the
+declaring team only when the declared assignment matches the revealed holders
+exactly, and to the **opponents** whenever any revealed holder is on the other
+team (line 345). So a team that does not hold all six cannot take a half-suit by
+declaring it, under any award rule. Correct declaration requires outright
+ownership.
+
+The counters say the same thing, from `results/bridge_dealt_hand_price.json` at
+`BRIDGE_REV 3`:
+
+| | per game |
+|---|---:|
+| half-suits collected outright and declared correctly | **8.7600** of 9 |
+| declarations involving any error at all, both sides | 0.2400 |
+| their ownership errors — the only "contested" case | 0.0233 |
+
+**Contested half-suits essentially do not happen.** Every half-suit is collected
+outright by one team and then declared by that team; the declaration is a
+formality. We complete 3.9617 a game and SESTINA completes 4.7983.
+
+So RACE is not a timing channel and cannot be moved by declaring earlier. A
+half-suit our team already owns will be declared by us whether the gate opens on
+turn 12 or turn 30; the gate changes *when*, not *whether*. **RACE is a
+card-collection deficit, which is the ask channel** — exactly where
+`prereg/kraken_v12_vs_sestina.md` aimed. That document's aim was right and this
+one said otherwise on a premise I did not check.
+
+## What survives
+
+The identity work and the decomposition stand: they were measured, and the
+per-game integrality check passes. What changes is the *ceiling on the
+declaration channel*, which the same table already gave and which I did not
+carry into the candidate design:
+
+> OURS — declare perfectly, never wrong again — **+0.277**
+
+That is the entire headroom of every declaration-side candidate, N0 through N4.
+It is a third of the deficit. **No amount of declaration work beats SESTINA**,
+and the correct reading of "declaring perfectly still loses by 0.60" is not that
+declarations are the route but that they are *not*.
+
+## What replaces it
+
+The finding that survives is narrower than the one above and, unlike it, is
+checkable against the record: the ask channel has always been scored by **ask
+hit rate** — 52.5% against 54.9% in the earlier registration's own table — and
+hit rate is not half-suit completion. The record already contains the evidence
+that they come apart:
+
+> "The hit rate rose again — 0.5289 against 0.5173 — and for the first time the
+> arm did not lose." (P46 Stage 1)
+
+Three arms raised the hit rate by about a point. P44's D1 and P45's F1 each lost
+about a third of a set; P46's G was the first not to. **A point of hit rate has
+never once bought a set**, and no arm in this study has ever been scored on
+half-suits completed, which is the quantity the margin is made of.
+
+## The replacement N0, and it is a measurement
+
+`scripts4/completion_ledger.py`: instrument a `BRIDGE_REV 3` block and record
+per game, for both engines, turns taken, asks made, asks that hit, half-suits
+completed, and **asks per half-suit completed**. Ships nothing; it is the
+diagnostic that should have preceded the whole SESTINA programme.
+
+The two readings it separates, fixed now:
+
+* **tempo** — they complete more because they take more turns, at a similar
+  asks-per-completion. Then the lever is turn retention and the hit rate was
+  the right proxy after all, measured on the wrong margin.
+* **concentration** — they complete more per ask, at similar turn counts. Then
+  the lever is *which* half-suit an ask is spent on, the hit rate is actively
+  misleading (an ask that hits in a half-suit we will never complete is a
+  wasted hit that also looks like a success), and the candidate is an ask
+  objective scored on completion rather than on `p`.
+
+Prediction, recorded before the run: **concentration**, on the reasoning that
+three arms raised the hit rate without buying a set, which is hard to reconcile
+with tempo being the binding channel.
+
+N1 through N5 above are **not withdrawn but demoted**: they are bounded by
++0.277 and cannot reach the bar alone, so none of them is a route to beating
+SESTINA and none may be reported as one. N0's scoring run
+(`scripts4/split_partner_model.py`) is still worth finishing — it answers why
+the split joint is under-confident, which is the OURS channel's mechanism — and
+its per-game column is now to be read against **+0.277 of available headroom**,
+not against the +0.5412 target, which no declaration-side arm can address.
