@@ -95,20 +95,39 @@ def _one(args) -> dict:
     st = GameState.deal(rules, seed=deal_seed)
     for p, a in enumerate(agents):
         a.begin_game(p, rules, AGENT0 + deal_seed * 13 + p)
+    kv_team = 0 if kv_even else 1
+    side_of = {kv_team: "kv", 1 - kv_team: "dy"}
+    # Plies spent holding a completed half-suit without declaring it. The
+    # paper's acquisition table carries this column, and it is the only one
+    # here that is about TIMING rather than collection -- so it is where a
+    # declaration-side effect would show if there were one to show.
+    unspoken = {0: 0, 1: 0}
     for _ in range(MAX_ACTIONS):
         if st.is_terminal:
             break
         st.apply(st.turn, agents[st.turn].act(
             Observation.from_state(st, st.turn)))
-
-    kv_team = 0 if kv_even else 1
-    side_of = {kv_team: "kv", 1 - kv_team: "dy"}
+        for hs in range(9):
+            if st.set_winner[hs] is not None:
+                continue
+            m = 0
+            for c in range(hs * 6, hs * 6 + 6):
+                for pl in range(6):
+                    if st.hands[pl] >> c & 1:
+                        m |= 1 << pl
+                        break
+            # wholly held by ONE team: some seats set, none on the other side
+            if m and not ((m & 0b010101) and (m & 0b101010)):
+                unspoken[0 if m & 0b010101 else 1] += 1
     row = {"deal": deal_seed, "kv_even": kv_even,
            "terminal": st.is_terminal,
            "fallbacks": sum(getattr(a, "fallbacks", 0) for a in agents)}
     for s in SIDES:
         row[s] = {"acts": 0, "turns": 0, "asks": 0, "hits": 0,
-                  "completed": 0, "hits_kept": 0, "hits_wasted": 0}
+                  "completed": 0, "hits_kept": 0, "hits_wasted": 0,
+                  "unspoken": 0}
+    for _t, _v in unspoken.items():
+        row[side_of[_t]]["unspoken"] = _v
 
     # Who eventually won each half-suit, and by whose declaration. A team
     # "completed" a half-suit when its own declaration was correct; a half-suit
@@ -162,7 +181,7 @@ def report(rows: list[dict]) -> dict:
            "unfinished": sum(1 for r in rows if not r["terminal"]),
            "sides": {}}
     keys = ("acts", "turns", "asks", "hits", "completed",
-            "hits_kept", "hits_wasted")
+            "hits_kept", "hits_wasted", "unspoken")
     for s in SIDES:
         d = {k: sum(r[s][k] for r in rows) / n for k in keys}
         d["hit_rate"] = d["hits"] / d["asks"] if d["asks"] else 0.0
@@ -206,7 +225,8 @@ def report(rows: list[dict]) -> dict:
                      ("hits_kept", "hits it kept"),
                      ("hits_wasted", "hits WASTED"),
                      ("wasted_share", "wasted share of hits"),
-                     ("asks_per_completion", "asks per completion")):
+                     ("asks_per_completion", "asks per completion"),
+                     ("unspoken", "plies sitting on a set")):
         p = out["paired"].get(k)
         tail = (f"{p['mean']:+.4f} [{p['ci95'][0]:+.4f}, {p['ci95'][1]:+.4f}]"
                 if p else "")

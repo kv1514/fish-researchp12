@@ -74,7 +74,14 @@ def sweep() -> tuple[list, list]:
     watched = watched_values()
     unexplained, exempt = [], []
     seen = set()
-    for body in re.findall(r"\\textbf\{([^{}]*)\}", text):
+    # BOTH bold macros. This swept only \textbf for its whole life and
+    # printed "every bolded number in the paper is pinned or exempt", while
+    # 153 of the paper's bolded figures are \mathbf inside math mode and were
+    # never looked at. That is how a table taken through the retracted bridge
+    # survived the retraction sweep: its bolded cell was in math mode, so the
+    # guard that exists to catch exactly this could not see it.
+    for mac, body in re.findall(r"\\((?:text|math)bf)\{([^{}]*)\}",
+                                text):
         ctx = " ".join(body.split())
         why = next((r for k, r in EXEMPT.items() if _norm(k) in body), None)
         for m in re.findall(r"[-+]?\d+(?:\.\d+)?%?", body):
@@ -85,7 +92,8 @@ def sweep() -> tuple[list, list]:
             seen.add(key)
             if val in watched:
                 continue
-            (exempt if why else unexplained).append((val, ctx, why))
+            (exempt if why else unexplained).append(
+                (val, ctx, why, mac))
     return unexplained, exempt
 
 
@@ -94,7 +102,7 @@ def main(argv: list[str]) -> int:
     print("which of the paper's bolded numbers does nothing check?\n")
     if exempt:
         print(f"{len(exempt)} exempt (not measurements):")
-        for val, ctx, why in exempt:
+        for val, ctx, why, _mac in exempt:
             print(f"  {val:>9}  {ctx[:40]:<42} {why[:44]}")
         print()
     if not unexplained:
@@ -103,8 +111,8 @@ def main(argv: list[str]) -> int:
               "reason. That is the property that failed three times.")
         return 0
     print(f"{len(unexplained)} bolded number(s) with NOTHING behind them:\n")
-    for val, ctx, _ in unexplained:
-        print(f"  {val:>9}   in  \\textbf{{{ctx[:58]}}}")
+    for val, ctx, _, mac in unexplained:
+        print(f"  {val:>9}   in  \\{mac}{{{ctx[:52]}}}")
     print("\nEach is either a measurement that should be watched, a value that "
           "should be\nexempted with a reason, or a claim that should stop "
           "being asserted. It is not\nautomatically an error -- but a bolded "
