@@ -3,71 +3,42 @@
 % Opponent Modelling, Exact Endgames, and Solver-Guided Policy Repair
 % in Six-Player Literature
 % =====================================================================
-\documentclass[11pt,a4paper]{article}
+\documentclass[11pt,letterpaper]{article}
 
+% The page is the standard article in Latin Modern: one column, one-inch
+% margins, bold serif headings, a running head carrying the short title over
+% a rule, page numbers centred in the foot, a full contents with dotted
+% leaders, and links in one dark green. Nothing here is decorative.
 \usepackage[T1]{fontenc}
-% Times for text and maths, Helvetica for headings. This is the conventional
-% pairing for a journal-style paper, and it also shrinks the file by an order
-% of magnitude: Computer Modern ships as cm-super Type1 outlines that embed at
-% roughly 900 kB, where these subset to a fraction of that.
-\usepackage{mathptmx}
-\usepackage[scaled=0.92]{helvet}
-\usepackage[margin=1in,top=0.95in,bottom=1.05in]{geometry}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{longtable}
-\usepackage{microtype}
-\usepackage[colorlinks=true,linkcolor=navy,citecolor=navy,urlcolor=navy]{hyperref}
-\usepackage{natbib}
 \usepackage{multirow}
 \usepackage{multicol}
+\usepackage{microtype}
 \usepackage{xcolor}
-\definecolor{navy}{RGB}{16,42,96}
-\definecolor{rule}{RGB}{140,140,140}
-\usepackage{fancyhdr}
+\definecolor{linkgreen}{RGB}{0,110,70}
+\usepackage[colorlinks=true,linkcolor=linkgreen,citecolor=linkgreen,urlcolor=linkgreen]{hyperref}
+\urlstyle{tt}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage[font=small,labelfont=bf,skip=6pt]{caption}
 \usepackage{enumitem}
-\usepackage{titlesec}
-\usepackage{setspace}
+\usepackage{fancyhdr}
 
-% -- Headings, running heads, and the page -----------------------------
-% Sans-serif numbered headings in a dark blue that the links share, a thin
-% rule under a running head that names the section, and the page number
-% centred in the foot. The point is that a reader of a 140-page report can
-% always see where they are.
-\titleformat{\section}{\Large\bfseries\sffamily\color{navy}}{\thesection}{0.8em}{}
-\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.8em}{}
-\titleformat{\subsubsection}{\normalsize\bfseries\sffamily}{\thesubsubsection}{0.8em}{}
 \setlength{\headheight}{14pt}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\sffamily Exact Inference Is Not Enough}
-\fancyhead[R]{\small\sffamily\nouppercase{\rightmark}}
-\fancyfoot[C]{\small\thepage}
-\renewcommand{\headrulewidth}{0.3pt}
-\renewcommand{\sectionmark}[1]{\markright{\thesection\ \ #1}}
-\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}\renewcommand{\headrulewidth}{0pt}}
+\fancyhead[L]{\small KRAKEN v1.1}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
 
-% -- Spacing -----------------------------------------------------------
-% The complaint this addresses is white space, and in a document with 48
-% tables set inline the slack collects in three places: around headings,
-% around the display blocks holding those tables, and at the foot of a page
-% whose last paragraph will not fit. The first two are tightened here; the
-% third is left to \raggedbottom, which parks the slack in ONE gap at the
-% bottom rather than stretching every inter-paragraph space on the page to
-% hide it. Stretching is what makes a page look loose all over.
-\titlespacing*{\section}{0pt}{2.1ex plus .6ex minus .2ex}{1.2ex plus .2ex}
-\titlespacing*{\subsection}{0pt}{1.8ex plus .5ex minus .2ex}{0.9ex plus .2ex}
-\titlespacing*{\paragraph}{0pt}{1.3ex plus .3ex minus .2ex}{1em}
-\setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}
-\setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
 \setlist[enumerate]{itemsep=2pt,topsep=4pt,parsep=0pt}
 \setlist[itemize]{itemsep=2pt,topsep=4pt,parsep=0pt}
-% Last resort before a line is allowed into the margin. This is only consulted
-% on the final pass for a paragraph TeX could not otherwise set, so it does not
-% loosen anything that already fits -- unlike \sloppy, which loosens the whole
-% document to fix five paragraphs.
+% Last resort before a line is allowed into the margin. Consulted only on the
+% final pass for a paragraph TeX could not otherwise set.
 \emergencystretch=2em
 \raggedbottom
 \clubpenalty=9999
@@ -89,18 +60,14 @@
 % choose, and what is left to win is knowing our own team's cards. "Exact
 % inference is not enough" is that result, and the subtitle it used to carry
 % was a table of contents.
-\title{\vspace{-1.5cm}
-{\sffamily\bfseries\LARGE\color{navy} Exact Inference Is Not Enough}\\[0.45em]
-{\sffamily\large Opponent Models and Endgames in Six-Player Literature}\\[0.7em]
-{\normalsize\normalfont KRAKEN v1.1 --- a research report}\vspace{-0.4em}}
-
-\author{\normalsize Kausthubh Veldanda}
-\date{\small First version 30 August 2026; revised 20 September 2026\vspace{-0.6em}}
+\title{\bfseries KRAKEN v1.1: Exact Inference Is Not Enough\\[0.2em]
+\large\bfseries Opponent Models and Endgames in Six-Player Literature}
+\author{Kausthubh Veldanda}
+\date{First version 30 August 2026; revised 20 September 2026}
 
 \begin{document}
 \maketitle
-\thispagestyle{plain}
-\vspace{-2.4em}
+\thispagestyle{fancy}
 
 % =====================================================================
 % The abstract is set small and tight on purpose: it has to hold every
@@ -153,14 +120,9 @@ footing as the successes.
 % normally claims: at thirty-four sections the default single column runs to
 % two pages and pushes the introduction onto the third, which is exactly the
 % white space this paper has been trying to get rid of.
-{\small
-\setlength{\columnsep}{2em}
-\begin{multicols}{2}
-\setcounter{tocdepth}{1}
-\vspace{-1.2em}
+\setcounter{tocdepth}{2}
 \tableofcontents
-\end{multicols}}
-\vspace{-1.4em}
+\clearpage
 
 % =====================================================================
 \section{Introduction}
@@ -6935,7 +6897,7 @@ identity closing with residual zero on every game
 (the ladder-sweep instrument and its results file):
 
 \begin{center}
-\small
+\footnotesize
 \begin{tabular}{lrrr}
 \toprule
 opponent & margin, sets a game & their error rate & their wrong/game \\
@@ -6945,7 +6907,7 @@ release 3 & $+0.6133$ $[+0.4597, +0.7670]$ & $4.71\%$  & $0.199$ \\
 release 4 & $+1.9867$ $[+1.8371, +2.1362]$ & $16.36\%$ & $0.598$ \\
 release 5 & $+2.1233$ $[+1.9663, +2.2803]$ & $15.06\%$ & $0.574$ \\
 release 6 & $+1.8850$ $[+1.7333, +2.0367]$ & $15.72\%$ & $0.624$ \\
-release 7, the build measured everywhere else & $+2.3600$ $[+2.2017, +2.5183]$ & $20.71\%$ & $0.828$ \\
+release 7 (measured everywhere else) & $+2.3600$ $[+2.2017, +2.5183]$ & $20.71\%$ & $0.828$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -7722,7 +7684,7 @@ population; candidate minus champion, sets a game, vs external through
 
 \begin{center}
 \small
-\begin{tabular}{lrr}
+\begin{tabular}{p{5.6cm}rr}
 \toprule
 arm & vs external & self-play \\
 \midrule
@@ -8367,7 +8329,7 @@ minus champion within a deal, and the two contrasts are taken within
 
 \begin{center}
 \small
-\begin{tabular}{llrr}
+\begin{tabular}{lp{4.4cm}rr}
 \toprule
 arm & change from \texttt{V06\_DEPLOYED} & vs external & self-play \\
 \midrule
@@ -8531,7 +8493,7 @@ zero and lies below the rev-2 lower bound of $+0.2270$.
 
 \begin{center}
 \small
-\begin{tabular}{llrr}
+\begin{tabular}{lp{4.4cm}rr}
 \toprule
 arm & change from \texttt{V06\_DEPLOYED} & vs external & self-play \\
 \midrule
