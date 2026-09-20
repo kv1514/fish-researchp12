@@ -176,64 +176,68 @@ def report(games: list[dict]) -> dict:
             "kv": sum(a) / n, "dy": sum(b) / n,
             "paired": {"mean": m, "ci95": [lo, hi]}}
 
-    # 2. SELECTION vs CONVERSION. Win rate by investment, and by dealt share.
-    #    A half-suit won because the OTHER side misdeclared is excluded from
-    #    both, because nobody's asking produced it.
-    def table(keyfn, title, head):
-        print(f"\n  --- {title} ---")
-        print(f"  {head:<16}{'n (ours)':>10}{'we win':>9}"
-              f"{'n (theirs)':>12}{'they win':>10}{'diff':>9}")
-        cells = {}
-        for s, other in (("kv", "dy"), ("dy", "kv")):
-            for _deal, r in flat:
-                if r["winner"] is None or r[f"hits_{s}"] == 0:
-                    continue
-                k = keyfn(r, s)
-                cells.setdefault(k, {}).setdefault(s, []).append(
-                    1.0 if r["winner"] == s else 0.0)
-        rows = {}
-        for k in sorted(cells):
-            a = cells[k].get("kv", [])
-            b = cells[k].get("dy", [])
-            ma = sum(a) / len(a) if a else float("nan")
-            mb = sum(b) / len(b) if b else float("nan")
-            print(f"  {str(k):<16}{len(a):>10}{ma:>9.3f}"
-                  f"{len(b):>12}{mb:>10.3f}{ma - mb:>+9.3f}")
-            rows[str(k)] = {"n_kv": len(a), "win_kv": ma,
-                            "n_dy": len(b), "win_dy": mb, "diff": ma - mb}
-        return rows
+    # 2. THE MATCHED COMPARISON. Dealt splits are complementary, so "we were
+    #    dealt k" and "they were dealt 6-k" name the SAME half-suits scored
+    #    from opposite sides: one set, scored twice, no subset confound. The
+    #    deal is also the only covariate here that is exogenous -- it is fixed
+    #    before a card moves and neither policy can influence it.
+    #
+    #    A TABLE THIS FILE USED TO PRINT IS GONE, and why matters more than
+    #    what it said. It reported the win rate conditional on HITS INVESTED,
+    #    as if investment were a choice priced against an outcome. It is not:
+    #    winning a 3-3 half-suit requires taking the opponent's three cards,
+    #    so three successful asks into it are a CONSEQUENCE of winning it, not
+    #    a bet placed on it. Scored on the 800-game block the cell structure
+    #    was degenerate -- hit difference -3 gave a 0.000/0.996 split and +3
+    #    gave 0.990/0.000, with nine half-suits anywhere between. A covariate
+    #    downstream of the outcome cannot separate selection from conversion,
+    #    and reading one that does looks exactly like a finding.
+    print(f"\n  --- conversion at a matched deal: the same half-suits, "
+          f"scored both ways ---")
+    print(f"  {'deal (ours)':<13}{'n':>7}{'we convert':>12}"
+          f"{'they convert':>14}{'edge':>9}{'gift':>8}")
+    matched, cost = {}, 0.0
+    for k in range(6, -1, -1):
+        ours = [r for _d, r in flat if r["dealt_kv"] == k]
+        mirror = [r for _d, r in flat if r["dealt_kv"] == 6 - k]
+        if not ours or not mirror:
+            continue
+        a = sum(1 for r in ours if r["winner"] == "kv") / len(ours)
+        b = sum(1 for r in mirror if r["winner"] == "dy") / len(mirror)
+        gift = sum(1 for r in ours if r["winner"] is None) / len(ours)
+        cost += len(ours) * (b - a)
+        print(f"  {f'{k}-{6-k}':<13}{len(ours):>7}{a:>12.3f}{b:>14.3f}"
+              f"{a - b:>+9.3f}{gift:>8.3f}")
+        matched[f"{k}-{6-k}"] = {"n": len(ours), "we_convert": a,
+                                 "they_convert": b, "edge": a - b,
+                                 "gift_share": gift}
+    out["matched_by_deal"] = matched
 
-    out["win_by_investment"] = table(
-        lambda r, s: min(r[f"hits_{s}"], 5), "win rate by hits invested",
-        "hits invested")
-    out["win_by_dealt"] = table(
-        lambda r, s: r[f"dealt_{s}"], "win rate by cards DEALT to that side",
-        "cards dealt")
+    # 3. What the gap is worth, stated as arithmetic and labelled as such.
+    mid = ("4-2", "3-3", "2-4")
+    ext = ("6-0", "5-1", "1-5", "0-6")
+    def block(keys):
+        return sum(matched[k]["n"] * -matched[k]["edge"]
+                   for k in keys if k in matched) / n
+    out["cost_per_game"] = cost / n
+    out["cost_middle"] = block(mid)
+    out["cost_extremes"] = block(ext)
+    out["middle_share"] = sum(matched[k]["n"] for k in mid if k in matched) \
+        / len(flat)
+    print(f"\n  half-suits a game if we converted at their rate everywhere: "
+          f"{cost / n:+.4f}")
+    print(f"    the contested middle (4-2, 3-3, 2-4), "
+          f"{out['middle_share']:.1%} of all half-suits: "
+          f"{out['cost_middle']:+.4f}")
+    print(f"    the extremes (6-0, 5-1, 1-5, 0-6), where we are AHEAD: "
+          f"{out['cost_extremes']:+.4f}")
+    print("  Arithmetic on finished games, not a counterfactual margin: a")
+    print("  half-suit that changed hands changes every ply after it.")
 
-    # 3. Where the asks go relative to the deal. Selection shows here.
-    print(f"\n  --- hits invested, by how many of the six you were dealt ---")
-    print(f"  {'cards dealt':<16}{'ours':>10}{'theirs':>10}{'diff':>10}"
-          f"{'n (ours)':>11}{'n (theirs)':>12}")
-    by_dealt = {}
-    for s in SIDES:
-        for _deal, r in flat:
-            by_dealt.setdefault(r[f"dealt_{s}"], {}).setdefault(s, []).append(
-                r[f"hits_{s}"])
-    rows = {}
-    for k in sorted(by_dealt):
-        a, b = by_dealt[k].get("kv", []), by_dealt[k].get("dy", [])
-        ma = sum(a) / len(a) if a else float("nan")
-        mb = sum(b) / len(b) if b else float("nan")
-        print(f"  {k:<16}{ma:>10.3f}{mb:>10.3f}{ma - mb:>+10.3f}"
-              f"{len(a):>11}{len(b):>12}")
-        rows[str(k)] = {"hits_kv": ma, "hits_dy": mb, "diff": ma - mb,
-                        "n_kv": len(a), "n_dy": len(b)}
-    out["hits_by_dealt"] = rows
-
-    print("\n  SELECTION reads as a level win rate at matched hits AND matched")
-    print("  deal, with the investment going to different half-suits.")
-    print("  CONVERSION reads as a lower win rate for us at matched both.")
-    print("  SPREAD reads as more half-suits asked into, at fewer hits each.")
+    print("\n  SELECTION would read as a level conversion at a matched deal,")
+    print("  with the asks going to different half-suits. CONVERSION reads as")
+    print("  a lower conversion for us at the SAME deal. SPREAD reads as more")
+    print("  half-suits asked into, at fewer hits each.")
     return out
 
 
@@ -242,7 +246,19 @@ def main(argv=None) -> int:
     ap.add_argument("--deals", type=int, default=400)
     ap.add_argument("--seed", type=int, default=SEED0)
     ap.add_argument("--jobs", type=int, default=3)
+    ap.add_argument("--rescore", action="store_true",
+                    help="re-report from the stored run instead of replaying "
+                         "it; the games do not change when a table is fixed")
     a = ap.parse_args(argv)
+    if a.rescore:
+        dest = default_path("contest_ledger", a.seed)
+        old = json.loads(dest.read_text())
+        out = report(old["per_game"])
+        out["seconds"] = old.get("seconds")
+        out["rescored"] = True
+        out["per_game"] = old["per_game"]
+        print("\n  wrote", write(dest, out, force=True))
+        return 0
     todo = [(a.seed + i, ke) for i in range(a.deals) for ke in (True, False)]
     print(f"{len(todo):,} games on {a.jobs} workers", flush=True)
     games, t0 = [], time.time()

@@ -4993,3 +4993,73 @@ N2 is licensed exactly as registered and for the registered reason: N1 moves
 the declaration posterior and the ask posterior with one number and cannot say
 which paid. It stays bounded by the OURS channel's +0.2017 whatever it
 returns. **Nothing ships; `V06_DEPLOYED` is unchanged.**
+
+## OUTCOME 2026-09-20: the wasted-hit gap is CONVERSION, and it is entirely the contested middle
+
+`results/contest_ledger_12700000.json`, 800 games at `BRIDGE_REV 3`, 7,200
+half-suits, zero fallbacks, zero unfinished. **The registered prediction —
+selection with a spread component — is wrong on both counts**, and the
+instrument that produced it had a defect of its own, described below.
+
+### Spread is out
+
+Half-suits asked into: 7.372 against 7.393, **−0.0200 [−0.1238, +0.0838]**.
+We do not spread wider. We invest slightly less per half-suit we touch
+(−0.2213 [−0.2886, −0.1541]), which is a consequence of the result below
+rather than a cause of it.
+
+### Conversion, at a matched deal
+
+Dealt splits are complementary, so "we were dealt k" and "they were dealt
+6−k" name the **same half-suits scored from opposite sides** — one set,
+scored twice, no subset confound — and the deal is the only exogenous
+covariate available, fixed before a card moves.
+
+| deal (ours) | n | we convert | they convert | edge |
+|---|---:|---:|---:|---:|
+| 6-0 | 99 | 0.949 | 0.859 | **+0.091** |
+| 5-1 | 607 | 0.845 | 0.807 | **+0.038** |
+| 4-2 | 1717 | 0.619 | 0.694 | −0.075 |
+| **3-3** | **2354** | **0.441** | **0.547** | **−0.106** |
+| 2-4 | 1717 | 0.292 | 0.360 | −0.068 |
+| 1-5 | 607 | 0.150 | 0.107 | **+0.043** |
+| 0-6 | 99 | 0.000 | 0.000 | +0.000 |
+
+**We are better than SESTINA at both extremes and worse in the middle.** We
+convert a dealt advantage better than they do and steal long shots better
+than they do; we lose the fights that the deal leaves open. At an even 3-3
+they take it 55 to 44.
+
+Converting at their rate everywhere is worth **+0.5450 half-suits a game**,
+which through the identity is a margin swing of about **+1.09 sets** — larger
+than the 0.525 deficit. The contested middle, 80.4% of all half-suits, is
+**+0.6175** of it; the extremes give back **−0.0725** because we are ahead
+there. It is arithmetic on finished games and not a counterfactual margin.
+
+### A defect in the instrument, found by running it
+
+This file first reported win rate conditional on **hits invested**, as though
+investment were a bet placed on a half-suit. It is not: winning a 3-3
+half-suit requires taking the opponent's three cards, so three successful
+asks into it are a *consequence* of winning it. On the 800-game block the
+cells were degenerate — hit difference −3 gave 0.000/0.996 and +3 gave
+0.990/0.000, with nine half-suits anywhere in between. **A covariate
+downstream of the outcome cannot separate selection from conversion, and
+reading one that does looks exactly like a finding.** The table is gone and
+the reason is in the source, because the 40-game smoke of the same table
+showed a plausible −0.126/−0.140 pattern that would have been reported.
+
+### What this points at, and what it does not license
+
+It does not license an arm. It narrows the question from "why are hits
+wasted" to **"why do we lose half-suits the deal leaves open"**, which is a
+question about contested play and not about ask accuracy — our hit rate in
+these games is 0.5157 against their 0.5365, and the conversion gap is four
+times larger than anything a point of hit rate has ever bought.
+
+`expose` is the one named term on this axis: `−(1−π)·`our publicly located
+cards the target could take, fitted slope **+1.807 ± 0.536**, the largest of
+the four the paper quotes, **shipped weight zero**, and only ever dueled
+inside a learned vector that lost as a whole. It has never been dueled alone.
+That is the obvious next registration and it is deliberately not written
+here.
