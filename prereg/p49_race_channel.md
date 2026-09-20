@@ -486,3 +486,58 @@ weights, and it is not answered by any arm scored on `p`. That is the next
 registration, and it is not written here, because writing it in the same
 document as the measurement that motivated it is how a measurement becomes
 a hypothesis without anyone deciding to let it.
+
+## N1 — dueled, and dropped on a registered withdrawal condition
+
+`results/p49_n1.json`, 300 deals × 2 parities on block 12,300,000, 1,800
+games, zero fallbacks, zero unfinished, paired within the deal and clustered
+on it (both intervals agree to three decimals, so the parities were not
+pretending to be independent).
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| N1 `gamma_team = 1.4` | −0.1433 [−0.452, +0.166] | **−0.2533 [−0.478, −0.028]** | no |
+
+**It is not a null.** Against SESTINA the interval covers zero. In self-play
+it does not: −0.2533 with the whole interval below zero. This document's
+withdrawal conditions read *"if a candidate's self-play arm moves negatively
+past the bar it is dropped immediately, whatever it does against SESTINA"*,
+and it does. N1 is dropped, and it is dropped by a rule written before the
+run rather than by a reading taken after it.
+
+**The registered prediction was a null in both populations. It is half
+right**, and the half it got wrong is the more useful half: the arm does not
+merely fail to pay, it costs a quarter of a set in self-play. The belief it
+buys is better — `results/split_partner_model_12000000.json` measures that
+directly, on the same decisions, and the bias goes from −0.171 to −0.016 at
+no cost in accuracy. A better belief that loses is the shape this project has
+now seen four times, and it is the reason the dual-population bar exists.
+
+**The fourth arm to raise the ask hit rate by about a point, and the third to
+lose doing it.** Candidate 0.5409 against champion 0.5236, $+1.73$ points ---
+the largest single-arm rise on record here, from a knob that touches the
+*partner* model and has no business improving the asking. It does because
+`gamma_team` reaches the ask objective through the same posterior: one
+attribute moves the declaration and the search together.
+
+| arm | hit-rate rise | result |
+|---|---:|---|
+| P44 D1 | ~1 point | lost about a third of a set |
+| P45 F1 | ~1 point | lost about a third of a set |
+| P46 G | +1.16 points | first not to lose |
+| **P49 N1** | **+1.73 points** | **−0.2533 in self-play, interval clear of zero** |
+
+Four arms, four hit-rate rises, and not one set bought. That is the same
+finding the assembly ledger reached from the other end, arriving here by
+accident: **hit rate is not the quantity**.
+
+**What this licenses, and what it does not.** It does not license reading the
+loss as "the partner model is wrong" — the belief measurably improved. It
+licenses N2 exactly as registered, and for the reason registered: N1 moves the
+declaration posterior and the ask posterior with one number and cannot say
+which one paid. N2 gives the claim evaluator its own exponent and leaves the
+ask search on the shipped posterior. That is now the only way to find out
+whether the +0.2017 in the OURS channel is reachable at all, and it remains
+bounded by +0.2017 whatever it returns.
+
+**Nothing ships. `V06_DEPLOYED` is unchanged.**

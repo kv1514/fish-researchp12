@@ -4951,3 +4951,45 @@ the dealt-hand repair landed 2026-09-08, and the file carries that era's
 `margin: 2.3375`. It has never been re-run, and because the script records no
 `BRIDGE_REV` in its output there was nothing in the file for the retraction
 sweep to key on. The box in the paper says that instead.
+
+## OUTCOME 2026-09-20: P49 N1 — the belief improves, the arm loses, and the hit rate rises again
+
+`results/p49_n1.json`: 300 deals × 2 parities on block 12,300,000, 1,800
+games, zero fallbacks, zero unfinished.
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| N1 `gamma_team = 1.4` | −0.1433 [−0.452, +0.166] | **−0.2533 [−0.478, −0.028]** | no |
+
+Not a null: the self-play interval lies entirely below zero. P49's withdrawal
+condition — *a candidate whose self-play arm moves negatively past the bar is
+dropped immediately, whatever it does against SESTINA* — fires. **Dropped by a
+rule written before the run.**
+
+The registered prediction was a null in both populations; it is half right,
+and the wrong half is the useful one. The belief this arm buys is measurably
+better on the same decisions (split-joint bias −0.171 → −0.016 at no cost in
+accuracy, `results/split_partner_model_12000000.json`). A better belief that
+loses is now the fourth of its kind, and the reason the dual-population bar
+exists.
+
+**The ask hit rate rose again — the fourth time, and the largest.** Candidate
+0.5409 against champion 0.5236, **+1.73 points**, from a knob that touches the
+*partner* model and has no business improving the asking. It does because
+`gamma_team` reaches the ask objective through the same posterior.
+
+| arm | hit-rate rise | result |
+|---|---:|---|
+| P44 D1 | ~1 point | lost about a third of a set |
+| P45 F1 | ~1 point | lost about a third of a set |
+| P46 G | +1.16 points | first not to lose |
+| P49 N1 | **+1.73 points** | −0.2533 in self-play, interval clear of zero |
+
+Four arms, four hit-rate rises, not one set bought. The assembly ledger
+reached the same conclusion from the other end and by design; this one arrives
+at it by accident, which is the better evidence.
+
+N2 is licensed exactly as registered and for the registered reason: N1 moves
+the declaration posterior and the ask posterior with one number and cannot say
+which paid. It stays bounded by the OURS channel's +0.2017 whatever it
+returns. **Nothing ships; `V06_DEPLOYED` is unchanged.**
