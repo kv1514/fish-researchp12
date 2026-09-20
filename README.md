@@ -17,6 +17,21 @@ stable per-branch preview at
 which follows the branch rather than any one deployment --- useful while work
 is in flight, and not the link to give anybody.
 
+**In one paragraph.** Built KRAKEN v1.1, a research engine for six-player
+Literature with exact combinatorial belief tracking over the hidden deal: a
+dynamic program returns the exact partition function, marginals, uniform
+samples and joint probabilities of the deal space, validated against exhaustive
+enumeration. Found that exact inference alone changes nothing in play, and that
+a one-parameter model of how players choose is worth +1.92 sets per deal-pair
+(95% CI +1.48 to +2.36), the study's largest gain. Retracted the project's own
++2.35 sets/game cross-engine headline after tracing it to a defect in the
+bridge to the other engine; the corrected pairing is −0.525 (95% CI −0.689 to
+−0.361) over 1,200 games, confirmed independently by the other engine's author.
+Ran forty-eight pre-registrations with thresholds fixed in advance, including
+six programmes (sixteen arms, seventeen duels) aimed at that deficit, none of
+which cleared; exactly one registration produced a change to the deployed
+engine. A 144-page report, 1,209 tests, and a public playable exhibition.
+
 - Rules: [SPEC.md](SPEC.md) (Wikipedia baseline plus configurable house rules)
 - Research log, v0.3: [RESEARCH_LOG.md](RESEARCH_LOG.md) (v0.4 keeps its record in
   the paper, in the per-module notes [fish4/infer/FRONTIER.md](fish4/infer/FRONTIER.md),
@@ -32,7 +47,7 @@ is in flight, and not the link to give anybody.
 - Roadmap: [ROADMAP.md](ROADMAP.md)
 - Running this bot somewhere else: [kraken/README.md](kraken/README.md) (JSON
   decision service, any host) or [fishlab/README.md](fishlab/README.md) (an
-  uploadable package for FishLab's own engine)
+  uploadable package for the external engine's own arbiter)
 - Running *their* bot here: [external_v07/README.md](external_v07/README.md)
 
 ## Where the engine is now
@@ -48,7 +63,7 @@ identifiers did not move with the name — see `fish4/brand.py` for why).
 ### The cross-engine headline is withdrawn
 
 > **RETRACTED.** This section previously led with **+2.3466 sets/game** against
-> Dylan's FishBot v0.7. That figure is withdrawn: it was an artifact of our own
+> the external engine. That figure is withdrawn: it was an artifact of our own
 > bridge, not a measurement of the two engines. See below.
 
 **What happened.** `external_v07/shim_decide.cpp` is stateless by design — a
@@ -74,7 +89,7 @@ entire margin it produced — and their declaration errors fall tenfold, 0.880 t
 Two routes sharing no host, no rules and no code agree to within 0.08; the
 published one is out by three.
 
-**Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.5–0.7 sets/game
+**Corrected: KRAKEN v1.1 loses to the external engine by roughly 0.5–0.7 sets/game
 depending on route** (−0.5250 [−0.6886, −0.3614] through the repaired bridge,
 `results/mega_match.json`, the baseline P43–P48 were measured against; −0.70
 through the persistent bridge; −0.62 inside their own arbiter). Three
@@ -108,24 +123,24 @@ opponent's declaration errors was a margin worth being suspicious of:
 - **Pairing is worth between 1.1× and 414× the games, and how often a knob
   changes a decision is what decides which.** Not the effect size. This is now
   how runs here are sized.
-- **Three pre-registered attempts to beat SESTINA through the repaired bridge
+- **Three pre-registered attempts to beat the external engine through the repaired bridge
   (P43–P48 in `prereg/`, sixteen arms) and none cleared +0.15 in both
   populations.** Two of the arms raised our ask hit rate — the one metric the
   cross-engine table says we trail on — by one to one and a half points
   (0.5245 vs 0.5184; 0.5287 vs 0.5136) and each lost about a third of a set
-  a game against SESTINA doing it. A gap in a metric is not necessarily a gap
+  a game against the external engine doing it. A gap in a metric is not necessarily a gap
   to close; that is now replicated on two independent channels. The fourth
   programme, P46, measured the belief itself and found it sharper at a higher
   exponent than the champion's; the one arm its rule licensed,
   `opponent_gamma = 0.7`, is the first to read positive in both populations
   (+0.24 / +0.16 at 600 pairings) and clears neither interval; the fifth,
-  P47, confirmed it at 1,200 pairings as a null against SESTINA (+0.0017
+  P47, confirmed it at 1,200 pairings as a null against the external engine (+0.0017
   [−0.204, +0.208]) that clears the self-play half (+0.1667 [+0.009,
   +0.325]) — the first half of the dual bar anything has cleared, and the
   half it exists to distrust. Nothing ships. A sixth, P48, re-read the
   signalling protocol — the last mechanism with a positive value on the
   record, every reading of it a duel through the corrupted bridge — through
-  the repaired one: +0.0033 [−0.078, +0.085] against SESTINA, the opponent
+  the repaired one: +0.0033 [−0.078, +0.085] against the external engine, the opponent
   channel that carried its gain gone (+0.0167 [−0.010, +0.044] against
   +0.2725), the dose down from 8.94 to 0.62 signals a game.
 - **The ownership inference is measured and is not what stops us declaring:

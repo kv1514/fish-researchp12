@@ -99,7 +99,7 @@ P4 & \path{concentration_v2.md} \newline
 \emph{Does a corrected concentration term cut allocation errors?} &
 ``Point estimate $\geq +0.15$ \textbf{and} interval lower bound $> 0$
 \ldots \textbf{Here the document governs}.'' Primary: paired set margin vs
-v0.7, B $-$ A. \textbf{4,000 games per arm}; ``fresh seed block'' (unnumbered).
+the external engine, B $-$ A. \textbf{4,000 games per arm}; ``fresh seed block'' (unnumbered).
 &
 Yes: ``a standard error near $0.044$ and a 95\% interval of about $\pm 0.086$
 \ldots Analysed once, at the end. No interim looks.'' &
@@ -194,7 +194,7 @@ everywhere \ldots Both conditions fail.'' Side-prediction ``2 of 3''.
 P11 & \path{deadline_signalling.md} \newline
 \emph{Was the signalling gate set below the measured free-turn threshold?} &
 ``\textbf{Ship bar.} Point estimate $\geq +0.15$ with the interval clear of
-zero.'' Primary: paired set margin vs v0.7, C $-$ A. \textbf{1,000 games per
+zero.'' Primary: paired set margin vs the external engine, C $-$ A. \textbf{1,000 games per
 arm}; ``fresh seed block''; withdrawal 1: B must reproduce $+0.068$ within its
 interval. &
 Yes: ``paired SD of $\approx 1.15$ \ldots at about $\pm 0.071$.'' &
@@ -323,13 +323,13 @@ P20 & \path{forced_exhaustive.md} \newline
 bar of $+0.15$ sets/game \ldots is \textbf{the wrong instrument here and is
 deliberately not used.} \ldots \textbf{Primary outcome, fixed now.}
 Forced-declaration accuracy at one live half-suit \ldots Ships if accuracy
-rises with the interval clear of zero.'' 2,400 self-play games; 1,000 vs v0.7.
+rises with the interval clear of zero.'' 2,400 self-play games; 1,000 vs the external engine.
 Three guards, three withdrawal conditions. &
 Yes: ``roughly 12,000 games to resolve from zero. Every duel this project could
 afford would return a null.'' &
 \textbf{REAL --- SHIPPED.} ``Every condition the pre-registration fixed in
 advance is met \ldots \textbf{This ships.}''
-$0.2984 \rightarrow 0.4070$ self-play; $0.3218 \rightarrow 0.4253$ vs v0.7.
+$0.2984 \rightarrow 0.4070$ self-play; $0.3218 \rightarrow 0.4253$ vs the external engine.
 \path{results/forced_exhaustive_self.json},
 \path{results/forced_exhaustive_v07.json} &
 \S\ref{sec:res-pathledger} \\
@@ -355,7 +355,7 @@ P22 & \path{gamma_policy_specific.md} \newline
 \emph{What does the wrong-signed opponent model cost?} &
 ``\textbf{Minimum interesting effect 0.15 sets/game} \ldots G2 runs
 \textbf{ONLY} if G1's arm C clears the bar \ldots C must clear the bar against
-v0.3 as well, on the SAME fixed setting fitted against v0.7, with no
+v0.3 as well, on the SAME fixed setting fitted against the external engine, with no
 refitting.'' Arms $\gamma \in \{+0.35, 0.0, -1.00\}$;
 ``\textbf{400 deals $\times$ 2 rotations per arm}'', ``fresh seed block
 1,800,000+''; clustered over deals. &
@@ -415,7 +415,7 @@ mechanism was argued rather than provable.''
 P26 & \path{information_ceiling_split.md} \newline
 \emph{Is the information we lack our teammates' or theirs?} &
 ``\textbf{Ship bar. None. Nothing here can ship, ever.}'' Primary: ``paired
-difference of set margins against v0.7: T minus A, and O minus A, reported
+difference of set margins against the external engine: T minus A, and O minus A, reported
 separately and \textbf{never summed}''. \textbf{600 games per arm}, both
 parities, award rule pinned, ``fresh seed block''. &
 Yes: ``600 games puts the standard error near $0.11$ sets/game \ldots sized
@@ -550,7 +550,7 @@ P35 & \path{stuck_claim_gate.md} \newline
 \ldots Point estimate in \textbf{[+0.05, +0.15)} with the interval clear of
 zero: ships \textbf{only if} the ledger confirms the mechanism \ldots
 \textbf{and} the v0.3 guard does not sit below zero. Otherwise: does not
-ship.'' \textbf{1,000 pairs per rung} vs \texttt{dylan\_v07}; seed block
+ship.'' \textbf{1,000 pairs per rung} vs the external engine; seed block
 2,400,000; clustered over deals. &
 Yes: ``$\pm 0.071$ --- enough to resolve the predicted effect from zero, and
 honest about the fact that this is a 0.16-events-per-game intervention.'' &
@@ -613,7 +613,7 @@ P39 & \path{signal_dose_law.md} \newline
 ``\textbf{MULTIPLICATIVE} --- the interval covers $+0.0426$ and excludes
 $+0.0143$''; \textbf{LOGISTIC} the reverse; \textbf{NEITHER} if it excludes
 both, named in advance as ``the outcome that would matter most''. Both
-predictions fitted before the run to \texttt{dylan\_v07}'s measured rise;
+predictions fitted before the run to the external engine's measured rise;
 \texttt{heuristic} at $2{,}500$ paired deals, seed base \textbf{14,900,000}. &
 Yes: \textsc{underpowered} if the half-width exceeds $0.0142$. &
 \textbf{LOGISTIC.} $+0.0178$ $[+0.0048, +0.0308]$, covering the logistic
@@ -641,7 +641,7 @@ P41 & \path{signal_generality.md} \newline
 \emph{Is the signalling effect a property of the convention or an exploit of
 one opponent's declaration policy?} &
 ``\textbf{GENERAL} --- the margin effect clears zero and the declaration error
-rate rises outside its Wilson interval''; \textbf{DYLAN-SPECIFIC} if both cover
+rate rises outside its Wilson interval''; \textbf{OPPONENT-SPECIFIC} if both cover
 zero at a half-width at or below $0.0734$; \textbf{CONTROL VIOLATED} overrides
 everything if \texttt{self} shows an effect. $800$ paired deals per opponent,
 seed \textbf{12,100,000}. &
@@ -658,7 +658,7 @@ verdicts are not read. Superseded by P42.
 P42 & \path{signal_matched_dose.md} \newline
 \emph{The same question with the dose held equal by construction.} &
 ``\textbf{GENERAL} --- \texttt{ev\_claim}'s opponent channel clears zero at
-matched dose''; \textbf{DYLAN-SPECIFIC} if it covers zero at a half-width at
+matched dose''; \textbf{OPPONENT-SPECIFIC} if it covers zero at a half-width at
 or below $0.0209$; \textbf{INFEASIBLE} if the calibration gate finds no common
 dose. Calibration bank scores nothing; scored bank $2{,}500$ paired deals,
 seed base \textbf{14,300,000}, dose tolerance $\pm15\%$. &
@@ -666,7 +666,7 @@ Yes: \textsc{underpowered} above a half-width of $0.0414$; re-sized from the
 calibration bank before any scored deal was played, and the change recorded in
 the document. &
 \textbf{GENERAL.} Both opponents inside tolerance at $2.766$ and $2.872$;
-\texttt{dylan\_v07} $+0.0454$ $[+0.0326, +0.0582]$ and \texttt{ev\_claim}
+the external engine $+0.0454$ $[+0.0326, +0.0582]$ and \texttt{ev\_claim}
 $+0.0172$ $[+0.0048, +0.0296]$. The effect transfers as a rate \emph{factor}
 ($+0.0160$ predicted, inside) and not as a fixed rise in points ($+0.0423$,
 outside). \path{results/matched_dose_scored.json},
@@ -674,31 +674,31 @@ outside). \path{results/matched_dose_scored.json},
 \S\ref{sec:res-signal} \\
 
 P43 & \path{kraken_v12_vs_sestina.md} \newline
-\emph{Can anything beat SESTINA v1.0 through the repaired bridge, and does it
+\emph{Can anything beat the external engine through the repaired bridge, and does it
 still hold in self-play?} &
 Ships only on $+0.15$ sets/game with the interval clear of zero in
-\emph{both} populations: against SESTINA through \texttt{BRIDGE\_REV\ 3},
+\emph{both} populations: against the external engine through \texttt{BRIDGE\_REV\ 3},
 and against the v1.1 champion in self-play. Three candidates fixed in advance
 (opponent-model $\gamma$, \texttt{avoid\_doomed\_asks},
 \texttt{depth\_mode}); screen $300$ deals $\times\,2$ parities at seed base
 \textbf{9,300,000}, confirm $600 \times 2$ at \textbf{9,400,000}, never
-pooled. A candidate clearing against SESTINA and failing self-play is reported
+pooled. A candidate clearing against the external engine and failing self-play is reported
 as opponent-specific and not shipped. &
 Yes, and stated as the expected outcome: that none of the three clears the
-$0.6$ gap and v1.2 does not beat SESTINA. Multiplicity across three candidates
+$0.6$ gap and v1.2 does not beat the external engine. Multiplicity across three candidates
 is named in the document rather than in a discussion section. &
 \textbf{NOTHING SHIPS}, as predicted. No arm clears either half of the
 bar, so none reaches confirm and the stacking arm is not licensed:
 $\gamma{=}0$ at $-0.5867$ / $-1.0667$, $\gamma{=}\hat\alpha$ at
 $-0.9033$ / $-2.0033$, \texttt{avoid\_doomed\_asks} at $-0.0933$ /
-$-0.0900$, \texttt{depth\_mode} at $-0.0033$ / $-0.0867$ (vs SESTINA /
+$-0.0900$, \texttt{depth\_mode} at $-0.0033$ / $-0.0867$ (vs external /
 self-play). Two lessons outrank the nulls. R0's re-measured exponent
 survives the bridge repair ($-1.1055$ against $-1.0041$), and acting on
 it is the worst arm in the study --- a correct measurement of an
 opponent does not license a change to us, and only the self-play half of
 the bar separates those. And removing the opponent model entirely costs
 $-0.59$ / $-1.07$, so the model on all five seats is an \emph{asset}
-against SESTINA; P46 separated the halves, and its reading rule weakened
+against the external engine; P46 separated the halves, and its reading rule weakened
 ``being wrong about an opponent's propensity beats having no opinion'' to:
 the part on their seats, teammates held, costs $-0.25$ $[-0.536, +0.036]$
 when removed, consistent with a small asset and with zero at that power.
@@ -756,7 +756,7 @@ channel plus $4.8$ points of carry. Stated as \emph{not expected to clear}. &
 \textbf{NOTHING SHIPS.} The screen passed at $+5.80\%$ carry gain, arm carry
 $39.5\%$ against the $40.1\%$ the earlier document predicts for this gate. The
 duel then returned a significant \textbf{negative} in \emph{both} populations,
-$-0.3067$ $[-0.607, -0.006]$ against SESTINA and $-0.8567$ $[-1.069, -0.645]$
+$-0.3067$ $[-0.607, -0.006]$ against the external engine and $-0.8567$ $[-1.069, -0.645]$
 in self-play, so the confirm stage was not paid for. \textbf{The prediction was
 wrong about the size}: sending changes the game in a way receiving does not,
 and the free read's null does not bound it. Self-play is where F1 loses
@@ -770,7 +770,7 @@ against $0.5136$, \textbf{replicating P44's finding on an independent channel}.
 \S\ref{sec:p45} \\
 
 P46 & \path{kraken_v12_belief_grid.md} \newline
-\emph{Is the belief about SESTINA's cards improvable at any exponent, on
+\emph{Is the belief about the external engine's cards improvable at any exponent, on
 either side, at any budget --- and which half of P43's C1b loss is about
 them and which is about us?} &
 Written before any instrument position was scored or candidate game played.
@@ -780,7 +780,7 @@ after \texttt{act()} at every fourth scored decision, re-weighted at
 0.7, 1.0\} \times \gamma_{\text{team}} \in \{0.0, 0.35, 0.7\}$, plus
 \texttt{opp\_lambda} $\in \{0.3, 0.9\}$ at the incumbent $(0.35, 0.35)$ ---
 at \textbf{two budgets}, $720$ and $2{,}880$ draws, block~A cross-engine
-against SESTINA and block~B self-play, NLL/Brier/top-1 per truth pool paired
+against the external engine and block~B self-play, NLL/Brier/top-1 per truth pool paired
 against the incumbent cell, intervals clustered by game, Kish ESS per row.
 Decisions where the incumbent takes the exact DP are excluded from every
 paired contrast. \textbf{Licensing rule}, dual like the ship bar: a cell
@@ -791,7 +791,7 @@ rule licenses $(0.0, 0.0)$ or $(-1.1055, 0.35)$ --- the belief twins of P43's
 dueled C1b and C1c --- or fails to fail the latter, the rule is recorded as
 uncalibrated and the grid closes nothing. Stage~1, the same dual-population
 design as P43--P45: \textbf{E0} \texttt{opponent\_gamma} $=0.0$ (C1b
-replicated within deal), \textbf{E1} off on SESTINA's seats only,
+replicated within deal), \textbf{E1} off on the external engine's seats only,
 \textbf{E2} off on our teammates only, and \textbf{G}
 \texttt{opponent\_gamma} $=0.7$ played only if Stage~0 licenses it. Seeds
 \textbf{10,600,000} (instrument), \textbf{10,700,000} (screen, $300\times2$
@@ -803,12 +803,12 @@ sample (opp-pool NLL $+0.015$ $[+0.005, +0.025]$ at $720$, ESS ratio about
 $0.55$); $(0.7, 0.7)$ fails the licensing rule, so G is \emph{not} played.
 Stage~1: C1b decomposes, E1~$-$~E0 $= +0.30$ $[+0.02, +0.58]$, and the
 sentence ``being wrong about an opponent's propensity beats having no
-opinion'' is retained only if E1's vs-SESTINA interval lies entirely below
+opinion'' is retained only if E1's vs-external interval lies entirely below
 $-0.15$. &
 \textbf{NO ARM CLEARS; THE PREDICTION WAS WRONG IN THE DIRECTION.}
 Stage~0: the belief improves monotonically with the exponent on both sides;
 the rule licensed $(0.7, 0.7)$ in both blocks at both budgets (opp-pool NLL
-$-0.0131$ / $-0.0185$ against SESTINA at $720$ / $2{,}880$ draws, $-0.0128$
+$-0.0131$ / $-0.0185$ against the external engine at $720$ / $2{,}880$ draws, $-0.0128$
 / $-0.0271$ in self-play); the C1c twin is a worse belief and not a thinner
 sample ($+0.0620$, ESS ratio $0.86$); the silence term closes at the belief
 level. Stage~1: E2 (off on our teammates only) is a null in both populations,
@@ -831,11 +831,11 @@ $111{,}000$), the P43--P46 dual-population design imported from P46's
 harness, no futility screen (P46's Stage~1 was the screen), never pooled
 with it. Bar: $+0.15$ with the interval clear of zero in both populations;
 clears both $\Rightarrow$ ships as v1.2. &
-G does not clear both halves: vs SESTINA $+0.18$ $[-0.03, +0.39]$, self-play
+G does not clear both halves: vs external $+0.18$ $[-0.03, +0.39]$, self-play
 $+0.11$ $[-0.04, +0.26]$ --- the self-play half fails on the mean as well as
 the interval; ask hit rate up by about a point again. &
 \textbf{DOES NOT SHIP; CLEARS THE SELF-PLAY HALF ALONE.} $1{,}200$
-pairings, zero fallbacks: vs SESTINA $+0.0017$ $[-0.204, +0.208]$, a null;
+pairings, zero fallbacks: vs external $+0.0017$ $[-0.204, +0.208]$, a null;
 self-play $+0.1667$ $[+0.009, +0.325]$, clearing --- the first half of the
 dual bar any arm has cleared, and the half it exists to distrust. The
 prediction got the verdict right and both halves wrong in opposite
@@ -847,7 +847,7 @@ P48 & \path{kraken_v12_signalling_rev3.md} \newline
 it the defect measured from the other side?} &
 Written after P47 was on disk and before any P48 game. Every margin the
 signalling line reported against an opponent was a \texttt{BRIDGE\_REV}~2
-duel against \texttt{dylan\_v07}, and its own identity put most of the gain
+duel against the external engine, and its own identity put most of the gain
 in \emph{their} extra wrong declarations, the counter the defect inflated;
 the self-play control was a null. Two arms on the fresh block
 \textbf{11,400,000} (agent base $114{,}000$), $300$ deals $\times$ 2
@@ -858,17 +858,17 @@ parities each, the P43--P47 dual-population design: \textbf{S1}
 three channels (race / ours / theirs) per arm and population, paired within
 deal, the residual asserted zero on every game; signals a game. Reading rule
 for the paper's ``value established and positive'' sentences keyed on S1's
-theirs channel against SESTINA against its rev-2 value $+0.2725$
+theirs channel against the external engine against its rev-2 value $+0.2725$
 $[+0.2270, +0.3180]$. Bar: $+0.15$ clear of zero in both populations. &
-Nothing clears. S1 vs SESTINA $-0.10$ $[-0.40, +0.20]$, self-play $+0.02$
-$[-0.20, +0.24]$; S1's theirs channel against SESTINA $+0.01$ $[-0.05,
-+0.07]$, the opponent channel gone; about $3$ signals a game against SESTINA
-(from $8.94$). S2 vs SESTINA $+0.05$ $[-0.25, +0.35]$, self-play $0.00$. &
+Nothing clears. S1 vs external $-0.10$ $[-0.40, +0.20]$, self-play $+0.02$
+$[-0.20, +0.24]$; S1's theirs channel against the external engine $+0.01$ $[-0.05,
++0.07]$, the opponent channel gone; about $3$ signals a game against the external engine
+(from $8.94$). S2 vs external $+0.05$ $[-0.25, +0.35]$, self-play $0.00$. &
 \textbf{NOTHING CLEARS; THE GAIN WAS THE DEFECT.} $1{,}200$ pairings,
 $3{,}600$ games, zero fallbacks, the identity closing on every game. S1 vs
-SESTINA $+0.0033$ $[-0.078, +0.085]$ --- a null whose interval excludes the
+the external engine $+0.0033$ $[-0.078, +0.085]$ --- a null whose interval excludes the
 bar --- and $+0.0267$ $[-0.205, +0.258]$ in self-play; S2 is S1 (the budget
-binds on eight pairings in six hundred). S1's theirs channel against SESTINA
+binds on eight pairings in six hundred). S1's theirs channel against the external engine
 $+0.0167$ $[-0.010, +0.044]$ against $+0.2725$ at rev~2, their error rate
 $3.58\%$ against $3.43\%$; $0.623$ signals a game, from $8.94$. The ours
 channel survives, $+0.0600$ $[+0.020, +0.100]$, and the race cancels it,
@@ -938,7 +938,7 @@ sets/game \ldots is \textbf{the wrong instrument here and is deliberately not
 used.} \ldots \textbf{Primary outcome, fixed now.} Forced-declaration accuracy
 at one live half-suit, arm B against arm A on identical deals, fresh seeds,
 both parities. Ships if accuracy rises with the interval clear of zero.
-\textbf{Secondary outcome, fixed now.} The paired margin against v0.7 with its
+\textbf{Secondary outcome, fixed now.} The paired margin against the external engine with its
 interval, reported whatever it says, and \textbf{explicitly not a ship
 criterion}.''
 \end{quote}
@@ -947,7 +947,7 @@ criterion}.''
 primary. The registration also honoured its own secondary the hard way: the
 first self-play run gave every seat the arm, producing ``$+0.0000$, 95\%
 $[-0.0142, +0.0142]$ \ldots an arithmetic identity wearing a confidence
-interval'', and nothing shipped until the registered v0.7 arm was actually run.
+interval'', and nothing shipped until the registered the external engine arm was actually run.
 
 \paragraph{P23, \protect\path{prereg/gamma_split.md} --- the two-condition belief rule
 that every later belief measurement in this paper inherited.}

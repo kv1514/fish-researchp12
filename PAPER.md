@@ -5,7 +5,7 @@
 > **This is the v0.4-era paper and it is superseded.** The live document is
 > `paper/kraken.tex`, which is where every result since v0.4 lives --
 > among them the opponent-award rule change, the bridge-revision retraction,
-> the 10,000-game head-to-head against Dylan's FishBot v0.7 (+2.3466
+> the 10,000-game head-to-head against the external engine (+2.3466
 > [+2.2928, +2.4004] sets/game — **withdrawn**: it measured a stateless
 > bridge, and the corrected figures are -0.5250 [-0.6886, -0.3614] through
 > the repaired bridge, -0.70 through the persistent bridge and -0.62 inside
