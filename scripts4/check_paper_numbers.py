@@ -1652,6 +1652,56 @@ WATCH = [
     ("p48_screen.json", "arms.S1_signal_stuck_05.signals_per_game.vs_sestina",
      "{:.3f}", "S1's signals a game against SESTINA",
      "signals a game against the external engine, not"),
+    # The revision-3 channel decomposition (\S sec:res-rev3channels). The
+    # withdrawn rev-2 decomposition was arithmetically exact on corrupted
+    # inputs, which is precisely the shape a stale figure has, so its
+    # replacement is watched from the day it enters the paper rather than
+    # added to the list after something drifts.
+    ("margin_channels_rev3.json", "race", "{:+.4f}",
+     "rev-3 RACE channel", "half-suits we declare at all"),
+    ("margin_channels_rev3.json", "ours", "{:+.4f}",
+     "rev-3 OURS channel",
+     "\\textsc{ours}, our own wrong declarations"),
+    ("margin_channels_rev3.json", "theirs", "{:+.4f}",
+     "rev-3 THEIRS channel",
+     "\\textsc{theirs}, their wrong declarations"),
+    ("margin_channels_rev3.json", "headroom.ours", "{:+.4f}",
+     "what perfect declaration is worth", "and it still loses"),
+    ("margin_channels_rev3.json", "d_us", "{:.3f}",
+     "our declarations a game at rev 3", "half-suits we declare at all"),
+    # The revision-3 assembly race (\S sec:res-assembly). The table it
+    # replaces was rev-2, carried no marker of its own, and inverted; both of
+    # its bolded cells are watched here so the replacement cannot repeat it.
+    ("completion_ledger_12500000.json", "paired.completed.mean", "{:+.4f}",
+     "rev-3 assembly gap", "half-suits assembled and named right"),
+    ("completion_ledger_12500000.json", "paired.hits_wasted.mean", "{:+.3f}",
+     "rev-3 wasted-hit gap", "hits \\emph{wasted}"),
+    ("completion_ledger_12500000.json", "paired.turns.mean", "{:+.3f}",
+     "rev-3 turn-acquisition gap", "turn acquisitions &"),
+    ("completion_ledger_12500000.json", "sides.kv.wasted_share", "{:.4f}",
+     "our wasted share of hits", "wasted share of hits"),
+    ("completion_ledger_12500000.json", "sides.dy.wasted_share", "{:.4f}",
+     "their wasted share of hits", "wasted share of hits"),
+    # The pure half-suit-value objective, quoted in sec:res-assembly as the
+    # reason its instinct is not a plan. The paper had block 0's -7.191; the
+    # pooled estimate over both blocks is what the file holds.
+    ("value_baseline_verdict.json", "estimate", "{:.3f}",
+     "pure value objective vs champion", "and it lost by"),
+    # The abstract's allocation share. It was quoted from the rev-2
+    # decomposition the paper withdraws in full; re-taken on the 1,200-game
+    # revision-3 block it is 95.9%, so the claim survives and the number that
+    # carried it does not.
+    ("margin_channels_rev3.json", "our_allocation_share", "{:.1%}",
+     "allocation share of our wrong declarations",
+     "are \\emph{allocation} errors"),
+    ("margin_channels_rev3.json", "our_allocation_per_game", "{:.4f}",
+     "our allocation errors a game", "$116$ of $121$ over the"),
+    ("margin_channels_rev3.json", "our_ownership_per_game", "{:.4f}",
+     "our ownership errors a game", "ownership errors --- $116$"),
+    # The dialect table's last row, which is a marked revision-2 figure.
+    ("dialect_declaration_probe.json", "comparison_our_arbiter.their_wrong_per_game",
+     "{:.4f}", "their wrong declarations in our arbiter, rev 2",
+     "\\emph{our arbiter, our dialect}"),
 ]
 
 

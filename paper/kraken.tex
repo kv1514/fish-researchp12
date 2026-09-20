@@ -14,6 +14,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
+\usepackage{array}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{multirow}
@@ -100,7 +101,7 @@ the biased sampler it replaced, because a uniform posterior assumes that
 players' choices carry no information beyond legality. Replacing that accident
 with an explicit one-parameter model of how players choose is worth $+1.92$
 $[+1.48, +2.36]$ sets per deal-pair, the largest single gain in the study. Of
-the remaining errors, $95.3\%$ are allocation errors: the team held all six
+the remaining errors, $95.9\%$ are allocation errors: the team held all six
 cards of a half-suit and split them wrongly.
 
 An earlier version of this paper reported a $+2.35$ sets-per-game win over an
@@ -110,7 +111,7 @@ opponent's posterior. Measured through the repaired bridge, KRAKEN loses that
 pairing by $-0.525$ $[-0.689, -0.361]$. Six pre-registered programmes then
 tried to recover the deficit under a bar fixed in advance, $+0.15$ sets a game
 against the external engine and in self-play, and none cleared it. Across the
-project, forty-eight pre-registrations produced exactly one change to the
+project, forty-nine pre-registrations produced exactly one change to the
 deployed engine. The paper records every one of them, the failures on the same
 footing as the successes.
 
@@ -198,7 +199,7 @@ choice model is worth $\mathbf{+1.92}$ $[+1.48, +2.36]$ sets per pair, the
 largest single gain in the study.
 
 Three results follow. The residual errors are not failures to \emph{find}
-cards: $\mathbf{95.3\%}$ are \emph{allocation} errors, where our team held all
+cards: $\mathbf{95.9\%}$ are \emph{allocation} errors, where our team held all
 six of a half-suit and split them wrongly. Handing a seat the true deal one
 side at a time --- a ceiling obtained by cheating, never a strength figure ---
 prices teammates' cards at $+3.41$ against opponents' $+1.31$, and we had
@@ -232,7 +233,7 @@ Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
 a proof that the belief-space search cannot move $99.96\%$ of the allocation
 uncertainty, and an audit of our own clustering restates every position-level
-interval and withdraws one conclusion. Across the whole project, forty-eight
+interval and withdraws one conclusion. Across the whole project, forty-nine
 pre-registrations produced exactly one change to the deployed engine
 (Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
 not ship, because the bar was fixed before the runs and was not amended
@@ -3182,9 +3183,10 @@ The policy already declines every declaration it is entitled to decline.}
 \end{figure}
 
 \paragraph{What the declaration is actually risking, and a lever that looked
-free and was not.} Of our $0.1759$ wrong declarations a game, $0.1676$ are
+free and was not.} Of our $0.1008$ wrong declarations a game, $\mathbf{0.0967}$ are
 allocation class (our own team held all six and we named the wrong split)
-against $0.0083$ ownership errors. That is $95.3\%$, and it is a different
+against $0.0042$ ownership errors --- $116$ of $121$ over the $1{,}200$-game
+revision-3 block. That is $95.9\%$, and it is a different
 problem from reading the opposition: every card is held by someone who knows
 they hold it, so the team has the answer and no member of it does.
 
@@ -3434,9 +3436,9 @@ one decision in sixty, reporting an interval four times the ship bar in each
 direction, is a statement about the harness rather than about the idea.
 
 The retest mattered because this is the only term in the basis that points at
-the error we actually make. Of our $0.1759$ wrong declarations a game, $0.1676$
-are allocation class (our own team held all six and we named the wrong split)
-against $0.0083$ ownership errors, and a half-suit held entirely in one
+the error we actually make. Of our $0.1008$ wrong declarations a game, $0.0967$
+are allocation class (the team held all six and we named the wrong split)
+against $0.0042$ ownership errors, and a half-suit held entirely in one
 hand has no split to name. It was registered at
 \path{prereg/concentration_v2.md} at $4{,}000$ games, with arms at $0.60$ and
 $1.50$ and with the mechanism as a \emph{withdrawal condition} rather than a
@@ -6889,6 +6891,102 @@ after the netting, not the margin a differently-declaring the external engine wo
 conceded. The distinction is worth insisting on because the temptation is to
 read the last row as ``our true strength'', and it is not that.
 
+\paragraph{The decomposition the withdrawal left owing, at revision~3.}
+\label{sec:res-rev3channels}
+Striking the table above answers the question it asked by deleting it. The
+question survives the retraction, and the same identity answers it on the
+corrected pairing, because the identity is a property of the rules rather
+than of any run. Under the award rule each of the nine half-suits is awarded
+to exactly one team by exactly one declaration, so with $D$ for declarations
+made and $W$ for the ones a side gets wrong,
+\[
+  \text{margin} \;=\; 2\,(D_{\text{us}} - W_{\text{us}} + W_{\text{them}}) - 9
+  \;=\; \underbrace{2\,(D_{\text{us}} - \tfrac{9}{2})}_{\textsc{race}}
+  \;+\; \underbrace{(-2\,W_{\text{us}})}_{\textsc{ours}}
+  \;+\; \underbrace{2\,W_{\text{them}}}_{\textsc{theirs}} .
+\]
+Both counts are recoverable from the head-to-head's own stored rates, and
+recovering them is a check rather than a definition: $D$ follows from
+$W/(1-\text{declare right})$ on each side separately, from four numbers
+measured independently of one another, so $D_{\text{us}} + D_{\text{them}} =
+9$ is a constraint the run can fail. It does not fail, and the identity then
+closes with residual zero
+(\path{scripts4/margin_identity.py} on \path{results/mega_match.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+channel & per game & contribution to margin \\
+\midrule
+measured margin at revision~3 & --- & $\mathbf{-0.5250}$ $[-0.6886, -0.3614]$ \\
+\textsc{race}, half-suits we declare at all & $4.178$ against $4.822$ &
+$\mathbf{-0.6433}$ \\
+\textsc{ours}, our own wrong declarations & $0.101$/game & $-0.2017$ \\
+\textsc{theirs}, their wrong declarations & $0.160$/game & $+0.3200$ \\
+\midrule
+residual & --- & $0.0000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{The two accuracy channels together are $+0.118$. The whole
+deficit and more is \textsc{race}.} That is the reverse of the withdrawn
+reading in every respect: there, declaration accounting was fifty-seven per
+cent of a margin in our favour; here it is the only part of the scoreboard we
+are ahead on, and it is not nearly enough.
+
+\textsc{race} is not a channel about \emph{when} a half-suit is declared, and
+the rule says why. \path{fish/engine.py}'s claim resolution awards a
+half-suit to the declaring team only on an exact match and to the
+\emph{opponents} whenever any revealed holder sits on the other team, so a
+team that does not hold all six cannot take one by declaring it. The counters
+agree: $8.76$ of the nine half-suits a game are collected outright and named
+right, and only $0.24$ declarations a game involve any error at all. A
+half-suit our team already holds will be declared by us whether the gate
+opens early or late. \textsc{race} counts \emph{assembly}, and assembly is
+the ask channel --- which is where the preceding table already located the
+only difference between the two engines, and where the cross-engine
+programme's candidates were aimed (\S\ref{sec:askdeficit}).
+
+\paragraph{What that bounds.} The same identity bounds each channel from the
+same counters. Setting $W_{\text{us}} = 0$ --- declaring perfectly, never
+wrong again, for the rest of the project --- moves the margin to $-0.3234$.
+It is worth $\mathbf{+0.2017}$ and it still loses.
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+the most a channel could ever give, from this arm & margin \\
+\midrule
+\textsc{ours}: declare perfectly & $+0.202$ \\
+\textsc{race}: declare all nine at our own accuracy & $+9.091$ \\
+\textsc{theirs}: they never get one right & $+9.323$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent These are bounds, not targets, and they are not simultaneously
+reachable: a half-suit moved into \textsc{race} leaves \textsc{theirs}
+carrying their error rate with it. The one that does useful work is the
+first, because it is small, it is a bound rather than an estimate, and it
+retires a whole family of candidates without playing them. No improvement to
+declaration accuracy --- not a better split joint, not a recalibrated gate,
+not a perfect one --- closes a $0.525$ deficit, because the entire channel is
+worth $0.202$. A $600$-game paired study through the persistent bridge agrees
+in shape at a larger margin: $-0.8733$ decomposing to \textsc{race}
+$-0.8000$, \textsc{ours} $-0.2767$, \textsc{theirs} $+0.2033$, with perfect
+declaration worth $+0.277$ and still losing by $0.597$
+(\path{results/bridge_dealt_hand_price.json}).
+
+This is what the withdrawn decomposition cost the paper, and it is worth
+naming: for one draft the project believed its margin came from declaring
+better than an opponent who declared badly. The corrected pairing says the
+opponent declares within a point of us and beats us by assembling more, and
+the channel the project spent the least compute on is the only one large
+enough to matter.
+
 \paragraph{The same account, across his whole ladder.}
 \label{sec:ladder-sweep}
 Everything above is one opponent. That was never a limit of the bridge: the
@@ -6995,7 +7093,101 @@ $250$-deal probe kills it --- with and without the option the two arms are
 identical to four decimals, for two independent reasons in their source, and
 so the anomaly stands with no hypothesis behind it.
 
-\paragraph{What the other $39\%$ is made of.} The residual --- everything
+\paragraph{The assembly race, at revision~3.} \label{sec:res-assembly}
+\S\ref{sec:res-rev3channels} located the deficit in \textsc{race}, and
+\textsc{race} counts assembly. The paragraph that follows this one is the
+rev-2 account of that race and every row of it inverts; the corrected account
+comes first, so a reader meets the live numbers before the withdrawn ones.
+Over $1{,}600$ games through the persistent bridge, both engines instrumented
+on the same finished games, zero fallbacks and zero unfinished
+(\path{scripts4/completion_ledger.py}):
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.6cm}rrr}
+\toprule
+per game & KRAKEN & the external engine & ours $-$ theirs \\
+\midrule
+turn acquisitions & $23.184$ & $23.091$ & $+0.093$ $[+0.060, +0.127]$ \\
+asks & $46.374$ & $48.184$ & $-1.810$ $[-2.206, -1.414]$ \\
+asks that hit & $23.914$ & $25.849$ & $-1.936$ $[-2.337, -1.535]$ \\
+hit rate & $0.5157$ & $0.5365$ & $-0.0218$ $[-0.0260, -0.0175]$ \\
+half-suits assembled and named right & $4.078$ & $4.730$ &
+$\mathbf{-0.6525}$ $[-0.786, -0.519]$ \\
+hits kept, i.e.\ in a half-suit it went on to win & $16.346$ & $19.347$ &
+$-3.001$ $[-3.656, -2.345]$ \\
+hits \emph{wasted} & $7.568$ & $6.503$ & $\mathbf{+1.065}$ $[+0.758, +1.372]$ \\
+wasted share of hits & $0.3164$ & $0.2516$ & $+0.0715$ $[+0.0550, +0.0881]$ \\
+plies holding a set unspoken & $68.922$ & $36.282$ & $+32.640$ $[+29.8, +35.4]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A hit is \emph{wasted} when the asking team never went on to win
+that half-suit by its own correct declaration. It is a fact about the
+finished game and not a model: the card arrived, it scored as a successful
+ask, and every card it was gathered with ended up somewhere else.
+
+\textbf{It is not tempo.} Turn acquisitions are level to within a tenth of a
+turn in $23$ --- and the tenth is \emph{ours}. We take marginally more turns
+than they do and assemble two thirds of a half-suit a game fewer. Whatever
+the deficit is, it is not that they get to play more.
+
+\textbf{It is conversion, and conversion decomposes further.} Divide kept
+hits by half-suits assembled and the two engines are the same engine:
+$4.009$ kept hits per half-suit for us, $4.090$ for them. Nothing separates
+them in what they do with a card once it is on the winning side of the
+ledger. The entire gap is which side of that ledger a hit lands on:
+$68.4\%$ of our hits are kept against $74.8\%$ of theirs.
+
+\noindent That is worth stating as arithmetic, clearly labelled as
+arithmetic. Holding our hit count and our kept-hits-per-half-suit fixed and
+moving only our kept \emph{share} to theirs gives $4.465$ half-suits a game
+against our $4.078$; run back through \S\ref{sec:res-rev3channels}'s identity
+at both engines' measured error rates, that is a margin of $+0.205$ instead
+of $-0.525$. \textbf{The wasted-hit gap is, arithmetically, larger than the
+deficit.}
+
+It is arithmetic and not a plan, and the record contains the reason to say so
+loudly. A pure half-suit-value objective --- asking for what completes a
+half-suit rather than for what is likely to be there --- was built and
+measured, and it lost by $\mathbf{-7.195}$ $[-7.356, -7.034]$ sets over
+$2{,}000$ pairs, picking asks with success probability $0.457$ against the
+heuristic's $0.551$
+(\path{results/value_baseline_verdict.json},
+\path{results/value_objective_diag.json}). The concentration term that
+expresses the same instinct additively was confirmed negative at $4{,}000$
+games. Trading hit rate for concentration is a measured disaster, and this
+table is not evidence for it --- the external engine does not trade. It has
+the \emph{higher} hit rate and the lower wasted share, both at once, which is
+what makes the gap a target rather than a tradeoff, and why no arm of this
+project has yet been aimed at it: every candidate the cross-engine programme
+drew was scored on hit rate, and hit rate is the one axis on which the two
+engines nearly agree.
+\paragraph{What the other $39\%$ is made of --- the rev-2 account, withdrawn.}
+
+\begin{center}
+\fbox{\parbox{0.93\linewidth}{\small
+\textbf{WITHDRAWN.} Every row of the table below was taken through the
+published stateless bridge. Its results file was written eleven days before
+the dealt-hand repair landed, and carries that era's $+2.3375$ margin; the
+script has since been repaired with the rest and would produce revision-3
+numbers if re-run, but it has not been re-run and it records no
+\texttt{BRIDGE\_REV} in its output, so there was nothing in the file for the
+retraction sweep to key on and it kept no marker of its own --- which is
+contrary to this paper's practice of recording a correction beside the number
+it corrects. At revision~3 both of its readings invert: we assemble
+$4.078$ half-suits a game against their $4.730$, not $5.008$ against $3.416$,
+and we land $51.6\%$ of asks against their $53.7\%$, not $51.5\%$ against
+$47.8\%$ (\S\ref{sec:res-assembly}). The paragraph is kept, struck, because
+the $1/(1-p)$ argument in it is a property of the rules and survives the
+change of sign --- at revision~3 the measured hit rates predict an ask-count
+ratio of $2.065/2.157 = 0.957$ against an observed $46.374/48.184 = 0.962$,
+so volume is still what conversion implies. The direction of every gap it
+reports does not survive.}}
+\end{center}
+
+\noindent The residual --- everything
 asking, inference and search produce once the declarations net out --- has a
 shape that follows from the rules. Every set is won by declaring a half-suit
 your team holds, so once misdeclarations are accounted for what remains is the
@@ -7369,6 +7561,16 @@ their \texttt{-{}-legacy} bundle & $0.00$ & $0.0729$ \\
 \end{tabular}
 \end{center}
 
+\noindent The last row is a \textbf{revision-2} figure and is the last one in
+this paper that still is. Through the repaired bridge their wrong declarations
+in our arbiter are $0.1600$ a game, not $0.8442$, so the contrast this
+paragraph turns on shrinks roughly fivefold. Its \emph{direction} survives ---
+$0.075$ is still below $0.160$, and taking the out-of-turn channel away still
+makes their declarations more accurate rather than less --- so the conclusion
+below stands and its magnitude does not. The row is left in place, marked,
+rather than silently refreshed, because the size of the gap is what the
+original argument leaned on.
+
 \noindent Taking the channel away makes their declarations \emph{more}
 accurate, not less; their own dialect sweep agrees in direction, pricing
 \texttt{no-out-of-turn} at $+0.52$ points of their edge. So the dialect is not
@@ -7687,7 +7889,7 @@ population; candidate minus champion, sets a game, vs external through
 
 \begin{center}
 \small
-\begin{tabular}{p{5.6cm}rr}
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.6cm}rr}
 \toprule
 arm & vs external & self-play \\
 \midrule
@@ -8332,7 +8534,7 @@ minus champion within a deal, and the two contrasts are taken within
 
 \begin{center}
 \small
-\begin{tabular}{lp{4.4cm}rr}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.4cm}rr}
 \toprule
 arm & change from \texttt{V06\_DEPLOYED} & vs external & self-play \\
 \midrule
@@ -8496,7 +8698,7 @@ zero and lies below the rev-2 lower bound of $+0.2270$.
 
 \begin{center}
 \small
-\begin{tabular}{lp{4.4cm}rr}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{4.4cm}rr}
 \toprule
 arm & change from \texttt{V06\_DEPLOYED} & vs external & self-play \\
 \midrule
@@ -9609,12 +9811,12 @@ alone --- a null against the external engine, and the first half of the dual bar
 has cleared --- and the sixth registration re-read the one earlier mechanism
 with a positive value on the record through the repaired bridge and found
 that the value was the bridge defect, measured from the other side
-(\S\ref{sec:p48}). The pre-registered thresholds and outcomes for all forty-eight
+(\S\ref{sec:p48}). The pre-registered thresholds and outcomes for all forty-nine
 registrations this project has written are in Appendix~\ref{app:prereg}. Two
 mechanisms measured there are real and positive and still do not ship,
 because the bar was fixed in advance and was not amended afterwards. That is
 the discipline this paper is actually arguing for, and it costs more than it
-looks: exactly one of the forty-eight registrations produced a change to the
+looks: exactly one of the forty-nine registrations produced a change to the
 deployed engine.
 
 \subsection{What we would do next}
