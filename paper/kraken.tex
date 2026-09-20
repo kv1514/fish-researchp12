@@ -7126,7 +7126,97 @@ $250$-deal probe kills it --- with and without the option the two arms are
 identical to four decimals, for two independent reasons in their source, and
 so the anomaly stands with no hypothesis behind it.
 
-\paragraph{What the other $39\%$ is made of.} The residual --- everything
+\paragraph{The assembly race, at revision~3.} \label{sec:res-assembly}
+\S\ref{sec:res-rev3channels} located the deficit in \textsc{race}, and
+\textsc{race} counts assembly. The paragraph that follows this one is the
+rev-2 account of that race and every row of it inverts; the corrected account
+comes first, so a reader meets the live numbers before the withdrawn ones.
+Over $1{,}600$ games through the persistent bridge, both engines instrumented
+on the same finished games, zero fallbacks and zero unfinished
+(\path{scripts4/completion_ledger.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+per game & KRAKEN & the external engine & ours $-$ theirs \\
+\midrule
+turn acquisitions & $23.184$ & $23.091$ & $+0.093$ $[+0.060, +0.127]$ \\
+asks & $46.374$ & $48.184$ & $-1.810$ $[-2.206, -1.414]$ \\
+asks that hit & $23.914$ & $25.849$ & $-1.936$ $[-2.337, -1.535]$ \\
+hit rate & $0.5157$ & $0.5365$ & $-0.0218$ $[-0.0260, -0.0175]$ \\
+half-suits assembled and named right & $4.078$ & $4.730$ &
+$\mathbf{-0.6525}$ $[-0.786, -0.519]$ \\
+hits kept, i.e.\ in a half-suit it went on to win & $16.346$ & $19.347$ &
+$-3.001$ $[-3.656, -2.345]$ \\
+hits \emph{wasted} & $7.568$ & $6.503$ & $\mathbf{+1.065}$ $[+0.758, +1.372]$ \\
+wasted share of hits & $0.3164$ & $0.2516$ & $+0.0715$ $[+0.0550, +0.0881]$ \\
+plies holding a set unspoken & $68.922$ & $36.282$ & $+32.640$ $[+29.8, +35.4]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent A hit is \emph{wasted} when the asking team never went on to win
+that half-suit by its own correct declaration. It is a fact about the
+finished game and not a model: the card arrived, it scored as a successful
+ask, and every card it was gathered with ended up somewhere else.
+
+\textbf{It is not tempo.} Turn acquisitions are level to within a tenth of a
+turn in $23$ --- and the tenth is \emph{ours}. We take marginally more turns
+than they do and assemble two thirds of a half-suit a game fewer. Whatever
+the deficit is, it is not that they get to play more.
+
+\textbf{It is conversion, and conversion decomposes further.} Divide kept
+hits by half-suits assembled and the two engines are the same engine:
+$4.009$ kept hits per half-suit for us, $4.090$ for them. Nothing separates
+them in what they do with a card once it is on the winning side of the
+ledger. The entire gap is which side of that ledger a hit lands on:
+$68.4\%$ of our hits are kept against $74.8\%$ of theirs.
+
+\noindent That is worth stating as arithmetic, clearly labelled as
+arithmetic. Holding our hit count and our kept-hits-per-half-suit fixed and
+moving only our kept \emph{share} to theirs gives $4.465$ half-suits a game
+against our $4.078$; run back through \S\ref{sec:res-rev3channels}'s identity
+at both engines' measured error rates, that is a margin of $+0.205$ instead
+of $-0.525$. \textbf{The wasted-hit gap is, arithmetically, larger than the
+deficit.}
+
+It is arithmetic and not a plan, and the record contains the reason to say so
+loudly. A pure half-suit-value objective --- asking for what completes a
+half-suit rather than for what is likely to be there --- was built and
+measured, and it lost by $\mathbf{-7.191}$ sets, picking asks with success
+probability $0.457$ against the heuristic's $0.551$
+(\path{results/value_baseline_verdict.json},
+\path{results/value_objective_diag.json}). The concentration term that
+expresses the same instinct additively was confirmed negative at $4{,}000$
+games. Trading hit rate for concentration is a measured disaster, and this
+table is not evidence for it --- the external engine does not trade. It has
+the \emph{higher} hit rate and the lower wasted share, both at once, which is
+what makes the gap a target rather than a tradeoff, and why no arm of this
+project has yet been aimed at it: every candidate the cross-engine programme
+drew was scored on hit rate, and hit rate is the one axis on which the two
+engines nearly agree.
+\paragraph{What the other $39\%$ is made of --- the rev-2 account, withdrawn.}
+
+\begin{center}
+\fbox{\parbox{0.93\linewidth}{\small
+\textbf{WITHDRAWN.} Every row of the table below was taken through the
+published stateless bridge. \path{scripts4/acquisition.py} builds the
+opponent with the rev-2 transport and records no \texttt{BRIDGE\_REV}, so
+nothing keyed on it during the retraction and it kept no marker of its own,
+which is contrary to this paper's practice of recording a correction beside
+the number it corrects. At revision~3 both of its readings invert: we assemble
+$4.078$ half-suits a game against their $4.730$, not $5.008$ against $3.416$,
+and we land $51.6\%$ of asks against their $53.7\%$, not $51.5\%$ against
+$47.8\%$ (\S\ref{sec:res-assembly}). The paragraph is kept, struck, because
+the $1/(1-p)$ argument in it is a property of the rules and survives the
+change of sign --- at revision~3 the measured hit rates predict an ask-count
+ratio of $2.065/2.157 = 0.957$ against an observed $46.374/48.184 = 0.962$,
+so volume is still what conversion implies. The direction of every gap it
+reports does not survive.}}
+\end{center}
+
+\noindent The residual --- everything
 asking, inference and search produce once the declarations net out --- has a
 shape that follows from the rules. Every set is won by declaring a half-suit
 your team holds, so once misdeclarations are accounted for what remains is the

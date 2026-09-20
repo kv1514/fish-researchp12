@@ -1669,6 +1669,19 @@ WATCH = [
      "what perfect declaration is worth", "and it still loses"),
     ("margin_channels_rev3.json", "d_us", "{:.3f}",
      "our declarations a game at rev 3", "half-suits we declare at all"),
+    # The revision-3 assembly race (\S sec:res-assembly). The table it
+    # replaces was rev-2, carried no marker of its own, and inverted; both of
+    # its bolded cells are watched here so the replacement cannot repeat it.
+    ("completion_ledger_12500000.json", "paired.completed.mean", "{:+.4f}",
+     "rev-3 assembly gap", "half-suits assembled and named right"),
+    ("completion_ledger_12500000.json", "paired.hits_wasted.mean", "{:+.3f}",
+     "rev-3 wasted-hit gap", "hits \\emph{wasted}"),
+    ("completion_ledger_12500000.json", "paired.turns.mean", "{:+.3f}",
+     "rev-3 turn-acquisition gap", "turn acquisitions &"),
+    ("completion_ledger_12500000.json", "sides.kv.wasted_share", "{:.4f}",
+     "our wasted share of hits", "wasted share of hits"),
+    ("completion_ledger_12500000.json", "sides.dy.wasted_share", "{:.4f}",
+     "their wasted share of hits", "wasted share of hits"),
 ]
 
 
