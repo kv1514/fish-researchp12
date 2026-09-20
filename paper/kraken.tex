@@ -130,7 +130,7 @@ the biased sampler it replaced, because a uniform posterior assumes that
 players' choices carry no information beyond legality. Replacing that accident
 with an explicit one-parameter model of how players choose is worth $+1.92$
 $[+1.48, +2.36]$ sets per deal-pair, the largest single gain in the study. Of
-the remaining errors, $95.3\%$ are allocation errors: the team held all six
+the remaining errors, $95.9\%$ are allocation errors: the team held all six
 cards of a half-suit and split them wrongly.
 
 An earlier version of this paper reported a $+2.35$ sets-per-game win over an
@@ -233,7 +233,7 @@ choice model is worth $\mathbf{+1.92}$ $[+1.48, +2.36]$ sets per pair, the
 largest single gain in the study.
 
 Three results follow. The residual errors are not failures to \emph{find}
-cards: $\mathbf{95.3\%}$ are \emph{allocation} errors, where our team held all
+cards: $\mathbf{95.9\%}$ are \emph{allocation} errors, where our team held all
 six of a half-suit and split them wrongly. Handing a seat the true deal one
 side at a time --- a ceiling obtained by cheating, never a strength figure ---
 prices teammates' cards at $+3.41$ against opponents' $+1.31$, and we had
@@ -3217,9 +3217,10 @@ The policy already declines every declaration it is entitled to decline.}
 \end{figure}
 
 \paragraph{What the declaration is actually risking, and a lever that looked
-free and was not.} Of our $0.1759$ wrong declarations a game, $0.1676$ are
+free and was not.} Of our $0.1008$ wrong declarations a game, $\mathbf{0.0967}$ are
 allocation class (our own team held all six and we named the wrong split)
-against $0.0083$ ownership errors. That is $95.3\%$, and it is a different
+against $0.0042$ ownership errors --- $116$ of $121$ over the $1{,}200$-game
+revision-3 block. That is $95.9\%$, and it is a different
 problem from reading the opposition: every card is held by someone who knows
 they hold it, so the team has the answer and no member of it does.
 
@@ -3469,9 +3470,9 @@ one decision in sixty, reporting an interval four times the ship bar in each
 direction, is a statement about the harness rather than about the idea.
 
 The retest mattered because this is the only term in the basis that points at
-the error we actually make. Of our $0.1759$ wrong declarations a game, $0.1676$
-are allocation class (our own team held all six and we named the wrong split)
-against $0.0083$ ownership errors, and a half-suit held entirely in one
+the error we actually make. Of our $0.1008$ wrong declarations a game, $0.0967$
+are allocation class (the team held all six and we named the wrong split)
+against $0.0042$ ownership errors, and a half-suit held entirely in one
 hand has no split to name. It was registered at
 \path{prereg/concentration_v2.md} at $4{,}000$ games, with arms at $0.60$ and
 $1.50$ and with the mechanism as a \emph{withdrawal condition} rather than a
@@ -7593,6 +7594,16 @@ their \texttt{-{}-legacy} bundle & $0.00$ & $0.0729$ \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent The last row is a \textbf{revision-2} figure and is the last one in
+this paper that still is. Through the repaired bridge their wrong declarations
+in our arbiter are $0.1600$ a game, not $0.8442$, so the contrast this
+paragraph turns on shrinks roughly fivefold. Its \emph{direction} survives ---
+$0.075$ is still below $0.160$, and taking the out-of-turn channel away still
+makes their declarations more accurate rather than less --- so the conclusion
+below stands and its magnitude does not. The row is left in place, marked,
+rather than silently refreshed, because the size of the gap is what the
+original argument leaned on.
 
 \noindent Taking the channel away makes their declarations \emph{more}
 accurate, not less; their own dialect sweep agrees in direction, pricing

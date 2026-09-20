@@ -555,7 +555,18 @@ def emit(path: Path, arm: str, dest: Path) -> int:
         return 1
     ab = absolute(payload, arm)
     h = headroom(payload, arm)
-    out = dict(ab, headroom=h, source=path.name, n_games=payload["n_games"],
+    # The allocation share of our own wrong declarations, when the source run
+    # recorded the split. The paper's abstract quotes it, and quoted it from
+    # the WITHDRAWN rev-2 decomposition for want of a live file holding it.
+    extra = {}
+    aw, w = (payload.get("allocation_misdeclares_kv"),
+             payload.get("wrong_declarations_kv"))
+    if aw is not None and w:
+        extra["our_allocation_share"] = aw / w
+        extra["our_allocation_per_game"] = aw / payload["n_games"]
+        extra["our_ownership_per_game"] = (w - aw) / payload["n_games"]
+    out = dict(ab, **extra, headroom=h, source=path.name,
+               n_games=payload["n_games"],
                bridge_rev=payload.get("bridge_rev"),
                script="scripts4/margin_identity.py", descriptive=True,
                note="RACE+OURS+THEIRS sum to the margin exactly; they are an "

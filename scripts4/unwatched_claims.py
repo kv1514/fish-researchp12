@@ -84,7 +84,13 @@ def sweep() -> tuple[list, list]:
                                 text):
         ctx = " ".join(body.split())
         why = next((r for k, r in EXEMPT.items() if _norm(k) in body), None)
-        for m in re.findall(r"[-+]?\d+(?:\.\d+)?%?", body):
+        # The lookbehind is load-bearing. Without it \textbf{revision-2}
+        # yields the "number" -2, and a bolded WORD containing a digit is
+        # reported as an unbacked measurement -- noise that trains a reader
+        # to skim this list, which is the one thing it cannot survive. A
+        # match may not start immediately after a letter, digit, dot or
+        # hyphen, so a figure glued to a word is not one.
+        for m in re.findall(r"(?<![A-Za-z0-9.-])[-+]?\d+(?:\.\d+)?%?", body):
             val = m.lstrip("+")
             key = (val, ctx)
             if key in seen:
@@ -103,7 +109,8 @@ def sweep() -> tuple[list, list]:
 #: bolded number in the paper is either pinned or exempt". The paper has 226
 #: `\textbf` numbers and 153 `\mathbf` ones -- every bolded figure inside
 #: math mode, which is where a table cell that wants emphasis ends up. The
-#: claim was false, and widening the sweep made 46 figures visible at once.
+#: claim was false, and widening the sweep made 46 figures visible at once. Two have
+#: since been paid off and the list is 44.
 #:
 #: THIS IS NOT AN ALLOW-LIST AND IT MUST NOT BECOME ONE. It is a baseline
 #: with a ratchet, and the ratchet is enforced in both directions by
@@ -154,7 +161,6 @@ BASELINE = frozenset([
     ("0.570", "mathbf"),
     ("0.676", "mathbf"),
     ("0.796", "mathbf"),
-    ("0.8442", "mathbf"),
     ("000", "mathbf"),
     ("1.327", "mathbf"),
     ("1.92", "mathbf"),
@@ -166,7 +172,6 @@ BASELINE = frozenset([
     ("601", "mathbf"),
     ("657", "mathbf"),
     ("900", "mathbf"),
-    ("95.3%", "mathbf"),
     ("99.96%", "mathbf"),
 ])
 

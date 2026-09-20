@@ -1687,6 +1687,21 @@ WATCH = [
     # pooled estimate over both blocks is what the file holds.
     ("value_baseline_verdict.json", "estimate", "{:.3f}",
      "pure value objective vs champion", "and it lost by"),
+    # The abstract's allocation share. It was quoted from the rev-2
+    # decomposition the paper withdraws in full; re-taken on the 1,200-game
+    # revision-3 block it is 95.9%, so the claim survives and the number that
+    # carried it does not.
+    ("margin_channels_rev3.json", "our_allocation_share", "{:.1%}",
+     "allocation share of our wrong declarations",
+     "are \\emph{allocation} errors"),
+    ("margin_channels_rev3.json", "our_allocation_per_game", "{:.4f}",
+     "our allocation errors a game", "$116$ of $121$ over the"),
+    ("margin_channels_rev3.json", "our_ownership_per_game", "{:.4f}",
+     "our ownership errors a game", "ownership errors --- $116$"),
+    # The dialect table's last row, which is a marked revision-2 figure.
+    ("dialect_declaration_probe.json", "comparison_our_arbiter.their_wrong_per_game",
+     "{:.4f}", "their wrong declarations in our arbiter, rev 2",
+     "\\emph{our arbiter, our dialect}"),
 ]
 
 
