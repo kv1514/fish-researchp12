@@ -1652,6 +1652,23 @@ WATCH = [
     ("p48_screen.json", "arms.S1_signal_stuck_05.signals_per_game.vs_sestina",
      "{:.3f}", "S1's signals a game against SESTINA",
      "signals a game against the external engine, not"),
+    # The revision-3 channel decomposition (\S sec:res-rev3channels). The
+    # withdrawn rev-2 decomposition was arithmetically exact on corrupted
+    # inputs, which is precisely the shape a stale figure has, so its
+    # replacement is watched from the day it enters the paper rather than
+    # added to the list after something drifts.
+    ("margin_channels_rev3.json", "race", "{:+.4f}",
+     "rev-3 RACE channel", "half-suits we declare at all"),
+    ("margin_channels_rev3.json", "ours", "{:+.4f}",
+     "rev-3 OURS channel",
+     "\\textsc{ours}, our own wrong declarations"),
+    ("margin_channels_rev3.json", "theirs", "{:+.4f}",
+     "rev-3 THEIRS channel",
+     "\\textsc{theirs}, their wrong declarations"),
+    ("margin_channels_rev3.json", "headroom.ours", "{:+.4f}",
+     "what perfect declaration is worth", "and it still loses"),
+    ("margin_channels_rev3.json", "d_us", "{:.3f}",
+     "our declarations a game at rev 3", "half-suits we declare at all"),
 ]
 
 

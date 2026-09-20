@@ -6924,6 +6924,102 @@ after the netting, not the margin a differently-declaring the external engine wo
 conceded. The distinction is worth insisting on because the temptation is to
 read the last row as ``our true strength'', and it is not that.
 
+\paragraph{The decomposition the withdrawal left owing, at revision~3.}
+\label{sec:res-rev3channels}
+Striking the table above answers the question it asked by deleting it. The
+question survives the retraction, and the same identity answers it on the
+corrected pairing, because the identity is a property of the rules rather
+than of any run. Under the award rule each of the nine half-suits is awarded
+to exactly one team by exactly one declaration, so with $D$ for declarations
+made and $W$ for the ones a side gets wrong,
+\[
+  \text{margin} \;=\; 2\,(D_{\text{us}} - W_{\text{us}} + W_{\text{them}}) - 9
+  \;=\; \underbrace{2\,(D_{\text{us}} - \tfrac{9}{2})}_{\textsc{race}}
+  \;+\; \underbrace{(-2\,W_{\text{us}})}_{\textsc{ours}}
+  \;+\; \underbrace{2\,W_{\text{them}}}_{\textsc{theirs}} .
+\]
+Both counts are recoverable from the head-to-head's own stored rates, and
+recovering them is a check rather than a definition: $D$ follows from
+$W/(1-\text{declare right})$ on each side separately, from four numbers
+measured independently of one another, so $D_{\text{us}} + D_{\text{them}} =
+9$ is a constraint the run can fail. It does not fail, and the identity then
+closes with residual zero
+(\path{scripts4/margin_identity.py} on \path{results/mega_match.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+channel & per game & contribution to margin \\
+\midrule
+measured margin at revision~3 & --- & $\mathbf{-0.5250}$ $[-0.6886, -0.3614]$ \\
+\textsc{race}, half-suits we declare at all & $4.178$ against $4.822$ &
+$\mathbf{-0.6433}$ \\
+\textsc{ours}, our own wrong declarations & $0.101$/game & $-0.2017$ \\
+\textsc{theirs}, their wrong declarations & $0.160$/game & $+0.3200$ \\
+\midrule
+residual & --- & $0.0000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{The two accuracy channels together are $+0.118$. The whole
+deficit and more is \textsc{race}.} That is the reverse of the withdrawn
+reading in every respect: there, declaration accounting was fifty-seven per
+cent of a margin in our favour; here it is the only part of the scoreboard we
+are ahead on, and it is not nearly enough.
+
+\textsc{race} is not a channel about \emph{when} a half-suit is declared, and
+the rule says why. \path{fish/engine.py}'s claim resolution awards a
+half-suit to the declaring team only on an exact match and to the
+\emph{opponents} whenever any revealed holder sits on the other team, so a
+team that does not hold all six cannot take one by declaring it. The counters
+agree: $8.76$ of the nine half-suits a game are collected outright and named
+right, and only $0.24$ declarations a game involve any error at all. A
+half-suit our team already holds will be declared by us whether the gate
+opens early or late. \textsc{race} counts \emph{assembly}, and assembly is
+the ask channel --- which is where the preceding table already located the
+only difference between the two engines, and where the cross-engine
+programme's candidates were aimed (\S\ref{sec:askdeficit}).
+
+\paragraph{What that bounds.} The same identity bounds each channel from the
+same counters. Setting $W_{\text{us}} = 0$ --- declaring perfectly, never
+wrong again, for the rest of the project --- moves the margin to $-0.3234$.
+It is worth $\mathbf{+0.2017}$ and it still loses.
+
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+the most a channel could ever give, from this arm & margin \\
+\midrule
+\textsc{ours}: declare perfectly & $+0.202$ \\
+\textsc{race}: declare all nine at our own accuracy & $+9.091$ \\
+\textsc{theirs}: they never get one right & $+9.323$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent These are bounds, not targets, and they are not simultaneously
+reachable: a half-suit moved into \textsc{race} leaves \textsc{theirs}
+carrying their error rate with it. The one that does useful work is the
+first, because it is small, it is a bound rather than an estimate, and it
+retires a whole family of candidates without playing them. No improvement to
+declaration accuracy --- not a better split joint, not a recalibrated gate,
+not a perfect one --- closes a $0.525$ deficit, because the entire channel is
+worth $0.202$. A $600$-game paired study through the persistent bridge agrees
+in shape at a larger margin: $-0.8733$ decomposing to \textsc{race}
+$-0.8000$, \textsc{ours} $-0.2767$, \textsc{theirs} $+0.2033$, with perfect
+declaration worth $+0.277$ and still losing by $0.597$
+(\path{results/bridge_dealt_hand_price.json}).
+
+This is what the withdrawn decomposition cost the paper, and it is worth
+naming: for one draft the project believed its margin came from declaring
+better than an opponent who declared badly. The corrected pairing says the
+opponent declares within a point of us and beats us by assembling more, and
+the channel the project spent the least compute on is the only one large
+enough to matter.
+
 \paragraph{The same account, across his whole ladder.}
 \label{sec:ladder-sweep}
 Everything above is one opponent. That was never a limit of the bridge: the

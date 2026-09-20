@@ -535,10 +535,48 @@ def sweep(paths: list[Path]) -> list[dict]:
     return rows
 
 
+def emit(path: Path, arm: str, dest: Path) -> int:
+    """Write one arm's absolute channels and headroom to a results file.
+
+    The paper quotes these, and a figure the paper quotes has to come from a
+    file `scripts4/check_paper_numbers.py` can read. Computing them in a
+    report and typing the answer into the manuscript is the exact failure the
+    guard exists to catch, so the instrument writes them instead.
+    """
+    payload = adapt(json.loads(path.read_text()))
+    if payload is None or arm not in payload.get("margins", {}):
+        print(f"{path.name}: no arm {arm!r} to emit")
+        return 1
+    bad = verify(payload)
+    if bad:
+        #: A broken identity must not reach a results file the paper reads.
+        for line in bad:
+            print(f"  IDENTITY BROKEN  {line}")
+        return 1
+    ab = absolute(payload, arm)
+    h = headroom(payload, arm)
+    out = dict(ab, headroom=h, source=path.name, n_games=payload["n_games"],
+               bridge_rev=payload.get("bridge_rev"),
+               script="scripts4/margin_identity.py", descriptive=True,
+               note="RACE+OURS+THEIRS sum to the margin exactly; they are an "
+                    "accounting and they co-move. Headroom values are bounds, "
+                    "not targets, and are not simultaneously reachable.")
+    dest.write_text(json.dumps(out, indent=1) + "\n")
+    print(f"wrote {dest}")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     args = [a for a in argv if not a.startswith("--")]
     base = next((a.split("=", 1)[1] for a in argv
                  if a.startswith("--base=")), None)
+    emit_to = next((a.split("=", 1)[1] for a in argv
+                    if a.startswith("--emit=")), None)
+    if emit_to:
+        if len(args) != 1 or base is None:
+            print("--emit needs exactly one input file and --base=<arm>")
+            return 1
+        return emit(Path(args[0]), base, ROOT / "results" / emit_to)
     paths = [Path(a) for a in args] or sorted(
         (ROOT / "results").glob("*.json"))
     if "--sweep" in argv:
