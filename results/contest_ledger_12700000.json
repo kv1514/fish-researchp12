@@ -85,6 +85,7 @@
   }
  },
  "cost_per_game": 0.545,
+ "margin_swing": 1.09,
  "cost_middle": 0.6175,
  "cost_extremes": -0.07250000000000001,
  "middle_share": 0.8038888888888889,

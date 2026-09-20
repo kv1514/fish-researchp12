@@ -220,6 +220,11 @@ def report(games: list[dict]) -> dict:
         return sum(matched[k]["n"] * -matched[k]["edge"]
                    for k in keys if k in matched) / n
     out["cost_per_game"] = cost / n
+    #: two sets a half-suit, per the margin identity. Quoted in the paper, so
+    #: it is stored rather than multiplied out in LaTeX -- computing a figure
+    #: in the manuscript is how Table tab:exact came to disagree with its own
+    #: pipeline.
+    out["margin_swing"] = 2 * cost / n
     out["cost_middle"] = block(mid)
     out["cost_extremes"] = block(ext)
     out["middle_share"] = sum(matched[k]["n"] for k in mid if k in matched) \
