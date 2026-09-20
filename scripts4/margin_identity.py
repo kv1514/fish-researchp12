@@ -279,6 +279,47 @@ def _bridge_arm(rows: list[dict], arm: str) -> dict:
             "integrality_failures": bad}
 
 
+def from_match(payload: dict) -> dict | None:
+    """Normalise a `mega_match` run into the canonical margins+ledger shape.
+
+    This is the shape the paper's HEADLINE cross-engine figure is in, and it
+    was the last one the identity could not reach -- so the decomposition of
+    the number the abstract quotes was being done, when it was done at all, by
+    hand. It stores per-side rates rather than counts, and the counts follow:
+
+        d = wrong / (1 - declare_right)
+
+    Unlike the bridge shape, BOTH checks here bite. `d_us` and `d_them` are
+    recovered from four numbers that were measured independently of each
+    other, so `d_us + d_them = 9` is a real constraint rather than a
+    definition, and the margin identity then has to close on top of it. A run
+    that dropped a declaration, or reported a rate over the wrong
+    denominator, fails one or the other.
+    """
+    need = ("margin", "n_games", "wrong_declarations_kv",
+            "wrong_declarations_dylan", "declare_right_kv",
+            "declare_right_dylan")
+    if not all(k in payload for k in need):
+        return None
+    n = payload["n_games"]
+    out = {}
+    for who, side in (("us", "kv"), ("them", "dylan")):
+        w = payload[f"wrong_declarations_{side}"]
+        r = payload[f"declare_right_{side}"]
+        if not 0.0 <= r < 1.0:
+            return None
+        out[who] = (w / (1.0 - r) / n, w / n)       # (declarations, wrong)
+    d_us, w_us = out["us"]
+    d_them, w_them = out["them"]
+    return dict(payload, rules=REQUIRED_RULE,
+                ledger={"match": {"identity": {"n": d_us * n,
+                                               "wrong": w_us * n}}},
+                margins={"match": {"mean": payload["margin"]}},
+                both_sides={"match": {"their_wrong": w_them * n,
+                                      "their_declares": d_them * n}},
+                vs="dylan_v07")
+
+
 def from_bridge(payload: dict) -> dict | None:
     """Normalise a `bridge_*_price` run into the canonical margins+ledger shape.
 
@@ -341,7 +382,7 @@ def adapt(payload: dict) -> dict | None:
     if not isinstance(payload, dict):
         return None
     if "ledger" not in payload:
-        return from_bridge(payload)
+        return from_bridge(payload) or from_match(payload)
     if "margins" in payload:
         return payload
     if payload.get("vs") == "self":
