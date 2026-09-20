@@ -216,7 +216,12 @@ def report(rows: list[dict]) -> dict:
           f"{out['fallbacks']} fallbacks, {out['unfinished']} unfinished")
     print("=" * 74)
     print(f"\n  {'':<22}{'KRAKEN':>10}{'SESTINA':>10}{'ours - theirs':>24}")
-    for k, label in (("completed", "half-suits completed"),
+    # "completed" counts a team's OWN correct declarations, so it is
+    # assembled AND named right. A half-suit won because the other side
+    # misdeclared is a gift and is counted for nobody here -- it belongs to
+    # the THEIRS channel of the margin identity, not to either side's
+    # collection.
+    for k, label in (("completed", "assembled, named right"),
                      ("turns", "turn acquisitions"),
                      ("acts", "actions"),
                      ("asks", "asks"),
