@@ -193,11 +193,38 @@ def test_no_bolded_number_in_the_paper_is_unaccounted_for():
     against, so the exemption table is required to carry one.
     """
     sys.path.insert(0, str(ROOT / "scripts4"))
-    from unwatched_claims import EXEMPT, sweep
+    from unwatched_claims import (BASELINE, EXEMPT, regressions,
+                                  stale_baseline, sweep)
 
     assert all(isinstance(v, str) and v.strip() for v in EXEMPT.values()), (
         "every exemption must state a reason")
     unexplained, _ = sweep()
-    assert not unexplained, (
-        "bolded numbers with nothing behind them: "
-        + ", ".join(f"{v} in {c[:40]!r}" for v, c, _ in unexplained))
+
+    # The sweep sees \mathbf as well as \textbf now. It did not for most of
+    # this project, and printed that every bolded number was pinned or exempt
+    # the whole time; widening it made 46 figures visible at once, all of them
+    # \mathbf. Asserting zero here would mean either reverting the widening,
+    # which hides a real defect, or attaching each of the 46 to whichever
+    # results key happens to hold a similar float -- inventing provenance,
+    # which is worse than having none and is the exact thing this file exists
+    # to prevent. So the debt is recorded in `BASELINE` and ratcheted.
+    text_only = [t for t in unexplained if t[3] == "textbf"]
+    assert not text_only, (
+        "\\textbf was clean when the sweep widened and must stay clean: "
+        + ", ".join(f"{v} in {c[:40]!r}" for v, c, _w, _m in text_only))
+
+    new_debt = regressions(unexplained)
+    assert not new_debt, (
+        "bolded numbers with nothing behind them, and not in the recorded "
+        "baseline: "
+        + ", ".join(f"{v} in {c[:40]!r}" for v, c, _w, _m in new_debt))
+
+    # The other direction, which is what stops BASELINE becoming a permanent
+    # allow-list: once a figure is watched or exempted it must leave the list,
+    # and this fails until it does.
+    stale = stale_baseline(unexplained)
+    assert not stale, (
+        "these are no longer unexplained and must be deleted from "
+        f"unwatched_claims.BASELINE: {stale}")
+    assert len(BASELINE) <= 46, (
+        f"the baseline is meant to shrink; it holds {len(BASELINE)}")

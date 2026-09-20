@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-eight documents in \path{prereg/}
+no registered threshold anywhere. The forty-nine documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -24,10 +24,11 @@ what the run returned, and where in this paper the verdict appears.
 
 The registrations that returned nulls, refutations, withdrawals and
 non-results are listed on exactly the same footing as the ones that returned
-effects, in the same table, in filename order --- with the four written after
-this appendix was first compiled (P39--P42) appended at the end, in filename
-order among themselves, so that the identifiers already cited in the text keep
-their referents. Twelve of the forty-eight have \emph{no outcome recorded in the
+effects, in the same table, in filename order --- with the eleven written after
+this appendix was first compiled (P39--P49) appended at the end, P39--P42 in
+filename order among themselves and the rest in the order they were
+registered, so that the identifiers already cited in the text keep their
+referents. Twelve of the forty-nine have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -876,11 +877,57 @@ $-0.0733$. The reading rule fires: the paper's ``established and positive''
 sentences are withdrawn and the confirmations join the withdrawn list.
 \path{results/p48_screen.json} &
 \S\ref{sec:p48} \\
+P49 & \path{p49_race_channel.md} \newline
+\emph{Which channel is the revision-3 deficit actually in, and is the
+declaration side big enough to close it?} &
+Written before any candidate game and \textbf{corrected the same day, also
+before any candidate game}, against \path{fish/engine.py} rather than
+against its author's summary of it. The registration argued the deficit was
+a declaration-timing channel the cross-engine programme had never aimed at.
+That is wrong: \texttt{\_apply\_claim} awards a half-suit to the opponents
+whenever any revealed holder is on the other team, so a team that does not
+hold all six cannot take one by declaring, $8.76$ of the nine a game are
+collected outright and named right, and the channel counts \emph{assembly}
+--- the ask channel, where the earlier programme did aim. The correction is
+appended to the document rather than edited over the claim. Two descriptive
+screens, neither of which plays a candidate: \textbf{N0-split}, eight
+$(\gamma_{\text{opp}}, \gamma_{\text{team}})$ cells scored on one belief
+at $300$ self-play games on block \textbf{12,000,000}, with the promotion
+rule --- per-game bound above target \emph{and} $d(\text{wrong})$'s
+interval not wholly above zero --- fixed before the run; and
+\textbf{N0-assembly}, both engines instrumented over $1{,}600$
+\texttt{BRIDGE\_REV}~3 games on block \textbf{12,500,000}. Prediction:
+concentration over tempo, the partner exponent carrying the split
+correction, and that correction \emph{costing} top-1 accuracy. Bar for any
+duelled arm unchanged at $+0.15$ clear of zero in both populations. &
+Both screens return what was predicted except one clause, and the exception
+is recorded: tempo is out (turn acquisitions $+0.093$ $[+0.060, +0.127]$,
+the tenth of a turn being ours) and the gap is wasted hits ($+1.065$
+$[+0.758, +1.372]$ a game, $31.6\%$ of our hits against $25.2\%$ of
+theirs, at kept-hits-per-half-suit of $4.009$ against $4.090$). The split
+joint's under-confidence is the \emph{partner} model --- $(0.35, 1.4)$
+takes the bias from $-0.171$ to $-0.016$ where $(1.4, 0.35)$ reaches only
+$-0.116$ --- and the prediction that the correction costs accuracy is
+\textbf{falsified}: the partner exponent is free, while the opponent
+exponent costs $-0.035$ $[-0.045, -0.025]$. The promotion rule selects
+$(0.35, 1.4)$ uniquely, dropping the two larger cells for buying
+declarations with misdeclarations. &
+\textbf{THE DEFICIT IS A COLLECTION DEFICIT, AND THE DECLARATION CHANNEL
+CANNOT CLOSE IT.} The identity on the head-to-head's own $1{,}200$-game
+block, residual zero: margin $-0.5250$ $=$ race $-0.6433$ $+$ ours
+$-0.2017$ $+$ theirs $+0.3200$. Declaring \emph{perfectly} is worth
+$+0.2017$ and still loses by $0.323$, which retires every declaration-side
+candidate without playing one. N1 (the $\gamma_{\text{team}} = 1.4$ duel)
+is licensed as a cheap arm and explicitly not as a route.
+\path{results/margin_channels_rev3.json},
+\path{results/completion_ledger_12500000.json},
+\path{results/split_partner_model_12000000.json} &
+\S\ref{sec:res-rev3channels}, \S\ref{sec:res-assembly} \\
 
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-eight resolved.} Seven returned an effect that
+\noindent\textbf{How the forty-nine resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
@@ -895,7 +942,10 @@ gain to the bridge defect. Four were closed by a screen or by
 proof before the registered duel was paid for, saving roughly $9{,}000$
 duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's D2,
 inside a registration already counted above. One was a set of graded
-predictions rather than a threshold and scored four of five (P25). Twelve have
+predictions rather than a threshold and scored four of five (P25). One (P49)
+returned two descriptive screens and a \emph{correction to its own central
+premise}, made the same day and before any candidate game, with its single
+duelled arm registered and not yet played. Twelve have
 \textbf{no outcome recorded in the registration at all} (P15, P19, P21, P22,
 P30, P31, P37, P38, P39, P40, P41, P42) --- ten of them run and written up
 elsewhere, two of them never run.
@@ -913,7 +963,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-eight --- P20 --- shipped, and it is the
+\noindent Exactly one of the forty-nine --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 

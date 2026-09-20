@@ -97,6 +97,91 @@ def sweep() -> tuple[list, list]:
     return unexplained, exempt
 
 
+#: THE DEBT THIS SWEEP UNCOVERED WHEN IT WAS WIDENED TO \mathbf.
+#:
+#: For its whole life this file swept `\textbf` only and printed "every
+#: bolded number in the paper is either pinned or exempt". The paper has 226
+#: `\textbf` numbers and 153 `\mathbf` ones -- every bolded figure inside
+#: math mode, which is where a table cell that wants emphasis ends up. The
+#: claim was false, and widening the sweep made 46 figures visible at once.
+#:
+#: THIS IS NOT AN ALLOW-LIST AND IT MUST NOT BECOME ONE. It is a baseline
+#: with a ratchet, and the ratchet is enforced in both directions by
+#: `tests4/test_paper_numbers.py`:
+#:
+#:   * nothing outside this set may be unexplained -- so no NEW unguarded
+#:     bolded figure can enter the paper, which is the property the old
+#:     sweep was supposed to give and did not;
+#:   * nothing IN this set may still be here once it is watched or exempted
+#:     -- the test fails on a stale entry, so paying a figure off forces its
+#:     removal and the list can only shrink;
+#:   * `\textbf` is held at zero outright. It was genuinely clean when the
+#:     sweep widened, and that is a property, not a baseline.
+#:
+#: Each entry is (value, macro). Values, not contexts, because the same
+#: figure is quoted in several places and pinning the context would let a
+#: figure move to a new sentence and escape.
+BASELINE = frozenset([
+    ("-0.0640", "mathbf"),
+    ("-0.0660", "mathbf"),
+    ("-0.890", "mathbf"),
+    ("-1.00", "mathbf"),
+    ("-1.015", "mathbf"),
+    ("-2.0000", "mathbf"),
+    ("-3.5", "mathbf"),
+    ("-7.355", "mathbf"),
+    ("0.000", "mathbf"),
+    ("0.0000", "mathbf"),
+    ("0.0422", "mathbf"),
+    ("0.045", "mathbf"),
+    ("0.071", "mathbf"),
+    ("0.0711", "mathbf"),
+    ("0.1040", "mathbf"),
+    ("0.1108", "mathbf"),
+    ("0.111", "mathbf"),
+    ("0.118", "mathbf"),
+    ("0.139", "mathbf"),
+    ("0.1729", "mathbf"),
+    ("0.184", "mathbf"),
+    ("0.1997", "mathbf"),
+    ("0.2400", "mathbf"),
+    ("0.241", "mathbf"),
+    ("0.307", "mathbf"),
+    ("0.386", "mathbf"),
+    ("0.415", "mathbf"),
+    ("0.490", "mathbf"),
+    ("0.508", "mathbf"),
+    ("0.570", "mathbf"),
+    ("0.676", "mathbf"),
+    ("0.796", "mathbf"),
+    ("0.8442", "mathbf"),
+    ("000", "mathbf"),
+    ("1.327", "mathbf"),
+    ("1.92", "mathbf"),
+    ("1.920", "mathbf"),
+    ("10", "mathbf"),
+    ("3.18", "mathbf"),
+    ("4.688", "mathbf"),
+    ("43", "mathbf"),
+    ("601", "mathbf"),
+    ("657", "mathbf"),
+    ("900", "mathbf"),
+    ("95.3%", "mathbf"),
+    ("99.96%", "mathbf"),
+])
+
+
+def regressions(unexplained):
+    """Unexplained figures that are NOT in the recorded baseline."""
+    return [t for t in unexplained if (t[0], t[3]) not in BASELINE]
+
+
+def stale_baseline(unexplained):
+    """Baseline entries that are no longer unexplained, so must be removed."""
+    live = {(v, m) for v, _c, _w, m in unexplained}
+    return sorted(BASELINE - live)
+
+
 def main(argv: list[str]) -> int:
     unexplained, exempt = sweep()
     print("which of the paper's bolded numbers does nothing check?\n")
