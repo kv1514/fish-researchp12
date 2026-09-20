@@ -7164,6 +7164,84 @@ what makes the gap a target rather than a tradeoff, and why no arm of this
 project has yet been aimed at it: every candidate the cross-engine programme
 drew was scored on hit rate, and hit rate is the one axis on which the two
 engines nearly agree.
+
+\paragraph{Where each engine is stronger, at a matched deal.}
+\label{sec:res-conversion}
+The wasted-hit gap says which side of the ledger a card lands on and nothing
+about why. Three mechanisms fit it and they want opposite fixes: we invest in
+half-suits we were never going to win (\textsc{selection}); we invest in the
+same ones and lose them (\textsc{conversion}); or we invest thinly in many
+where they invest heavily in few (\textsc{spread}). Separating them needs a
+covariate that is \emph{exogenous} --- fixed before either policy acts --- and
+exactly one is available: how the six cards of a half-suit were \emph{dealt}.
+
+It is the right covariate for a second reason that makes the comparison exact.
+Dealt splits are complementary, so ``we were dealt $k$'' and ``they were dealt
+$6-k$'' name the \emph{same half-suits}, scored from opposite sides. One set,
+scored twice, no subset to choose. Over $800$ games and $7{,}200$ half-suits
+at \texttt{BRIDGE\_REV}~3 (\path{scripts4/contest_ledger.py}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+dealt to us & half-suits & we convert & they convert & edge \\
+\midrule
+$6$--$0$ & $99$   & $0.949$ & $0.859$ & $\mathbf{+0.091}$ \\
+$5$--$1$ & $607$  & $0.845$ & $0.807$ & $\mathbf{+0.038}$ \\
+$4$--$2$ & $1{,}717$ & $0.619$ & $0.694$ & $-0.075$ \\
+$3$--$3$ & $2{,}354$ & $0.441$ & $0.547$ & $\mathbf{-0.106}$ \\
+$2$--$4$ & $1{,}717$ & $0.292$ & $0.360$ & $-0.068$ \\
+$1$--$5$ & $607$  & $0.150$ & $0.107$ & $\mathbf{+0.043}$ \\
+$0$--$6$ & $99$   & $0.000$ & $0.000$ & $+0.000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{The two engines are stronger in different places, and the
+shape is not the one the scoreboard suggests.} KRAKEN converts a dealt
+advantage \emph{better} than the external engine does --- given all six it
+takes $94.9\%$ against their $85.9\%$, given five of six $84.5\%$ against
+$80.7\%$ --- and it is also better at the long shot, stealing a half-suit it
+was dealt one card of $15.0\%$ of the time against their $10.7\%$. Those are
+the two ends of the distribution and we are ahead at both.
+
+We lose the middle. At an even $3$--$3$ deal, where neither side starts with a
+claim and the half-suit is decided entirely by play, they take it $54.7\%$ of
+the time and we take it $44.1\%$. The same sign holds at $4$--$2$ and
+$2$--$4$. \textbf{The contested band is $80.4\%$ of all half-suits}, so a gap
+of a tenth there is not a detail of the distribution; it is the match.
+
+\paragraph{What that is worth, as arithmetic.} Holding each deal's population
+fixed and moving only our conversion rate to theirs gives $+0.5450$ half-suits
+a game, of which the contested middle is $+0.6175$ and the extremes give back
+$-0.0725$ because we lead there. Through \S\ref{sec:res-rev3channels}'s
+identity that is a margin swing of about $\mathbf{+1.09}$ sets --- larger than
+the $0.525$ deficit it would have to close.
+
+That number is an accounting on finished games and it is not a margin this
+engine has achieved, a counterfactual, or a plan. A half-suit that changes
+hands changes every ply after it, and this paper has already withdrawn one
+headline for reading an accounting as a strength claim. What it establishes is
+narrower and, unlike a ship-bar result, does not depend on an arm existing:
+the deficit is not spread across the game, it is concentrated in one
+identifiable population, and that population is large enough that closing the
+gap in it would be sufficient.
+
+\paragraph{A measurement this section deleted, and why it is worth recording.}
+The first version of this instrument conditioned the win rate on \emph{hits
+invested}, as though investment were a bet placed on a half-suit and the win
+rate were its return. It is not a bet. Winning a $3$--$3$ half-suit requires
+taking the opponent's three cards, so three successful asks into it are a
+\emph{consequence} of winning it rather than a cause. On the full block the
+cells were degenerate --- a hit difference of $-3$ gave a $0.000/0.996$ split
+and $+3$ gave $0.990/0.000$, with nine half-suits of $7{,}200$ anywhere
+between --- but a $40$-game pilot of the same table showed a smooth,
+plausible pattern of about $-0.13$ across investment levels, and that pattern
+would have been reported as a finding. A covariate downstream of the outcome
+cannot separate selection from conversion, and a table built on one looks
+exactly like a table that can.
+
 \paragraph{What the other $39\%$ is made of --- the rev-2 account, withdrawn.}
 
 \begin{center}

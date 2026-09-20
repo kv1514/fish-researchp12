@@ -1702,6 +1702,26 @@ WATCH = [
     ("dialect_declaration_probe.json", "comparison_our_arbiter.their_wrong_per_game",
      "{:.4f}", "their wrong declarations in our arbiter, rev 2",
      "\\emph{our arbiter, our dialect}"),
+    # The conversion profile (\S sec:res-conversion). Every bolded cell of
+    # that table, because the claim it supports -- that the two engines are
+    # stronger in different places -- lives entirely in the signs.
+    ("contest_ledger_12700000.json", "matched_by_deal.6-0.edge", "{:+.3f}",
+     "our edge given all six dealt", "$6$--$0$ & $99$"),
+    ("contest_ledger_12700000.json", "matched_by_deal.5-1.edge", "{:+.3f}",
+     "our edge given five of six", "$5$--$1$ & $607$"),
+    ("contest_ledger_12700000.json", "matched_by_deal.3-3.edge", "{:+.3f}",
+     "our edge at an even deal", "$3$--$3$ & $2{,}354$"),
+    ("contest_ledger_12700000.json", "matched_by_deal.1-5.edge", "{:+.3f}",
+     "our edge given one of six", "$1$--$5$ & $607$"),
+    ("contest_ledger_12700000.json", "cost_per_game", "{:+.4f}",
+     "half-suits a game at their conversion rate", "fixed and moving only"),
+    ("contest_ledger_12700000.json", "cost_middle", "{:+.4f}",
+     "the contested middle's share of it", "of which the contested middle"),
+    ("contest_ledger_12700000.json", "margin_swing", "{:+.2f}",
+     "margin swing at their conversion rate", "that is a margin swing of"),
+    ("contest_ledger_12700000.json", "middle_share", "{:.1%}",
+     "the contested band's share of all half-suits",
+     "The contested band is"),
 ]
 
 
