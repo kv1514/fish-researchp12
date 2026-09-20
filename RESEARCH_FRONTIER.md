@@ -4940,3 +4940,14 @@ retraction left owing — the paper asked the question, withdrew the rev-2
 answer in full, and never computed the corrected one. `sec:res-assembly`
 replaces the rev-2 acquisition table. All eleven new figures are watched from
 the day they entered the manuscript. 146 pages, 0 undefined references.
+
+**Correction to the bullet above, made before the section was pushed.** The
+first draft of the withdrawal box said `scripts4/acquisition.py` "builds the
+opponent with the rev-2 transport". That is false of the script as it stands:
+`fish4/dylan_v07.py` carries `BRIDGE_REV = 3` and sends `obs.initial_hand()`,
+so the script would produce revision-3 numbers if run today. What is true is
+about the **file**: `results/acquisition_v07.json` was committed 2026-08-28,
+the dealt-hand repair landed 2026-09-08, and the file carries that era's
+`margin: 2.3375`. It has never been re-run, and because the script records no
+`BRIDGE_REV` in its output there was nothing in the file for the retraction
+sweep to key on. The box in the paper says that instead.
