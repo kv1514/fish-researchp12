@@ -1682,6 +1682,11 @@ WATCH = [
      "our wasted share of hits", "wasted share of hits"),
     ("completion_ledger_12500000.json", "sides.dy.wasted_share", "{:.4f}",
      "their wasted share of hits", "wasted share of hits"),
+    # The pure half-suit-value objective, quoted in sec:res-assembly as the
+    # reason its instinct is not a plan. The paper had block 0's -7.191; the
+    # pooled estimate over both blocks is what the file holds.
+    ("value_baseline_verdict.json", "estimate", "{:.3f}",
+     "pure value objective vs champion", "and it lost by"),
 ]
 
 

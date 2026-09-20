@@ -4826,3 +4826,117 @@ rescored from its own rows with no game replayed, a test added.
 
 Seventeen duels of sixteen arms across six registrations. `V06_DEPLOYED`
 unchanged; KRAKEN v1.1 still loses to SESTINA v1.0 by −0.5250.
+
+## OUTCOME 2026-09-20: P49 — the deficit is a collection deficit, and it is wasted hits
+
+`prereg/p49_race_channel.md`, written before any candidate game, corrected the
+same day against `fish/engine.py` before any candidate game was played, and
+its two descriptive screens now on disk.
+
+### The claim this answers, and what was actually wrong with it
+
+The record after `prereg/kraken_v12_vs_sestina.md` reads: *"the residual half
+set is not reachable by any single knob this engine exposes at the power this
+project can buy; the next attempt would have to change what the engine
+computes."* That is honestly stated, narrower than "impossible", and **its aim
+was right**. P49's registration argued otherwise and was wrong; the correction
+is in that file, above these outcomes, rather than edited over the claim.
+
+What the earlier programme did not have was the corrected decomposition.
+Nobody had put the rev-3 counters through the margin identity, because
+`margin_identity.py` could read neither the bridge-run shape nor the
+`mega_match` shape. It reads both now, with a non-vacuous check in each
+(per-game integrality in the first, `d_us + d_them = 9` from four
+independently measured numbers in the second), and both pass.
+
+### Where the margin lives, at revision 3
+
+`results/mega_match.json`, 1,200 games, residual exactly zero:
+
+    margin  -0.5250  =  RACE -0.6433  +  OURS -0.2017  +  THEIRS +0.3200
+
+The two accuracy channels together are **+0.118**. The 600-game persistent
+bridge study agrees in shape at a larger margin: −0.8733 = −0.8000 − 0.2767 +
+0.2033.
+
+**The bound that retires a family of candidates without playing one.**
+Setting `W_us = 0` — declaring perfectly, never wrong again, for the rest of
+the project — moves the margin to −0.3234. **It is worth +0.2017 and it still
+loses.** No improvement to declaration accuracy closes a 0.525 deficit,
+because the entire channel is worth 0.202.
+
+### RACE is assembly, and assembly is the ask channel
+
+`_apply_claim` awards a half-suit to the declaring team only on an exact match
+and to the **opponents** whenever any revealed holder is on the other team, so
+a team that does not hold all six cannot take one by declaring it. 8.76 of the
+nine a game are collected outright and named right; only 0.24 declarations
+involve any error at all. A half-suit our team holds will be declared by us
+whether the gate opens early or late. RACE counts assembly.
+
+### It is not tempo. It is wasted hits.
+
+`results/completion_ledger_12500000.json`, 1,600 games at `BRIDGE_REV 3`:
+
+| per game | KRAKEN | SESTINA | ours − theirs |
+|---|---:|---:|---|
+| turn acquisitions | 23.184 | 23.091 | **+0.093 [+0.060, +0.127]** |
+| hit rate | 0.5157 | 0.5365 | −0.0218 [−0.0260, −0.0175] |
+| assembled and named right | 4.078 | 4.730 | **−0.6525 [−0.786, −0.519]** |
+| hits **wasted** | 7.568 | 6.503 | **+1.065 [+0.758, +1.372]** |
+| wasted share of hits | 0.3164 | 0.2516 | +0.0715 [+0.0550, +0.0881] |
+| plies sitting on a set | 68.922 | 36.282 | +32.640 |
+
+Turn acquisitions are level to a tenth of a turn in 23, and the tenth is ours.
+Kept hits per half-suit assembled are **4.009 for us and 4.090 for them** —
+indistinguishable. The entire gap is which side of the ledger a hit lands on:
+68.4% of our hits are kept against 74.8% of theirs.
+
+Arithmetic, and labelled as such: moving only our kept share to theirs gives
+4.465 half-suits a game, which through the identity is **+0.205 instead of
+−0.525**. The wasted-hit gap is larger than the deficit.
+
+**Two standing results keep this from being a plan.** A pure half-suit-value
+objective lost by −7.195 [−7.356, −7.034] over 2,000 pairs, picking asks at
+success probability 0.457 against the heuristic's 0.551. The additive
+concentration term was confirmed negative at 4,000 games. Trading hit rate for
+concentration is a measured disaster, twice over. What makes the gap a target
+rather than a tradeoff is that **SESTINA does not trade**: higher hit rate
+*and* lower wasted share. And the reason no arm was ever aimed at it is in the
+same table — every candidate was scored on hit rate, the one axis on which the
+two engines nearly agree.
+
+### The split joint, finally attributed
+
+`results/split_partner_model_12000000.json`, 300 games, 16,438 frozen pairs.
+The under-confidence is the **partner** model: `(0.35, 1.4)` takes the bias
+from −0.171 to −0.016 where `(1.4, 0.35)` reaches only −0.116. The registered
+prediction that the correction costs accuracy is **falsified** — the partner
+exponent is free or slightly positive (+0.006 [+0.002, +0.010] at 0.7), while
+raising the *opponent* exponent costs −0.035 [−0.045, −0.025] at 1.4. The two
+sides of the table want opposite things and `gamma_team=None` makes them share
+a number. P46 swept `gamma_team` to 0.7; the fix region is 1.4.
+
+It is licensed as a cheap arm and not as a route: its channel is OURS, bounded
+at +0.2017, and the mechanism by which earlier declaration could pay was
+dueled as C2 `avoid_doomed_asks` at −0.0933 [−0.196, +0.010].
+
+### Two defects in this project's own machinery, found on the way
+
+* `scripts4/unwatched_claims.py` printed *"every bolded number in the paper is
+  either pinned or exempt"* while sweeping `\textbf` only. The paper has 226
+  `\textbf` numbers and **153 `\mathbf`** ones. Fixed; 46 bolded figures have
+  nothing behind them, and they are left standing rather than mass-exempted.
+* `scripts4/acquisition.py` builds the opponent with the rev-2 transport and
+  records no `BRIDGE_REV`. Its table — assembly 5.008 against 3.416, hit rate
+  51.5% against 47.8% — **inverts at rev 3**. It sat 240 lines downstream of a
+  withdrawal box that plausibly covers it, with no marker of its own, contrary
+  to this paper's own practice. Struck in place, and replaced.
+
+### The paper
+
+Two new sections. `sec:res-rev3channels` supplies the decomposition the
+retraction left owing — the paper asked the question, withdrew the rev-2
+answer in full, and never computed the corrected one. `sec:res-assembly`
+replaces the rev-2 acquisition table. All eleven new figures are watched from
+the day they entered the manuscript. 146 pages, 0 undefined references.

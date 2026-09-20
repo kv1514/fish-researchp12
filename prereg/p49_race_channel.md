@@ -374,3 +374,115 @@ SESTINA and none may be reported as one. N0's scoring run
 the split joint is under-confident, which is the OURS channel's mechanism — and
 its per-game column is now to be read against **+0.277 of available headroom**,
 not against the +0.5412 target, which no declaration-side arm can address.
+
+---
+
+# OUTCOME, recorded against the registration and its correction
+
+## N0-split — the partner exponent. Registered prediction 1 holds, 2 falsified.
+
+`results/split_partner_model_12000000.json`, 300 self-play games, **16,438**
+frozen (decision, half-suit) pairs over 299 games, cluster bootstrap over
+games, paired within the resampled game.
+
+| arm | cond | names it right | bias | d(right) vs deployed |
+|---|---:|---:|---:|---|
+| deployed .35/.35 | 0.544 | 0.715 | −0.171 | — |
+| team 0.7 | 0.617 | 0.721 | −0.104 | +0.006 [+0.002, +0.010] |
+| team 1.0 | 0.664 | 0.720 | −0.057 | +0.006 [+0.001, +0.010] |
+| **team 1.4** | 0.704 | 0.720 | **−0.016** | +0.005 [−0.000, +0.010] |
+| team 2.0 | 0.742 | 0.720 | +0.022 | +0.005 [−0.001, +0.011] |
+| opp 0.7 | 0.548 | 0.706 | −0.158 | −0.008 [−0.013, −0.004] |
+| opp 1.4 | 0.564 | 0.680 | −0.116 | **−0.035 [−0.045, −0.025]** |
+| both 1.4 | 0.706 | 0.707 | −0.001 | −0.007 [−0.014, +0.000] |
+
+**Prediction 1 holds decisively.** `(0.35, 1.4)` takes the bias from −0.171 to
+−0.016; `(1.4, 0.35)` only reaches −0.116. The correction belongs to the
+**partner** model. `split_why.py`'s finding is now attributed, and its
+inability to attribute it was the `gamma_team=None` fallback, exactly as this
+document said before the run.
+
+**Prediction 2 is falsified, and in the useful direction.** It said the
+correction costs top-1 accuracy. It does not: the partner exponent *gains* a
+little (+0.006 [+0.002, +0.010] at 0.7) and is free at 1.4. What costs
+accuracy is raising the **opponent** exponent — −0.035 [−0.045, −0.025] at
+1.4 — which is the knob P46 raised and P47 dueled to a null. The two sides of
+the table want opposite things and the shipped fallback forces them to share
+a number.
+
+At the gate the deployed arm clears 0.97 on **0.000** of these rows: on a
+frozen half-suit whose partner cards are not yet publicly located, the
+shipped engine never declares from inference and waits for deduction. `team
+1.4` clears on 0.082 at 99.8% precision, `team 2.0` on 0.191 at 99.0%.
+
+**What this does and does not license.** It is a scoring run, it acted on
+nothing, and by the correction above its channel is `OURS`, whose entire
+headroom is **+0.2017**. The per-game conversion column reads `team 1.4` at
++0.846 net, but that number is an upper bound on *declarations*, and on a
+half-suit our team already holds the declaration was coming anyway — so it
+buys timing, not half-suits. The one mechanism by which timing could pay,
+freeing us from the doomed asks a held half-suit generates, was dueled as C2
+`avoid_doomed_asks` at −0.0933 [−0.196, +0.010].
+
+**Verdict: N1 is licensed as a cheap arm and not as a route.** The belief
+demonstrably improves in a region P46's grid never visited, the improvement
+is free in accuracy, and that is worth 600 paired games. It is not worth
+being described as a way to beat SESTINA, and this document will not describe
+it that way.
+
+## N0-assembly — the replacement diagnostic. Prediction holds: concentration.
+
+`results/completion_ledger_12500000.json`, 1,600 games at `BRIDGE_REV 3`
+through the persistent bridge, zero fallbacks, zero unfinished, paired within
+the deal.
+
+| per game | KRAKEN | SESTINA | ours − theirs |
+|---|---:|---:|---|
+| turn acquisitions | 23.184 | 23.091 | **+0.093 [+0.060, +0.127]** |
+| asks | 46.374 | 48.184 | −1.810 [−2.206, −1.414] |
+| asks that hit | 23.914 | 25.849 | −1.936 [−2.337, −1.535] |
+| hit rate | 0.5157 | 0.5365 | −0.0218 [−0.0260, −0.0175] |
+| assembled and named right | 4.078 | 4.730 | **−0.6525 [−0.786, −0.519]** |
+| hits kept | 16.346 | 19.347 | −3.001 [−3.656, −2.345] |
+| hits **wasted** | 7.568 | 6.503 | **+1.065 [+0.758, +1.372]** |
+| wasted share of hits | 0.3164 | 0.2516 | +0.0715 [+0.0550, +0.0881] |
+| plies sitting on a set | 68.922 | 36.282 | +32.640 [+29.8, +35.4] |
+
+**Tempo is out.** Turn acquisitions are level to a tenth of a turn in 23, and
+the tenth is ours. We take marginally more turns and assemble two thirds of a
+half-suit a game fewer.
+
+**Conversion decomposes further, and the second half is the finding.** Kept
+hits per half-suit assembled: **4.009 for us, 4.090 for them.** The two
+engines are indistinguishable in what they do with a card once it is on the
+winning side. The entire gap is which side a hit lands on — 68.4% of our hits
+are kept against 74.8% of theirs.
+
+Arithmetic, labelled as arithmetic: holding our hit count and our
+kept-hits-per-half-suit fixed and moving only our kept share to theirs gives
+4.465 half-suits a game, which through the identity is **+0.205 instead of
+−0.525**. The wasted-hit gap is larger than the deficit.
+
+**The two warnings that keep this from being a plan.** A pure half-suit-value
+objective was built and lost by **−7.195 [−7.356, −7.034]** over 2,000 pairs,
+picking asks at success probability 0.457 against the heuristic's 0.551. The
+additive concentration term was confirmed negative at 4,000 games. Trading
+hit rate for concentration is a measured disaster, twice.
+
+What makes the gap a target rather than a tradeoff is that **SESTINA does not
+trade**: it has the higher hit rate *and* the lower wasted share. There is no
+frontier here being moved along; there is a point off the frontier. And the
+reason no arm has been aimed at it is visible in the same table — every
+candidate the cross-engine programme drew was scored on hit rate, and hit
+rate is the one axis on which the two engines nearly agree.
+
+## What the programme is now
+
+N1 runs as a cheap arm, bounded and labelled. N2 through N5 stand registered
+and demoted. The open question this outcome creates, and which nothing in the
+record answers, is **why 31.6% of our hits land in half-suits we never
+finish** — which is a question about ask selection, not about the objective's
+weights, and it is not answered by any arm scored on `p`. That is the next
+registration, and it is not written here, because writing it in the same
+document as the measurement that motivated it is how a measurement becomes
+a hypothesis without anyone deciding to let it.
