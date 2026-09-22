@@ -5358,3 +5358,51 @@ dual-population bar; the general form — condition the posterior on the exact
 policy likelihood of *whichever* opponent is at the table, ours included — is
 the only version that could, and it is expensive enough that the ceiling has
 to be priced before a line of it is written.
+
+## OUTCOME 2026-09-22: the opponent ceiling more than triples at rev 3, and the ratio the corpus chased collapses
+
+`results/ceiling_rev3.json`, 500 games on block 13,500,000 with its own
+journal so no rev-2 game could resume into it. Honest baseline **−0.66**,
+against the rev-2 study's **+2.3033**.
+
+| told the true location of | pinned/game | rev 2 | rev 3 |
+|---|---:|---:|---:|
+| its **teammates'** cards | 40.5 | +3.4100 | **+5.2080** [+4.909, +5.507] |
+| its **opponents'** cards | 40.9 | +1.3067 | **+4.5960** [+4.270, +4.922] |
+| everything | 60.2 | +6.6067 | **+9.5560** [+9.311, +9.801] |
+
+**The opponent ceiling more than triples, and the teammate/opponent ratio
+falls from 2.61 to 1.13.** The mechanism is not mysterious: this is a
+comparison *against an opponent*, so the opponent's competence is one of its
+inputs. Knowing where a card sits is worth less against a player who is
+already making errors for you, and at rev 2 their posterior was scrambled by
+our own bridge.
+
+**What that overturns.** The corpus has repeatedly read the 2.6× gap as a
+qualitative split — the sentence in `appendix_prereg.tex` puts it plainly,
+*"which is why the teammate ceiling, not the opponent one, is the number the
+rest of the paper chases."* At rev 3 the two channels are worth nearly the
+same. The direction survives; the factor that made it a finding does not, and
+the research priority it justified was an inference from a handicapped
+opponent.
+
+**The sub-additivity claim reverses too.** At rev 2 the partial arms summed to
++4.7167 against +6.6067 for omniscience: parts < whole, read as
+complementarity. At rev 3 they sum to +9.8040 against +9.5560: parts >
+whole, which is the ordinary overlap of two information sources.
+
+**Why this matters for the inversion pathway.** The gate a transcript inverter
+has to clear is +0.525 of deficit plus the +0.15 bar, against a ceiling that
+is now **+4.60** rather than +1.31 — roughly **15%** of what perfect opponent
+knowledge buys, not the ~52% the rev-2 figure implied. The pathway is not
+closed by arithmetic. It remains bounded by a cheat and is not a strength
+claim, and the general form — conditioning on the exact policy likelihood of
+whichever opponent is at the table — is the only version that could clear a
+dual-population bar.
+
+**Third rev-2 survivor, and the one that had sat in the abstract.** After the
+acquisition table and the allocation share. All three were `\mathbf` figures,
+invisible to the bolded-number sweep for the life of the paper; the sweep now
+covers both macros and all six new ceiling figures are watched from the day
+they enter, the derived ratio among them, stored in the results file rather
+than divided out in LaTeX.
