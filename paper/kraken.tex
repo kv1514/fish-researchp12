@@ -202,8 +202,11 @@ Three results follow. The residual errors are not failures to \emph{find}
 cards: $\mathbf{95.9\%}$ are \emph{allocation} errors, where our team held all
 six of a half-suit and split them wrongly. Handing a seat the true deal one
 side at a time --- a ceiling obtained by cheating, never a strength figure ---
-prices teammates' cards at $+3.41$ against opponents' $+1.31$, and we had
-predicted the reverse. Exact best responses over information sets measure the
+prices teammates' cards at $+5.21$ against opponents' $+4.60$ through the
+repaired bridge, and we had predicted the reverse. The earlier figures,
+$+3.41$ against $+1.31$, were taken against the handicapped opponent and made
+the two channels look $2.6$ times apart where they are $1.13$
+(\S\ref{sec:res-ceiling-rev3}). Exact best responses over information sets measure the
 deployed policy's endgame exploitability at $+0.4405$ over $305$ positions with
 one half-suit live, against a deterministic realisation of a policy that
 mixes. Under the corrected misdeclaration rule (the engine scored it wrongly
@@ -3305,6 +3308,49 @@ that cell could not have come out any other way and confirms nothing. And the
 arms are sub-additive, $+4.7167$ against $+6.6067$ for omniscience, where the
 registration braced for the opposite: knowing where a card is \emph{not} pays
 only if you can also act on it.
+
+\paragraph{Re-measured through the repaired bridge, the ratio nearly vanishes.}
+\label{sec:res-ceiling-rev3}
+Every figure above is \texttt{BRIDGE\_REV}~2: \path{results/ceiling_split.json}
+records it, and its honest baseline is $+2.3033$, the withdrawn regime. The
+study is a \emph{comparison against an opponent}, so the opponent's competence
+is one of its inputs --- knowing where a card sits is worth less against a
+player already making errors for you. Re-run unchanged on block
+$13{,}500{,}000$ with its own journal, $500$ games, honest baseline $-0.66$
+(\path{results/ceiling_rev3.json}):
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+told the true location of & pinned/game & ceiling, rev~2 & ceiling, rev~3 \\
+\midrule
+its \textbf{teammates'} cards & $40.5$ & $+3.4100$ & $\mathbf{+5.2080}$ $[+4.9090, +5.5070]$ \\
+its \textbf{opponents'} cards & $40.9$ & $+1.3067$ & $\mathbf{+4.5960}$ $[+4.2701, +4.9219]$ \\
+everything & $60.2$ & $+6.6067$ & $\mathbf{+9.5560}$ $[+9.3108, +9.8012]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \textbf{The opponent ceiling more than triples, and the ratio the
+paragraph above turns on falls from $2.6$ to $\mathbf{1.13}$.} The two
+channels are worth nearly the same. The \emph{direction} survives --- teammates
+still price higher --- but the factor that made it a qualitative finding does
+not, and the sentence this corpus has repeated from it, that the teammate
+ceiling and not the opponent one is the number the rest of the paper should
+chase, was an inference from a handicapped opponent.
+
+The sub-additivity claim reverses with it. At revision~2 the partial arms summed
+to $+4.7167$ against $+6.6067$ for omniscience, so the parts bought less than
+the whole. At revision~3 they sum to $+9.8040$ against $+9.5560$: the parts now
+buy slightly \emph{more} than the whole, which is the ordinary overlap of two
+information sources and not the complementarity the earlier reading found.
+
+These remain ceilings obtained by handing a seat the true deal. They are bounds
+on what better inference could buy, they are not strength figures, and they may
+never appear in a strength ladder. What the re-measurement changes is which
+bound is worth chasing: against an opponent who plays well, knowing the
+opponents' cards is worth $+4.60$ a game, and the deficit to close is $0.525$.
 
 % =====================================================================
 \section{What did not work, what search buys, and what a learner recovers}

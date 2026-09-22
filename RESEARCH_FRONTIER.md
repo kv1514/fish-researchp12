@@ -5292,3 +5292,117 @@ and **raises** if `--seed` disagrees with them, so a file cannot contradict its
 own rows. The reporter also skips the shape table on blocks written before
 those columns existed, with a line saying so, rather than crashing on its own
 older files.
+
+## READING 2026-09-22: their paper names the attack, ran it against the wrong policy, and says so
+
+`/home/user/dylann4500/fishbot/paper/sections_v07/08-threat-model.tex` and
+`11-results.tex`. Their v0.7 paper carries a **threat model**, written before
+any v0.7 measurement, and the adversary it defines is the one this project
+has an unusually good position to build.
+
+### What their threat model says
+
+* **The exploitable property is named by them.** Their team is *three
+  identical published deterministic agents*, so its coordination is **common
+  knowledge** — which, they point out, inverts the standing assumption in the
+  team-correlation literature that the correlation device is private. The
+  adversary class built for that property is a **transcript inverter**: read
+  the target's own deterministic policy and reconstruct the deal posterior
+  from the public transcript.
+* **The adversary is white-box**: given the source, the parameter vector and
+  unlimited offline access; denied the deal, the seed, any hand and the
+  confidence field. We hold every permitted item.
+* **Their standing principle, stated twice**: *"a search that fails to find an
+  exploit is evidence about the search, not a property of the target."* They
+  apply it to correct their own v0.4 record, which had reported a null as a
+  demonstration of robustness.
+
+### What happened when they ran it on themselves
+
+Their `Zeight` class — the inverter — **lost**, replicated. And they attach
+two limits to that cell themselves:
+
+* its **white-box base derives from the v0.6 agent** and reads only that
+  policy's coordinates, while the target is v0.7 and the search extends over
+  more; a large share of its fitted coordinates are therefore **inert**;
+* **"the budget is small."**
+
+Their own summary: *"evidence that this inverter, at this budget, does not
+exploit FISH-7; it is not evidence that no white-box attack can."*
+
+**So the strongest adversary class against them was aimed at the previous
+version of their own policy, and they say so in print.** We hold the v0.7
+source, the frozen 55-parameter spec, and a working bridge that runs the
+actual binary — which is the configuration their inverter did not have.
+
+### The gate this has to clear first, and it is not yet known
+
+Any opponent-inference improvement, a perfect inverter included, is bounded
+by what perfect knowledge of the *opponents'* cards is worth. That is
+`results/ceiling_split.json`'s `O_opp` arm, **+1.3067 [+1.007, +1.606]** —
+and it carries **`bridge_rev: 2`** with `margin_A: 2.3033`. It is a
+retracted-regime figure, and **the abstract quotes it**, beside the +3.41
+teammate ceiling, in the sentence "prices teammates' cards at +3.41 against
+opponents' +1.31, and we had predicted the reverse".
+
+That is the third rev-2 survivor this line has turned up, after the
+acquisition table and the abstract's allocation share, and it is the one that
+matters most here: an inverter would have to capture roughly
+**0.525 + 0.15 = 0.675 sets** of a ceiling whose rev-3 value nobody has
+measured. Re-measured now on block 13,500,000 with its own journal, so no
+rev-2 game can resume into it.
+
+**Nothing is registered off this reading yet.** An exact inverter of one
+named opponent is opponent-specific by construction and cannot clear the
+dual-population bar; the general form — condition the posterior on the exact
+policy likelihood of *whichever* opponent is at the table, ours included — is
+the only version that could, and it is expensive enough that the ceiling has
+to be priced before a line of it is written.
+
+## OUTCOME 2026-09-22: the opponent ceiling more than triples at rev 3, and the ratio the corpus chased collapses
+
+`results/ceiling_rev3.json`, 500 games on block 13,500,000 with its own
+journal so no rev-2 game could resume into it. Honest baseline **−0.66**,
+against the rev-2 study's **+2.3033**.
+
+| told the true location of | pinned/game | rev 2 | rev 3 |
+|---|---:|---:|---:|
+| its **teammates'** cards | 40.5 | +3.4100 | **+5.2080** [+4.909, +5.507] |
+| its **opponents'** cards | 40.9 | +1.3067 | **+4.5960** [+4.270, +4.922] |
+| everything | 60.2 | +6.6067 | **+9.5560** [+9.311, +9.801] |
+
+**The opponent ceiling more than triples, and the teammate/opponent ratio
+falls from 2.61 to 1.13.** The mechanism is not mysterious: this is a
+comparison *against an opponent*, so the opponent's competence is one of its
+inputs. Knowing where a card sits is worth less against a player who is
+already making errors for you, and at rev 2 their posterior was scrambled by
+our own bridge.
+
+**What that overturns.** The corpus has repeatedly read the 2.6× gap as a
+qualitative split — the sentence in `appendix_prereg.tex` puts it plainly,
+*"which is why the teammate ceiling, not the opponent one, is the number the
+rest of the paper chases."* At rev 3 the two channels are worth nearly the
+same. The direction survives; the factor that made it a finding does not, and
+the research priority it justified was an inference from a handicapped
+opponent.
+
+**The sub-additivity claim reverses too.** At rev 2 the partial arms summed to
++4.7167 against +6.6067 for omniscience: parts < whole, read as
+complementarity. At rev 3 they sum to +9.8040 against +9.5560: parts >
+whole, which is the ordinary overlap of two information sources.
+
+**Why this matters for the inversion pathway.** The gate a transcript inverter
+has to clear is +0.525 of deficit plus the +0.15 bar, against a ceiling that
+is now **+4.60** rather than +1.31 — roughly **15%** of what perfect opponent
+knowledge buys, not the ~52% the rev-2 figure implied. The pathway is not
+closed by arithmetic. It remains bounded by a cheat and is not a strength
+claim, and the general form — conditioning on the exact policy likelihood of
+whichever opponent is at the table — is the only version that could clear a
+dual-population bar.
+
+**Third rev-2 survivor, and the one that had sat in the abstract.** After the
+acquisition table and the allocation share. All three were `\mathbf` figures,
+invisible to the bolded-number sweep for the life of the paper; the sweep now
+covers both macros and all six new ceiling figures are watched from the day
+they enter, the derived ratio among them, stored in the results file rather
+than divided out in LaTeX.

@@ -993,9 +993,11 @@ WATCH = [
     # on the two partial arms being told nearly the SAME number of cards, so a
     # drift in either pinned-per-game figure would silently dissolve it.
     ("ceiling_split.json", "arms.T_team.ceiling", "{:+.4f}",
-     "teammate-knowledge ceiling", "its \\textbf{teammates'} cards"),
+     "teammate-knowledge ceiling",
+     "its \\textbf{teammates'} cards & $40.7$"),
     ("ceiling_split.json", "arms.O_opp.ceiling", "{:+.4f}",
-     "opponent-knowledge ceiling", "its \\textbf{opponents'} cards"),
+     "opponent-knowledge ceiling",
+     "its \\textbf{opponents'} cards & $40.4$"),
     ("ceiling_split.json", "arms.T_team.pinned_by_cheat_per_game", "{:.1f}",
      "teammate arm, cards pinned per game", "cards pinned/game"),
     ("ceiling_split.json", "arms.O_opp.pinned_by_cheat_per_game", "{:.1f}",
@@ -1736,6 +1738,18 @@ WATCH = [
     ("contest_ledger_13100000.json",
      "coordination_shape_3_3.3-0-0.edge", "{:+.3f}",
      "our edge at the 3-0-0 seat shape", "$3$--$0$--$0$ & $0.351$"),
+    # The revision-3 information ceilings. The rev-2 pair they replace sat in
+    # the abstract for the life of the paper and nothing checked it, because
+    # both figures were \mathbf and the sweep saw only \textbf.
+    ("ceiling_rev3.json", "arms.T_team.ceiling", "{:+.4f}",
+     "rev-3 teammate ceiling", "its \\textbf{teammates'} cards & $40.5$"),
+    ("ceiling_rev3.json", "arms.O_opp.ceiling", "{:+.4f}",
+     "rev-3 opponent ceiling", "its \\textbf{opponents'} cards & $40.9$"),
+    ("ceiling_rev3.json", "arms.F_all.ceiling", "{:+.4f}",
+     "rev-3 omniscience ceiling", "everything & $60.2$"),
+    ("ceiling_rev3.json", "teammate_over_opponent", "{:.2f}",
+     "rev-3 teammate/opponent ceiling ratio",
+     "times apart where they are"),
 ]
 
 
