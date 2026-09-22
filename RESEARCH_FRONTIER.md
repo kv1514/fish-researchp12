@@ -5063,3 +5063,97 @@ the four the paper quotes, **shipped weight zero**, and only ever dueled
 inside a learned vector that lost as a whole. It has never been dueled alone.
 That is the obvious next registration and it is deliberately not written
 here.
+
+## FINDING 2026-09-22: SESTINA ships ONE of its eighteen extra ask terms, and it is the contest term
+
+Read directly from the released engine rather than inferred from play:
+`/home/user/dylann4500/fishbot/engine/src/v07_responder.hpp` and the frozen
+spec our bridge sends (`external_v07/v07_spec.txt`). Nothing here is a
+measurement of play; it is what their code does, and it reframes three
+standing questions.
+
+### The eighteen terms, and the one that is live
+
+`V07Responder` extends v0.6 with `NR7 = 18` extra ask terms in five families:
+target modelling (`targetKnownStrength`, `targetSetMass`, `oppTeamSetMass`,
+`turnDonationCost`, `targetThreat`), **seat roles** (`roleHit0`, `roleHit1`,
+`roleClaim` — "an agreed division of half-suits among the three seats"),
+within-match tally modelling (`targetAskedHere`, `targetMissedHere`,
+`phaseHit`, `deadDonation` — "the deliberate miss"), **information denial**
+(`oppCertDonate`, `oppCertHit`, `oppNearLock`, `oppDenyLate`), and **tally
+inflation** (`selfTally`, `tallyLie` — "lying to an outcome-blind prior").
+
+The spec carries 55 parameters, so `K7 = 37` and the last eighteen are the
+responder terms. Checked by index rather than by a tail slice, because the
+first attempt sliced `[-18:]` off a string whose split length was ambiguous
+and that is how an off-by-one becomes a finding:
+
+    idx 37..48   all 0.00000
+    idx 49       oppCertDonate   25.00000   <== the only nonzero
+    idx 50..54   all 0.00000
+
+**Exactly one of the eighteen is live, and its weight is 25.0** — against
+other parameters in the same vector running 0.03 to 11.3.
+
+### What it actually computes, and why the name understates it
+
+    g[12] = (1 - p) * oppFrac * (uS / 6)
+
+`p` is P(the target holds the asked card), `oppFrac` the opposing team's
+expected mass of that half-suit over six, `uS` the count of its cards whose
+holder cannot be placed. `blueprintScore` is **maximised** (`if (u > best)`,
+and the sort is `u[a] > u[b]`), so a weight of +25 makes the agent **seek**
+these asks, not avoid them.
+
+So despite the name it is not a denial term in effect. It rewards asking into
+half-suits **the opposing team holds**, at **low hit probability**, while much
+of the half-suit is **unresolved**. It is a contest-seeking term carrying a
+deliberately large coefficient.
+
+### It lines up with the conversion profile, from the other side
+
+`oppFrac` is high exactly where the matched-deal table says they beat us and
+low exactly where we beat them:
+
+| deal | oppFrac | who is ahead |
+|---|---|---|
+| 6-0, 5-1 | low | **us** (+0.091, +0.038) |
+| 4-2, 3-3, 2-4 | high | them (−0.075, −0.106, −0.068) |
+| 1-5 | high for us to attack | **us** (+0.043) |
+
+And our own basis points the other way: `scarce` (weight 0.2, a v0.3 win)
+rewards **team** share. We prefer half-suits we already hold; they prefer
+half-suits the opponents hold; the deal-matched table says they are right in
+the band that is 80.4% of the game.
+
+### Three standing questions this settles or moves
+
+1. **The tally-inflation attack is NOT live.** Their header describes it
+   precisely — one card of a half-suit lets an adversary ask there repeatedly
+   and inflate the target's marginal for the other five by up to 13.5× at one
+   lost turn per repetition — and **we are exposed to exactly that**, because
+   `count_mode = "linear"` weights the raw ask tally and our own docstring
+   calls linear the over-counting reading. But `selfTally` and `tallyLie` are
+   **zero** in the shipped spec, so this opponent does not run the attack.
+   `count_mode` appears in no registration, results file or paper: an untested
+   knob with two hedges already implemented (`sqrt`, `capped`), and **not** an
+   explanation of the deficit. Recorded so it is not later mistaken for one.
+2. **Seat roles are the other unexplored family.** `roleClaim` divides
+   half-suits among the three seats by `(S + offset) % 3 == myRole`. We have
+   no coordination primitive of any kind, and the signalling line that looked
+   like one was closed as a null. Their weight on it is zero, so it is not
+   what beats us — but it is the one mechanism in their basis with no analogue
+   in ours at all.
+3. **The contest term was ported and rejected — at `BRIDGE_REV 2`.** Commit
+   `03877d9`, 4,000 games, five doses, every arm negative and monotone in the
+   wrong direction, against a **baseline margin of +2.732**. That is the
+   retracted regime. `prereg/kraken_v12_vs_sestina.md` states the rule
+   plainly: *a knob rejected for failing the bar against a handicapped
+   opponent has not been tested against this one.* The term survives in the
+   live engine as `fish4/adaptive.py:contest_bonus` behind
+   `w_contest = 0.0`, bit-identical at zero, and it is one flag.
+
+**Nothing here is a strength claim and nothing has shipped.** Reading an
+opponent's source generates hypotheses; the dual-population bar still decides,
+and an arm that beats SESTINA and fails self-play is still opponent-specific
+and still does not ship.
