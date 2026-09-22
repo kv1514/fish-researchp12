@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The forty-nine documents in \path{prereg/}
+no registered threshold anywhere. The fifty documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -24,11 +24,11 @@ what the run returned, and where in this paper the verdict appears.
 
 The registrations that returned nulls, refutations, withdrawals and
 non-results are listed on exactly the same footing as the ones that returned
-effects, in the same table, in filename order --- with the eleven written after
-this appendix was first compiled (P39--P49) appended at the end, P39--P42 in
+effects, in the same table, in filename order --- with the twelve written after
+this appendix was first compiled (P39--P50) appended at the end, P39--P42 in
 filename order among themselves and the rest in the order they were
 registered, so that the identifiers already cited in the text keep their
-referents. Twelve of the forty-nine have \emph{no outcome recorded in the
+referents. Twelve of the fifty have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -923,11 +923,49 @@ is licensed as a cheap arm and explicitly not as a route.
 \path{results/completion_ledger_12500000.json},
 \path{results/split_partner_model_12000000.json} &
 \S\ref{sec:res-rev3channels}, \S\ref{sec:res-assembly} \\
+P50 & \path{p50_contest_rev3.md} \newline
+\emph{Does the contest term, rejected against a handicapped opponent, survive
+a valid baseline --- and does the untested ask-tally mode cost anything?} &
+Written before any P50 game, from a reading of the opponent's released
+source rather than from play. Its spec turns on \textbf{exactly one} of its
+eighteen extra ask terms, \texttt{oppCertDonate} at $25.0$, which computes
+$(1-p)\cdot\mathrm{oppFrac}\cdot(u_S/6)$ --- the same quantity
+\path{fish4/adaptive.py}'s \texttt{contest\_bonus} computes --- and its
+score is maximised, so it \emph{seeks} those asks. A REOPENING under this
+project's own rule that a knob rejected against a handicapped opponent has
+not been tested against this one: the earlier rejection's baseline was
+$+2.732$, the retracted regime. Five arms on block \textbf{12,900,000},
+$300$ deals $\times$ 2 parities each, two families scored separately: C1
+\texttt{w\_contest} at $+0.3$, $+1.0$ and $-0.3$ --- \emph{both signs},
+because the measurement says we lose the contested band and that is equally
+consistent with fighting it better and with banking the extremes --- and C2
+\texttt{count\_mode} at \texttt{sqrt} and \texttt{capped}, a knob shipped
+at \texttt{linear} and appearing in no prior registration, results file or
+line of this paper. Bar: $+0.15$ clear of zero in both populations.
+Withdrawal conditions include one aimed at the harness rather than the term:
+C1a and C1b disagreeing in sign with both intervals clear of zero. &
+None of the five clears, as predicted. C1b's self-play interval lies entirely
+below zero and the registered withdrawal fires. The C1 dose response is
+monotone decreasing in the positive direction --- the same shape the rev-2
+sweep found, now on a valid baseline --- so the reopening was justified and
+the conclusion it reopened held. C2 closes \texttt{count\_mode}: both hedges
+are worse, monotonically in how much tally information they discard, and
+\texttt{capped} is significant in both populations. &
+\textbf{NOTHING CLEARS; A REV-2 REJECTION RE-ESTABLISHED, AND A KNOB CLOSED.}
+$9{,}000$ games, zero fallbacks, zero unfinished. C1a $+0.0967$
+$[-0.161, +0.354]$ / $+0.1400$ $[-0.081, +0.361]$; C1b $-0.1367$ / $-0.3067$
+$[-0.516, -0.097]$, withdrawn; C1c $+0.1000$ / $-0.0200$; C2a $-0.1867$ /
+$-0.1267$; C2b $-0.3700$ $[-0.634, -0.106]$ / $-0.6667$ $[-0.888, -0.445]$.
+C1a is positive in both populations and does not advance: below the bar,
+both intervals covering zero, and a screen that promotes its best near-miss
+is not a screen. The same term is worth a cycle to their engine at $+25$ and
+negative to ours at every dose. \path{results/p50_contest.json} &
+\S\ref{sec:res-conversion} \\
 
 \end{longtable}
 }
 
-\noindent\textbf{How the forty-nine resolved.} Seven returned an effect that
+\noindent\textbf{How the fifty resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
@@ -945,7 +983,9 @@ inside a registration already counted above. One was a set of graded
 predictions rather than a threshold and scored four of five (P25). One (P49)
 returned two descriptive screens and a \emph{correction to its own central
 premise}, made the same day and before any candidate game, with its single
-duelled arm registered and not yet played. Twelve have
+duelled arm registered and not yet played. One (P50) reopened a
+rejection on a rule and had it hold, while closing a second knob that no
+earlier registration had looked at. Twelve have
 \textbf{no outcome recorded in the registration at all} (P15, P19, P21, P22,
 P30, P31, P37, P38, P39, P40, P41, P42) --- ten of them run and written up
 elsewhere, two of them never run.
@@ -963,7 +1003,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the forty-nine --- P20 --- shipped, and it is the
+\noindent Exactly one of the fifty --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
