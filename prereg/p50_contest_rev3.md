@@ -104,3 +104,97 @@ a knob that has never been looked at.
 Paired per deal, intervals clustered on the deal. Every runner pins
 `wrong_distribution_outcome="opponent"` and records the engine digest and
 `BRIDGE_REV`. No arm is inspected before its block completes.
+
+---
+
+# OUTCOME, recorded against the registration above
+
+`results/p50_contest.json`, 300 deals × 2 parities per arm on block
+12,900,000, 9,000 games, **zero fallbacks and zero unfinished on every arm**,
+paired within deal.
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| C1a `w_contest=+0.3` | +0.0967 [−0.161, +0.354] | +0.1400 [−0.081, +0.361] | no |
+| C1b `w_contest=+1.0` | −0.1367 [−0.454, +0.180] | **−0.3067 [−0.516, −0.097]** | **withdrawn** |
+| C1c `w_contest=−0.3` | +0.1000 [−0.145, +0.345] | −0.0200 [−0.232, +0.192] | no |
+| C2a `count_mode=sqrt` | −0.1867 [−0.441, +0.067] | −0.1267 [−0.352, +0.099] | no |
+| C2b `count_mode=capped` | **−0.3700 [−0.634, −0.106]** | **−0.6667 [−0.888, −0.445]** | no |
+
+**The registered expected outcome — that none of the five clears — is
+correct.** No arm reaches +0.15 with its interval clear of zero in either
+population, let alone both. Nothing goes to confirm, nothing ships,
+`V06_DEPLOYED` is unchanged.
+
+## C1b fires the withdrawal condition
+
+*"An arm whose self-play interval lies entirely below zero is dropped
+immediately, whatever it does against SESTINA."* C1b's is
+[−0.516, −0.097]. Dropped by a rule written before the run, and the second
+arm in two registrations to go that way.
+
+## The dose response, and what it does to the rev-2 rejection
+
++0.3 gives +0.0967 / +0.1400 and +1.0 gives −0.1367 / −0.3067: **monotone
+decreasing in the positive direction**, which is the same shape commit
+`03877d9` found at five doses over 4,000 games. That run's *baseline* was
+invalid — +2.732 is the retracted regime — and this one's is not.
+
+So the reopening was justified and the conclusion it reopened **survives its
+instrument**. That is worth separating carefully: the rev-2 numbers are still
+withdrawn and are not evidence for anything; the finding they reported has now
+been re-established on a valid baseline, at a fresh block, against an opponent
+we are behind rather than ahead of. Reopening a rejection on a rule and having
+it hold is the outcome that makes the rule worth having.
+
+## C2 closes `count_mode`, and prices the hedge
+
+`fish4/oppmodel.py` says asks in one half-suit are plainly not independent, so
+the linear form over-counts correlated evidence, and names `sqrt` and `capped`
+as the two obvious hedges. **Both hedges are worse, and the ordering is
+monotone in how much tally information is kept:**
+
+    linear (shipped)   0.0000     0.0000
+    sqrt              -0.1867    -0.1267
+    capped            -0.3700    -0.6667   both intervals clear of zero
+
+So the docstring's reasoning is sound and its conclusion is wrong: whatever
+the linear form over-counts, the tally carries more usable signal than the
+hedges preserve, and throwing it away costs sets — decisively at `capped`,
+which is significant in **both** populations.
+
+**This does not say the exposure is safe.** As registered: SESTINA's own
+header describes the tally-inflation attack our linear count opens us to, and
+`selfTally`/`tallyLie` are zero in its shipped spec, so it does not run it.
+What C2 establishes is the **price of the defence** — about 0.13 to 0.19 sets
+for `sqrt`, 0.37 to 0.67 for `capped`. Against an opponent that did inflate
+tallies, that is the cost side of a trade nobody has had to make yet, and it
+is now measured rather than assumed.
+
+## The hit rate, a fifth time — and for the first time in both directions
+
+| arm | hit-rate change | result |
+|---|---:|---|
+| P44 D1 | ~+1.0 pt | lost about a third of a set |
+| P45 F1 | ~+1.0 pt | lost about a third of a set |
+| P46 G | +1.16 pt | first not to lose |
+| P49 N1 | +1.73 pt | −0.2533 self-play, interval clear of zero |
+| **P50 C1b** | **+2.96 pt** | **−0.3067 self-play, interval clear of zero** |
+| **P50 C1c** | **−0.70 pt** | **+0.1000 vs SESTINA**, the best of the five there |
+
+C1b raises the hit rate by three points and loses a third of a set. C1c
+*lowers* it and is the best arm of the five against SESTINA. **Five arms have
+raised the ask hit rate and none bought a set; the one arm that lowered it did
+best against the opponent.** Until now the evidence was one-sided — arms that
+raised it and gained nothing — which is consistent with hit rate being merely
+uninformative. An arm that lowers it and does better is the first datum
+pointing the other way, and it is a single arm whose interval covers zero.
+
+## What does not advance, and why that is said out loud
+
+C1a is positive in both populations. It is the only arm in this registration
+that is, and the temptation is to read a 300-deal screen that misses the bar
+as a reason to spend 600 more deals looking again. The registration says
+*anything clearing the screen re-runs*, and C1a does not clear: its self-play
+point estimate is below the bar and both intervals cover zero. **It does not
+advance.** A screen that promotes its best near-miss is not a screen.

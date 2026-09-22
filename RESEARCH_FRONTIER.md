@@ -5157,3 +5157,60 @@ the band that is 80.4% of the game.
 opponent's source generates hypotheses; the dual-population bar still decides,
 and an arm that beats SESTINA and fails self-play is still opponent-specific
 and still does not ship.
+
+## OUTCOME 2026-09-22: P50 — the contest rejection survives a valid baseline, and `count_mode` is closed
+
+`results/p50_contest.json`, 9,000 games on block 12,900,000, zero fallbacks
+and zero unfinished on all five arms. **The registered prediction that none of
+the five clears is correct.**
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| C1a `w_contest=+0.3` | +0.0967 [−0.161, +0.354] | +0.1400 [−0.081, +0.361] | no |
+| C1b `w_contest=+1.0` | −0.1367 [−0.454, +0.180] | **−0.3067 [−0.516, −0.097]** | **withdrawn** |
+| C1c `w_contest=−0.3` | +0.1000 [−0.145, +0.345] | −0.0200 [−0.232, +0.192] | no |
+| C2a `count_mode=sqrt` | −0.1867 [−0.441, +0.067] | −0.1267 [−0.352, +0.099] | no |
+| C2b `count_mode=capped` | **−0.3700 [−0.634, −0.106]** | **−0.6667 [−0.888, −0.445]** | no |
+
+**C1: the reopening was justified and the conclusion held.** The dose response
+is monotone decreasing in the positive direction, the same shape the rev-2
+sweep found — but that sweep's baseline was +2.732, the retracted regime, and
+this one's is valid. The rev-2 *numbers* stay withdrawn; the *finding* they
+reported is now established on a sound baseline, at a fresh block, against an
+opponent we are behind rather than ahead of. This is what reopening on a rule
+is for, and it is the first time in this project that a rev-2 rejection has
+been re-established rather than overturned.
+
+Reading it with the source: SESTINA carries this quantity at +25 and wins the
+contested band with it; we carry it at any dose and lose. Their attribution
+study credits the coordinate with essentially their whole v0.7 gain. **The
+same term, in the same game, is worth a cycle to one engine and negative to
+the other** — the strongest instance yet of the finding that an ask-scoring
+term fitted against one belief representation is not a portable strategic
+insight.
+
+**C2: `count_mode` is closed, and the hedge is priced.** `oppmodel.py`'s own
+docstring says the linear form over-counts correlated evidence and names
+`sqrt` and `capped` as the obvious hedges. Both are worse, monotonically in
+how much tally information they discard, and `capped` is significant in both
+populations. The reasoning is sound and the conclusion is wrong: the tally
+carries more usable signal than the hedges keep.
+
+This does **not** make the exposure safe. SESTINA's header describes the
+tally-inflation attack our linear count is open to and its `selfTally` /
+`tallyLie` weights are zero, so it does not run it. What is now measured is
+the **price of the defence** — 0.13 to 0.19 sets for `sqrt`, 0.37 to 0.67 for
+`capped`. Against an opponent that did inflate tallies that is the cost side
+of a trade nobody has had to make.
+
+**The hit rate, now from both directions.** C1b raised it 2.96 points, the
+largest rise on record here, and lost a third of a set in self-play. C1c
+*lowered* it 0.70 points and was the best of the five against SESTINA. Five
+arms have now raised the ask hit rate and none bought a set; the first arm to
+lower it did best against the opponent. The one-sided evidence has a second
+side, from a single arm whose interval covers zero.
+
+**Nothing ships. `V06_DEPLOYED` is unchanged.** C1a is positive in both
+populations and still does not advance: its self-play point estimate is below
+the bar and both intervals cover zero, and a screen that promotes its best
+near-miss is not a screen.
