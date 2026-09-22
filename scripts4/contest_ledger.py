@@ -73,6 +73,9 @@ from scripts4.resultfile import default_path, write         # noqa: E402
 RULES_D = {"wrong_distribution_outcome": "opponent"}
 #: Fresh block again. 12,500,000 is the completion ledger's.
 SEED0 = 12_700_000
+#: the shape columns were added after the first block, so the run that
+#: carries them uses its own seeds rather than re-reporting a file without them
+SEED_SHAPE = 13_100_000
 AGENT0 = 127_000
 MAX_ACTIONS = 600
 SIDES = ("kv", "dy")
@@ -95,10 +98,18 @@ def _one(args) -> dict:
     # The DEALT share, taken before a card moves. It is the covariate the
     # whole question turns on and it is unrecoverable after the first ask.
     dealt = [[0, 0] for _ in range(9)]
+    #: per-seat dealt counts, so each team's holding of a half-suit has a
+    #: SHAPE as well as a size. Which of our seats may ask in a half-suit is
+    #: fixed by the deal -- the rules require the asker to hold a card of it
+    #: -- so the shape is exogenous in exactly the way the split is, and it is
+    #: the only covariate available that separates "three seats each holding
+    #: one card and none able to lead" from "one seat holding three".
+    per_seat = [[0] * 6 for _ in range(9)]
     for c in range(54):
         for p in range(6):
             if st.hands[p] >> c & 1:
                 dealt[c // 6][team_of(p)] += 1
+                per_seat[c // 6][p] += 1
                 break
 
     for p, a in enumerate(agents):
@@ -120,8 +131,14 @@ def _one(args) -> dict:
     rows = []
     for hs in range(9):
         w = won_by_own.get(hs)
+        shape = {}
+        for side, t in (("kv", kv_team), ("dy", 1 - kv_team)):
+            counts = sorted((per_seat[hs][p] for p in range(6)
+                             if team_of(p) == t), reverse=True)
+            shape[side] = "-".join(str(x) for x in counts)
         rows.append({
             "hs": hs,
+            "shape_kv": shape["kv"], "shape_dy": shape["dy"],
             "dealt_kv": dealt[hs][kv_team], "dealt_dy": dealt[hs][1 - kv_team],
             "hits_kv": hits[hs][kv_team], "hits_dy": hits[hs][1 - kv_team],
             # None when neither side won it by its own correct declaration,
@@ -238,6 +255,35 @@ def report(games: list[dict]) -> dict:
           f"{out['cost_extremes']:+.4f}")
     print("  Arithmetic on finished games, not a counterfactual margin: a")
     print("  half-suit that changed hands changes every ply after it.")
+
+    # 4. THE COORDINATION SPLIT. Within an even 3-3 deal, how the three cards
+    #    sit across a team's three seats is fixed by the deal and is the one
+    #    remaining exogenous covariate. If our disadvantage concentrates in
+    #    1-1-1 -- three seats each holding one card, none able to lead the
+    #    fight -- that is a coordination failure and not a play failure, and
+    #    it is the only family in the opponent's basis with no analogue in
+    #    ours. If it is flat across shapes, coordination is not the story.
+    print(f"\n  --- even 3-3 deals only, by how the three sit across seats ---")
+    print(f"  {'shape':<10}{'n':>7}{'we convert':>12}{'they convert':>14}"
+          f"{'edge':>9}")
+    coord = {}
+    seen = sorted({r["shape_kv"] for _d, r in flat if r["dealt_kv"] == 3})
+    for sh in seen:
+        ours = [r for _d, r in flat
+                if r["dealt_kv"] == 3 and r["winner"] is not None
+                and r["shape_kv"] == sh]
+        theirs = [r for _d, r in flat
+                  if r["dealt_dy"] == 3 and r["winner"] is not None
+                  and r["shape_dy"] == sh]
+        if not ours or not theirs:
+            continue
+        a = sum(1 for r in ours if r["winner"] == "kv") / len(ours)
+        b = sum(1 for r in theirs if r["winner"] == "dy") / len(theirs)
+        print(f"  {sh:<10}{len(ours):>7}{a:>12.3f}{b:>14.3f}{a - b:>+9.3f}")
+        coord[sh] = {"n_ours": len(ours), "we_convert": a,
+                     "n_theirs": len(theirs), "they_convert": b,
+                     "edge": a - b}
+    out["coordination_shape_3_3"] = coord
 
     print("\n  SELECTION would read as a level conversion at a matched deal,")
     print("  with the asks going to different half-suits. CONVERSION reads as")
