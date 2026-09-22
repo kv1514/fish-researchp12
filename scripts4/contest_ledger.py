@@ -158,11 +158,21 @@ def _ci(xs):
     return m, m - 1.96 * se, m + 1.96 * se
 
 
-def report(games: list[dict]) -> dict:
+def report(games: list[dict], seed: int | None = None) -> dict:
     n = len(games)
+    #: The seed ACTUALLY played, read off the games when not passed. It used to
+    #: be the module constant, so `--seed` changed the deals and neither the
+    #: filename nor the recorded identity -- and a run on a fresh block
+    #: overwrote an earlier one under an identity the clobber guard could not
+    #: distinguish. Derived rather than trusted, so the file cannot disagree
+    #: with its own rows.
+    played = min(g["deal"] for g in games)
+    if seed is not None and seed != played:
+        raise SystemExit(f"--seed {seed} but the games start at {played}")
+    seed = played
     flat = [(g["deal"], r) for g in games for r in g["half_suits"]]
     out = {"script": "scripts4/contest_ledger.py", "descriptive": True,
-           "rules": RULES_D, "seed_deal": SEED0, "seed_agent": AGENT0,
+           "rules": RULES_D, "seed_deal": seed, "seed_agent": AGENT0,
            "n_games": n, "n_half_suits": len(flat), "bridge_rev": 3,
            "fallbacks": sum(g["fallbacks"] for g in games),
            "unfinished": sum(1 for g in games if not g["terminal"])}
@@ -263,6 +273,21 @@ def report(games: list[dict]) -> dict:
     #    fight -- that is a coordination failure and not a play failure, and
     #    it is the only family in the opponent's basis with no analogue in
     #    ours. If it is flat across shapes, coordination is not the story.
+    # Blocks written before the shape columns existed have no shape_kv, and a
+    # reporter that crashes on its own older files is a reporter nobody will
+    # re-run. Skipped with a line saying so, rather than silently omitted.
+    if not all("shape_kv" in r for _d, r in flat):
+        print("\n  --- seat-shape split: SKIPPED, this block predates the "
+              "shape columns ---")
+        out["coordination_shape_3_3"] = None
+        print("\n  SELECTION would read as a level conversion at a matched "
+              "deal,")
+        print("  with the asks going to different half-suits. CONVERSION "
+              "reads as")
+        print("  a lower conversion for us at the SAME deal. SPREAD reads as "
+              "more")
+        print("  half-suits asked into, at fewer hits each.")
+        return out
     print(f"\n  --- even 3-3 deals only, by how the three sit across seats ---")
     print(f"  {'shape':<10}{'n':>7}{'we convert':>12}{'they convert':>14}"
           f"{'edge':>9}")
@@ -304,7 +329,7 @@ def main(argv=None) -> int:
     if a.rescore:
         dest = default_path("contest_ledger", a.seed)
         old = json.loads(dest.read_text())
-        out = report(old["per_game"])
+        out = report(old["per_game"], a.seed)
         out["seconds"] = old.get("seconds")
         out["rescored"] = True
         out["per_game"] = old["per_game"]
@@ -322,10 +347,10 @@ def main(argv=None) -> int:
     if len(games) < 30:
         print("too few games", file=sys.stderr)
         return 1
-    out = report(games)
+    out = report(games, a.seed)
     out["seconds"] = round(time.time() - t0, 1)
     out["per_game"] = games
-    print("\n  wrote", write(default_path("contest_ledger", SEED0), out))
+    print("\n  wrote", write(default_path("contest_ledger", a.seed), out))
     return 0
 
 

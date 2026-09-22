@@ -5214,3 +5214,81 @@ side, from a single arm whose interval covers zero.
 populations and still does not advance: its self-play point estimate is below
 the bar and both intervals cover zero, and a screen that promotes its best
 near-miss is not a screen.
+
+## OUTCOME 2026-09-22: the conversion profile replicates, and coordination is refuted
+
+`results/contest_ledger_13100000.json`, a second 800-game block on
+independent deals.
+
+### The profile replicates
+
+| deal | edge, block 12.7M | edge, block 13.1M |
+|---|---:|---:|
+| 6-0 | +0.091 | +0.070 |
+| 5-1 | +0.038 | +0.023 |
+| 4-2 | −0.075 | −0.072 |
+| 3-3 | −0.106 | −0.102 |
+| 2-4 | −0.068 | −0.059 |
+| 1-5 | +0.043 | +0.013 |
+| cost a game | +0.5450 | +0.5487 |
+
+**The contested middle replicates almost exactly** — −0.072 / −0.102 / −0.059
+against −0.075 / −0.106 / −0.068 — and so does the total, +0.5487 against
++0.5450. **The extremes replicate weakly**: the sign holds at 6-0 and 5-1 but
+both shrink, and 1-5 falls from +0.043 to +0.013, which is no longer a
+difference worth naming. So the claim "we are ahead at both ends" is one block
+strong and one block marginal, and the paper says so rather than averaging the
+two into a number neither produced.
+
+### Coordination is refuted, and the deficit is largest where coordination cannot matter
+
+Even 3-3 deals only, by how a team's three cards sit across its three seats —
+a shape the deal fixes before either policy acts:
+
+| shape | we convert | they convert | edge |
+|---|---:|---:|---:|
+| 1-1-1 | 0.477 | 0.536 | **−0.059** |
+| 2-1-0 | 0.450 | 0.565 | −0.115 |
+| 3-0-0 | 0.351 | 0.490 | **−0.139** |
+
+**We are behind at every shape, and the deficit is smallest at 1-1-1 and
+largest at 3-0-0** — the exact opposite of the coordination reading. If three
+seats each holding one card and none able to lead the fight were the problem,
+1-1-1 would be the worst cell. It is the best. And 3-0-0, where one seat holds
+all three and coordination is irrelevant by construction, is where we lose
+most.
+
+So **the seat-role family closes without porting it.** `roleClaim` and its two
+siblings are the only terms in SESTINA's basis with no analogue in ours, their
+weights are zero in its shipped spec, and the mechanism they would supply is
+not the one costing us the contested band.
+
+The 3-0-0 cell is worth noting for a different reason: it is the *concentrated*
+shape, and `concent` — the term that rewards concentrating a half-suit in one
+hand — was confirmed negative at 4,000 games. A single seat holding three cards
+of a contested half-suit needs three more from three different opponents and is
+an obvious target while it waits. Two independent measurements now point the
+same way about concentration.
+
+### The pilot was wrong in sign, on both cells
+
+A 36-game smoke of this same table read 1-1-1 at **+0.160** and 3-0-0 at
+**+0.250** — we ahead at both — against −0.059 and −0.139 at 800 games. It was
+recorded as not a reading and not acted on, which is the only reason it is a
+footnote instead of a retraction. Two pilots in two days have now pointed the
+wrong way on this instrument family.
+
+### A clobber bug in the instrument, found by its own output
+
+The 13.1M run first wrote itself to `contest_ledger_12700000.json`. Both
+`default_path()` and `out["seed_deal"]` read the module constant `SEED0`
+instead of the `--seed` actually played, so `--seed` changed which deals were
+dealt and neither the filename nor the recorded identity — and the run
+overwrote the earlier block under an identity `scripts4/resultfile.py`'s guard
+could not distinguish, because both files claimed to be the same experiment.
+The earlier block was recovered from commit `19d4938`, this one relabelled from
+its own `per_game` deals, and `report()` now derives the seed from the games
+and **raises** if `--seed` disagrees with them, so a file cannot contradict its
+own rows. The reporter also skips the shape table on blocks written before
+those columns existed, with a line saying so, rather than crashing on its own
+older files.
