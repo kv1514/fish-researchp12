@@ -5292,3 +5292,69 @@ and **raises** if `--seed` disagrees with them, so a file cannot contradict its
 own rows. The reporter also skips the shape table on blocks written before
 those columns existed, with a line saying so, rather than crashing on its own
 older files.
+
+## READING 2026-09-22: their paper names the attack, ran it against the wrong policy, and says so
+
+`/home/user/dylann4500/fishbot/paper/sections_v07/08-threat-model.tex` and
+`11-results.tex`. Their v0.7 paper carries a **threat model**, written before
+any v0.7 measurement, and the adversary it defines is the one this project
+has an unusually good position to build.
+
+### What their threat model says
+
+* **The exploitable property is named by them.** Their team is *three
+  identical published deterministic agents*, so its coordination is **common
+  knowledge** — which, they point out, inverts the standing assumption in the
+  team-correlation literature that the correlation device is private. The
+  adversary class built for that property is a **transcript inverter**: read
+  the target's own deterministic policy and reconstruct the deal posterior
+  from the public transcript.
+* **The adversary is white-box**: given the source, the parameter vector and
+  unlimited offline access; denied the deal, the seed, any hand and the
+  confidence field. We hold every permitted item.
+* **Their standing principle, stated twice**: *"a search that fails to find an
+  exploit is evidence about the search, not a property of the target."* They
+  apply it to correct their own v0.4 record, which had reported a null as a
+  demonstration of robustness.
+
+### What happened when they ran it on themselves
+
+Their `Zeight` class — the inverter — **lost**, replicated. And they attach
+two limits to that cell themselves:
+
+* its **white-box base derives from the v0.6 agent** and reads only that
+  policy's coordinates, while the target is v0.7 and the search extends over
+  more; a large share of its fitted coordinates are therefore **inert**;
+* **"the budget is small."**
+
+Their own summary: *"evidence that this inverter, at this budget, does not
+exploit FISH-7; it is not evidence that no white-box attack can."*
+
+**So the strongest adversary class against them was aimed at the previous
+version of their own policy, and they say so in print.** We hold the v0.7
+source, the frozen 55-parameter spec, and a working bridge that runs the
+actual binary — which is the configuration their inverter did not have.
+
+### The gate this has to clear first, and it is not yet known
+
+Any opponent-inference improvement, a perfect inverter included, is bounded
+by what perfect knowledge of the *opponents'* cards is worth. That is
+`results/ceiling_split.json`'s `O_opp` arm, **+1.3067 [+1.007, +1.606]** —
+and it carries **`bridge_rev: 2`** with `margin_A: 2.3033`. It is a
+retracted-regime figure, and **the abstract quotes it**, beside the +3.41
+teammate ceiling, in the sentence "prices teammates' cards at +3.41 against
+opponents' +1.31, and we had predicted the reverse".
+
+That is the third rev-2 survivor this line has turned up, after the
+acquisition table and the abstract's allocation share, and it is the one that
+matters most here: an inverter would have to capture roughly
+**0.525 + 0.15 = 0.675 sets** of a ceiling whose rev-3 value nobody has
+measured. Re-measured now on block 13,500,000 with its own journal, so no
+rev-2 game can resume into it.
+
+**Nothing is registered off this reading yet.** An exact inverter of one
+named opponent is opponent-specific by construction and cannot clear the
+dual-population bar; the general form — condition the posterior on the exact
+policy likelihood of *whichever* opponent is at the table, ours included — is
+the only version that could, and it is expensive enough that the ceiling has
+to be priced before a line of it is written.
