@@ -1722,6 +1722,20 @@ WATCH = [
     ("contest_ledger_12700000.json", "middle_share", "{:.1%}",
      "the contested band's share of all half-suits",
      "The contested band is"),
+    # The replication block and the seat-shape refutation. Watched from the
+    # day they enter, and the replication's own figures are watched too --
+    # a second block quoted to weaken a first claim is exactly the kind of
+    # number that must not be allowed to drift back.
+    ("contest_ledger_13100000.json", "matched_by_deal.1-5.edge", "{:+.3f}",
+     "our edge given one of six, replication", "falls from $+0.043$ to"),
+    ("contest_ledger_13100000.json", "cost_per_game", "{:+.4f}",
+     "half-suits a game, replication", "the total within four thousandths"),
+    ("contest_ledger_13100000.json",
+     "coordination_shape_3_3.1-1-1.edge", "{:+.3f}",
+     "our edge at the 1-1-1 seat shape", "$1$--$1$--$1$ & $0.477$"),
+    ("contest_ledger_13100000.json",
+     "coordination_shape_3_3.3-0-0.edge", "{:+.3f}",
+     "our edge at the 3-0-0 seat shape", "$3$--$0$--$0$ & $0.351$"),
 ]
 
 

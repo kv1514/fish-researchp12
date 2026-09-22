@@ -111,7 +111,7 @@ opponent's posterior. Measured through the repaired bridge, KRAKEN loses that
 pairing by $-0.525$ $[-0.689, -0.361]$. Six pre-registered programmes then
 tried to recover the deficit under a bar fixed in advance, $+0.15$ sets a game
 against the external engine and in self-play, and none cleared it. Across the
-project, forty-nine pre-registrations produced exactly one change to the
+project, fifty pre-registrations produced exactly one change to the
 deployed engine. The paper records every one of them, the failures on the same
 footing as the successes.
 
@@ -233,7 +233,7 @@ Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
 a proof that the belief-space search cannot move $99.96\%$ of the allocation
 uncertainty, and an audit of our own clustering restates every position-level
-interval and withdraws one conclusion. Across the whole project, forty-nine
+interval and withdraws one conclusion. Across the whole project, fifty
 pre-registrations produced exactly one change to the deployed engine
 (Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
 not ship, because the bar was fixed before the runs and was not amended
@@ -7212,6 +7212,53 @@ the time and we take it $44.1\%$. The same sign holds at $4$--$2$ and
 $2$--$4$. \textbf{The contested band is $80.4\%$ of all half-suits}, so a gap
 of a tenth there is not a detail of the distribution; it is the match.
 
+\paragraph{Replicated on a second block, and it does not replicate evenly.}
+A second $800$ games on independent deals (block $13{,}100{,}000$, same
+instrument) returns the contested middle almost exactly --- $-0.072$,
+$-0.102$, $-0.059$ at $4$--$2$, $3$--$3$, $2$--$4$ against $-0.075$,
+$-0.106$, $-0.068$ --- and the total within four thousandths, $+0.5487$
+against $+0.5450$. The extremes replicate \emph{weakly}: the sign holds at
+$6$--$0$ and $5$--$1$ but both shrink, to $+0.070$ and $+0.023$, and
+$1$--$5$ falls from $+0.043$ to $\mathbf{+0.013}$, which is no longer a
+difference worth naming. So the two halves of the finding do not carry equal
+weight and are not reported as though they did: \textbf{the contested
+deficit is replicated; the advantage at the extremes is one block strong and
+one block marginal.} The two are not averaged into a number neither block
+produced.
+
+\paragraph{It is not a coordination failure, and the deficit is largest where
+coordination cannot matter.} Which of a team's three seats may fight for a
+half-suit is fixed by the deal, because the rules require an asker to hold a
+card of the half-suit it asks in. That makes the \emph{shape} of a team's
+holding across its seats as exogenous as its size, and on even $3$--$3$ deals
+it is the one covariate left that could separate a coordination failure from
+a play failure:
+
+\begin{center}
+\small
+\begin{tabular}{lrrr}
+\toprule
+shape across our three seats & we convert & they convert & edge \\
+\midrule
+$1$--$1$--$1$ & $0.477$ & $0.536$ & $\mathbf{-0.059}$ \\
+$2$--$1$--$0$ & $0.450$ & $0.565$ & $-0.115$ \\
+$3$--$0$--$0$ & $0.351$ & $0.490$ & $\mathbf{-0.139}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent We are behind at every shape, and the deficit is \emph{smallest}
+where three seats each hold one card and none can lead the fight, \emph{largest}
+where one seat holds all three and coordination is irrelevant by construction.
+That is the opposite of the coordination reading, and it closes a family this
+paper could otherwise have spent a cycle porting: the external engine's basis
+carries three seat-role terms with no analogue in ours, and the mechanism they
+would supply is not the one costing us this band. The $3$--$0$--$0$ cell also
+agrees with the concentration term's null from a second direction --- it is
+the concentrated shape, and \path{prereg/concentration_v2.md}'s arms, at
+$4{,}000$ games, already measured concentrating a half-suit in one hand as
+worth nothing.
+
 \paragraph{What that is worth, as arithmetic.} Holding each deal's population
 fixed and moving only our conversion rate to theirs gives $+0.5450$ half-suits
 a game, of which the contested middle is $+0.6175$ and the extremes give back
@@ -9889,12 +9936,12 @@ alone --- a null against the external engine, and the first half of the dual bar
 has cleared --- and the sixth registration re-read the one earlier mechanism
 with a positive value on the record through the repaired bridge and found
 that the value was the bridge defect, measured from the other side
-(\S\ref{sec:p48}). The pre-registered thresholds and outcomes for all forty-nine
+(\S\ref{sec:p48}). The pre-registered thresholds and outcomes for all fifty
 registrations this project has written are in Appendix~\ref{app:prereg}. Two
 mechanisms measured there are real and positive and still do not ship,
 because the bar was fixed in advance and was not amended afterwards. That is
 the discipline this paper is actually arguing for, and it costs more than it
-looks: exactly one of the forty-nine registrations produced a change to the
+looks: exactly one of the fifty registrations produced a change to the
 deployed engine.
 
 \subsection{What we would do next}

@@ -89,6 +89,7 @@
  "cost_middle": 0.6175,
  "cost_extremes": -0.07250000000000001,
  "middle_share": 0.8038888888888889,
+ "coordination_shape_3_3": null,
  "seconds": 314.3,
  "rescored": true,
  "per_game": [

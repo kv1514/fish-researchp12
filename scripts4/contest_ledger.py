@@ -73,6 +73,9 @@ from scripts4.resultfile import default_path, write         # noqa: E402
 RULES_D = {"wrong_distribution_outcome": "opponent"}
 #: Fresh block again. 12,500,000 is the completion ledger's.
 SEED0 = 12_700_000
+#: the shape columns were added after the first block, so the run that
+#: carries them uses its own seeds rather than re-reporting a file without them
+SEED_SHAPE = 13_100_000
 AGENT0 = 127_000
 MAX_ACTIONS = 600
 SIDES = ("kv", "dy")
@@ -95,10 +98,18 @@ def _one(args) -> dict:
     # The DEALT share, taken before a card moves. It is the covariate the
     # whole question turns on and it is unrecoverable after the first ask.
     dealt = [[0, 0] for _ in range(9)]
+    #: per-seat dealt counts, so each team's holding of a half-suit has a
+    #: SHAPE as well as a size. Which of our seats may ask in a half-suit is
+    #: fixed by the deal -- the rules require the asker to hold a card of it
+    #: -- so the shape is exogenous in exactly the way the split is, and it is
+    #: the only covariate available that separates "three seats each holding
+    #: one card and none able to lead" from "one seat holding three".
+    per_seat = [[0] * 6 for _ in range(9)]
     for c in range(54):
         for p in range(6):
             if st.hands[p] >> c & 1:
                 dealt[c // 6][team_of(p)] += 1
+                per_seat[c // 6][p] += 1
                 break
 
     for p, a in enumerate(agents):
@@ -120,8 +131,14 @@ def _one(args) -> dict:
     rows = []
     for hs in range(9):
         w = won_by_own.get(hs)
+        shape = {}
+        for side, t in (("kv", kv_team), ("dy", 1 - kv_team)):
+            counts = sorted((per_seat[hs][p] for p in range(6)
+                             if team_of(p) == t), reverse=True)
+            shape[side] = "-".join(str(x) for x in counts)
         rows.append({
             "hs": hs,
+            "shape_kv": shape["kv"], "shape_dy": shape["dy"],
             "dealt_kv": dealt[hs][kv_team], "dealt_dy": dealt[hs][1 - kv_team],
             "hits_kv": hits[hs][kv_team], "hits_dy": hits[hs][1 - kv_team],
             # None when neither side won it by its own correct declaration,
@@ -141,11 +158,21 @@ def _ci(xs):
     return m, m - 1.96 * se, m + 1.96 * se
 
 
-def report(games: list[dict]) -> dict:
+def report(games: list[dict], seed: int | None = None) -> dict:
     n = len(games)
+    #: The seed ACTUALLY played, read off the games when not passed. It used to
+    #: be the module constant, so `--seed` changed the deals and neither the
+    #: filename nor the recorded identity -- and a run on a fresh block
+    #: overwrote an earlier one under an identity the clobber guard could not
+    #: distinguish. Derived rather than trusted, so the file cannot disagree
+    #: with its own rows.
+    played = min(g["deal"] for g in games)
+    if seed is not None and seed != played:
+        raise SystemExit(f"--seed {seed} but the games start at {played}")
+    seed = played
     flat = [(g["deal"], r) for g in games for r in g["half_suits"]]
     out = {"script": "scripts4/contest_ledger.py", "descriptive": True,
-           "rules": RULES_D, "seed_deal": SEED0, "seed_agent": AGENT0,
+           "rules": RULES_D, "seed_deal": seed, "seed_agent": AGENT0,
            "n_games": n, "n_half_suits": len(flat), "bridge_rev": 3,
            "fallbacks": sum(g["fallbacks"] for g in games),
            "unfinished": sum(1 for g in games if not g["terminal"])}
@@ -239,6 +266,50 @@ def report(games: list[dict]) -> dict:
     print("  Arithmetic on finished games, not a counterfactual margin: a")
     print("  half-suit that changed hands changes every ply after it.")
 
+    # 4. THE COORDINATION SPLIT. Within an even 3-3 deal, how the three cards
+    #    sit across a team's three seats is fixed by the deal and is the one
+    #    remaining exogenous covariate. If our disadvantage concentrates in
+    #    1-1-1 -- three seats each holding one card, none able to lead the
+    #    fight -- that is a coordination failure and not a play failure, and
+    #    it is the only family in the opponent's basis with no analogue in
+    #    ours. If it is flat across shapes, coordination is not the story.
+    # Blocks written before the shape columns existed have no shape_kv, and a
+    # reporter that crashes on its own older files is a reporter nobody will
+    # re-run. Skipped with a line saying so, rather than silently omitted.
+    if not all("shape_kv" in r for _d, r in flat):
+        print("\n  --- seat-shape split: SKIPPED, this block predates the "
+              "shape columns ---")
+        out["coordination_shape_3_3"] = None
+        print("\n  SELECTION would read as a level conversion at a matched "
+              "deal,")
+        print("  with the asks going to different half-suits. CONVERSION "
+              "reads as")
+        print("  a lower conversion for us at the SAME deal. SPREAD reads as "
+              "more")
+        print("  half-suits asked into, at fewer hits each.")
+        return out
+    print(f"\n  --- even 3-3 deals only, by how the three sit across seats ---")
+    print(f"  {'shape':<10}{'n':>7}{'we convert':>12}{'they convert':>14}"
+          f"{'edge':>9}")
+    coord = {}
+    seen = sorted({r["shape_kv"] for _d, r in flat if r["dealt_kv"] == 3})
+    for sh in seen:
+        ours = [r for _d, r in flat
+                if r["dealt_kv"] == 3 and r["winner"] is not None
+                and r["shape_kv"] == sh]
+        theirs = [r for _d, r in flat
+                  if r["dealt_dy"] == 3 and r["winner"] is not None
+                  and r["shape_dy"] == sh]
+        if not ours or not theirs:
+            continue
+        a = sum(1 for r in ours if r["winner"] == "kv") / len(ours)
+        b = sum(1 for r in theirs if r["winner"] == "dy") / len(theirs)
+        print(f"  {sh:<10}{len(ours):>7}{a:>12.3f}{b:>14.3f}{a - b:>+9.3f}")
+        coord[sh] = {"n_ours": len(ours), "we_convert": a,
+                     "n_theirs": len(theirs), "they_convert": b,
+                     "edge": a - b}
+    out["coordination_shape_3_3"] = coord
+
     print("\n  SELECTION would read as a level conversion at a matched deal,")
     print("  with the asks going to different half-suits. CONVERSION reads as")
     print("  a lower conversion for us at the SAME deal. SPREAD reads as more")
@@ -258,7 +329,7 @@ def main(argv=None) -> int:
     if a.rescore:
         dest = default_path("contest_ledger", a.seed)
         old = json.loads(dest.read_text())
-        out = report(old["per_game"])
+        out = report(old["per_game"], a.seed)
         out["seconds"] = old.get("seconds")
         out["rescored"] = True
         out["per_game"] = old["per_game"]
@@ -276,10 +347,10 @@ def main(argv=None) -> int:
     if len(games) < 30:
         print("too few games", file=sys.stderr)
         return 1
-    out = report(games)
+    out = report(games, a.seed)
     out["seconds"] = round(time.time() - t0, 1)
     out["per_game"] = games
-    print("\n  wrote", write(default_path("contest_ledger", SEED0), out))
+    print("\n  wrote", write(default_path("contest_ledger", a.seed), out))
     return 0
 
 

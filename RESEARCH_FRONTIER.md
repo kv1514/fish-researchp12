@@ -5063,3 +5063,232 @@ the four the paper quotes, **shipped weight zero**, and only ever dueled
 inside a learned vector that lost as a whole. It has never been dueled alone.
 That is the obvious next registration and it is deliberately not written
 here.
+
+## FINDING 2026-09-22: SESTINA ships ONE of its eighteen extra ask terms, and it is the contest term
+
+Read directly from the released engine rather than inferred from play:
+`/home/user/dylann4500/fishbot/engine/src/v07_responder.hpp` and the frozen
+spec our bridge sends (`external_v07/v07_spec.txt`). Nothing here is a
+measurement of play; it is what their code does, and it reframes three
+standing questions.
+
+### The eighteen terms, and the one that is live
+
+`V07Responder` extends v0.6 with `NR7 = 18` extra ask terms in five families:
+target modelling (`targetKnownStrength`, `targetSetMass`, `oppTeamSetMass`,
+`turnDonationCost`, `targetThreat`), **seat roles** (`roleHit0`, `roleHit1`,
+`roleClaim` — "an agreed division of half-suits among the three seats"),
+within-match tally modelling (`targetAskedHere`, `targetMissedHere`,
+`phaseHit`, `deadDonation` — "the deliberate miss"), **information denial**
+(`oppCertDonate`, `oppCertHit`, `oppNearLock`, `oppDenyLate`), and **tally
+inflation** (`selfTally`, `tallyLie` — "lying to an outcome-blind prior").
+
+The spec carries 55 parameters, so `K7 = 37` and the last eighteen are the
+responder terms. Checked by index rather than by a tail slice, because the
+first attempt sliced `[-18:]` off a string whose split length was ambiguous
+and that is how an off-by-one becomes a finding:
+
+    idx 37..48   all 0.00000
+    idx 49       oppCertDonate   25.00000   <== the only nonzero
+    idx 50..54   all 0.00000
+
+**Exactly one of the eighteen is live, and its weight is 25.0** — against
+other parameters in the same vector running 0.03 to 11.3.
+
+### What it actually computes, and why the name understates it
+
+    g[12] = (1 - p) * oppFrac * (uS / 6)
+
+`p` is P(the target holds the asked card), `oppFrac` the opposing team's
+expected mass of that half-suit over six, `uS` the count of its cards whose
+holder cannot be placed. `blueprintScore` is **maximised** (`if (u > best)`,
+and the sort is `u[a] > u[b]`), so a weight of +25 makes the agent **seek**
+these asks, not avoid them.
+
+So despite the name it is not a denial term in effect. It rewards asking into
+half-suits **the opposing team holds**, at **low hit probability**, while much
+of the half-suit is **unresolved**. It is a contest-seeking term carrying a
+deliberately large coefficient.
+
+### It lines up with the conversion profile, from the other side
+
+`oppFrac` is high exactly where the matched-deal table says they beat us and
+low exactly where we beat them:
+
+| deal | oppFrac | who is ahead |
+|---|---|---|
+| 6-0, 5-1 | low | **us** (+0.091, +0.038) |
+| 4-2, 3-3, 2-4 | high | them (−0.075, −0.106, −0.068) |
+| 1-5 | high for us to attack | **us** (+0.043) |
+
+And our own basis points the other way: `scarce` (weight 0.2, a v0.3 win)
+rewards **team** share. We prefer half-suits we already hold; they prefer
+half-suits the opponents hold; the deal-matched table says they are right in
+the band that is 80.4% of the game.
+
+### Three standing questions this settles or moves
+
+1. **The tally-inflation attack is NOT live.** Their header describes it
+   precisely — one card of a half-suit lets an adversary ask there repeatedly
+   and inflate the target's marginal for the other five by up to 13.5× at one
+   lost turn per repetition — and **we are exposed to exactly that**, because
+   `count_mode = "linear"` weights the raw ask tally and our own docstring
+   calls linear the over-counting reading. But `selfTally` and `tallyLie` are
+   **zero** in the shipped spec, so this opponent does not run the attack.
+   `count_mode` appears in no registration, results file or paper: an untested
+   knob with two hedges already implemented (`sqrt`, `capped`), and **not** an
+   explanation of the deficit. Recorded so it is not later mistaken for one.
+2. **Seat roles are the other unexplored family.** `roleClaim` divides
+   half-suits among the three seats by `(S + offset) % 3 == myRole`. We have
+   no coordination primitive of any kind, and the signalling line that looked
+   like one was closed as a null. Their weight on it is zero, so it is not
+   what beats us — but it is the one mechanism in their basis with no analogue
+   in ours at all.
+3. **The contest term was ported and rejected — at `BRIDGE_REV 2`.** Commit
+   `03877d9`, 4,000 games, five doses, every arm negative and monotone in the
+   wrong direction, against a **baseline margin of +2.732**. That is the
+   retracted regime. `prereg/kraken_v12_vs_sestina.md` states the rule
+   plainly: *a knob rejected for failing the bar against a handicapped
+   opponent has not been tested against this one.* The term survives in the
+   live engine as `fish4/adaptive.py:contest_bonus` behind
+   `w_contest = 0.0`, bit-identical at zero, and it is one flag.
+
+**Nothing here is a strength claim and nothing has shipped.** Reading an
+opponent's source generates hypotheses; the dual-population bar still decides,
+and an arm that beats SESTINA and fails self-play is still opponent-specific
+and still does not ship.
+
+## OUTCOME 2026-09-22: P50 — the contest rejection survives a valid baseline, and `count_mode` is closed
+
+`results/p50_contest.json`, 9,000 games on block 12,900,000, zero fallbacks
+and zero unfinished on all five arms. **The registered prediction that none of
+the five clears is correct.**
+
+| arm | vs SESTINA | self-play | verdict |
+|---|---:|---:|---|
+| C1a `w_contest=+0.3` | +0.0967 [−0.161, +0.354] | +0.1400 [−0.081, +0.361] | no |
+| C1b `w_contest=+1.0` | −0.1367 [−0.454, +0.180] | **−0.3067 [−0.516, −0.097]** | **withdrawn** |
+| C1c `w_contest=−0.3` | +0.1000 [−0.145, +0.345] | −0.0200 [−0.232, +0.192] | no |
+| C2a `count_mode=sqrt` | −0.1867 [−0.441, +0.067] | −0.1267 [−0.352, +0.099] | no |
+| C2b `count_mode=capped` | **−0.3700 [−0.634, −0.106]** | **−0.6667 [−0.888, −0.445]** | no |
+
+**C1: the reopening was justified and the conclusion held.** The dose response
+is monotone decreasing in the positive direction, the same shape the rev-2
+sweep found — but that sweep's baseline was +2.732, the retracted regime, and
+this one's is valid. The rev-2 *numbers* stay withdrawn; the *finding* they
+reported is now established on a sound baseline, at a fresh block, against an
+opponent we are behind rather than ahead of. This is what reopening on a rule
+is for, and it is the first time in this project that a rev-2 rejection has
+been re-established rather than overturned.
+
+Reading it with the source: SESTINA carries this quantity at +25 and wins the
+contested band with it; we carry it at any dose and lose. Their attribution
+study credits the coordinate with essentially their whole v0.7 gain. **The
+same term, in the same game, is worth a cycle to one engine and negative to
+the other** — the strongest instance yet of the finding that an ask-scoring
+term fitted against one belief representation is not a portable strategic
+insight.
+
+**C2: `count_mode` is closed, and the hedge is priced.** `oppmodel.py`'s own
+docstring says the linear form over-counts correlated evidence and names
+`sqrt` and `capped` as the obvious hedges. Both are worse, monotonically in
+how much tally information they discard, and `capped` is significant in both
+populations. The reasoning is sound and the conclusion is wrong: the tally
+carries more usable signal than the hedges keep.
+
+This does **not** make the exposure safe. SESTINA's header describes the
+tally-inflation attack our linear count is open to and its `selfTally` /
+`tallyLie` weights are zero, so it does not run it. What is now measured is
+the **price of the defence** — 0.13 to 0.19 sets for `sqrt`, 0.37 to 0.67 for
+`capped`. Against an opponent that did inflate tallies that is the cost side
+of a trade nobody has had to make.
+
+**The hit rate, now from both directions.** C1b raised it 2.96 points, the
+largest rise on record here, and lost a third of a set in self-play. C1c
+*lowered* it 0.70 points and was the best of the five against SESTINA. Five
+arms have now raised the ask hit rate and none bought a set; the first arm to
+lower it did best against the opponent. The one-sided evidence has a second
+side, from a single arm whose interval covers zero.
+
+**Nothing ships. `V06_DEPLOYED` is unchanged.** C1a is positive in both
+populations and still does not advance: its self-play point estimate is below
+the bar and both intervals cover zero, and a screen that promotes its best
+near-miss is not a screen.
+
+## OUTCOME 2026-09-22: the conversion profile replicates, and coordination is refuted
+
+`results/contest_ledger_13100000.json`, a second 800-game block on
+independent deals.
+
+### The profile replicates
+
+| deal | edge, block 12.7M | edge, block 13.1M |
+|---|---:|---:|
+| 6-0 | +0.091 | +0.070 |
+| 5-1 | +0.038 | +0.023 |
+| 4-2 | −0.075 | −0.072 |
+| 3-3 | −0.106 | −0.102 |
+| 2-4 | −0.068 | −0.059 |
+| 1-5 | +0.043 | +0.013 |
+| cost a game | +0.5450 | +0.5487 |
+
+**The contested middle replicates almost exactly** — −0.072 / −0.102 / −0.059
+against −0.075 / −0.106 / −0.068 — and so does the total, +0.5487 against
++0.5450. **The extremes replicate weakly**: the sign holds at 6-0 and 5-1 but
+both shrink, and 1-5 falls from +0.043 to +0.013, which is no longer a
+difference worth naming. So the claim "we are ahead at both ends" is one block
+strong and one block marginal, and the paper says so rather than averaging the
+two into a number neither produced.
+
+### Coordination is refuted, and the deficit is largest where coordination cannot matter
+
+Even 3-3 deals only, by how a team's three cards sit across its three seats —
+a shape the deal fixes before either policy acts:
+
+| shape | we convert | they convert | edge |
+|---|---:|---:|---:|
+| 1-1-1 | 0.477 | 0.536 | **−0.059** |
+| 2-1-0 | 0.450 | 0.565 | −0.115 |
+| 3-0-0 | 0.351 | 0.490 | **−0.139** |
+
+**We are behind at every shape, and the deficit is smallest at 1-1-1 and
+largest at 3-0-0** — the exact opposite of the coordination reading. If three
+seats each holding one card and none able to lead the fight were the problem,
+1-1-1 would be the worst cell. It is the best. And 3-0-0, where one seat holds
+all three and coordination is irrelevant by construction, is where we lose
+most.
+
+So **the seat-role family closes without porting it.** `roleClaim` and its two
+siblings are the only terms in SESTINA's basis with no analogue in ours, their
+weights are zero in its shipped spec, and the mechanism they would supply is
+not the one costing us the contested band.
+
+The 3-0-0 cell is worth noting for a different reason: it is the *concentrated*
+shape, and `concent` — the term that rewards concentrating a half-suit in one
+hand — was confirmed negative at 4,000 games. A single seat holding three cards
+of a contested half-suit needs three more from three different opponents and is
+an obvious target while it waits. Two independent measurements now point the
+same way about concentration.
+
+### The pilot was wrong in sign, on both cells
+
+A 36-game smoke of this same table read 1-1-1 at **+0.160** and 3-0-0 at
+**+0.250** — we ahead at both — against −0.059 and −0.139 at 800 games. It was
+recorded as not a reading and not acted on, which is the only reason it is a
+footnote instead of a retraction. Two pilots in two days have now pointed the
+wrong way on this instrument family.
+
+### A clobber bug in the instrument, found by its own output
+
+The 13.1M run first wrote itself to `contest_ledger_12700000.json`. Both
+`default_path()` and `out["seed_deal"]` read the module constant `SEED0`
+instead of the `--seed` actually played, so `--seed` changed which deals were
+dealt and neither the filename nor the recorded identity — and the run
+overwrote the earlier block under an identity `scripts4/resultfile.py`'s guard
+could not distinguish, because both files claimed to be the same experiment.
+The earlier block was recovered from commit `19d4938`, this one relabelled from
+its own `per_game` deals, and `report()` now derives the seed from the games
+and **raises** if `--seed` disagrees with them, so a file cannot contradict its
+own rows. The reporter also skips the shape table on blocks written before
+those columns existed, with a line saying so, rather than crashing on its own
+older files.
