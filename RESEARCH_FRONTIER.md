@@ -5771,3 +5771,75 @@ be read as "does not clear" rather than "is significantly negative".
 The substantive conclusion is unchanged and now rests on the right evidence: the
 partner action model is closed in both dimensions, and the correction that
 matters is at the counts that are *common*, not the ones that are most wrong.
+
+## OUTCOME 2026-09-23: the disclosure hypothesis is REFUTED, and the asymmetry runs the other way
+
+`results/disclosure_cost_15300000.json`, 400 games, history-only so there is no
+posterior to be stale and no sampling error of its own. Self-test: the tracker
+and the engine's history agree about how many asks succeeded in every game.
+
+### The hypothesis, and why it looked strong
+
+`fish4/askfeat.py` prices exposure as `F[i, 5] = -fail * exposure[target]` — the
+cost of **losing the turn** on a failure, which goes to **zero for a certain
+steal**. But a certain steal is exactly the ask that makes a card publicly ours
+and therefore takeable, and `_apply_ask` says *"asker retains the turn"* on
+success, so an opponent who knows we hold three of a half-suit takes all three in
+one visit. The cost compounds and is charged on none of the asks most likely to
+incur it.
+
+It fitted everything: we waste 31.6% of our hits against their 25.2%; the deficit
+is the contested middle and we lead at the extremes, which is exactly where
+disclosure is free because they cannot legally ask; and P51's ask hit rate rose
+with no margin to show for it.
+
+**The raw numbers looked decisive.**
+
+| | acquired | taken back | rate |
+|---|---:|---:|---|
+| KRAKEN | 9,670 | 3,984 | **0.4120** [0.3968, 0.4276] |
+| SESTINA | 10,526 | 3,705 | **0.3520** [0.3369, 0.3661] |
+
+and the matched-contest gap is positive at every band: +0.043, +0.074, +0.065,
++0.059.
+
+### And the time control dissolves it
+
+A take-back needs **time**, and the two sides do not give their cards the same
+amount of it. SESTINA declares more half-suits a game than we do, and every
+declaration slams every window in that half-suit shut.
+
+| | mean window | hazard per ply of exposure |
+|---|---:|---|
+| KRAKEN | **10.58** plies [10.20, 10.98] | **0.03895** [0.03700, 0.04101] |
+| SESTINA | **8.49** plies [8.11, 8.86] | **0.04148** [0.03956, 0.04344] |
+
+**Per unit of exposure our cards are taken back LESS often than theirs**, and the
+intervals barely overlap. The entire raw-rate gap is our windows being 25%
+longer, and the window length traces back to declaring less — which is the RACE
+channel, already bounded at **+0.2017**. The hypothesis is refuted, and refuted
+in the direction opposite to the one predicted.
+
+Per band the residual survives only where we hold least: hazard gap +0.0169 at
+band 1 and +0.0158 at band 2, then +0.0020 at band 3 and **−0.0040** at band 4.
+Two of five bands, with the pooled number going the other way, is a near-miss and
+not a finding. **Promoting it would be exactly the error this project's screens
+exist to refuse.**
+
+### The one new fact, and it points the other way
+
+| | visits | cards per visit | visits of 3+ |
+|---|---:|---|---:|
+| KRAKEN | 6,020 | **1.6063** [1.5815, 1.6312] | 939 |
+| SESTINA | 5,987 | **1.7581** [1.7320, 1.7850] | **1,278** |
+
+**SESTINA extracts more per visit than we do — 1.758 against 1.606, with 36% more
+runs of three or more.** On essentially the same number of visits. The
+retained-turn compounding is real and *they* are the ones exploiting it; the
+asymmetry is offensive, not defensive, and it is the opposite of what the
+disclosure hypothesis predicted.
+
+That is a lead, not a finding. What it does establish is that this engine's
+handling of disclosure is not the defect — so the remaining candidates are what
+it does with a visit once it has one, and the declaration rate that decides how
+long every window stays open.
