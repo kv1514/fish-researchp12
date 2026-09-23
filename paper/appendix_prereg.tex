@@ -1036,8 +1036,30 @@ harness: doses disagreeing in sign inside the swept range, and any arm whose
 \texttt{weights.claim} does not equal its registered dose at run time --- the
 runner asserts it, because a duel that silently ran the champion under a
 candidate's name would repeat this registration's own premise in a worse form. &
-\emph{Running.} &
-\emph{Pending.} &
+Nothing clears and no withdrawal fires, as predicted --- but
+\textbf{prediction~1 failed}, and it is the one that decides what may be read.
+The dose response is \emph{not monotone} in either population: $-0.063$,
+$\mathbf{+0.090}$, $-0.047$ against \textsc{sestina} and $+0.107$,
+$\mathbf{+0.223}$, $+0.187$ in self-play, up then down both times. The
+registration fixed the consequence in advance --- ``the term is interacting with
+\texttt{turn} or \texttt{scarce} rather than adding, and no single dose should be
+read'' --- so A2, the most promising cell this line of work has produced, is set
+aside for the registered reason rather than the convenient one. It would not ship
+regardless: the bar needs $+0.15$ clear of zero in \emph{both} populations and
+A2's \textsc{sestina} interval covers zero. Prediction~4 also failed and points
+the same way: the ask hit rate was predicted flat or falling and \emph{rose} in
+every arm. Prediction~2 is half right --- A4 is negative in self-play and
+\textbf{positive} against \textsc{sestina}, which is a warning about A2 in
+itself. All four arms are genuinely distinct, every pair differing on $500+$ of
+$600$ pairings, so this is not P51's case of two names for one arm. &
+\textbf{NOTHING CLEARS, AND THE REGISTRATION DISQUALIFIES ITS OWN BEST CELL.}
+$7{,}200$ games, zero fallbacks, zero unfinished, and the dose check confirmed
+every arm's \texttt{weights.claim} at run time. A1 $-0.0633$ / $+0.1067$; A2
+$+0.0900$ $[-0.200, +0.380]$ / $+0.2233$ $[-0.012, +0.458]$; A3 $-0.0467$ /
+$+0.1867$; A4 $+0.2267$ / $-0.2000$. What it closes is \texttt{w\_claim} as the
+lever \emph{at these doses}; it does not close declaration count as the channel,
+which still needs $D_{\text{us}}$ to rise by $+0.541$ a game.
+\path{results/p52_claim_term.json} &
 \S\ref{sec:res-profile} \\
 
 \end{longtable}

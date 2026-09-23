@@ -115,3 +115,74 @@ No other weight moves in any arm. `scripts4/arm_overlap.py` is run on the result
 to report how many deals each arm actually changes, because an arm that changes
 almost nothing and an arm that changes nothing are different claims, and P51 made
 that mistake already.
+
+---
+
+## OUTCOME, `results/p52_claim_term.json`
+
+$7{,}200$ games on block 15,700,000, 300 deals × 2 parities, zero fallbacks,
+zero unfinished. The dose check passed: every arm's `weights.claim` equalled its
+registered dose and the champion's was still 0.0.
+
+| arm | `w_claim` | vs SESTINA (rev 3) | self-play | verdict |
+|---|---:|---|---|---|
+| A1 | +0.10 | −0.0633 [−0.259, +0.133] | +0.1067 [−0.112, +0.325] | no |
+| A2 | +0.30 | +0.0900 [−0.200, +0.380] | +0.2233 [−0.012, +0.458] | no |
+| A3 | +0.60 | −0.0467 [−0.325, +0.232] | +0.1867 [−0.032, +0.405] | no |
+| A4 | −0.20 | +0.2267 [−0.051, +0.505] | −0.2000 [−0.424, +0.024] | no |
+
+**Nothing clears. No withdrawal fires.** All four arms are genuinely distinct —
+`arm_overlap` puts every pair at 500+ of 600 pairings differing, so this is not
+P51's case of two names for one arm.
+
+### Prediction 1 failed, and it is the one that decides what may be read
+
+**The dose response is not monotone in either population.** Against SESTINA:
+−0.063, **+0.090**, −0.047. In self-play: +0.107, **+0.223**, +0.187. Up then
+down, both times, with A2 the peak.
+
+The registration fixed what that means before the run: *"If it is not, the term
+is interacting with `turn` or `scarce` rather than adding, and no single dose
+should be read."*
+
+So **A2 is not readable as a dose effect** — and A2 is the most promising cell
+this line of work has produced. It would not ship in any case: the bar needs
+$+0.15$ clear of zero in *both* populations, and A2's SESTINA figure is $+0.0900$
+with an interval covering zero. But the reason it is set aside is the registered
+one, not the convenient one.
+
+### Prediction 4 failed too, and it points the same way
+
+The ask hit rate was predicted flat or falling, because a term that prefers
+completing to hitting should cost hits. It **rose** in every arm — 0.5206,
+0.5236, 0.5212, 0.5207 against the champion's 0.5194. Small, but the wrong sign,
+and the registration said a rise *"would suggest the term is not doing what it
+says."*
+
+Two of four predictions failed and both say the same thing: at these doses
+`claim` is perturbing an objective whose three live terms already interact,
+rather than adding a preference for half-suit lifetime.
+
+### Prediction 2 is half right
+
+A4 is negative in self-play (−0.2000) and **positive against SESTINA**
+(+0.2267). A term whose sign flips between populations is opponent-specific by
+definition and does not ship, but it is also a warning about A2: if a *negative*
+dose can look that good against SESTINA, a positive one looking good there is
+worth little.
+
+### Prediction 3 holds
+
+A null below the bar, as registered. That was the predicted outcome and it is
+what happened.
+
+### What this does and does not close
+
+It does **not** close the idea that declaration count is the channel with room —
+the identity still says $D_{\text{us}}$ must rise by **+0.541** a game, from
+4.100 to 4.641, and the external engine reaches 4.832. What it closes is
+`w_claim` **as the lever at these doses**, and the reason is legible: the term
+moved hits, not declarations. `scripts4/claim_term_mechanism.py` measures
+$D_{\text{us}}$ directly, which this duel's harness does not record — because a
+duel that cannot see the quantity its registration is about can say whether an
+arm wins and not whether the mechanism fired.
