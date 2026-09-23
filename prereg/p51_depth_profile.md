@@ -112,3 +112,53 @@ not ship**, and will be reported as such rather than as a win.
 convention knob stay at their shipped values in every arm. Nothing in this
 registration is permitted to become a grid search: three arms, one of them
 conditional, and no promotion of a cell that was not named here.
+
+---
+
+## OUTCOME, `results/p51_depth_profile.json`
+
+$7{,}200$ games on block 15,100,000, 300 deals × 2 parities, zero fallbacks,
+zero unfinished.
+
+| arm | vs SESTINA (rev 3) | self-play | verdict |
+|---|---|---|---|
+| D1 flat past k=4 | −0.0267 [−0.296, +0.243] | −0.1367 [−0.359, +0.085] | no |
+| D2 measured table | +0.1000 [−0.174, +0.374] | −0.1333 [−0.358, +0.091] | no |
+
+**Neither clears. Neither withdrawal fires.** D3 stays demoted.
+
+Against the three registered predictions:
+
+1. **Directionally right, and not yet measured as asked.** 1.4's self-play
+   figure was −0.2533 [−0.478, −0.028]; D1 is −0.1367 [−0.359, +0.085], so the
+   loss roughly halves and the interval now covers zero. But that comparison is
+   **across seed blocks** — P49 N1 ran on 12,300,000 and this on 15,100,000 —
+   and the prediction asks whether D1 beats 1.4, which is a paired question.
+   `R_gamma_team_14` re-runs 1.4 on **this** block for that reason. It is a
+   control and cannot ship: P49's withdrawal already fired on it.
+2. **Right on the ordering, wrong on the size.** D2 ≥ D1 in both populations,
+   but the gap against SESTINA is +0.127, not "little". In self-play the two are
+   indistinguishable (−0.1333 against −0.1367).
+3. **Right.** Neither clears, and this was registered rather than discovered.
+
+**The outcome registered as least expected did not happen.** D1 did not land at
+1.4's −0.25. So the shape hypothesis is not refuted: the top-end over-weight
+does look like part of the mechanism. What is now measured is that fixing it is
+worth something close to zero and not worth the bar.
+
+**Bite without conversion.** The ask hit rate rises 0.5227 → 0.5411 and the
+margin does not follow. That is the same pattern `contest_ledger` and
+`completion_ledger` found: this engine's deficit is not a shortage of hits.
+
+**What this closes.** Together with P49 N1 the partner action model is now
+closed in both of its dimensions — the exponent by that duel, the functional
+form by this one. Both were measurable improvements to the belief that bought
+nothing at the bar, which is consistent with the OURS channel bound of +0.2017:
+the teammate channel's effect runs through declarations, and declarations cannot
+carry a +0.15 win however well calibrated they are.
+
+The teammate *information* is still worth +5.208 by the ceiling. The route from
+it to sets does not run through the action model, and after this it does not run
+through a missing constraint either — `belief_legality_audit` closed that at
+1.0000 over 129,600 worlds. If it exists it is in what the engine *does* with
+what it already knows.

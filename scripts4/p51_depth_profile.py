@@ -60,8 +60,21 @@ ARMS = {
     "D2_measured": {"depth_profile": "measured"},
     "D3_measured_both": {"depth_profile": "measured",
                          "depth_profile_side": "both"},
+    # A CONTROL, NOT A CANDIDATE. Prediction 1 of the registration is "D1 beats
+    # gamma_team = 1.4 in self-play", and P49 N1 measured 1.4 on block
+    # 12,300,000 while this runs on 15,100,000. Comparing across blocks answers
+    # a weaker question than the prediction asks, so 1.4 is re-run HERE, on the
+    # same deals, paired within deal like every other arm.
+    #
+    # It is not eligible to ship and could not be: P49's withdrawal condition
+    # already fired on it (-0.2533 [-0.478, -0.028] in self-play). It is in this
+    # table to make a registered prediction testable, and it is named R_ rather
+    # than D_ so it can never be read as one of the three registered arms.
+    "R_gamma_team_14": {"gamma_team": 1.4},
 }
 DEFAULT_ARMS = ("D1_flat4", "D2_measured")
+#: Arms that exist to measure a prediction, never to be promoted.
+CONTROLS = ("R_gamma_team_14",)
 
 p46_screen.ARMS.update({k: dict(v) for k, v in ARMS.items()})
 
@@ -114,6 +127,7 @@ def main(argv=None) -> int:
                ship_bar=SHIP_BAR, seed_base=SEED0, agent0=AGENT0,
                deals=a.deals, seconds=round(time.time() - t0, 1),
                screen="results/partner_choice_likelihood_14800000.json",
+               controls=CONTROLS,
                closed_by_p49="(0.35, 1.4) lost: -0.1433 vs SESTINA, "
                              "-0.2533 self-play; this varies SHAPE not exponent",
                per_pair=rows)

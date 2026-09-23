@@ -5667,3 +5667,64 @@ measurements do not, they flatten." The depth dimension never got it.
 `prereg/p51_depth_profile.md` registers it, and registers that it is **not
 expected to clear the bar** — the teammate channel's effect runs through the
 declaration gate and the OURS channel is bounded at +0.2017.
+
+## OUTCOME 2026-09-23: the shape was real, and worth less than the bar — P51
+
+`results/p51_depth_profile.json`, 7,200 games on block 15,100,000, 300 deals ×
+2 parities, zero fallbacks, zero unfinished.
+
+| arm | vs SESTINA (rev 3) | self-play | verdict |
+|---|---|---|---|
+| D1, power law held flat past k=4 | −0.0267 [−0.296, +0.243] | −0.1367 [−0.359, +0.085] | no |
+| D2, the measured table | **+0.1000** [−0.174, +0.374] | −0.1333 [−0.358, +0.091] | no |
+
+**Neither clears. Neither withdrawal fires.** D3 stays demoted, as registered.
+
+D2's SESTINA figure is the most positive number this line of work has produced
+and it is **not a win**: below the +0.15 bar, interval covering zero, and
+negative in the other population. A screen that promotes its best near-miss is
+not a screen.
+
+### What the registration predicted, and what it got wrong
+
+Prediction 3 — *neither clears* — was right, and it was registered rather than
+discovered. Prediction 2 — *D2 ≥ D1 but barely* — was right on the ordering and
+wrong on the size: the gap against SESTINA is +0.127, while in self-play the two
+are indistinguishable.
+
+Prediction 1 — *D1 beats gamma_team = 1.4 in self-play* — is directionally
+right and **not yet measured as it was asked**. 1.4 was −0.2533 [−0.478,
+−0.028]; D1 is −0.1367 [−0.359, +0.085]. The loss roughly halves and the
+interval now covers zero — but P49 N1 ran on block 12,300,000 and this on
+15,100,000, and "D1 beats 1.4" is a paired question. `R_gamma_team_14` re-runs
+1.4 on *this* block for that reason. It is a **control, not a candidate**: it
+cannot ship, because P49's withdrawal condition already fired on it.
+
+**The outcome registered as least expected did not happen.** D1 did not land at
+−0.25. So the shape hypothesis survives: the +42.8% over-weight at k=5 does look
+like part of the mechanism. What is now measured is that fixing it is worth
+approximately nothing.
+
+### Bite without conversion, again
+
+The ask hit rate rises **0.5227 → 0.5411** and the margin does not follow. That
+is the third instrument to find this shape: `completion_ledger` found we waste
+31.6% of our hits against their 25.2%, and `contest_ledger` found the deficit
+sits in the contested middle at a matched deal. **This engine's problem is not a
+shortage of hits.**
+
+### What is now closed
+
+The partner action model is closed in **both** of its dimensions: the exponent
+by P49 N1, the functional form by P51. Both were real, measurable improvements
+to the belief that bought nothing at the bar — consistent with the OURS channel
+bound of **+0.2017**, because the teammate channel's effect runs through
+declarations and declarations cannot carry a +0.15 win however well calibrated
+they are.
+
+Teammate *information* is still worth +5.208 by the ceiling. After this the
+route from it to sets does not run through the action model, and after
+`belief_legality_audit` (1.0000 over 129,600 worlds) it does not run through a
+missing constraint either. **If it exists, it is in what the engine does with
+what it already knows** — allocation, not inference. That is where the contested
+middle lives, and it is the next thing to attack.

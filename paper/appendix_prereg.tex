@@ -962,6 +962,43 @@ is not a screen. The same term is worth a cycle to their engine at $+25$ and
 negative to ours at every dose. \path{results/p50_contest.json} &
 \S\ref{sec:res-conversion} \\
 
+P51 & \path{p51_depth_profile.md} \newline
+\emph{The exponent of the partner choice model is closed. Is its functional
+form?} &
+Written before any P51 game. P49~N1 dueled $(\gamma_{\mathrm{opp}},
+\gamma_{\mathrm{team}}) = (0.35, 1.4)$ and lost in both populations, closing the
+partner \emph{exponent}; it could not separate a wrong exponent from a wrong
+\emph{shape}, because the log-linear tilt makes the likelihood
+$\mathrm{depth}^{\gamma \cdot n}$, a power law with no shape parameter at all.
+The shape is measurable without fitting anything: our partner runs our policy,
+so $P(\text{ask in } H \mid k)$ is a count. Over $13{,}801$ partner asks the
+best-fit power law is $1.40$ --- so $1.4$ was very nearly the right strength
+--- and its error is concentrated at the top, \textbf{$+42.8\%$ at $k=5$},
+because the measurement flattens and a power law keeps climbing. $k=4$ and
+$k=5$ are the counts a declaration is decided on and the gate reads $0.97$ on
+the joint. Three arms on block \textbf{15,100,000}, $300$ deals $\times$ 2
+parities: D1 holds the power law flat past $k=4$, D2 uses the measured table,
+D3 applies D2 to opponent slots too and is \emph{demoted unless D2 clears},
+because a profile fitted on our own policy is not evidence about theirs.
+Predicted before the run: D1 recovers most of $1.4$'s self-play loss; D2
+$\ge$ D1 but barely; \emph{neither clears the bar}, since the channel runs
+through declarations and the \textsc{ours} channel is bounded at $+0.2017$. &
+Neither clears, as predicted, and neither withdrawal fires. The shape
+hypothesis is not refuted --- the outcome registered as least expected, D1
+landing at $1.4$'s $-0.25$ as well, did not happen --- but the correction does
+not buy a shippable gain either. The prediction that D2 exceeds D1 ``but
+barely'' is wrong against \textsc{sestina}, where the gap is $+0.127$; in
+self-play the two are indistinguishable. D3 stays demoted. &
+\textbf{NOTHING CLEARS; THE SHAPE IS REAL AND WORTH LESS THAN THE BAR.}
+$7{,}200$ games, zero fallbacks, zero unfinished. D1 $-0.0267$
+$[-0.296, +0.243]$ / $-0.1367$ $[-0.359, +0.085]$; D2 $+0.1000$
+$[-0.174, +0.374]$ / $-0.1333$ $[-0.358, +0.091]$. D2's \textsc{sestina} figure
+is below the bar with an interval covering zero and is negative in the other
+population, so it is not a win and does not advance. Ask hit rate rises
+$0.5227 \to 0.5411$, which is bite without conversion --- the same pattern the
+conversion ledger found. \path{results/p51_depth_profile.json} &
+\S\ref{sec:res-profile} \\
+
 \end{longtable}
 }
 
