@@ -127,3 +127,66 @@ Harness conditions: any arm whose `weights.suit` does not equal its registered
 dose at run time, and non-monotonicity per prediction 2.
 `scripts4/arm_overlap.py` is run on the result, because an arm that changes
 almost nothing and an arm that changes nothing are different claims.
+
+---
+
+## OUTCOME, `results/p53_depth_preference.json` — the chain is REFUTED
+
+$7{,}200$ games on block 16,500,000, 300 deals × 2 parities, zero fallbacks,
+zero unfinished, dose check passed at run time.
+
+| arm | `w_suit` | vs SESTINA | self-play | ask hit rate |
+|---|---:|---|---|---:|
+| B4 | **+0.12** | −0.0600 [−0.315, +0.195] | −0.1033 [−0.318, +0.111] | 0.5159 |
+| — | +0.06 champion | — | — | 0.5177 |
+| B1 | 0.00 | −0.0400 [−0.297, +0.217] | +0.0600 [−0.159, +0.279] | 0.5299 |
+| B2 | −0.03 | −0.1167 [−0.406, +0.173] | **−0.5533 [−0.777, −0.330]** | 0.5412 |
+| B3 | −0.06 | **−0.4133 [−0.717, −0.110]** | **−1.1700 [−1.390, −0.950]** | 0.5556 |
+
+**B2 and B3 are WITHDRAWN** — their intervals lie entirely below zero. All four
+arms are genuinely distinct (every pair differs on 564+ of 600 pairings).
+
+### Prediction 1 failed, and it was registered as the one I would most regret
+
+> *"B4 is the worst arm in both populations. If doubling the preference does not
+> hurt, the chain above is wrong about the sign and everything built on it needs
+> re-reading."*
+
+**B4 is nearly neutral and is the second-best arm.** The worst arms are B3 and
+B2 — the ones the chain predicted would help. The dose response is clean and
+monotone in the wrong direction: the more we flatten the depth preference, the
+worse we play, in **both** populations, with the largest dose losing **−1.17** in
+self-play.
+
+**So the chain has the sign backwards.** Flattening our allocation toward
+SESTINA's does not help; it is the single most damaging change this project has
+measured from one knob.
+
+### Prediction 2 held, and it makes the result readable
+
+The response *is* monotone across B4 → champion → B1 → B2 → B3. That was the
+condition for a dose being readable at all, and it is met — so unlike P51 and
+P52 this result may be read as a dose effect. It reads: **do not do this.**
+
+### And the hit rate went the wrong way with the margin
+
+The ask hit rate rises monotonically as the preference flattens — 0.5159,
+0.5177, 0.5299, 0.5412, **0.5556** — while the margin falls. Flattening makes us
+ask where we succeed *more often* and win *less*. That is the "bite without
+conversion" pattern for the fourth time in this project, and now in its sharpest
+form: **+3.8 points of hit rate bought −1.17 sets a game.**
+
+It also disposes of a reading that has hovered over the cross-engine comparison
+for a long time. The external engine's higher hit rate is not something to chase:
+here is a knob that buys hit rate directly and it is a disaster.
+
+### What was wrong with the chain
+
+Each measured link survives — assembly *is* the whole deficit, our climb at low
+holdings *is* slower, our allocation *is* steeper. What fails is the causal
+reading laid over them. Their flat allocation is right for **their** engine, not
+a target for ours; correlation across two different policies was treated as a
+lever inside one.
+
+`scripts4/chain_mechanism.py` measures every link at these exact doses, which
+says *where* the chain breaks rather than that it did.

@@ -94,6 +94,15 @@ def main(argv=None) -> int:
                     help="override our w_suit, to check a candidate knob "
                          "actually flattens the curve BEFORE it is dueled")
     ap.add_argument("--w-scarce", type=float, default=None)
+    ap.add_argument("--by", choices=("own", "team"), default="own",
+                    help="classify a half-suit by the ASKER's own count or by "
+                         "the asker's TEAM's count. The two are different "
+                         "questions: `suit` weights own depth, but assembly is "
+                         "a team quantity, so a half-suit the asker holds one "
+                         "of may be one the TEAM holds five of. If the gap "
+                         "survives the team conditioning it is a real "
+                         "misallocation; if it vanishes, the own-count gap was "
+                         "an artifact of which seat happened to hold what.")
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
 
@@ -137,16 +146,21 @@ def main(argv=None) -> int:
             if isinstance(act, Ask):
                 side = "ours" if actor in ours else "theirs"
                 hand = st.hands[actor]          # PRE-ask, the hand that chose
+                mates = [p for p in range(NUM_PLAYERS)
+                         if team_of(p) == team_of(actor)]
                 asked = half_suit_of(act.card)
                 row[f"{side}_asks"] += 1
                 for h in range(n_hs):
                     if st.set_winner[h] is not None:
                         continue
-                    k = _count(hand, h)
+                    if a.by == "team":
+                        k = sum(_count(st.hands[p], h) for p in mates)
+                    else:
+                        k = _count(hand, h)
                     row[f"{side}_seen{k}"] += 1
                     if h == asked:
                         row[f"{side}_chosen{k}"] += 1
-                        if k == 0 and len(impossible) < 10:
+                        if k == 0 and a.by == "own" and len(impossible) < 10:
                             impossible.append({"game": g, "seat": actor,
                                                "half_suit": h, "side": side})
             st.apply(actor, act)
@@ -161,7 +175,9 @@ def main(argv=None) -> int:
     out = {"script": "scripts4/ask_allocation.py", "descriptive": True,
            "rules": RULES_D, "seed_deal": SEED0, "seed_agent": AGENT0,
            "n_games": a.games,
-           "classifier": "the asker's own PRE-ask count in the half-suit",
+           "classifier": ("the asker's own PRE-ask count" if a.by == "own"
+                          else "the asker's TEAM's PRE-ask count"),
+           "by": a.by,
            "our_overrides": {k: v for k, v in (
                ("w_suit", a.w_suit), ("w_scarce", a.w_scarce)) if v is not None},
            "selftest_chose_a_half_suit_held_none_of": len(impossible),
@@ -188,8 +204,12 @@ def main(argv=None) -> int:
                              if tot("theirs_asks") else None)}
 
     print("\n" + "=" * 72)
-    print(f"  SELF-TEST: asks in a half-suit the asker held none of: "
-          f"{len(impossible)}")
+    if a.by == "own":
+        print(f"  SELF-TEST: asks in a half-suit the asker held none of: "
+              f"{len(impossible)}")
+    else:
+        print("  SELF-TEST: not applicable under TEAM conditioning -- a seat")
+        print("  may legally ask in a half-suit its PARTNER holds all of.")
     if impossible:
         print("  *** MUST BE ZERO -- the rules forbid it, so the harness is")
         print("  *** misreading the hand and NO RATE BELOW MAY BE READ.")

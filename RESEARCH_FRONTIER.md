@@ -6144,3 +6144,72 @@ had to be separated afterwards.
 **The prediction I would most regret getting wrong** is registered as such: B4,
 doubling the preference, should be the worst arm in both populations. If it is
 not, the chain has the sign backwards and everything above needs re-reading.
+
+## OUTCOME 2026-09-23: P53 refutes the chain — and the panel says exactly where it breaks
+
+`results/p53_depth_preference.json`, 7,200 games, and
+`results/chain_mechanism_16700000.json`, 150 deals × 2 parities.
+
+| arm | `w_suit` | vs SESTINA | self-play | ask hit rate |
+|---|---:|---|---|---:|
+| B4 | +0.12 | −0.0600 [−0.315, +0.195] | −0.1033 [−0.318, +0.111] | 0.5159 |
+| — | +0.06 champion | — | — | 0.5177 |
+| B1 | 0.00 | −0.0400 [−0.297, +0.217] | +0.0600 [−0.159, +0.279] | 0.5299 |
+| B2 | −0.03 | −0.1167 [−0.406, +0.173] | **−0.5533** [−0.777, −0.330] | 0.5412 |
+| B3 | −0.06 | **−0.4133** [−0.717, −0.110] | **−1.1700** [−1.390, −0.950] | 0.5556 |
+
+**B2 and B3 withdrawn.** All four arms distinct (564+ of 600 pairings differ).
+
+### The prediction I registered as most regretted, failed
+
+> *"B4 is the worst arm in both populations. If doubling the preference does not
+> hurt, the chain is wrong about the sign and everything built on it needs
+> re-reading."*
+
+B4 is nearly neutral and second-best. The worst arms are the two the chain said
+would help. The dose response is clean and **monotone in the wrong direction**.
+Prediction 2 held — the response *is* monotone — which is what makes the doses
+readable at all, and they read *do not do this*.
+
+### The panel says the break is between link 1 and link 3
+
+| arm | alloc@1 | climb@1 | peak-6 | vs champion | margin |
+|---|---:|---:|---:|---:|---:|
+| B4 +0.12 | 0.09918 | 0.03036 | 4.253 | +0.023 | −0.387 |
+| champion | 0.11004 | 0.03118 | 4.230 | — | −0.440 |
+| B1 0.00 | 0.12875 | 0.02989 | 4.213 | −0.017 | −0.453 |
+| B2 −0.03 | 0.16122 | 0.03252 | 4.210 | −0.020 | −0.500 |
+| B3 −0.06 | **0.24025** | 0.03441 | **4.027** | **−0.203** | −0.893 |
+| **SESTINA** | **0.19717** | **0.04493** | **4.860** | | |
+
+**Link 1 moves exactly as designed** — allocation at holding-1 spans 0.099 to
+0.240 across the doses, and B2 lands near their 0.197.
+
+**Link 2 barely moves and never approaches theirs.** At B3 we allocate *more*
+to holding-1 than SESTINA does (0.240 against 0.197) and still climb out at
+0.0344 against their 0.0449.
+
+**Link 3 never rises.** Peak-6 is flat then falls.
+
+So their climb advantage at low holdings is **not caused by their allocation**.
+Sending more asks into half-suits we hold one of does not convert into
+assembling them, and past a point it costs a fifth of a half-suit a game.
+
+### What was actually wrong, and what survives
+
+Every measured link survives as a **description**: assembly is the whole
+deficit, our climb at low holdings is slower, our allocation is steeper. What
+fails is the causal reading laid over them — their flat allocation is right for
+*their* engine, and a correlation observed **across two different policies** was
+treated as a lever **inside one**. That is the error, stated plainly, and it is
+the same shape as reading a fitted weight as evidence a term helps alone.
+
+### And a reading this disposes of for good
+
+The ask hit rate rises monotonically as the preference flattens — 0.5159,
+0.5177, 0.5299, 0.5412, **0.5556** — while the margin falls. **+3.8 points of
+hit rate bought −1.17 sets a game.** The external engine's higher hit rate has
+hovered over the cross-engine comparison as something to chase; here is a knob
+that buys it directly and it is the most damaging single change this project has
+measured. Hit rate is not the objective, and now there is a dose response
+proving it rather than an argument.
