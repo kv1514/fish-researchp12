@@ -5973,3 +5973,72 @@ back **less** often than theirs ($0.03895$ against $0.04148$). A term aimed at a
 refuted mechanism should not be dueled because a fit liked it.
 
 None of the remaining four will be run without a reason of its own.
+
+## OUTCOME 2026-09-23: P52 — the `claim` term moved hits, not declarations
+
+`results/p52_claim_term.json`, 7,200 games, and
+`results/claim_term_mechanism_15900000.json`, 150 deals × 2 parities.
+
+| arm | `w_claim` | vs SESTINA | self-play |
+|---|---:|---|---|
+| A1 | +0.10 | −0.0633 [−0.259, +0.133] | +0.1067 [−0.112, +0.325] |
+| A2 | +0.30 | +0.0900 [−0.200, +0.380] | +0.2233 [−0.012, +0.458] |
+| A3 | +0.60 | −0.0467 [−0.325, +0.232] | +0.1867 [−0.032, +0.405] |
+| A4 | −0.20 | +0.2267 [−0.051, +0.505] | −0.2000 [−0.424, +0.024] |
+
+**Nothing clears, no withdrawal fires**, and all four arms are genuinely distinct
+(every pair differs on 500+ of 600 pairings — not P51's case of two names for one
+arm).
+
+### The registration disqualified its own best cell
+
+The dose response is **not monotone** in either population: −0.063, **+0.090**,
+−0.047 against SESTINA and +0.107, **+0.223**, +0.187 in self-play — up then
+down, both times. The registration fixed the consequence before the run: *"the
+term is interacting with `turn` or `scarce` rather than adding, and no single
+dose should be read."* A2 is the most promising cell this line of work has
+produced and it is set aside for the **registered** reason, not the convenient
+one. It would not ship regardless — the bar needs +0.15 clear of zero in *both*
+populations and A2's SESTINA interval covers zero.
+
+### And the mechanism check says why, which no duel could
+
+`p46_screen` records margins, asks and hit rates and **not declarations**, so a
+duel about declaration count could not see its own subject.
+`scripts4/claim_term_mechanism.py` reads $D_{\text{us}}$ and $W_{\text{us}}$
+straight off the `ClaimEvent`s, paired within deal:
+
+| `w_claim` | $D_{\text{us}}$ | vs champion | 95% CI | $W_{\text{us}}$ | margin vs champion |
+|---:|---:|---:|---|---:|---:|
+| 0.00 | 4.183 | — | — | 0.133 | — |
+| +0.10 | 4.157 | −0.027 | [−0.160, +0.110] | 0.133 | −0.053 |
+| +0.30 | 4.203 | **+0.020** | [−0.167, +0.203] | **0.093** | **+0.180** |
+| +0.60 | 4.087 | −0.097 | [−0.297, +0.097] | 0.100 | −0.007 |
+| −0.20 | 4.220 | +0.037 | [−0.163, +0.247] | 0.110 | +0.047 |
+
+**$D_{\text{us}}$ does not move.** Every interval covers zero and the largest
+point estimate is +0.037 against a target of **+0.541** — about 7% of what is
+needed, and indistinguishable from nothing. (The smoke's alarming −0.875 at the
+negative dose was eight deals of noise; at power that dose is +0.037.)
+
+**What A2 actually did was declare more accurately, not more often.**
+$W_{\text{us}}$ falls 0.133 → 0.093 and the margin moves +0.180 — which sits
+inside the **+0.202** bound on the OURS channel, exactly where a bounded effect
+should sit. The term is working through the channel that cannot carry a win,
+which is the complete explanation of the duel, and the monotonicity condition
+flagged it as unreadable before any of this was known.
+
+### What is closed and what is not
+
+Closed: `w_claim` as a lever on declaration **count**, at any dose in the swept
+range, for a mechanical reason rather than a statistical one.
+
+Not closed: **declaration count remains the only channel with room.**
+$D_{\text{us}}$ must rise from 4.100 to **4.641**, $+0.541$ a game; the external
+engine reaches 4.832. Nothing measured today touches that, and every candidate
+this project has played moved accuracy or hits instead.
+
+The next question is therefore not "which ask weight" but **why fewer half-suits
+end up entirely in our hands at all** — `completion_ledger` puts assembly at
+−0.6525 while turn acquisitions are *+0.0931 in our favour*. We acquire as much
+and assemble less.
