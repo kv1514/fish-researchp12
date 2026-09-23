@@ -85,7 +85,7 @@ class Posterior:
     share the same DP tables and the same batch of weighted draws.
     """
 
-    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma", "gamma_team", "convention_beta", "convention_q", "convention_aim", "convention_book",
+    __slots__ = ("bel", "obs", "rng", "n_draws", "n_worlds", "mode", "gamma", "gamma_team", "depth_profile", "depth_profile_side", "convention_beta", "convention_q", "convention_aim", "convention_book",
                  "stats", "n", "_sys", "_card_group", "_free", "_marg",
                  "_worlds", "_batch", "_sampler", "_exact_ok", "_idx",
                  "_free_pos", "depth_mode", "count_mode", "opp_lambda",
@@ -99,6 +99,8 @@ class Posterior:
                  opp_lambda: float = 0.0, gamma_schedule: float = 0.0,
                  sis_tilt: float = 0.0, silence_delta: float = 1.0,
                  gamma_team: Optional[float] = None,
+                 depth_profile: Optional[str] = None,
+                 depth_profile_side: str = "team",
                  w_unlocated: float = 0.0,
                  convention_beta: float = 0.0,
                  convention_q: float = 0.0,
@@ -111,6 +113,11 @@ class Posterior:
         # A separate sharpness for our own side's asks. None means one number
         # for both sides, which is the incumbent and is bit-identical to it.
         self.gamma_team = gamma_team if obs is not None else None
+        #: prereg/p51_depth_profile.md. Like gamma it needs the observation:
+        #: without asks there is no choice model to shape. None is the shipped
+        #: power law and is bit-identical to the incumbent.
+        self.depth_profile = depth_profile if obs is not None else None
+        self.depth_profile_side = depth_profile_side
         #: Weight on the pre-play naming agreement. Inert at 0.
         self.convention_beta = convention_beta if obs is not None else 0.0
         self.convention_q = convention_q if obs is not None else 0.0
@@ -195,6 +202,7 @@ class Posterior:
         # "believe nothing about opponents, something about teammates" is a
         # coherent configuration and one the sweep visits.
         if (self.gamma != 0.0 or self.opp_lambda > 0.0
+                or self.depth_profile is not None
                 or (self.gamma_team is not None and self.gamma_team != 0.0)
                 or self.convention_beta != 0.0
                 or self.convention_q != 0.0):
@@ -206,6 +214,9 @@ class Posterior:
                                        gamma_schedule=self.gamma_schedule,
                                        sis_tilt=self.sis_tilt,
                                        gamma_team=self.gamma_team,
+                                       depth_profile=self.depth_profile,
+                                       depth_profile_side=(
+                                           self.depth_profile_side),
                                        w_unlocated=self.w_unlocated,
                                        convention_beta=self.convention_beta,
                                        convention_q=self.convention_q,

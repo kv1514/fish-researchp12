@@ -146,6 +146,48 @@ ALPHA_FLAT = 0.7923
 ALPHA_MEAN = 1.0626
 
 
+#: P(our partner asks in a half-suit | cards of it they hold), measured
+#: directly on 13,801 partner asks over 300 games and normalised to k=1.
+#: results/partner_choice_likelihood_14800000.json; prereg/p51_depth_profile.md.
+#:
+#: The entry at 0 is never read: depth 0 is handled by the same 1e-9 floor the
+#: power law uses, because "asked in a half-suit it holds none of" is already a
+#: hard constraint in the belief and must not be softened into a weight here.
+#: The entry at 6 repeats 5 because k=6 was NEVER OBSERVED -- hold all six and
+#: this engine declares rather than asking elsewhere -- so there is no measured
+#: value to put there and extrapolating the rising fit is exactly the error this
+#: profile exists to remove.
+PROFILE_MEASURED = (0.0, 1.0, 2.58, 5.52, 6.85, 6.67, 6.67)
+
+#: The exponent the measured profile is best fitted by, over the counts where a
+#: power law tracks it (k <= 4): 1.44 there, 1.40 over all k. D1 uses the
+#: all-k value, so D1 and D2 differ only in SHAPE and not in strength.
+PROFILE_EXPONENT = 1.4
+
+#: Where the power law stops tracking the measurement. At k=5 it over-weights
+#: by 42.8%, and k=4 and k=5 are the counts a declaration is decided on.
+PROFILE_FLAT_AT = 4
+
+
+def profile_log(kind: str, depth: int) -> float:
+    """One ask's log term under a named depth profile.
+
+    ``kind`` "flat4" holds the shipped power law at ``PROFILE_FLAT_AT`` and is
+    the minimal change; "measured" reads the table. Both return the same thing
+    the power law does at depth 1, so the profiles differ from the incumbent
+    only in shape.
+    """
+    if depth <= 0:
+        return math.log(1e-9)
+    if kind == "flat4":
+        return PROFILE_EXPONENT * math.log(min(depth, PROFILE_FLAT_AT))
+    if kind == "measured":
+        d = min(depth, len(PROFILE_MEASURED) - 1)
+        v = PROFILE_MEASURED[d]
+        return math.log(v) if v > 0.0 else math.log(1e-9)
+    raise ValueError(f"unknown depth_profile {kind!r}")
+
+
 def measured_alpha(frac: float) -> float:
     """The fitted depth exponent for an ask at this point in the game."""
     f = frac if frac < ALPHA_FLAT else ALPHA_FLAT
@@ -214,7 +256,8 @@ def build(bel, obs, gamma: float, include_self: bool = False,
           w_unlocated: float = 0.0,
           opp_lambda: float = 0.0, order=None,
           gamma_schedule: float = 0.0, sis_tilt: float = 0.0,
-          gamma_team: float | None = None, convention_beta: float = 0.0,
+          gamma_team: float | None = None, depth_profile: str | None = None,
+          depth_profile_side: str = "team", convention_beta: float = 0.0,
           convention_q: float = 0.0, convention_aim: bool = False,
           convention_book: str = "depth"):
     """Build an ``(OpponentModel, card_slot)`` pair, or ``(None, None)``.
@@ -445,6 +488,10 @@ def build(bel, obs, gamma: float, include_self: bool = False,
                 u = sum(1 for c_ in range(lo_, lo_ + 6)
                         if bel.public_loc[c_] is None)
                 unloc_factor[hs_] = float(max(u, 1)) ** w_unlocated
+    #: slots the depth profile applies to, collected while the side test for
+    #: gamma_team is already being made so the two can never disagree about
+    #: which seats are ours
+    profile_slots: set[int] = set()
     for key, i in slots.items():
         n = counts[key]
         # The schedule enters as the MEAN factor over that slot's asks, so it
@@ -466,8 +513,19 @@ def build(bel, obs, gamma: float, include_self: bool = False,
         # (prereg/information_ceiling_split.md). gamma_team=None keeps one
         # number for both and is bit-identical to the incumbent.
         g = gamma
-        if gamma_team is not None and (key[0] % 2) == (me % 2):
+        ours_slot = (key[0] % 2) == (me % 2)
+        if gamma_team is not None and ours_slot:
             g = gamma_team
+        if depth_profile is not None and (depth_profile_side == "both"
+                                          or ours_slot):
+            # THE PROFILE CARRIES ITS OWN EXPONENT, so the slot's weight must
+            # not multiply one in as well or the shape would be raised to a
+            # power and stop being the measured shape. What is left in the
+            # weight is the per-slot strength -- how many asks, and the
+            # schedule's mean factor -- which is exactly what the power-law
+            # path would have kept had gamma been 1.
+            profile_slots.add(i)
+            g = 1.0
         w = g * n * mean_f
         if w_unlocated:
             w *= unloc_factor[key[1]]
@@ -540,7 +598,40 @@ def build(bel, obs, gamma: float, include_self: bool = False,
     #: decision rather than a replay per draw. Verified on 23,268
     #: (player, half-suit, time) triples across six games: zero mismatches.
     table = None
-    if depth_mode == "at_ask" and slots:
+    if depth_profile is not None and slots:
+        # THE PROFILE TABLE, and it must agree with the power-law path wherever
+        # the profile is not applied. The non-table branch of
+        # `log_likelihood_from_depths` computes `weight[i] * log(depth + base)`;
+        # every row here computes the same thing, with `log` swapped for the
+        # profile on profile slots only. A row for a non-profile slot is
+        # therefore bit-identical to what the power law would have produced,
+        # which is what `tests4/test_depth_profile.py` asserts -- a table that
+        # silently re-scaled the slots it was not meant to touch would move
+        # every arm's opponent model as a side effect and the duel would be
+        # measuring two changes at once.
+        #
+        # The at_ask deltas are honoured where they exist, so the profile
+        # composes with depth_mode rather than replacing it.
+        table = []
+        for key, i in slots.items():
+            n = counts[key]
+            if depth_mode == "at_ask":
+                ds = deltas.get(key, [0] * n)
+            else:
+                ds = [0] * max(n, 1)
+            per_ask = weight[i] / len(ds) if ds else 0.0
+            row = []
+            for d in range(DEPTH_TABLE_MAX):
+                tot = 0.0
+                for dl in ds:
+                    v = d + base[i] + dl
+                    if i in profile_slots:
+                        tot += profile_log(depth_profile, v)
+                    else:
+                        tot += math.log(v if v > 0 else 1e-9)
+                row.append(per_ask * tot)
+            table.append(tuple(row))
+    elif depth_mode == "at_ask" and slots:
         table = []
         for key, i in slots.items():
             n = counts[key]

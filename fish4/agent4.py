@@ -93,6 +93,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                  infer_mode: str = "auto",
                  opponent_gamma: float = 0.0,
                  gamma_team: float | None = None,
+                 depth_profile: str | None = None,
+                 depth_profile_side: str = "team",
                  convention_beta: float = 0.0,
                  convention_q: float = 0.0,
                  convention_aim: bool = False,
@@ -263,6 +265,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
         #: Sharpness for our OWN side's asks. None -> one gamma for both
         #: sides, which is the incumbent and bit-identical to it.
         self.gamma_team = gamma_team
+        self.depth_profile = depth_profile
+        self.depth_profile_side = depth_profile_side
         #: Decoder weight: how sharply a partner's ask is read as
         #: carrying the agreed message. Inert at 0.
         self.convention_beta = convention_beta
@@ -510,6 +514,8 @@ class FishBot4(ExactEndgameMixin, Tablebase4Mixin, Agent):
                          gamma=(self.opponent_gamma if gamma is None
                                 else float(gamma)),
                          gamma_team=self.gamma_team,
+                         depth_profile=self.depth_profile,
+                         depth_profile_side=self.depth_profile_side,
                          convention_beta=self.convention_beta,
                          convention_q=self.convention_q,
                          convention_aim=self.convention_aim,

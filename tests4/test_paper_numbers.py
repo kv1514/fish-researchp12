@@ -226,6 +226,9 @@ def test_no_bolded_number_in_the_paper_is_unaccounted_for():
     assert not stale, (
         "these are no longer unexplained and must be deleted from "
         f"unwatched_claims.BASELINE: {stale}")
-    # Edit this DOWN as figures are paid off, never up. It started at 46.
-    assert len(BASELINE) <= 44, (
+    # Edit this DOWN as figures are paid off, never up. It started at 46, and
+    # is 40 since the sweep learned to read a thousands separator: four entries
+    # for two grouped figures collapsed to two, and four more figures resolved
+    # to watched values they had always matched but could not be compared with.
+    assert len(BASELINE) <= 40, (
         f"the baseline is meant to shrink; it holds {len(BASELINE)}")

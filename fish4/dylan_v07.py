@@ -194,6 +194,9 @@ class DylanV07(Agent):
         self._spec = spec or _load_spec()
         self._bin = str(_find_binary())
         self._seed = 1
+        #: See `_feed`. None on every shipped path, so the bridge is
+        #: bit-identical unless a study assigns it.
+        self.dealt_override = None
 
     def begin_game(self, player: int, rules, seed: int) -> None:
         super().begin_game(player, rules, seed)
@@ -216,7 +219,24 @@ class DylanV07(Agent):
         # one. That was this bridge until rev 3, it was worth +3.0833
         # [+2.7917, +3.3749] sets/game to us, and it is why this project's
         # cross-engine headline was withdrawn.
-        dealt = obs.initial_hand()
+        # SCREENING HOOK, inert on every shipped path. `dealt_override` is
+        # None unless a study sets it, and then the reconstruction below is
+        # skipped because the study has already computed the dealt hand from a
+        # COUNTERFACTUAL world. `Observation.initial_hand` cannot do that job:
+        # it restores resolved half-suits from `ev.revealed`, the true holder
+        # at resolution, so it reconciles a counterfactual current hand against
+        # a real historical fact and fails the nine-card check for that reason
+        # alone -- which is what rejected three quarters of the draws in
+        # scripts4/policy_inversion_bite.py before this existed.
+        # getattr, not attribute access: an INERT hook must not add a
+        # dependency. Reading `self.dealt_override` directly made `_feed`
+        # require an attribute only `begin_game` sets, which broke every caller
+        # that exercises `_feed` on its own -- the bridge's own regression tests
+        # among them. "Inert" has to mean inert for callers that have never
+        # heard of the hook, not merely that no shipped path assigns it.
+        dealt = getattr(self, "dealt_override", None)
+        if dealt is None:
+            dealt = obs.initial_hand()
         # Check it. A PURE round trip is worthless here and it took a failing
         # test to notice: `initial_hand` walks the transfers backwards and
         # replaying them forwards is its exact inverse, so the two always agree

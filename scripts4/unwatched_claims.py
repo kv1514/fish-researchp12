@@ -90,7 +90,16 @@ def sweep() -> tuple[list, list]:
         # to skim this list, which is the one thing it cannot survive. A
         # match may not start immediately after a letter, digit, dot or
         # hyphen, so a figure glued to a word is not one.
-        for m in re.findall(r"(?<![A-Za-z0-9.-])[-+]?\d+(?:\.\d+)?%?", body):
+        # THOUSANDS SEPARATORS ARE PART OF THE NUMBER. Without the group
+        # below, \mathbf{129{,}600} yields "129" and "600" -- two figures
+        # nothing can match, reported as unbacked, while the actual value IS
+        # watched. That inflated this list by two entries per grouped figure
+        # and taught the reader that entries here are noise. `{,}` is how the
+        # paper writes the separator inside math mode, so `_norm` has already
+        # turned it into a plain comma by the time the body is scanned.
+        for m in re.findall(
+                r"(?<![A-Za-z0-9.,-])[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?%?"
+                r"|(?<![A-Za-z0-9.,-])[-+]?\d+(?:\.\d+)?%?", body):
             val = m.lstrip("+")
             key = (val, ctx)
             if key in seen:
@@ -138,7 +147,6 @@ BASELINE = frozenset([
     ("-3.5", "mathbf"),
     ("-7.355", "mathbf"),
     ("0.000", "mathbf"),
-    ("0.0000", "mathbf"),
     ("0.0422", "mathbf"),
     ("0.045", "mathbf"),
     ("0.071", "mathbf"),
@@ -161,18 +169,22 @@ BASELINE = frozenset([
     ("0.570", "mathbf"),
     ("0.676", "mathbf"),
     ("0.796", "mathbf"),
-    ("000", "mathbf"),
     ("1.327", "mathbf"),
     ("1.92", "mathbf"),
     ("1.920", "mathbf"),
-    ("10", "mathbf"),
     ("3.18", "mathbf"),
     ("4.688", "mathbf"),
-    ("43", "mathbf"),
     ("601", "mathbf"),
-    ("657", "mathbf"),
-    ("900", "mathbf"),
     ("99.96%", "mathbf"),
+    # The two search speedups, as GROUPED figures. They were on this list as
+    # ("43", ...), ("000", ...), ("10", ...), ("900", ...) -- four entries for
+    # two numbers -- because the sweep read a thousands separator as the end of
+    # one number and the start of another. Recombining them is the same debt
+    # under a truer name, not new debt, and it pays four list entries down to
+    # two. Both are speedup ratios against an exact solver and neither has a
+    # results key; they come off this list when one is given one.
+    ("43,000", "mathbf"),
+    ("10,900", "mathbf"),
 ])
 
 

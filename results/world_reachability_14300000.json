@@ -1,0 +1,19 @@
+{
+ "script": "scripts4/world_reachability.py",
+ "descriptive": true,
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "seed_deal": 14300000,
+ "seed_agent": 143000,
+ "n_games": 25,
+ "n_decisions": 620,
+ "n_worlds": 19840,
+ "reachable_worlds": 19840,
+ "reachable_share": 1.0,
+ "truth_n": 620,
+ "truth_reachable": 620,
+ "truth_share": 1.0,
+ "bridge_survival_for_comparison": 0.26,
+ "world_source": "FishBot4.build_posterior(...).worlds()"
+}

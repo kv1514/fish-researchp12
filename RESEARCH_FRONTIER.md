@@ -5406,3 +5406,440 @@ invisible to the bolded-number sweep for the life of the paper; the sweep now
 covers both macros and all six new ceiling figures are watched from the day
 they enter, the derived ratio among them, stored in the results file rather
 than divided out in LaTeX.
+
+## ~~OUTCOME 2026-09-23: the inversion channel is not empty — 1.24 bits an opponent decision beyond legality~~ WITHDRAWN
+
+> **The 1.24 in this heading is retracted** and every ratio in the > section below with it; the defect and the corrected figure are at > the end of it. The body is left standing because the retraction is > only legible beside what it replaces.
+
+`results/policy_inversion_bite_14100000.json`, 30 games, **797 of their
+decisions**, 32 worlds each drawn from the champion's own posterior at that
+moment (`build_posterior(...).worlds()`, the SIS path, not the fallback).
+
+**Self-test: 797/797.** Their policy is deterministic and the probe is seeded
+as the live seat was, so the true world must reproduce the action that
+actually happened. It does, at every decision. Without that the ratios below
+would be noise about a broken harness.
+
+| | |
+|---|---:|
+| worlds where the observed action was even legal | 0.1846 |
+| of ALL worlds, share reproducing the action | 0.0782 (3.68 bits) |
+| **of LEGAL worlds, share reproducing it** | **0.4234 (1.24 bits)** |
+
+The second line is the decision-relevant one. Legality is already in our
+constraint store — a seat must hold a card of the half-suit it asks in — so
+elimination by legality is not new information. What an inverter adds is
+elimination among worlds where they **could** have made the ask and did not,
+and that removes **58% of them**: 1.24 bits per opponent decision.
+
+**The channel is not empty.** That is all a futility screen can establish. A
+fraction surviving is a bits bound, bits are not sets, and this file licenses
+no arm and no duel.
+
+### An open question the screen raises and cannot answer
+
+**Only 26.0% of drawn worlds survive the bridge's consistency checks** —
+6,624 of 25,504, with the rest rejected as either a dealt-hand reconstruction
+that does not come to nine cards or a forward replay that ends on a different
+hand than the arbiter holds. The rate is the same on the SIS path as on the
+v0.3 fallback, so it is not an artefact of which sampler is used.
+
+Two readings, and **this instrument cannot separate them**:
+
+1. our posterior puts mass on worlds that no deal-plus-transfer-history could
+   produce, which would be a real defect in the belief; or
+2. `Observation.initial_hand()` is not valid for counterfactual use — it
+   restores resolved half-suits from `ev.revealed`, which is the *true*
+   holder at resolution, so a counterfactual current hand is reconciled
+   against a real historical fact and may fail the count for that reason
+   alone.
+
+Reading 2 would make the rejections a property of the harness rather than of
+the belief. Until it is settled, the 1.24 bits is **conditional on the
+surviving subset and its bias direction is unknown** — it is not claimed as
+conservative, because nothing here establishes that.
+
+This is recorded as a question rather than a finding. An earlier version of
+this screen drew from the v0.3 fallback sampler and I was one step from
+reporting the same 74% as a property of the shipped posterior; that claim was
+withdrawn before it was made, and the corrected run shows the rate is real on
+the shipped path — but "real on the shipped path" and "a defect in the
+belief" are still two different statements.
+
+## CORRECTION 2026-09-23: the 74% was my instrument, not the belief — and the inversion bits were inflated 1.7x
+
+Two instruments disagreed and one of them was mine.
+
+### The belief is sound
+
+`results/world_reachability_14300000.json`: 620 decisions, **19,840 sampled
+worlds, 1.0000 reachable**, with the true world reachable 620/620 as the
+self-test. Reachability is decided by arithmetic and needs no engine — every
+card's dealt owner is determined by walking the public record backwards from
+either its current holder or, for a resolved half-suit, the holder
+`ev.revealed` published at resolution. **Our posterior does not put mass on
+worlds that cannot exist.** The prediction recorded before that run said near
+1.00 and reading 2, and both hold.
+
+### So what rejected three quarters of the inversion screen's draws was the screen
+
+`FishBot4.act()` calls `bel.update(obs)` **inside** `act`. A seat that has not
+acted since the last few events therefore holds a **stale belief**, and a
+posterior built on it samples worlds inconsistent with the history that has
+since happened. The inversion screen built the watcher's posterior at the
+*opponent's* decisions — exactly the case where the watcher has not acted —
+and never updated the belief first.
+
+The discriminating measurement, same games and same check, two sampling
+points:
+
+| worlds drawn from | reachable |
+|---|---:|
+| the acting seat's own posterior, at its own decision | 600/600 = 1.0000 |
+| a watcher's posterior, at someone else's decision | 144/528 = **0.2727** |
+| the same watcher, after one `bel.update(wobs)` | 516/516 = 1.0000 |
+
+**One line.** With it the screen drops zero worlds.
+
+### Every number this screen has produced is withdrawn
+
+1.16 bits (16 decisions, fallback sampler), 1.44 (794, fallback), 1.24 (797,
+SIS but stale belief) and 2.20 (30, stale belief plus the new reconstruction)
+were all computed on a subset selected by that defect. Corrected at smoke
+size the figure is **0.74 bits** — the legal share rises from 0.18 to 0.68,
+and the share of legal worlds reproducing the action from 0.42 to 0.60. **My
+bug inflated the headline by about 1.7x**, in the direction that made the
+pathway look better.
+
+### The corrected figure, at power: 0.76 bits [0.70, 0.83]
+
+`results/policy_inversion_bite_14100000.json`, 30 games, **831 of their
+decisions**, 32 worlds each, 26,592 worlds scored.
+
+| | |
+|---|---:|
+| self-test: the true world reproduces the real action | **831/831 (1.0000)** |
+| worlds the sampler could not produce | **0** |
+| worlds their engine refused | **0** |
+| worlds where the observed action was even legal | 0.7728 $[0.7539, 0.7902]$ |
+| of ALL worlds, share reproducing the action | 0.4569 (1.13 bits $[1.06, 1.22]$) |
+| **of LEGAL worlds, share reproducing it** | **0.5912 (0.76 bits $[0.70, 0.83]$)** |
+
+Intervals are 2,000 cluster bootstrap replicates over **games**, not
+decisions: two decisions in one deal share the hands, the transcript and the
+opponent's whole trajectory, so pricing them as independent draws would shrink
+the interval by a factor this study has no right to. No replicate was
+degenerate. The per-game sufficient statistics are in the result file, so the
+interval is recomputable without re-running the screen.
+
+The smoke reading held: **0.74 at 30 decisions, 0.76 [0.70, 0.83] at 831.**
+The drop counters are now zero on both paths — the stale-belief fix did not
+merely raise the surviving share, it left nothing to survive.
+
+**What this licenses and what it does not.** The channel is not empty, and the
+interval is clear of zero, so an arm may be built. It says nothing about sets:
+bits bound information, and this file has measured elimination among worlds,
+not games won. It also measures the CURRENT decision alone — a world's past
+decisions carry information too, and conditioning on the real transcript while
+asking only about now is the conservative choice, not the complete one.
+
+**And it cannot clear the ship bar as written.** An exact SESTINA inverter is
+opponent-specific by construction: it is unavailable in self-play, where the
+opponent is Kraken. The dual-population bar needs the gain in both
+populations, so this measurement licenses a *mechanism*, not this instance of
+it — see the teammate channel below, where the policy is exactly known in both
+populations.
+
+### What stands
+
+* `Observation.initial_hand()` genuinely cannot serve a counterfactual world —
+  it restores resolved half-suits from the true holder at resolution — so the
+  dealt hand is now computed from the world by `world_reachability.dealt_owners`
+  and handed to the bridge through `DylanV07.dealt_override`, which is `None`
+  and therefore inert on every shipped path.
+* The self-test held at every stage: 16/16, 794/794, 797/797, 30/30. It is the
+  only reason the numbers could be compared across four versions and the
+  defect localised rather than argued about.
+
+## OUTCOME 2026-09-23: there is no free constraint left, and 1.4 was the right power law in the wrong place
+
+Four measurements, one of which refutes the arm the other three pointed at.
+
+### The belief is tight against the whole record, not just the transfers
+
+`results/belief_legality_audit_14600000.json`, 60 games, 5,400 posteriors,
+**129,600 sampled worlds**, every one valid: **1.0000 [1.0000, 1.0000]**, at a
+seat's own decision (21,312) and as a watcher at someone else's (108,288)
+alike. Self-test 5,400/5,400 — the true deal, which is consistent by
+definition.
+
+The instrument is `fish.beliefs.validate_deal_against_history`, called
+unmodified. Its own source describes it as an "independent gold-standard
+validator … completely independent of BeliefState's constraint encoding", which
+is exactly what an audit of that encoding needs: something that cannot agree
+with what it checks by construction. It replays the record and tests asker
+half-suit legality, no-bluff, denial consistency, revealed holders and
+surrendered counts.
+
+This is **strictly stronger than `world_reachability`**, which asked only
+whether a world's dealt assignment could be recovered by walking transfers
+backwards. A world can have every transfer consistent and still be one no game
+could have produced. None here is.
+
+**There is no free constraint to add.** Whatever is left in the teammate
+channel is in *choices*.
+
+To localise a failure the script keeps an instrumented twin that names the
+failing check, cross-checked against the validator's boolean on all 129,600
+worlds and agreeing on every one. It refuses to print any breakdown unless they
+agree everywhere — a reason-reporting duplicate that had drifted would
+attribute failures to the wrong cause while looking authoritative about it.
+
+### The partner's choice does carry holdings we do not extract
+
+`results/partner_ask_calibration_14700000.json`, 120 games, 3,790 partner asks.
+After the belief has ingested the ask, legality constraint and all, the truth
+still exceeds our posterior's expectation for the chosen half-suit by **+0.2160
+[+0.1911, +0.2445]** cards, against −0.0366 for the live half-suits they did
+not choose: a paired contrast of **+0.2526 [+0.2219, +0.2877]**.
+
+The pre-ask reading is +0.4158 and **is not the finding**. `_ingest_ask`
+records "the asker held one of that half-suit" the moment the ask goes public,
+so a posterior read before the ask is missing a constraint it is about to be
+handed for free. Reporting that gap would credit an inverter with what the
+constraint store does on its own, one event later. Both are printed, the
+pre-ask one labelled as not the finding.
+
+### And the arm all of this points at was already dueled, and lost
+
+The ceiling (T_team +5.208 against O_opp +4.596), the split study (partner
+exponent free, opponent exponent costly at −0.035) and the inversion screen
+(an exact SESTINA inverter cannot clear a dual-population bar; our partner can)
+all point at `(gamma_opp, gamma_team) = (0.35, 1.4)`.
+
+`results/p49_n1.json` dueled **exactly that cell**: −0.1433 [−0.452, +0.166]
+against SESTINA and **−0.2533 [−0.478, −0.028]** in self-play. P49's withdrawal
+condition fired. `prereg/gamma_split.md` had named the branch in advance: *"if 1
+is true and 3 shows no gate movement, the calibration is real and worth
+nothing, which is also an answer."*
+
+So the partner **exponent** is closed. Three converging instruments and a
+measured calibration fix are not a licence — the duel is.
+
+### Why, and it is the shape rather than the strength
+
+`results/partner_choice_likelihood_14800000.json`, 300 games, **13,801 partner
+asks**. `P(partner asks in a half-suit | cards of it they hold)`, estimated by
+counting: our partner runs our own policy, so nothing is fitted and no policy
+is replayed.
+
+| k held | pairs | chosen | P(chosen \| k) | 95% CI | weight | k^1.4 | error |
+|---:|---:|---:|---:|---|---:|---:|---:|
+| 0 | 31,022 | **0** | **0.0000** | [0.0000, 0.0000] | 0.00 | — | — |
+| 1 | 30,317 | 3,434 | 0.1133 | [0.1097, 0.1169] | 1.00 | 1.00 | — |
+| 2 | 15,062 | 4,402 | 0.2923 | [0.2824, 0.3031] | 2.58 | 2.64 | +2.3% |
+| 3 | 5,216 | 3,264 | 0.6258 | [0.6005, 0.6514] | 5.52 | 4.66 | −15.7% |
+| 4 | 2,265 | 1,758 | 0.7762 | [0.7420, 0.8133] | 6.85 | 6.96 | +1.6% |
+| 5 | 1,249 | 943 | 0.7550 | [0.7122, 0.7998] | 6.67 | 9.52 | **+42.8%** |
+
+The `k = 0` row is the self-test. Fish forbids asking in a half-suit you hold
+no card of, so one k=0 choice among 31,022 pairs would mean the harness is
+misreading the hand it attributes the choice to. It is exactly zero. And
+**k = 6 never occurs**: hold all six and this engine declares rather than
+asking elsewhere, so the domain is k ∈ 0..5.
+
+The best-fit power law is **1.40** over all k and **1.44** over k ≤ 4. So 1.4 is
+very nearly the right *exponent* — which is why it took the calibration bias
+from −0.171 to −0.016 — and its residual error is not spread evenly. It is
+**+42.8% at k = 5**, because the measurement flattens and turns over at the top
+while a power law keeps climbing.
+
+That is the worst place to be wrong. k=4 and k=5 are the counts a declaration is
+decided on, the gate reads 0.97 on the joint, and `_apply_claim` awards a
+half-suit to the **opponents** whenever a revealed holder is on the other team.
+Over-weight exactly those worlds and the gate fires on worlds that are
+over-weighted, at −2 a miss. That is a mechanism for the self-play loss at an
+exponent whose calibration is otherwise good, and it is testable.
+
+The same correction already exists one dimension over: `ALPHA_FLAT` holds the
+schedule profile at its vertex because "past it the fit turns upward; the
+measurements do not, they flatten." The depth dimension never got it.
+`prereg/p51_depth_profile.md` registers it, and registers that it is **not
+expected to clear the bar** — the teammate channel's effect runs through the
+declaration gate and the OURS channel is bounded at +0.2017.
+
+## OUTCOME 2026-09-23: the shape was real, and worth less than the bar — P51
+
+`results/p51_depth_profile.json`, 7,200 games on block 15,100,000, 300 deals ×
+2 parities, zero fallbacks, zero unfinished.
+
+| arm | vs SESTINA (rev 3) | self-play | verdict |
+|---|---|---|---|
+| D1, power law held flat past k=4 | −0.0267 [−0.296, +0.243] | −0.1367 [−0.359, +0.085] | no |
+| D2, the measured table | **+0.1000** [−0.174, +0.374] | −0.1333 [−0.358, +0.091] | no |
+
+**Neither clears. Neither withdrawal fires.** D3 stays demoted, as registered.
+
+D2's SESTINA figure is the most positive number this line of work has produced
+and it is **not a win**: below the +0.15 bar, interval covering zero, and
+negative in the other population. A screen that promotes its best near-miss is
+not a screen.
+
+### What the registration predicted, and what it got wrong
+
+Prediction 3 — *neither clears* — was right, and it was registered rather than
+discovered. Prediction 2 — *D2 ≥ D1 but barely* — was right on the ordering and
+wrong on the size: the gap against SESTINA is +0.127, while in self-play the two
+are indistinguishable.
+
+Prediction 1 — *D1 beats gamma_team = 1.4 in self-play* — is directionally
+right and **not yet measured as it was asked**. 1.4 was −0.2533 [−0.478,
+−0.028]; D1 is −0.1367 [−0.359, +0.085]. The loss roughly halves and the
+interval now covers zero — but P49 N1 ran on block 12,300,000 and this on
+15,100,000, and "D1 beats 1.4" is a paired question. `R_gamma_team_14` re-runs
+1.4 on *this* block for that reason. It is a **control, not a candidate**: it
+cannot ship, because P49's withdrawal condition already fired on it.
+
+**The outcome registered as least expected did not happen.** D1 did not land at
+−0.25. So the shape hypothesis survives: the +42.8% over-weight at k=5 does look
+like part of the mechanism. What is now measured is that fixing it is worth
+approximately nothing.
+
+### Bite without conversion, again
+
+The ask hit rate rises **0.5227 → 0.5411** and the margin does not follow. That
+is the third instrument to find this shape: `completion_ledger` found we waste
+31.6% of our hits against their 25.2%, and `contest_ledger` found the deficit
+sits in the contested middle at a matched deal. **This engine's problem is not a
+shortage of hits.**
+
+### What is now closed
+
+The partner action model is closed in **both** of its dimensions: the exponent
+by P49 N1, the functional form by P51. Both were real, measurable improvements
+to the belief that bought nothing at the bar — consistent with the OURS channel
+bound of **+0.2017**, because the teammate channel's effect runs through
+declarations and declarations cannot carry a +0.15 win however well calibrated
+they are.
+
+Teammate *information* is still worth +5.208 by the ceiling. After this the
+route from it to sets does not run through the action model, and after
+`belief_legality_audit` (1.0000 over 129,600 worlds) it does not run through a
+missing constraint either. **If it exists, it is in what the engine does with
+what it already knows** — allocation, not inference. That is where the contested
+middle lives, and it is the next thing to attack.
+
+### CORRECTION, same day: D1 is `gamma_team = 1.4`, and I credited a block effect to the shape
+
+The control was built to answer prediction 1 as it was written, and it answered
+it **no**. `results/p51_control_gamma_team_14.json`, same 300 deals, same
+parities:
+
+| | vs SESTINA | self-play |
+|---|---|---|
+| `gamma_team = 1.4` on this block | −0.0267 [−0.295, +0.242] | −0.1367 [−0.359, +0.085] |
+| D1, flat past k=4 | −0.0267 [−0.296, +0.243] | −0.1367 [−0.359, +0.085] |
+
+**594 of 600 pairings are identical.** D1 changes what the engine does in 1% of
+games. So:
+
+* **"The loss roughly halves, −0.2533 → −0.1367" was wrong.** Those are the
+  same arm measured on two different seed blocks. The shift is a **block
+  effect** and I attributed it to the shape correction. The control existed
+  precisely to catch this, and it did — a cross-block comparison could not have.
+* **"The outcome registered as least expected did not happen" was wrong.** It
+  did happen, in the only form that can be tested: D1 lands exactly where 1.4
+  lands when both are measured on the same deals.
+* **The flattening past k=4 is inert in practice.** The +42.8% over-weight at
+  k=5 is a real measurement, but k=5 slots are ~2.5% of pairs, so correcting
+  only them changes almost nothing. *Rarity, not size, is what decides whether a
+  mis-specification matters.*
+
+**What does bite is k=3.** D2, the full measured table, differs from both in
+**487 of 600** pairings, and its only other correction is the −15.7%
+**under**-weight at k=3 — 5,216 pairs against 1,249 at k=5. D2 is +0.1000
+against SESTINA where D1/1.4 is −0.0267: a real +0.127, still below the bar with
+an interval covering zero, and still negative in self-play.
+
+**And a caution about single-block withdrawals.** P49's self-play interval for
+1.4 was [−0.478, −0.028], clear of zero, and the withdrawal fired. The same arm
+on this block gives [−0.359, +0.085], covering zero. Both are consistent with a
+true value near −0.19. Neither run is wrong, but **a withdrawal established on
+one block is a weaker statement than it reads as**, and P49's conclusion should
+be read as "does not clear" rather than "is significantly negative".
+
+The substantive conclusion is unchanged and now rests on the right evidence: the
+partner action model is closed in both dimensions, and the correction that
+matters is at the counts that are *common*, not the ones that are most wrong.
+
+## OUTCOME 2026-09-23: the disclosure hypothesis is REFUTED, and the asymmetry runs the other way
+
+`results/disclosure_cost_15300000.json`, 400 games, history-only so there is no
+posterior to be stale and no sampling error of its own. Self-test: the tracker
+and the engine's history agree about how many asks succeeded in every game.
+
+### The hypothesis, and why it looked strong
+
+`fish4/askfeat.py` prices exposure as `F[i, 5] = -fail * exposure[target]` — the
+cost of **losing the turn** on a failure, which goes to **zero for a certain
+steal**. But a certain steal is exactly the ask that makes a card publicly ours
+and therefore takeable, and `_apply_ask` says *"asker retains the turn"* on
+success, so an opponent who knows we hold three of a half-suit takes all three in
+one visit. The cost compounds and is charged on none of the asks most likely to
+incur it.
+
+It fitted everything: we waste 31.6% of our hits against their 25.2%; the deficit
+is the contested middle and we lead at the extremes, which is exactly where
+disclosure is free because they cannot legally ask; and P51's ask hit rate rose
+with no margin to show for it.
+
+**The raw numbers looked decisive.**
+
+| | acquired | taken back | rate |
+|---|---:|---:|---|
+| KRAKEN | 9,670 | 3,984 | **0.4120** [0.3968, 0.4276] |
+| SESTINA | 10,526 | 3,705 | **0.3520** [0.3369, 0.3661] |
+
+and the matched-contest gap is positive at every band: +0.043, +0.074, +0.065,
++0.059.
+
+### And the time control dissolves it
+
+A take-back needs **time**, and the two sides do not give their cards the same
+amount of it. SESTINA declares more half-suits a game than we do, and every
+declaration slams every window in that half-suit shut.
+
+| | mean window | hazard per ply of exposure |
+|---|---:|---|
+| KRAKEN | **10.58** plies [10.20, 10.98] | **0.03895** [0.03700, 0.04101] |
+| SESTINA | **8.49** plies [8.11, 8.86] | **0.04148** [0.03956, 0.04344] |
+
+**Per unit of exposure our cards are taken back LESS often than theirs**, and the
+intervals barely overlap. The entire raw-rate gap is our windows being 25%
+longer, and the window length traces back to declaring less — which is the RACE
+channel, already bounded at **+0.2017**. The hypothesis is refuted, and refuted
+in the direction opposite to the one predicted.
+
+Per band the residual survives only where we hold least: hazard gap +0.0169 at
+band 1 and +0.0158 at band 2, then +0.0020 at band 3 and **−0.0040** at band 4.
+Two of five bands, with the pooled number going the other way, is a near-miss and
+not a finding. **Promoting it would be exactly the error this project's screens
+exist to refuse.**
+
+### The one new fact, and it points the other way
+
+| | visits | cards per visit | visits of 3+ |
+|---|---:|---|---:|
+| KRAKEN | 6,020 | **1.6063** [1.5815, 1.6312] | 939 |
+| SESTINA | 5,987 | **1.7581** [1.7320, 1.7850] | **1,278** |
+
+**SESTINA extracts more per visit than we do — 1.758 against 1.606, with 36% more
+runs of three or more.** On essentially the same number of visits. The
+retained-turn compounding is real and *they* are the ones exploiting it; the
+asymmetry is offensive, not defensive, and it is the opposite of what the
+disclosure hypothesis predicted.
+
+That is a lead, not a finding. What it does establish is that this engine's
+handling of disclosure is not the defect — so the remaining candidates are what
+it does with a visit once it has one, and the declaration rate that decides how
+long every window stays open.
