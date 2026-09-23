@@ -6213,3 +6213,67 @@ hovered over the cross-engine comparison as something to chase; here is a knob
 that buys it directly and it is the most damaging single change this project has
 measured. Hit rate is not the objective, and now there is a dose response
 proving it rather than an argument.
+
+## OUTCOME 2026-09-23: a ninth of our asks cannot succeed, and the engine knows
+
+`results/doomed_asks_17100000.json`. **A fact about the rules, not a
+correlation:** if your *team* holds all six of a half-suit, an ask in it goes to
+an opponent who holds none of them. It cannot succeed, and `_apply_ask` hands
+the turn to the target on a failure.
+
+| | doomed asks | share of own asks |
+|---|---:|---|
+| KRAKEN | 2,451 | **0.1340** [0.1230, 0.1444] |
+| SESTINA | 1,834 | **0.0961** [0.0879, 0.1047] |
+
+400 games, 18,293 of our asks, intervals not overlapping: **6.13
+guaranteed-failure asks a game, 39% more than theirs.** Zero hit, in two
+independently written implementations that agree *exactly* on the same seeds —
+which is the self-test, since one hit would mean the team count is wrong.
+
+**Not signals.** The signalling protocol, whose method is a deliberately doomed
+ask, is off in the champion (`signal_mode='off'`, `signal_budget=0`,
+`w_signal=0`, `convention_beta=0`).
+
+### The engine is not blind
+
+Reading the seat's own posterior at each doomed ask, 120 games:
+
+| P(our team holds all six) | share of doomed asks |
+|---:|---:|
+| ≥ 0.10 | 0.787 |
+| ≥ 0.25 | **0.603** |
+| ≥ 0.50 | **0.272** |
+| ≥ 0.75 | 0.075 |
+
+Mean **0.340**. More than a quarter are made with even odds or better already on
+the half-suit being ours outright. The information is there; the decision rule
+does not use it.
+
+*(The posterior read saves and restores the agent's RNG. The first version did
+not, and `build_posterior` draws from that same generator — so it was changing
+the games it measured. Caught by a 0.218 against a 0.118 that two
+implementations then reproduced exactly once the seeds matched: the difference
+was block variation, which is large here and is why the rate needed 400 games.)*
+
+### And one live term points straight into it
+
+`scarce` = `(team_exp[hs]/6 − 0.5)·2`, weighted **+0.2**, rewards asking where
+our **team's** expected share is high — but an ask succeeds only if an
+**opponent** holds the card.
+
+| `w_scarce` | doomed-ask share | per game |
+|---:|---|---:|
+| **+0.2** shipped | 0.1340 | 6.13 |
+| 0.0 | **0.1056** | 4.83 |
+| −0.2 | **0.0852** | 3.91 |
+
+Monotone, and at −0.2 below their rate. **P54 is registered** and running.
+
+**Its registered risk, named before the run:** P53 moved its target quantity
+perfectly and lost anyway, because flattening a concentration preference is
+damaging in itself. `w_scarce` going negative is the same kind of change and may
+fail the same way *while still removing the waste* — in which case the
+conclusion is that `scarce` is not the lever, and what is wanted is a term that
+prices **this ask cannot succeed** rather than a blunt preference against
+half-suits our team holds.
