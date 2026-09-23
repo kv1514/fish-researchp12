@@ -45,6 +45,7 @@ Descriptive. No arm, no duel, no ship claim.
 from __future__ import annotations
 
 import argparse
+import math
 import random
 import sys
 import time
@@ -174,6 +175,25 @@ def main(argv=None) -> int:
     anchor = rate.get(1) or float("nan")
     weight = {k: (rate[k] / anchor if anchor else float("nan")) for k in ks}
 
+    # THE POWER LAW THIS REPLACES, and its error, derived here rather than in
+    # the paper. A figure computed in LaTeX from two watched numbers is not
+    # itself watchable, and the guard is right to refuse it: the arithmetic is
+    # where a stale number hides. `best_exponent` is fitted by weighted least
+    # squares on the logs, weighted by pairs, so the counts that carry the
+    # measurement carry the fit.
+    def _best(ks_fit) -> float:
+        cand = [g / 100.0 for g in range(1, 400)]
+        return min(cand, key=lambda g: sum(
+            seen[k] * (math.log(weight[k]) - g * math.log(k)) ** 2
+            for k in ks_fit if k > 1 and weight.get(k, 0) > 0))
+
+    fit_all = [k for k in ks if k > 1]
+    fit_low = [k for k in fit_all if k <= 4]
+    best_all, best_low = _best(fit_all), _best(fit_low)
+    power = {k: k ** best_all for k in ks if k > 0}
+    err = {k: (power[k] - weight[k]) / weight[k]
+           for k in ks if k > 0 and weight.get(k, 0) > 0}
+
     out = {"script": "scripts4/partner_choice_likelihood.py",
            "descriptive": True, "rules": RULES_D,
            "seed_deal": SEED0, "seed_agent": AGENT0,
@@ -181,6 +201,14 @@ def main(argv=None) -> int:
            "counts_seen": seen, "counts_chosen": chosen,
            "p_chosen_given_k": rate, "ci": cis,
            "weight_shape_anchored_at_k1": weight,
+           "power_law_best_exponent": best_all,
+           "power_law_best_exponent_low_counts": best_low,
+           "power_law_at_best_exponent": power,
+           "power_law_relative_error": err,
+           "power_law_note": ("the shipped choice model is depth ** gamma; "
+                              "these are that form at its own best-fit "
+                              "exponent, so the error is misspecification of "
+                              "SHAPE and not a badly chosen exponent"),
            "selftest_chose_a_half_suit_they_held_none_of": impossible,
            "selftest_examples": impossible_examples,
            "count_is": "PRE-ask, the hand the choice was made from",
@@ -207,6 +235,16 @@ def main(argv=None) -> int:
         lo, hi = cis[k]
         print(f"  {k:>4}  {seen[k]:>8,}  {chosen[k]:>7,}  {rate[k]:>11.4f}"
               f"  [{lo:.4f}, {hi:.4f}]  {weight[k]:>7.2f}")
+    print("-" * 72)
+    print(f"  best-fit power law: {best_all:.2f} over all k, "
+          f"{best_low:.2f} over k<=4")
+    print(f"  {'k':>4}  {'measured':>9}  {'k**' + format(best_all, '.2f'):>9}"
+          f"  {'error':>8}")
+    for k in ks:
+        if k <= 0 or k not in err:
+            continue
+        print(f"  {k:>4}  {weight[k]:>9.2f}  {power[k]:>9.2f}"
+              f"  {err[k]:>+7.1%}")
     if not impossible:
         print("\n  P(chosen | k=0) is 0 by the rules and the table reproduces")
         print("  it, so the harness is reading the hand the choice was made")

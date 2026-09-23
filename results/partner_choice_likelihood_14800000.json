@@ -66,6 +66,23 @@
   "4": 6.852303609792222,
   "5": 6.665537671838111
  },
+ "power_law_best_exponent": 1.4,
+ "power_law_best_exponent_low_counts": 1.44,
+ "power_law_at_best_exponent": {
+  "1": 1.0,
+  "2": 2.6390158215457884,
+  "3": 4.655536721746079,
+  "4": 6.964404506368992,
+  "5": 9.518269693579391
+ },
+ "power_law_relative_error": {
+  "1": 0.0,
+  "2": 0.02279516432697108,
+  "3": -0.15730337159453248,
+  "4": 0.016359592767689578,
+  "5": 0.4279822817286098
+ },
+ "power_law_note": "the shipped choice model is depth ** gamma; these are that form at its own best-fit exponent, so the error is misspecification of SHAPE and not a badly chosen exponent",
  "selftest_chose_a_half_suit_they_held_none_of": 0,
  "selftest_examples": [],
  "count_is": "PRE-ask, the hand the choice was made from",

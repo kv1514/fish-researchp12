@@ -5560,3 +5560,110 @@ populations.
 * The self-test held at every stage: 16/16, 794/794, 797/797, 30/30. It is the
   only reason the numbers could be compared across four versions and the
   defect localised rather than argued about.
+
+## OUTCOME 2026-09-23: there is no free constraint left, and 1.4 was the right power law in the wrong place
+
+Four measurements, one of which refutes the arm the other three pointed at.
+
+### The belief is tight against the whole record, not just the transfers
+
+`results/belief_legality_audit_14600000.json`, 60 games, 5,400 posteriors,
+**129,600 sampled worlds**, every one valid: **1.0000 [1.0000, 1.0000]**, at a
+seat's own decision (21,312) and as a watcher at someone else's (108,288)
+alike. Self-test 5,400/5,400 — the true deal, which is consistent by
+definition.
+
+The instrument is `fish.beliefs.validate_deal_against_history`, called
+unmodified. Its own source describes it as an "independent gold-standard
+validator … completely independent of BeliefState's constraint encoding", which
+is exactly what an audit of that encoding needs: something that cannot agree
+with what it checks by construction. It replays the record and tests asker
+half-suit legality, no-bluff, denial consistency, revealed holders and
+surrendered counts.
+
+This is **strictly stronger than `world_reachability`**, which asked only
+whether a world's dealt assignment could be recovered by walking transfers
+backwards. A world can have every transfer consistent and still be one no game
+could have produced. None here is.
+
+**There is no free constraint to add.** Whatever is left in the teammate
+channel is in *choices*.
+
+To localise a failure the script keeps an instrumented twin that names the
+failing check, cross-checked against the validator's boolean on all 129,600
+worlds and agreeing on every one. It refuses to print any breakdown unless they
+agree everywhere — a reason-reporting duplicate that had drifted would
+attribute failures to the wrong cause while looking authoritative about it.
+
+### The partner's choice does carry holdings we do not extract
+
+`results/partner_ask_calibration_14700000.json`, 120 games, 3,790 partner asks.
+After the belief has ingested the ask, legality constraint and all, the truth
+still exceeds our posterior's expectation for the chosen half-suit by **+0.2160
+[+0.1911, +0.2445]** cards, against −0.0366 for the live half-suits they did
+not choose: a paired contrast of **+0.2526 [+0.2219, +0.2877]**.
+
+The pre-ask reading is +0.4158 and **is not the finding**. `_ingest_ask`
+records "the asker held one of that half-suit" the moment the ask goes public,
+so a posterior read before the ask is missing a constraint it is about to be
+handed for free. Reporting that gap would credit an inverter with what the
+constraint store does on its own, one event later. Both are printed, the
+pre-ask one labelled as not the finding.
+
+### And the arm all of this points at was already dueled, and lost
+
+The ceiling (T_team +5.208 against O_opp +4.596), the split study (partner
+exponent free, opponent exponent costly at −0.035) and the inversion screen
+(an exact SESTINA inverter cannot clear a dual-population bar; our partner can)
+all point at `(gamma_opp, gamma_team) = (0.35, 1.4)`.
+
+`results/p49_n1.json` dueled **exactly that cell**: −0.1433 [−0.452, +0.166]
+against SESTINA and **−0.2533 [−0.478, −0.028]** in self-play. P49's withdrawal
+condition fired. `prereg/gamma_split.md` had named the branch in advance: *"if 1
+is true and 3 shows no gate movement, the calibration is real and worth
+nothing, which is also an answer."*
+
+So the partner **exponent** is closed. Three converging instruments and a
+measured calibration fix are not a licence — the duel is.
+
+### Why, and it is the shape rather than the strength
+
+`results/partner_choice_likelihood_14800000.json`, 300 games, **13,801 partner
+asks**. `P(partner asks in a half-suit | cards of it they hold)`, estimated by
+counting: our partner runs our own policy, so nothing is fitted and no policy
+is replayed.
+
+| k held | pairs | chosen | P(chosen \| k) | 95% CI | weight | k^1.4 | error |
+|---:|---:|---:|---:|---|---:|---:|---:|
+| 0 | 31,022 | **0** | **0.0000** | [0.0000, 0.0000] | 0.00 | — | — |
+| 1 | 30,317 | 3,434 | 0.1133 | [0.1097, 0.1169] | 1.00 | 1.00 | — |
+| 2 | 15,062 | 4,402 | 0.2923 | [0.2824, 0.3031] | 2.58 | 2.64 | +2.3% |
+| 3 | 5,216 | 3,264 | 0.6258 | [0.6005, 0.6514] | 5.52 | 4.66 | −15.7% |
+| 4 | 2,265 | 1,758 | 0.7762 | [0.7420, 0.8133] | 6.85 | 6.96 | +1.6% |
+| 5 | 1,249 | 943 | 0.7550 | [0.7122, 0.7998] | 6.67 | 9.52 | **+42.8%** |
+
+The `k = 0` row is the self-test. Fish forbids asking in a half-suit you hold
+no card of, so one k=0 choice among 31,022 pairs would mean the harness is
+misreading the hand it attributes the choice to. It is exactly zero. And
+**k = 6 never occurs**: hold all six and this engine declares rather than
+asking elsewhere, so the domain is k ∈ 0..5.
+
+The best-fit power law is **1.40** over all k and **1.44** over k ≤ 4. So 1.4 is
+very nearly the right *exponent* — which is why it took the calibration bias
+from −0.171 to −0.016 — and its residual error is not spread evenly. It is
+**+42.8% at k = 5**, because the measurement flattens and turns over at the top
+while a power law keeps climbing.
+
+That is the worst place to be wrong. k=4 and k=5 are the counts a declaration is
+decided on, the gate reads 0.97 on the joint, and `_apply_claim` awards a
+half-suit to the **opponents** whenever a revealed holder is on the other team.
+Over-weight exactly those worlds and the gate fires on worlds that are
+over-weighted, at −2 a miss. That is a mechanism for the self-play loss at an
+exponent whose calibration is otherwise good, and it is testable.
+
+The same correction already exists one dimension over: `ALPHA_FLAT` holds the
+schedule profile at its vertex because "past it the fit turns upward; the
+measurements do not, they flatten." The depth dimension never got it.
+`prereg/p51_depth_profile.md` registers it, and registers that it is **not
+expected to clear the bar** — the teammate channel's effect runs through the
+declaration gate and the OURS channel is bounded at +0.2017.

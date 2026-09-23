@@ -140,7 +140,7 @@ opponent's posterior. Measured through the repaired bridge, KRAKEN loses that
 pairing by $-0.525$ $[-0.689, -0.361]$. Six pre-registered programmes then
 tried to recover the deficit under a bar fixed in advance, $+0.15$ sets a game
 against the external engine and in self-play, and none cleared it. Across the
-project, fifty pre-registrations produced exactly one change to the
+project, fifty-one pre-registrations produced exactly one change to the
 deployed engine. The paper records every one of them, the failures on the same
 footing as the successes.
 
@@ -270,7 +270,8 @@ Version 1.1 took seven pre-registered directions at the residue and shipped
 none: four were stopped by a futility screen fixed in advance, one is closed by
 a proof that the belief-space search cannot move $99.96\%$ of the allocation
 uncertainty, and an audit of our own clustering restates every position-level
-interval and withdraws one conclusion. Across the whole project, fifty
+interval and withdraws one conclusion. Across the whole project,
+fifty-one
 pre-registrations produced exactly one change to the deployed engine
 (Appendix~\ref{app:prereg}). Two mechanisms measured as real and positive do
 not ship, because the bar was fixed before the runs and was not amended
@@ -3385,6 +3386,109 @@ on what better inference could buy, they are not strength figures, and they may
 never appear in a strength ladder. What the re-measurement changes is which
 bound is worth chasing: against an opponent who plays well, knowing the
 opponents' cards is worth $+4.60$ a game, and the deficit to close is $0.525$.
+
+\subsection{Is the posterior wider than the record allows?}
+\label{sec:res-legality}
+The ceilings above say what better inference could buy. Before asking how to
+buy it, it is worth asking whether the belief is leaving anything on the table
+that is simply \emph{free} --- a constraint the public record fixes and the
+sampler does not honour. A missing hard constraint would be the cheapest
+improvement available anywhere in this system: it needs no opponent model, no
+fitted parameter, and it applies identically in every population.
+
+\path{scripts4/belief_legality_audit.py} settles it. Every world the champion's
+posterior draws is converted to a dealt assignment and handed to
+\texttt{fish.beliefs.validate\_deal\_against\_history}, described in its own
+source as an ``independent gold-standard validator \ldots\ completely
+independent of BeliefState's constraint encoding'' --- which is what an audit of
+that encoding requires, an instrument that cannot agree with the thing it
+checks by construction. It replays the record and tests every
+legality-relevant fact: that an asker held a card of the half-suit it asked in,
+that it did not already hold the card it asked for, that a target denying a card
+did not hold it, that every revealed holder held what was published, and that
+every surrendered count is reproduced.
+
+Over $60$ games, $5{,}400$ posteriors and $\mathbf{129{,}600}$ sampled worlds,
+\textbf{every world is valid}: $1.0000$ $[1.0000, 1.0000]$, at a seat's own
+decision ($21{,}312$ worlds) and as a watcher at someone else's ($108{,}288$)
+alike. The self-test --- the true deal, which is consistent by definition ---
+passes $5{,}400/5{,}400$.
+
+This is strictly stronger than the reachability check in
+\path{scripts4/world_reachability.py}, which asked only whether each world's
+dealt assignment could be recovered by walking the public transfers backwards
+--- $19{,}840$ worlds, all reachable. A
+world can have every transfer consistent and still be one no game could have
+produced. None here is. \textbf{There is no free constraint to add}, and
+whatever remains in the teammate channel is in \emph{choices} rather than in
+constraints.
+
+To localise a failure the script keeps an instrumented twin that names the
+failing check, and that twin is cross-checked against the validator's boolean on
+all $129{,}600$ worlds, agreeing on every one. A reason-reporting duplicate that
+had drifted from the gold standard would attribute failures to the wrong cause
+while looking authoritative about it, so the run refuses to print any breakdown
+unless the two agree everywhere.
+
+\subsection{The choice model has the right strength and the wrong shape}
+\label{sec:res-profile}
+The action model this engine conditions on is a power law: an ask in half-suit
+$H$ is taken as evidence in proportion to $\mathrm{depth}_H^{\gamma}$, where
+depth is the number of cards of $H$ the asker holds. The exponent has been
+swept, split by side, and dueled. What has never been varied is the
+\emph{functional form}, because the log-linear tilt exposes no shape parameter
+at all --- $\gamma$ is the only handle, so a shape error cannot be found by
+moving it.
+
+The shape is directly measurable. Our own partner runs our own policy, so
+$P(\text{ask in } H \mid k)$ can be estimated by counting, with nothing fitted
+and no policy replayed. Over $300$ games and $\mathbf{13{,}801}$ partner asks
+(\path{results/partner_choice_likelihood_14800000.json}):
+
+\begin{center}
+\small
+\begin{tabular}{rrrrrr}
+\toprule
+$k$ held & pairs & chosen & $P(\text{chosen} \mid k)$ & $k^{1.4}$ & error \\
+\midrule
+$0$ & $31{,}022$ & $0$ & $\mathbf{0.0000}$ & --- & --- \\
+$1$ & $30{,}317$ & $3{,}434$ & $0.1133$ & $1.00$ & --- \\
+$2$ & $15{,}062$ & $4{,}402$ & $0.2923$ & $2.64$ & $+2.3\%$ \\
+$3$ & $5{,}216$ & $3{,}264$ & $0.6258$ & $4.66$ & $-15.7\%$ \\
+$4$ & $2{,}265$ & $1{,}758$ & $0.7762$ & $6.96$ & $+1.6\%$ \\
+$5$ & $1{,}249$ & $943$ & $0.7550$ & $9.52$ & $\mathbf{+42.8\%}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The $k=0$ row is the self-test. Fish forbids asking in a half-suit
+you hold no card of, so a single $k=0$ choice among $31{,}022$ pairs would mean
+the harness is misreading the hand it is attributing the choice to. It is
+exactly zero. And $k=6$ \emph{never occurs}: hold all six and this engine
+declares rather than asking elsewhere, so the domain is $k \in 0..5$ and the
+model is never asked about the count above it.
+
+The best-fit power law is $1.40$ over all $k$ and $1.44$ over $k \le 4$. So the
+exponent the partner-side split identified is very nearly right --- which is why
+it took that model's calibration bias from $-0.171$ to $-0.016$ --- and its
+residual error is not spread evenly. \textbf{It is $+42.8\%$ at $k=5$}, because
+the measurement flattens and turns over at the top while a power law keeps
+climbing.
+
+That is the worst place for it to be wrong. $k=4$ and $k=5$ are the counts on
+which a declaration is decided, the gate reads $0.97$ on the joint, and
+\texttt{\_apply\_claim} awards a half-suit to the \emph{opponents} whenever a
+revealed holder is on the other team. Over-weighting exactly those worlds fires
+the gate on worlds that are over-weighted, at $-2$ a miss.
+
+The analogous correction already exists one dimension over: \texttt{ALPHA\_FLAT}
+holds the schedule profile at its vertex, because ``past it the fit turns
+upward; the measurements do not, they flatten.'' The depth dimension never got
+it. \path{prereg/p51_depth_profile.md} registers the correction and its
+predicted outcome before the duel, including the prediction that it does
+\emph{not} clear the ship bar --- the teammate channel's measured effect runs
+through the declaration gate, and \S\ref{sec:res-rev3channels}'s identity bounds
+that channel at $+0.2017$ sets a game.
 
 % =====================================================================
 \section{What did not work, what search buys, and what a learner recovers}
@@ -10016,12 +10120,13 @@ alone --- a null against the external engine, and the first half of the dual bar
 has cleared --- and the sixth registration re-read the one earlier mechanism
 with a positive value on the record through the repaired bridge and found
 that the value was the bridge defect, measured from the other side
-(\S\ref{sec:p48}). The pre-registered thresholds and outcomes for all fifty
+(\S\ref{sec:p48}). The pre-registered thresholds and outcomes for all
+fifty-one
 registrations this project has written are in Appendix~\ref{app:prereg}. Two
 mechanisms measured there are real and positive and still do not ship,
 because the bar was fixed in advance and was not amended afterwards. That is
 the discipline this paper is actually arguing for, and it costs more than it
-looks: exactly one of the fifty registrations produced a change to the
+looks: exactly one of the fifty-one registrations produced a change to the
 deployed engine.
 
 \subsection{What we would do next}

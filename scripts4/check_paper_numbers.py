@@ -1750,6 +1750,39 @@ WATCH = [
     ("ceiling_rev3.json", "teammate_over_opponent", "{:.2f}",
      "rev-3 teammate/opponent ceiling ratio",
      "times apart where they are"),
+    # The legality audit and the measured choice profile. Both are quoted with
+    # \mathbf, which the bolded-number sweep now reads as well as \textbf.
+    ("belief_legality_audit_14600000.json", "all.n", "{:,d}",
+     "worlds validated against the record", "posteriors and"),
+    ("belief_legality_audit_14600000.json", "all.rate", "{:.4f}",
+     "share of sampled worlds the record permits", "every world is valid"),
+    ("belief_legality_audit_14600000.json", "own_decision.n", "{:,d}",
+     "worlds validated at a seat's own decision", "decision ($"),
+    ("belief_legality_audit_14600000.json", "as_watcher.n", "{:,d}",
+     "worlds validated as a watcher", "as a watcher at someone"),
+    ("partner_choice_likelihood_14800000.json", "n_partner_asks", "{:,d}",
+     "partner asks behind the measured choice profile", "partner asks"),
+    ("partner_choice_likelihood_14800000.json", "counts_seen.5", "{:,d}",
+     "pairs at the count the power law overshoots",
+     "$1{,}249$ & $943$"),
+    ("partner_choice_likelihood_14800000.json", "p_chosen_given_k.5", "{:.4f}",
+     "P(chosen | k=5)", "$1{,}249$ & $943$"),
+    ("partner_choice_likelihood_14800000.json", "p_chosen_given_k.0", "{:.4f}",
+     "P(chosen | k=0), which the rules force to zero",
+     "$31{,}022$ & $0$"),
+    ("partner_choice_likelihood_14800000.json", "power_law_relative_error.5",
+     "{:+.1%}", "how far the power law overshoots at k=5",
+     # NOT "because the measurement flattens": the anchor search runs on the
+     # raw file and that phrase straddles a line break, so it was never going
+     # to be found however true it is of the paragraph.
+     "residual error is not spread evenly"),
+    ("partner_choice_likelihood_14800000.json", "power_law_best_exponent",
+     "{:.2f}", "best-fit exponent of the shipped functional form",
+     "The best-fit power law is"),
+    # The weaker reachability check the legality audit supersedes, quoted so
+    # the comparison between the two is checkable rather than remembered.
+    ("world_reachability_14300000.json", "n_worlds", "{:,d}",
+     "worlds in the reachability check", "walking the public transfers"),
 ]
 
 
