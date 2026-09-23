@@ -41,7 +41,7 @@ NUMBER_WORDS = {
     38: "thirty-eight", 39: "thirty-nine", 40: "forty", 41: "forty-one",
     42: "forty-two", 43: "forty-three", 44: "forty-four", 45: "forty-five",
     46: "forty-six", 47: "forty-seven", 48: "forty-eight", 49: "forty-nine",
-    50: "fifty", 51: "fifty-one", 52: "fifty-two", 53: "fifty-three",
+    50: "fifty", 51: "fifty-one", 52: "fifty-two", 53: "fifty-three", 54: "fifty-four", 54: "fifty-four",
 }
 
 

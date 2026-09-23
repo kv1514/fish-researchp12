@@ -106,3 +106,75 @@ dose at run time; and a non-monotone dose response, which as in P51, P52 and P53
 means **no single dose may be read**. `scripts4/arm_overlap.py` is run on the
 result, and `scripts4/doomed_asks.py` is re-run on the winning and losing doses
 so the mechanism is measured on the same block as the margin.
+
+---
+
+## OUTCOME, `results/p54_scarce_and_doomed_asks.json`
+
+$7{,}200$ games on block 17,500,000, 300 deals × 2 parities, zero fallbacks,
+zero unfinished, dose check passed at run time. All four arms distinct (521+ of
+600 pairings differ).
+
+| arm | `w_scarce` | vs SESTINA | self-play | ask hit rate |
+|---|---:|---|---|---:|
+| C4 | **+0.40** | −0.1667 [−0.439, +0.106] | **+0.1200** [−0.093, +0.333] | 0.5054 |
+| — | +0.20 champion | — | — | 0.5192 |
+| C1 | +0.10 | −0.2533 [−0.508, +0.001] | −0.0833 [−0.312, +0.145] | 0.5263 |
+| C2 | 0.00 | **−0.4567** [−0.723, −0.191] | −0.0900 [−0.308, +0.128] | 0.5336 |
+| C3 | −0.10 | **−0.5800** [−0.858, −0.302] | **−0.2433** [−0.460, −0.026] | 0.5335 |
+
+**C2 and C3 withdrawn.** Nothing clears.
+
+### Prediction 2 failed; prediction 3, the registered risk, was right
+
+**C4 is the BEST arm, not the worst.** Doubling the term that points into the
+waste *helps* — it is the only arm positive in either population. Prediction 2
+failed exactly as P53's prediction 1 did, and for the same reason.
+
+Prediction 3 named this in advance: *"the outcome I expect is that C1 and C2 are
+near neutral and C3 is negative, with the doomed-ask rate falling across all of
+them — which would say the waste is real, the knob removes it, and removing it
+this way costs more than it saves."* That is what happened, except that C1 and
+C2 are worse than neutral.
+
+### And the decisive measurement: the best arm makes MORE doomed asks
+
+`results/doomed_asks_scarce040.json`, 150 games at `w_scarce = 0.40`:
+
+| | doomed-ask share | per game |
+|---|---|---:|
+| champion (+0.20) | 0.1340 [0.1230, 0.1444] | 6.13 |
+| **C4 (+0.40), the best arm** | **0.1781** [0.1583, 0.1998] | **8.30** |
+| SESTINA | 0.0961 | — |
+
+**The arm that makes the most guaranteed-failure asks is the best arm, and the
+arms that remove them are the worst.** The waste is real, logically certain,
+verified twice over and 39% worse than the opponent's — and it is **not the
+binding constraint**. It is a symptom of a preference that is net beneficial, not
+a leak to plug.
+
+Prediction 4 therefore stands as written: **`scarce` is not the lever.** What it
+would take is a term pricing *this ask cannot succeed* specifically — narrow
+enough to cut the provably worthless asks without flattening the preference that
+is evidently earning its keep. That remains untried, and after this result it is
+a weaker prospect than it looked: the 27% of doomed asks made at
+P(own all six) ≥ 0.5 are worth at most a fraction of a channel that two dose
+sweeps say is already near its optimum.
+
+### The hit rate, for the third time
+
+C4 is the best arm and has the **lowest** hit rate (0.5054 against the
+champion's 0.5192). C2 and C3 are the worst and have the **highest** (0.5336,
+0.5335). With P53's monotone sweep this is the third independent confirmation
+that hit rate is anti-correlated with margin in this engine.
+
+### A correction to this registration's own motivation
+
+It cited `concent` — "confirmed negative at 4,000 games" — as corroboration for
+reducing concentration. That was a loose reading. `concent` prices the change in
+how our team's holding is spread **across our own seats**; `suit` and `scarce`
+price **which half-suit** to ask in. They are different quantities, and the
+`concent` result is not evidence about these knobs in either direction. P53 and
+P54 together say the opposite of what that citation implied: **both
+concentration knobs are at or below their optimum, and moving either downward is
+costly.**
