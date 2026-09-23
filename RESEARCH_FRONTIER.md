@@ -5843,3 +5843,80 @@ That is a lead, not a finding. What it does establish is that this engine's
 handling of disclosure is not the defect — so the remaining candidates are what
 it does with a visit once it has one, and the declaration rate that decides how
 long every window stays open.
+
+## CORRECTION + OUTCOME 2026-09-23: "they extract more per visit" was the hit rate restated, and the real chain runs back to declaring
+
+### Three errors in my own metric, and what it actually measured
+
+The "one new fact" recorded above — *SESTINA extracts 1.7581 cards per visit
+against our 1.6063* — was wrong three times over.
+
+1. **It was keyed on `(asker, target)`.** A run broke when the asker switched
+   target, but `_apply_ask` retains the *turn*, so that is cards taken from one
+   opponent before moving on, not cards taken in a turn. I described it as the
+   latter.
+2. **It excluded zero-card runs**, making it a mean *conditional on the run
+   getting something* — which inflates both sides by however often a visit
+   yields nothing, and that is the failure a long-run comparison is about.
+3. **And corrected, it is the hit rate.** A turn ends at its first failure, so
+   `cards/turn = h/(1−h)`. The paper's rev-3 hit rates, $0.5157$ and $0.5365$,
+   predict $1.0648$ and $1.1575$; measured at power, $1.0728$ $[1.0393,
+   1.1032]$ and $1.1644$ $[1.1292, 1.1979]$.
+
+So there was no new fact. It was the hit-rate gap — **−0.0218 [−0.0260,
+−0.0175]**, already in the paper, and already described there as *"the one axis
+on which the two engines nearly agree"* — restated in a different unit. I
+flagged it as the first asymmetry not bounded by the declaration ceiling. It
+isn't one.
+
+### And we play the visit BETTER, which makes the chain clear
+
+`results/visit_ordering_15500000.json`, 400 games. A certain steal is one the
+**public record** already places with the target — the same objective rule for
+both engines, no posterior and no threshold. Self-test: no "certain" steal is
+contradicted by the true hands, in any game.
+
+| | decisions | with a free card up | took it | gambled instead | gamble failed |
+|---|---:|---:|---|---:|---|
+| KRAKEN | 20,308 | 4,815 (0.2371) | **0.7774** [0.7668, 0.7880] | 1,072 | **7 (0.0065)** |
+| SESTINA | 21,306 | 5,515 (0.2588) | 0.7164 [0.7046, 0.7295] | 1,564 | 147 (0.0940) |
+
+**We bank free cards more reliably than they do, and when we pass one over our
+alternative almost never fails — 7 times in 1,072.** Theirs fails 9.4% of the
+time, and a failure hands the turn back with every free card still standing.
+Our exact inference is doing exactly what it is for.
+
+So their higher hit rate is not better play within a visit. **It is more
+visits with something free in them: they face a free card 1.092× as often as we
+do.**
+
+### The chain, and every link is measured
+
+* we declare less — $4.027$ against $4.832$ a game;
+* so half-suits stay live longer, and a live half-suit is one they can legally
+  ask in;
+* so our acquired cards sit publicly located **25% longer** — windows of
+  $10.58$ plies against $8.49$;
+* so they meet a free card 9% more often per decision;
+* so they hit more often and take more cards per turn, **despite ordering the
+  visit worse than we do**;
+* and our hits are wasted more often — $+1.065$ a game, which is the gap the
+  paper already names as the target.
+
+Per ply of exposure our cards are taken back **less** often than theirs
+($0.03895$ against $0.04148$). The wasted-hits gap is **exposure time, not
+exposure rate.**
+
+### What this closes, and it is the most useful thing here
+
+**There is no separate allocation defect.** The ask-side gaps — hit rate, cards
+per turn, wasted hits — are *downstream of the declaration rate*, and the OURS
+channel of the margin identity bounds that at **+0.2017** sets a game. That is
+why every arm this project has aimed at inference has failed at the bar, and it
+says the remaining headroom is genuinely small unless something moves the
+declaration rate itself.
+
+The instrument earned its keep for its controls, not its findings: the time
+control killed the hypothesis it was built for, the identity check caught two
+counting errors in my own metric, and the public-record classifier showed the
+side I assumed was outplaying us is the one making the ordering mistakes.
