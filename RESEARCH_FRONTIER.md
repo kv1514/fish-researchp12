@@ -5728,3 +5728,46 @@ route from it to sets does not run through the action model, and after
 missing constraint either. **If it exists, it is in what the engine does with
 what it already knows** — allocation, not inference. That is where the contested
 middle lives, and it is the next thing to attack.
+
+### CORRECTION, same day: D1 is `gamma_team = 1.4`, and I credited a block effect to the shape
+
+The control was built to answer prediction 1 as it was written, and it answered
+it **no**. `results/p51_control_gamma_team_14.json`, same 300 deals, same
+parities:
+
+| | vs SESTINA | self-play |
+|---|---|---|
+| `gamma_team = 1.4` on this block | −0.0267 [−0.295, +0.242] | −0.1367 [−0.359, +0.085] |
+| D1, flat past k=4 | −0.0267 [−0.296, +0.243] | −0.1367 [−0.359, +0.085] |
+
+**594 of 600 pairings are identical.** D1 changes what the engine does in 1% of
+games. So:
+
+* **"The loss roughly halves, −0.2533 → −0.1367" was wrong.** Those are the
+  same arm measured on two different seed blocks. The shift is a **block
+  effect** and I attributed it to the shape correction. The control existed
+  precisely to catch this, and it did — a cross-block comparison could not have.
+* **"The outcome registered as least expected did not happen" was wrong.** It
+  did happen, in the only form that can be tested: D1 lands exactly where 1.4
+  lands when both are measured on the same deals.
+* **The flattening past k=4 is inert in practice.** The +42.8% over-weight at
+  k=5 is a real measurement, but k=5 slots are ~2.5% of pairs, so correcting
+  only them changes almost nothing. *Rarity, not size, is what decides whether a
+  mis-specification matters.*
+
+**What does bite is k=3.** D2, the full measured table, differs from both in
+**487 of 600** pairings, and its only other correction is the −15.7%
+**under**-weight at k=3 — 5,216 pairs against 1,249 at k=5. D2 is +0.1000
+against SESTINA where D1/1.4 is −0.0267: a real +0.127, still below the bar with
+an interval covering zero, and still negative in self-play.
+
+**And a caution about single-block withdrawals.** P49's self-play interval for
+1.4 was [−0.478, −0.028], clear of zero, and the withdrawal fired. The same arm
+on this block gives [−0.359, +0.085], covering zero. Both are consistent with a
+true value near −0.19. Neither run is wrong, but **a withdrawal established on
+one block is a weaker statement than it reads as**, and P49's conclusion should
+be read as "does not clear" rather than "is significantly negative".
+
+The substantive conclusion is unchanged and now rests on the right evidence: the
+partner action model is closed in both dimensions, and the correction that
+matters is at the counts that are *common*, not the ones that are most wrong.

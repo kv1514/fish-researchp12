@@ -983,16 +983,24 @@ because a profile fitted on our own policy is not evidence about theirs.
 Predicted before the run: D1 recovers most of $1.4$'s self-play loss; D2
 $\ge$ D1 but barely; \emph{neither clears the bar}, since the channel runs
 through declarations and the \textsc{ours} channel is bounded at $+0.2017$. &
-Neither clears, as predicted, and neither withdrawal fires. The shape
-hypothesis is not refuted --- the outcome registered as least expected, D1
-landing at $1.4$'s $-0.25$ as well, did not happen --- but the correction does
-not buy a shippable gain either. The prediction that D2 exceeds D1 ``but
+Neither clears, as predicted, and neither withdrawal fires. Prediction~1 is
+answered \textbf{no}, and only because a control was added to answer it: the
+registration compares D1 against $\gamma_{\mathrm{team}} = 1.4$, which P49~N1
+measured on a \emph{different} seed block, so $1.4$ was re-run on this one.
+\textbf{594 of the 600 pairings are identical to D1's.} D1 \emph{is} $1.4$,
+and the apparent halving of $1.4$'s self-play loss is a block effect. The
+flattening is inert in practice because it bites only above $k=4$ and $k=5$ is
+$1{,}249$ pairs of ${\sim}54{,}000$: \emph{rarity, not size, decides whether a
+mis-specification matters}. What bites is D2's other correction, the $-15.7\%$
+\emph{under}-weight at $k=3$ and its $5{,}216$ pairs --- D2 differs from both
+arms in $487$ of $600$ pairings. The prediction that D2 exceeds D1 ``but
 barely'' is wrong against \textsc{sestina}, where the gap is $+0.127$; in
 self-play the two are indistinguishable. D3 stays demoted. &
 \textbf{NOTHING CLEARS; THE SHAPE IS REAL AND WORTH LESS THAN THE BAR.}
 $7{,}200$ games, zero fallbacks, zero unfinished. D1 $-0.0267$
 $[-0.296, +0.243]$ / $-0.1367$ $[-0.359, +0.085]$; D2 $+0.1000$
-$[-0.174, +0.374]$ / $-0.1333$ $[-0.358, +0.091]$. D2's \textsc{sestina} figure
+$[-0.174, +0.374]$ / $-0.1333$ $[-0.358, +0.091]$; the control $-0.0267$ /
+$-0.1367$. D2's \textsc{sestina} figure
 is below the bar with an interval covering zero and is negative in the other
 population, so it is not a win and does not advance. Ask hit rate rises
 $0.5227 \to 0.5411$, which is bite without conversion --- the same pattern the

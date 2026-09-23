@@ -162,3 +162,36 @@ it to sets does not run through the action model, and after this it does not run
 through a missing constraint either — `belief_legality_audit` closed that at
 1.0000 over 129,600 worlds. If it exists it is in what the engine *does* with
 what it already knows.
+
+### CORRECTION, same day: prediction 1 is answered NO
+
+`results/p51_control_gamma_team_14.json` ran `gamma_team = 1.4` on **this** block,
+which is what prediction 1 actually asks. Result: **−0.0267 [−0.295, +0.242]**
+against SESTINA and **−0.1367 [−0.359, +0.085]** in self-play — and **594 of the
+600 pairings are bit-identical to D1's.**
+
+So D1 *is* `gamma_team = 1.4`, to within 1% of games. The reading recorded above
+— "the loss roughly halves" and "the outcome registered as least expected did
+not happen" — was **wrong on both counts**. The −0.2533 → −0.1367 movement is a
+seed-block effect between P49's 12,300,000 and this 15,100,000, and I credited it
+to the shape correction. The control was added for exactly this reason and it
+earned its place.
+
+**Prediction 1: NO.** D1 does not beat 1.4; it is 1.4.
+
+**Why the flattening is inert, and the lesson.** D1 differs from a plain power
+law only above k=4, and k=5 is 1,249 pairs of ~54,000. The +42.8% over-weight
+there is real and it is the largest error in the model, and correcting it alone
+changes nothing, because *rarity and not size decides whether a
+mis-specification matters.* D2 differs from both arms in **487 of 600** pairings
+because its other correction is the −15.7% under-weight at **k=3**, which is
+5,216 pairs.
+
+**A caution this registration should carry.** P49's self-play interval for 1.4
+was [−0.478, −0.028] and fired a withdrawal; the same arm on this block gives
+[−0.359, +0.085], covering zero. Both are consistent with a true value near
+−0.19. A withdrawal established on a single block is weaker than it reads, and
+P49's conclusion is better stated as *does not clear* than as *significantly
+negative*.
+
+The substantive conclusion stands and now rests on the right evidence.
