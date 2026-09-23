@@ -72,6 +72,73 @@ AGENT0 = 141_000
 MAX_ACTIONS = 600
 
 
+BOOT = 2000
+BOOT_SEED = 20_260_923
+
+
+def _by_game(rows: list[dict]) -> list[dict]:
+    """Collapse per-decision rows to per-game sufficient statistics.
+
+    The cluster is the GAME, not the decision: two decisions in one deal share
+    the hands, the transcript and the opponent's whole trajectory, so treating
+    them as independent draws would shrink the interval by a factor this study
+    has no right to. Every statistic below is a plain count, so the pooled
+    ratio is recoverable from the per-game sums alone -- which is why these go
+    in the result file: the interval can be recomputed without re-running.
+    """
+    agg: dict[int, dict] = {}
+    for r in rows:
+        a = agg.setdefault(r["game"], {"game": r["game"], "decisions": 0,
+                                       "worlds": 0, "same_all": 0,
+                                       "legal": 0, "same_legal": 0})
+        a["decisions"] += 1
+        for k in ("worlds", "same_all", "legal", "same_legal"):
+            a[k] += r[k]
+    return [agg[g] for g in sorted(agg)]
+
+
+def _boot(per_game: list[dict], boot: int = BOOT,
+          seed: int = BOOT_SEED) -> dict:
+    """Cluster bootstrap over games for the three headline ratios.
+
+    Each replicate re-pools the counts and only THEN takes the ratio and the
+    log, because bits are a nonlinear function of a ratio of sums: averaging
+    per-game bits would answer a different question and would be undefined for
+    any game that happened to reproduce nothing. A replicate that still lands
+    on a zero numerator cannot yield a finite bit count, so it is counted and
+    excluded rather than folded in as an infinity that would silently dominate
+    every percentile above it.
+    """
+    import math
+    rng = random.Random(seed)
+    n = len(per_game)
+    keep = {"consistent_all": [], "consistent_legal": [], "legal_share": [],
+            "bits_all": [], "bits_beyond_legality": []}
+    degenerate = 0
+    for _ in range(boot):
+        pick = [per_game[rng.randrange(n)] for _ in range(n)]
+        w = sum(r["worlds"] for r in pick)
+        sa = sum(r["same_all"] for r in pick)
+        lg = sum(r["legal"] for r in pick)
+        sl = sum(r["same_legal"] for r in pick)
+        if not w or not lg or not sa or not sl:
+            degenerate += 1
+            continue
+        keep["consistent_all"].append(sa / w)
+        keep["consistent_legal"].append(sl / lg)
+        keep["legal_share"].append(lg / w)
+        keep["bits_all"].append(math.log2(w / sa))
+        keep["bits_beyond_legality"].append(math.log2(lg / sl))
+    out = {"boot": boot, "boot_seed": seed, "n_clusters": n,
+           "cluster": "game", "degenerate_replicates": degenerate}
+    for k, v in keep.items():
+        v.sort()
+        lo = v[int(0.025 * len(v))]
+        hi = v[min(len(v) - 1, int(0.975 * len(v)))]
+        out[k + "_ci"] = [lo, hi]
+    return out
+
+
 def _dealt_for(seat, hands, history):
     """The dealt hand of `seat` in the world `hands`, from the public record.
 
@@ -272,6 +339,8 @@ def main(argv=None) -> int:
     tot_sl = sum(r["same_legal"] for r in rows)
     c_all = tot_sa / tot_w
     c_legal = (tot_sl / tot_l) if tot_l else float("nan")
+    per_game = _by_game(rows)
+    ci = _boot(per_game)
     import math
     rate = selftest_ok / selftest_n if selftest_n else 0.0
     out = {"script": "scripts4/policy_inversion_bite.py", "descriptive": True,
@@ -293,6 +362,7 @@ def main(argv=None) -> int:
            "bits_beyond_legality": (math.log2(1 / c_legal)
                                     if c_legal else float("inf")),
            "ceiling_rev3_opponent": 4.596,
+           "per_game": per_game, "ci": ci,
            "note": ("bits are a bound on information, not sets; this screen "
                     "can say the channel is empty and cannot say what a full "
                     "one is worth")}
@@ -314,12 +384,19 @@ def main(argv=None) -> int:
     for why, n in sorted(reasons.items(), key=lambda kv: -kv[1])[:4]:
         print(f"    {n:>6}  {why}")
     print("=" * 72)
+    bl, ba, ls = (ci["bits_beyond_legality_ci"], ci["bits_all_ci"],
+                  ci["legal_share_ci"])
     print(f"\n  worlds where the observed action was legal   "
-          f"{out['legal_share']:.4f}")
+          f"{out['legal_share']:.4f}  [{ls[0]:.4f}, {ls[1]:.4f}]")
     print(f"  of ALL worlds, share reproducing the action   {c_all:.4f}"
-          f"   ({out['bits_all']:.2f} bits)")
+          f"   ({out['bits_all']:.2f} bits [{ba[0]:.2f}, {ba[1]:.2f}])")
     print(f"  of LEGAL worlds, share reproducing it         {c_legal:.4f}"
-          f"   ({out['bits_beyond_legality']:.2f} bits)")
+          f"   ({out['bits_beyond_legality']:.2f} bits "
+          f"[{bl[0]:.2f}, {bl[1]:.2f}])")
+    print(f"\n  {ci['boot']} cluster bootstrap replicates over "
+          f"{ci['n_clusters']} games"
+          + (f", {ci['degenerate_replicates']} degenerate and excluded"
+             if ci["degenerate_replicates"] else ""))
     print("\n  The second line is the one that matters. Legality is already in")
     print("  our constraint store, so only elimination among worlds where they")
     print("  COULD have asked and did not is new information.")

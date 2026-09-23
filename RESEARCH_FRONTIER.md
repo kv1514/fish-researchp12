@@ -5407,7 +5407,9 @@ covers both macros and all six new ceiling figures are watched from the day
 they enter, the derived ratio among them, stored in the results file rather
 than divided out in LaTeX.
 
-## OUTCOME 2026-09-23: the inversion channel is not empty — 1.24 bits an opponent decision beyond legality
+## ~~OUTCOME 2026-09-23: the inversion channel is not empty — 1.24 bits an opponent decision beyond legality~~ WITHDRAWN
+
+> **The 1.24 in this heading is retracted** and every ratio in the > section below with it; the defect and the corrected figure are at > the end of it. The body is left standing because the retraction is > only legible beside what it replaces.
 
 `results/policy_inversion_bite_14100000.json`, 30 games, **797 of their
 decisions**, 32 worlds each drawn from the champion's own posterior at that
@@ -5508,6 +5510,45 @@ size the figure is **0.74 bits** — the legal share rises from 0.18 to 0.68,
 and the share of legal worlds reproducing the action from 0.42 to 0.60. **My
 bug inflated the headline by about 1.7x**, in the direction that made the
 pathway look better.
+
+### The corrected figure, at power: 0.76 bits [0.70, 0.83]
+
+`results/policy_inversion_bite_14100000.json`, 30 games, **831 of their
+decisions**, 32 worlds each, 26,592 worlds scored.
+
+| | |
+|---|---:|
+| self-test: the true world reproduces the real action | **831/831 (1.0000)** |
+| worlds the sampler could not produce | **0** |
+| worlds their engine refused | **0** |
+| worlds where the observed action was even legal | 0.7728 $[0.7539, 0.7902]$ |
+| of ALL worlds, share reproducing the action | 0.4569 (1.13 bits $[1.06, 1.22]$) |
+| **of LEGAL worlds, share reproducing it** | **0.5912 (0.76 bits $[0.70, 0.83]$)** |
+
+Intervals are 2,000 cluster bootstrap replicates over **games**, not
+decisions: two decisions in one deal share the hands, the transcript and the
+opponent's whole trajectory, so pricing them as independent draws would shrink
+the interval by a factor this study has no right to. No replicate was
+degenerate. The per-game sufficient statistics are in the result file, so the
+interval is recomputable without re-running the screen.
+
+The smoke reading held: **0.74 at 30 decisions, 0.76 [0.70, 0.83] at 831.**
+The drop counters are now zero on both paths — the stale-belief fix did not
+merely raise the surviving share, it left nothing to survive.
+
+**What this licenses and what it does not.** The channel is not empty, and the
+interval is clear of zero, so an arm may be built. It says nothing about sets:
+bits bound information, and this file has measured elimination among worlds,
+not games won. It also measures the CURRENT decision alone — a world's past
+decisions carry information too, and conditioning on the real transcript while
+asking only about now is the conservative choice, not the complete one.
+
+**And it cannot clear the ship bar as written.** An exact SESTINA inverter is
+opponent-specific by construction: it is unavailable in self-play, where the
+opponent is Kraken. The dual-population bar needs the gain in both
+populations, so this measurement licenses a *mechanism*, not this instance of
+it — see the teammate channel below, where the policy is exactly known in both
+populations.
 
 ### What stands
 
