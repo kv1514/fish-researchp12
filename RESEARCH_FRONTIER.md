@@ -5843,3 +5843,202 @@ That is a lead, not a finding. What it does establish is that this engine's
 handling of disclosure is not the defect — so the remaining candidates are what
 it does with a visit once it has one, and the declaration rate that decides how
 long every window stays open.
+
+## CORRECTION + OUTCOME 2026-09-23: "they extract more per visit" was the hit rate restated, and the real chain runs back to declaring
+
+### Three errors in my own metric, and what it actually measured
+
+The "one new fact" recorded above — *SESTINA extracts 1.7581 cards per visit
+against our 1.6063* — was wrong three times over.
+
+1. **It was keyed on `(asker, target)`.** A run broke when the asker switched
+   target, but `_apply_ask` retains the *turn*, so that is cards taken from one
+   opponent before moving on, not cards taken in a turn. I described it as the
+   latter.
+2. **It excluded zero-card runs**, making it a mean *conditional on the run
+   getting something* — which inflates both sides by however often a visit
+   yields nothing, and that is the failure a long-run comparison is about.
+3. **And corrected, it is the hit rate.** A turn ends at its first failure, so
+   `cards/turn = h/(1−h)`. The paper's rev-3 hit rates, $0.5157$ and $0.5365$,
+   predict $1.0648$ and $1.1575$; measured at power, $1.0728$ $[1.0393,
+   1.1032]$ and $1.1644$ $[1.1292, 1.1979]$.
+
+So there was no new fact. It was the hit-rate gap — **−0.0218 [−0.0260,
+−0.0175]**, already in the paper, and already described there as *"the one axis
+on which the two engines nearly agree"* — restated in a different unit. I
+flagged it as the first asymmetry not bounded by the declaration ceiling. It
+isn't one.
+
+### And we play the visit BETTER, which makes the chain clear
+
+`results/visit_ordering_15500000.json`, 400 games. A certain steal is one the
+**public record** already places with the target — the same objective rule for
+both engines, no posterior and no threshold. Self-test: no "certain" steal is
+contradicted by the true hands, in any game.
+
+| | decisions | with a free card up | took it | gambled instead | gamble failed |
+|---|---:|---:|---|---:|---|
+| KRAKEN | 20,308 | 4,815 (0.2371) | **0.7774** [0.7668, 0.7880] | 1,072 | **7 (0.0065)** |
+| SESTINA | 21,306 | 5,515 (0.2588) | 0.7164 [0.7046, 0.7295] | 1,564 | 147 (0.0940) |
+
+**We bank free cards more reliably than they do, and when we pass one over our
+alternative almost never fails — 7 times in 1,072.** Theirs fails 9.4% of the
+time, and a failure hands the turn back with every free card still standing.
+Our exact inference is doing exactly what it is for.
+
+So their higher hit rate is not better play within a visit. **It is more
+visits with something free in them: they face a free card 1.092× as often as we
+do.**
+
+### The chain, and every link is measured
+
+* we declare less — $4.027$ against $4.832$ a game;
+* so half-suits stay live longer, and a live half-suit is one they can legally
+  ask in;
+* so our acquired cards sit publicly located **25% longer** — windows of
+  $10.58$ plies against $8.49$;
+* so they meet a free card 9% more often per decision;
+* so they hit more often and take more cards per turn, **despite ordering the
+  visit worse than we do**;
+* and our hits are wasted more often — $+1.065$ a game, which is the gap the
+  paper already names as the target.
+
+Per ply of exposure our cards are taken back **less** often than theirs
+($0.03895$ against $0.04148$). The wasted-hits gap is **exposure time, not
+exposure rate.**
+
+### What this closes, and it is the most useful thing here
+
+**There is no separate allocation defect.** The ask-side gaps — hit rate, cards
+per turn, wasted hits — are *downstream of the declaration rate*, and the OURS
+channel of the margin identity bounds that at **+0.2017** sets a game. That is
+why every arm this project has aimed at inference has failed at the bar, and it
+says the remaining headroom is genuinely small unless something moves the
+declaration rate itself.
+
+The instrument earned its keep for its controls, not its findings: the time
+control killed the hypothesis it was built for, the identity check caught two
+counting errors in my own metric, and the public-record classifier showed the
+side I assumed was outplaying us is the one making the ordering mistakes.
+
+## AUDIT 2026-09-23: why is each of the ten zeroed ask terms zero?
+
+`AskWeights` has thirteen terms. The champion ships **three**. Finding `claim`'s
+zero was an artifact rather than a result raised the obvious question about the
+other nine, and the answer was scattered across `prereg/`, `results/` and three
+separate passages of the paper — which is precisely how an artifact-zero
+masquerades as a measured one. Collected here once.
+
+| term | shipped | why it holds that value | status |
+|---|---:|---|---|
+| `suit` | 0.06 | live | — |
+| `turn` | 0.60 | live | — |
+| `scarce` | 0.20 | live; v0.3 win, +0.65 | — |
+| `claim` | 0.0 | **never fitted.** Its ridge column described the pre-correction formula (product over all six cards *including the asked one*, so exactly 0 on provably certain steals). The fit named it, zeroed it and recorded that it was not fitted | **P52 duels it** |
+| `expose` | 0.0 | fitted **+0.825** from an incumbent of zero, permutation $p \le 0.023$ — the largest move in the vector | never individually dueled |
+| `certain` | 0.0 | fitted −0.502, but `target_feature_fit` gives the same term **+0.649** on a different population; it correlates 0.738 with $P(\text{success})$, which already carries weight 1.0 | never individually dueled; sign unstable |
+| `signal` | 0.0 | fitted −0.249 | never individually dueled |
+| `info` | 0.0 | fitted −0.155 | never individually dueled |
+| `reveal` | 0.0 | fitted −0.118 | never individually dueled |
+| `deplete` | 0.0 | v0.3 null; fitted −0.219 | closed |
+| `concent` | 0.0 | confirmed negative at 4,000 games | closed |
+| `locate` | 0.0 | dueled: **null**, +0.047 [−0.075, +0.168], diagnosed | closed |
+| `reach` | 0.0 | swept in self-play at 240 deals: −0.075 at $w=-0.4$, −0.100 at $-0.8$, **−1.671 at $+0.8$**; screens fired, no duel | effectively closed |
+
+### The thing that makes the fitted column not a licence
+
+**The whole fitted vector was played and lost: −0.745 [−0.914, −0.576], 2,000
+pairs, entirely below zero**, blocks agreeing exactly ($I^2 = 0\%$), arms
+diverging on 87.6% of pairs. The paper is explicit that *"the individual signs
+are not findings"* and gives the reason for `certain` by name — the same term
+fits with the opposite sign on another population.
+
+So a fitted weight is **not** evidence that the term helps alone. But a
+whole-vector loss is also not evidence about which term sank it. Five terms —
+`expose`, `certain`, `signal`, `info`, `reveal` — sit in the gap between those
+two statements.
+
+### And that gap is not a licence to sweep them
+
+Five untested knobs and a deficit to close is how a fishing expedition starts.
+What separates P52 from that is that its motivation is independent of the fit:
+its zero is a *documented artifact*, and the mechanism it prices — half-suit
+lifetime — is the one the measured chain arrives at from three directions.
+
+`expose` is the next-strongest on paper (the largest fitted move, $p \le 0.023$)
+and its motivation just got **weaker, not stronger**: the hypothesis it would
+implement is that our cards are more vulnerable once exposed, and
+`disclosure_cost` measured the opposite — per ply of exposure our cards are taken
+back **less** often than theirs ($0.03895$ against $0.04148$). A term aimed at a
+refuted mechanism should not be dueled because a fit liked it.
+
+None of the remaining four will be run without a reason of its own.
+
+## OUTCOME 2026-09-23: P52 — the `claim` term moved hits, not declarations
+
+`results/p52_claim_term.json`, 7,200 games, and
+`results/claim_term_mechanism_15900000.json`, 150 deals × 2 parities.
+
+| arm | `w_claim` | vs SESTINA | self-play |
+|---|---:|---|---|
+| A1 | +0.10 | −0.0633 [−0.259, +0.133] | +0.1067 [−0.112, +0.325] |
+| A2 | +0.30 | +0.0900 [−0.200, +0.380] | +0.2233 [−0.012, +0.458] |
+| A3 | +0.60 | −0.0467 [−0.325, +0.232] | +0.1867 [−0.032, +0.405] |
+| A4 | −0.20 | +0.2267 [−0.051, +0.505] | −0.2000 [−0.424, +0.024] |
+
+**Nothing clears, no withdrawal fires**, and all four arms are genuinely distinct
+(every pair differs on 500+ of 600 pairings — not P51's case of two names for one
+arm).
+
+### The registration disqualified its own best cell
+
+The dose response is **not monotone** in either population: −0.063, **+0.090**,
+−0.047 against SESTINA and +0.107, **+0.223**, +0.187 in self-play — up then
+down, both times. The registration fixed the consequence before the run: *"the
+term is interacting with `turn` or `scarce` rather than adding, and no single
+dose should be read."* A2 is the most promising cell this line of work has
+produced and it is set aside for the **registered** reason, not the convenient
+one. It would not ship regardless — the bar needs +0.15 clear of zero in *both*
+populations and A2's SESTINA interval covers zero.
+
+### And the mechanism check says why, which no duel could
+
+`p46_screen` records margins, asks and hit rates and **not declarations**, so a
+duel about declaration count could not see its own subject.
+`scripts4/claim_term_mechanism.py` reads $D_{\text{us}}$ and $W_{\text{us}}$
+straight off the `ClaimEvent`s, paired within deal:
+
+| `w_claim` | $D_{\text{us}}$ | vs champion | 95% CI | $W_{\text{us}}$ | margin vs champion |
+|---:|---:|---:|---|---:|---:|
+| 0.00 | 4.183 | — | — | 0.133 | — |
+| +0.10 | 4.157 | −0.027 | [−0.160, +0.110] | 0.133 | −0.053 |
+| +0.30 | 4.203 | **+0.020** | [−0.167, +0.203] | **0.093** | **+0.180** |
+| +0.60 | 4.087 | −0.097 | [−0.297, +0.097] | 0.100 | −0.007 |
+| −0.20 | 4.220 | +0.037 | [−0.163, +0.247] | 0.110 | +0.047 |
+
+**$D_{\text{us}}$ does not move.** Every interval covers zero and the largest
+point estimate is +0.037 against a target of **+0.541** — about 7% of what is
+needed, and indistinguishable from nothing. (The smoke's alarming −0.875 at the
+negative dose was eight deals of noise; at power that dose is +0.037.)
+
+**What A2 actually did was declare more accurately, not more often.**
+$W_{\text{us}}$ falls 0.133 → 0.093 and the margin moves +0.180 — which sits
+inside the **+0.202** bound on the OURS channel, exactly where a bounded effect
+should sit. The term is working through the channel that cannot carry a win,
+which is the complete explanation of the duel, and the monotonicity condition
+flagged it as unreadable before any of this was known.
+
+### What is closed and what is not
+
+Closed: `w_claim` as a lever on declaration **count**, at any dose in the swept
+range, for a mechanical reason rather than a statistical one.
+
+Not closed: **declaration count remains the only channel with room.**
+$D_{\text{us}}$ must rise from 4.100 to **4.641**, $+0.541$ a game; the external
+engine reaches 4.832. Nothing measured today touches that, and every candidate
+this project has played moved accuracy or hits instead.
+
+The next question is therefore not "which ask weight" but **why fewer half-suits
+end up entirely in our hands at all** — `completion_ledger` puts assembly at
+−0.6525 while turn acquisitions are *+0.0931 in our favour*. We acquire as much
+and assemble less.

@@ -1796,6 +1796,16 @@ WATCH = [
     ("arm_overlap.json", "pairs.D1_flat4 vs D2_measured.differ", "{:d}",
      "deals the measured table differs from the flattened arm",
      "whole table differs in"),
+    # WHAT IT TAKES TO WIN, solved from the identity rather than quoted. The
+    # give-back is included: a half-suit moved into RACE leaves THEIRS behind.
+    ("split_partner_model_12000000.json", "needed_per_game", "{:.3f}",
+     "extra declarations a game needed to clear the bar",
+     # 'declarations a game' alone occurs 18 times in the paper
+     "text{ declarations"),
+    ("split_partner_model_12000000.json", "needed_derivation.d_us_required",
+     "{:.3f}", "declarations a game the bar requires", "D_{\\text{us}} \\;\\ge\\;"),
+    ("split_partner_model_12000000.json", "needed_derivation.d_us", "{:.3f}",
+     "declarations a game we make now", "a game, our error rate"),
 ]
 
 

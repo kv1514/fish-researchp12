@@ -108,6 +108,15 @@ def track(rules, agents, our_team: int, seed: int, agent0: int) -> dict:
     rows: list[dict] = []
     runs: list[dict] = []
     run_key, run_len = None, 0
+    #: TWO RUN LENGTHS, because they are different quantities and the first
+    #: version of this file reported one under the other's name. `run_key` is
+    #: (asker, target): consecutive cards taken from ONE target. A TURN is
+    #: longer -- `_apply_ask` retains the turn on success and the asker may then
+    #: switch target -- so it is keyed on the asker alone and broken when
+    #: somebody else acts. "Cards per visit" is the turn one; the (asker,
+    #: target) one is cards from a single opponent before moving on.
+    turn_actor, turn_len = None, 0
+    turns: list[dict] = []
     #: HOW LONG THE WINDOW WAS OPEN, and it is not optional. A take-back needs
     #: TIME, and the two sides do not give their cards the same amount of it:
     #: SESTINA declares 4.832 half-suits a game against our 4.027, and every
@@ -119,10 +128,36 @@ def track(rules, agents, our_team: int, seed: int, agent0: int) -> dict:
     ply = 0
 
     def close_run():
+        #: kept CONDITIONAL on the run having taken at least one card, and
+        #: labelled that way where it is printed: a "run against one target" is
+        #: only meaningful once a card has come from that target, whereas a
+        #: TURN exists whether or not it yields anything.
         nonlocal run_key, run_len
         if run_key is not None and run_len > 0:
             runs.append({"asker_team": team_of(run_key[0]), "length": run_len})
         run_key, run_len = None, 0
+
+    def close_turn():
+        """Record EVERY turn, including the ones that got nothing.
+
+        Dropping zero-length turns makes the mean "cards per turn GIVEN the
+        turn got a card", which is a different and flattering quantity: a turn
+        whose first ask fails is exactly the failure a long-run comparison is
+        about, and excluding it inflates both sides by however often that
+        happens. The identity that has to hold is
+
+            cards per turn = hits / turns   and   hit rate = hits / asks
+
+        and with a turn ending at its first failure those give hit rate
+        = L/(L+1) only if every turn is counted. The first version of this
+        function dropped the empties and reported 2.34 against a measured hit
+        rate of 0.52, which cannot both be true.
+        """
+        nonlocal turn_actor, turn_len
+        if turn_actor is not None:
+            turns.append({"asker_team": team_of(turn_actor),
+                          "length": turn_len})
+        turn_actor, turn_len = None, 0
 
     st = GameState.deal(rules, seed=seed)
     for p, ag in enumerate(agents):
@@ -133,6 +168,9 @@ def track(rules, agents, our_team: int, seed: int, agent0: int) -> dict:
             break
         actor = st.turn
         ply += 1
+        if actor != turn_actor:
+            close_turn()
+            turn_actor = actor
         act = agents[actor].act(Observation.from_state(st, actor))
         card = getattr(act, "card", None)
         band = None
@@ -167,6 +205,7 @@ def track(rules, agents, our_team: int, seed: int, agent0: int) -> dict:
             close_run()
             run_key = (actor, act.target)
         run_len += 1
+        turn_len += 1
 
         prior = open_on.pop(card, None)
         if prior is not None:
@@ -181,10 +220,12 @@ def track(rules, agents, our_team: int, seed: int, agent0: int) -> dict:
                          "opened_at": ply, "closed_at": None}
 
     close_run()
+    close_turn()
     for prior in open_on.values():
         prior["closed_at"] = ply      # the game ended with the window open
         rows.append(prior)
-    return {"rows": rows, "runs": runs, "state": st, "plies": ply}
+    return {"rows": rows, "runs": runs, "turns": turns, "state": st,
+            "plies": ply}
 
 
 def main(argv=None) -> int:
@@ -212,11 +253,22 @@ def main(argv=None) -> int:
         w = track(rules, agents, our_team, seed, AGENT0)
 
         row = {"game": g}
+        # THE DIRECT HIT RATE, straight off the engine's history, so the turn
+        # counting has something outside itself to agree with. The identity
+        # (asks = hits + turns) is necessary but not sufficient: a systematic
+        # miscount of turns would satisfy it while moving the implied rate.
+        for ev in w["state"].history:
+            if isinstance(ev, AskEvent):
+                sd = "ours" if team_of(ev.asker) == our_team else "theirs"
+                row[f"{sd}_asks"] = row.get(f"{sd}_asks", 0) + 1
+                row[f"{sd}_hits"] = row.get(f"{sd}_hits", 0) + int(ev.success)
         for side in ("ours", "theirs"):
             row[f"{side}_acq"] = row[f"{side}_back"] = 0
             row[f"{side}_runs"] = row[f"{side}_run_cards"] = 0
             row[f"{side}_runs3"] = 0
             row[f"{side}_window_plies"] = 0
+            row[f"{side}_turns"] = row[f"{side}_turn_cards"] = 0
+            row[f"{side}_turns3"] = 0
             for band in range(7):
                 row[f"{side}_acq_{band}"] = row[f"{side}_back_{band}"] = 0
                 row[f"{side}_plies_{band}"] = 0
@@ -239,6 +291,11 @@ def main(argv=None) -> int:
             row[f"{side}_runs"] += 1
             row[f"{side}_run_cards"] += rr["length"]
             row[f"{side}_runs3"] += int(rr["length"] >= 3)
+        for tt in w["turns"]:
+            side = "ours" if tt["asker_team"] == our_team else "theirs"
+            row[f"{side}_turns"] += 1
+            row[f"{side}_turn_cards"] += tt["length"]
+            row[f"{side}_turns3"] += int(tt["length"] >= 3)
         # THE SELF-TEST. Every acquisition is a successful ask and every
         # successful ask is an acquisition, so the two counts must agree with
         # the engine's own history. A tracker that dropped or double-counted one
@@ -283,6 +340,25 @@ def main(argv=None) -> int:
         out[f"{side}_cards_per_run_ci"] = _boot(per, f"{side}_run_cards",
                                                f"{side}_runs")
         out[f"{side}_runs_of_3_plus"] = tot(f"{side}_runs3")
+        tn, tc = tot(f"{side}_turns"), tot(f"{side}_turn_cards")
+        out[f"{side}_turns"] = tn
+        out[f"{side}_cards_per_turn"] = (tc / tn) if tn else float("nan")
+        out[f"{side}_cards_per_turn_ci"] = _boot(per, f"{side}_turn_cards",
+                                               f"{side}_turns")
+        out[f"{side}_turns_of_3_plus"] = tot(f"{side}_turns3")
+        # THE IDENTITY. Every turn ends at its first failure or at the end of
+        # the deal, so asks = hits + turns up to the handful of turns the game
+        # ends inside. hit rate and cards per turn are then two readings of one
+        # number, and if they disagree this file is miscounting turns.
+        out[f"{side}_implied_hit_rate"] = (tc / (tc + tn)) if (tc + tn) \
+            else float("nan")
+        asks, hits = tot(f"{side}_asks"), tot(f"{side}_hits")
+        out[f"{side}_asks"] = asks
+        out[f"{side}_hits"] = hits
+        out[f"{side}_hit_rate"] = (hits / asks) if asks else float("nan")
+        out[f"{side}_hit_rate_ci"] = _boot(per, f"{side}_hits", f"{side}_asks")
+        # hits and cards-per-turn are two readings of the same events
+        out[f"{side}_hits_equal_turn_cards"] = (hits == tc)
     out["by_contest"] = {}
     for band in range(7):
         oa, ob = tot(f"ours_acq_{band}"), tot(f"ours_back_{band}")
@@ -324,7 +400,15 @@ def main(argv=None) -> int:
     out["note"] = ("history-only: no posterior is sampled, so there is no "
                    "stale-belief exposure and no sampling error of its own")
 
+    bad_id = [sd for sd in ("ours", "theirs")
+              if not out[f"{sd}_hits_equal_turn_cards"]]
     print("\n" + "=" * 72)
+    print(f"  SELF-TEST: sides where the turn cards and the history's hits "
+          f"disagree: {len(bad_id)} {bad_id if bad_id else ''}")
+    if bad_id:
+        print("  *** MUST BE ZERO. Every card taken in a turn is a successful")
+        print("  *** ask in the history, so these are the same number counted")
+        print("  *** two ways and NO TURN FIGURE BELOW MAY BE READ.")
     print(f"  SELF-TEST: games where the tracker and the engine's history "
           f"disagree about how many asks succeeded: {len(mismatch)}")
     if mismatch:
@@ -356,10 +440,23 @@ def main(argv=None) -> int:
               f"[{wlo:.2f}, {whi:.2f}]   hazard "
               f"{out[f'{side}_hazard_per_ply']:.5f} [{hlo:.5f}, {hhi:.5f}]")
     print("-" * 72)
-    print("  consecutive steals in one visit (the turn is retained on success)")
+    print("  CARDS PER TURN -- a turn is retained on success and ends at the")
+    print("  first failure, whoever the asker switches to along the way.")
+    for side, label in (("ours", "KRAKEN"), ("theirs", "SESTINA")):
+        lo, hi = out[f"{side}_cards_per_turn_ci"]
+        print(f"  {label:<8} {out[f'{side}_turns']:>6,} turns, "
+              f"{out[f'{side}_cards_per_turn']:.4f} cards each "
+              f"[{lo:.4f}, {hi:.4f}], "
+              f"{out[f'{side}_turns_of_3_plus']:,} of 3+")
+        print(f"           implies a hit rate of "
+              f"{out[f'{side}_implied_hit_rate']:.4f}; the history says "
+              f"{out[f'{side}_hit_rate']:.4f}")
+    print()
+    print("  cards from ONE target before moving on -- a NARROWER quantity, and")
+    print("  the one an earlier version of this file reported as cards per turn")
     for side, label in (("ours", "KRAKEN"), ("theirs", "SESTINA")):
         lo, hi = out[f"{side}_cards_per_run_ci"]
-        print(f"  {label:<8} {out[f'{side}_runs']:>6,} visits, "
+        print(f"  {label:<8} {out[f'{side}_runs']:>6,} target-runs, "
               f"{out[f'{side}_cards_per_run']:.4f} cards each "
               f"[{lo:.4f}, {hi:.4f}], "
               f"{out[f'{side}_runs_of_3_plus']:,} of 3+")

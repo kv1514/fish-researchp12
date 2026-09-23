@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The fifty-one documents in \path{prereg/}
+no registered threshold anywhere. The fifty-two documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -25,10 +25,10 @@ what the run returned, and where in this paper the verdict appears.
 The registrations that returned nulls, refutations, withdrawals and
 non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the twelve written after
-this appendix was first compiled (P39--P51) appended at the end, P39--P42 in
+this appendix was first compiled (P39--P52) appended at the end, P39--P42 in
 filename order among themselves and the rest in the order they were
 registered, so that the identifiers already cited in the text keep their
-referents. Twelve of the fifty-one have \emph{no outcome recorded in the
+referents. Twelve of the fifty-two have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -1007,10 +1007,71 @@ $0.5227 \to 0.5411$, which is bite without conversion --- the same pattern the
 conversion ledger found. \path{results/p51_depth_profile.json} &
 \S\ref{sec:res-profile} \\
 
+P52 & \path{p52_claim_term.md} \newline
+\emph{The \texttt{claim} term sits at zero. Was that ever a measurement?} &
+Written before any P52 game. \texttt{AskWeights} has thirteen terms and the
+champion ships \textbf{three} live --- \texttt{suit} $0.06$, \texttt{turn}
+$0.6$, \texttt{scarce} $0.2$ --- with the other ten at exactly zero. For most of
+them that zero is a result: \texttt{deplete} is a v0.3 null, \texttt{locate} was
+duelled to $+0.047$ $[-0.075, +0.168]$, \texttt{concent} was confirmed negative
+at $4{,}000$ games. \texttt{claim} is not one of those. Its zero comes from a
+ridge fit whose stored column described the pre-correction formula, which
+multiplied over all six cards including the one being asked for and therefore
+scored exactly zero on provably certain steals --- the asks it exists to reward.
+\S\ref{sec:res-learn} records the decision not to re-harvest, which is sound
+about harvesting and says nothing about a duel: \texttt{w\_claim} is already a
+constructor parameter and needs no code change. &
+Nothing clears and no withdrawal fires, as predicted --- but
+\textbf{prediction~1 failed}, and it is the one that decides what may be read.
+The dose response is \emph{not monotone} in either population: $-0.063$,
+$\mathbf{+0.090}$, $-0.047$ against the external engine and $+0.107$,
+$\mathbf{+0.223}$, $+0.187$ in self-play, up then down both times. The
+registration fixed the consequence in advance --- ``the term is interacting with
+\texttt{turn} or \texttt{scarce} rather than adding, and no single dose should be
+read'' --- so A2, the most promising cell this line of work has produced, is set
+aside for the registered reason rather than the convenient one. &
+\textbf{NOTHING CLEARS, AND THE REGISTRATION DISQUALIFIES ITS OWN BEST CELL.}
+$7{,}200$ games, zero fallbacks, zero unfinished, and the dose check confirmed
+every arm's \texttt{weights.claim} at run time. &
+\S\ref{sec:res-profile} \\
+
+ & \emph{(P52, continued)} &
+Four doses on block
+\textbf{15,700,000}, $300$ deals $\times$ 2 parities: $+0.10$, $+0.30$, $+0.60$
+and \textbf{$-0.20$} --- both signs, because a sweep that looks only where the
+story predicts is not a measurement of the term. Aimed here because the chain is
+measured end to end: we declare less, so half-suits stay live longer, so our
+cards sit publicly located $25\%$ longer, so the external engine meets a free card
+$1.092\times$ as often as we do and hits more \emph{despite ordering a visit
+worse than we do}. Per ply of exposure our cards are taken back \emph{less}
+often, so the wasted-hits gap is exposure \emph{time}, and \texttt{claim} is the
+only term that prices half-suit lifetime. Predicted: monotone in the middle
+doses, the negative dose negative, a null below the bar the most likely outcome,
+and the ask hit rate flat or falling. Two withdrawal conditions aim at the
+harness: doses disagreeing in sign inside the swept range, and any arm whose
+\texttt{weights.claim} does not equal its registered dose at run time --- the
+runner asserts it, because a duel that silently ran the champion under a
+candidate's name would repeat this registration's own premise in a worse form. &
+It would not ship
+regardless: the bar needs $+0.15$ clear of zero in \emph{both} populations and
+A2's interval against the external engine covers zero. Prediction~4 also failed and points
+the same way: the ask hit rate was predicted flat or falling and \emph{rose} in
+every arm. Prediction~2 is half right --- A4 is negative in self-play and
+\textbf{positive} against the external engine, which is a warning about A2 in
+itself. All four arms are genuinely distinct, every pair differing on $500+$ of
+$600$ pairings, so this is not P51's case of two names for one arm. &
+A1 $-0.0633$ / $+0.1067$; A2
+$+0.0900$ $[-0.200, +0.380]$ / $+0.2233$ $[-0.012, +0.458]$; A3 $-0.0467$ /
+$+0.1867$; A4 $+0.2267$ / $-0.2000$. What it closes is \texttt{w\_claim} as the
+lever \emph{at these doses}; it does not close declaration count as the channel,
+which still needs $D_{\text{us}}$ to rise by $+0.541$ a game.
+\path{results/p52_claim_term.json} &
+ \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the fifty-one resolved.} Seven returned an effect that
+\noindent\textbf{How the fifty-two resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
@@ -1048,7 +1109,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the fifty-one --- P20 --- shipped, and it is the
+\noindent Exactly one of the fifty-two --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
