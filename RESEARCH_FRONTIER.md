@@ -5406,3 +5406,60 @@ invisible to the bolded-number sweep for the life of the paper; the sweep now
 covers both macros and all six new ceiling figures are watched from the day
 they enter, the derived ratio among them, stored in the results file rather
 than divided out in LaTeX.
+
+## OUTCOME 2026-09-23: the inversion channel is not empty — 1.24 bits an opponent decision beyond legality
+
+`results/policy_inversion_bite_14100000.json`, 30 games, **797 of their
+decisions**, 32 worlds each drawn from the champion's own posterior at that
+moment (`build_posterior(...).worlds()`, the SIS path, not the fallback).
+
+**Self-test: 797/797.** Their policy is deterministic and the probe is seeded
+as the live seat was, so the true world must reproduce the action that
+actually happened. It does, at every decision. Without that the ratios below
+would be noise about a broken harness.
+
+| | |
+|---|---:|
+| worlds where the observed action was even legal | 0.1846 |
+| of ALL worlds, share reproducing the action | 0.0782 (3.68 bits) |
+| **of LEGAL worlds, share reproducing it** | **0.4234 (1.24 bits)** |
+
+The second line is the decision-relevant one. Legality is already in our
+constraint store — a seat must hold a card of the half-suit it asks in — so
+elimination by legality is not new information. What an inverter adds is
+elimination among worlds where they **could** have made the ask and did not,
+and that removes **58% of them**: 1.24 bits per opponent decision.
+
+**The channel is not empty.** That is all a futility screen can establish. A
+fraction surviving is a bits bound, bits are not sets, and this file licenses
+no arm and no duel.
+
+### An open question the screen raises and cannot answer
+
+**Only 26.0% of drawn worlds survive the bridge's consistency checks** —
+6,624 of 25,504, with the rest rejected as either a dealt-hand reconstruction
+that does not come to nine cards or a forward replay that ends on a different
+hand than the arbiter holds. The rate is the same on the SIS path as on the
+v0.3 fallback, so it is not an artefact of which sampler is used.
+
+Two readings, and **this instrument cannot separate them**:
+
+1. our posterior puts mass on worlds that no deal-plus-transfer-history could
+   produce, which would be a real defect in the belief; or
+2. `Observation.initial_hand()` is not valid for counterfactual use — it
+   restores resolved half-suits from `ev.revealed`, which is the *true*
+   holder at resolution, so a counterfactual current hand is reconciled
+   against a real historical fact and may fail the count for that reason
+   alone.
+
+Reading 2 would make the rejections a property of the harness rather than of
+the belief. Until it is settled, the 1.24 bits is **conditional on the
+surviving subset and its bias direction is unknown** — it is not claimed as
+conservative, because nothing here establishes that.
+
+This is recorded as a question rather than a finding. An earlier version of
+this screen drew from the v0.3 fallback sampler and I was one step from
+reporting the same 74% as a property of the shipped posterior; that claim was
+withdrawn before it was made, and the corrected run shows the rate is real on
+the shipped path — but "real on the shipped path" and "a defect in the
+belief" are still two different statements.
