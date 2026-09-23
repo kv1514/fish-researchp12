@@ -1783,6 +1783,19 @@ WATCH = [
     # the comparison between the two is checkable rather than remembered.
     ("world_reachability_14300000.json", "n_worlds", "{:,d}",
      "worlds in the reachability check", "walking the public transfers"),
+    # How much an arm actually CHANGES. A verdict table cannot show this: two
+    # arms can differ in every game and land on the same mean, or agree in every
+    # game and look like independent evidence.
+    ("arm_overlap.json", "pairs.D1_flat4 vs R_gamma_team_14.differ", "{:d}",
+     "deals where the flattened arm differs from gamma_team=1.4",
+     # line-safe: the longer phrase straddles a line break in the source, and
+     # the anchor search reads the raw file
+     "engine does in"),
+    ("arm_overlap.json", "pairs.D1_flat4 vs R_gamma_team_14.shared", "{:d}",
+     "deals the two were compared on", "engine does in"),
+    ("arm_overlap.json", "pairs.D1_flat4 vs D2_measured.differ", "{:d}",
+     "deals the measured table differs from the flattened arm",
+     "whole table differs in"),
 ]
 
 
