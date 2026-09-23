@@ -6042,3 +6042,174 @@ The next question is therefore not "which ask weight" but **why fewer half-suits
 end up entirely in our hands at all** — `completion_ledger` puts assembly at
 −0.6525 while turn acquisitions are *+0.0931 in our favour*. We acquire as much
 and assemble less.
+
+## OUTCOME 2026-09-23: the whole deficit is ASSEMBLY, and the stall is at the bottom of the ladder
+
+Two instruments, and together they give the first complete causal chain from a
+policy parameter to the margin.
+
+### The deficit is reaching six, not converting six
+
+`results/assembly_ledger_16100000.json`, 400 games. Peak = the most of a
+half-suit a team ever held at once. Self-test: no half-suit was won by a correct
+declaration from a team that never held all six — which `_apply_claim` makes
+impossible, so a counter-example would mean the ledger is mis-tracking.
+
+| | ours | theirs | gap |
+|---|---:|---:|---:|
+| half-suits won a game | 4.145 | 4.855 | −0.710 |
+| **reached peak 6 a game** | **4.098** | **4.860** | **−0.762** |
+| converted a peak 6 | 0.9732 | 0.9748 | −0.0016 |
+
+**Conversion is identical. Assembly is everything.** The excess sits in
+half-suits stalled at 3, 4 and 5 — +0.690 a game, almost exactly the shortfall
+at 6. And the bar's +0.541 extra declarations is **0.556 more peak-6s, or 73% of
+this gap**.
+
+So the declaration gate, the split joint, the claim threshold — none of them are
+the bottleneck. Getting all six cards into our hands is.
+
+### And the stall is where nobody was looking
+
+Climb rate = upward transitions per ply spent at that holding:
+
+| holding | ours | theirs | gap | our plies | their plies |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 0.02930 | 0.04493 | **−0.01563** | 34,024 | 23,613 |
+| 2 | 0.04084 | 0.05568 | **−0.01484** | 54,794 | 40,677 |
+| 3 | 0.04577 | 0.05075 | −0.00498 | 58,623 | 58,623 |
+| 4 | 0.05775 | 0.04747 | **+0.01028** | 40,677 | 54,794 |
+| 5 | 0.06763 | 0.05581 | **+0.01182** | 23,613 | 34,024 |
+
+**We are faster at finishing and slower at starting.** We spend **38% more
+plies** holding only one or two of a half-suit, and they make 9.5% more upward
+transitions overall. (Plies mirror exactly — our *k* against their 6−*k* — as
+complementarity requires, which is a check on the tracking.)
+
+This overturns the reading this line of work has been carrying. Every arm since
+P49 has been aimed at the top of the ladder: better partner belief, a better
+declaration gate, a term rewarding nearly-complete half-suits. The top is the
+half we are already **winning**.
+
+### Because our ask allocation is far steeper in own-depth than theirs
+
+`results/ask_allocation_16300000.json`, 400 games, 18,498 of our asks against
+19,119 of theirs, each classified by **the asker's own pre-ask count** — one
+objective rule for both engines, no posterior, no model of anyone. Self-test:
+`P(chosen | k=0)` is exactly zero for both, as the rules require.
+
+| held | ours | theirs | ratio | share of our asks | share of theirs |
+|---:|---:|---:|---:|---:|---:|
+| 1 | **0.11258** | **0.19717** | **0.57** | 0.2432 | **0.3467** |
+| 2 | 0.28986 | 0.23826 | 1.22 | 0.3238 | 0.2986 |
+| 3 | 0.63851 | 0.40890 | **1.56** | 0.2341 | 0.1830 |
+| 4 | 0.75711 | 0.71711 | 1.06 | 0.1296 | 0.1083 |
+| 5 | 0.72841 | 0.85836 | 0.85 | 0.0693 | 0.0634 |
+
+Their curve is nearly flat from 1 to 2 (0.197 → 0.238); ours more than doubles
+(0.113 → 0.290). **At a half-suit we hold one of, they ask 75% more readily than
+we do.**
+
+### The chain
+
+    our ask objective is steep in own-depth  (w_suit, w_scarce both concentrate)
+      -> we neglect half-suits we hold 1-2 of      (0.113 against their 0.197)
+      -> we climb out of them slower               (0.0293 against 0.0449)
+      -> we spend 38% more plies down there
+      -> we reach all six less often               (4.098 against 4.860)
+      -> we declare less                           (4.100 against 4.832)
+      -> and conversion at six is identical, so that is the entire margin
+
+A prior measurement points the same way without being proof: the `concent` term,
+which rewards increasing concentration, was **confirmed negative at 4,000
+games**, and the paper's own summary is that *"trading hit rate for
+concentration is a measured disaster."*
+
+### P53, registered — and its mechanism verified before the duel
+
+`prereg/p53_depth_preference.md` sweeps `w_suit`, the weight on the asker's own
+depth, at 0.00, −0.03, −0.06 and **+0.12** (both signs). Before registering, 40
+games per setting confirmed the knob moves the first link:
+
+| `w_suit` | our P(chosen \| held 1) |
+|---:|---:|
+| +0.06 shipped | 0.113 |
+| 0.00 | 0.132 |
+| −0.06 | 0.259 |
+
+against their 0.197, so the match interpolates near **−0.03**. That check is
+what P52 lacked: `w_claim` lost *and* never moved $D_{\text{us}}$, and the two
+had to be separated afterwards.
+
+**The prediction I would most regret getting wrong** is registered as such: B4,
+doubling the preference, should be the worst arm in both populations. If it is
+not, the chain has the sign backwards and everything above needs re-reading.
+
+## OUTCOME 2026-09-23: P53 refutes the chain — and the panel says exactly where it breaks
+
+`results/p53_depth_preference.json`, 7,200 games, and
+`results/chain_mechanism_16700000.json`, 150 deals × 2 parities.
+
+| arm | `w_suit` | vs SESTINA | self-play | ask hit rate |
+|---|---:|---|---|---:|
+| B4 | +0.12 | −0.0600 [−0.315, +0.195] | −0.1033 [−0.318, +0.111] | 0.5159 |
+| — | +0.06 champion | — | — | 0.5177 |
+| B1 | 0.00 | −0.0400 [−0.297, +0.217] | +0.0600 [−0.159, +0.279] | 0.5299 |
+| B2 | −0.03 | −0.1167 [−0.406, +0.173] | **−0.5533** [−0.777, −0.330] | 0.5412 |
+| B3 | −0.06 | **−0.4133** [−0.717, −0.110] | **−1.1700** [−1.390, −0.950] | 0.5556 |
+
+**B2 and B3 withdrawn.** All four arms distinct (564+ of 600 pairings differ).
+
+### The prediction I registered as most regretted, failed
+
+> *"B4 is the worst arm in both populations. If doubling the preference does not
+> hurt, the chain is wrong about the sign and everything built on it needs
+> re-reading."*
+
+B4 is nearly neutral and second-best. The worst arms are the two the chain said
+would help. The dose response is clean and **monotone in the wrong direction**.
+Prediction 2 held — the response *is* monotone — which is what makes the doses
+readable at all, and they read *do not do this*.
+
+### The panel says the break is between link 1 and link 3
+
+| arm | alloc@1 | climb@1 | peak-6 | vs champion | margin |
+|---|---:|---:|---:|---:|---:|
+| B4 +0.12 | 0.09918 | 0.03036 | 4.253 | +0.023 | −0.387 |
+| champion | 0.11004 | 0.03118 | 4.230 | — | −0.440 |
+| B1 0.00 | 0.12875 | 0.02989 | 4.213 | −0.017 | −0.453 |
+| B2 −0.03 | 0.16122 | 0.03252 | 4.210 | −0.020 | −0.500 |
+| B3 −0.06 | **0.24025** | 0.03441 | **4.027** | **−0.203** | −0.893 |
+| **SESTINA** | **0.19717** | **0.04493** | **4.860** | | |
+
+**Link 1 moves exactly as designed** — allocation at holding-1 spans 0.099 to
+0.240 across the doses, and B2 lands near their 0.197.
+
+**Link 2 barely moves and never approaches theirs.** At B3 we allocate *more*
+to holding-1 than SESTINA does (0.240 against 0.197) and still climb out at
+0.0344 against their 0.0449.
+
+**Link 3 never rises.** Peak-6 is flat then falls.
+
+So their climb advantage at low holdings is **not caused by their allocation**.
+Sending more asks into half-suits we hold one of does not convert into
+assembling them, and past a point it costs a fifth of a half-suit a game.
+
+### What was actually wrong, and what survives
+
+Every measured link survives as a **description**: assembly is the whole
+deficit, our climb at low holdings is slower, our allocation is steeper. What
+fails is the causal reading laid over them — their flat allocation is right for
+*their* engine, and a correlation observed **across two different policies** was
+treated as a lever **inside one**. That is the error, stated plainly, and it is
+the same shape as reading a fitted weight as evidence a term helps alone.
+
+### And a reading this disposes of for good
+
+The ask hit rate rises monotonically as the preference flattens — 0.5159,
+0.5177, 0.5299, 0.5412, **0.5556** — while the margin falls. **+3.8 points of
+hit rate bought −1.17 sets a game.** The external engine's higher hit rate has
+hovered over the cross-engine comparison as something to chase; here is a knob
+that buys it directly and it is the most damaging single change this project has
+measured. Hit rate is not the objective, and now there is a dose response
+proving it rather than an argument.

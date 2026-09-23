@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The fifty-two documents in \path{prereg/}
+no registered threshold anywhere. The fifty-three documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -25,10 +25,10 @@ what the run returned, and where in this paper the verdict appears.
 The registrations that returned nulls, refutations, withdrawals and
 non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the twelve written after
-this appendix was first compiled (P39--P52) appended at the end, P39--P42 in
+this appendix was first compiled (P39--P53) appended at the end, P39--P42 in
 filename order among themselves and the rest in the order they were
 registered, so that the identifiers already cited in the text keep their
-referents. Twelve of the fifty-two have \emph{no outcome recorded in the
+referents. Twelve of the fifty-three have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -1068,10 +1068,50 @@ which still needs $D_{\text{us}}$ to rise by $+0.541$ a game.
 \path{results/p52_claim_term.json} &
  \\
 
+P53 & \path{p53_depth_preference.md} \newline
+\emph{Our ask allocation is far steeper in own-depth than theirs. Is that the
+deficit?} &
+Written before any P53 game, from a chain measured end to end rather than
+argued. \path{results/assembly_ledger_16100000.json} put the WHOLE deficit in
+reaching six rather than converting it --- peak-6 a game $4.098$ against
+$4.860$, conversion $0.9732$ against $0.9748$ --- and the climb rates put the
+stall at the BOTTOM of the ladder: we are faster than they are at holdings 4 and
+5 and slower at 1, 2 and 3, and we spend $38\%$ more plies holding one or two of
+a half-suit. \path{results/ask_allocation_16300000.json} said why: at a
+half-suit we hold ONE of, they ask $75\%$ more readily than we do ($0.19717$
+against $0.11258$). Four doses of \texttt{w\_suit} on block \textbf{16,500,000},
+$300$ deals $\times$ 2 parities: $0.00$, $-0.03$ (interpolated to match their
+rate), $-0.06$, and $+0.12$ --- both signs. \textbf{The mechanism was verified
+BEFORE the duel}, which P52 lacked: 40 games per setting put our holding-1 rate
+at $0.113$ shipped, $0.132$ at $w=0$ and $0.259$ at $-0.06$. Registered as the
+prediction most regretted if wrong: \emph{B4, doubling the preference, is the
+worst arm in both populations.} &
+\textbf{Prediction~1 failed and the chain is refuted.} B4 is nearly neutral and
+the second-best arm; the worst are the two the chain said would help. The dose
+response is clean and monotone \emph{in the wrong direction} --- the more the
+preference is flattened the worse the engine plays, in both populations. B2 and
+B3 are withdrawn, their intervals entirely below zero. Prediction~2 held, so
+unlike P51 and P52 the doses ARE readable, and they read ``do not do this''. The
+ask hit rate rises monotonically as the preference flattens --- $0.5159$,
+$0.5177$, $0.5299$, $0.5412$, $\mathbf{0.5556}$ --- while the margin falls:
+$+3.8$ points of hit rate bought $-1.17$ sets a game. Every measured link
+survives; what fails is the causal reading laid over them. Their flat allocation
+is right for \emph{their} engine, and a correlation across two policies was
+treated as a lever inside one. &
+\textbf{NOTHING CLEARS; THE MOST DAMAGING SINGLE KNOB THIS PROJECT HAS
+MEASURED.} $7{,}200$ games, zero fallbacks, zero unfinished, dose check passed
+at run time, all four arms distinct ($564+$ of $600$ pairings differ). B1
+$-0.0400$ / $+0.0600$; B2 $-0.1167$ / $\mathbf{-0.5533}$ $[-0.777, -0.330]$; B3
+$\mathbf{-0.4133}$ $[-0.717, -0.110]$ / $\mathbf{-1.1700}$ $[-1.390, -0.950]$;
+B4 $-0.0600$ / $-0.1033$. It also disposes of a reading that has hovered over
+the cross-engine comparison: the external engine's higher hit rate is not
+something to chase. \path{results/p53_depth_preference.json} &
+\S\ref{sec:res-profile} \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the fifty-two resolved.} Seven returned an effect that
+\noindent\textbf{How the fifty-three resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
@@ -1109,7 +1149,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the fifty-two --- P20 --- shipped, and it is the
+\noindent Exactly one of the fifty-three --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
