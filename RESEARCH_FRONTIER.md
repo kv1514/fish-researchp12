@@ -5920,3 +5920,56 @@ The instrument earned its keep for its controls, not its findings: the time
 control killed the hypothesis it was built for, the identity check caught two
 counting errors in my own metric, and the public-record classifier showed the
 side I assumed was outplaying us is the one making the ordering mistakes.
+
+## AUDIT 2026-09-23: why is each of the ten zeroed ask terms zero?
+
+`AskWeights` has thirteen terms. The champion ships **three**. Finding `claim`'s
+zero was an artifact rather than a result raised the obvious question about the
+other nine, and the answer was scattered across `prereg/`, `results/` and three
+separate passages of the paper — which is precisely how an artifact-zero
+masquerades as a measured one. Collected here once.
+
+| term | shipped | why it holds that value | status |
+|---|---:|---|---|
+| `suit` | 0.06 | live | — |
+| `turn` | 0.60 | live | — |
+| `scarce` | 0.20 | live; v0.3 win, +0.65 | — |
+| `claim` | 0.0 | **never fitted.** Its ridge column described the pre-correction formula (product over all six cards *including the asked one*, so exactly 0 on provably certain steals). The fit named it, zeroed it and recorded that it was not fitted | **P52 duels it** |
+| `expose` | 0.0 | fitted **+0.825** from an incumbent of zero, permutation $p \le 0.023$ — the largest move in the vector | never individually dueled |
+| `certain` | 0.0 | fitted −0.502, but `target_feature_fit` gives the same term **+0.649** on a different population; it correlates 0.738 with $P(\text{success})$, which already carries weight 1.0 | never individually dueled; sign unstable |
+| `signal` | 0.0 | fitted −0.249 | never individually dueled |
+| `info` | 0.0 | fitted −0.155 | never individually dueled |
+| `reveal` | 0.0 | fitted −0.118 | never individually dueled |
+| `deplete` | 0.0 | v0.3 null; fitted −0.219 | closed |
+| `concent` | 0.0 | confirmed negative at 4,000 games | closed |
+| `locate` | 0.0 | dueled: **null**, +0.047 [−0.075, +0.168], diagnosed | closed |
+| `reach` | 0.0 | swept in self-play at 240 deals: −0.075 at $w=-0.4$, −0.100 at $-0.8$, **−1.671 at $+0.8$**; screens fired, no duel | effectively closed |
+
+### The thing that makes the fitted column not a licence
+
+**The whole fitted vector was played and lost: −0.745 [−0.914, −0.576], 2,000
+pairs, entirely below zero**, blocks agreeing exactly ($I^2 = 0\%$), arms
+diverging on 87.6% of pairs. The paper is explicit that *"the individual signs
+are not findings"* and gives the reason for `certain` by name — the same term
+fits with the opposite sign on another population.
+
+So a fitted weight is **not** evidence that the term helps alone. But a
+whole-vector loss is also not evidence about which term sank it. Five terms —
+`expose`, `certain`, `signal`, `info`, `reveal` — sit in the gap between those
+two statements.
+
+### And that gap is not a licence to sweep them
+
+Five untested knobs and a deficit to close is how a fishing expedition starts.
+What separates P52 from that is that its motivation is independent of the fit:
+its zero is a *documented artifact*, and the mechanism it prices — half-suit
+lifetime — is the one the measured chain arrives at from three directions.
+
+`expose` is the next-strongest on paper (the largest fitted move, $p \le 0.023$)
+and its motivation just got **weaker, not stronger**: the hypothesis it would
+implement is that our cards are more vulnerable once exposed, and
+`disclosure_cost` measured the opposite — per ply of exposure our cards are taken
+back **less** often than theirs ($0.03895$ against $0.04148$). A term aimed at a
+refuted mechanism should not be dueled because a fit liked it.
+
+None of the remaining four will be run without a reason of its own.
