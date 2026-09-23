@@ -228,7 +228,13 @@ class DylanV07(Agent):
         # a real historical fact and fails the nine-card check for that reason
         # alone -- which is what rejected three quarters of the draws in
         # scripts4/policy_inversion_bite.py before this existed.
-        dealt = self.dealt_override
+        # getattr, not attribute access: an INERT hook must not add a
+        # dependency. Reading `self.dealt_override` directly made `_feed`
+        # require an attribute only `begin_game` sets, which broke every caller
+        # that exercises `_feed` on its own -- the bridge's own regression tests
+        # among them. "Inert" has to mean inert for callers that have never
+        # heard of the hook, not merely that no shipped path assigns it.
+        dealt = getattr(self, "dealt_override", None)
         if dealt is None:
             dealt = obs.initial_hand()
         # Check it. A PURE round trip is worthless here and it took a failing
