@@ -130,7 +130,7 @@ def test_cover_note_counts_the_preregistrations():
     """'Forty-two pre-registrations' has to be however many there are."""
     words = {38: "thirty-eight", 39: "thirty-nine", 40: "forty", 41: "forty-one",
              49: "forty-nine", 50: "fifty", 51: "fifty-one",
-             52: "fifty-two", 53: "fifty-three",
+             52: "fifty-two", 53: "fifty-three", 54: "fifty-four",
              42: "forty-two", 43: "forty-three", 44: "forty-four",
              45: "forty-five", 46: "forty-six", 47: "forty-seven",
              48: "forty-eight"}

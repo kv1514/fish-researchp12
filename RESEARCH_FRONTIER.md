@@ -6213,3 +6213,128 @@ hovered over the cross-engine comparison as something to chase; here is a knob
 that buys it directly and it is the most damaging single change this project has
 measured. Hit rate is not the objective, and now there is a dose response
 proving it rather than an argument.
+
+## OUTCOME 2026-09-23: a ninth of our asks cannot succeed, and the engine knows
+
+`results/doomed_asks_17100000.json`. **A fact about the rules, not a
+correlation:** if your *team* holds all six of a half-suit, an ask in it goes to
+an opponent who holds none of them. It cannot succeed, and `_apply_ask` hands
+the turn to the target on a failure.
+
+| | doomed asks | share of own asks |
+|---|---:|---|
+| KRAKEN | 2,451 | **0.1340** [0.1230, 0.1444] |
+| SESTINA | 1,834 | **0.0961** [0.0879, 0.1047] |
+
+400 games, 18,293 of our asks, intervals not overlapping: **6.13
+guaranteed-failure asks a game, 39% more than theirs.** Zero hit, in two
+independently written implementations that agree *exactly* on the same seeds —
+which is the self-test, since one hit would mean the team count is wrong.
+
+**Not signals.** The signalling protocol, whose method is a deliberately doomed
+ask, is off in the champion (`signal_mode='off'`, `signal_budget=0`,
+`w_signal=0`, `convention_beta=0`).
+
+### The engine is not blind
+
+Reading the seat's own posterior at each doomed ask, 120 games:
+
+| P(our team holds all six) | share of doomed asks |
+|---:|---:|
+| ≥ 0.10 | 0.787 |
+| ≥ 0.25 | **0.603** |
+| ≥ 0.50 | **0.272** |
+| ≥ 0.75 | 0.075 |
+
+Mean **0.340**. More than a quarter are made with even odds or better already on
+the half-suit being ours outright. The information is there; the decision rule
+does not use it.
+
+*(The posterior read saves and restores the agent's RNG. The first version did
+not, and `build_posterior` draws from that same generator — so it was changing
+the games it measured. Caught by a 0.218 against a 0.118 that two
+implementations then reproduced exactly once the seeds matched: the difference
+was block variation, which is large here and is why the rate needed 400 games.)*
+
+### And one live term points straight into it
+
+`scarce` = `(team_exp[hs]/6 − 0.5)·2`, weighted **+0.2**, rewards asking where
+our **team's** expected share is high — but an ask succeeds only if an
+**opponent** holds the card.
+
+| `w_scarce` | doomed-ask share | per game |
+|---:|---|---:|
+| **+0.2** shipped | 0.1340 | 6.13 |
+| 0.0 | **0.1056** | 4.83 |
+| −0.2 | **0.0852** | 3.91 |
+
+Monotone, and at −0.2 below their rate. **P54 is registered** and running.
+
+**Its registered risk, named before the run:** P53 moved its target quantity
+perfectly and lost anyway, because flattening a concentration preference is
+damaging in itself. `w_scarce` going negative is the same kind of change and may
+fail the same way *while still removing the waste* — in which case the
+conclusion is that `scarce` is not the lever, and what is wanted is a term that
+prices **this ask cannot succeed** rather than a blunt preference against
+half-suits our team holds.
+
+## OUTCOME 2026-09-23: P54 — the best arm makes MORE doomed asks. The waste is not the constraint.
+
+`results/p54_scarce_and_doomed_asks.json`, 7,200 games, all four arms distinct
+(521+ of 600 pairings differ).
+
+| arm | `w_scarce` | vs SESTINA | self-play | hit rate |
+|---|---:|---|---|---:|
+| C4 | **+0.40** | −0.1667 [−0.439, +0.106] | **+0.1200** [−0.093, +0.333] | 0.5054 |
+| — | +0.20 champion | — | — | 0.5192 |
+| C1 | +0.10 | −0.2533 [−0.508, +0.001] | −0.0833 [−0.312, +0.145] | 0.5263 |
+| C2 | 0.00 | **−0.4567** [−0.723, −0.191] | −0.0900 [−0.308, +0.128] | 0.5336 |
+| C3 | −0.10 | **−0.5800** [−0.858, −0.302] | **−0.2433** [−0.460, −0.026] | 0.5335 |
+
+C2 and C3 withdrawn. **C4 — doubling the term that points into the waste — is
+the best arm**, and the only one positive in either population. That is
+prediction 2 failing exactly as P53's prediction 1 did.
+
+### The decisive measurement
+
+`results/doomed_asks_scarce040.json`, 150 games at `w_scarce = 0.40`:
+
+| | doomed-ask share | per game |
+|---|---|---:|
+| champion (+0.20) | 0.1340 [0.1230, 0.1444] | 6.13 |
+| **C4 (+0.40), the best arm** | **0.1781** [0.1583, 0.1998] | **8.30** |
+
+**The arm that makes the most guaranteed-failure asks is the best arm, and the
+arms that remove them are the worst.** The waste is real, logically certain,
+verified in two independent implementations and 39% worse than the opponent's —
+and it is **not the binding constraint**. It is a by-product of a preference that
+earns more than the waste costs.
+
+### What P53 and P54 establish together
+
+Two dose sweeps, both signs, **14,400 duel games**, on the two live
+concentration knobs:
+
+| knob | shipped | down | up |
+|---|---|---|---|
+| `w_suit` | 0.06 | −0.06 → **−1.170** self-play | +0.12 → −0.103 |
+| `w_scarce` | 0.20 | −0.10 → **−0.243** self-play | +0.40 → **+0.120** self-play |
+
+**The ask objective is at or just below a local optimum in both knobs, and the
+downward direction is expensive in both.** Every mechanistic story I built this
+session pointed downward, and the duels say the opposite.
+
+### And the hit rate, a third time
+
+C4 is best and has the lowest hit rate; C2 and C3 are worst and have the
+highest. With P53's monotone sweep — 0.5159 through 0.5556 as the margin fell —
+**hit rate is anti-correlated with margin in this engine**, across two knobs and
+both signs. That is no longer an argument; it is a dose response.
+
+### A correction to my own citation
+
+I cited `concent`, "confirmed negative at 4,000 games", as corroboration for
+reducing concentration. That was a loose reading: `concent` prices how our
+holding is spread **across our own seats**, while `suit` and `scarce` price
+**which half-suit** to ask in. Different quantities, and the `concent` result is
+not evidence about these knobs either way.

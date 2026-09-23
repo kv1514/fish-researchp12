@@ -93,6 +93,13 @@ def _boot(per: list[dict], num: str, den: str,
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--games", type=int, default=120)
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--w-scarce", type=float, default=None,
+                    help="override w_scarce. `scarce` rewards asking where our "
+                         "TEAM's expected share is high -- but an ask succeeds "
+                         "only if an OPPONENT holds the card, so the term "
+                         "points into the failure mode this script counts.")
+    ap.add_argument("--w-suit", type=float, default=None)
     ap.add_argument("--no-belief", action="store_true",
                     help="skip the posterior read. The doomed-ask RATE varies "
                          "a lot between seed blocks -- 0.118 over 40 games at "
@@ -114,7 +121,13 @@ def main(argv=None) -> int:
     for g in range(a.games):
         seed = SEED0 + g
         kv_even = (g % 2 == 0)
-        agents = [make_agent(KRAKEN_V1) if (p % 2 == 0) == kv_even
+        over = {}
+        if a.w_scarce is not None:
+            over["w_scarce"] = a.w_scarce
+        if a.w_suit is not None:
+            over["w_suit"] = a.w_suit
+        spec = ("fishbot4", dict(KRAKEN_V1[1], **over)) if over else KRAKEN_V1
+        agents = [make_agent(spec) if (p % 2 == 0) == kv_even
                   else DylanV07() for p in range(NUM_PLAYERS)]
         ours = {p for p in range(NUM_PLAYERS) if (p % 2 == 0) == kv_even}
         our_team = 0 if kv_even else 1
@@ -190,6 +203,9 @@ def main(argv=None) -> int:
     out = {"script": "scripts4/doomed_asks.py", "descriptive": True,
            "rules": RULES_D, "seed_deal": SEED0, "seed_agent": AGENT0,
            "n_games": a.games, "asks": asks, "doomed": doomed,
+           "our_overrides": {k: v for k, v in (
+               ("w_scarce", a.w_scarce), ("w_suit", a.w_suit))
+               if v is not None},
            "doomed_share": (doomed / asks) if asks else float("nan"),
            "doomed_share_ci": _boot(per, "doomed", "asks"),
            "doomed_per_game": doomed / a.games,
@@ -239,7 +255,9 @@ def main(argv=None) -> int:
     print("  inference. High means it knew and the fix is the decision rule --")
     print("  the declaration gate reads 0.97 on the JOINT, and knowing an ask")
     print("  is pointless needs no split at all.")
-    print(f"\n  wrote {write(default_path('doomed_asks', SEED0), out)}")
+    dest = a.out if getattr(a, "out", None) else default_path(
+        "doomed_asks", SEED0)
+    print(f"\n  wrote {write(Path(dest), out)}")
     return 0
 
 

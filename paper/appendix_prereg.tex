@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The fifty-three documents in \path{prereg/}
+no registered threshold anywhere. The fifty-four documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -25,10 +25,10 @@ what the run returned, and where in this paper the verdict appears.
 The registrations that returned nulls, refutations, withdrawals and
 non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the twelve written after
-this appendix was first compiled (P39--P53) appended at the end, P39--P42 in
+this appendix was first compiled (P39--P54) appended at the end, P39--P42 in
 filename order among themselves and the rest in the order they were
 registered, so that the identifiers already cited in the text keep their
-referents. Twelve of the fifty-three have \emph{no outcome recorded in the
+referents. Twelve of the fifty-four have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -1108,10 +1108,50 @@ the cross-engine comparison: the external engine's higher hit rate is not
 something to chase. \path{results/p53_depth_preference.json} &
 \S\ref{sec:res-profile} \\
 
+P54 & \path{p54_scarce_and_doomed_asks.md} \newline
+\emph{A ninth of our asks cannot succeed. Is the term that points into them the
+lever?} &
+Written before any P54 game, from a fact about the rules rather than a
+correlation: if your \emph{team} holds all six of a half-suit, an ask in it goes
+to an opponent holding none of them, so it \textbf{cannot succeed}, and
+\texttt{\_apply\_ask} hands over the turn on a failure. We make $6.13$ a game,
+$\mathbf{0.1340}$ $[0.1230, 0.1444]$ of our asks against their $0.0961$
+$[0.0879, 0.1047]$, intervals not overlapping, and \emph{zero} of them hit in two
+independently written implementations agreeing exactly. Signalling is off in the
+champion, so they are not deliberate. The engine is not blind: at the moment of
+one its own posterior puts $\Prob(\text{our team holds all six}) \ge 0.5$ in
+$27.2\%$ of cases and $\ge 0.25$ in $60.3\%$. And \texttt{scarce}, weighted
+$+0.2$, rewards asking where our \emph{team's} expected share is high --- the
+failure mode. Four doses on block \textbf{17,500,000}: $+0.10$, $0.00$, $-0.10$
+and $+0.40$, both signs, with the mechanism pre-checked ($0.1340$ shipped,
+$0.1056$ at $0$, $0.0852$ at $-0.2$). Its risk was registered in advance: P53
+moved its target quantity perfectly and lost, so this may cut the waste and lose
+too. &
+\textbf{The registered risk was right and prediction~2 was wrong.} C4 ---
+\emph{doubling} the term that points into the waste --- is the BEST arm and the
+only one positive in either population; C2 and C3, which remove the waste, are
+withdrawn with intervals entirely below zero. The decisive measurement is
+\path{results/doomed_asks_scarce040.json}: C4's doomed-ask share is
+$\mathbf{0.1781}$ against the champion's $0.1340$, so \textbf{the arm making the
+most guaranteed-failure asks is the best arm}. The waste is real, logically
+certain and $39\%$ worse than the opponent's, and it is \emph{not the binding
+constraint} --- it is a by-product of a preference earning more than it costs. &
+\textbf{NOTHING CLEARS; THE WASTE IS NOT THE CONSTRAINT.} $7{,}200$ games, zero
+fallbacks, zero unfinished, dose check passed, all arms distinct. C1 $-0.2533$ /
+$-0.0833$; C2 $\mathbf{-0.4567}$ $[-0.723, -0.191]$ / $-0.0900$; C3
+$\mathbf{-0.5800}$ $[-0.858, -0.302]$ / $\mathbf{-0.2433}$ $[-0.460, -0.026]$;
+C4 $-0.1667$ / $\mathbf{+0.1200}$. With P53 this makes two sweeps, both signs,
+$14{,}400$ games, saying the ask objective sits at or just below a local optimum
+in both concentration knobs and that the downward direction is expensive in both.
+C4 also has the \emph{lowest} hit rate and C2/C3 the highest --- a third
+confirmation that hit rate is anti-correlated with margin here.
+\path{results/p54_scarce_and_doomed_asks.json} &
+\S\ref{sec:res-profile} \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the fifty-three resolved.} Seven returned an effect that
+\noindent\textbf{How the fifty-four resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
@@ -1149,7 +1189,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the fifty-three --- P20 --- shipped, and it is the
+\noindent Exactly one of the fifty-four --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
