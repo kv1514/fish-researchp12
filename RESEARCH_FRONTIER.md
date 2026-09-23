@@ -6042,3 +6042,105 @@ The next question is therefore not "which ask weight" but **why fewer half-suits
 end up entirely in our hands at all** — `completion_ledger` puts assembly at
 −0.6525 while turn acquisitions are *+0.0931 in our favour*. We acquire as much
 and assemble less.
+
+## OUTCOME 2026-09-23: the whole deficit is ASSEMBLY, and the stall is at the bottom of the ladder
+
+Two instruments, and together they give the first complete causal chain from a
+policy parameter to the margin.
+
+### The deficit is reaching six, not converting six
+
+`results/assembly_ledger_16100000.json`, 400 games. Peak = the most of a
+half-suit a team ever held at once. Self-test: no half-suit was won by a correct
+declaration from a team that never held all six — which `_apply_claim` makes
+impossible, so a counter-example would mean the ledger is mis-tracking.
+
+| | ours | theirs | gap |
+|---|---:|---:|---:|
+| half-suits won a game | 4.145 | 4.855 | −0.710 |
+| **reached peak 6 a game** | **4.098** | **4.860** | **−0.762** |
+| converted a peak 6 | 0.9732 | 0.9748 | −0.0016 |
+
+**Conversion is identical. Assembly is everything.** The excess sits in
+half-suits stalled at 3, 4 and 5 — +0.690 a game, almost exactly the shortfall
+at 6. And the bar's +0.541 extra declarations is **0.556 more peak-6s, or 73% of
+this gap**.
+
+So the declaration gate, the split joint, the claim threshold — none of them are
+the bottleneck. Getting all six cards into our hands is.
+
+### And the stall is where nobody was looking
+
+Climb rate = upward transitions per ply spent at that holding:
+
+| holding | ours | theirs | gap | our plies | their plies |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 0.02930 | 0.04493 | **−0.01563** | 34,024 | 23,613 |
+| 2 | 0.04084 | 0.05568 | **−0.01484** | 54,794 | 40,677 |
+| 3 | 0.04577 | 0.05075 | −0.00498 | 58,623 | 58,623 |
+| 4 | 0.05775 | 0.04747 | **+0.01028** | 40,677 | 54,794 |
+| 5 | 0.06763 | 0.05581 | **+0.01182** | 23,613 | 34,024 |
+
+**We are faster at finishing and slower at starting.** We spend **38% more
+plies** holding only one or two of a half-suit, and they make 9.5% more upward
+transitions overall. (Plies mirror exactly — our *k* against their 6−*k* — as
+complementarity requires, which is a check on the tracking.)
+
+This overturns the reading this line of work has been carrying. Every arm since
+P49 has been aimed at the top of the ladder: better partner belief, a better
+declaration gate, a term rewarding nearly-complete half-suits. The top is the
+half we are already **winning**.
+
+### Because our ask allocation is far steeper in own-depth than theirs
+
+`results/ask_allocation_16300000.json`, 400 games, 18,498 of our asks against
+19,119 of theirs, each classified by **the asker's own pre-ask count** — one
+objective rule for both engines, no posterior, no model of anyone. Self-test:
+`P(chosen | k=0)` is exactly zero for both, as the rules require.
+
+| held | ours | theirs | ratio | share of our asks | share of theirs |
+|---:|---:|---:|---:|---:|---:|
+| 1 | **0.11258** | **0.19717** | **0.57** | 0.2432 | **0.3467** |
+| 2 | 0.28986 | 0.23826 | 1.22 | 0.3238 | 0.2986 |
+| 3 | 0.63851 | 0.40890 | **1.56** | 0.2341 | 0.1830 |
+| 4 | 0.75711 | 0.71711 | 1.06 | 0.1296 | 0.1083 |
+| 5 | 0.72841 | 0.85836 | 0.85 | 0.0693 | 0.0634 |
+
+Their curve is nearly flat from 1 to 2 (0.197 → 0.238); ours more than doubles
+(0.113 → 0.290). **At a half-suit we hold one of, they ask 75% more readily than
+we do.**
+
+### The chain
+
+    our ask objective is steep in own-depth  (w_suit, w_scarce both concentrate)
+      -> we neglect half-suits we hold 1-2 of      (0.113 against their 0.197)
+      -> we climb out of them slower               (0.0293 against 0.0449)
+      -> we spend 38% more plies down there
+      -> we reach all six less often               (4.098 against 4.860)
+      -> we declare less                           (4.100 against 4.832)
+      -> and conversion at six is identical, so that is the entire margin
+
+A prior measurement points the same way without being proof: the `concent` term,
+which rewards increasing concentration, was **confirmed negative at 4,000
+games**, and the paper's own summary is that *"trading hit rate for
+concentration is a measured disaster."*
+
+### P53, registered — and its mechanism verified before the duel
+
+`prereg/p53_depth_preference.md` sweeps `w_suit`, the weight on the asker's own
+depth, at 0.00, −0.03, −0.06 and **+0.12** (both signs). Before registering, 40
+games per setting confirmed the knob moves the first link:
+
+| `w_suit` | our P(chosen \| held 1) |
+|---:|---:|
+| +0.06 shipped | 0.113 |
+| 0.00 | 0.132 |
+| −0.06 | 0.259 |
+
+against their 0.197, so the match interpolates near **−0.03**. That check is
+what P52 lacked: `w_claim` lost *and* never moved $D_{\text{us}}$, and the two
+had to be separated afterwards.
+
+**The prediction I would most regret getting wrong** is registered as such: B4,
+doubling the preference, should be the worst arm in both populations. If it is
+not, the chain has the sign backwards and everything above needs re-reading.
