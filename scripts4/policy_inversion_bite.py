@@ -133,6 +133,8 @@ def main(argv=None) -> int:
     reasons: dict = {}
     selftest_n = selftest_ok = 0
     selftest_bad: list = []
+    #: decisions where the posterior offered no worlds at all
+    no_pool = 0
     probe = DylanV07()
 
     for g in range(a.games):
@@ -160,7 +162,19 @@ def main(argv=None) -> int:
             act = agents[actor].act(Observation.from_state(st, actor))
             if actor in theirs and picked < a.cap and rng.random() < 0.5:
                 picked += 1
-                bel = agents[watcher].bel
+                # THE WORLDS THE CHAMPION ACTUALLY REASONS OVER. The first
+                # version of this screen called bel.sample_current_hands,
+                # which is the v0.3 sampler -- and in fish4/posterior.py that
+                # is reached only from two `# Last resort` fallbacks after SIS
+                # fails. Screening the fallback's distribution would have
+                # described worlds the shipped engine does not use, so the
+                # posterior is built at the watcher's seat and its own
+                # resampled draws are used instead.
+                wobs = Observation.from_state(st, watcher)
+                pool = agents[watcher].build_posterior(wobs).worlds()
+                if not pool:
+                    no_pool += 1
+                    continue
                 same_all = legal = same_legal = 0
                 probe.begin_game(actor, rules, AGENT0 + seed * 13 + actor)
                 # THE SELF-TEST, and the screen is worthless without it. The
@@ -179,9 +193,8 @@ def main(argv=None) -> int:
                                          "got": str(truth)[:60],
                                          "want": str(act)[:60]})
                 for _k in range(a.worlds):
-                    try:
-                        hands = bel.sample_current_hands(rng)
-                    except Exception:
+                    hands = pool[rng.randrange(len(pool))]
+                    if hands is None:
                         drop_sampler += 1
                         continue
                     alt, why = _their_action(probe, st, actor, hands)
@@ -230,6 +243,8 @@ def main(argv=None) -> int:
            "selftest_n": selftest_n, "selftest_ok": selftest_ok,
            "selftest_rate": rate,
            "selftest_failures": selftest_bad[:20],
+           "decisions_without_a_pool": no_pool,
+           "world_source": "FishBot4.build_posterior(...).worlds()",
            "worlds_dropped_sampler": drop_sampler,
            "worlds_dropped_bridge": drop_bridge,
            "drop_reasons": reasons,
