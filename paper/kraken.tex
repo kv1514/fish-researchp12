@@ -7176,6 +7176,31 @@ $-0.8000$, \textsc{ours} $-0.2767$, \textsc{theirs} $+0.2033$, with perfect
 declaration worth $+0.277$ and still losing by $0.597$
 (\path{results/bridge_dealt_hand_price.json}).
 
+\paragraph{And what it therefore takes to win, in one number.} The bounds above
+say which channel cannot do it. Solving the identity for the ship bar says what
+the one that can would have to deliver. With the persistent arm's counters ---
+$D_{\text{us}} = 4.100$ a game, our error rate $0.0337$ a declaration, theirs
+$0.0207$ --- and holding both accuracies fixed, clearing $+0.15$ requires
+
+\[
+  D_{\text{us}} \;\ge\; \mathbf{4.641}, \qquad \text{i.e.\ }
+  \mathbf{+0.541} \text{ declarations a game}
+\]
+
+\noindent (\path{results/split_partner_model_12000000.json}, whose
+\texttt{needed\_per\_game} derives it rather than quoting it, so the figure moves
+when its inputs do). The give-back is included: a half-suit moved into
+\textsc{race} leaves \textsc{theirs} behind, so the naive $+0.15/2$ understates
+what is needed.
+
+That number is the useful one because it is \emph{inside the opponent's range}
+rather than outside it --- the external engine declares $4.832$ a game, so the
+target is not a fantasy about a better game, it is most of the gap to a player we
+already measure. It also says plainly why every candidate this project has aimed
+at inference has failed at the bar: none of them moved $D_{\text{us}}$. Better
+belief is spent on declaring the \emph{same} half-suits more accurately, and the
+accuracy channel is the one worth $0.202$.
+
 This is what the withdrawn decomposition cost the paper, and it is worth
 naming: for one draft the project believed its margin came from declaring
 better than an opponent who declared badly. The corrected pairing says the
