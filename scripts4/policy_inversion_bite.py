@@ -72,6 +72,28 @@ AGENT0 = 141_000
 MAX_ACTIONS = 600
 
 
+def _dealt_for(seat, hands, history):
+    """The dealt hand of `seat` in the world `hands`, from the public record.
+
+    `Observation.initial_hand` cannot do this for a counterfactual world: it
+    restores resolved half-suits from `ev.revealed`, the true holder at
+    resolution, so it reconciles a counterfactual current hand against a real
+    historical fact. Three quarters of this screen's draws were rejected for
+    that reason before the reconstruction was done here instead, and
+    `scripts4/world_reachability.py` is the instrument that established the
+    rejections were the artefact and not the belief.
+    """
+    from scripts4.world_reachability import dealt_owners
+    own = dealt_owners(list(hands), history, None)
+    if own is None or any(o is None for o in own):
+        return None
+    mask = 0
+    for c, o in enumerate(own):
+        if o == seat:
+            mask |= 1 << c
+    return mask
+
+
 def _restate(st, seat, hands):
     """`st` with one counterfactual set of hands, same public record.
 
@@ -99,6 +121,10 @@ def _their_action(bridge, st, seat, hands):
     """
     alt = _restate(st, seat, hands)
     obs = Observation.from_state(alt, seat)
+    dealt = _dealt_for(seat, hands, st.history)
+    if dealt is None:
+        return None, "unreachable: the public record forbids this world"
+    bridge.dealt_override = dealt
     try:
         return bridge.act(obs), None
     except Exception as e:
@@ -109,6 +135,8 @@ def _their_action(bridge, st, seat, hands):
         #: error, a protocol mismatch -- is a defect in this script, and it
         #: must not be silently counted as an impossible world.
         return None, f"{type(e).__name__}: {str(e)[:120]}"
+    finally:
+        bridge.dealt_override = None
 
 
 def main(argv=None) -> int:
@@ -171,6 +199,16 @@ def main(argv=None) -> int:
                 # posterior is built at the watcher's seat and its own
                 # resampled draws are used instead.
                 wobs = Observation.from_state(st, watcher)
+                # BRING THE BELIEF CURRENT FIRST. FishBot4 calls
+                # bel.update(obs) inside act(), so a seat that has not acted
+                # since the last few events holds a STALE belief, and a
+                # posterior built on it samples worlds inconsistent with the
+                # history that has since happened. That was this screen's own
+                # defect: 73% of its draws were unreachable and it read them
+                # as the engine's problem. scripts4/world_reachability.py found
+                # 100% reachable at a seat's OWN decision and 27% at a
+                # watcher's, and the gap was this line.
+                agents[watcher].bel.update(wobs)
                 pool = agents[watcher].build_posterior(wobs).worlds()
                 if not pool:
                     no_pool += 1

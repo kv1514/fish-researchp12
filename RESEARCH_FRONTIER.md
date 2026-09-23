@@ -5463,3 +5463,59 @@ reporting the same 74% as a property of the shipped posterior; that claim was
 withdrawn before it was made, and the corrected run shows the rate is real on
 the shipped path — but "real on the shipped path" and "a defect in the
 belief" are still two different statements.
+
+## CORRECTION 2026-09-23: the 74% was my instrument, not the belief — and the inversion bits were inflated 1.7x
+
+Two instruments disagreed and one of them was mine.
+
+### The belief is sound
+
+`results/world_reachability_14300000.json`: 620 decisions, **19,840 sampled
+worlds, 1.0000 reachable**, with the true world reachable 620/620 as the
+self-test. Reachability is decided by arithmetic and needs no engine — every
+card's dealt owner is determined by walking the public record backwards from
+either its current holder or, for a resolved half-suit, the holder
+`ev.revealed` published at resolution. **Our posterior does not put mass on
+worlds that cannot exist.** The prediction recorded before that run said near
+1.00 and reading 2, and both hold.
+
+### So what rejected three quarters of the inversion screen's draws was the screen
+
+`FishBot4.act()` calls `bel.update(obs)` **inside** `act`. A seat that has not
+acted since the last few events therefore holds a **stale belief**, and a
+posterior built on it samples worlds inconsistent with the history that has
+since happened. The inversion screen built the watcher's posterior at the
+*opponent's* decisions — exactly the case where the watcher has not acted —
+and never updated the belief first.
+
+The discriminating measurement, same games and same check, two sampling
+points:
+
+| worlds drawn from | reachable |
+|---|---:|
+| the acting seat's own posterior, at its own decision | 600/600 = 1.0000 |
+| a watcher's posterior, at someone else's decision | 144/528 = **0.2727** |
+| the same watcher, after one `bel.update(wobs)` | 516/516 = 1.0000 |
+
+**One line.** With it the screen drops zero worlds.
+
+### Every number this screen has produced is withdrawn
+
+1.16 bits (16 decisions, fallback sampler), 1.44 (794, fallback), 1.24 (797,
+SIS but stale belief) and 2.20 (30, stale belief plus the new reconstruction)
+were all computed on a subset selected by that defect. Corrected at smoke
+size the figure is **0.74 bits** — the legal share rises from 0.18 to 0.68,
+and the share of legal worlds reproducing the action from 0.42 to 0.60. **My
+bug inflated the headline by about 1.7x**, in the direction that made the
+pathway look better.
+
+### What stands
+
+* `Observation.initial_hand()` genuinely cannot serve a counterfactual world —
+  it restores resolved half-suits from the true holder at resolution — so the
+  dealt hand is now computed from the world by `world_reachability.dealt_owners`
+  and handed to the bridge through `DylanV07.dealt_override`, which is `None`
+  and therefore inert on every shipped path.
+* The self-test held at every stage: 16/16, 794/794, 797/797, 30/30. It is the
+  only reason the numbers could be compared across four versions and the
+  defect localised rather than argued about.
