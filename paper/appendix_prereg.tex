@@ -13,7 +13,7 @@
 
 This paper uses the words ``pre-registered'', ``fixed in advance'' and
 ``registered before'' about seventy times and, until this appendix, reproduced
-no registered threshold anywhere. The fifty-four documents in \path{prereg/}
+no registered threshold anywhere. The fifty-five documents in \path{prereg/}
 are the record those phrases refer to. Each was committed to the repository
 before the material it governs was played: before the arm existed, before the
 runner existed, or --- where a screening measurement had already been taken ---
@@ -25,10 +25,10 @@ what the run returned, and where in this paper the verdict appears.
 The registrations that returned nulls, refutations, withdrawals and
 non-results are listed on exactly the same footing as the ones that returned
 effects, in the same table, in filename order --- with the twelve written after
-this appendix was first compiled (P39--P54) appended at the end, P39--P42 in
+this appendix was first compiled (P39--P55) appended at the end, P39--P42 in
 filename order among themselves and the rest in the order they were
 registered, so that the identifiers already cited in the text keep their
-referents. Twelve of the fifty-four have \emph{no outcome recorded in the
+referents. Twelve of the fifty-five have \emph{no outcome recorded in the
 registration document itself}; ten of those twelve were nonetheless run and are
 reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
 been run at all. Both facts are
@@ -1142,10 +1142,49 @@ confirmation that hit rate is anti-correlated with margin here.
 \path{results/p54_scarce_and_doomed_asks.json} &
 \S\ref{sec:res-profile} \\
 
+P55 & \path{p55_joint_concentration.md} \newline
+\emph{P53 and P54 found a coordinate optimum in each concentration knob. Is
+there a joint one they could not see?} &
+Written before any P55 game. A function can be maximal along every axis through a
+point and still rise along a diagonal, and the evidence for interaction was
+direct rather than hypothetical: three of the last four registrations failed a
+monotonicity condition, and P51's own reading was that the term ``is interacting
+with \texttt{turn} or \texttt{scarce} rather than adding''. The direction was
+indicated too --- the best arm on each axis was the \emph{upward} one, and P54's
+C4 at $+0.1200$ self-play was the only positive figure either sweep produced.
+Two-stage by design, because eight cells are eight chances for noise to look like
+a winner: stage 1 screens \texttt{w\_suit} $\in \{0.06, 0.12, 0.24\}$ $\times$
+\texttt{w\_scarce} $\in \{0.20, 0.40, 0.80\}$ at $100$ deals on block
+\textbf{17,900,000}, and only cells with \emph{both} point estimates $\ge 0$
+advance to $300$ deals on a \emph{different} block --- because P51 showed a
+cross-block comparison can invent an effect worth $0.117$ sets. Registered: if no
+cell passes, P55 ends and is not re-scoped into a finer grid. &
+\textbf{A null at stage 1, and prediction~1 failed, which refutes the
+interaction hypothesis.} Every cell is negative in self-play and not one has both
+point estimates $\ge 0$, so nothing advances and there is no stage 2. The two
+best cells by \textsc{sestina} margin both sit at the \emph{shipped}
+\texttt{w\_suit}, i.e.\ on the \texttt{w\_scarce} axis rather than on a diagonal
+--- and the registration had fixed what that means: the single sweeps had already
+answered the question. Raising \texttt{w\_suit} is worse at every
+\texttt{w\_scarce}, monotonically, so the grid is close to \emph{separable}
+rather than interacting. Prediction~4 held and sharpened: all eight cells have a
+\emph{lower} hit rate than the champion, falling monotonically in
+\texttt{w\_scarce}, so hit rate drops in both directions away from the shipped
+cell while margin is maximal near it. &
+\textbf{NOTHING ADVANCES; THE OBJECTIVE IS AT A JOINT OPTIMUM.} $4{,}800$ games,
+zero fallbacks, zero unfinished, dose check passed. Best cell $(0.06, 0.40)$ at
+$+0.1300$ / $-0.0900$; worst $(0.24, 0.80)$ at $-0.3400$ / $-0.4100$. With P53
+and P54 this is \textbf{19,200 duel games}, both signs on both knobs, saying the
+concentration parameters are at a \emph{joint} optimum and not merely a
+coordinate one. The three monotonicity failures have some other cause, and
+finding it is not the same as finding a better cell.
+\path{results/p55_joint_stage1.json} &
+\S\ref{sec:res-profile} \\
+
 \end{longtable}
 }
 
-\noindent\textbf{How the fifty-four resolved.} Seven returned an effect that
+\noindent\textbf{How the fifty-five resolved.} Seven returned an effect that
 still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
 returned an effect and then lost it to later evidence, in every case by a rule
 the same document had already written down (P6, P9, P16, P17, P18). Eight were
@@ -1183,7 +1222,7 @@ fired at $8.94$ and $2.17$ signals a game and the design could not separate
 opponent from dose --- a confound that was in the registration rather than in
 the run, and the reason P42 exists.
 
-\noindent Exactly one of the fifty-four --- P20 --- shipped, and it is the
+\noindent Exactly one of the fifty-five --- P20 --- shipped, and it is the
 one whose registration argued in advance that this project's standing $+0.15$
 ship bar was the wrong instrument for it.
 
