@@ -1,0 +1,1363 @@
+% =====================================================================
+% appendix_prereg.tex --- \input{appendix_prereg} AFTER \appendix
+%
+% Self-contained fragment. Requires booktabs and longtable in the
+% preamble. As of this writing kraken.tex loads booktabs but NOT
+% longtable; add \usepackage{longtable} before \input-ing this file.
+% Nothing else is assumed beyond hyperref (for \path) and amsmath,
+% both of which kraken.tex already loads.
+% =====================================================================
+
+\section{The pre-registered thresholds, verbatim}
+\label{app:prereg}
+
+This paper uses the words ``pre-registered'', ``fixed in advance'' and
+``registered before'' about seventy times and, until this appendix, reproduced
+no registered threshold anywhere. The fifty-five documents in \path{prereg/}
+are the record those phrases refer to. Each was committed to the repository
+before the material it governs was played: before the arm existed, before the
+runner existed, or --- where a screening measurement had already been taken ---
+with that measurement stated inside the document so it could not be
+re-described afterwards. The table below reproduces, for every one of them, the
+decision rule as written, whether the document stated a power limit in advance,
+what the run returned, and where in this paper the verdict appears.
+
+The registrations that returned nulls, refutations, withdrawals and
+non-results are listed on exactly the same footing as the ones that returned
+effects, in the same table, in filename order --- with the twelve written after
+this appendix was first compiled (P39--P55) appended at the end, P39--P42 in
+filename order among themselves and the rest in the order they were
+registered, so that the identifiers already cited in the text keep their
+referents. Twelve of the fifty-five have \emph{no outcome recorded in the
+registration document itself}; ten of those twelve were nonetheless run and are
+reported in this paper or in \path{RESEARCH_FRONTIER.md}, and two have not
+been run at all. Both facts are
+marked in the table rather than smoothed over, because a registration that is
+written and never resolved is the file-drawer risk this appendix exists to
+expose. Anything that could not be verified against a committed results file
+is marked \textbf{unverified}; it is not presented as though it had been.
+
+Throughout: ``pairs'' are duplicate-deal paired games with the pair as the
+independent unit; ``ship bar'' is this project's standing $+0.15$ sets/game
+threshold; a quoted string is verbatim from the registration. Two typographic
+liberties, and no others: a Markdown code span such as \texttt{`D + K`} is set
+as $D + K$, and where a quote joins one of a document's own section headings to
+the text beneath it the heading is set in bold and closed with a full stop.
+
+{\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{@{}l@{\hspace{4pt}}p{3.55cm}p{3.7cm}p{2.15cm}p{2.65cm}p{1.75cm}@{}}
+\toprule
+\# & Registration & Registered condition & Power limit stated & Outcome &
+Where reported \\
+\midrule
+\endfirsthead
+\multicolumn{6}{@{}l}{\emph{The pre-registered thresholds, continued}}\\
+\toprule
+\# & Registration & Registered condition & Power limit stated & Outcome &
+Where reported \\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r@{}}{\emph{continued overleaf}}\\
+\endfoot
+\bottomrule
+\endlastfoot
+
+P1 & \path{channel_vs_precision.md} \newline
+\emph{Does the channel's value shrink as the belief improves?} &
+``\textbf{REFUTED} if the interval on D lies entirely \textbf{below} zero.''
+$D = d_{1440} - d_{180}$, clustered by game. 40 games, stride 4, seed base
+\textbf{880,000}, sender gate 0.05, $\beta = 0.8$. &
+Yes: ``40 games, stride 4, and no extension''; anchor tolerance $0.010$. &
+\textbf{REFUTED.} ``$D = -0.0372$ $[-0.0481, -0.0263]$''.
+\path{results/channel_precision.json} &
+Not in the paper; alluded to in \S\ref{sec:failures} \\
+
+P2 & \path{choice_basis.md} \newline
+\emph{Is there a richer teammate choice model worth building?} &
+``$D \ge 1{,}000$ $\rightarrow$ \textbf{licensed to build}''; $D < 200$
+withdraw; $200 \le D < 1{,}000$ fit only. $D = $ held-out nats, M5 over M2,
+17,005 choices, 5 folds at the \textbf{game} level. No seed base fixed. &
+\textbf{None.} &
+\textbf{REAL.} ``Primary outcome: $D = $ M5 $-$ M2 $= +3{,}143$ nats, against
+a bar of 1,000.'' \path{results/choice_basis.json} &
+\S\ref{sec:v11}, Table~\ref{tab:v11} row 2 \\
+
+P3 & \path{claim_gamma.md} \newline
+\emph{A separate action-model $\gamma$ for the declaration?} &
+``\textbf{If declarations per game do not rise by at least 5\%} \ldots
+\textbf{no duel is run.}'' Duel, never reached: 3,000 pairs, ship bar
+$+0.15$, $\gamma = 0.7$. Screen: 480 games self-play. &
+Duel half-width ``$\sim 0.11$'' named; no unresolvable-effect clause. &
+\textbf{SCREEN FIRED, NO DUEL.} ``Declarations per game FELL by 1.9\% against a
+rule requiring a 5\% rise.''
+\path{results/path_ledger_self_claim_gamma0.7.json} &
+Table~\ref{tab:v11} row 7 \\
+
+P4 & \path{concentration_v2.md} \newline
+\emph{Does a corrected concentration term cut allocation errors?} &
+``Point estimate $\geq +0.15$ \textbf{and} interval lower bound $> 0$
+\ldots \textbf{Here the document governs}.'' Primary: paired set margin vs
+the external engine, B $-$ A. \textbf{4,000 games per arm}; ``fresh seed block'' (unnumbered).
+&
+Yes: ``a standard error near $0.044$ and a 95\% interval of about $\pm 0.086$
+\ldots Analysed once, at the end. No interim looks.'' &
+\textbf{WITHDRAWN} on condition 1. ``Allocation errors were required to fall.
+They \textbf{rose}, monotonically in the weight.''
+\path{results/concent_confirm.json} &
+\S\ref{sec:res-null} \\
+
+P5 & \path{convention.md} \newline
+\emph{Can a pre-play naming agreement beat the depth heuristic?} &
+``An arm \textbf{licenses a duel} only if, on the teammate pool: 1.\ its paired
+NLL interval lies \textbf{entirely below zero}, \textbf{and} 2.\ its paired
+top-1 interval is \textbf{not entirely below zero}. Both, or nothing.'' Plus
+V1 $\ge 25\%$ carry, V2 $\ge 20\%$, V3 $\ge 50\%$, V4 bit-identity. 40 games
+per sender gate, $\sim$1,040 decisions, $n_{\text{draws}} = 720$, seed base
+560,000. &
+\textbf{None.} &
+\textbf{REAL.} ``The channel is real and the depth code book clears both gates
+at every sender gate tested.'' V2 failed as written and passed only as amended
+--- disclosed in the document.
+\path{results/convention_posterior.json} &
+Table~\ref{tab:v11} row 3; \S\ref{sec:limitations} \\
+
+P6 & \path{convention_aimed.md} \newline
+\emph{Does the aimed code book replicate on fresh seeds?} &
+``replicates only if \ldots 1.\ the paired NLL interval lies entirely below
+zero, \textbf{and} 2.\ the paired top-1 interval lies entirely \textbf{above}
+zero, \textbf{and} 3.\ both point estimates are at least \textbf{half} the
+exploratory magnitudes --- NLL at most $-0.0356$, top-1 at least $+0.0176$.''
+40 games, stride 4, $n_{\text{draws}} = 720$, fresh seed base 880,000. &
+\textbf{None.} &
+\textbf{REAL, then re-priced.} ``Replicated on all three conditions''
+(2026-08-29); the 2026-08-31 reproduction records that
+\textbf{the replication run committed no results file}, so
+$-0.0535$/$+0.0392$ are \textbf{unverified}. Re-run:
+\path{results/convention_replication.json} &
+\textbf{Not in the paper} \\
+
+P7 & \path{convention_duel.md} \newline
+\emph{Does the aimed convention win games?} &
+``\textbf{Ship bar: +0.15 sets/game} \ldots lower bound of the interval
+$> 0$ AND point estimate $>= +0.15$ $\rightarrow$ ships.'' Primary: paired
+sets/game, Y $-$ X. \textbf{n\_pairs: 3,000.} &
+Yes: ``a 95\% half-width near $0.093$ sets, which resolves the $+0.15$ bar with
+room to spare''; extend if paired SD $> 4.0$. &
+\textbf{REFUTED (defect).} ``The convention as registered \textbf{LOSES},
+heavily, and the reason is a mis-specified gate.'' Stopped at 40 pairs;
+the registered 3,000 were \textbf{not run}.
+\path{results/convention_duels.json} &
+Table~\ref{tab:v11} row 3 \\
+
+P8 & \path{convention_freeread.md} \newline
+\emph{Is the agreement already on the wire worth reading?} &
+``The ship bar is \textbf{+0.05 sets/game}, not the $+0.15$ \ldots because
+those two spend a resource and this spends nothing.'' ``n\_pairs: 1,200 to
+start. If the interval straddles the bar, extend to 3,000 rather than reading
+a straddle as a result.'' &
+Partial: the extension rule only; no numeric half-width. &
+\textbf{NULL.} ``3,000 duplicate-deal pairs. Y minus X: $-0.002$ $[-0.127,
++0.123]$.'' \path{results/convention_duels.json},
+\path{results/convention_freeread_belief.json} &
+\textbf{Not in the paper} \\
+
+P9 & \path{convention_locate.md} \newline
+\emph{Should a code book carry a location instead of a count?} &
+``supersedes the depth book only if \ldots 1.\ its best arm satisfies both
+gates of \path{prereg/convention.md} \ldots \textbf{and} 2.\ its best arm's
+paired \textbf{top-1} point estimate is \textbf{at least as good} as the best
+passing depth arm's'' ($+0.0351$, later re-based to $+0.0260$). Gates 0.02 and
+0.05; $\beta \in \{0.25,0.5,0.8,1.2,2.0\}$. &
+Partial: ``reported as underpowered rather than as a result'' clause; no
+numeric limit. &
+\textbf{PASSED, then REVERSED.} 2026-08-29 ``clears its gate''; 2026-08-31
+``\textbf{condition 2 fails and the locating book does not supersede}''.
+2026-08-29 figures \textbf{unverified} (no results file committed).
+\path{results/convention_replication.json} &
+\textbf{Not in the paper} \\
+
+P10 & \path{convention_mixture.md} \newline
+\emph{Is the flat decode weight mis-specified?} &
+``supersedes the flat weight only if \ldots its best arm's paired NLL point
+estimate is \textbf{at least as negative} as the best flat arm's.'' Falsifiable
+side-prediction: ``the spread of dtop-1 must be \textbf{less than half} the
+spread over the four flat arms at beta $<=$ 1.2 (which is 0.0202).''
+$q \in \{0.4,\ldots,0.8\}$, same transcripts as P5. &
+\textbf{None.} &
+\textbf{REFUTED} on its own withdrawal condition. ``The mixture is beaten
+everywhere \ldots Both conditions fail.'' Side-prediction ``2 of 3''.
+\path{results/convention_posterior.json} &
+\textbf{Not in the paper} \\
+
+P11 & \path{deadline_signalling.md} \newline
+\emph{Was the signalling gate set below the measured free-turn threshold?} &
+``\textbf{Ship bar.} Point estimate $\geq +0.15$ with the interval clear of
+zero.'' Primary: paired set margin vs the external engine, C $-$ A. \textbf{1,000 games per
+arm}; ``fresh seed block''; withdrawal 1: B must reproduce $+0.068$ within its
+interval. &
+Yes: ``paired SD of $\approx 1.15$ \ldots at about $\pm 0.071$.'' &
+\textbf{REAL, SUB-BAR.} ``C is $+0.1220$ \ldots \textbf{It does not ship}, and
+the bar is not amended after seeing the number.'' A bridge-revision-2 duel;
+re-read through the repaired bridge under P48, the arm is $+0.0033$
+$[-0.078, +0.085]$ and the gain was the defect.
+\path{results/signal_gate_confirm.json} &
+\S\ref{sec:res-perpetual} \\
+
+P12 & \path{declarability_leaf.md} \newline
+\emph{Score declarability inside the search, not beside it?} &
+``The confirmation runs at the \textbf{SMALLEST} $w$ in $\{0.25, 0.5, 1.0,
+2.0\}$ whose bite falls in \textbf{[15\%, 60\%]} \ldots \textbf{If no $w$ lands
+in that window, no duel is run.}'' Amended ceiling $w = 6$ fixed by argument.
+Duel, never reached: 3,000 pairs, ship bar $+0.15$. &
+Yes: ``3,000 pairs at fresh seeds. Half-width $\sim$0.11, which resolves the
+bar.'' &
+\textbf{CLOSED BY PROOF, NO DUEL.} ``Bite does not reach 15\% even at $w = 6$
+\ldots The falsifier did not fire.''
+\path{results/declare_bite.json}, \path{results/allocation_locus.json} &
+Table~\ref{tab:v11} row 6; \S\ref{sec:v11-theorem} \\
+
+P13 & \path{declaration_timing.md} \newline
+\emph{Is the teammate ceiling card-reading or declaration-timing?} &
+``\textbf{CONFIRMED} if the interval on $D - A$ lies entirely above zero
+\textbf{and} $S_D \geq 0.50$ \textbf{and} ($S_K < 0.25$ \textbf{or} the
+interval on $K - A$ contains zero). \textbf{REFUTED} if $S_K \geq 0.50$
+\textbf{and} $S_D < 0.25$. \textbf{SPLIT} otherwise.'' \textbf{600 games},
+$\mathtt{SEED0} = 5{,}500{,}000$. V1--V4 validity conditions. &
+\textbf{None.} &
+\textbf{SPLIT.} ``$S_D = 0.316$, $S_K = 0.223$ \ldots Neither.
+\textbf{SPLIT}\ldots\ the hypothesis \ldots is not supported.'' V1 and V2 both
+voided as mis-specified, disclosed.
+\path{results/declaration_timing.json} &
+\S\ref{sec:v11} (Direction 4) \\
+
+P14 & \path{defer_gate_at_power.md} \newline
+\emph{Is the deferred gate real on the current engine, at power?} &
+``$D = $ margin(C\_defer) $-$ margin(A\_shipped) \ldots \textbf{REAL} if the
+interval is clear of zero and positive. \textbf{REFUTED} if clear of zero and
+negative. \textbf{NULL AT POWER} if it covers zero.'' Seed base
+\textbf{10,900,000}, barred from seven earlier bases. \textbf{2,000 deals
+$\times$ 2 parities}, clustered on the deal. &
+Yes: ``At 2,000 deals expect about 0.038, which separates $+0.058$ from
+zero.'' &
+\textbf{REAL.} ``$+0.0455$ $[+0.0134, +0.0776]$, 2,000 deal clusters.'' Below
+the $+0.15$ bar; does not ship. \path{results/signal_vs_defer.json} &
+\textbf{Not in the paper} \\
+
+P15 & \path{endgame_ask_on_combined.md} \newline
+\emph{Does the endgame ask correction still pay on top of what ships?} &
+``1.\ CI entirely above 0 --- it stacks. Ship into \texttt{V04\_COMBINED} and
+into \path{api/_engine.py}'s \texttt{WEB\_SPEC} \ldots 2.\ CI straddles 0 with
+a positive point estimate --- cannot resolve. \textbf{Do not ship} \ldots 3.\
+Point estimate at or below 0 --- \ldots Do not ship.'' 2,000 pairs, base seeds
+991000--992875 (16 blocks of 125 after Amendment 1). &
+Partial: ``a run that can see $+0.09$ can see whether it is still there''; no
+numeric half-width. &
+\textbf{NOT RECORDED} in the registration. The run exists; the paper reports
+$+0.1220$ $[+0.0711, +0.1729]$ over 2,000 pairs.
+\path{results/v04_duels.jsonl} &
+\S\ref{sec:critic} \\
+
+P16 & \path{endgame_ask_weights.md} \newline
+\emph{Does the endgame ask correction pay in play?} &
+``1.\ CI entirely above 0 --- the correction pays in play. Ship it \ldots
+2.\ CI entirely below 0 --- it costs \ldots 3.\ CI straddles 0 --- no
+detectable effect at this resolution.'' \textbf{2,000 pairs}, base seed
+771000, agent seed 7710; replication at 881000--881750. &
+Yes, unusually explicit: ``A test with $\pm 0.047$ resolution against an
+effect that may be a fifth of that is \textbf{underpowered by construction}
+\ldots No outcome licenses running more pairs until the interval clears
+zero.'' &
+\textbf{REAL, then WITHDRAWN.} ``$+0.0835$ \ldots $[+0.0338, +0.1332]$'';
+replication $+0.0980$. Amendment 2: ``The correction is \textbf{withdrawn
+permanently}'' under the award rule.
+\path{results/v04_duels.jsonl}, and the \path{ii_ask_fit} refits &
+\S\ref{sec:critic}; \S\ref{sec:v11} \\
+
+P17 & \path{endgame_m3.md} \newline
+\emph{Does the correction pay at three live half-suits?} &
+``1.\ CI entirely above 0 --- it extends. Ship \texttt{endgame\_m = 3} \ldots
+2.\ CI straddles 0 with a positive point estimate --- unresolved. Do not ship.
+3.\ Point estimate at or below 0 --- it does not extend.'' 8 blocks of 250
+pairs, base seeds 771000+, agent seeds 6610--6617; weight
+\textbf{not refitted}. &
+\textbf{None} (its ``what this cannot tell us'' is about the weight, not
+power). &
+\textbf{SHIPPED, then WITHDRAWN.} ``Outcome 1 fired by this document's rule
+\ldots It is now \textbf{withdrawn}: \ldots m = 3 is \emph{worse} than no
+correction against v0.3 by $-0.438$ $[-0.829, -0.047]$.''
+\path{results/xplay_sweep.json} &
+\S\ref{sec:critic} \\
+
+P18 & \path{endgame_m_ladder.md} \newline
+\emph{How far up does the ask correction go?} &
+``\textbf{CI entirely above 0} --- ship $k{+}1$ and take the next step.
+\textbf{Anything else} --- stop. Do not ship, do not try $k{+}2$, do not re-run
+with more pairs.'' 8 blocks of 250 pairs a rung; $\mathtt{endgame\_d\_info} =
++2.0$ ``\textbf{never refitted}''. Amendment 2 replaces the ladder with a
+foreign-opponent sweep. &
+\textbf{None.} &
+\textbf{ALL RUNGS ABOVE $m=2$ WITHDRAWN.} ``every rung of this ladder was
+measured against the sibling and therefore measured \ldots the poisoning of
+its inference rather than better play.''
+\path{results/v04_duels.jsonl}, \path{results/xplay_sweep.json} &
+\S\ref{sec:critic}; Table~\ref{tab:ladder} \\
+
+P19 & \path{exact_endgame_in_play.md} \newline
+\emph{Is exact $m = 1$ endgame play worth anything in play?} &
+\textbf{No decision rule or threshold is registered.} Five graded predictions
+instead, e.g.\ ``\textbf{\texttt{one} comes out positive, and at least
+$+0.05$}'' and ``\texttt{all} is the worst of the three''. No sample size, no
+seed base fixed. &
+Yes, informally: ``$\pm 0.083$ at 40 pairs \ldots about 300 pairs resolves
+$\pm 0.03$.'' &
+\textbf{NOT RECORDED} in the registration. The run exists; the paper reports
+pooled $+0.0765$ $[+0.0422, +0.1108]$ over 1,200 pairs.
+\path{results/exact_endgame_one.json} &
+\S\ref{sec:exactplay} \\
+
+P20 & \path{forced_exhaustive.md} \newline
+\emph{Should the last forced declaration enumerate the whole team space?} &
+``\textbf{THE DECISION RULE IS NOT THIS PROJECT'S USUAL ONE} \ldots the ship
+bar of $+0.15$ sets/game \ldots is \textbf{the wrong instrument here and is
+deliberately not used.} \ldots \textbf{Primary outcome, fixed now.}
+Forced-declaration accuracy at one live half-suit \ldots Ships if accuracy
+rises with the interval clear of zero.'' 2,400 self-play games; 1,000 vs the external engine.
+Three guards, three withdrawal conditions. &
+Yes: ``roughly 12,000 games to resolve from zero. Every duel this project could
+afford would return a null.'' &
+\textbf{REAL --- SHIPPED.} ``Every condition the pre-registration fixed in
+advance is met \ldots \textbf{This ships.}''
+$0.2984 \rightarrow 0.4070$ self-play; $0.3218 \rightarrow 0.4253$ vs the external engine.
+\path{results/forced_exhaustive_self.json},
+\path{results/forced_exhaustive_v07.json} &
+\S\ref{sec:res-pathledger} \\
+
+P21 & \path{foreign_opponent_m2.md} \newline
+\emph{Does the $m=2$ correction survive a foreign opponent?} &
+``1.\ \textbf{CI entirely below 0} --- the correction's in-play gain was also a
+sibling artefact. Withdraw it \ldots 2.\ \textbf{CI straddles 0} --- no
+reversal detected. The correction stays \ldots 3.\ \textbf{CI entirely above
+0} --- it transfers.'' 250 deals $\times$ 2 rotations $=$ 500 paired games per
+arm, seeds 331000--331249, agent seed base 3310. ``No second run to chase a
+straddle.'' &
+Yes, explicitly: ``this run is \textbf{underpowered to confirm} an effect of
+sibling size \ldots What it IS powered for is a \textbf{reversal of deception
+scale}.'' &
+\textbf{NOT RECORDED} in the registration (``Amendments: None yet''). The run
+exists; the paper reports $-0.0300$ $[-0.1081, +0.0481]$, and $-0.0440$
+$[-0.1344, +0.0464]$ rule-matched.
+\path{results/foreign_m2_check.json} &
+\S\ref{sec:critic} \\
+
+P22 & \path{gamma_policy_specific.md} \newline
+\emph{What does the wrong-signed opponent model cost?} &
+``\textbf{Minimum interesting effect 0.15 sets/game} \ldots G2 runs
+\textbf{ONLY} if G1's arm C clears the bar \ldots C must clear the bar against
+v0.3 as well, on the SAME fixed setting fitted against the external engine, with no
+refitting.'' Arms $\gamma \in \{+0.35, 0.0, -1.00\}$;
+``\textbf{400 deals $\times$ 2 rotations per arm}'', ``fresh seed block
+1,800,000+''; clustered over deals. &
+\textbf{None} (an expected outcome is stated, not a power bound). &
+\textbf{NOT RECORDED} in the registration. The run exists and both arms lose;
+G2 correctly does not run. \textbf{Deviation:} run at 800 deals $\times$ 2
+$=$ 1,600 games, twice the registered size, with no amendment.
+\path{results/g1_gamma_cost.json} &
+\S\ref{sec:res-choicecurve} \\
+
+P23 & \path{gamma_split.md} \newline
+\emph{Does each side of the table deserve its own $\gamma$?} &
+``A cell \textbf{licenses a play experiment} only if, on the teammate pool:
+1.\ its paired NLL interval lies \textbf{entirely below zero} \ldots
+\textbf{and} 2.\ its paired top-1 interval is \textbf{not entirely below
+zero}. Both conditions, or nothing. \ldots \textbf{If no cell satisfies both,
+the direction is withdrawn and no play experiment is run.}'' 60 games, stride
+4, $n_{\text{draws}} = 720$; unit is the \textbf{decision}. &
+Partial: only the withdrawal clause ``reported as underpowered on the smaller
+pool'' if the two pools differ by more than $5\times$. &
+\textbf{REFUTED.} ``Condition 1 passes and \textbf{condition 2 fails}
+\ldots \textbf{Withdrawn. No play experiment is run.}''
+\path{results/gamma_split.json}. \textbf{Deviation:} the file carries an
+unregistered $\gamma_{\text{team}} = 2.0$ cell. &
+\S\ref{sec:failures}; Table~\ref{tab:v11} row 1; Figure~\ref{fig:gammasplit}
+\\
+
+P24 & \path{ii_bounds.md} \newline
+\emph{Is ``$+0.3250$ is a lower bound on the whole $m=2$ layer'' right?} &
+``1.\ $\bar{U} \le H$ --- the claim is \textbf{refuted} \ldots 2.\ $\bar{L} >
+H$ --- the claim \textbf{holds by attainment} \ldots 3.\ $\bar{L} \le H <
+\bar{U}$ --- \textbf{not settled}.'' $H = +0.3250$. 60-game run; budgets
+400,000 nodes / 90\,s upper, 120\,s lower; support $>400$ excluded. &
+Yes, as a budget clause: ``a wide interval is never read as a statement about
+the game when it is a statement about the clock.'' &
+\textbf{NOT SETTLED} (outcome 3), recorded in the amendments rather than under
+an outcome heading. ``The pre-registered decision rule is untouched and its
+verdict is unchanged: \textbf{outcome 3, not settled.}''
+\path{results/ii_bound_analysis.json} &
+\S\ref{sec:iibounds} \\
+
+P25 & \path{ii_memo_rerun.md} \newline
+\emph{What should the corrected solver do to the $m=1$ numbers?} &
+\textbf{Five graded predictions, not a threshold:} ``1.\ The pinned control
+stays 344/344. 2.\ \texttt{mean\_champion} lands within 0.02 of $+0.0670$.
+3.\ \texttt{n\_solved} falls below 308. 4.\ \texttt{mean\_optimum} and
+\texttt{mean\_gain} come out \textbf{HIGHER} \ldots 5.\ Zero negative gains.''
+200 games; budget amended 60\,s $\rightarrow$ 300,000 nodes before any run
+reached game 20. &
+\textbf{None} (it names an ``interesting way to be wrong'' at
+$|\Delta| < 0.01$, which is not a power bound). &
+\textbf{GRADED 4/5.} ``Four of five, and the one that missed is the one whose
+mechanism was argued rather than provable.''
+\path{results/ii_memo_effect.json} &
+\textbf{Not in the paper} \\
+
+P26 & \path{information_ceiling_split.md} \newline
+\emph{Is the information we lack our teammates' or theirs?} &
+``\textbf{Ship bar. None. Nothing here can ship, ever.}'' Primary: ``paired
+difference of set margins against the external engine: T minus A, and O minus A, reported
+separately and \textbf{never summed}''. \textbf{600 games per arm}, both
+parities, award rule pinned, ``fresh seed block''. &
+Yes: ``600 games puts the standard error near $0.11$ sets/game \ldots sized
+for the \emph{smallest} arm rather than the largest.'' &
+\textbf{REAL; PREDICTION REFUTED.} T $+3.4100$ $[+3.1625, +3.6575]$, O
+$+1.3067$ $[+1.0070, +1.6063]$. ``T beats O by a factor of \textbf{2.6}''
+against a registered prediction that O would win.
+\path{results/ceiling_split.json} &
+\S\ref{sec:res-pathledger}; Figure~\ref{fig:ceiling} \\
+
+P27 & \path{locate_term.md} \newline
+\emph{Can an ask be priced by the declaration it enables?} &
+``\textbf{Primary:} mean paired difference in sets/game, Y $-$ X, 95\%
+interval, \textbf{on the confirmation run only}. \textbf{Ship bar: +0.15
+sets/game}.'' Screen $w \in \{0.15, 0.3, 0.6\}$ at 400 pairs; confirmation
+3,000 pairs, seed base \textbf{1,250,000}. Withdrawal: the screen must be
+``monotone or single-peaked in $w$''. &
+Yes, in the amendment: ``half-width $\sim$0.106, which resolves the bar'' ---
+and the document records that the registered shape condition ``was untestable
+at this sample size, and that is my error''. &
+\textbf{NULL.} ``Y $-$ X $= +0.047$ $[-0.075, +0.168]$ \ldots \textbf{The term
+does not ship.}'' Backed only by a record inside
+\path{results/v04_duels.jsonl}; no dedicated results file. &
+Table~\ref{tab:v11} row 5 \\
+
+P28 & \path{precision_generality.md} \newline
+\emph{Is ``the effect grows with draws'' the channel or the instrument?} &
+``\textbf{INSTRUMENT PROPERTY} if D's interval lies entirely \textbf{above}
+zero \ldots \textbf{SPECIFIC TO THE CHANNEL} if D's interval lies entirely
+\textbf{below} zero, or covers zero \ldots \textbf{VOID} if the 480 anchor
+misses by more than 0.010.'' Cells $n_{\text{draws}} \in \{180,360,480,720,
+1440\}$; arms $w_{\text{unlocated}} \in \{0.0, -4.0\}$; seed base
+\textbf{720,000}; 40 games. &
+Yes: ``40 games, stride 4, no extension \ldots $k = 40$ clusters against a
+floor of 8.'' &
+\textbf{INSTRUMENT PROPERTY.} ``$D = +0.0094$ $[+0.0016, +0.0172]$
+\ldots Entirely above zero.'' Anchor reproduced to $0.0000$.
+\path{results/precision_generality.json} &
+Not in the paper; alluded to in \S\ref{sec:failures} \\
+
+P29 & \path{reach_term.md} \newline
+\emph{Should an ask be charged for the entry point it spends?} &
+``\textbf{\texttt{gate} + \texttt{forced} declarations per game must fall}
+\ldots \textbf{no duel is run}. \textbf{Total declarations per game must not
+fall by more than 10\%} \ldots \textbf{no duel is run at this weight.}''
+Weight chosen by the same $[15\%, 60\%]$ bite window $\rightarrow$ $w = 0.80$.
+Screen 480 games; duel, never reached, 3,000 pairs at ship bar $+0.15$. &
+Yes: ``3,000 pairs at fresh seeds, half-width $\sim$0.11.'' &
+\textbf{BOTH SCREEN RULES FIRED, NO DUEL.} ``They were $0.427$. They are
+\textbf{0.800} --- nearly doubled \ldots They fell \textbf{16.3\%}.''
+\path{results/path_ledger_self_w_reach0.8.json} &
+Table~\ref{tab:v11} row 7 \\
+
+P30 & \path{rules_award_baseline.md} \newline
+\emph{Does everything survive the misdeclaration rule becoming standard?} &
+Six designs, each with outcomes fixed first. R1: 500 pairs, seed block
+400000+, ``CI clear of zero, positive: \ldots the new estimate
+\textbf{REPLACES} $+1.85$''. R2: seeds 332000+. R3: 200 pairs each,
+``registered expectation is \emph{no detectable difference} 0.90..0.999''.
+R4: 500 pairs. R5: 500 pairs, seeds 440000+. R6: screen 333000+, confirm
+334000+, guard vs v0.3, ``the screen picks, the confirm proves''. &
+\textbf{None} for any of R1--R6. &
+\textbf{NOT RECORDED} in the registration. All six ran; results are reported
+across the paper (R1 $+2.412$ $[+2.088, +2.736]$).
+\path{results/award_headline.json}, \path{results/r6_screen.json} and four
+others &
+\S\ref{sec:game}; \S\ref{sec:res-ladder}; \S\ref{sec:res-rules};
+\S\ref{sec:res-perpetual}; \S\ref{sec:critic} \\
+
+P31 & \path{signal_budget.md} \newline
+\emph{Is the signalling exchange rate flat?} &
+``$D = $ margin(C\_budget6) $-$ margin(B\_uncapped)'' --- ``\textbf{Not} `the
+best cap against the incumbent'.'' Verdicts: ``clear of zero, positive $=$
+\textbf{REAL} \ldots negative $=$ \textbf{REFUTED} \ldots covers zero,
+half-width $<= 0.05 =$ \textbf{NULL AT POWER} \ldots covers zero, half-width
+$> 0.05 =$ \textbf{UNDERPOWERED}, and it retires nothing.'' Seed base
+\textbf{11,700,000} (nine bases barred), 4,000 games an arm, 16,000 total. &
+Yes, the sharpest in the set: ``\textbf{It cannot resolve an improvement of
++0.03}, which is a plausible size for this intervention.'' &
+\textbf{NOT RUN.} No results file exists at seed 11,700,000;
+\path{RESEARCH_FRONTIER.md} records it as ``registered, implemented and
+pending a run''. &
+\textbf{Not in the paper} \\
+
+P32 & \path{signal_no_repeat.md} \newline
+\emph{Does suppressing repeated signalling asks help?} &
+``$D = $ margin(C\_norepeat) $-$ margin(B\_incumbent), paired per game
+\ldots \textbf{SHIP-CANDIDATE} if the interval excludes zero and D is positive
+\ldots \textbf{REFUTED} if the interval excludes zero and D is negative
+\ldots \textbf{INCONCLUSIVE} if it covers zero.'' Seed base
+\textbf{9,700,000}, re-run at \textbf{9,900,000} after the replication gate
+was found mis-specified; 4,000 games per arm, clustered on the deal. &
+\textbf{None} stated in advance. &
+\textbf{REFUTED.} ``$D = -0.0715$ $[-0.1068, -0.0362]$.'' \textbf{Citation
+error:} the document cites \path{results/signal_no_repeat.json}, which now
+holds the later seed-10,100,000 run ($-0.1075$); the quoted figure is in
+\path{results/signal_no_repeat_9900000.json}. &
+\S\ref{sec:res-perpetual} \\
+
+P33 & \path{signal_value_after_exhaustive.md} \newline
+\emph{Does signalling's $+0.1220$ survive the engine change?} &
+``\textbf{SURVIVES} if the interval is clear of zero AND contains $+0.1220$.
+\textbf{SHRUNK} if the interval is clear of zero and lies entirely below
+$+0.1220$ \ldots \textbf{GONE} if the interval covers zero.'' $D = $
+margin(B\_incumbent) $-$ margin(A\_shipped). Seed base \textbf{10,100,000};
+4,000 games per arm; clustered on the deal. &
+Yes, explicitly: ``This run is \textbf{powered to answer GONE, and is not
+powered to distinguish SURVIVES from SHRUNK} when both are positive.'' &
+\textbf{SURVIVES.} ``$+0.1435$ $[+0.0971, +0.1899]$, 2,000 deal clusters.''
+Still below the $+0.15$ bar, ``which is not amended now either''. A
+bridge-revision-2 duel; withdrawn with the line under P48.
+\path{results/signal_no_repeat.json} &
+\textbf{Not in the paper} \\
+
+P34 & \path{signal_vs_defer_additivity.md} \newline
+\emph{Are signalling and the deferred gate one effect or two?} &
+``$I = (\text{D\_both} - \text{B\_signal}) - (\text{C\_defer} -
+\text{A\_shipped})$ \ldots \textbf{ONE EFFECT} if $I$'s interval excludes zero
+and $I$ is negative \ldots \textbf{TWO EFFECTS} if $I$ covers zero AND $d$ is
+clear of both $b$ and $c$ \ldots \textbf{INCONCLUSIVE} otherwise.'' Seed base
+\textbf{10,500,000}; 4,000 games per arm, four arms on the same deals. &
+Yes: ``expect roughly 0.05--0.07 \ldots It \textbf{cannot} finely estimate a
+partial overlap.'' &
+\textbf{NOT RUN --- degenerate design.} ``B\_signal and D\_both produce
+identical margins in all 400 games \ldots So the run is not executed.'' The
+400-game probe is \path{results/signal_vs_defer_probe200.json}. &
+\textbf{Not in the paper} \\
+
+P35 & \path{stuck_claim_gate.md} \newline
+\emph{Should the $0.5$ doomed-ask gate read \texttt{p\_team}?} &
+``Point estimate $>=$ \textbf{+0.15} with the interval clear of zero: ships
+\ldots Point estimate in \textbf{[+0.05, +0.15)} with the interval clear of
+zero: ships \textbf{only if} the ledger confirms the mechanism \ldots
+\textbf{and} the v0.3 guard does not sit below zero. Otherwise: does not
+ship.'' \textbf{1,000 pairs per rung} vs the external engine; seed block
+2,400,000; clustered over deals. &
+Yes: ``$\pm 0.071$ --- enough to resolve the predicted effect from zero, and
+honest about the fact that this is a 0.16-events-per-game intervention.'' &
+\textbf{NULL IN PLAY, MECHANISM CONFIRMED} (withdrawal condition 1). ``Neither
+interval is clear of zero \ldots \textbf{Nothing ships.}'' The registration
+\textbf{names no results file}; verified against
+\path{results/stuck_gate_confirm.json}. &
+\S\ref{sec:res-pathledger} \\
+
+P36 & \path{tempo_regime.md} \newline
+\emph{Should the objective stop charging for a turn that is free?} &
+``\textbf{Ship bar.} Point estimate $\geq +0.15$ with the interval clear of
+zero.'' 1,000 games per arm. Addendum, fixed before any game of it:
+\textbf{8,000 games per arm}, $\mathtt{TEMPO\_SEED0} = 7{,}700{,}000$,
+``analysed \textbf{once}, at the end. No interim looks, no stopping early'',
+and ``\textbf{Bar, disambiguated in advance.} Ship \textbf{only if both
+readings agree}''. &
+Yes: ``this puts the standard error near $0.040$, which is the point at which
+the two readings of the bar coincide.'' &
+\textbf{UNRESOLVED, then WITHDRAWN.} 1,000 games $+0.2280$ $[+0.0076,
++0.4484]$; 8,000 games $-0.0163$ $[-0.0973, +0.0648]$. ``\textbf{B does not
+replicate} \ldots condition 3 \ldots \textbf{Triggered. Withdrawn.}''
+\path{results/tempo_rep8k_confirm.json} &
+\textbf{Not in the paper} \\
+
+P37 & \path{unlocated_belief.md} \newline
+\emph{Does \texttt{unlocated\_now} make the BELIEF better, not just the fit?} &
+``\textbf{SHIP-CANDIDATE} requires \textbf{BOTH}, each with a 95\% interval
+excluding zero: team NLL improves, AND team top-1 improves. \textbf{REFUTED}
+if team NLL improves and team top-1 does not \ldots \textbf{REFUTED} if the
+best cell is $w_{\text{unlocated}} = 0.0$, the incumbent.'' Grid $\{0.0, -0.5,
+-1.0, -2.0, -4.0\}$; \textbf{40 games at stride 4}; clustered by game, floor 8.
+Clamp $u = \max(\texttt{unlocated\_now}, 1)$ fixed in advance. &
+Yes: ``If 40 games turn out to be too few \ldots that is a finding about power
+\ldots it does not license a longer run against the same hypothesis.'' The
+document also records that $n_{\text{games}}$ was \emph{omitted} from its first
+version and added before any interval was read. &
+\textbf{NOT RECORDED} in the registration. The run exists and refutes the
+covariate at every weight; the verdict lives only in
+\path{RESEARCH_FRONTIER.md} and in this paper.
+\path{results/unlocated_belief.json} (no verdict field) &
+\S\ref{sec:v11}, Table~\ref{tab:v11} row 2 \\
+
+P38 & \path{where_the_margin_lives.md} \newline
+\emph{Which channel of the margin identity does signalling move?} &
+Four numbered predictions with a named falsifier, not a ship rule:
+``2.\ \texttt{their\_wrong\_\allowbreak per\_game(\allowbreak B\_signal)} $-$
+\texttt{their\_wrong\_\allowbreak per\_game(\allowbreak A\_shipped)} is about
+$+0.13$ a game, and clear of zero.'' ``If the opponent's error rate does not move under signalling
+\ldots the finding is withdrawn and the defect is the result.'' Seed
+\textbf{11,300,000}, 2,000 deals, three arms. &
+\textbf{None.} &
+\textbf{NOT RECORDED / NOT RUN.} No results file exists at seed 11,300,000;
+\path{RESEARCH_FRONTIER.md} records the run as still in flight when the
+document was committed. &
+\textbf{Not in the paper} \\
+
+P39 & \path{signal_dose_law.md} \newline
+\emph{Is the transfer across opponents multiplicative or logistic?} &
+``\textbf{MULTIPLICATIVE} --- the interval covers $+0.0426$ and excludes
+$+0.0143$''; \textbf{LOGISTIC} the reverse; \textbf{NEITHER} if it excludes
+both, named in advance as ``the outcome that would matter most''. Both
+predictions fitted before the run to the external engine's measured rise;
+\texttt{heuristic} at $2{,}500$ paired deals, seed base \textbf{14,900,000}. &
+Yes: \textsc{underpowered} if the half-width exceeds $0.0142$. &
+\textbf{LOGISTIC.} $+0.0178$ $[+0.0048, +0.0308]$, covering the logistic
+prediction and excluding the multiplicative one; realised half-width $0.0130$.
+One registered input was later found to be a screen figure good to $\pm4$
+points; the verdict survives recomputation at the measured baseline.
+\path{results/signal_dose_law.json} &
+\S\ref{sec:res-signal} \\
+
+P40 & \path{signal_dose_linearity.md} \newline
+\emph{Is the log-odds shift linear in the dose, or is there a dead zone below
+three signals a game?} &
+``\textbf{LINEAR} --- the interval covers the linear prediction and excludes
+zero''; \textbf{THRESHOLD} the reverse; \textbf{NEITHER} if it excludes both,
+named as ``the outcome that would hurt most''. A direct replication at power of
+the $1.477$-dose arm, $5{,}000$ paired deals, seed base \textbf{15,700,000}. &
+Yes: \textsc{underpowered} if the half-width exceeds $0.0095$. &
+\textbf{NEITHER.} $+0.0088$ $[+0.0007, +0.0169]$ at a realised dose of
+$1.381$: excludes zero, so there is no dead zone, and excludes the linear
+prediction of $+0.0201$, so the shift is not proportional to the dose either.
+\path{results/signal_dose_linearity.json} &
+\S\ref{sec:res-signal} \\
+
+P41 & \path{signal_generality.md} \newline
+\emph{Is the signalling effect a property of the convention or an exploit of
+one opponent's declaration policy?} &
+``\textbf{GENERAL} --- the margin effect clears zero and the declaration error
+rate rises outside its Wilson interval''; \textbf{OPPONENT-SPECIFIC} if both cover
+zero at a half-width at or below $0.0734$; \textbf{CONTROL VIOLATED} overrides
+everything if \texttt{self} shows an effect. $800$ paired deals per opponent,
+seed \textbf{12,100,000}. &
+Yes: half-width $0.0734$, with \textsc{underpowered} named. &
+\textbf{ANSWERS NEITHER --- the design is dose-confounded.} The control holds
+($+0.0200$ $[-0.0232, +0.0632]$) and \texttt{ev\_claim} does not move
+($-0.0525$ $[-0.1415, +0.0365]$), but the two arms fired at $8.94$ and $2.17$
+signals a game, so opponent and dose are not separated and the registered
+verdicts are not read. Superseded by P42.
+\path{results/signal_generality_ev_claim_12100000.json},
+\path{results/signal_generality_self_12100000.json} &
+\S\ref{sec:res-signal} \\
+
+P42 & \path{signal_matched_dose.md} \newline
+\emph{The same question with the dose held equal by construction.} &
+``\textbf{GENERAL} --- \texttt{ev\_claim}'s opponent channel clears zero at
+matched dose''; \textbf{OPPONENT-SPECIFIC} if it covers zero at a half-width at
+or below $0.0209$; \textbf{INFEASIBLE} if the calibration gate finds no common
+dose. Calibration bank scores nothing; scored bank $2{,}500$ paired deals,
+seed base \textbf{14,300,000}, dose tolerance $\pm15\%$. &
+Yes: \textsc{underpowered} above a half-width of $0.0414$; re-sized from the
+calibration bank before any scored deal was played, and the change recorded in
+the document. &
+\textbf{GENERAL.} Both opponents inside tolerance at $2.766$ and $2.872$;
+the external engine $+0.0454$ $[+0.0326, +0.0582]$ and \texttt{ev\_claim}
+$+0.0172$ $[+0.0048, +0.0296]$. The effect transfers as a rate \emph{factor}
+($+0.0160$ predicted, inside) and not as a fixed rise in points ($+0.0423$,
+outside). \path{results/matched_dose_scored.json},
+\path{results/matched_dose_calibration.json} &
+\S\ref{sec:res-signal} \\
+
+P43 & \path{kraken_v12_vs_sestina.md} \newline
+\emph{Can anything beat the external engine through the repaired bridge, and does it
+still hold in self-play?} &
+Ships only on $+0.15$ sets/game with the interval clear of zero in
+\emph{both} populations: against the external engine through \texttt{BRIDGE\_REV\ 3},
+and against the v1.1 champion in self-play. Three candidates fixed in advance
+(opponent-model $\gamma$, \texttt{avoid\_doomed\_asks},
+\texttt{depth\_mode}); screen $300$ deals $\times\,2$ parities at seed base
+\textbf{9,300,000}, confirm $600 \times 2$ at \textbf{9,400,000}, never
+pooled. A candidate clearing against the external engine and failing self-play is reported
+as opponent-specific and not shipped. &
+Yes, and stated as the expected outcome: that none of the three clears the
+$0.6$ gap and v1.2 does not beat the external engine. Multiplicity across three candidates
+is named in the document rather than in a discussion section. &
+\textbf{NOTHING SHIPS}, as predicted. No arm clears either half of the
+bar, so none reaches confirm and the stacking arm is not licensed:
+$\gamma{=}0$ at $-0.5867$ / $-1.0667$, $\gamma{=}\hat\alpha$ at
+$-0.9033$ / $-2.0033$, \texttt{avoid\_doomed\_asks} at $-0.0933$ /
+$-0.0900$, \texttt{depth\_mode} at $-0.0033$ / $-0.0867$ (vs external /
+self-play). Two lessons outrank the nulls. R0's re-measured exponent
+survives the bridge repair ($-1.1055$ against $-1.0041$), and acting on
+it is the worst arm in the study --- a correct measurement of an
+opponent does not license a change to us, and only the self-play half of
+the bar separates those. And removing the opponent model entirely costs
+$-0.59$ / $-1.07$, so the model on all five seats is an \emph{asset}
+against the external engine; P46 separated the halves, and its reading rule weakened
+``being wrong about an opponent's propensity beats having no opinion'' to:
+the part on their seats, teammates held, costs $-0.25$ $[-0.536, +0.036]$
+when removed, consistent with a small asset and with zero at that power.
+\path{results/v12_screen.json},
+\path{results/v12_screen_c3.json} &
+\S\ref{sec:otherarbiter} \\
+
+P44 & \path{kraken_v12_declaration_latency.md} \newline
+\emph{The deficit is a declaration latency, not an ask deficit --- can either
+end of it be reached?} &
+Same dual-population bar as P43. Two arms, each replacing a CERTAINTY test
+with a graded one: \texttt{dead\_ask\_threshold} $=0.5$ (D1) restricts the
+ask when the top-scoring one's half-suit is more likely than not already
+ours; \texttt{claim\_owned\_threshold} $=0.77$ (D2) declares a half-suit we
+are certain we own at a lower exactness. D2's $0.77$ is a break-even from this
+project's own turn price and declaration accuracy, stated with its
+approximation, not the best of a sweep. Futility screen fixed first: $2\%$ of
+ask decisions (D1), $0.25$ declarations/game (D2), at seed base
+\textbf{9,500,000}; screen $300\times2$ at \textbf{9,600,000}. D3 (both)
+licensed only if both cleared independently. &
+Yes: that D1 clears futility and fails the duel, with the mechanism named ---
+a failed ask publicly proves the asker holds another card of that half-suit,
+so D1 removes the engine's own way of resolving the allocation it is stuck on.
+D2 was predicted to be ``the one with a case''. &
+\textbf{NOTHING SHIPS.} D2 fired on $0.235$ declarations/game against its
+$0.250$ bar and never reached a duel, which is itself the result: it gates on
+$p_{\text{team}} \ge 0.99$, and the belief puts $0.3120$ on a genuinely dead
+half-suit being ours; a later sweep (\path{results/ownership_estimators.json})
+shows relaxing that test to $0.20$ adds only $0.103$ declarations a game, so
+the gate is bound by the exactness band, not ownership. D1 reached the duel and returned a significant \textbf{negative} in
+both populations, $-0.3233$ $[-0.527, -0.119]$ and $-0.2300$ $[-0.448,
+-0.012]$ --- while raising the ask hit rate it targets, $0.5245$ against the
+champion's $0.5184$ on the same deals. It did what it was built to do and cost
+a third of a set doing it, so \textbf{the ask hit rate is not a quantity to
+maximise} and the $1.95$-point gap of \S\ref{sec:otherarbiter} is not
+necessarily a gap to close. \path{results/p44_futility.json},
+\path{results/p44_screen.json} &
+\S\ref{sec:askdeficit} \\
+
+P45 & \path{kraken_v12_free_message.md} \newline
+\emph{The convention's gate was priced in the wrong currency --- does the
+channel win once the price is right?} &
+Same dual-population bar as P43 and P44. One arm, F1, the \textbf{free-message}
+gate: \texttt{convention\_max\_cost} $=10^{-9}$ in the \emph{re-priced}
+objective units, so the agreed card is named only when it \emph{ties} the card
+the objective already chose and the message costs nothing in the currency the
+old gate mis-read --- a median $0.3596$ objective units out of a range of
+$1.5$. Book \texttt{locate}, $q=0.5$, neither swept. The decoder half is not
+re-run: the free read settled it at $3{,}000$ pairs, $-0.002$ $[-0.127,
++0.123]$. Futility screen fixed first --- the arm must raise the carry rate by
+$2$ points over the champion on the same deals, seed base
+\textbf{10,150,000}; screen $300\times2$ at \textbf{10,200,000}. &
+A null in both populations, near the free read's, because F1 is that same
+channel plus $4.8$ points of carry. Stated as \emph{not expected to clear}. &
+\textbf{NOTHING SHIPS.} The screen passed at $+5.80\%$ carry gain, arm carry
+$39.5\%$ against the $40.1\%$ the earlier document predicts for this gate. The
+duel then returned a significant \textbf{negative} in \emph{both} populations,
+$-0.3067$ $[-0.607, -0.006]$ against the external engine and $-0.8567$ $[-1.069, -0.645]$
+in self-play, so the confirm stage was not paid for. \textbf{The prediction was
+wrong about the size}: sending changes the game in a way receiving does not,
+and the free read's null does not bound it. Self-play is where F1 loses
+\emph{most}, the opposite of the opponent-specific shape the dual population
+was added to catch. A gate costing nothing in the objective's own units costs
+$0.86$ sets a game --- it replaces a \emph{random} tie-break with a
+\emph{deterministic} one, and the uniform draw it removes is what decorrelates
+three seats sharing an objective. And the ask hit rate rose again, $0.5287$
+against $0.5136$, \textbf{replicating P44's finding on an independent channel}.
+\path{results/p45_futility.json}, \path{results/p45_screen.json} &
+\S\ref{sec:p45} \\
+
+P46 & \path{kraken_v12_belief_grid.md} \newline
+\emph{Is the belief about the external engine's cards improvable at any exponent, on
+either side, at any budget --- and which half of P43's C1b loss is about
+them and which is about us?} &
+Written before any instrument position was scored or candidate game played.
+Stage~0 is an instrument that ships nothing: the champion's own games, frozen
+after \texttt{act()} at every fourth scored decision, re-weighted at
+\textbf{20 cells} --- $\gamma_{\text{opp}} \in \{-1.1055, -0.5, 0.0, 0.35,
+0.7, 1.0\} \times \gamma_{\text{team}} \in \{0.0, 0.35, 0.7\}$, plus
+\texttt{opp\_lambda} $\in \{0.3, 0.9\}$ at the incumbent $(0.35, 0.35)$ ---
+at \textbf{two budgets}, $720$ and $2{,}880$ draws, block~A cross-engine
+against the external engine and block~B self-play, NLL/Brier/top-1 per truth pool paired
+against the incumbent cell, intervals clustered by game, Kish ESS per row.
+Decisions where the incumbent takes the exact DP are excluded from every
+paired contrast. \textbf{Licensing rule}, dual like the ship bar: a cell
+licenses a play arm only if its opp-pool NLL interval lies entirely below
+zero at both budgets in both blocks and no top-1 interval lies entirely below
+zero; only $(0.7, 0.7)$ can be promoted. \textbf{Calibration clause}: if the
+rule licenses $(0.0, 0.0)$ or $(-1.1055, 0.35)$ --- the belief twins of P43's
+dueled C1b and C1c --- or fails to fail the latter, the rule is recorded as
+uncalibrated and the grid closes nothing. Stage~1, the same dual-population
+design as P43--P45: \textbf{E0} \texttt{opponent\_gamma} $=0.0$ (C1b
+replicated within deal), \textbf{E1} off on the external engine's seats only,
+\textbf{E2} off on our teammates only, and \textbf{G}
+\texttt{opponent\_gamma} $=0.7$ played only if Stage~0 licenses it. Seeds
+\textbf{10,600,000} (instrument), \textbf{10,700,000} (screen, $300\times2$
+per arm), \textbf{10,800,000} (confirm, $600\times2$, never pooled). &
+Yes: nothing ships, for the fourth time. Stage~0: no cell with
+$\gamma_{\text{opp}}$ outside $\{0.0, 0.35\}$ licenses; the fitted exponent
+$(-1.1055, 0.35)$ is both a worse belief about their cards and a thinner
+sample (opp-pool NLL $+0.015$ $[+0.005, +0.025]$ at $720$, ESS ratio about
+$0.55$); $(0.7, 0.7)$ fails the licensing rule, so G is \emph{not} played.
+Stage~1: C1b decomposes, E1~$-$~E0 $= +0.30$ $[+0.02, +0.58]$, and the
+sentence ``being wrong about an opponent's propensity beats having no
+opinion'' is retained only if E1's vs-external interval lies entirely below
+$-0.15$. &
+\textbf{NO ARM CLEARS; THE PREDICTION WAS WRONG IN THE DIRECTION.}
+Stage~0: the belief improves monotonically with the exponent on both sides;
+the rule licensed $(0.7, 0.7)$ in both blocks at both budgets (opp-pool NLL
+$-0.0131$ / $-0.0185$ against the external engine at $720$ / $2{,}880$ draws, $-0.0128$
+/ $-0.0271$ in self-play); the C1c twin is a worse belief and not a thinner
+sample ($+0.0620$, ESS ratio $0.86$); the silence term closes at the belief
+level. Stage~1: E2 (off on our teammates only) is a null in both populations,
+$-0.05$ / $-0.10$, so C1b's cost belongs to their seats; E1 reads $-0.25$
+$[-0.536, +0.036]$ and the reading rule weakens the P43 sentence; G reads
+$+0.2433$ $[-0.051, +0.537]$ / $+0.1567$ $[-0.055, +0.368]$, positive in both
+populations for the first time in fourteen arms and clear of zero in neither.
+Nothing ships; the confirm is a new registration (P47).
+\path{results/p46_belief_grid.json}, \path{results/p46_screen.json},
+\path{results/p46_screen_G.json} &
+\S\ref{sec:p46} \\
+
+P47 & \path{kraken_v12_g_confirm.md} \newline
+\emph{Does the one arm P46's belief-level rule licensed clear the dual bar
+at confirm scale?} &
+Written after P46's Stage~1 was on disk and before any P47 game. One arm, G
+(\texttt{opponent\_gamma} $=0.7$, their seats and ours), $600$ deals
+$\times$ 2 parities on the fresh block \textbf{11,100,000} (agent base
+$111{,}000$), the P43--P46 dual-population design imported from P46's
+harness, no futility screen (P46's Stage~1 was the screen), never pooled
+with it. Bar: $+0.15$ with the interval clear of zero in both populations;
+clears both $\Rightarrow$ ships as v1.2. &
+G does not clear both halves: vs external $+0.18$ $[-0.03, +0.39]$, self-play
+$+0.11$ $[-0.04, +0.26]$ --- the self-play half fails on the mean as well as
+the interval; ask hit rate up by about a point again. &
+\textbf{DOES NOT SHIP; CLEARS THE SELF-PLAY HALF ALONE.} $1{,}200$
+pairings, zero fallbacks: vs external $+0.0017$ $[-0.204, +0.208]$, a null;
+self-play $+0.1667$ $[+0.009, +0.325]$, clearing --- the first half of the
+dual bar any arm has cleared, and the half it exists to distrust. The
+prediction got the verdict right and both halves wrong in opposite
+directions. Ask hit rate $0.5261$ against $0.5249$: the Stage~1 rise did not
+replicate. \path{results/p47_confirm.json} &
+\S\ref{sec:p46} \\
+P48 & \path{kraken_v12_signalling_rev3.md} \newline
+\emph{Does the signalling protocol's gain survive the bridge repair, or was
+it the defect measured from the other side?} &
+Written after P47 was on disk and before any P48 game. Every margin the
+signalling line reported against an opponent was a \texttt{BRIDGE\_REV}~2
+duel against the external engine, and its own identity put most of the gain
+in \emph{their} extra wrong declarations, the counter the defect inflated;
+the self-play control was a null. Two arms on the fresh block
+\textbf{11,400,000} (agent base $114{,}000$), $300$ deals $\times$ 2
+parities each, the P43--P47 dual-population design: \textbf{S1}
+\texttt{signal\_mode} $=$ \texttt{stuck}, \texttt{signal\_max\_p} $=0.5$
+(arm C of the line, verbatim) and \textbf{S2} $=$ S1 $+$
+\texttt{signal\_budget} $=6$. Registered secondary: the margin identity's
+three channels (race / ours / theirs) per arm and population, paired within
+deal, the residual asserted zero on every game; signals a game. Reading rule
+for the paper's ``value established and positive'' sentences keyed on S1's
+theirs channel against the external engine against its rev-2 value $+0.2725$
+$[+0.2270, +0.3180]$. Bar: $+0.15$ clear of zero in both populations. &
+Nothing clears. S1 vs external $-0.10$ $[-0.40, +0.20]$, self-play $+0.02$
+$[-0.20, +0.24]$; S1's theirs channel against the external engine $+0.01$ $[-0.05,
++0.07]$, the opponent channel gone; about $3$ signals a game against the external engine
+(from $8.94$). S2 vs external $+0.05$ $[-0.25, +0.35]$, self-play $0.00$. &
+\textbf{NOTHING CLEARS; THE GAIN WAS THE DEFECT.} $1{,}200$ pairings,
+$3{,}600$ games, zero fallbacks, the identity closing on every game. S1 vs
+the external engine $+0.0033$ $[-0.078, +0.085]$ --- a null whose interval excludes the
+bar --- and $+0.0267$ $[-0.205, +0.258]$ in self-play; S2 is S1 (the budget
+binds on eight pairings in six hundred). S1's theirs channel against the external engine
+$+0.0167$ $[-0.010, +0.044]$ against $+0.2725$ at rev~2, their error rate
+$3.58\%$ against $3.43\%$; $0.623$ signals a game, from $8.94$. The ours
+channel survives, $+0.0600$ $[+0.020, +0.100]$, and the race cancels it,
+$-0.0733$. The reading rule fires: the paper's ``established and positive''
+sentences are withdrawn and the confirmations join the withdrawn list.
+\path{results/p48_screen.json} &
+\S\ref{sec:p48} \\
+P49 & \path{p49_race_channel.md} \newline
+\emph{Which channel is the revision-3 deficit actually in, and is the
+declaration side big enough to close it?} &
+Written before any candidate game and \textbf{corrected the same day, also
+before any candidate game}, against \path{fish/engine.py} rather than
+against its author's summary of it. The registration argued the deficit was
+a declaration-timing channel the cross-engine programme had never aimed at.
+That is wrong: \texttt{\_apply\_claim} awards a half-suit to the opponents
+whenever any revealed holder is on the other team, so a team that does not
+hold all six cannot take one by declaring, $8.76$ of the nine a game are
+collected outright and named right, and the channel counts \emph{assembly}
+--- the ask channel, where the earlier programme did aim. The correction is
+appended to the document rather than edited over the claim. Two descriptive
+screens, neither of which plays a candidate: \textbf{N0-split}, eight
+$(\gamma_{\text{opp}}, \gamma_{\text{team}})$ cells scored on one belief
+at $300$ self-play games on block \textbf{12,000,000}, with the promotion
+rule --- per-game bound above target \emph{and} $d(\text{wrong})$'s
+interval not wholly above zero --- fixed before the run; and
+\textbf{N0-assembly}, both engines instrumented over $1{,}600$
+\texttt{BRIDGE\_REV}~3 games on block \textbf{12,500,000}. Prediction:
+concentration over tempo, the partner exponent carrying the split
+correction, and that correction \emph{costing} top-1 accuracy. Bar for any
+duelled arm unchanged at $+0.15$ clear of zero in both populations. &
+Both screens return what was predicted except one clause, and the exception
+is recorded: tempo is out (turn acquisitions $+0.093$ $[+0.060, +0.127]$,
+the tenth of a turn being ours) and the gap is wasted hits ($+1.065$
+$[+0.758, +1.372]$ a game, $31.6\%$ of our hits against $25.2\%$ of
+theirs, at kept-hits-per-half-suit of $4.009$ against $4.090$). The split
+joint's under-confidence is the \emph{partner} model --- $(0.35, 1.4)$
+takes the bias from $-0.171$ to $-0.016$ where $(1.4, 0.35)$ reaches only
+$-0.116$ --- and the prediction that the correction costs accuracy is
+\textbf{falsified}: the partner exponent is free, while the opponent
+exponent costs $-0.035$ $[-0.045, -0.025]$. The promotion rule selects
+$(0.35, 1.4)$ uniquely, dropping the two larger cells for buying
+declarations with misdeclarations. &
+\textbf{THE DEFICIT IS A COLLECTION DEFICIT, AND THE DECLARATION CHANNEL
+CANNOT CLOSE IT.} The identity on the head-to-head's own $1{,}200$-game
+block, residual zero: margin $-0.5250$ $=$ race $-0.6433$ $+$ ours
+$-0.2017$ $+$ theirs $+0.3200$. Declaring \emph{perfectly} is worth
+$+0.2017$ and still loses by $0.323$, which retires every declaration-side
+candidate without playing one. N1 (the $\gamma_{\text{team}} = 1.4$ duel)
+is licensed as a cheap arm and explicitly not as a route.
+\path{results/margin_channels_rev3.json},
+\path{results/completion_ledger_12500000.json},
+\path{results/split_partner_model_12000000.json} &
+\S\ref{sec:res-rev3channels}, \S\ref{sec:res-assembly} \\
+P50 & \path{p50_contest_rev3.md} \newline
+\emph{Does the contest term, rejected against a handicapped opponent, survive
+a valid baseline --- and does the untested ask-tally mode cost anything?} &
+Written before any P50 game, from a reading of the opponent's released
+source rather than from play. Its spec turns on \textbf{exactly one} of its
+eighteen extra ask terms, \texttt{oppCertDonate} at $25.0$, which computes
+$(1-p)\cdot\mathrm{oppFrac}\cdot(u_S/6)$ --- the same quantity
+\path{fish4/adaptive.py}'s \texttt{contest\_bonus} computes --- and its
+score is maximised, so it \emph{seeks} those asks. A REOPENING under this
+project's own rule that a knob rejected against a handicapped opponent has
+not been tested against this one: the earlier rejection's baseline was
+$+2.732$, the retracted regime. Five arms on block \textbf{12,900,000},
+$300$ deals $\times$ 2 parities each, two families scored separately: C1
+\texttt{w\_contest} at $+0.3$, $+1.0$ and $-0.3$ --- \emph{both signs},
+because the measurement says we lose the contested band and that is equally
+consistent with fighting it better and with banking the extremes --- and C2
+\texttt{count\_mode} at \texttt{sqrt} and \texttt{capped}, a knob shipped
+at \texttt{linear} and appearing in no prior registration, results file or
+line of this paper. Bar: $+0.15$ clear of zero in both populations.
+Withdrawal conditions include one aimed at the harness rather than the term:
+C1a and C1b disagreeing in sign with both intervals clear of zero. &
+None of the five clears, as predicted. C1b's self-play interval lies entirely
+below zero and the registered withdrawal fires. The C1 dose response is
+monotone decreasing in the positive direction --- the same shape the rev-2
+sweep found, now on a valid baseline --- so the reopening was justified and
+the conclusion it reopened held. C2 closes \texttt{count\_mode}: both hedges
+are worse, monotonically in how much tally information they discard, and
+\texttt{capped} is significant in both populations. &
+\textbf{NOTHING CLEARS; A REV-2 REJECTION RE-ESTABLISHED, AND A KNOB CLOSED.}
+$9{,}000$ games, zero fallbacks, zero unfinished. C1a $+0.0967$
+$[-0.161, +0.354]$ / $+0.1400$ $[-0.081, +0.361]$; C1b $-0.1367$ / $-0.3067$
+$[-0.516, -0.097]$, withdrawn; C1c $+0.1000$ / $-0.0200$; C2a $-0.1867$ /
+$-0.1267$; C2b $-0.3700$ $[-0.634, -0.106]$ / $-0.6667$ $[-0.888, -0.445]$.
+C1a is positive in both populations and does not advance: below the bar,
+both intervals covering zero, and a screen that promotes its best near-miss
+is not a screen. The same term is worth a cycle to their engine at $+25$ and
+negative to ours at every dose. \path{results/p50_contest.json} &
+\S\ref{sec:res-conversion} \\
+
+P51 & \path{p51_depth_profile.md} \newline
+\emph{The exponent of the partner choice model is closed. Is its functional
+form?} &
+Written before any P51 game. P49~N1 dueled $(\gamma_{\mathrm{opp}},
+\gamma_{\mathrm{team}}) = (0.35, 1.4)$ and lost in both populations, closing the
+partner \emph{exponent}; it could not separate a wrong exponent from a wrong
+\emph{shape}, because the log-linear tilt makes the likelihood
+$\mathrm{depth}^{\gamma \cdot n}$, a power law with no shape parameter at all.
+The shape is measurable without fitting anything: our partner runs our policy,
+so $P(\text{ask in } H \mid k)$ is a count. Over $13{,}801$ partner asks the
+best-fit power law is $1.40$ --- so $1.4$ was very nearly the right strength
+--- and its error is concentrated at the top, \textbf{$+42.8\%$ at $k=5$},
+because the measurement flattens and a power law keeps climbing. $k=4$ and
+$k=5$ are the counts a declaration is decided on and the gate reads $0.97$ on
+the joint. Three arms on block \textbf{15,100,000}, $300$ deals $\times$ 2
+parities: D1 holds the power law flat past $k=4$, D2 uses the measured table,
+D3 applies D2 to opponent slots too and is \emph{demoted unless D2 clears},
+because a profile fitted on our own policy is not evidence about theirs.
+Predicted before the run: D1 recovers most of $1.4$'s self-play loss; D2
+$\ge$ D1 but barely; \emph{neither clears the bar}, since the channel runs
+through declarations and the \textsc{ours} channel is bounded at $+0.2017$. &
+Neither clears, as predicted, and neither withdrawal fires. Prediction~1 is
+answered \textbf{no}, and only because a control was added to answer it: the
+registration compares D1 against $\gamma_{\mathrm{team}} = 1.4$, which P49~N1
+measured on a \emph{different} seed block, so $1.4$ was re-run on this one.
+\textbf{594 of the 600 pairings are identical to D1's.} D1 \emph{is} $1.4$,
+and the apparent halving of $1.4$'s self-play loss is a block effect. The
+flattening is inert in practice because it bites only above $k=4$ and $k=5$ is
+$1{,}249$ pairs of ${\sim}54{,}000$: \emph{rarity, not size, decides whether a
+mis-specification matters}. What bites is D2's other correction, the $-15.7\%$
+\emph{under}-weight at $k=3$ and its $5{,}216$ pairs --- D2 differs from both
+arms in $487$ of $600$ pairings. The prediction that D2 exceeds D1 ``but
+barely'' is wrong against \textsc{sestina}, where the gap is $+0.127$; in
+self-play the two are indistinguishable. D3 stays demoted. &
+\textbf{NOTHING CLEARS; THE SHAPE IS REAL AND WORTH LESS THAN THE BAR.}
+$7{,}200$ games, zero fallbacks, zero unfinished. D1 $-0.0267$
+$[-0.296, +0.243]$ / $-0.1367$ $[-0.359, +0.085]$; D2 $+0.1000$
+$[-0.174, +0.374]$ / $-0.1333$ $[-0.358, +0.091]$; the control $-0.0267$ /
+$-0.1367$. D2's \textsc{sestina} figure
+is below the bar with an interval covering zero and is negative in the other
+population, so it is not a win and does not advance. Ask hit rate rises
+$0.5227 \to 0.5411$, which is bite without conversion --- the same pattern the
+conversion ledger found. \path{results/p51_depth_profile.json} &
+\S\ref{sec:res-profile} \\
+
+P52 & \path{p52_claim_term.md} \newline
+\emph{The \texttt{claim} term sits at zero. Was that ever a measurement?} &
+Written before any P52 game. \texttt{AskWeights} has thirteen terms and the
+champion ships \textbf{three} live --- \texttt{suit} $0.06$, \texttt{turn}
+$0.6$, \texttt{scarce} $0.2$ --- with the other ten at exactly zero. For most of
+them that zero is a result: \texttt{deplete} is a v0.3 null, \texttt{locate} was
+duelled to $+0.047$ $[-0.075, +0.168]$, \texttt{concent} was confirmed negative
+at $4{,}000$ games. \texttt{claim} is not one of those. Its zero comes from a
+ridge fit whose stored column described the pre-correction formula, which
+multiplied over all six cards including the one being asked for and therefore
+scored exactly zero on provably certain steals --- the asks it exists to reward.
+\S\ref{sec:res-learn} records the decision not to re-harvest, which is sound
+about harvesting and says nothing about a duel: \texttt{w\_claim} is already a
+constructor parameter and needs no code change. Four doses on block
+\textbf{15,700,000}, $300$ deals $\times$ 2 parities: $+0.10$, $+0.30$, $+0.60$
+and \textbf{$-0.20$} --- both signs, because a sweep that looks only where the
+story predicts is not a measurement of the term. Aimed here because the chain is
+measured end to end: we declare less, so half-suits stay live longer, so our
+cards sit publicly located $25\%$ longer, so \textsc{sestina} meets a free card
+$1.092\times$ as often as we do and hits more \emph{despite ordering a visit
+worse than we do}. Per ply of exposure our cards are taken back \emph{less}
+often, so the wasted-hits gap is exposure \emph{time}, and \texttt{claim} is the
+only term that prices half-suit lifetime. Predicted: monotone in the middle
+doses, the negative dose negative, a null below the bar the most likely outcome,
+and the ask hit rate flat or falling. Two withdrawal conditions aim at the
+harness: doses disagreeing in sign inside the swept range, and any arm whose
+\texttt{weights.claim} does not equal its registered dose at run time --- the
+runner asserts it, because a duel that silently ran the champion under a
+candidate's name would repeat this registration's own premise in a worse form. &
+Nothing clears and no withdrawal fires, as predicted --- but
+\textbf{prediction~1 failed}, and it is the one that decides what may be read.
+The dose response is \emph{not monotone} in either population: $-0.063$,
+$\mathbf{+0.090}$, $-0.047$ against \textsc{sestina} and $+0.107$,
+$\mathbf{+0.223}$, $+0.187$ in self-play, up then down both times. The
+registration fixed the consequence in advance --- ``the term is interacting with
+\texttt{turn} or \texttt{scarce} rather than adding, and no single dose should be
+read'' --- so A2, the most promising cell this line of work has produced, is set
+aside for the registered reason rather than the convenient one. It would not ship
+regardless: the bar needs $+0.15$ clear of zero in \emph{both} populations and
+A2's \textsc{sestina} interval covers zero. Prediction~4 also failed and points
+the same way: the ask hit rate was predicted flat or falling and \emph{rose} in
+every arm. Prediction~2 is half right --- A4 is negative in self-play and
+\textbf{positive} against \textsc{sestina}, which is a warning about A2 in
+itself. All four arms are genuinely distinct, every pair differing on $500+$ of
+$600$ pairings, so this is not P51's case of two names for one arm. &
+\textbf{NOTHING CLEARS, AND THE REGISTRATION DISQUALIFIES ITS OWN BEST CELL.}
+$7{,}200$ games, zero fallbacks, zero unfinished, and the dose check confirmed
+every arm's \texttt{weights.claim} at run time. A1 $-0.0633$ / $+0.1067$; A2
+$+0.0900$ $[-0.200, +0.380]$ / $+0.2233$ $[-0.012, +0.458]$; A3 $-0.0467$ /
+$+0.1867$; A4 $+0.2267$ / $-0.2000$. What it closes is \texttt{w\_claim} as the
+lever \emph{at these doses}; it does not close declaration count as the channel,
+which still needs $D_{\text{us}}$ to rise by $+0.541$ a game.
+\path{results/p52_claim_term.json} &
+\S\ref{sec:res-profile} \\
+
+P53 & \path{p53_depth_preference.md} \newline
+\emph{Our ask allocation is far steeper in own-depth than theirs. Is that the
+deficit?} &
+Written before any P53 game, from a chain measured end to end rather than
+argued. \path{results/assembly_ledger_16100000.json} put the WHOLE deficit in
+reaching six rather than converting it --- peak-6 a game $4.098$ against
+$4.860$, conversion $0.9732$ against $0.9748$ --- and the climb rates put the
+stall at the BOTTOM of the ladder: we are faster than they are at holdings 4 and
+5 and slower at 1, 2 and 3, and we spend $38\%$ more plies holding one or two of
+a half-suit. \path{results/ask_allocation_16300000.json} said why: at a
+half-suit we hold ONE of, they ask $75\%$ more readily than we do ($0.19717$
+against $0.11258$). Four doses of \texttt{w\_suit} on block \textbf{16,500,000},
+$300$ deals $\times$ 2 parities: $0.00$, $-0.03$ (interpolated to match their
+rate), $-0.06$, and $+0.12$ --- both signs. \textbf{The mechanism was verified
+BEFORE the duel}, which P52 lacked: 40 games per setting put our holding-1 rate
+at $0.113$ shipped, $0.132$ at $w=0$ and $0.259$ at $-0.06$. Registered as the
+prediction most regretted if wrong: \emph{B4, doubling the preference, is the
+worst arm in both populations.} &
+\textbf{Prediction~1 failed and the chain is refuted.} B4 is nearly neutral and
+the second-best arm; the worst are the two the chain said would help. The dose
+response is clean and monotone \emph{in the wrong direction} --- the more the
+preference is flattened the worse the engine plays, in both populations. B2 and
+B3 are withdrawn, their intervals entirely below zero. Prediction~2 held, so
+unlike P51 and P52 the doses ARE readable, and they read ``do not do this''. The
+ask hit rate rises monotonically as the preference flattens --- $0.5159$,
+$0.5177$, $0.5299$, $0.5412$, $\mathbf{0.5556}$ --- while the margin falls:
+$+3.8$ points of hit rate bought $-1.17$ sets a game. Every measured link
+survives; what fails is the causal reading laid over them. Their flat allocation
+is right for \emph{their} engine, and a correlation across two policies was
+treated as a lever inside one. &
+\textbf{NOTHING CLEARS; THE MOST DAMAGING SINGLE KNOB THIS PROJECT HAS
+MEASURED.} $7{,}200$ games, zero fallbacks, zero unfinished, dose check passed
+at run time, all four arms distinct ($564+$ of $600$ pairings differ). B1
+$-0.0400$ / $+0.0600$; B2 $-0.1167$ / $\mathbf{-0.5533}$ $[-0.777, -0.330]$; B3
+$\mathbf{-0.4133}$ $[-0.717, -0.110]$ / $\mathbf{-1.1700}$ $[-1.390, -0.950]$;
+B4 $-0.0600$ / $-0.1033$. It also disposes of a reading that has hovered over
+the cross-engine comparison: the external engine's higher hit rate is not
+something to chase. \path{results/p53_depth_preference.json} &
+\S\ref{sec:res-profile} \\
+
+P54 & \path{p54_scarce_and_doomed_asks.md} \newline
+\emph{A ninth of our asks cannot succeed. Is the term that points into them the
+lever?} &
+Written before any P54 game, from a fact about the rules rather than a
+correlation: if your \emph{team} holds all six of a half-suit, an ask in it goes
+to an opponent holding none of them, so it \textbf{cannot succeed}, and
+\texttt{\_apply\_ask} hands over the turn on a failure. We make $6.13$ a game,
+$\mathbf{0.1340}$ $[0.1230, 0.1444]$ of our asks against their $0.0961$
+$[0.0879, 0.1047]$, intervals not overlapping, and \emph{zero} of them hit in two
+independently written implementations agreeing exactly. Signalling is off in the
+champion, so they are not deliberate. The engine is not blind: at the moment of
+one its own posterior puts $\Prob(\text{our team holds all six}) \ge 0.5$ in
+$27.2\%$ of cases and $\ge 0.25$ in $60.3\%$. And \texttt{scarce}, weighted
+$+0.2$, rewards asking where our \emph{team's} expected share is high --- the
+failure mode. Four doses on block \textbf{17,500,000}: $+0.10$, $0.00$, $-0.10$
+and $+0.40$, both signs, with the mechanism pre-checked ($0.1340$ shipped,
+$0.1056$ at $0$, $0.0852$ at $-0.2$). Its risk was registered in advance: P53
+moved its target quantity perfectly and lost, so this may cut the waste and lose
+too. &
+\textbf{The registered risk was right and prediction~2 was wrong.} C4 ---
+\emph{doubling} the term that points into the waste --- is the BEST arm and the
+only one positive in either population; C2 and C3, which remove the waste, are
+withdrawn with intervals entirely below zero. The decisive measurement is
+\path{results/doomed_asks_scarce040.json}: C4's doomed-ask share is
+$\mathbf{0.1781}$ against the champion's $0.1340$, so \textbf{the arm making the
+most guaranteed-failure asks is the best arm}. The waste is real, logically
+certain and $39\%$ worse than the opponent's, and it is \emph{not the binding
+constraint} --- it is a by-product of a preference earning more than it costs. &
+\textbf{NOTHING CLEARS; THE WASTE IS NOT THE CONSTRAINT.} $7{,}200$ games, zero
+fallbacks, zero unfinished, dose check passed, all arms distinct. C1 $-0.2533$ /
+$-0.0833$; C2 $\mathbf{-0.4567}$ $[-0.723, -0.191]$ / $-0.0900$; C3
+$\mathbf{-0.5800}$ $[-0.858, -0.302]$ / $\mathbf{-0.2433}$ $[-0.460, -0.026]$;
+C4 $-0.1667$ / $\mathbf{+0.1200}$. With P53 this makes two sweeps, both signs,
+$14{,}400$ games, saying the ask objective sits at or just below a local optimum
+in both concentration knobs and that the downward direction is expensive in both.
+C4 also has the \emph{lowest} hit rate and C2/C3 the highest --- a third
+confirmation that hit rate is anti-correlated with margin here.
+\path{results/p54_scarce_and_doomed_asks.json} &
+\S\ref{sec:res-profile} \\
+
+P55 & \path{p55_joint_concentration.md} \newline
+\emph{P53 and P54 found a coordinate optimum in each concentration knob. Is
+there a joint one they could not see?} &
+Written before any P55 game. A function can be maximal along every axis through a
+point and still rise along a diagonal, and the evidence for interaction was
+direct rather than hypothetical: three of the last four registrations failed a
+monotonicity condition, and P51's own reading was that the term ``is interacting
+with \texttt{turn} or \texttt{scarce} rather than adding''. The direction was
+indicated too --- the best arm on each axis was the \emph{upward} one, and P54's
+C4 at $+0.1200$ self-play was the only positive figure either sweep produced.
+Two-stage by design, because eight cells are eight chances for noise to look like
+a winner: stage 1 screens \texttt{w\_suit} $\in \{0.06, 0.12, 0.24\}$ $\times$
+\texttt{w\_scarce} $\in \{0.20, 0.40, 0.80\}$ at $100$ deals on block
+\textbf{17,900,000}, and only cells with \emph{both} point estimates $\ge 0$
+advance to $300$ deals on a \emph{different} block --- because P51 showed a
+cross-block comparison can invent an effect worth $0.117$ sets. Registered: if no
+cell passes, P55 ends and is not re-scoped into a finer grid. &
+\textbf{A null at stage 1, and prediction~1 failed, which refutes the
+interaction hypothesis.} Every cell is negative in self-play and not one has both
+point estimates $\ge 0$, so nothing advances and there is no stage 2. The two
+best cells by \textsc{sestina} margin both sit at the \emph{shipped}
+\texttt{w\_suit}, i.e.\ on the \texttt{w\_scarce} axis rather than on a diagonal
+--- and the registration had fixed what that means: the single sweeps had already
+answered the question. Raising \texttt{w\_suit} is worse at every
+\texttt{w\_scarce}, monotonically, so the grid is close to \emph{separable}
+rather than interacting. Prediction~4 held and sharpened: all eight cells have a
+\emph{lower} hit rate than the champion, falling monotonically in
+\texttt{w\_scarce}, so hit rate drops in both directions away from the shipped
+cell while margin is maximal near it. &
+\textbf{NOTHING ADVANCES; THE OBJECTIVE IS AT A JOINT OPTIMUM.} $4{,}800$ games,
+zero fallbacks, zero unfinished, dose check passed. Best cell $(0.06, 0.40)$ at
+$+0.1300$ / $-0.0900$; worst $(0.24, 0.80)$ at $-0.3400$ / $-0.4100$. With P53
+and P54 this is \textbf{19,200 duel games}, both signs on both knobs, saying the
+concentration parameters are at a \emph{joint} optimum and not merely a
+coordinate one. The three monotonicity failures have some other cause, and
+finding it is not the same as finding a better cell.
+\path{results/p55_joint_stage1.json} &
+\S\ref{sec:res-profile} \\
+
+\end{longtable}
+}
+
+\noindent\textbf{How the fifty-five resolved.} Seven returned an effect that
+still stands on the rule as registered (P2, P5, P11, P14, P20, P26, P33). Five
+returned an effect and then lost it to later evidence, in every case by a rule
+the same document had already written down (P6, P9, P16, P17, P18). Eight were
+\textbf{refuted} on a registered condition (P1, P4, P7, P10, P23, P28, P32,
+P36). Five returned an explicit null, an explicit \textsc{split}, or an
+explicit ``not settled'' (P8, P13, P24, P27, P35), and six (P43, P44, P45,
+P46, P47, P48) returned no arm clearing a dual-population ship bar, two of
+them with significant negatives in both populations, the fourth with the
+first arm positive in both, the fifth with that arm clearing the self-play
+half alone, and the sixth with a null that traced an earlier mechanism's
+gain to the bridge defect. Four were closed by a screen or by
+proof before the registered duel was paid for, saving roughly $9{,}000$
+duplicate-deal pairs (P3, P12, P29, P34) --- and a fifth arm was, P44's D2,
+inside a registration already counted above. One was a set of graded
+predictions rather than a threshold and scored four of five (P25). One (P49)
+returned two descriptive screens and a \emph{correction to its own central
+premise}, made the same day and before any candidate game, with its single
+duelled arm registered and not yet played. One (P50) reopened a
+rejection on a rule and had it hold, while closing a second knob that no
+earlier registration had looked at. Twelve have
+\textbf{no outcome recorded in the registration at all} (P15, P19, P21, P22,
+P30, P31, P37, P38, P39, P40, P41, P42) --- ten of them run and written up
+elsewhere, two of them never run.
+
+\noindent The last four of those are the ones added after this appendix was
+first compiled, and they resolved on their own registered verdicts rather than
+on the ship bar, because none of them was a candidate for shipping: P39
+returned \textsc{logistic}, separating two laws of transfer and refuting the
+multiplicative one; P42 returned \textsc{general}, the first result in this
+line to hold at a dose matched by construction across two engines; P40 returned
+\textsc{neither}, which its own document had named in advance as the outcome
+that would hurt most, killing both the dead-zone reading and the proportional
+one at once; and P41 answered neither of its verdicts, because its two arms
+fired at $8.94$ and $2.17$ signals a game and the design could not separate
+opponent from dose --- a confound that was in the registration rather than in
+the run, and the reason P42 exists.
+
+\noindent Exactly one of the fifty-five --- P20 --- shipped, and it is the
+one whose registration argued in advance that this project's standing $+0.15$
+ship bar was the wrong instrument for it.
+
+\subsection{The six conditions the headline claims rest on}
+
+The rules below are quoted in full because they are load-bearing: each one is
+the reason a claim elsewhere in this paper is stated the way it is, and in
+every case the rule was written before the number that would be judged against
+it existed.
+
+\paragraph{P20, \protect\path{prereg/forced_exhaustive.md} --- the only change in this
+round that shipped, and the only one that refused the standing bar in advance.}
+
+\begin{quote}
+``\textbf{THE DECISION RULE IS NOT THIS PROJECT'S USUAL ONE, and here is why,
+in advance.} The predicted margin effect is $+0.028$ sets/game \ldots Against a
+paired-difference SD near $1.15$ that needs roughly $12{,}000$ games to resolve
+from zero. Every duel this project could afford would return a null, and that
+null would read as `no effect' when the truth is `an effect two orders of
+magnitude below what this instrument can see'. So the ship bar of $+0.15$
+sets/game \ldots is \textbf{the wrong instrument here and is deliberately not
+used.} \ldots \textbf{Primary outcome, fixed now.} Forced-declaration accuracy
+at one live half-suit, arm B against arm A on identical deals, fresh seeds,
+both parities. Ships if accuracy rises with the interval clear of zero.
+\textbf{Secondary outcome, fixed now.} The paired margin against the external engine with its
+interval, reported whatever it says, and \textbf{explicitly not a ship
+criterion}.''
+\end{quote}
+
+\noindent The accuracy claim of \S\ref{sec:res-pathledger} is exactly this
+primary. The registration also honoured its own secondary the hard way: the
+first self-play run gave every seat the arm, producing ``$+0.0000$, 95\%
+$[-0.0142, +0.0142]$ \ldots an arithmetic identity wearing a confidence
+interval'', and nothing shipped until the registered the external engine arm was actually run.
+
+\paragraph{P23, \protect\path{prereg/gamma_split.md} --- the two-condition belief rule
+that every later belief measurement in this paper inherited.}
+
+\begin{quote}
+``A cell \textbf{licenses a play experiment} only if, on the teammate pool:
+1.\ its paired NLL interval lies \textbf{entirely below zero} (a real
+improvement in the proper score), \textbf{and} 2.\ its paired top-1 interval is
+\textbf{not entirely below zero} (it does not significantly worsen how often
+the true holder is named). \textbf{Both conditions, or nothing.} \ldots A model
+can improve NLL purely by spreading probability mass while naming the holder
+correctly less often. For a policy whose dominant error is \emph{naming a
+split}, that is a worse belief, not a better one --- the allocation decision
+reads the argmax, not the entropy. \textbf{If no cell satisfies both, the
+direction is withdrawn and no play experiment is run.}''
+\end{quote}
+
+\noindent Condition 2 is what refuted the split (Figure~\ref{fig:gammasplit}),
+and it was then imposed unchanged on the convention (P5), on the aimed and
+locating code books (P6, P9), and on \texttt{unlocated\_now} in the belief
+(P37). The three ``refuted in the belief'' entries of Table~\ref{tab:v11} are
+all this rule firing.
+
+\paragraph{P12, \protect\path{prereg/declarability_leaf.md} --- the futility screen
+that saved four duels, with its window fixed before any bite was measured.}
+
+\begin{quote}
+``\textbf{The confirmation runs at the SMALLEST $w$ in $\{0.25, 0.5, 1.0,
+2.0\}$ whose bite falls in [15\%, 60\%].} \textbf{Smallest}, not largest: every
+point of bite is objective displaced \ldots \textbf{15\% floor} is
+$\sim$4$\times$ \texttt{locate}'s 3.9\%. A term that re-ranks 4\% of asks
+produced a 95\% interval of $\pm 0.121$ centred on $0.047$; nothing that small
+can be the $1.57$. \textbf{60\% ceiling}: above that the term is not
+tie-breaking the objective, it is overriding it \ldots \textbf{If no $w$ lands
+in that window, no duel is run.} \ldots Bite is a mechanism quantity measured
+on the \emph{champion's own} transcripts. It cannot be traded for a margin,
+which is what makes selecting on it legitimate where selecting on a screen's
+point estimate would not be.''
+\end{quote}
+
+\noindent \S\ref{sec:v11} reports that four of seven directions never reached a
+duel. This is the screen that stopped two of them, and the invariant of
+\S\ref{sec:v11-theorem} was found while diagnosing why it fired.
+
+\paragraph{P13, \protect\path{prereg/declaration_timing.md} --- the three-way rule
+behind the ``46\% is interaction'' result.}
+
+\begin{quote}
+``\textbf{CONFIRMED} if the interval on $D - A$ lies entirely above zero
+\textbf{and} $S_D \geq 0.50$ \textbf{and} ($S_K < 0.25$ \textbf{or} the
+interval on $K - A$ contains zero) \ldots \textbf{REFUTED} if $S_K \geq 0.50$
+\textbf{and} $S_D < 0.25$ \ldots \textbf{SPLIT} otherwise --- reported as a
+decomposition with both shares, licensing neither conclusion. This is the
+honest outcome for a genuinely mixed effect and is not a failure of the design.
+\ldots $D + K$ is \textbf{not} required to equal $T$ and any report saying so
+is wrong \ldots $T$ is carried precisely so that $D + K == T$ is visibly a
+question rather than an assumption.''
+\end{quote}
+
+\noindent The run returned $S_D = 0.316$ and $S_K = 0.223$: SPLIT, and the
+hypothesis the document was written to test is \emph{not supported}. The
+finding this paper reports --- $D + K = 1.84$ against $T = 3.41$ --- is the
+question the last clause insisted on carrying, not the one the registration set
+out to answer.
+
+\paragraph{P11, \protect\path{prereg/deadline_signalling.md} --- the ship bar that was
+missed by $0.028$ and not amended.}
+
+\begin{quote}
+``\textbf{Ship bar.} Point estimate $\geq +0.15$ with the interval clear of
+zero. The usual bar, used here without amendment \ldots \textbf{Expected
+outcome, written down in advance.} C beats B \ldots and neither clears $+0.15$.
+The honest prediction is another decomposable null \ldots \textbf{If C clears
+$+0.15$ I should check the seating and the ledger before believing it}, because
+that would be three times what the previous measurement of the same mechanism
+returned.''
+\end{quote}
+
+\noindent C returned $+0.1220$ $[+0.0291, +0.2149]$ --- clear of zero, short of
+the bar. The same threshold then declined $+0.1435$ (P33), $+0.0580$ (P35) and
+$+0.0455$ (P14), each time without amendment, and the registrations record the
+refusal explicitly: ``it is not amended now because it came within $0.0065$ of
+being met''.
+
+\paragraph{P26, \protect\path{prereg/information_ceiling_split.md} --- the only
+registration in the set whose bar is that nothing can ever ship.}
+
+\begin{quote}
+``\textbf{A SAFETY RULE THAT GOVERNS THIS ENTIRE FILE.} Every arm here except
+the baseline \textbf{cheats} \ldots Its margins are \textbf{bounds on what
+better inference could buy}, and they are not strength measurements. They must
+never appear in a strength ladder, never be quoted beside an honest engine's
+margin as though the two were comparable, and never enter the head-to-head
+table. Any figure this produces carries the word \emph{ceiling} wherever it is
+written down. \ldots \textbf{Ship bar. None. Nothing here can ship, ever.}
+There is no bar because there is no decision: an arm that cheats is not a
+candidate.''
+\end{quote}
+
+\noindent Every appearance of $+3.41$, $+1.31$ and $+6.61$ in this paper is
+governed by that paragraph. The same document also recorded, in advance, the
+prediction that the \emph{opponent} arm would win, and then recorded that it
+lost by a factor of $2.6$ --- which is why the teammate ceiling, not the
+opponent one, is the number the rest of the paper chases.

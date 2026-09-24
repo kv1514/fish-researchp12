@@ -1,0 +1,116 @@
+[
+ {
+  "label": "CLAIMFEAS feasibility filter vs champion block 0",
+  "n_pairs": 1000,
+  "base_seed": 74000000,
+  "agent_seed": 74001,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_feasibility": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "CLAIMFEAS feasibility filter vs champion block 1",
+  "n_pairs": 1000,
+  "base_seed": 74200000,
+  "agent_seed": 74002,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_feasibility": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "CLAIMFEAS feasibility filter vs champion block 2",
+  "n_pairs": 1000,
+  "base_seed": 74400000,
+  "agent_seed": 74003,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_feasibility": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "CLAIMFEAS feasibility filter vs champion block 3",
+  "n_pairs": 1000,
+  "base_seed": 74600000,
+  "agent_seed": 74004,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_feasibility": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "CLAIMFEAS feasibility filter vs champion block 4",
+  "n_pairs": 1000,
+  "base_seed": 74800000,
+  "agent_seed": 74005,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_feasibility": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "CLAIMFEAS feasibility filter vs champion block 5",
+  "n_pairs": 1000,
+  "base_seed": 75000000,
+  "agent_seed": 74006,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_feasibility": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]

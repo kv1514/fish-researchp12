@@ -322,6 +322,13 @@ def _play_pair(job) -> dict:
 # Variance accounting for seat rotation
 # ---------------------------------------------------------------------------
 
+def _jsonable(v):
+    """Non-finite floats become None; everything else passes through."""
+    if isinstance(v, float) and not math.isfinite(v):
+        return None
+    return v
+
+
 @dataclass
 class VarianceReport:
     """Did antithetic seat rotation actually buy anything?
@@ -368,8 +375,13 @@ class VarianceReport:
                 f"[{lo:.3f},{hi:.3f}] -> {verdict}")
 
     def to_dict(self) -> dict:
-        d = dict(self.__dict__)
-        d["compute_matched_ci"] = list(self.compute_matched_ci)
+        # A perfectly antithetic rotation gives an infinite compute-matched
+        # efficiency, and an undecidable bootstrap gives NaN. Both are real
+        # answers and neither is valid JSON, so they go out as null rather than
+        # as the `Infinity`/`NaN` tokens Python's encoder would otherwise emit
+        # into a results file no strict parser could read back.
+        d = {k: _jsonable(v) for k, v in self.__dict__.items()}
+        d["compute_matched_ci"] = [_jsonable(x) for x in self.compute_matched_ci]
         d["helped"] = self.helped
         return d
 
@@ -378,9 +390,21 @@ def _rotation_stats(rows: list, r: int) -> tuple:
     flat = [v for row in rows for v in row]
     v_single = statistics.variance(flat)
     v_deal = statistics.variance([sum(row) / r for row in rows])
-    if v_single <= 0 or v_deal <= 0:
+    if v_single <= 0:
+        # Nothing varies at all, so there is no correlation to report and both
+        # ratios are genuinely undefined. Neutral values are the honest answer.
         return v_single, v_deal, 0.0, 1.0, 1.0
     rho = (r * v_deal / v_single - 1.0) / (r - 1)
+    if v_deal <= 0:
+        # The R seats of a deal cancel exactly. That is rotation working as well
+        # as it can possibly work - rho sits at its theoretical floor of
+        # -1/(r-1), which the formula above already returns - and the
+        # compute-matched efficiency genuinely diverges. Folding this into the
+        # v_single guard reported 1.0, i.e. "rotation makes no difference",
+        # about the one case where it makes the most. It also quietly biased the
+        # bootstrap interval down, since every resample landing on v_deal == 0
+        # contributed 1.0 instead of a large value.
+        return v_single, v_deal, rho, 0.0, math.inf
     eff = (v_single / r) / v_deal
     return v_single, v_deal, rho, v_deal / v_single, eff
 

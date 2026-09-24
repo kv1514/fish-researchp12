@@ -1,0 +1,33 @@
+{
+ "summary": {
+  "n_pairs": 10,
+  "mean": 17.3,
+  "sd": 1.1595018087284057,
+  "se": 0.36666666666666664,
+  "ci95": [
+   16.581333333333333,
+   18.018666666666668
+  ]
+ },
+ "diffs": [
+  15,
+  18,
+  18,
+  18,
+  18,
+  18,
+  18,
+  18,
+  16,
+  16
+ ],
+ "x": "OracleBot(opponent_gamma=0.35) -- CHEATS, sees the true deal",
+ "y": [
+  "fishbot4",
+  {
+   "opponent_gamma": 0.35
+  }
+ ],
+ "base_seed": 40000000,
+ "agent_seed_base": 40001
+}

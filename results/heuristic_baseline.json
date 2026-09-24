@@ -1,0 +1,25 @@
+{
+ "what": "prereg/signal_dose_law.md, the registered inputs",
+ "both_sides": {
+  "A_shipped": {
+   "their_declares": 1166,
+   "their_wrong": 723,
+   "their_wrong_per_game": 0.723,
+   "their_err": 0.6201
+  }
+ },
+ "registered": {
+  "their_err": 0.7252,
+  "their_declares_per_game": 1.092
+ },
+ "identity_residual_max": 0,
+ "unfinished": 0,
+ "fallbacks": 0,
+ "seed_deal": 15300000,
+ "seed_agent": 153000,
+ "n_deals": 500,
+ "n_games": 1000,
+ "vs": "heuristic",
+ "smoke": false,
+ "minutes": 8.8
+}

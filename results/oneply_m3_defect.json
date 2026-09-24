@@ -1,0 +1,12 @@
+{
+ "layer": 3,
+ "worlds": 64,
+ "n": 30,
+ "n_with_champion": 24,
+ "beaten": 23,
+ "mean_gain": 0.6256793478260869,
+ "mean_dp": -0.4925065219304261,
+ "riskier": 19,
+ "safer": 1,
+ "equal": 3
+}

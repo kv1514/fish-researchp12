@@ -1,0 +1,459 @@
+{
+  "base_rate_ours": 0.11523711270843379,
+  "contrasts": {
+    "product_minus_uniform": {
+      "delta": 0.08044295374390503,
+      "hi": 0.08182581505418406,
+      "lo": 0.0790728378233783,
+      "n_decisions": 17366
+    },
+    "weighted_minus_product": {
+      "delta": -0.051152061072896556,
+      "hi": -0.05056894597804363,
+      "lo": -0.051747808248305924,
+      "n_decisions": 17366
+    },
+    "weighted_minus_uniform": {
+      "delta": 0.029290892671008244,
+      "hi": 0.03050039911824356,
+      "lo": 0.028058533407344738,
+      "n_decisions": 17366
+    }
+  },
+  "cost": {
+    "mean_joint_seconds_per_decision": 0.00020350387335975735,
+    "mean_joint_seconds_per_half_suit": 4.297338312374663e-05,
+    "mean_posterior_seconds": 0.003928480921082676
+  },
+  "gate": [
+    {
+      "n_flagged": 103,
+      "naive_sets_per_game": 0.087,
+      "new_per_game": 0.103,
+      "owned_p_team": 0.2,
+      "precision": 0.9223300970873787,
+      "right_per_game": 0.095,
+      "wrong_per_game": 0.008
+    },
+    {
+      "n_flagged": 103,
+      "naive_sets_per_game": 0.087,
+      "new_per_game": 0.103,
+      "owned_p_team": 0.3,
+      "precision": 0.9223300970873787,
+      "right_per_game": 0.095,
+      "wrong_per_game": 0.008
+    },
+    {
+      "n_flagged": 103,
+      "naive_sets_per_game": 0.087,
+      "new_per_game": 0.103,
+      "owned_p_team": 0.4,
+      "precision": 0.9223300970873787,
+      "right_per_game": 0.095,
+      "wrong_per_game": 0.008
+    },
+    {
+      "n_flagged": 103,
+      "naive_sets_per_game": 0.087,
+      "new_per_game": 0.103,
+      "owned_p_team": 0.5,
+      "precision": 0.9223300970873787,
+      "right_per_game": 0.095,
+      "wrong_per_game": 0.008
+    },
+    {
+      "n_flagged": 103,
+      "naive_sets_per_game": 0.087,
+      "new_per_game": 0.103,
+      "owned_p_team": 0.6,
+      "precision": 0.9223300970873787,
+      "right_per_game": 0.095,
+      "wrong_per_game": 0.008
+    },
+    {
+      "n_flagged": 103,
+      "naive_sets_per_game": 0.087,
+      "new_per_game": 0.103,
+      "owned_p_team": 0.7,
+      "precision": 0.9223300970873787,
+      "right_per_game": 0.095,
+      "wrong_per_game": 0.008
+    },
+    {
+      "n_flagged": 103,
+      "naive_sets_per_game": 0.087,
+      "new_per_game": 0.103,
+      "owned_p_team": 0.77,
+      "precision": 0.9223300970873787,
+      "right_per_game": 0.095,
+      "wrong_per_game": 0.008
+    },
+    {
+      "n_flagged": 60,
+      "naive_sets_per_game": 0.056,
+      "new_per_game": 0.06,
+      "owned_p_team": 0.85,
+      "precision": 0.9666666666666667,
+      "right_per_game": 0.058,
+      "wrong_per_game": 0.002
+    },
+    {
+      "n_flagged": 37,
+      "naive_sets_per_game": 0.035,
+      "new_per_game": 0.037,
+      "owned_p_team": 0.9,
+      "precision": 0.972972972972973,
+      "right_per_game": 0.036,
+      "wrong_per_game": 0.001
+    },
+    {
+      "n_flagged": 19,
+      "naive_sets_per_game": 0.019,
+      "new_per_game": 0.019,
+      "owned_p_team": 0.95,
+      "precision": 1.0,
+      "right_per_game": 0.019,
+      "wrong_per_game": 0.0
+    },
+    {
+      "n_flagged": 14,
+      "naive_sets_per_game": 0.014,
+      "new_per_game": 0.014,
+      "owned_p_team": 0.99,
+      "precision": 1.0,
+      "right_per_game": 0.014,
+      "wrong_per_game": 0.0
+    }
+  ],
+  "joint_u": {
+    "auc": 0.9549455232358436,
+    "brier": 0.0639346916559509,
+    "mean_when_not": 0.024168592879639544,
+    "mean_when_ours": 0.3230462858220211,
+    "n_negative": 157801,
+    "n_positive": 20553,
+    "share_over_0.5_when_not": 0.0037452234143002896,
+    "share_over_0.5_when_ours": 0.1986571303459349,
+    "share_over_0.99_when_not": 0.0,
+    "share_over_0.99_when_ours": 0.04169707585267358
+  },
+  "joint_w": {
+    "auc": 0.9640903820979747,
+    "brier": 0.05924995748926193,
+    "mean_when_not": 0.023345427365175846,
+    "mean_when_ours": 0.3523371784930295,
+    "n_negative": 157801,
+    "n_positive": 20553,
+    "share_over_0.5_when_not": 0.0032129073960241064,
+    "share_over_0.5_when_ours": 0.24419792730988177,
+    "share_over_0.99_when_not": 0.0,
+    "share_over_0.99_when_ours": 0.04174573055028463
+  },
+  "meta": {
+    "bridge_rev": 3,
+    "elapsed_seconds": 343.3537290096283,
+    "n_deals": 500,
+    "n_games": 1000,
+    "n_worlds_uniform": 128,
+    "rules": {
+      "wrong_distribution_outcome": "opponent"
+    },
+    "seed0": 10000000
+  },
+  "n_cells": 178354,
+  "n_decisions": 41512,
+  "prod": {
+    "auc": 0.9703668518104619,
+    "brier": 0.05246319686756635,
+    "mean_when_not": 0.03210996747056972,
+    "mean_when_ours": 0.4034892395659262,
+    "n_negative": 157801,
+    "n_positive": 20553,
+    "share_over_0.5_when_not": 0.004011381423438381,
+    "share_over_0.5_when_ours": 0.3349875930521092,
+    "share_over_0.99_when_not": 0.0,
+    "share_over_0.99_when_ours": 0.04174573055028463
+  },
+  "reliability": {
+    "joint_u": [
+      {
+        "flag_ours_per_game": 1.683,
+        "flag_wrong_per_game": 1.377,
+        "n_flagged": 3060,
+        "precision": 0.55,
+        "threshold": 0.3
+      },
+      {
+        "flag_ours_per_game": 1.436,
+        "flag_wrong_per_game": 0.856,
+        "n_flagged": 2292,
+        "precision": 0.6265270506108203,
+        "threshold": 0.4
+      },
+      {
+        "flag_ours_per_game": 1.063,
+        "flag_wrong_per_game": 0.419,
+        "n_flagged": 1482,
+        "precision": 0.7172739541160594,
+        "threshold": 0.5
+      },
+      {
+        "flag_ours_per_game": 0.659,
+        "flag_wrong_per_game": 0.165,
+        "n_flagged": 824,
+        "precision": 0.7997572815533981,
+        "threshold": 0.6
+      },
+      {
+        "flag_ours_per_game": 0.426,
+        "flag_wrong_per_game": 0.061,
+        "n_flagged": 487,
+        "precision": 0.8747433264887063,
+        "threshold": 0.7
+      },
+      {
+        "flag_ours_per_game": 0.352,
+        "flag_wrong_per_game": 0.027,
+        "n_flagged": 379,
+        "precision": 0.9287598944591029,
+        "threshold": 0.75
+      },
+      {
+        "flag_ours_per_game": 0.278,
+        "flag_wrong_per_game": 0.01,
+        "n_flagged": 288,
+        "precision": 0.9652777777777778,
+        "threshold": 0.8
+      },
+      {
+        "flag_ours_per_game": 0.24,
+        "flag_wrong_per_game": 0.004,
+        "n_flagged": 244,
+        "precision": 0.9836065573770492,
+        "threshold": 0.85
+      },
+      {
+        "flag_ours_per_game": 0.221,
+        "flag_wrong_per_game": 0.002,
+        "n_flagged": 223,
+        "precision": 0.9910313901345291,
+        "threshold": 0.9
+      },
+      {
+        "flag_ours_per_game": 0.199,
+        "flag_wrong_per_game": 0.001,
+        "n_flagged": 200,
+        "precision": 0.995,
+        "threshold": 0.95
+      },
+      {
+        "flag_ours_per_game": 0.196,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 196,
+        "precision": 1.0,
+        "threshold": 0.97
+      },
+      {
+        "flag_ours_per_game": 0.195,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 195,
+        "precision": 1.0,
+        "threshold": 0.99
+      },
+      {
+        "flag_ours_per_game": 0.195,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 195,
+        "precision": 1.0,
+        "threshold": 0.999
+      }
+    ],
+    "joint_w": [
+      {
+        "flag_ours_per_game": 1.687,
+        "flag_wrong_per_game": 1.181,
+        "n_flagged": 2868,
+        "precision": 0.5882147838214784,
+        "threshold": 0.3
+      },
+      {
+        "flag_ours_per_game": 1.434,
+        "flag_wrong_per_game": 0.715,
+        "n_flagged": 2149,
+        "precision": 0.6672871102838529,
+        "threshold": 0.4
+      },
+      {
+        "flag_ours_per_game": 1.088,
+        "flag_wrong_per_game": 0.337,
+        "n_flagged": 1425,
+        "precision": 0.7635087719298246,
+        "threshold": 0.5
+      },
+      {
+        "flag_ours_per_game": 0.709,
+        "flag_wrong_per_game": 0.129,
+        "n_flagged": 838,
+        "precision": 0.8460620525059666,
+        "threshold": 0.6
+      },
+      {
+        "flag_ours_per_game": 0.468,
+        "flag_wrong_per_game": 0.036,
+        "n_flagged": 504,
+        "precision": 0.9285714285714286,
+        "threshold": 0.7
+      },
+      {
+        "flag_ours_per_game": 0.365,
+        "flag_wrong_per_game": 0.014,
+        "n_flagged": 379,
+        "precision": 0.9630606860158312,
+        "threshold": 0.75
+      },
+      {
+        "flag_ours_per_game": 0.32,
+        "flag_wrong_per_game": 0.007,
+        "n_flagged": 327,
+        "precision": 0.9785932721712538,
+        "threshold": 0.8
+      },
+      {
+        "flag_ours_per_game": 0.271,
+        "flag_wrong_per_game": 0.002,
+        "n_flagged": 273,
+        "precision": 0.9926739926739927,
+        "threshold": 0.85
+      },
+      {
+        "flag_ours_per_game": 0.23,
+        "flag_wrong_per_game": 0.001,
+        "n_flagged": 231,
+        "precision": 0.9956709956709957,
+        "threshold": 0.9
+      },
+      {
+        "flag_ours_per_game": 0.202,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 202,
+        "precision": 1.0,
+        "threshold": 0.95
+      },
+      {
+        "flag_ours_per_game": 0.198,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 198,
+        "precision": 1.0,
+        "threshold": 0.97
+      },
+      {
+        "flag_ours_per_game": 0.196,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 196,
+        "precision": 1.0,
+        "threshold": 0.99
+      },
+      {
+        "flag_ours_per_game": 0.196,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 196,
+        "precision": 1.0,
+        "threshold": 0.999
+      }
+    ],
+    "prod": [
+      {
+        "flag_ours_per_game": 1.738,
+        "flag_wrong_per_game": 1.328,
+        "n_flagged": 3066,
+        "precision": 0.5668623613829094,
+        "threshold": 0.3
+      },
+      {
+        "flag_ours_per_game": 1.529,
+        "flag_wrong_per_game": 0.838,
+        "n_flagged": 2367,
+        "precision": 0.645965356991973,
+        "threshold": 0.4
+      },
+      {
+        "flag_ours_per_game": 1.201,
+        "flag_wrong_per_game": 0.376,
+        "n_flagged": 1577,
+        "precision": 0.761572606214331,
+        "threshold": 0.5
+      },
+      {
+        "flag_ours_per_game": 0.776,
+        "flag_wrong_per_game": 0.135,
+        "n_flagged": 911,
+        "precision": 0.8518111964873765,
+        "threshold": 0.6
+      },
+      {
+        "flag_ours_per_game": 0.485,
+        "flag_wrong_per_game": 0.037,
+        "n_flagged": 522,
+        "precision": 0.9291187739463601,
+        "threshold": 0.7
+      },
+      {
+        "flag_ours_per_game": 0.376,
+        "flag_wrong_per_game": 0.015,
+        "n_flagged": 391,
+        "precision": 0.9616368286445013,
+        "threshold": 0.75
+      },
+      {
+        "flag_ours_per_game": 0.324,
+        "flag_wrong_per_game": 0.007,
+        "n_flagged": 331,
+        "precision": 0.9788519637462235,
+        "threshold": 0.8
+      },
+      {
+        "flag_ours_per_game": 0.273,
+        "flag_wrong_per_game": 0.002,
+        "n_flagged": 275,
+        "precision": 0.9927272727272727,
+        "threshold": 0.85
+      },
+      {
+        "flag_ours_per_game": 0.23,
+        "flag_wrong_per_game": 0.001,
+        "n_flagged": 231,
+        "precision": 0.9956709956709957,
+        "threshold": 0.9
+      },
+      {
+        "flag_ours_per_game": 0.202,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 202,
+        "precision": 1.0,
+        "threshold": 0.95
+      },
+      {
+        "flag_ours_per_game": 0.198,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 198,
+        "precision": 1.0,
+        "threshold": 0.97
+      },
+      {
+        "flag_ours_per_game": 0.196,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 196,
+        "precision": 1.0,
+        "threshold": 0.99
+      },
+      {
+        "flag_ours_per_game": 0.196,
+        "flag_wrong_per_game": 0.0,
+        "n_flagged": 196,
+        "precision": 1.0,
+        "threshold": 0.999
+      }
+    ]
+  }
+}

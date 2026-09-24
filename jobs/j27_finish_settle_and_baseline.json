@@ -1,0 +1,66 @@
+[
+ {
+  "label": "SETTLE value_keep 0.30 vs champion block 1",
+  "n_pairs": 1000,
+  "base_seed": 32200000,
+  "agent_seed": 32002,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "objective": "value",
+    "value_turn": 0.15,
+    "value_keep": 0.3,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "BASELINE value pure vs champion block 0",
+  "n_pairs": 1000,
+  "base_seed": 33000000,
+  "agent_seed": 33001,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "objective": "value",
+    "value_turn": 0.15,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "BASELINE value pure vs champion block 1",
+  "n_pairs": 1000,
+  "base_seed": 33200000,
+  "agent_seed": 33002,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "objective": "value",
+    "value_turn": 0.15,
+    "hsvalue_path": "checkpoints/hsvalue_v1.json"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]

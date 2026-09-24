@@ -51,6 +51,7 @@ from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.posterior import Posterior
 from fish4.registry4 import make_agent
+from scripts4.resultfile import write as write_result
 
 EPS = 1e-9
 
@@ -75,18 +76,87 @@ def _sis(n, gamma=0.0, depth_mode="initial", count_mode="linear"):
         depth_mode=depth_mode, count_mode=count_mode).marginals()
 
 
-CONFIGS = [
-    ("v03-512", lambda bel, rng, obs: v03_marginals(bel, rng, 512)),
-    ("sis-160", _sis(160)),
-    ("sis-160-g0.35", _sis(160, 0.35)),
-    ("sis-160-g0.35-attime", _sis(160, 0.35, depth_mode="attime")),
-    ("sis-160-g0.70-attime", _sis(160, 0.70, depth_mode="attime")),
-    ("sis-160-g1.20-attime", _sis(160, 1.20, depth_mode="attime")),
-    ("sis-160-g0.70-attime-sqrt", _sis(160, 0.70, depth_mode="attime",
-                                       count_mode="sqrt")),
-    ("sis-320-g0.70-attime", _sis(320, 0.70, depth_mode="attime")),
-    ("sis-320-g0.45", _sis(320, 0.45)),
-]
+def _v03(n):
+    return lambda bel, rng, obs: v03_marginals(bel, rng, n)
+
+
+#: THE CONFIGURATION SET IS AN EXPLICIT SELECTOR, one entry per campaign.
+#:
+#: It was a single list edited in place across three campaigns, so the script
+#: could only ever reproduce whichever campaign ran last: TWELVE of the
+#: fourteen rows in `results/posterior_accuracy.json` -- the file that backs
+#: this paper's central negative result, and the file
+#: `scripts4/check_paper_numbers.py` watches -- had become unproducible by any
+#: command in the repository, including `sis-512` at 1.3618, one of the two
+#: numbers in the headline comparison. Found by an audit of the paper's
+#: reproduction section.
+#:
+#: The sets are reconstructed from the row names in each results file, which
+#: encode their own parameters. One row cannot come back and says so below.
+CAMPAIGNS = {
+    # results/posterior_accuracy.json -- the gamma sweep at two draw budgets.
+    "gamma": [
+        ("v03-512", _v03(512)), ("v03-96", _v03(96)), ("v03-32", _v03(32)),
+        ("sis-512", _sis(512)),
+        ("sis-512-g0.30", _sis(512, 0.30)),
+        ("sis-512-g0.45", _sis(512, 0.45)),
+        ("sis-512-g0.60", _sis(512, 0.60)),
+        ("sis-160", _sis(160)),
+        ("sis-160-g0.15", _sis(160, 0.15)),
+        ("sis-160-g0.30", _sis(160, 0.30)),
+        ("sis-160-g0.45", _sis(160, 0.45)),
+        ("sis-160-g0.60", _sis(160, 0.60)),
+        ("sis-160-g0.80", _sis(160, 0.80)),
+        # ("exact-free", ...) CANNOT BE REGENERATED, and that is deliberate.
+        # It was the counting DP run with the OR clauses ignored. `Posterior`
+        # now RAISES on mode="exact" wherever a clause is active, because the
+        # DP draws from a strict superset of the feasible worlds and reporting
+        # that as exact is the worst of the three available outcomes. The row
+        # stands in the results file as a measurement of a mode the engine has
+        # since removed on purpose; it is not recoverable and must not be
+        # quietly re-derived from something else.
+    ],
+    # results/posterior_accuracy2.json -- count and cap variants.
+    "shape": [
+        ("v03-512", _v03(512)), ("v03-32", _v03(32)),
+        ("sis-160", _sis(160)),
+        ("sis-160-g0.35", _sis(160, 0.35)),
+        ("sis-160-g0.35-sqrt", _sis(160, 0.35, count_mode="sqrt")),
+        ("sis-320-g0.45", _sis(320, 0.45)),
+        ("sis-160-g0.70-sqrt", _sis(160, 0.70, count_mode="sqrt")),
+        ("sis-320-g0.70-sqrt", _sis(320, 0.70, count_mode="sqrt")),
+        ("sis-160-g0.35-cap", _sis(160, 0.35, count_mode="capped")),
+        ("sis-160-g1.20-cap", _sis(160, 1.20, count_mode="capped")),
+        # The two `-cur` rows of results/posterior_accuracy2.json are NOT
+        # reconstructed. They scored NLL 2.221 and 2.644 against a class prior
+        # near 1.4 -- far worse than guessing -- and no surviving argument of
+        # `Posterior` reproduces that name. Guessing at a configuration and
+        # labelling the guess with the original row's name would be worse than
+        # leaving the row unproducible, so it is left unproducible and said so.
+    ],
+    # results/posterior_accuracy3.json -- the at-ask-time depth variants.
+    "attime": [
+        ("v03-512", _v03(512)),
+        ("sis-160", _sis(160)),
+        ("sis-160-g0.35", _sis(160, 0.35)),
+        ("sis-160-g0.35-attime", _sis(160, 0.35, depth_mode="attime")),
+        ("sis-160-g0.70-attime", _sis(160, 0.70, depth_mode="attime")),
+        ("sis-160-g1.20-attime", _sis(160, 1.20, depth_mode="attime")),
+        ("sis-160-g0.70-attime-sqrt", _sis(160, 0.70, depth_mode="attime",
+                                           count_mode="sqrt")),
+        ("sis-320-g0.70-attime", _sis(320, 0.70, depth_mode="attime")),
+        ("sis-320-g0.45", _sis(320, 0.45)),
+    ],
+}
+
+#: Which results file each campaign produced, so a reader can go both ways.
+CAMPAIGN_FILE = {"gamma": "posterior_accuracy.json",
+                 "shape": "posterior_accuracy2.json",
+                 "attime": "posterior_accuracy3.json"}
+
+#: The last campaign run, kept as the default so existing invocations are
+#: unchanged. Pass --campaign= to reproduce an earlier one.
+CONFIGS = CAMPAIGNS["attime"]
 
 
 class Score:
@@ -208,14 +278,27 @@ def main(n_games: int = 12, stride: int = 3, out: str = None):
     for r in rows:
         print(f"{r['name']:16s} {r['nll']:8.4f} {r['brier']:8.4f} "
               f"{r['top1']:8.4f} {r['ms_per_decision']:9.2f}")
+    #: The output path is now an ARGUMENT. It was not, and `__main__` never
+    #: passed one, so every invocation wrote `posterior_accuracy3.json` while
+    #: `scripts4/check_paper_numbers.py` watches `posterior_accuracy.json` --
+    #: a file no documented command could regenerate. Found by an audit of the
+    #: paper's reproduction section.
     path = Path(out) if out else ROOT / "results" / "posterior_accuracy3.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(
-        {"n_games": n_games, "stride": stride, "decisions": decisions,
-         "rows": rows}, indent=2))
-    print(f"\nSaved {path}")
+    payload = {"n_games": n_games, "stride": stride, "decisions": decisions,
+               "rows": rows}
+    print(f"\nSaved {write_result(path, payload)}")
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 12,
-         int(sys.argv[2]) if len(sys.argv) > 2 else 3)
+    camp = next((x.split("=", 1)[1] for x in sys.argv[1:]
+                 if x.startswith("--campaign=")), None)
+    if camp is not None:
+        if camp not in CAMPAIGNS:
+            raise SystemExit(f"--campaign= must be one of "
+                             f"{sorted(CAMPAIGNS)}; each reproduces the "
+                             f"results file named in CAMPAIGN_FILE.")
+        CONFIGS = CAMPAIGNS[camp]
+    a = [x for x in sys.argv[1:] if not x.startswith("--")]
+    main(int(a[0]) if a else 12,
+         int(a[1]) if len(a) > 1 else 3,
+         a[2] if len(a) > 2 else None)

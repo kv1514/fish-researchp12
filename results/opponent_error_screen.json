@@ -1,0 +1,110 @@
+{
+ "what": "baseline declaration accuracy of each opponent",
+ "descriptive": true,
+ "seed_deal": 12500000,
+ "seed_agent": 125000,
+ "n_deals": 60,
+ "opponents": {
+  "dylan_v07": {
+   "margin": 2.3333333333333335,
+   "margin_half_width": 0.5246204655405757,
+   "their_declares_per_game": 4.016666666666667,
+   "their_err": 0.21784232365145229,
+   "our_err": 0.038461538461538464,
+   "theirs_headroom": 6.283333333333333,
+   "games": 120,
+   "unfinished": 0
+  },
+  "heuristic": {
+   "margin": 7.85,
+   "margin_half_width": 0.3001492868804958,
+   "their_declares_per_game": 1.0916666666666666,
+   "their_err": 0.7251908396946565,
+   "our_err": 0.03477344573234984,
+   "theirs_headroom": 0.6,
+   "games": 120,
+   "unfinished": 0
+  },
+  "probabilistic": {
+   "margin": 1.85,
+   "margin_half_width": 0.5184577074208699,
+   "their_declares_per_game": 3.591666666666667,
+   "their_err": 0.06728538283062645,
+   "our_err": 0.04160246533127889,
+   "theirs_headroom": 6.7,
+   "games": 120,
+   "unfinished": 0
+  },
+  "memory": {
+   "margin": 2.283333333333333,
+   "margin_half_width": 0.5168553899605047,
+   "their_declares_per_game": 3.183333333333333,
+   "their_err": 0.04450261780104712,
+   "our_err": 0.054441260744985676,
+   "theirs_headroom": 6.083333333333333,
+   "games": 120,
+   "unfinished": 0
+  },
+  "tuned": {
+   "margin": 1.85,
+   "margin_half_width": 0.5184577074208699,
+   "their_declares_per_game": 3.591666666666667,
+   "their_err": 0.06728538283062645,
+   "our_err": 0.04160246533127889,
+   "theirs_headroom": 6.7,
+   "games": 120,
+   "unfinished": 0
+  },
+  "search": {
+   "margin": 3.05,
+   "margin_half_width": 0.5813946832086845,
+   "their_declares_per_game": 2.8666666666666667,
+   "their_err": 0.06686046511627906,
+   "our_err": 0.04891304347826087,
+   "theirs_headroom": 5.35,
+   "games": 120,
+   "unfinished": 0
+  },
+  "ev_claim": {
+   "margin": 1.9166666666666667,
+   "margin_half_width": 0.5084716065219713,
+   "their_declares_per_game": 3.716666666666667,
+   "their_err": 0.10762331838565023,
+   "our_err": 0.04258675078864353,
+   "theirs_headroom": 6.633333333333334,
+   "games": 120,
+   "unfinished": 0
+  },
+  "value_search": {
+   "margin": 1.7666666666666666,
+   "margin_half_width": 0.5152663825804896,
+   "their_declares_per_game": 3.525,
+   "their_err": 0.030732860520094562,
+   "our_err": 0.0365296803652968,
+   "theirs_headroom": 6.833333333333333,
+   "games": 120,
+   "unfinished": 0
+  },
+  "paired_search": {
+   "margin": 1.65,
+   "margin_half_width": 0.405881886506929,
+   "their_declares_per_game": 3.6333333333333333,
+   "their_err": 0.06192660550458716,
+   "our_err": 0.049689440993788817,
+   "theirs_headroom": 6.816666666666666,
+   "games": 120,
+   "unfinished": 0
+  },
+  "self": {
+   "margin": 0.0,
+   "margin_half_width": 0.0,
+   "their_declares_per_game": 4.5,
+   "their_err": 0.03333333333333333,
+   "our_err": 0.03333333333333333,
+   "theirs_headroom": 8.7,
+   "games": 120,
+   "unfinished": 0
+  }
+ },
+ "minutes": 35.8
+}

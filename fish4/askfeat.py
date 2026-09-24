@@ -54,9 +54,59 @@ TERM_NAMES = (
     "claim",       # NEW: progress toward a half-suit we can actually claim
     "info",        # NEW: expected information gained about the half-suit
     "certain",     # NEW: explicit bonus for a provably certain steal
-    "concent",     # NEW: prefer suits our team's holding is concentrated in
+    "concent",     # v2: the CHANGE in team concentration this ask causes
     "signal",      # NEW: the BENEFIT side of revealing a holding to teammates
+    "locate",      # NEW: location-uncertainty this ask removes from a half-suit
+                   #      our team is on course to declare
+    "reach",       # NEW: the entry point this ask spends -- P(the half-suit
+                   #      stops being askable by us once we take this card)
 )
+
+#: Definition version of each term, bumped whenever a term's FORMULA changes
+#: while its name stays the same.
+#:
+#: fish4/learn/fit.py already refused a harvest whose TERM_NAMES differed from
+#: the current ones, because adding or reordering a term silently attributes
+#: one term's effect to another. It could not see the other half of the same
+#: hazard: a name that stays put while the column beneath it changes meaning.
+#: That is not hypothetical -- ``claim`` was corrected from a product over all
+#: six cards of the half-suit to a product over the OTHER five, which flips it
+#: from scoring zero on a certain steal to scoring highest there. Any fit over
+#: a harvest predating that correction would attribute a weight to a feature
+#: the engine no longer computes.
+#:
+#: A harvest with no versions recorded is treated as all-1s, which is exactly
+#: what it is.
+TERM_VERSIONS = {
+    "suit": 1, "turn": 1, "scarce": 1, "reveal": 1, "deplete": 1,
+    "expose": 1,
+    "claim": 2,        # v2: excludes the asked card from the product
+    "info": 1, "certain": 1,
+    "concent": 2,      # v2: expected change caused, not level observed
+    "signal": 1,
+    "locate": 1,
+    "reach": 2,       # v2: no 1/n_askable divisor; see the comment in the
+                      #     feature block and results/term_bite_reach.json
+}
+assert tuple(TERM_VERSIONS) == TERM_NAMES, "TERM_VERSIONS must mirror TERM_NAMES"
+
+
+def term_versions() -> list:
+    """Current definition versions, aligned to :data:`TERM_NAMES`."""
+    return [TERM_VERSIONS[n] for n in TERM_NAMES]
+
+
+def stale_terms(recorded) -> list:
+    """Names whose stored definition version is not the current one.
+
+    ``recorded`` is a list aligned to TERM_NAMES, or None for a harvest taken
+    before versions were written -- which means every term was at version 1.
+    """
+    have = list(recorded) if recorded else [1] * len(TERM_NAMES)
+    if len(have) != len(TERM_NAMES):
+        raise ValueError(f"recorded {len(have)} term versions for "
+                         f"{len(TERM_NAMES)} terms")
+    return [n for n, v in zip(TERM_NAMES, have) if v != TERM_VERSIONS[n]]
 
 
 @dataclass(frozen=True)
@@ -73,6 +123,8 @@ class AskWeights:
     certain: float = 0.0
     concent: float = 0.0
     signal: float = 0.0
+    locate: float = 0.0
+    reach: float = 0.0
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -96,9 +148,10 @@ class DecisionContext:
     """
 
     __slots__ = ("obs", "bel", "post", "M", "me", "my_team", "n_hs", "per",
+                 "mine", "theirs",
                  "hs_live", "my_depth", "team_exp", "opp_exp", "player_exp",
                  "revealed", "turn_risk", "exposure", "hs_entropy",
-                 "team_concentration", "p_team_all", "avg_live")
+                 "team_concentration", "p_team_all", "p_team_card", "avg_live")
 
     def __init__(self, obs, bel, post):
         self.obs = obs
@@ -118,6 +171,9 @@ class DecisionContext:
         n_hs, me, my_team = self.n_hs, self.me, self.my_team
         mine = [p for p in range(NUM_PLAYERS) if team_of(p) == my_team]
         theirs = [p for p in range(NUM_PLAYERS) if team_of(p) != my_team]
+        # Kept because the per-ask concentration feature needs the roster and
+        # rebuilding it once per candidate ask is the whole cost of the term.
+        self.mine, self.theirs = mine, theirs
 
         self.hs_live = np.array([w is None for w in obs.set_winner], dtype=bool)
         self.my_depth = np.zeros(n_hs)
@@ -127,6 +183,12 @@ class DecisionContext:
         self.hs_entropy = np.zeros(n_hs)
         self.team_concentration = np.zeros(n_hs)
         self.p_team_all = np.zeros(n_hs)
+        #: Per-card P(this card sits with our team), by half-suit.
+        #: Kept because the claim feature needs the product over the
+        #: OTHER five cards, and dividing the six-card product by one
+        #: factor is exactly wrong when that factor is zero -- which
+        #: is precisely the case the feature exists to reward.
+        self.p_team_card = np.zeros((n_hs, 6))
 
         for hs in range(n_hs):
             if not self.hs_live[hs]:
@@ -154,6 +216,7 @@ class DecisionContext:
             # cheap screen and is only ever used as a *relative* term.
             pteam = block[:, mine].sum(axis=1)
             self.p_team_all[hs] = float(np.prod(pteam))
+            self.p_team_card[hs] = pteam
 
         counts = obs.hand_counts
         live_counts = [c for c in counts if c > 0]
@@ -225,6 +288,27 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
     M = ctx.M
     per = ctx.per
     counts = ctx.obs.hand_counts
+    # -- `reach`: the entry point an ask spends ------------------------------
+    #
+    # results/forced_locus.json, 15,929 decisions with the game stage
+    # controlled for: a seat five of its own decisions away from a `gate` or
+    # `forced` declaration has 6.9 FEWER live asks than a seat at the same
+    # cards-left, and 4.0 fewer at eight decisions. Those two paths carry 62 of
+    # 63 wrong declarations. And the seat about to be stuck holds 0.6 to 0.9
+    # MORE cards than the control: it is not short of cards, it is short of
+    # places to reach.
+    #
+    # Every successful ask takes a card from an OPPONENT, so every success
+    # spends a little of the asker's own future askability. Taking cards is how
+    # the game is won and how a seat strands itself, and the basis prices only
+    # the first half of that -- `concent` rewards concentrating the team's
+    # holding and `scarce` rewards team share, both of which consume entry
+    # points, while nothing charges for them.
+    #
+    # opp_mass[c] is P(an opponent currently holds c), which is 0 for a card in
+    # our own hand and for a resolved one, so a product over it needs no
+    # special cases for either.
+    opp_mass = M[:, ctx.theirs].sum(axis=1)
     for i, a in enumerate(asks):
         hs = a.card // 6
         t = a.target
@@ -240,13 +324,66 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
         # Claim progress: how much closer a success brings this half-suit to
         # being one WE can declare. Gaining a card puts it in our own hand,
         # which is the only perfectly localised place it can be, so the gain is
-        # largest when the rest of the suit is already ours.
-        F[i, 6] = pi * ctx.p_team_all[hs] ** (1.0 / 6.0)
+        # largest when THE REST of the suit is already ours.
+        #
+        # "The rest" is the whole point and was the bug. This used
+        # ctx.p_team_all[hs], the product over all SIX cards -- including the
+        # one being asked for, which by construction we do not hold. For a
+        # provably-certain steal that card's factor is exactly 0, so the
+        # product is 0 and the feature is 0: it scored zero on precisely the
+        # asks it was written to reward, and rose as the steal became less
+        # certain. Excluding the asked card is what the comment above always
+        # described.
+        others = ctx.p_team_card[hs]
+        rest = 1.0
+        for k in range(6):
+            if hs * 6 + k != a.card:
+                rest *= float(others[k])
+        F[i, 6] = pi * rest ** (1.0 / 5.0)
         # Information: a maximally uncertain ask (p ~ 0.5) in a maximally
         # uncertain half-suit resolves the most.
         F[i, 7] = 4.0 * pi * fail * ctx.hs_entropy[hs]
         F[i, 8] = 1.0 if pi >= 0.999999 else 0.0
-        F[i, 9] = ctx.team_concentration[hs]
+        # Concentration, v2: the change this ask would cause, not the level it
+        # observes.
+        #
+        # v1 was `ctx.team_concentration[hs]` -- one number per half-suit,
+        # identical for every candidate ask in it and independent of the target
+        # and of who would end up holding the card. A term that takes the same
+        # value on every ask in a half-suit cannot express a preference BETWEEN
+        # asks; it can only tilt the choice of half-suit. Worse, its sign is
+        # wrong in the case the term exists for: when the concentration sits
+        # with a TEAMMATE, my taking a card breaks it up, and v1 scored that
+        # ask highest precisely because the half-suit was concentrated.
+        #
+        # This is the same defect `claim` had at v1 -- a formula that cannot
+        # reward what its own comment describes -- and gets the same remedy:
+        # corrected in place, TERM_VERSIONS bumped, every harvest fitted
+        # against the old column marked stale by stale_terms().
+        #
+        # Why it is worth correcting rather than deleting: 0.1676 of our 0.1759
+        # wrong declarations a game are allocation class, our own team holding
+        # all six and naming the wrong split, against 0.0083 ownership errors
+        # (results/margin_decomposition.json). A holding in one hand needs no
+        # split named at all. Concentration is the only term in the basis that
+        # points at the dominant error class.
+        #
+        # On success the card moves from the target to me: my expectation gains
+        # one, every teammate's probability mass on that card is discharged,
+        # and the team total moves by the same amount. Scaled by pi, so the
+        # feature is the EXPECTED change.
+        e = ctx.player_exp[hs]
+        t = float(ctx.team_exp[hs])
+        if t > 1e-9:
+            cur = float(max(e[q] for q in ctx.mine)) / t
+            spent = float(sum(M[a.card, q] for q in ctx.mine))
+            new_t = t + 1.0 - spent
+            if new_t > 1e-9:
+                best = float(e[ctx.me]) + 1.0 - float(M[a.card, ctx.me])
+                for q in ctx.mine:
+                    if q != ctx.me:
+                        best = max(best, float(e[q]) - float(M[a.card, q]))
+                F[i, 9] = pi * (best / new_t - cur)
         # Signalling. An ask publicly certifies that we hold a card of this
         # half-suit - the only legal communication channel in Literature, and
         # one that is simultaneously read by the opponents. v0.3 modelled only
@@ -259,6 +396,100 @@ def ask_feature_matrix(ctx: DecisionContext, asks) -> tuple[np.ndarray, np.ndarr
         # story, decides.
         if not ctx.revealed[hs]:
             F[i, 10] = (ctx.team_exp[hs] / 6.0 - 0.5) * 2.0
+        # Location. THE ONE TERM THAT PRICES AN ASK BY THE DECLARATION IT
+        # ENABLES, which is why it exists.
+        #
+        # results/declaration_timing.json decomposed the +3.41 sets a game that
+        # perfect knowledge of a teammate's cards is worth, by routing the same
+        # cheat to one decision at a time. Neither channel carries it: the
+        # declaration channel alone is worth +1.08, the ask channel alone
+        # +0.76, and 46% of the ceiling -- 1.57 sets a game -- lives in NEITHER
+        # ALONE. It is interaction. Four separate attempts had each improved
+        # one channel and returned nothing, which is what reaching for a third
+        # of a prize looks like.
+        #
+        # The only intervention that can reach an interaction term is one that
+        # couples the two decisions, and this is the cheapest such coupling:
+        # score an ask by what it will let the team DECLARE later.
+        #
+        # The quantity is fixed by the mediator finding, not chosen: what a
+        # declaration risks is how many of the half-suit's six cards have never
+        # been publicly LOCATED, not how many the declarer holds. A successful
+        # ask locates exactly one card, permanently, for the whole table --
+        # including our partners. So the value of an ask, to a future
+        # declaration, is the share of that half-suit's remaining location
+        # uncertainty it removes.
+        #
+        #     pi          it only locates anything if it lands
+        #     1 / u       the fraction of the remaining uncertainty removed:
+        #                 going from two unlocated to one is worth more than
+        #                 six to five, which is the shape "risk tracks
+        #                 unlocated count" implies
+        #     rest^(1/5)  weighted by our team owning the REST of the suit,
+        #                 because locating a card of a half-suit we will never
+        #                 declare buys nothing. Same per-card geometric mean
+        #                 the `claim` term uses, and excluding the asked card
+        #                 for the same reason: on a provably certain steal its
+        #                 own factor is 0, and a term that scores zero exactly
+        #                 where it should score highest is the bug `claim` and
+        #                 `concent` both already had.
+        #
+        # Zero when the asked card is ALREADY publicly located: the ask then
+        # adds no location and the term must not pay for one. That is the case
+        # this feature would otherwise reward twice, since a located card
+        # sitting with the target is a certain steal and `certain` already
+        # prices it.
+        if ctx.bel.public_loc[a.card] is None:
+            u = 0
+            for k in range(6):
+                if ctx.bel.public_loc[hs * 6 + k] is None:
+                    u += 1
+            if u:
+                F[i, 11] = pi * (rest ** (1.0 / 5.0)) / u
+        # `reach`, and it is a COST: negative, so a positive weight penalises.
+        #
+        #     -pi * P(no other card of this half-suit is with an opponent)
+        #
+        #   pi        it spends nothing if it does not land.
+        #   the product  P(h stops being askable by us). Taking the last card
+        #             an opponent held closes the half-suit as an entry point;
+        #             taking one of four leaves it wide open. The asked card is
+        #             excluded because we are about to hold it either way --
+        #             including it would zero the term exactly on a certain
+        #             steal, the bug `claim`, `concent` and `locate` all had.
+        #
+        # v1 DIVIDED BY the number of half-suits we could still ask in, and
+        # results/term_bite_reach.json says that shape cannot reach the
+        # decision at all: a top-ask change in 1.6% of positions at w = 0.3 and
+        # only 7.6% at w = 1.2. That is `locate`'s 1/u again, and `locate` is a
+        # measured null. v2 drops it; the weight sets the exchange rate instead
+        # of a divisor chosen by me.
+        #
+        # READ THIS BEFORE RAISING THE WEIGHT. The term is REFUTED at a
+        # positive weight and the screen is in prereg/reach_term.md. `keep` is
+        # largest exactly when our team already holds the rest of the
+        # half-suit, so a positive weight penalises the ask that COMPLETES a
+        # set -- the ask that banks one. Measured over 480 games at w = 0.8:
+        # voluntary declarations fall 33%, the displaced ones reappear on the
+        # `gate` path (up 165%, 22.4% wrong), total declarations fall 16.3%,
+        # wrong declarations per game rise from 0.1313 to 0.2167, and the
+        # margin is -1.67 sets a game. Both pre-registered screen rules fired
+        # and no duel was run.
+        #
+        # The NEGATIVE weight is the one that works mechanically -- at -0.4 it
+        # cuts gate+forced declarations 19% and wrong declarations 24% while
+        # voluntary holds -- and it still does not pay: margin -0.075. That
+        # sign was chosen after reading the screen, so it is a diagnostic and
+        # not a registered arm, and nothing was confirmed on it. The finding is
+        # that the trajectory is steerable and steering it is not worth
+        # anything, which is why this ships at 0.0 and stays there.
+        #
+        keep = 1.0
+        for k in range(6):
+            d = hs * 6 + k
+            if d != a.card:
+                keep *= 1.0 - float(opp_mass[d])
+        F[i, 12] = -pi * keep
     return p, F
 
 

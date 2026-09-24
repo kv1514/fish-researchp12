@@ -1,0 +1,18 @@
+{
+ "matched_groups": 181,
+ "matched_positions": 304,
+ "old_positions": 308,
+ "new_positions": 305,
+ "champion_identical": true,
+ "broken": {
+  "optimum": 0.5084455931495405,
+  "champion": 0.06814170843776109,
+  "gain": 0.4403038847117792
+ },
+ "fixed": {
+  "optimum": 0.5073034147869675,
+  "champion": 0.06814170843776109,
+  "gain": 0.4391617063492063
+ },
+ "optimum_moved": 43
+}

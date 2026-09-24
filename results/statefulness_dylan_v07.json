@@ -1,0 +1,180 @@
+{
+ "question": "does our stateless replay ask their engine the same question their arbiter asks it",
+ "spec": "dylan_v07",
+ "games": 6,
+ "decisions": 296,
+ "divergent": 84,
+ "divergence_rate": 0.28378378378378377,
+ "verdict": "STATEFUL -- the two paths are not the same agent",
+ "kind_changes": {
+  "ASK->ASK": 75,
+  "DECL->ASK": 9
+ },
+ "per_game": [
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decisions": 49,
+   "divergent": 12,
+   "first_divergence": 8
+  },
+  {
+   "deal": 7400000,
+   "kv_even": false,
+   "decisions": 47,
+   "divergent": 8,
+   "first_divergence": 6
+  },
+  {
+   "deal": 7400001,
+   "kv_even": true,
+   "decisions": 55,
+   "divergent": 22,
+   "first_divergence": 6
+  },
+  {
+   "deal": 7400001,
+   "kv_even": false,
+   "decisions": 47,
+   "divergent": 15,
+   "first_divergence": 6
+  },
+  {
+   "deal": 7400002,
+   "kv_even": true,
+   "decisions": 50,
+   "divergent": 13,
+   "first_divergence": 12
+  },
+  {
+   "deal": 7400002,
+   "kv_even": false,
+   "decisions": 48,
+   "divergent": 14,
+   "first_divergence": 21
+  }
+ ],
+ "examples": [
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 8,
+   "stateless": "ASK 2 8",
+   "persistent": "ASK 0 11",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 10,
+   "stateless": "ASK 0 27",
+   "persistent": "ASK 4 9",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 11,
+   "stateless": "ASK 0 28",
+   "persistent": "ASK 4 10",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 13,
+   "stateless": "ASK 0 26",
+   "persistent": "ASK 0 29",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 17,
+   "stateless": "DECL 1 1 1 1 3 1 1",
+   "persistent": "ASK 4 9",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 21,
+   "stateless": "ASK 4 52",
+   "persistent": "ASK 2 53",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 23,
+   "stateless": "ASK 4 50",
+   "persistent": "ASK 4 20",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 35,
+   "stateless": "ASK 0 34",
+   "persistent": "ASK 2 34",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 39,
+   "stateless": "ASK 2 3",
+   "persistent": "ASK 2 2",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 41,
+   "stateless": "ASK 4 5",
+   "persistent": "ASK 4 4",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 42,
+   "stateless": "ASK 0 17",
+   "persistent": "ASK 0 15",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decision": 43,
+   "stateless": "ASK 2 14",
+   "persistent": "ASK 0 15",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": false,
+   "decision": 6,
+   "stateless": "ASK 3 9",
+   "persistent": "ASK 1 10",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": false,
+   "decision": 16,
+   "stateless": "ASK 1 31",
+   "persistent": "ASK 5 31",
+   "decide": "DECIDE TURN"
+  },
+  {
+   "deal": 7400000,
+   "kv_even": false,
+   "decision": 30,
+   "stateless": "ASK 5 41",
+   "persistent": "ASK 5 38",
+   "decide": "DECIDE TURN"
+  }
+ ],
+ "seconds": 15.5
+}

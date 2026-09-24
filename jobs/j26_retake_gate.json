@@ -1,0 +1,42 @@
+[
+ {
+  "label": "RETAKE GATE w0.30 depth>=2 vs champion block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_retake": 0.3,
+    "retake_min_depth": 2
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 20000000,
+  "agent_seed": 9900
+ },
+ {
+  "label": "RETAKE GATE w0.30 depth>=2 vs champion block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_retake": 0.3,
+    "retake_min_depth": 2
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 20200000,
+  "agent_seed": 9901
+ }
+]

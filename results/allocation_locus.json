@@ -1,0 +1,29 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "uses_ground_truth": false,
+ "bands": {
+  "any": {
+   "n_pairs": 20472,
+   "mean_deficit_nats": 2.2096603102774455,
+   "unreachable_share": 0.4074384842817087
+  },
+  ">= 0.05": {
+   "n_pairs": 3605,
+   "mean_deficit_nats": 1.0693893331117836,
+   "unreachable_share": 0.5818242205423404
+  },
+  ">= 0.5": {
+   "n_pairs": 609,
+   "mean_deficit_nats": 0.5986041865661833,
+   "unreachable_share": 0.844681151746358
+  },
+  ">= 0.9": {
+   "n_pairs": 91,
+   "mean_deficit_nats": 0.8922544427114378,
+   "unreachable_share": 0.9996156794998766
+  }
+ },
+ "n_pairs": 20472
+}

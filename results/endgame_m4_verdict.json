@@ -1,0 +1,14 @@
+{
+ "n_pairs": 2000,
+ "n_blocks": 8,
+ "duplicates_dropped": 0,
+ "engine": "f756f2057921",
+ "diff": 0.6995,
+ "ci95": [
+  0.6032740794084215,
+  0.7957259205915785
+ ],
+ "blocks_positive": 8,
+ "verdict": "extends",
+ "m2_stack_for_scale": 0.122
+}

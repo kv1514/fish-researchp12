@@ -21,13 +21,27 @@ the objective, and deliberately stores nothing else:
     banked       set differential already resolved, from the acting team's view
     n_hidden     number of live cards whose location is not yet pinned
 
-**The worlds are stored, not the true hands.** Two reasons. First,
-``fish.beliefs.BeliefState`` is anchored on the initial deal and refuses to
-attach to a mid-game position, so a posterior cannot be reconstructed after the
-fact - it has to be captured while the game is running. Second, storing the
-posterior's worlds and nothing else makes the leak-freedom of the whole
-downstream pipeline structural rather than a matter of discipline: the true
-layout is never written to disk, so no later stage can accidentally read it.
+**The worlds are stored, not the true hands.** The reason that matters is
+leak-freedom: storing the posterior's worlds and nothing else makes it
+structural rather than a matter of discipline, because the true layout is never
+written to disk and no later stage can accidentally read it. Capturing the
+posterior while the game runs also makes every batch reproducible from the file
+alone.
+
+This paragraph used to give a second, stronger reason, and it was false.
+``fish.beliefs.BeliefState`` is anchored on the initial deal, so it was said
+that "a posterior cannot be reconstructed after the fact". It is anchored on the
+initial deal but does not have to be HANDED one: given the current hand and the
+public history, ``initial_hand()`` back-computes a deal consistent with both and
+the tracker attaches to that. ``scripts4/rollout_target.py`` does it over 110
+positions without a single ``BeliefContradiction``.
+
+The correction is recorded rather than quietly deleted because the false half of
+that sentence cost more than the true half ever earned: the paper closed the
+whole objective-learning line on it (see ``fish4/learn/rollout.py``). An
+impossibility claim generates no experiment -- a positive result invites
+replication, "this cannot be done" invites moving on -- so the sentence that
+closes a direction is exactly the sentence nobody tests.
 
 WHICH DECISIONS ARE RECORDED
 ----------------------------
@@ -56,6 +70,7 @@ present and skips them, so an interrupted run resumes at the game boundary.
 from __future__ import annotations
 
 import json
+import os
 import random
 import sys
 import time
@@ -68,21 +83,91 @@ import numpy as np
 
 from fish.beliefs import RESOLVED, BeliefContradiction
 from fish.cards import deck_size, team_of
-from fish.engine import Ask
+from fish.engine import Ask, AskEvent, ClaimEvent, PassEvent
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish.runner import GameTimeout, play_game
 
 from ..agent4 import FishBot4
-from ..askfeat import TERM_NAMES, ask_feature_matrix, DecisionContext
+from ..askfeat import (TERM_NAMES, ask_feature_matrix, DecisionContext,
+                       term_versions)
 from ..posterior import Posterior
 from .rollout import banked_differential
 
 #: Bump when the record shape changes.
-POSITION_SCHEMA = "askobj-positions/1"
+POSITION_SCHEMA = "askobj-positions/2"
+#: Schemas this module can still read. Version 1 lacks ``history`` and so
+#: cannot feed the strong continuation; the rollout stage refuses it by name
+#: rather than by seeding an empty log, which would anchor six belief trackers
+#: on a game that never happened.
+READABLE_SCHEMAS = ("askobj-positions/1", "askobj-positions/2")
 
 #: Hard cap on worker processes: 8 cores, other jobs running alongside.
-MAX_WORKERS = 2
+
+def encode_history(history) -> list:
+    """The public log as JSON, one compact row per event.
+
+    Tags mirror ``fish.gamelog``: ``a`` ask, ``c`` claim, ``p`` pass. Stored
+    because the strong rollout continuation reconstructs each seat's initial
+    deal from its hand plus this log, and a position without it can only be
+    finished by a policy that has no model to attach.
+    """
+    out = []
+    for ev in history:
+        if isinstance(ev, AskEvent):
+            out.append(["a", ev.asker, ev.target, ev.card,
+                        1 if ev.success else 0])
+        elif isinstance(ev, ClaimEvent):
+            out.append(["c", ev.claimer, ev.half_suit, list(ev.declared),
+                        list(ev.revealed), ev.winner])
+        elif isinstance(ev, PassEvent):
+            out.append(["p", ev.player, ev.teammate])
+        else:
+            raise TypeError(f"cannot encode event {ev!r}")
+    return out
+
+
+def decode_history(rows) -> list:
+    """Inverse of :func:`encode_history`. Unknown tags raise."""
+    out = []
+    for r in rows:
+        tag = r[0]
+        if tag == "a":
+            out.append(AskEvent(r[1], r[2], r[3], bool(r[4])))
+        elif tag == "c":
+            out.append(ClaimEvent(r[1], r[2], tuple(r[3]), tuple(r[4]), r[5]))
+        elif tag == "p":
+            out.append(PassEvent(r[1], r[2]))
+        else:
+            raise ValueError(f"unknown history tag {tag!r}")
+    return out
+
+
+def _worker_cap() -> int:
+    """How many processes a harvest or rollout pass may use.
+
+    Was a hard-coded 2, chosen when this ran on a machine with eight cores
+    shared with other jobs. Two is right while duels occupy the rest and wrong
+    the moment they finish, and a constant cannot tell the difference. The cap
+    now leaves one core for whatever else is running and can be overridden
+    explicitly, so a long resumable pass can be restarted wider once the queue
+    beside it drains.
+
+    An explicit FISH_LEARN_WORKERS is honoured down to 1: the docstring used to
+    promise "never below 2" while the override path returned max(1, ...), and a
+    promise the code does not keep is worse than either behaviour. Setting it
+    to 1 deliberately is a legitimate thing to want on a small box.
+    """
+    override = os.environ.get("FISH_LEARN_WORKERS")
+    if override:
+        try:
+            return max(1, int(override))
+        except ValueError:
+            pass
+    return max(2, (os.cpu_count() or 4) - 1)
+
+
+MAX_WORKERS = _worker_cap()
 
 
 # ---------------------------------------------------------------------------
@@ -226,6 +311,7 @@ class HarvestBot(FishBot4):
             "pid": f"{self.sink.game_seed}:{len(obs.history)}",
             "game": self.sink.game_seed,
             "ply": len(obs.history),
+            "history": encode_history(obs.history),
             "seat": obs.player,
             "rules": obs.rules.to_dict(),
             "set_winner": list(obs.set_winner),
@@ -237,6 +323,10 @@ class HarvestBot(FishBot4):
             "banked": banked_differential(obs.set_winner, team_of(obs.player)),
             "n_hidden": n_hidden,
             "terms": list(TERM_NAMES),
+            # Not just the names: the DEFINITION version of each, so a formula
+            # that changes under a stable name is caught too. See
+            # fish4.askfeat.TERM_VERSIONS.
+            "tv": term_versions(),
         }
 
 
@@ -275,6 +365,17 @@ def positions_path(root: Path) -> Path:
 
 def meta_path(root: Path) -> Path:
     return Path(root) / "meta.json"
+
+
+def _meta(root: Path) -> dict:
+    """The harvest's recorded metadata, or an empty dict if there is none."""
+    p = meta_path(root)
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
 
 
 def load_positions(root: Path) -> list[dict]:
@@ -323,9 +424,26 @@ def harvest(root: Path, cfg: HarvestConfig, n_workers: int = MAX_WORKERS,
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
     n_workers = max(1, min(n_workers, MAX_WORKERS))
+    # The schema tag was written unconditionally and before this check, so
+    # resuming a directory whose positions.jsonl holds version-1 rows stamped
+    # it "askobj-positions/2" -- a dataset claiming to carry histories while
+    # only partly doing so. READABLE_SCHEMAS existed to police exactly that and
+    # was referenced nowhere, so nothing ever read the tag it was policing.
+    old = _meta(root)
+    prior = old.get("schema") if old else None
+    if prior is not None and prior != POSITION_SCHEMA:
+        if prior not in READABLE_SCHEMAS:
+            raise ValueError(
+                f"{root} holds schema {prior!r}, which this module cannot "
+                f"read (known: {list(READABLE_SCHEMAS)})")
+        raise ValueError(
+            f"{root} holds schema {prior!r} and this harvest writes "
+            f"{POSITION_SCHEMA!r}. Appending would leave one file mixing both, "
+            f"with the tag naming only the newer. Harvest into a new root.")
     meta_path(root).write_text(json.dumps(
         {"schema": POSITION_SCHEMA, "config": cfg.to_dict(),
-         "terms": list(TERM_NAMES), "agent": ["fishbot4", {}]},
+         "terms": list(TERM_NAMES), "term_versions": term_versions(),
+         "agent": ["fishbot4", {}]},
         indent=2), encoding="utf-8")
     done = completed_games(root)
     seed_rng = random.Random(cfg.agent_seed_base)

@@ -1,0 +1,15 @@
+[
+ {"label": "REPLAY COMBINED 480+lookahead vs champion block 1", "n_pairs": 1000,
+  "base_seed": 27200000, "agent_seed": 9921,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
+                     "w_lookahead": 0.25, "lookahead_depth": 3,
+                     "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+
+ {"label": "REPLAY COMBINED 480+lookahead vs champion block 0", "n_pairs": 1000,
+  "base_seed": 27000000, "agent_seed": 9920,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
+                     "w_lookahead": 0.25, "lookahead_depth": 3,
+                     "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]}
+]

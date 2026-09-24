@@ -1,0 +1,195 @@
+"""The pre-registered verdict on the belief-space lookahead.
+
+This script does what ``jobs/PREREGISTRATION_lookahead.md`` says and nothing
+else. It was written before the blocks finished, which is the only way a fixed
+analysis stays fixed: an analysis chosen after the numbers arrive is a choice
+about the numbers.
+
+  PRIMARY, and the only thing that decides. A fixed-effect pool of the six new
+  blocks. Every block is unselected, so none may be dropped for its result.
+  The effect is demonstrated if and only if the 95% interval excludes zero.
+
+  SECONDARY, reported either way. The six new blocks pooled with the four
+  existing unselected cells. Reported for the estimate, not for the verdict.
+
+  HOMOGENEITY. Cochran's Q across the six new blocks, diagnostic only. The A/A
+  study measured tau = 0 with coverage 23/24, so a significant Q here would be
+  evidence of a deal-population-dependent effect rather than grounds to switch
+  to random-effects pooling.
+
+The 200-pair screening cell that resolved at +0.570 is excluded from the
+secondary pool wherever it appears, because it was selected for having resolved.
+That exclusion was decided before the retests, not now.
+
+Refuses to print a verdict on fewer than six blocks. A partial pool of an
+append-only run is an interim look, and taking an interim look at a
+pre-registered test and then deciding whether to keep going is how a fixed
+analysis stops being one.
+
+    py scripts4/settle_verdict.py
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts4"))
+
+from pool_cells import Z, cells, pool                            # noqa: E402
+
+SETTLE = [f"SETTLE lookahead d3 w0.25 block {i}" for i in range(6)]
+
+#: The four cells that were run without being selected for their result. The
+#: 200-pair screen is not among them: it was chosen for resolving, and pooling a
+#: cell chosen for its size with cells that were not is the winner's curse with
+#: extra steps.
+UNSELECTED = [
+    "REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)",
+    "REPLICATE lookahead d3 w0.25 vs champion (second fresh set)",
+    "DECISIVE lookahead d3 w0.25 vs champion (A)",
+    "DECISIVE lookahead d3 w0.25 vs champion (B)",
+]
+
+#: Written into the pre-registration before the run, and repeated here so the
+#: report can be read without the other document open.
+ASSUMED_EFFECT = 0.153
+PER_PAIR_SD = 3.796
+
+
+def _line(c):
+    return (f"  {c['label'][-8:]:<9} n={c['n']:>5}  {c['est']:>+7.3f} "
+            f"[{c['lo']:+.3f}, {c['hi']:+.3f}]")
+
+
+def _verdict(est, se, name):
+    lo, hi = est - Z * se, est + Z * se
+    out = "EXCLUDES ZERO" if (lo > 0 or hi < 0) else "INCLUDES ZERO"
+    print(f"\n{name}")
+    print(f"  {est:+.4f}  95% [{lo:+.4f}, {hi:+.4f}]   {out}")
+    return lo > 0 or hi < 0
+
+
+#: The four rounds of the lookahead programme, by the label prefix each used.
+#: Cells about OTHER features that happen to mention a round name are excluded
+#: by name -- the two value-objective replications were being counted in.
+ROUNDS = {
+    "screens": ("lookahead d2 w0.25", "lookahead d3 w0.25 NO coupling",
+                "lookahead d3 w0.25 vs champion", "lookahead d3 w0.60"),
+    "replications": ("REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)",
+                     "REPLICATE lookahead d3 w0.25 vs champion (second fresh",
+                     "REPLICATE coupling ablation d3"),
+    "decisive": ("DECISIVE lookahead d3 w0.25 vs champion (A)",
+                 "DECISIVE lookahead d3 w0.25 vs champion (B)"),
+    "settling": ("SETTLE lookahead d3 w0.25 block",),
+}
+
+
+def _programme_pairs() -> dict:
+    """Deal-pairs spent on the lookahead question, by round, from the record."""
+    src = ROOT / "results" / "v04_duels.jsonl"
+    rows = [json.loads(l) for l in src.read_text(encoding="utf-8").splitlines()
+            if l.strip()]
+    out, total = {}, 0
+    for name, prefixes in ROUNDS.items():
+        n = sum(r["n_pairs"] for r in rows
+                if any((r.get("label") or "").startswith(px) for px in prefixes))
+        out[name] = n
+        total += n
+    return {"rounds": out, "total": total}
+
+
+def main() -> int:
+    cs = cells(SETTLE)
+    print(f"blocks recorded: {len(cs)}/6")
+    for c in cs:
+        print(_line(c))
+    if len(cs) < 6:
+        print("\nNot all six blocks are in. The pre-registration fixes a pool "
+              "of six, so\nthere is no verdict to print yet -- and looking at "
+              "a partial pool and\nthen deciding whether to continue is "
+              "precisely what pre-registering was\nfor. Re-run when the "
+              "remaining blocks land.")
+        return 1
+
+    n_tot = sum(c["n"] for c in cs)
+    # The minimum DETECTABLE effect is the 80%-power figure the
+    # pre-registration was sized against, (z_{0.975} + z_{0.80}) * sd / sqrt(n),
+    # not the 95% interval half-width. The two differ by 43% and an earlier
+    # draft of this script printed the half-width under the MDE's name, which
+    # would have made the run look better powered than it was designed to be.
+    half = Z * PER_PAIR_SD / math.sqrt(n_tot)
+    mde = (Z + 0.8416212) * PER_PAIR_SD / math.sqrt(n_tot)
+    print(f"\ntotal pairs {n_tot}")
+    print(f"  MDE at 80% power        {mde:.3f}  "
+          f"(pre-registered as 0.137)")
+    print(f"  95% interval half-width {half:.3f}")
+    print(f"  effect the run was sized against {ASSUMED_EFFECT:+.3f}")
+
+    p = pool(cs)
+    demonstrated = _verdict(p["fe"], p["fe_se"],
+                            "PRIMARY -- fixed-effect pool of the six new blocks")
+
+    print(f"\nhomogeneity across the six (diagnostic only)")
+    print(f"  Cochran Q  {p['q']:.3f} on {p['df']} df, p = {p['q_p']:.4f}")
+    print(f"  I^2        {100 * p['i2']:.1f}%")
+    print(f"  tau        {p['tau']:.4f} sets per pair")
+    if p["q_p"] < 0.05:
+        print("  The blocks disagree by more than sampling noise allows. The "
+              "A/A study\n  measured no between-run variance, so read this as "
+              "an effect that depends\n  on the deal population, not as a "
+              "reason to re-pool.")
+
+    extra = cells(UNSELECTED)
+    p2, allc = None, []
+    if len(extra) == len(UNSELECTED):
+        allc = cs + extra
+        p2 = pool(allc)
+        n2 = sum(c["n"] for c in allc)
+        print(f"\nsecondary -- all {len(allc)} unselected cells, {n2} pairs "
+              f"(reported, not decisive)")
+        for c in extra:
+            print(f"  {c['label'][:52]:<52} n={c['n']:>4} {c['est']:>+7.3f}")
+        _verdict(p2["fe"], p2["fe_se"], "  pooled")
+
+    # Persist it. This script printed its verdict and stored nothing for its
+    # whole life, which made the paper's HEADLINE number the one figure
+    # check_paper_numbers.py could not watch -- the most load-bearing claim in
+    # the document was the least protected against drift. Found by
+    # check_verdicts.py, whose own reason for existing was a different finished
+    # run that had never been analysed at all.
+    # The whole programme's cost, computed from the duel record rather than
+    # summed by hand. The paper claimed 15,600 deal-pairs across four rounds in
+    # two places, including the abstract; the four rounds cost 9,700, and 15,600
+    # matches nothing -- not the table, not the record with the stacking run
+    # added (15,700), not anything. A number nobody could recompute drifted.
+    prog = _programme_pairs()
+    out = {"blocks": cs, "pooled": p, "n_pairs": sum(c["n"] for c in cs),
+           "programme_pairs": prog["total"],
+           "programme_rounds": prog["rounds"],
+           "demonstrated": bool(demonstrated)}
+    if len(extra) == len(UNSELECTED):
+        out["secondary"] = {"cells": extra, "pooled": p2,
+                            "n_pairs": sum(c["n"] for c in allc)}
+    dest = ROOT / "results" / "settle_verdict.json"
+    dest.write_text(json.dumps(out, indent=1))
+
+    print("\n" + "=" * 68)
+    if demonstrated:
+        print("VERDICT: the effect is DEMONSTRATED by the pre-registered test.")
+    else:
+        print("VERDICT: NOT DEMONSTRATED.")
+        print("The pre-registration commits to reporting it that way whatever "
+              "the\nsecondary pool says, and to adding no further run to chase "
+              "significance.\nIf 6000 pairs does not settle it, the effect is "
+              "below what this project\ncan resolve at reasonable cost, and "
+              "that is the finding.")
+    print("=" * 68)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

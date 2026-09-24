@@ -1,0 +1,10 @@
+{
+ "what": "the ladder sweep's derived statistics",
+ "descriptive": true,
+ "prereg": null,
+ "source": "dylan_ladder_sweep.json",
+ "n_rungs": 6,
+ "corr_margin_their_error": 0.9522,
+ "corr_our_error_our_declares": 0.7119,
+ "corr_our_error_our_declares_without_v04": 0.0959
+}

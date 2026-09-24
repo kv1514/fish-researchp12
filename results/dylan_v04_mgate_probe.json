@@ -1,0 +1,53 @@
+{
+ "what": "dylan ladder probe",
+ "descriptive": true,
+ "prereg": null,
+ "specs": {
+  "v04_bare": "v04",
+  "v04_mgate": "v04:mgate=0.008"
+ },
+ "opponents": {
+  "v04_bare": {
+   "spec": "v04",
+   "margin": 2.024,
+   "half_width": 0.255,
+   "ci95": [
+    1.769,
+    2.279
+   ],
+   "n_clusters": 250,
+   "their_declares": 1845,
+   "our_declares": 2655,
+   "their_err": 0.1642,
+   "our_err": 0.0761,
+   "our_declares_per_game": 5.31,
+   "fallbacks": 0,
+   "identity_residual_max": 0,
+   "games": 500
+  },
+  "v04_mgate": {
+   "spec": "v04:mgate=0.008",
+   "margin": 2.024,
+   "half_width": 0.255,
+   "ci95": [
+    1.769,
+    2.279
+   ],
+   "n_clusters": 250,
+   "their_declares": 1845,
+   "our_declares": 2655,
+   "their_err": 0.1642,
+   "our_err": 0.0761,
+   "our_declares_per_game": 5.31,
+   "fallbacks": 0,
+   "identity_residual_max": 0,
+   "games": 500
+  }
+ },
+ "seed_deal": 16300000,
+ "seed_agent": 163000,
+ "n_deals": 250,
+ "n_games": 1000,
+ "vs": "v04_bare|v04_mgate",
+ "minutes": 6.0
+}
