@@ -6338,3 +6338,58 @@ reducing concentration. That was a loose reading: `concent` prices how our
 holding is spread **across our own seats**, while `suit` and `scarce` price
 **which half-suit** to ask in. Different quantities, and the `concent` result is
 not evidence about these knobs either way.
+
+## OUTCOME 2026-09-24: the entire margin is the contested bands, and no single edge carries it
+
+`results/contested_race_18300000.json`, 400 games. The band is our team's count
+of a half-suit **at the deal**, so it is exogenous — nothing a policy did can
+move which band a half-suit started in.
+
+### The whole margin, accounted for
+
+| | |
+|---|---:|
+| contested half-suits (bands 2–4) a game | **7.312** |
+| we win | 3.297 |
+| symmetry would give | 3.656 |
+| **short by** | **0.359 a game = −0.718 sets** |
+
+The measured margin is **−0.710**. **Bands 2–4 are not where most of the deficit
+is; they are all of it**, to within the precision of the estimate. Bands 0, 1, 5
+and 6 net out.
+
+### And within them, no single edge is large enough to be the cause
+
+Comparing our behaviour holding *k* against theirs holding the same *k* (their
+band is 6−*k*):
+
+| holding | our asks/ply | their asks/ply | our hit rate | their hit rate |
+|---:|---:|---:|---:|---:|
+| 2 | 0.05752 | **0.06964** | 0.6494 | **0.6680** |
+| 3 | 0.08181 | **0.08829** | 0.6059 | **0.6135** |
+| 4 | **0.09084** | 0.08831 | 0.4841 | **0.6680**→0.4901 |
+
+At the **even race** — band 3, both teams dealt three, 3.03 half-suits a game —
+we win **0.4443** against their 0.5557. And the two factors that could cause it
+are nearly equal: they send **8%** more asks per ply into it and hit **1.3%**
+better. Neither is remotely the size of the outcome gap.
+
+The one clear asymmetry: **they invest more when behind.** Holding two, they send
+21% more asks per ply than we do in the same position. We invest slightly more
+when ahead. And we lose the behind positions (0.2860) by more than we win the
+ahead ones (0.6293) — the pair sums to 0.9153 rather than 1.0.
+
+### Why this explains every failed arm this session
+
+**Investing more when behind in a half-suit is exactly what P53, P54 and P55
+tested** — flattening `w_suit`, lowering `w_scarce`, and the joint grid. Nineteen
+thousand two hundred duel games, both signs on both knobs, and every downward
+step loses, `w_suit = −0.06` by **−1.17** in self-play.
+
+So the difference is **not a parameter of the ask objective**. The edges that
+decide the contested bands are 1–8% per-ask quantities compounding in
+winner-take-all races to six, and no single weight moves them by enough without
+moving something else by more. That is the coherent account of five consecutive
+null or negative registrations, and it is a stronger statement than any of them
+alone: the deficit is real, it is fully localised, and it is **not in the part of
+the engine this project has been tuning.**
