@@ -270,7 +270,7 @@ Yes, unusually explicit: ``A test with $\pm 0.047$ resolution against an
 effect that may be a fifth of that is \textbf{underpowered by construction}
 \ldots No outcome licenses running more pairs until the interval clears
 zero.'' &
-\textbf{REAL, then WITHDRAWN.} ``$+0.0835$ \ldots $[+0.0338, +0.1332]$'';
+\textbf{REAL, then WITHDRAWN.} ``$+0.0835$ \ldots $[+0.0338,$ $+0.1332]$'';
 replication $+0.0980$. Amendment 2: ``The correction is \textbf{withdrawn
 permanently}'' under the award rule.
 \path{results/v04_duels.jsonl}, and the \path{ii_ask_fit} refits &
@@ -777,8 +777,8 @@ them and which is about us?} &
 Written before any instrument position was scored or candidate game played.
 Stage~0 is an instrument that ships nothing: the champion's own games, frozen
 after \texttt{act()} at every fourth scored decision, re-weighted at
-\textbf{20 cells} --- $\gamma_{\text{opp}} \in \{-1.1055, -0.5, 0.0, 0.35,
-0.7, 1.0\} \times \gamma_{\text{team}} \in \{0.0, 0.35, 0.7\}$, plus
+\textbf{20 cells} --- $\gamma_{\text{opp}} \in \{-1.1055,$ $-0.5,$ $0.0,$ $0.35,$ $0.7,$ $1.0\}$
+$\times$ $\gamma_{\text{team}} \in \{0.0, 0.35, 0.7\}$, plus
 \texttt{opp\_lambda} $\in \{0.3, 0.9\}$ at the incumbent $(0.35, 0.35)$ ---
 at \textbf{two budgets}, $720$ and $2{,}880$ draws, block~A cross-engine
 against the external engine and block~B self-play, NLL/Brier/top-1 per truth pool paired
@@ -994,13 +994,13 @@ $1{,}249$ pairs of ${\sim}54{,}000$: \emph{rarity, not size, decides whether a
 mis-specification matters}. What bites is D2's other correction, the $-15.7\%$
 \emph{under}-weight at $k=3$ and its $5{,}216$ pairs --- D2 differs from both
 arms in $487$ of $600$ pairings. The prediction that D2 exceeds D1 ``but
-barely'' is wrong against \textsc{sestina}, where the gap is $+0.127$; in
+barely'' is wrong against the external engine, where the gap is $+0.127$; in
 self-play the two are indistinguishable. D3 stays demoted. &
 \textbf{NOTHING CLEARS; THE SHAPE IS REAL AND WORTH LESS THAN THE BAR.}
 $7{,}200$ games, zero fallbacks, zero unfinished. D1 $-0.0267$
 $[-0.296, +0.243]$ / $-0.1367$ $[-0.359, +0.085]$; D2 $+0.1000$
 $[-0.174, +0.374]$ / $-0.1333$ $[-0.358, +0.091]$; the control $-0.0267$ /
-$-0.1367$. D2's \textsc{sestina} figure
+$-0.1367$. D2's figure against the external engine
 is below the bar with an interval covering zero and is negative in the other
 population, so it is not a win and does not advance. Ask hit rate rises
 $0.5227 \to 0.5411$, which is bite without conversion --- the same pattern the
@@ -1020,12 +1020,28 @@ multiplied over all six cards including the one being asked for and therefore
 scored exactly zero on provably certain steals --- the asks it exists to reward.
 \S\ref{sec:res-learn} records the decision not to re-harvest, which is sound
 about harvesting and says nothing about a duel: \texttt{w\_claim} is already a
-constructor parameter and needs no code change. Four doses on block
+constructor parameter and needs no code change. &
+Nothing clears and no withdrawal fires, as predicted --- but
+\textbf{prediction~1 failed}, and it is the one that decides what may be read.
+The dose response is \emph{not monotone} in either population: $-0.063$,
+$\mathbf{+0.090}$, $-0.047$ against the external engine and $+0.107$,
+$\mathbf{+0.223}$, $+0.187$ in self-play, up then down both times. The
+registration fixed the consequence in advance --- ``the term is interacting with
+\texttt{turn} or \texttt{scarce} rather than adding, and no single dose should be
+read'' --- so A2, the most promising cell this line of work has produced, is set
+aside for the registered reason rather than the convenient one. &
+\textbf{NOTHING CLEARS, AND THE REGISTRATION DISQUALIFIES ITS OWN BEST CELL.}
+$7{,}200$ games, zero fallbacks, zero unfinished, and the dose check confirmed
+every arm's \texttt{weights.claim} at run time. &
+\S\ref{sec:res-profile} \\
+
+ & \emph{(P52, continued)} &
+Four doses on block
 \textbf{15,700,000}, $300$ deals $\times$ 2 parities: $+0.10$, $+0.30$, $+0.60$
 and \textbf{$-0.20$} --- both signs, because a sweep that looks only where the
 story predicts is not a measurement of the term. Aimed here because the chain is
 measured end to end: we declare less, so half-suits stay live longer, so our
-cards sit publicly located $25\%$ longer, so \textsc{sestina} meets a free card
+cards sit publicly located $25\%$ longer, so the external engine meets a free card
 $1.092\times$ as often as we do and hits more \emph{despite ordering a visit
 worse than we do}. Per ply of exposure our cards are taken back \emph{less}
 often, so the wasted-hits gap is exposure \emph{time}, and \texttt{claim} is the
@@ -1036,31 +1052,21 @@ harness: doses disagreeing in sign inside the swept range, and any arm whose
 \texttt{weights.claim} does not equal its registered dose at run time --- the
 runner asserts it, because a duel that silently ran the champion under a
 candidate's name would repeat this registration's own premise in a worse form. &
-Nothing clears and no withdrawal fires, as predicted --- but
-\textbf{prediction~1 failed}, and it is the one that decides what may be read.
-The dose response is \emph{not monotone} in either population: $-0.063$,
-$\mathbf{+0.090}$, $-0.047$ against \textsc{sestina} and $+0.107$,
-$\mathbf{+0.223}$, $+0.187$ in self-play, up then down both times. The
-registration fixed the consequence in advance --- ``the term is interacting with
-\texttt{turn} or \texttt{scarce} rather than adding, and no single dose should be
-read'' --- so A2, the most promising cell this line of work has produced, is set
-aside for the registered reason rather than the convenient one. It would not ship
+It would not ship
 regardless: the bar needs $+0.15$ clear of zero in \emph{both} populations and
-A2's \textsc{sestina} interval covers zero. Prediction~4 also failed and points
+A2's interval against the external engine covers zero. Prediction~4 also failed and points
 the same way: the ask hit rate was predicted flat or falling and \emph{rose} in
 every arm. Prediction~2 is half right --- A4 is negative in self-play and
-\textbf{positive} against \textsc{sestina}, which is a warning about A2 in
+\textbf{positive} against the external engine, which is a warning about A2 in
 itself. All four arms are genuinely distinct, every pair differing on $500+$ of
 $600$ pairings, so this is not P51's case of two names for one arm. &
-\textbf{NOTHING CLEARS, AND THE REGISTRATION DISQUALIFIES ITS OWN BEST CELL.}
-$7{,}200$ games, zero fallbacks, zero unfinished, and the dose check confirmed
-every arm's \texttt{weights.claim} at run time. A1 $-0.0633$ / $+0.1067$; A2
+A1 $-0.0633$ / $+0.1067$; A2
 $+0.0900$ $[-0.200, +0.380]$ / $+0.2233$ $[-0.012, +0.458]$; A3 $-0.0467$ /
 $+0.1867$; A4 $+0.2267$ / $-0.2000$. What it closes is \texttt{w\_claim} as the
 lever \emph{at these doses}; it does not close declaration count as the channel,
 which still needs $D_{\text{us}}$ to rise by $+0.541$ a game.
 \path{results/p52_claim_term.json} &
-\S\ref{sec:res-profile} \\
+ \\
 
 P53 & \path{p53_depth_preference.md} \newline
 \emph{Our ask allocation is far steeper in own-depth than theirs. Is that the
@@ -1162,7 +1168,7 @@ cell passes, P55 ends and is not re-scoped into a finer grid. &
 \textbf{A null at stage 1, and prediction~1 failed, which refutes the
 interaction hypothesis.} Every cell is negative in self-play and not one has both
 point estimates $\ge 0$, so nothing advances and there is no stage 2. The two
-best cells by \textsc{sestina} margin both sit at the \emph{shipped}
+best cells by margin against the external engine both sit at the \emph{shipped}
 \texttt{w\_suit}, i.e.\ on the \texttt{w\_scarce} axis rather than on a diagonal
 --- and the registration had fixed what that means: the single sweeps had already
 answered the question. Raising \texttt{w\_suit} is worse at every
