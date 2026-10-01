@@ -1,0 +1,68 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 3,
+ "n_games": 500,
+ "is_a_ceiling_study": true,
+ "margin_A": -0.66,
+ "arms": {
+  "T_team": {
+   "side": "team",
+   "ceiling": 5.208,
+   "ci95": [
+    4.908998701024933,
+    5.507001298975068
+   ],
+   "margin": 4.548,
+   "pinned_by_cheat_per_game": 40.45
+  },
+  "O_opp": {
+   "side": "opp",
+   "ceiling": 4.596,
+   "ci95": [
+    4.2700922176535405,
+    4.92190778234646
+   ],
+   "margin": 3.936,
+   "pinned_by_cheat_per_game": 40.888
+  },
+  "F_all": {
+   "side": "all",
+   "ceiling": 9.556,
+   "ci95": [
+    9.310780311401892,
+    9.801219688598106
+   ],
+   "margin": 8.896,
+   "pinned_by_cheat_per_game": 60.238
+  }
+ },
+ "sum_is_not_the_whole": {
+  "T_plus_O": 9.804,
+  "F": 9.556
+ },
+ "mechanism": {
+  "A_honest": {
+   "allocation_per_game": 0.144,
+   "ownership_per_game": 0.004
+  },
+  "T_team": {
+   "allocation_per_game": 0.0,
+   "ownership_per_game": 0.0
+  },
+  "O_opp": {
+   "allocation_per_game": 2.32,
+   "ownership_per_game": 0.0
+  },
+  "F_all": {
+   "allocation_per_game": 0.0,
+   "ownership_per_game": 0.0
+  }
+ },
+ "bridge_fallbacks": 0,
+ "unfinished": 0,
+ "teammate_over_opponent": 1.133159268929504,
+ "parts_sum": 9.804,
+ "note_ratio": "the teammate ceiling over the opponent ceiling; 2.61 at BRIDGE_REV 2, and the factor the corpus repeatedly read as a qualitative split between the two channels"
+}

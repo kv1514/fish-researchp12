@@ -1,0 +1,29 @@
+{
+ "declare_regret": {
+  "best_claim_minus_best_ask_when_asked": {
+   "mean": -1.1849489795918366,
+   "half_width_by_deal": 0.10513650394360882,
+   "n_deals": 4,
+   "n_positions": 98,
+   "positions_where_claim_beat_ask": 3
+  },
+  "all positions": {
+   "regret": 0.11009174311926606,
+   "half_width_by_deal": 0.1339255731478544,
+   "n_deals": 4,
+   "n_positions": 109
+  },
+  "it ASKED (declare instead?)": {
+   "regret": 0.16071428571428573,
+   "half_width_by_deal": 0.14328771998962028,
+   "n_deals": 4,
+   "n_positions": 98
+  },
+  "it DECLARED (ask instead?)": {
+   "regret": -0.3409090909090909,
+   "half_width_by_deal": 0.44016301323896245,
+   "n_deals": 4,
+   "n_positions": 11
+  }
+ }
+}

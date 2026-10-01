@@ -1,0 +1,24 @@
+{
+ "prereg": "prereg/kraken_v12_free_message.md",
+ "seed0": 10150000,
+ "arm": {
+  "convention_q": 0.5,
+  "convention_book": "locate",
+  "convention_max_cost": 1e-09
+ },
+ "totals": {
+  "games": 400,
+  "arm_asks": 17855,
+  "arm_carry": 7061,
+  "champ_asks": 18353,
+  "champ_carry": 6193
+ },
+ "arm_carry_rate": 0.3954634556146738,
+ "champion_carry_rate": 0.3374380210319839,
+ "carry_gain": 0.05802543458268988,
+ "carry_gain_bar": 0.02,
+ "passes_carry_gain_bar": true,
+ "carry_above_baseline": true,
+ "carry_within_10pts_of_expected": true,
+ "seconds": 175.5
+}

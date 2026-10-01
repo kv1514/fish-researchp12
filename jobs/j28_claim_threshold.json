@@ -1,0 +1,40 @@
+[
+ {
+  "label": "CLAIM THRESHOLD 0.90 vs 0.97 block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_threshold": 0.9
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 25000000,
+  "agent_seed": 9970
+ },
+ {
+  "label": "CLAIM THRESHOLD 0.90 vs 0.97 block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "claim_threshold": 0.9
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 25200000,
+  "agent_seed": 9971
+ }
+]

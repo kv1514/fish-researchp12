@@ -1,0 +1,55 @@
+{
+ "script": "scripts4/arm_overlap.py",
+ "descriptive": true,
+ "sources": [
+  "results/p53_depth_preference.json"
+ ],
+ "arms": [
+  "B1_suit_000",
+  "B2_suit_m03",
+  "B3_suit_m06",
+  "B4_suit_p12"
+ ],
+ "fields_compared": [
+  "sestina_cand",
+  "self"
+ ],
+ "pairs": {
+  "B1_suit_000 vs B2_suit_m03": {
+   "shared": 600,
+   "identical": 36,
+   "differ": 564,
+   "identical_share": 0.06
+  },
+  "B1_suit_000 vs B3_suit_m06": {
+   "shared": 600,
+   "identical": 19,
+   "differ": 581,
+   "identical_share": 0.03166666666666667
+  },
+  "B1_suit_000 vs B4_suit_p12": {
+   "shared": 600,
+   "identical": 35,
+   "differ": 565,
+   "identical_share": 0.058333333333333334
+  },
+  "B2_suit_m03 vs B3_suit_m06": {
+   "shared": 600,
+   "identical": 21,
+   "differ": 579,
+   "identical_share": 0.035
+  },
+  "B2_suit_m03 vs B4_suit_p12": {
+   "shared": 600,
+   "identical": 22,
+   "differ": 578,
+   "identical_share": 0.03666666666666667
+  },
+  "B3_suit_m06 vs B4_suit_p12": {
+   "shared": 600,
+   "identical": 20,
+   "differ": 580,
+   "identical_share": 0.03333333333333333
+  }
+ }
+}

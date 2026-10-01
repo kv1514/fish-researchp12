@@ -1,0 +1,157 @@
+{
+ "question": "does their released ladder run the same direction in both arbiters",
+ "control_for": "whether the FishLab package carries our policy at all",
+ "scope": "our side is held fixed WITHIN each arbiter, so the trend across their versions is robust to the two realisations of our champion differing; the LEVELS are not comparable across arbiters and are not compared here",
+ "rungs": {
+  "v02": {
+   "our_arbiter": {
+    "margin": 1.5283,
+    "half_width": 0.1548,
+    "ci95": [
+     1.3735,
+     1.6832
+    ],
+    "n_clusters": 600,
+    "their_declares": 4798,
+    "their_err": 0.0913,
+    "our_declares": 6002,
+    "our_err": 0.0205,
+    "fallbacks": 0,
+    "unfinished": 0,
+    "identity_residual_max": 0,
+    "games": 1200
+   },
+   "their_arbiter": null
+  },
+  "v03": {
+   "our_arbiter": {
+    "margin": 0.6133,
+    "half_width": 0.1537,
+    "ci95": [
+     0.4597,
+     0.767
+    ],
+    "n_clusters": 600,
+    "their_declares": 5058,
+    "their_err": 0.0471,
+    "our_declares": 5742,
+    "our_err": 0.0369,
+    "fallbacks": 0,
+    "unfinished": 0,
+    "identity_residual_max": 0,
+    "games": 1200
+   },
+   "their_arbiter": {
+    "margin": 1.2972199999999998,
+    "their_err": 0.13648099999999996,
+    "our_err": 0.019411999999999985,
+    "games": 720,
+    "win_rate": 0.670833
+   }
+  },
+  "v04": {
+   "our_arbiter": {
+    "margin": 1.9867,
+    "half_width": 0.1495,
+    "ci95": [
+     1.8371,
+     2.1362
+    ],
+    "n_clusters": 600,
+    "their_declares": 4389,
+    "their_err": 0.1636,
+    "our_declares": 6411,
+    "our_err": 0.0838,
+    "fallbacks": 0,
+    "unfinished": 0,
+    "identity_residual_max": 0,
+    "games": 1200
+   },
+   "their_arbiter": null
+  },
+  "v05": {
+   "our_arbiter": {
+    "margin": 2.1233,
+    "half_width": 0.157,
+    "ci95": [
+     1.9663,
+     2.2803
+    ],
+    "n_clusters": 600,
+    "their_declares": 4574,
+    "their_err": 0.1506,
+    "our_declares": 6226,
+    "our_err": 0.0387,
+    "fallbacks": 0,
+    "unfinished": 0,
+    "identity_residual_max": 0,
+    "games": 1200
+   },
+   "their_arbiter": {
+    "margin": -0.3527799999999992,
+    "their_err": 0.020047000000000037,
+    "our_err": 0.007967999999999975,
+    "games": 720,
+    "win_rate": 0.445833
+   }
+  },
+  "v06": {
+   "our_arbiter": {
+    "margin": 1.885,
+    "half_width": 0.1517,
+    "ci95": [
+     1.7333,
+     2.0367
+    ],
+    "n_clusters": 600,
+    "their_declares": 4765,
+    "their_err": 0.1572,
+    "our_declares": 6035,
+    "our_err": 0.0419,
+    "fallbacks": 0,
+    "unfinished": 0,
+    "identity_residual_max": 0,
+    "games": 1200
+   },
+   "their_arbiter": {
+    "margin": -0.48056000000000054,
+    "their_err": 0.015329999999999955,
+    "our_err": 0.012387000000000037,
+    "games": 720,
+    "win_rate": 0.420833
+   }
+  },
+  "v07": {
+   "our_arbiter": {
+    "margin": 2.36,
+    "half_width": 0.1583,
+    "ci95": [
+     2.2017,
+     2.5183
+    ],
+    "n_clusters": 600,
+    "their_declares": 4800,
+    "their_err": 0.2071,
+    "our_declares": 6000,
+    "our_err": 0.0297,
+    "fallbacks": 0,
+    "unfinished": 0,
+    "identity_residual_max": 0,
+    "games": 1200
+   },
+   "their_arbiter": {
+    "margin": -0.6199999999999992,
+    "their_err": 0.02086600000000005,
+    "our_err": 0.008689999999999976,
+    "games": 1200,
+    "win_rate": 0.400833
+   }
+  }
+ },
+ "spearman_vs_version": {
+  "their_declaration_error_our_arbiter": 0.7714285714285715,
+  "their_declaration_error_their_arbiter": -0.3999999999999999,
+  "our_margin_our_arbiter": 0.7714285714285715,
+  "our_margin_their_arbiter": -0.9999999999999998
+ }
+}

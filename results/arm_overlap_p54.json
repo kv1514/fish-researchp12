@@ -1,0 +1,55 @@
+{
+ "script": "scripts4/arm_overlap.py",
+ "descriptive": true,
+ "sources": [
+  "results/p54_scarce_and_doomed_asks.json"
+ ],
+ "arms": [
+  "C1_scarce_p10",
+  "C2_scarce_000",
+  "C3_scarce_m10",
+  "C4_scarce_p40"
+ ],
+ "fields_compared": [
+  "sestina_cand",
+  "self"
+ ],
+ "pairs": {
+  "C1_scarce_p10 vs C2_scarce_000": {
+   "shared": 600,
+   "identical": 79,
+   "differ": 521,
+   "identical_share": 0.13166666666666665
+  },
+  "C1_scarce_p10 vs C3_scarce_m10": {
+   "shared": 600,
+   "identical": 45,
+   "differ": 555,
+   "identical_share": 0.075
+  },
+  "C1_scarce_p10 vs C4_scarce_p40": {
+   "shared": 600,
+   "identical": 22,
+   "differ": 578,
+   "identical_share": 0.03666666666666667
+  },
+  "C2_scarce_000 vs C3_scarce_m10": {
+   "shared": 600,
+   "identical": 68,
+   "differ": 532,
+   "identical_share": 0.11333333333333333
+  },
+  "C2_scarce_000 vs C4_scarce_p40": {
+   "shared": 600,
+   "identical": 28,
+   "differ": 572,
+   "identical_share": 0.04666666666666667
+  },
+  "C3_scarce_m10 vs C4_scarce_p40": {
+   "shared": 600,
+   "identical": 31,
+   "differ": 569,
+   "identical_share": 0.051666666666666666
+  }
+ }
+}

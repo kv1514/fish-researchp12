@@ -1,0 +1,30 @@
+{
+ "n_games": 30,
+ "population": "champion",
+ "spec": {
+  "opponent_gamma": 0.35,
+  "n_draws": 240
+ },
+ "rules": {
+  "variant": "54",
+  "claims_any_time": false,
+  "allow_bluff_asks": false,
+  "wrong_distribution_outcome": "opponent",
+  "mandatory_claim_known": false,
+  "starting_player": 0
+ },
+ "nll": {
+  "mate": {
+   "gamma0": 1.4046551482353018,
+   "gamma035": 1.4633148630491795,
+   "improvement": -0.05865971481387766,
+   "n_cards": 4621
+  },
+  "opp": {
+   "gamma0": 1.4149544447090183,
+   "gamma035": 1.4902826687574435,
+   "improvement": -0.07532822404842521,
+   "n_cards": 6938
+  }
+ }
+}

@@ -77,16 +77,19 @@ Legal iff:
 
 Resolution (all 6 actual locations become **public**, since players show
 those cards):
-- **Exact match** of declared assignment vs actual holdings: the claiming
+- **Exact match** of declared assignment vs actual holdings: the declaring
   team scores the half-suit.
 - Else, if **any** of the 6 cards is held by the opposing team: the opposing
   team scores it.
-- Else (all 6 within the claiming team but the split was declared wrong):
-  `wrong_distribution_outcome` applies, `"null"` (baseline; nobody scores)
-  or `"opponent"`.
+- Else (all 6 within the declaring team but the split was declared wrong):
+  `wrong_distribution_outcome` applies, `"opponent"` (**baseline**: the
+  half-suit is awarded to the opposing team, so every wrong declaration
+  costs the set) or `"null"` (legacy variant: nobody scores it; this was
+  the engine's default through the v0.4 measurement era and is retained so
+  those results stay reproducible).
 
 All 6 cards leave every hand. The turn does not change as a result of the
-claim itself (see 4.4 for empty-hand consequences).
+declaration itself (see 4.4 for empty-hand consequences).
 
 ### 4.3 PASS(teammate)
 
@@ -103,11 +106,13 @@ successful ask keeps the turn with the asker, who just gained a card.)
   passes to the next opponent clockwise who has cards. (Their team
   necessarily holds all remaining cards, so play continues as forced claims.)
 - If the player to move has cards but **no opponent** has cards, no ASK is
-  legal and the player must CLAIM. Claims still resolve normally, so a
-  mis-declared split can still null a set.
+  legal and the player must DECLARE. Declarations still resolve normally, so
+  a mis-declared split hands the set to the opponents under the baseline
+  rule (and voids it under the legacy `"null"` variant).
 - The game ends when all half-suits are resolved. Final score is
-  (team A sets, team B sets, null sets), summing to 8 or 9. Higher set count
-  wins; equal is a tie.
+  (team A sets, team B sets, null sets), summing to 8 or 9; the null count
+  is always 0 under the baseline rule and exists for the legacy variant.
+  Higher set count wins; equal is a tie.
 
 ### 4.5 Termination is not guaranteed by the rules
 
@@ -148,7 +153,7 @@ inference reduces to constraints on the initial deal.
 | `variant` | `"54"` | `"48"` |
 | `claims_any_time` | `False` (own turn only) | `True` |
 | `allow_bluff_asks` | `False` | `True` (may ask for a held card) |
-| `wrong_distribution_outcome` | `"null"` | `"opponent"` |
+| `wrong_distribution_outcome` | `"opponent"` (misdeclared set awarded to the foe) | `"null"` (legacy void variant) |
 | `mandatory_claim_known` | `False` | `True` (reserved; not yet enforced) |
 | `starting_player` | `0` | any id / harness-randomized |
 

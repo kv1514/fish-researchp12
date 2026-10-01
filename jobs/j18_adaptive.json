@@ -1,0 +1,26 @@
+[
+ {"label": "retake penalty w0.30 vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_retake": 0.30}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 4110000, "agent_seed": 9101},
+
+ {"label": "retake penalty w1.00 vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_retake": 1.00}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 4120000, "agent_seed": 9102},
+
+ {"label": "score-adaptive w_behind 0.50 vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_behind": 0.50}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 4130000, "agent_seed": 9103},
+
+ {"label": "score-adaptive w_behind 1.00 vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_behind": 1.00}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 4140000, "agent_seed": 9104},
+
+ {"label": "score-adaptive w_behind -0.50 (play safe when behind) vs champion", "n_pairs": 200,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_behind": -0.50}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 4150000, "agent_seed": 9105}
+]

@@ -1,0 +1,665 @@
+{
+ "field": [
+  "kraken",
+  "kraken-nolookahead",
+  "tuned",
+  "probabilistic",
+  "heuristic",
+  "random"
+ ],
+ "n_deals_per_cell": 40,
+ "base_seed": 90000,
+ "independent_seeds": true,
+ "duplicate_deals": true,
+ "cells": {
+  "kraken|kraken": {
+   "a": "kraken",
+   "b": "kraken",
+   "n_pairs": 40,
+   "win_rate": 0.575,
+   "wins": 19,
+   "ties": 8,
+   "losses": 13,
+   "score_ci95": [
+    0.42194800436059987,
+    0.7149083147518411
+   ],
+   "margin": 0.1,
+   "margin_ci95": [
+    -1.1706220333507493,
+    1.3706220333507495
+   ]
+  },
+  "kraken|kraken-nolookahead": {
+   "a": "kraken",
+   "b": "kraken-nolookahead",
+   "n_pairs": 40,
+   "win_rate": 0.5,
+   "wins": 16,
+   "ties": 8,
+   "losses": 16,
+   "score_ci95": [
+    0.35199278797099753,
+    0.6480072120290025
+   ],
+   "margin": -0.8,
+   "margin_ci95": [
+    -2.149497028157659,
+    0.549497028157659
+   ]
+  },
+  "kraken|tuned": {
+   "a": "kraken",
+   "b": "tuned",
+   "n_pairs": 40,
+   "win_rate": 0.7625,
+   "wins": 27,
+   "ties": 7,
+   "losses": 6,
+   "score_ci95": [
+    0.6114465271532299,
+    0.8675505897403142
+   ],
+   "margin": 2.7,
+   "margin_ci95": [
+    1.5728826276555214,
+    3.827117372344479
+   ]
+  },
+  "kraken|probabilistic": {
+   "a": "kraken",
+   "b": "probabilistic",
+   "n_pairs": 40,
+   "win_rate": 0.7625,
+   "wins": 29,
+   "ties": 3,
+   "losses": 8,
+   "score_ci95": [
+    0.6114465271532299,
+    0.8675505897403142
+   ],
+   "margin": 2.55,
+   "margin_ci95": [
+    1.2225462553353048,
+    3.877453744664695
+   ]
+  },
+  "kraken|heuristic": {
+   "a": "kraken",
+   "b": "heuristic",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 15.35,
+   "margin_ci95": [
+    14.820017155407392,
+    15.879982844592607
+   ]
+  },
+  "kraken|random": {
+   "a": "kraken",
+   "b": "random",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 17.1,
+   "margin_ci95": [
+    16.691590689401092,
+    17.50840931059891
+   ]
+  },
+  "kraken-nolookahead|kraken": {
+   "a": "kraken-nolookahead",
+   "b": "kraken",
+   "n_pairs": 40,
+   "win_rate": 0.45,
+   "wins": 15,
+   "ties": 6,
+   "losses": 19,
+   "score_ci95": [
+    0.30705075280944694,
+    0.6017117011155924
+   ],
+   "margin": -0.6,
+   "margin_ci95": [
+    -2.028055881983273,
+    0.8280558819832727
+   ]
+  },
+  "kraken-nolookahead|kraken-nolookahead": {
+   "a": "kraken-nolookahead",
+   "b": "kraken-nolookahead",
+   "n_pairs": 40,
+   "win_rate": 0.425,
+   "wins": 14,
+   "ties": 6,
+   "losses": 20,
+   "score_ci95": [
+    0.28509168524815875,
+    0.5780519956394001
+   ],
+   "margin": -0.55,
+   "margin_ci95": [
+    -1.7443362274213174,
+    0.6443362274213174
+   ]
+  },
+  "kraken-nolookahead|tuned": {
+   "a": "kraken-nolookahead",
+   "b": "tuned",
+   "n_pairs": 40,
+   "win_rate": 0.6625,
+   "wins": 23,
+   "ties": 7,
+   "losses": 10,
+   "score_ci95": [
+    0.5075661365173825,
+    0.78895588822624
+   ],
+   "margin": 1.8,
+   "margin_ci95": [
+    0.5898483947632087,
+    3.0101516052367914
+   ]
+  },
+  "kraken-nolookahead|probabilistic": {
+   "a": "kraken-nolookahead",
+   "b": "probabilistic",
+   "n_pairs": 40,
+   "win_rate": 0.7875,
+   "wins": 29,
+   "ties": 5,
+   "losses": 6,
+   "score_ci95": [
+    0.6386226239809931,
+    0.8859932659500314
+   ],
+   "margin": 2.95,
+   "margin_ci95": [
+    1.764479809165972,
+    4.135520190834028
+   ]
+  },
+  "kraken-nolookahead|heuristic": {
+   "a": "kraken-nolookahead",
+   "b": "heuristic",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 14.4,
+   "margin_ci95": [
+    13.765308496896324,
+    15.034691503103677
+   ]
+  },
+  "kraken-nolookahead|random": {
+   "a": "kraken-nolookahead",
+   "b": "random",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 17.1,
+   "margin_ci95": [
+    16.666665179982374,
+    17.53333482001763
+   ]
+  },
+  "tuned|kraken": {
+   "a": "tuned",
+   "b": "kraken",
+   "n_pairs": 40,
+   "win_rate": 0.275,
+   "wins": 9,
+   "ties": 4,
+   "losses": 27,
+   "score_ci95": [
+    0.1610785343314309,
+    0.4283525083312457
+   ],
+   "margin": -2.25,
+   "margin_ci95": [
+    -3.7496300721710205,
+    -0.7503699278289795
+   ]
+  },
+  "tuned|kraken-nolookahead": {
+   "a": "tuned",
+   "b": "kraken-nolookahead",
+   "n_pairs": 40,
+   "win_rate": 0.35,
+   "wins": 10,
+   "ties": 8,
+   "losses": 22,
+   "score_ci95": [
+    0.2213433317104915,
+    0.5049440300646263
+   ],
+   "margin": -1.65,
+   "margin_ci95": [
+    -3.0232883024455353,
+    -0.2767116975544648
+   ]
+  },
+  "tuned|tuned": {
+   "a": "tuned",
+   "b": "tuned",
+   "n_pairs": 40,
+   "win_rate": 0.625,
+   "wins": 21,
+   "ties": 8,
+   "losses": 11,
+   "score_ci95": [
+    0.47032160054531913,
+    0.7577722646420829
+   ],
+   "margin": 1.05,
+   "margin_ci95": [
+    0.025899027670620578,
+    2.0741009723293793
+   ]
+  },
+  "tuned|probabilistic": {
+   "a": "tuned",
+   "b": "probabilistic",
+   "n_pairs": 40,
+   "win_rate": 0.6625,
+   "wins": 23,
+   "ties": 7,
+   "losses": 10,
+   "score_ci95": [
+    0.5075661365173825,
+    0.78895588822624
+   ],
+   "margin": 1.5,
+   "margin_ci95": [
+    0.36176862960656253,
+    2.6382313703934375
+   ]
+  },
+  "tuned|heuristic": {
+   "a": "tuned",
+   "b": "heuristic",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 14.1,
+   "margin_ci95": [
+    13.17308689381022,
+    15.02691310618978
+   ]
+  },
+  "tuned|random": {
+   "a": "tuned",
+   "b": "random",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 16.7,
+   "margin_ci95": [
+    16.186862288697554,
+    17.213137711302444
+   ]
+  },
+  "probabilistic|kraken": {
+   "a": "probabilistic",
+   "b": "kraken",
+   "n_pairs": 40,
+   "win_rate": 0.2875,
+   "wins": 9,
+   "ties": 5,
+   "losses": 26,
+   "score_ci95": [
+    0.17085731648676938,
+    0.44138311269464736
+   ],
+   "margin": -2.65,
+   "margin_ci95": [
+    -3.907655633877634,
+    -1.392344366122366
+   ]
+  },
+  "probabilistic|kraken-nolookahead": {
+   "a": "probabilistic",
+   "b": "kraken-nolookahead",
+   "n_pairs": 40,
+   "win_rate": 0.2875,
+   "wins": 8,
+   "ties": 7,
+   "losses": 25,
+   "score_ci95": [
+    0.17085731648676938,
+    0.44138311269464736
+   ],
+   "margin": -2.95,
+   "margin_ci95": [
+    -4.427075309299087,
+    -1.4729246907009133
+   ]
+  },
+  "probabilistic|tuned": {
+   "a": "probabilistic",
+   "b": "tuned",
+   "n_pairs": 40,
+   "win_rate": 0.375,
+   "wins": 11,
+   "ties": 8,
+   "losses": 21,
+   "score_ci95": [
+    0.2422277353579172,
+    0.529678399454681
+   ],
+   "margin": -1.35,
+   "margin_ci95": [
+    -2.41822224609472,
+    -0.28177775390528037
+   ]
+  },
+  "probabilistic|probabilistic": {
+   "a": "probabilistic",
+   "b": "probabilistic",
+   "n_pairs": 40,
+   "win_rate": 0.55,
+   "wins": 18,
+   "ties": 8,
+   "losses": 14,
+   "score_ci95": [
+    0.39828829888440775,
+    0.6929492471905531
+   ],
+   "margin": 0.75,
+   "margin_ci95": [
+    -0.49339461205573665,
+    1.9933946120557366
+   ]
+  },
+  "probabilistic|heuristic": {
+   "a": "probabilistic",
+   "b": "heuristic",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 13.6,
+   "margin_ci95": [
+    12.887442766936456,
+    14.312557233063544
+   ]
+  },
+  "probabilistic|random": {
+   "a": "probabilistic",
+   "b": "random",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 17.4,
+   "margin_ci95": [
+    17.069696069459756,
+    17.73030393054024
+   ]
+  },
+  "heuristic|kraken": {
+   "a": "heuristic",
+   "b": "kraken",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -15.4,
+   "margin_ci95": [
+    -16.082477844240753,
+    -14.717522155759248
+   ]
+  },
+  "heuristic|kraken-nolookahead": {
+   "a": "heuristic",
+   "b": "kraken-nolookahead",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -14.9,
+   "margin_ci95": [
+    -15.743979619206264,
+    -14.056020380793736
+   ]
+  },
+  "heuristic|tuned": {
+   "a": "heuristic",
+   "b": "tuned",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -13.45,
+   "margin_ci95": [
+    -14.399692841257185,
+    -12.500307158742814
+   ]
+  },
+  "heuristic|probabilistic": {
+   "a": "heuristic",
+   "b": "probabilistic",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -13.2,
+   "margin_ci95": [
+    -14.147619424531639,
+    -12.25238057546836
+   ]
+  },
+  "heuristic|heuristic": {
+   "a": "heuristic",
+   "b": "heuristic",
+   "n_pairs": 40,
+   "win_rate": 0.475,
+   "wins": 13,
+   "ties": 12,
+   "losses": 15,
+   "score_ci95": [
+    0.32935229550181694,
+    0.6250289314607027
+   ],
+   "margin": -0.25,
+   "margin_ci95": [
+    -1.316256341974331,
+    0.816256341974331
+   ]
+  },
+  "heuristic|random": {
+   "a": "heuristic",
+   "b": "random",
+   "n_pairs": 40,
+   "win_rate": 1.0,
+   "wins": 40,
+   "ties": 0,
+   "losses": 0,
+   "score_ci95": [
+    0.9123754607496077,
+    1.0
+   ],
+   "margin": 11.3,
+   "margin_ci95": [
+    10.366321014920073,
+    12.233678985079928
+   ]
+  },
+  "random|kraken": {
+   "a": "random",
+   "b": "kraken",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -17.15,
+   "margin_ci95": [
+    -17.530139392065006,
+    -16.76986060793499
+   ]
+  },
+  "random|kraken-nolookahead": {
+   "a": "random",
+   "b": "kraken-nolookahead",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -16.9,
+   "margin_ci95": [
+    -17.308409310598908,
+    -16.49159068940109
+   ]
+  },
+  "random|tuned": {
+   "a": "random",
+   "b": "tuned",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -16.65,
+   "margin_ci95": [
+    -17.116839492539963,
+    -16.183160507460034
+   ]
+  },
+  "random|probabilistic": {
+   "a": "random",
+   "b": "probabilistic",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -17.05,
+   "margin_ci95": [
+    -17.432889079924117,
+    -16.667110920075885
+   ]
+  },
+  "random|heuristic": {
+   "a": "random",
+   "b": "heuristic",
+   "n_pairs": 40,
+   "win_rate": 0.0,
+   "wins": 0,
+   "ties": 0,
+   "losses": 40,
+   "score_ci95": [
+    0.0,
+    0.08762453925039232
+   ],
+   "margin": -11.95,
+   "margin_ci95": [
+    -12.78821114929636,
+    -11.111788850703638
+   ]
+  },
+  "random|random": {
+   "a": "random",
+   "b": "random",
+   "n_pairs": 40,
+   "win_rate": 0.5875,
+   "wins": 22,
+   "ties": 3,
+   "losses": 15,
+   "score_ci95": [
+    0.4339080619817175,
+    0.7257576436494639
+   ],
+   "margin": 0.75,
+   "margin_ci95": [
+    -0.688941518160163,
+    2.188941518160163
+   ]
+  }
+ },
+ "seconds": 958.8228197097778
+}

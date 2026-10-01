@@ -1,0 +1,199 @@
+{
+ "engine": {
+  "digest": "8e1940169e32",
+  "files": {
+   "fish4/agent4.py": "a98397ace2f8",
+   "fish4/adaptive.py": "c4a790573857",
+   "fish4/askfeat.py": "1a9cceb2613f",
+   "fish4/posterior.py": "2bb422b1ca7e",
+   "fish4/lookahead.py": "b3e226a1a941",
+   "fish4/claim4.py": "30925c85eb41",
+   "fish4/oppmodel.py": "81225d4f2518",
+   "fish4/hsvalue.py": "7f5261b1ad8d",
+   "fish4/registry4.py": "f80979d9da90",
+   "fish/beliefs.py": "5a9dd46a02db",
+   "fish/engine.py": "a121f20f7004"
+  }
+ },
+ "prereg": "prereg/signal_no_repeat.md",
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 2,
+ "n_games": 4000,
+ "seed_deal": 9700000,
+ "seed_agent": 97000,
+ "arms": {
+  "A_shipped": {},
+  "B_incumbent": {
+   "signal_mode": "stuck",
+   "signal_max_p": 0.5
+  },
+  "C_norepeat": {
+   "signal_mode": "stuck",
+   "signal_max_p": 0.5,
+   "signal_no_repeat": true
+  }
+ },
+ "base": "B_incumbent",
+ "arm": "C_norepeat",
+ "margins": {
+  "A_shipped": {
+   "mean": 2.4015,
+   "half_width": 0.08575648802384953,
+   "n_clusters": 2000
+  },
+  "B_incumbent": {
+   "mean": 2.498,
+   "half_width": 0.0861895087821213,
+   "n_clusters": 2000
+  },
+  "C_norepeat": {
+   "mean": 2.3755,
+   "half_width": 0.08483392183973777,
+   "n_clusters": 2000
+  }
+ },
+ "replication": {
+  "target": 2.598,
+  "mean": 2.498,
+  "half_width": 0.0861895087821213,
+  "passes": false
+ },
+ "signal_stats": {
+  "A_shipped": {
+   "episodes": 0,
+   "fires": 0,
+   "distinct_cards": 0,
+   "fires_per_episode": null,
+   "repeats_saying_nothing_new": null
+  },
+  "B_incumbent": {
+   "episodes": 1603,
+   "fires": 32813,
+   "distinct_cards": 2393,
+   "fires_per_episode": 20.469744229569557,
+   "repeats_saying_nothing_new": 18.97691827822832
+  },
+  "C_norepeat": {
+   "episodes": 1626,
+   "fires": 2575,
+   "distinct_cards": 2575,
+   "fires_per_episode": 1.583640836408364,
+   "repeats_saying_nothing_new": 0.0
+  }
+ },
+ "manipulation": {
+  "passes": true
+ },
+ "primary": {
+  "mean": -0.1225,
+  "half_width": 0.034663209967367985,
+  "ci95": [
+   -0.157163209967368,
+   -0.087836790032632
+  ],
+  "n_clusters": 2000,
+  "verdict": "WITHDRAWN: a pre-registered gate failed"
+ },
+ "ledger": {
+  "A_shipped": {
+   "exact": {
+    "n": 3048,
+    "per_game": 0.762,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 15169,
+    "per_game": 3.7923,
+    "wrong": 1,
+    "err": 0.0001
+   },
+   "gate": {
+    "n": 1113,
+    "per_game": 0.2782,
+    "wrong": 291,
+    "err": 0.2615
+   },
+   "forced": {
+    "n": 748,
+    "per_game": 0.187,
+    "wrong": 337,
+    "err": 0.4505
+   }
+  },
+  "B_incumbent": {
+   "exact": {
+    "n": 3134,
+    "per_game": 0.7835,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 15008,
+    "per_game": 3.752,
+    "wrong": 6,
+    "err": 0.0004
+   },
+   "gate": {
+    "n": 292,
+    "per_game": 0.073,
+    "wrong": 33,
+    "err": 0.113
+   },
+   "forced": {
+    "n": 1253,
+    "per_game": 0.3132,
+    "wrong": 521,
+    "err": 0.4158
+   }
+  },
+  "C_norepeat": {
+   "exact": {
+    "n": 3062,
+    "per_game": 0.7655,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 15261,
+    "per_game": 3.8152,
+    "wrong": 2,
+    "err": 0.0001
+   },
+   "gate": {
+    "n": 866,
+    "per_game": 0.2165,
+    "wrong": 214,
+    "err": 0.2471
+   },
+   "forced": {
+    "n": 805,
+    "per_game": 0.2013,
+    "wrong": 370,
+    "err": 0.4596
+   }
+  }
+ },
+ "forced_by": {
+  "A_shipped": {
+   "no_asks": 619,
+   "stalled": 129
+  },
+  "B_incumbent": {
+   "no_asks": 668,
+   "stalled": 585
+  },
+  "C_norepeat": {
+   "no_asks": 649,
+   "stalled": 156
+  }
+ },
+ "bridge_fallbacks": 0,
+ "unfinished": 0,
+ "n_deals": 2000,
+ "registered_n_deals": 2000,
+ "smoke": false,
+ "minutes": 96.0
+}

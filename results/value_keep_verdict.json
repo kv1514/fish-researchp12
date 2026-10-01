@@ -1,0 +1,33 @@
+{
+ "name": "value_keep",
+ "complete": true,
+ "question": "does crediting the retained turn beat the champion?",
+ "prereg": "jobs/PREREGISTRATION_value_keep.md",
+ "blocks": [
+  {
+   "label": "SETTLE value_keep 0.30 vs champion block 0",
+   "est": -2.88,
+   "se": 0.11666709566630692,
+   "n": 1000
+  },
+  {
+   "label": "SETTLE value_keep 0.30 vs champion block 1",
+   "est": -2.889,
+   "se": 0.1217353625636302,
+   "n": 1000
+  }
+ ],
+ "n_pairs": 2000,
+ "estimate": -2.8843087528293063,
+ "se": 0.08423087061714994,
+ "ci": [
+  -3.049398226927578,
+  -2.7192192787310345
+ ],
+ "q": 0.002849031938598947,
+ "df": 1,
+ "i2": 0.0,
+ "rule": "above",
+ "bar": 0.05,
+ "decision": "do_not_adopt"
+}

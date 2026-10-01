@@ -1,0 +1,37 @@
+{
+ "script": "scripts4/arm_overlap.py",
+ "descriptive": true,
+ "sources": [
+  "results/p51_depth_profile.json",
+  "results/p51_control_gamma_team_14.json"
+ ],
+ "arms": [
+  "D1_flat4",
+  "D2_measured",
+  "R_gamma_team_14"
+ ],
+ "fields_compared": [
+  "sestina_cand",
+  "self"
+ ],
+ "pairs": {
+  "D1_flat4 vs D2_measured": {
+   "shared": 600,
+   "identical": 113,
+   "differ": 487,
+   "identical_share": 0.18833333333333332
+  },
+  "D1_flat4 vs R_gamma_team_14": {
+   "shared": 600,
+   "identical": 594,
+   "differ": 6,
+   "identical_share": 0.99
+  },
+  "D2_measured vs R_gamma_team_14": {
+   "shared": 600,
+   "identical": 113,
+   "differ": 487,
+   "identical_share": 0.18833333333333332
+  }
+ }
+}

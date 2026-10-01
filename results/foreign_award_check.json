@@ -1,0 +1,26 @@
+{
+ "rules": {
+  "variant": "54",
+  "claims_any_time": false,
+  "allow_bluff_asks": false,
+  "wrong_distribution_outcome": "opponent",
+  "mandatory_claim_known": false,
+  "starting_player": 0
+ },
+ "n_pairs": 500,
+ "effect": -0.044,
+ "ci95": [
+  -0.1344234644915872,
+  0.0464234644915872
+ ],
+ "kv_margin_on": 2.544,
+ "kv_margin_off": 2.588,
+ "kv_sets": 5783,
+ "dylan_sets": 3217,
+ "kv_set_share": 0.6425555555555555,
+ "misdeclares_kv": 160,
+ "misdeclares_dylan": 306,
+ "games": 1000,
+ "bridge_fallbacks": 0,
+ "verdict": "no-reversal"
+}

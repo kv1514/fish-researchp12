@@ -1,0 +1,21 @@
+# Nothing here is served or imported by the function, and some of it is large.
+# Keeping it out of the upload makes deploys smaller and faster.
+results/
+data/
+jobs/
+research/
+# paper/ is excluded EXCEPT the PDF, which the /paper.pdf route serves out of
+# the one copy this repository keeps rather than a duplicate in public/. The
+# exclusion is `paper/*` and not `paper/`: gitignore semantics never descend
+# into an excluded DIRECTORY, so a bare `paper/` makes the negation below
+# unreachable and vercel.json's includeFiles then has nothing to include. That
+# is exactly how the live route 404ed while every local check passed.
+paper/*
+!paper/kraken.pdf
+scripts4/
+scripts/
+tests/
+tests4/
+checkpoints/
+configs/
+*.md

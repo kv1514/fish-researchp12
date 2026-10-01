@@ -61,7 +61,7 @@ class ClaimEV:
         return max(0.0, 1.0 - self.p_team_holds)
 
 
-def claim_now_ev(c: ClaimEV, wrong_distribution_outcome: str = "null") -> float:
+def claim_now_ev(c: ClaimEV, wrong_distribution_outcome: str = "opponent") -> float:
     """Expected sets gained by claiming immediately."""
     loss_if_wrong = 0.0 if wrong_distribution_outcome == "null" else -1.0
     return (c.p_exact * 1.0
@@ -71,7 +71,8 @@ def claim_now_ev(c: ClaimEV, wrong_distribution_outcome: str = "null") -> float:
 
 def wait_ev(c: ClaimEV, *, p_improve: float = 0.55,
             p_opponent_takes: float = 0.10,
-            improvement_ceiling: float = 0.98) -> float:
+            improvement_ceiling: float = 0.98,
+            wrong_distribution_outcome: str = "opponent") -> float:
     """Expected sets from NOT claiming yet.
 
     Waiting is worth something only when the uncertainty is *resolvable*:
@@ -83,31 +84,37 @@ def wait_ev(c: ClaimEV, *, p_improve: float = 0.55,
     before the opportunity is lost; ``p_opponent_takes`` is the chance the
     opposing team claims it against us in the meantime.
     """
-    # If our team holds it, waiting converges toward an exact claim.
+    # If our team holds it, waiting converges toward an exact claim. The
+    # mass that stays unresolved is eventually declared wrong, and what that
+    # costs is the misdeclaration rule's to say: 0 under the legacy null
+    # variant, -1 under the opponent-award baseline.
+    loss_if_wrong = 0.0 if wrong_distribution_outcome == "null" else -1.0
     resolved_p = c.p_exact + p_improve * (c.p_team_holds - c.p_exact)
     resolved_p = min(resolved_p, improvement_ceiling * c.p_team_holds)
-    future = resolved_p * 1.0 + (c.p_team_holds - resolved_p) * 0.0
+    future = resolved_p * 1.0 + (c.p_team_holds - resolved_p) * loss_if_wrong
     # An opponent-held set stays a loss whether we claim it or not, but
     # waiting at least avoids handing it over on a bad claim.
     future += c.p_opponent_holds * -1.0 * 0.5
     return (1 - p_opponent_takes) * future + p_opponent_takes * (-1.0)
 
 
-def should_claim(c: ClaimEV, wrong_distribution_outcome: str = "null",
+def should_claim(c: ClaimEV, wrong_distribution_outcome: str = "opponent",
                  margin: float = 0.0, **wait_kwargs) -> bool:
     """Claim iff claiming now beats waiting by ``margin`` sets."""
     return (claim_now_ev(c, wrong_distribution_outcome)
-            >= wait_ev(c, **wait_kwargs) + margin)
+            >= wait_ev(c, wrong_distribution_outcome=wrong_distribution_outcome,
+                       **wait_kwargs) + margin)
 
 
 def best_claim_decision(candidates: list[ClaimEV],
-                        wrong_distribution_outcome: str = "null",
+                        wrong_distribution_outcome: str = "opponent",
                         margin: float = 0.0, **wait_kwargs):
     """Return (claim, ev_gain) for the best claim worth making, or None."""
     best = None
     for c in candidates:
         now = claim_now_ev(c, wrong_distribution_outcome)
-        later = wait_ev(c, **wait_kwargs)
+        later = wait_ev(c, wrong_distribution_outcome=wrong_distribution_outcome,
+                        **wait_kwargs)
         gain = now - later
         if gain >= margin and (best is None or gain > best[1]):
             best = (c.claim, gain)

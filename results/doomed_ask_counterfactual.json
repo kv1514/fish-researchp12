@@ -1,0 +1,30 @@
+{
+ "n_games": 60,
+ "firings": 64,
+ "n_paired": 128,
+ "champion_mean_cards": 0.09775949726730995,
+ "substitute_mean_cards": 0.4414379537700637,
+ "paired_difference": -0.34367845650275375,
+ "se": 0.04843340523369964,
+ "ci95": [
+  -0.43860793076080506,
+  -0.24874898224470243
+ ],
+ "opponents": {
+  "n": 192,
+  "champ": 0.10554745821989081,
+  "alt": 0.3745133853610767,
+  "diff": -0.26896592714118595,
+  "se": 0.03948565208314409,
+  "ci95": [
+   -0.3463578052241484,
+   -0.19157404905822353
+  ]
+ },
+ "net_partner_minus_opponent": -0.0747125293615678,
+ "like_for_like_n": 102,
+ "like_for_like_difference": -0.18506285626215943,
+ "sets_per_deal_pair": -0.4732452346042919,
+ "rate_sets_per_card": 0.45,
+ "verdict": "substitute_better"
+}

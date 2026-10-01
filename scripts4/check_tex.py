@@ -1,9 +1,16 @@
-"""A structural check on the paper source, since this machine has no TeX.
+r"""A structural check on the paper source.
 
 Catches the errors that would stop a build: unbalanced environments, unbalanced
-braces, citations with no bibliography entry, references with no label, and
-duplicate labels. It is not a parser and does not pretend to be; it is the
-cheapest thing that would have caught every LaTeX mistake actually made here.
+braces, citations with no bibliography entry, references with no label,
+duplicate labels, and fragile commands inside a moving argument. It is not a
+parser and does not pretend to be; it is the cheapest thing that would have
+caught every LaTeX mistake actually made here.
+
+It is NOT a substitute for a build. On 2026-08-30 it reported "no structural
+problems found" on a file that then failed with ``\url used in a moving
+argument``, because a rewritten caption used ``\path`` -- which this repository
+uses freely in body text and never in a caption. That specific check is below,
+but the general lesson is: when ``pdflatex`` is on the machine, run it.
 """
 
 from __future__ import annotations
@@ -33,9 +40,33 @@ def strip_comments(text: str) -> str:
     return "\n".join(out)
 
 
+def _inline_inputs(raw: str, base: Path, depth: int = 0) -> str:
+    """Splice in \\input{...} files so the checks see the whole document.
+
+    Without this the guard reports "reference to a missing label" for every
+    label that lives in an included file -- which pdflatex resolves happily,
+    so the guard would be the only thing complaining and it would be wrong.
+    Found when the pre-registered-thresholds appendix moved into its own file.
+    """
+    if depth > 4:
+        return raw
+
+    def one(m):
+        name = m.group(1).strip()
+        f = base / (name if name.endswith(".tex") else name + ".tex")
+        if not f.exists():
+            return m.group(0)
+        return _inline_inputs(f.read_text(encoding="utf-8"), base, depth + 1)
+
+    #: Comments FIRST. An included file's own header comment names the
+    #: \input line a reader should add, and inlining before stripping expanded
+    #: that comment once per recursion level -- five copies of the appendix and
+    #: five "duplicate label" reports, from a document that has one.
+    return re.sub(r"\\input\{([^}]+)\}", one, strip_comments(raw))
+
+
 def check(path: Path) -> int:
-    raw = path.read_text(encoding="utf-8")
-    text = strip_comments(raw)
+    text = _inline_inputs(path.read_text(encoding="utf-8"), path.parent)
     problems = []
 
     # -- environments
@@ -103,6 +134,41 @@ def check(path: Path) -> int:
         problems.append(f"reference to a missing label: {k}")
 
     # -- a few common breakages
+    # Doubled backslashes in front of a command are almost always a Python
+    # escaping slip from a script that edited this file: "\\\\pm" reaches LaTeX as
+    # a line break followed by the letters "pm". Nothing else here catches it,
+    # and one shipped in the paper for two commits before anyone read the line.
+    # "\\\\" alone is legitimate (a row break), so only flag it when a command
+    # name or a percent follows immediately.
+    for m in re.finditer(r"\\\\(?=[A-Za-z%])", text):
+        line = text.count("\n", 0, m.start()) + 1
+        frag = text[m.start():m.start() + 14].replace("\n", " ")
+        problems.append(f"line {line}: doubled backslash before a command: "
+                        f"{frag!r}")
+
+    # Fragile commands inside a moving argument. \caption writes its argument
+    # to the .lot/.lof file, and \path expands to \url, which is fragile
+    # there: the build dies with "\url used in a moving argument" at the
+    # caption's CLOSING brace, several lines after the offending command. The
+    # repository's own convention in captions is \texttt with escaped
+    # underscores; \path is for body text.
+    for m in re.finditer(r"\\caption\{", text):
+        i, depth = m.end(), 1
+        while i < len(text) and depth:
+            if text[i] == "{" and text[i - 1] != "\\":
+                depth += 1
+            elif text[i] == "}" and text[i - 1] != "\\":
+                depth -= 1
+            i += 1
+        body = text[m.end():i - 1]
+        line = text[:m.start()].count("\n") + 1
+        for cmd in (r"\path{", r"\url{", r"\verb"):
+            if cmd in body:
+                problems.append(
+                    f"line {line}: {cmd} inside a \\caption -- fragile in a "
+                    "moving argument; use \\texttt with escaped underscores, "
+                    "or \\protect")
+
     if "\\begin{document}" not in text:
         problems.append("no \\begin{document}")
     if "\\end{document}" not in text:
@@ -121,5 +187,5 @@ def check(path: Path) -> int:
 
 if __name__ == "__main__":
     paths = [Path(a) for a in sys.argv[1:]] or [
-        Path(__file__).resolve().parents[1] / "paper" / "fishbot_v04.tex"]
+        Path(__file__).resolve().parents[1] / "paper" / "kraken.tex"]
     sys.exit(max(check(p) for p in paths))

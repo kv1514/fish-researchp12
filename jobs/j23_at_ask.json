@@ -1,0 +1,98 @@
+[
+ {
+  "label": "SCREEN at_ask depth g0.35 vs champion",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 13100000,
+  "agent_seed": 9800
+ },
+ {
+  "label": "SCREEN at_ask depth g0.60 vs champion",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.6,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 13300000,
+  "agent_seed": 9801
+ },
+ {
+  "label": "SCREEN gamma profile under at_ask (prediction test)",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "depth_mode": "at_ask",
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "base_seed": 13500000,
+  "agent_seed": 9802
+ },
+ {
+  "label": "SCREEN gamma 1.0 exact normaliser (initial depth)",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 13700000,
+  "agent_seed": 9803
+ },
+ {
+  "label": "SCREEN at_ask depth g1.0 vs champion",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 13900000,
+  "agent_seed": 9804
+ }
+]

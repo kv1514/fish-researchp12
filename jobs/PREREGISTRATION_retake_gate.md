@@ -1,0 +1,133 @@
+# Pre-registration: does withholding help once it only fires on a real duel?
+
+Written **before any pair of this run has been played**, with the base rate and
+the noise both measured first and recorded in `results/duel_depth_base_rate.json`
+and `results/pair_sd_model.json`.
+
+## The prior, stated up front because it is bad
+
+Five screening cells have measured this family and all five failed:
+
+| cell | pairs | effect vs champion |
+|---|---|---|
+| retake penalty w0.30 | 200 | −0.340 [−0.665, −0.015] |
+| retake penalty w1.00 | 200 | −1.015 [−1.562, −0.468] |
+| score-adaptive w_behind 0.50 | 200 | −0.185 |
+| score-adaptive w_behind 1.00 | 200 | −0.890 |
+| score-adaptive w_behind −0.50 | 200 | −0.075 |
+
+Two lose decisively and the loss grows monotonically with the penalty. **This is
+the sixth cell of a family with five failures**, and that has to be on the record
+before the number exists, because a positive here read without it would look far
+stronger than it is. If this run comes out positive it earns a replication, not
+a paragraph.
+
+## Why it is not simply a sixth guess
+
+The measured penalty is **ungated**: it fires on the first retake as well as the
+fiftieth. The argument in `fish4/adaptive.py` is not about the first. It is about
+a repeated public exchange teaching the table that a half-suit is contested while
+neither side nets a card across the cycle. The first retake is a certain ask that
+keeps the turn and reveals nothing the table did not just watch — penalising it
+pays the theory's cost without being in the situation the theory describes.
+
+So the implementation did not match its own stated hypothesis, and every cell
+above tested the implementation. `retake_min_depth` gates the penalty on
+`duel_depth`, and this run tests the hypothesis.
+
+## What was measured before sizing, rather than assumed
+
+> **Second amendment, still before any pair of this run was played.** An audit
+> of `duel_depth` found that it did not implement the hypothesis above. It
+> counted successful asks between this seat and one opponent *in either
+> direction separately*, so two cards taken off this seat by one opponent, with
+> nothing given back, scored the same depth 2 as a card going out and coming
+> home. Those are opposite situations: in the first the opponent has netted two
+> cards, which is exactly not "neither side nets a card across the cycle".
+> Measured over the 1023 harvested positions, **37.8%** of the positions where
+> the gate opened had no two-way exchange at all with the opponent it opened on
+> — 31.2% pure loss runs, 6.6% pure taking runs.
+>
+> This is the same defect the section below identifies in the five prior cells:
+> the implementation did not match its own stated hypothesis. Discovering it
+> *after* running would have made this run the sixth cell testing the wrong
+> thing. `duel_depth` now requires cards to have moved both ways with that
+> opponent before it counts anything, and the base rates below are re-measured
+> under the corrected statistic. The test that was supposed to cover this was
+> named `test_duel_depth_counts_the_trade_in_both_directions` and its example
+> happened to run both ways, so it passed against an implementation that did
+> not.
+>
+> **The design does not change.** The re-measured numbers make 2000 pairs
+> *more* than adequate rather than less, so leaving it alone costs nothing and
+> changing it after inspecting the numbers is what this protocol exists to
+> prevent.
+
+Re-measured on 400 decision points under the corrected statistic:
+
+- Duels are common but not the normal case: `duel_depth ≥ 2` at **18%** of
+  decision points (the pre-amendment statistic said 57%, and was counting table
+  activity rather than duels).
+- A retake is on the menu at **11.2%** of positions, unchanged — the gate does
+  not change what is flagged, only what is spared. **5.25%** of all positions
+  are retakes below depth 2, which are exactly the ones the gate spares.
+- So the gate un-flags **47%** of the flagged positions, against 29% before. If
+  the ungated penalty's −0.340 is proportional to what it flags, the most the
+  gate can recover is **+0.159**, against +0.098 before. A 200-pair screen is
+  still not run: it resolves ±0.351 at 80% power, which does not separate
+  +0.159 from zero.
+
+## Effect size and sizing
+
+The comparison is **gated penalty (w=0.30, `retake_min_depth=2`) vs the
+champion**, so the hypothesis is "the theory-matching form does not lose", and
+the interesting alternatives are −0.340 (the gate changes nothing), −0.242 (it
+removes its share of the harm) and 0 or above (the depth-1 exemption was the
+whole problem).
+
+Per-pair sd is **not** taken as the A/A 3.796. `results/pair_sd_model.json`
+decomposes it as `sd = √s · sd(D | diverge)`. The ungated arms diverged on 0.440
+of pairs; under the corrected statistic the gate keeps 53% of the flagged
+positions, so the estimate is `s ≈ 0.205`, and with a flat conditional term of
+3.9 that gives **sd ≈ 1.77**. (Before the second amendment these read 71%,
+`s ≈ 0.31` and sd ≈ 2.16.)
+
+> **Amended before any pair of this run was played.** Auditing that model
+> afterwards showed the conditional term is *not* flat: it drifts with share
+> (`corr = +0.59`, fitted `2.48 + 1.72·s`), and at `s = 0.31` the flat model
+> predicts 2.18 where the fitted line predicts 1.68 — roughly a 30%
+> over-estimate. The design below is **not changed**, for two reasons. The bias
+> runs the safe way: over-predicting noise asks for more pairs than needed,
+> never fewer, so 2000 pairs is over-powered rather than under-powered against
+> the +0.02 threshold. And changing a design after inspecting the model that
+> sized it, when nothing about the hypothesis has changed, is the kind of
+> adjustment this protocol exists to prevent. The number is left as it was and
+> its bias is recorded here.
+
+- **2 blocks × 1000 pairs = 2000 duplicate deal-pairs**, fresh seeds throughout.
+- **MDE at 80% power ≈ 0.111** under the corrected statistic (0.135 as
+  originally sized), which separates −0.340 from 0 comfortably and separates
+  −0.242 from 0 adequately.
+- Sized on the A/A figure instead, the same power would have demanded about
+  6200 pairs and this would not have been run.
+
+## Analysis, fixed in advance
+
+**Primary.** Fixed-effect pool of the 2 blocks; report the estimate and its 95%
+interval.
+
+**The contrast that matters.** This estimate against the ungated −0.340. The
+gate is vindicated to the extent the difference is positive; it is refuted if
+the two are indistinguishable, because then the depth-1 exemption changed
+nothing that mattered.
+
+**Homogeneity.** Cochran's *Q* across the 2 blocks, diagnostic only.
+
+## Committed in advance
+
+- No block excluded for its result; no block added to chase significance.
+- A positive result does **not** change a default. It earns one replication at
+  the same size on fresh seeds, and only a replication that agrees gets written
+  up as an effect. Five prior failures in this family is exactly the prior under
+  which a single positive is most likely to be noise.
+- A negative or null result is reported as the sixth entry in the table above.

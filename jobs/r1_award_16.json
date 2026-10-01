@@ -1,0 +1,30 @@
+[
+ {
+  "label": "R1-award-16",
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4,
+    "endgame_m": 2,
+    "endgame_d_info": 2.0
+   }
+  ],
+  "y": [
+   "tuned",
+   {
+    "w_turn": 0.6,
+    "w_scarce": 0.2
+   }
+  ],
+  "n_pairs": 25,
+  "base_seed": 416000,
+  "agent_seed": 6116,
+  "rules": {
+   "wrong_distribution_outcome": "opponent"
+  }
+ }
+]

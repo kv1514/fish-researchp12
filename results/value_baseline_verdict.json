@@ -1,0 +1,33 @@
+{
+ "name": "value_baseline",
+ "complete": true,
+ "question": "how far below the champion is the pure value objective?",
+ "prereg": "jobs/PREREGISTRATION_value_baseline.md",
+ "blocks": [
+  {
+   "label": "BASELINE value pure vs champion block 0",
+   "est": -7.191,
+   "se": 0.11559360224891722,
+   "n": 1000
+  },
+  {
+   "label": "BASELINE value pure vs champion block 1",
+   "est": -7.2,
+   "se": 0.11673743027678667,
+   "n": 1000
+  }
+ ],
+ "n_pairs": 2000,
+ "estimate": -7.195455691658483,
+ "se": 0.08213843784553156,
+ "ci": [
+  -7.3564440728519624,
+  -7.034467310465004
+ ],
+ "q": 0.003001166174421838,
+ "df": 1,
+ "i2": 0.0,
+ "rule": "measure",
+ "bar": null,
+ "decision": "measured"
+}

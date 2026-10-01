@@ -1,0 +1,18 @@
+{
+ "question": "does SESTINA v1.0 answer our decisions as pinned v0.7 did",
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "deals": 60,
+ "seed0": 3100000,
+ "decisions_compared": 6329,
+ "asks": 5817,
+ "declarations": 472,
+ "mismatches": 0,
+ "mismatch_rate": 0.0,
+ "verdict": "IDENTICAL",
+ "old_binary": "/tmp/fish_v07_decide_pinned",
+ "new_binary": "external_v07/fish_v07_decide",
+ "examples": [],
+ "seconds": 246.1
+}
