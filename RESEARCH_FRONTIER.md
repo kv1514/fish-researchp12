@@ -6692,3 +6692,50 @@ without moving the rest of the policy: a **state-conditional** intervention
 rather than a global weight, acting at the 3–3 state and nowhere else. Nothing in
 the linear ask basis is state-conditional, and whether anything can be made so
 without the side effects that killed every global knob is untested.
+
+### Postscript, the same day: there is no privileged state, which closes the state-conditional arm
+
+The previous section ended by naming a **state-conditional** intervention as the
+next question, on the reading that the residual is non-monotone — worst at the
+extremes (−0.073) and at the centre (−0.044), smallest in between (−0.029). So
+the obvious arm was a hump in team share peaking at the 3–3 state: not reachable
+by scaling `scarce`, which tilts rather than bumps, and therefore genuinely
+orthogonal to everything P53, P54 and P55 swept.
+
+**Model arithmetic on the fitted chains, before any registration was written,
+says there is no hot spot to aim at.** Symmetrising one state-pair at a time:
+
+| intervention | block A | block B |
+|---|---:|---:|
+| symmetrise every state | +0.7357 | +0.7749 |
+| only the even state $c{=}3$ | +0.2402 | +0.2669 |
+| only $c{=}2$ and $c{=}4$ | +0.2536 | +0.2370 |
+| only $c{=}1$ and $c{=}5$ | +0.2389 | +0.2674 |
+| both shoulders, leaving $c{=}3$ | +0.4936 | +0.5057 |
+
+**Each state-pair is worth about a quarter of a set — within noise of the other
+two, on both blocks.** The per-state residuals differ but the chain's
+sensitivity differs the other way (the central states are visited far more
+often), and the two effects cancel almost exactly. The centre has no special
+claim, so a term shaped to act there has no measured reason to exist, and none
+is registered.
+
+What that leaves is the deflating reading rather than the structural one: **the
+gap is a per-transfer strength difference present at every state**, not a
+mis-shaped preference. A uniform strength difference is precisely what every
+global knob already tries to move, and is the one thing a state-conditional term
+cannot help with.
+
+**The largest measured gap is elsewhere, and it is not a weight at all.** In
+*skill* terms — realised against uniform choice over the same options —
+within-half-suit choice is **2.3544 against 2.4839** and **2.3731 against
+2.4774**, a **5.5%** deficit, far larger than the 1.3% visible in the raw hit
+rate (our raw rate flatters us because our baseline is easier: 0.2573 against
+0.2470). And within a half-suit the ask weights barely matter: `suit`, `scarce`
+and `turn` tilt between *half-suits*, while the choice of which card and which
+opponent is dominated by $P(\text{success}) = M[\text{card}, \text{target}]$,
+which carries weight 1.0 by convention. **So the only channel left pointing
+anywhere is posterior accuracy on (card, target), not preference** — which is
+the same place the 0.76 bits [0.70, 0.83] of un-extracted information in
+opponent asks points, and the same place P51's depth profile aimed and landed
+below the bar.
