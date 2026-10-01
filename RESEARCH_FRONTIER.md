@@ -6555,3 +6555,140 @@ not.
 That is the sharpest statement of the deficit yet, and it points where
 `contested_race` said it would: **which card, and which target, inside a
 half-suit — still not measured at all.**
+
+## OUTCOME 2026-10-01: the margin is one number at one symmetric state — and the ship bar is half a percentage point of it
+
+`results/within_halfsuit_choice_18300000.json` and `_18900000.json`,
+`results/race_walk_18300000.json` and `_18900000.json` (400 games each),
+`results/symmetry_value.json`. Two independent blocks throughout, chosen before
+any result was seen.
+
+### The last unmeasured dimension is measured, and it is matched
+
+`contested_race` left one thing open: "which card, and which target, inside a
+half-suit has not been measured at all." An ask is (card, target) and succeeds
+only if both are right, so
+
+$$P(\text{hit}) = P(\text{card right}) \cdot P(\text{target right} \mid \text{card right})$$
+
+exactly, and each factor is scored against uniform choice over the options that
+seat actually had. At band 3, both blocks:
+
+| | ours A | theirs A | ours B | theirs B |
+|---|---:|---:|---:|---:|
+| card skill | 1.1034 | 1.1495 | 1.1138 | 1.1550 |
+| target accuracy | 0.7583 | 0.7730 | 0.7554 | 0.7689 |
+| hit skill | 2.3544 | 2.4839 | 2.3731 | 2.4774 |
+
+**About 5% better, replicated, and that is all.** The hit rates reproduce
+`contested_race`'s 0.6494 / 0.6059 / 0.4841 and 0.6680 / 0.6135 / 0.4901 to
+every digit on its own block.
+
+So **every ask-level channel in the contested bands is now measured and each is
+a few percent**, against eleven points of outcome. Compounding is the whole
+remaining explanation.
+
+### A vacuous test, caught before it was written down
+
+A live half-suit's two team counts sum to six, so every transfer is a ±1 step on
+our count: a contested half-suit is a **gambler's ruin** absorbing at 6 and 0.
+Fitting the walk from the observed transitions and asking whether it reproduces
+the observed win rate looks like a closure test. **It cannot fail.** Across the
+cut between counts $c$ and $c{+}1$, up-steps from $c$ minus down-steps from
+$c{+}1$ is the net flow, and a trajectory crosses every cut above its start
+exactly once net, so the transition counts *algebraically* determine the
+absorption counts. The chain reproduces the outcome by Kirchhoff's identity,
+not by being right.
+
+It is kept as an arithmetic check on the solver — which is how a real bug
+surfaced: the solver returned $h_3$ for every band instead of $h_{\text{band}}$,
+and its spurious misses of +0.08 and +0.11 were the only reason the identity was
+not obvious at a glance. Two further things the walk **cannot** say, recorded so
+they are not reached for later: there is only one transition process per
+half-suit, so their step profile is identically $1 - p_{6-j}$ and "is our ladder
+steeper than theirs" is one profile read twice.
+
+And the walk description is *adequate*: **99.1–99.8%** of contested half-suits
+absorb at 0 or 6. The rest resolve off the absorbing states through a
+declaration with the split wrong, which is also why the identity is now broken
+slightly — the misses (+0.0247, −0.0052, −0.0085) measure that channel and bound
+it.
+
+### What is well posed, and it is the whole deficit
+
+Identical policies make the process invariant under swapping the teams, which
+requires $p_c + p_{6-c} = 1$ at every count — exactly as the outcome pair
+0.2860 + 0.3707 would have summed to 1 and sums to 0.9153. The residual is that
+same deficit **localised by state**, with no reflection degeneracy because it
+compares one profile against its own reflection.
+
+| state | block A | block B |
+|---|---|---|
+| $c{=}1$ vs 5 | **−0.0729** [−0.1002, −0.0433] | **−0.0839** [−0.1140, −0.0540] |
+| $c{=}2$ vs 4 | **−0.0299** [−0.0471, −0.0130] | **−0.0283** [−0.0466, −0.0107] |
+| $c{=}3$ vs 3 | **−0.0438** [−0.0617, −0.0244] | **−0.0492** [−0.0674, −0.0318] |
+
+**Negative at every state, every interval clear of zero, both blocks agreeing.**
+The $c{=}3$ entry is $2p_3 - 1$, so
+
+$$p_3 = \mathbf{0.478}$$
+
+**at the exactly symmetric 3–3 state — a position with no asymmetry of any kind
+in it — we lose the next transfer 52.2% of the time.** That is the deficit
+reduced to a single per-transfer number, free of allocation, of access, and of
+every band-level story.
+
+### Symmetrising recovers the whole margin, which says the description is complete
+
+Re-solving each band with the symmetric part of the profile,
+$\hat p_c = \tfrac12(p_c + 1 - p_{6-c})$:
+
+| band | a game | observed | chain | if symmetric | gain |
+|---:|---:|---:|---:|---:|---:|
+| 2 | 2.167 | 0.2860 | 0.2464 | 0.2914 | +0.0449 |
+| 3 | 3.027 | 0.4443 | 0.4444 | 0.5000 | +0.0556 |
+| 4 | 2.118 | 0.6293 | 0.6604 | 0.7086 | +0.0482 |
+
+**+0.7357 [+0.4976, +0.9683]** sets a game on block A and **+0.7749 [+0.5331,
++1.0131]** on block B, against a measured margin of **−0.710**.
+
+That equally strong policies tie is close to trivial, so the number itself is
+largely a consistency check and is not offered as a new source of gain. **What is
+not a restatement is that the residual is measured only inside contested
+half-suits and still recovers the whole margin** — so bands 0, 1, 5 and 6
+contribute nothing and there is **no fourth channel outside this description.**
+That confirms `contested_race`'s −0.718-of-−0.710 localisation by an entirely
+different route: transition-level rather than outcome-level.
+
+### The ship bar, in the units of one decision
+
+This is the reason the arithmetic was worth doing. Bisecting on how much of the
+residual must close to be worth the bar's +0.15 sets a game:
+
+| | block A | block B |
+|---|---:|---:|
+| $p_3$ now | 0.4781 | 0.4754 |
+| fraction of the residual to close | 0.205 | 0.194 |
+| $p_3$ that pays the ship bar | **0.4826** | **0.4802** |
+| | **+0.0045** | **+0.0048** |
+
+**The ship bar is winning half a percentage point more of the transfers at the
+symmetric state.** Every knob this project has swept moves the policy globally
+and by one to two orders of magnitude more than that, in both directions, with
+side effects — `w_suit` −0.06 costs 1.170 sets in self-play, `w_scarce` 0.00
+costs 0.4567 against SESTINA. **That is the most coherent account yet of why
+nineteen thousand duel games of dose sweeps have found nothing: the target is
+roughly 0.5% on one conditional probability, and the available instruments all
+move it by tens of percent while moving three other things at once.**
+
+None of this is a duel result, an arm, or a ship claim. It is a measurement of
+where the margin is and how large the required change is.
+
+### What this makes the next question
+
+Not "which weight" — that is now closed from two directions. The question is
+what kind of change can move a single conditional probability by half a point
+without moving the rest of the policy: a **state-conditional** intervention
+rather than a global weight, acting at the 3–3 state and nowhere else. Nothing in
+the linear ask basis is state-conditional, and whether anything can be made so
+without the side effects that killed every global knob is untested.
