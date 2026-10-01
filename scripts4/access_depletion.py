@@ -219,10 +219,29 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--games", type=int, default=400)
     ap.add_argument("--out", default=None)
+    #: THE MECHANISM CHECK. The selection profile is a measured fact; whether
+    #: the champion's `scarce` weight PRODUCES it is a separate question, and it
+    #: decides whether P54's duels already priced this direction. P54 swept
+    #: w_scarce over +0.40 / +0.10 / 0.00 / -0.10 and the two arms nearest our
+    #: profile's correction were withdrawn at -0.4567 and -0.5800. If setting
+    #: this to 0 flattens our selection ratio, that sweep already measured the
+    #: cost of the correction and the direction is closed. If it does NOT, the
+    #: profile is produced by something the sweep never touched.
+    #:
+    #: Applied to OUR side only. SESTINA is never overridden.
+    ap.add_argument("--w-scarce", type=float, default=None,
+                    help="override our w_scarce; theirs is untouched")
+    ap.add_argument("--w-suit", type=float, default=None)
     a = ap.parse_args(argv)
 
     from fish4.registry4 import KRAKEN_V1, make_agent
     from fish4.dylan_v07 import DylanV07
+
+    spec = KRAKEN_V1
+    overrides = {k: v for k, v in (("w_scarce", a.w_scarce),
+                                   ("w_suit", a.w_suit)) if v is not None}
+    if overrides:
+        spec = (KRAKEN_V1[0], {**KRAKEN_V1[1], **overrides})
 
     rules = RuleConfig(**RULES_D)
     t0 = time.time()
@@ -244,7 +263,7 @@ def main(argv=None) -> int:
     for g in range(a.games):
         seed = SEED0 + g
         kv_even = (g % 2 == 0)
-        agents = [make_agent(KRAKEN_V1) if (p % 2 == 0) == kv_even
+        agents = [make_agent(spec) if (p % 2 == 0) == kv_even
                   else DylanV07() for p in range(NUM_PLAYERS)]
         ours = {p for p in range(NUM_PLAYERS) if (p % 2 == 0) == kv_even}
         our_team = 0 if kv_even else 1
@@ -409,6 +428,7 @@ def main(argv=None) -> int:
     out = {"script": "scripts4/access_depletion.py", "descriptive": True,
            "rules": RULES_D, "seed_deal": SEED0, "seed_agent": AGENT0,
            "n_games": a.games, "bands": list(BANDS),
+           "our_overrides": overrides,
            "band_is": "our team's count of the half-suit AT THE DEAL",
            "selftest_ask_from_seat_without_access": st_illegal_seat,
            "selftest_ask_at_teammate": st_same_team,
@@ -564,12 +584,12 @@ def main(argv=None) -> int:
     for k in (2, 3, 4):
         o = out["by_side_band"][f"ours_b{k}"]
         t = out["by_side_band"][f"theirs_b{6-k}"]
-        a, b2 = o["selection_ratio"], t["selection_ratio"]
-        if a is None or b2 is None or not a:
+        ro, rt = o["selection_ratio"], t["selection_ratio"]
+        if ro is None or rt is None or not ro:
             continue
         oc, tc = o["selection_ratio_ci"], t["selection_ratio_ci"]
-        print(f"  {k:>7}  {a:>8.4f}  [{oc[0]:>7.4f}, {oc[1]:>7.4f}]  "
-              f"{b2:>8.4f}  [{tc[0]:>7.4f}, {tc[1]:>7.4f}]  {b2/a:>11.4f}")
+        print(f"  {k:>7}  {ro:>8.4f}  [{oc[0]:>7.4f}, {oc[1]:>7.4f}]  "
+              f"{rt:>8.4f}  [{tc[0]:>7.4f}, {tc[1]:>7.4f}]  {rt/ro:>11.4f}")
     print()
     print("  THE TIME CONTROL. SESTINA declares 4.832 half-suits a game against")
     print("  our 4.100, and a half-suit resolves OUT of the denominator, so a")
@@ -586,11 +606,11 @@ def main(argv=None) -> int:
               f"  {'n ours':>8}  {'n theirs':>8}")
         for q in range(len(PLY_EDGES) + 1):
             ob_, tb_ = o["by_ply_bucket"][q], t["by_ply_bucket"][q]
-            a, b2 = ob_["asks_per_access_ply"], tb_["asks_per_access_ply"]
-            if a is None or b2 is None or not a:
+            ro, rt = ob_["asks_per_access_ply"], tb_["asks_per_access_ply"]
+            if ro is None or rt is None or not ro:
                 continue
-            print(f"      {ob_['edge']:>8}  {a:>8.5f}  {b2:>8.5f}  "
-                  f"{b2/a:>11.4f}  {ob_['access_plies']:>8,}  "
+            print(f"      {ob_['edge']:>8}  {ro:>8.5f}  {rt:>8.5f}  "
+                  f"{rt/ro:>11.4f}  {ob_['access_plies']:>8,}  "
                   f"{tb_['access_plies']:>8,}")
     print()
     print("  THE NEAR-TAUTOLOGY, reported as one. Losing the last access seat")
