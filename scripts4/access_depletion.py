@@ -121,6 +121,41 @@ BOOT = 2000
 BOOT_SEED = 20_261_001
 BANDS = (2, 3, 4)
 SIDES = ("ours", "theirs")
+#: THE TIME CONTROL, and it is not optional. A side that resolves half-suits
+#: faster accrues fewer plies on the ones it wins, which SHORTENS the access
+#: denominator exactly where it wins -- and SESTINA declares 4.832 half-suits a
+#: game against our 4.100. An uncontrolled asks-per-access-ply would credit
+#: that composition difference to investment. This project has already lost one
+#: hypothesis to precisely this confound (the disclosure asymmetry, dissolved by
+#: a time control), so the same comparison is repeated inside ply buckets. The
+#: two sides share one ply clock within a game, so a bucket is a matched
+#: comparison rather than a reweighting.
+PLY_EDGES = (20, 40, 60)
+
+
+#: THE SECOND CONFOUND, and it is the mirror of the first. Asks per access ply
+#: is a SHARE OF ATTENTION: a seat with access to k half-suits on a ply can ask
+#: in only one of them, so the per-half-suit rate falls roughly as 1/k whatever
+#: the policy. We have MORE access than SESTINA at every holding, hence more
+#: accessible half-suits per ply, hence a mechanically smaller share each -- so a
+#: raw share comparison would read our wider access as reluctance.
+#:
+#: The selection ratio removes it. Conditional on an ask happening, and among
+#: exactly the half-suits that seat could legally have asked in, it compares the
+#: asks that went to band b against the asks uniform choice would have sent
+#: there:
+#:
+#:     selection_ratio(b) = (asks to band b) / sum over asks of (avail_b / k)
+#:
+#: 1.0 is indifference to the band, above 1 is over-selection. It is invariant
+#: to the access level, to k, and to how many band-b half-suits exist, so the
+#: two sides are directly comparable and neither the duration nor the breadth
+#: of their opportunity sets can move it.
+def _bucket(ply: int) -> int:
+    for i, e in enumerate(PLY_EDGES):
+        if ply < e:
+            return i
+    return len(PLY_EDGES)
 
 
 def _seats(hands, hs: int, team: int) -> list[int]:
@@ -232,8 +267,14 @@ def main(argv=None) -> int:
                 for k in ("s0", "took_from", "access_death", "lockout",
                           "won", "retained", "won_retained", "won_locked",
                           "seatsum", "liveplies", "accessplies", "turnplies",
-                          "asks", "hits", "asks_acc", "hits_acc"):
+                          "asks", "hits", "asks_acc", "hits_acc",
+                          "resolve_ply", "resolved"):
                     row[f"{s}_{k}_b{b}"] = 0
+                row[f"{s}_sel_num_b{b}"] = 0
+                row[f"{s}_sel_den_b{b}"] = 0.0
+                for q in range(len(PLY_EDGES) + 1):
+                    row[f"{s}_asks_b{b}_t{q}"] = 0
+                    row[f"{s}_accessplies_b{b}_t{q}"] = 0
 
         #: access seats per (half-suit, team) at the deal. Monotone from here.
         acc = {(h, t): set(_seats(st.hands, h, t))
@@ -244,9 +285,13 @@ def main(argv=None) -> int:
                 for t in (0, 1):
                     row[f"{team_side[t]}_s0_b{band[h]}"] += len(acc[(h, t)])
 
+        ply = 0
+        resolved_at = {}
         for _ in range(MAX_ACTIONS):
             if st.is_terminal:
                 break
+            ply += 1
+            q = _bucket(ply)
             actor = st.turn
             act = agents[actor].act(Observation.from_state(st, actor))
             a_side = team_side[team_of(actor)]
@@ -265,12 +310,29 @@ def main(argv=None) -> int:
                 # Both denominators use the engine's exact legality, so a ply
                 # on which NO seat of the team could have asked here counts as
                 # an opportunity for neither side.
-                if any(_askable(st.hands, h, q) for q in seats):
+                if any(_askable(st.hands, h, w) for w in seats):
                     row[f"{a_side}_turnplies_b{b}"] += 1
                     if _askable(st.hands, h, actor):
                         row[f"{a_side}_accessplies_b{b}"] += 1
+                        row[f"{a_side}_accessplies_b{b}_t{q}"] += 1
 
             if isinstance(act, Ask):
+                # -- the selection ratio, over the seat's OWN option set ------
+                # Scored against every half-suit this seat could legally have
+                # asked in at this ply, band 0-6 alike, so the denominator is
+                # the real alternative set and not just the contested part.
+                avail = [w for w in range(n_hs)
+                         if st.set_winner[w] is None
+                         and _askable(st.hands, w, actor)]
+                if avail:
+                    k = len(avail)
+                    for b in BANDS:
+                        nb = sum(1 for w in avail if band[w] == b)
+                        if nb:
+                            row[f"{a_side}_sel_den_b{b}"] += nb / k
+                    cb = band[half_suit_of(act.card)]
+                    if cb in BANDS:
+                        row[f"{a_side}_sel_num_b{cb}"] += 1
                 h = half_suit_of(act.card)
                 if not (st.hands[actor] & half_suit_mask(h)):
                     st_illegal_seat += 1
@@ -282,12 +344,20 @@ def main(argv=None) -> int:
                 if band[h] in BANDS:
                     b = band[h]
                     row[f"{a_side}_asks_b{b}"] += 1
+                    row[f"{a_side}_asks_b{b}_t{q}"] += 1
                     row[f"{a_side}_hits_b{b}"] += int(hit)
                     if hit:
                         v_side = team_side[team_of(act.target)]
                         row[f"{v_side}_took_from_b{b}"] += 1
 
             st.apply(actor, act)
+            for h in range(n_hs):
+                if (st.set_winner[h] is not None and h not in resolved_at
+                        and band[h] in BANDS):
+                    resolved_at[h] = ply
+                    w_side = team_side[st.set_winner[h]]
+                    row[f"{w_side}_resolve_ply_b{band[h]}"] += ply
+                    row[f"{w_side}_resolved_b{band[h]}"] += 1
 
             # -- recompute access and assert it only ever shrinks ------------
             for h in range(n_hs):
@@ -405,6 +475,32 @@ def main(argv=None) -> int:
                 "win_rate_given_retained_ci":
                     _boot(per, f"{s}_won_retained_b{b}", f"{s}_retained_b{b}"),
                 "won_after_lockout": tot(f"{s}_won_locked_b{b}"),
+                # the confound, measured: the mean ply at which a band-b
+                # half-suit this side WON was declared
+                "mean_resolve_ply_of_wins":
+                    ((tot(f"{s}_resolve_ply_b{b}") / tot(f"{s}_resolved_b{b}"))
+                     if tot(f"{s}_resolved_b{b}") else None),
+                # invariant to access level, to k, and to band abundance
+                "selection_ratio": ((tot(f"{s}_sel_num_b{b}")
+                                     / tot(f"{s}_sel_den_b{b}"))
+                                    if tot(f"{s}_sel_den_b{b}") else None),
+                "selection_ratio_ci": _boot(per, f"{s}_sel_num_b{b}",
+                                            f"{s}_sel_den_b{b}"),
+                "selection_asks": tot(f"{s}_sel_num_b{b}"),
+                "selection_expected": tot(f"{s}_sel_den_b{b}"),
+                "by_ply_bucket": [
+                    {"bucket": q,
+                     "edge": (f"<{PLY_EDGES[q]}" if q < len(PLY_EDGES)
+                              else f">={PLY_EDGES[-1]}"),
+                     "asks": tot(f"{s}_asks_b{b}_t{q}"),
+                     "access_plies": tot(f"{s}_accessplies_b{b}_t{q}"),
+                     "asks_per_access_ply":
+                         ((tot(f"{s}_asks_b{b}_t{q}")
+                           / tot(f"{s}_accessplies_b{b}_t{q}"))
+                          if tot(f"{s}_accessplies_b{b}_t{q}") else None),
+                     "ci": _boot(per, f"{s}_asks_b{b}_t{q}",
+                                 f"{s}_accessplies_b{b}_t{q}")}
+                    for q in range(len(PLY_EDGES) + 1)],
             }
             out["by_side_band"][f"{s}_b{b}"] = d
 
@@ -438,6 +534,9 @@ def main(argv=None) -> int:
             "asks_per_access_ply": [o["asks_per_access_ply"],
                                     t["asks_per_access_ply"]],
             "hit_rate": [o["hit_rate"], t["hit_rate"]],
+            "selection_ratio": [o["selection_ratio"], t["selection_ratio"]],
+            "selection_ratio_ci": [o["selection_ratio_ci"],
+                                   t["selection_ratio_ci"]],
             "death_per_card_taken": [o["death_per_card_taken"],
                                      t["death_per_card_taken"]],
             "lockout_rate": [o["lockout_rate"], t["lockout_rate"]],
@@ -454,6 +553,45 @@ def main(argv=None) -> int:
                   f"{f(d['access_rate'])}  {f(d['asks_per_live_ply'],9,5)}  "
                   f"{f(d['asks_per_access_ply'],11,5)}  {f(d['hit_rate'],6)}  "
                   f"{f(d['death_per_card_taken'],10)}  {f(d['win_rate'])}")
+    print()
+    print("  THE SELECTION RATIO -- the measure immune to BOTH confounds. Among")
+    print("  exactly the half-suits that seat could legally have asked in, how")
+    print("  many asks went to this band against what uniform choice would")
+    print("  send. 1.0 is indifference. Invariant to the access level, to how")
+    print("  many half-suits were accessible, and to band abundance.")
+    print(f"  {'holding':>7}  {'ours':>8}  {'95% CI':>18}  {'theirs':>8}"
+          f"  {'95% CI':>18}  {'theirs/ours':>11}")
+    for k in (2, 3, 4):
+        o = out["by_side_band"][f"ours_b{k}"]
+        t = out["by_side_band"][f"theirs_b{6-k}"]
+        a, b2 = o["selection_ratio"], t["selection_ratio"]
+        if a is None or b2 is None or not a:
+            continue
+        oc, tc = o["selection_ratio_ci"], t["selection_ratio_ci"]
+        print(f"  {k:>7}  {a:>8.4f}  [{oc[0]:>7.4f}, {oc[1]:>7.4f}]  "
+              f"{b2:>8.4f}  [{tc[0]:>7.4f}, {tc[1]:>7.4f}]  {b2/a:>11.4f}")
+    print()
+    print("  THE TIME CONTROL. SESTINA declares 4.832 half-suits a game against")
+    print("  our 4.100, and a half-suit resolves OUT of the denominator, so a")
+    print("  faster winner accrues fewer access plies exactly where it wins.")
+    print("  The same ratio inside ply buckets, which share one clock:")
+    for k in (2, 3, 4):
+        ob, tb = k, 6 - k
+        o = out["by_side_band"][f"ours_b{ob}"]
+        t = out["by_side_band"][f"theirs_b{tb}"]
+        print(f"    holding {k}   mean resolve ply of its own wins: "
+              f"ours {o['mean_resolve_ply_of_wins']:.1f}  "
+              f"theirs {t['mean_resolve_ply_of_wins']:.1f}")
+        print(f"      {'plies':>8}  {'ours':>8}  {'theirs':>8}  {'theirs/ours':>11}"
+              f"  {'n ours':>8}  {'n theirs':>8}")
+        for q in range(len(PLY_EDGES) + 1):
+            ob_, tb_ = o["by_ply_bucket"][q], t["by_ply_bucket"][q]
+            a, b2 = ob_["asks_per_access_ply"], tb_["asks_per_access_ply"]
+            if a is None or b2 is None or not a:
+                continue
+            print(f"      {ob_['edge']:>8}  {a:>8.5f}  {b2:>8.5f}  "
+                  f"{b2/a:>11.4f}  {ob_['access_plies']:>8,}  "
+                  f"{tb_['access_plies']:>8,}")
     print()
     print("  THE NEAR-TAUTOLOGY, reported as one. Losing the last access seat")
     print("  means the opponents hold all six, and every half-suit is")
