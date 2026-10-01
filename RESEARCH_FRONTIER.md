@@ -6393,3 +6393,165 @@ moving something else by more. That is the coherent account of five consecutive
 null or negative registrations, and it is a stronger statement than any of them
 alone: the deficit is real, it is fully localised, and it is **not in the part of
 the engine this project has been tuning.**
+
+## OUTCOME 2026-10-01: access is not the constraint, and imitating their allocation is reachable, measured, and bad
+
+`results/access_depletion_18300000.json` and
+`results/access_depletion_timed_18300000.json` (400 games each),
+`results/access_depletion_scarce000_18300000.json` and
+`results/access_depletion_scarce040_18300000.json` (400 games each). Same deal
+and agent seeds as `contested_race`, so no part of any difference is a seed
+block.
+
+### The hypothesis, and why it was worth a run
+
+The previous entry put the whole margin in bands 2–4, found no per-ask edge
+inside them large enough to be the cause, and concluded the deficit is "not in
+the part of the engine this project has been tuning." An ask is legal only if
+the **acting seat** holds a card of the half-suit, so a team's ability to
+contest one is not how many cards the *team* holds but whether the seat *with
+the turn* holds one — two cards in one seat gives access on a third of the
+team's plies, two in two seats on two thirds. The champion's entire live
+objective is three weights (`suit` 0.06, `turn` 0.6, `scarce` 0.2) and **not one
+is a seat-level quantity**. Access is also symmetric at the deal and **strictly
+depleting** after it: a seat can only come to hold a card of a half-suit by
+asking for one, which requires holding one already, so the set of seats with
+access can only ever shrink.
+
+That monotonicity is asserted on every event, not assumed. Across 1,200 games in
+three arms the access set **never grew once**.
+
+### It is refuted, and the correction runs the wrong way
+
+| holding | side | access | asks/live ply | asks/access ply |
+|---:|---|---:|---:|---:|
+| 2 | ours | **0.5774** [0.5640, 0.5901] | 0.11829 | 0.22181 |
+| 2 | theirs | 0.5197 [0.5058, 0.5335] | 0.13439 | **0.31311** |
+| 3 | ours | **0.6965** | 0.16811 | 0.24844 |
+| 3 | theirs | 0.6576 | 0.17199 | 0.27496 |
+| 4 | ours | **0.7744** | 0.18853 | 0.24633 |
+| 4 | theirs | 0.7639 | 0.17189 | 0.22749 |
+
+**We have more access than they do at every holding**, and at holding two the
+intervals do not overlap. So dividing ability out does not shrink the
+behind-investment gap — it **widens** it, from +13.6% per live ply to **+41.2%**
+per access ply. Whatever decides the contested bands, it is not that we cannot
+reach them.
+
+The instrument reproduces `contested_race`'s published **0.28604 / 0.44426 /
+0.62928** and its hit rates **0.6494 / 0.6059 / 0.4841** to every digit on
+867 / 1211 / 847 half-suits, and `seats@deal` comes out 1.714/1.679,
+2.153/2.181, 2.460/2.495 against a hypergeometric 1.6923 — symmetric, as a deal
+property must be.
+
+### The obvious version of this was degenerate, and the smoke test said so
+
+"Did the team reach zero cards in the half-suit" is **not a mechanism**. Reaching
+zero means the opponents hold all six, and every half-suit is eventually
+declared by whoever assembles it, so lockout is losing the half-suit restated:
+`P(win | retained access)` came out **1.0000** in every band for both sides and
+the lockout rate summed with the win rate to 1. It is reported as the
+near-tautology it is. Its one genuine residual is real but small — under
+`wrong_distribution_outcome="opponent"` a team holding none of a half-suit still
+takes it when the opponents declare with the split wrong, **43** half-suits in
+400 games. The first draft asserted that residual was *impossible*, as a
+self-test. It fired on the first six games.
+
+### What survived: the first confound-free allocation measure
+
+Asks per access ply has two confounds, and this project has already lost a
+hypothesis to the first. **Duration** — a half-suit resolves *out* of the
+denominator and they declare 4.832 a game against our 4.100, so a faster winner
+accrues fewer plies exactly where it wins. **Breadth**, its mirror — asks per
+access ply is a share of attention, a seat with access to *k* half-suits can ask
+in one, so the per-half-suit rate falls as roughly 1/*k* whatever the policy, and
+*we* have the wider access.
+
+The **selection ratio** removes both: conditional on an ask happening, and among
+exactly the half-suits that seat could legally have asked in, the asks that went
+to a band against what uniform choice would send there. Invariant to the access
+level, to *k*, and to band abundance.
+
+| holding | ours | 95% CI | theirs | 95% CI |
+|---:|---:|---|---:|---|
+| 2 | **0.8983** | [0.8561, 0.9445] | **1.3493** | [1.2779, 1.4282] |
+| 3 | 1.0555 | [1.0190, 1.0950] | 1.1242 | [1.0843, 1.1661] |
+| 4 | **1.0685** | [1.0256, 1.1164] | **0.8721** | [0.8387, 0.9105] |
+
+A **mirror image**. We over-select the half-suits we are ahead in and
+under-select the ones we are behind in; they do the exact opposite. Every
+interval is clear of 1.0 and the two sides do not overlap at either shoulder.
+Their profile is **monotone decreasing** in own holding, 1.3493 → 1.1242 →
+0.8721; ours is a hump.
+
+**The time control strengthens it rather than dissolving it.** At holding two the
+gap is widest in the first 20 plies — **2.27×**, on near-equal denominators of
+4,344 and 4,046 access plies — and decays to 1.18× past ply 60. A duration
+artifact does the opposite: it concentrates late, where the denominators
+diverge. (And when *we* win a band-2 half-suit it takes until ply 77.0; when
+they win one, ply 60.2.)
+
+### And the mechanism check closes the direction
+
+Whether `scarce` *produces* that profile is a separate question from whether the
+profile exists, and it decides whether any of this licenses an arm. Our
+`w_scarce` overridden, theirs never touched:
+
+| arm | holding 2 | holding 3 | holding 4 |
+|---|---:|---:|---:|
+| `w_scarce` 0.00 | 0.9888 [0.944, 1.037] | 1.1075 | 1.0312 |
+| **0.20 shipped** | **0.8983** [0.856, 0.945] | 1.0555 | 1.0685 |
+| `w_scarce` 0.40 | 0.7843 [0.746, 0.828] | 0.9945 | 1.1351 |
+| *SESTINA, untouched* | *1.3493* | *1.1242* | *0.8721* |
+
+**Monotone in both shoulders, and at `w_scarce = 0` our profile flattens to near
+symmetry.** So the setting that removes the asymmetry is exactly the setting
+**P54 already dueled**: `w_scarce = 0.00` is **−0.4567 [−0.723, −0.191]** against
+SESTINA, and −0.10 is **−0.5800 [−0.858, −0.302]**. Both withdrawn, monotone
+across four doses.
+
+**And the arm that makes the asymmetry WORSE is the best arm.** `w_scarce = 0.40`
+drives our holding-two selection down to 0.7843 — further from their 1.3493 than
+the shipped value — and it is the only positive figure either sweep produced
+(+0.1200 self-play). That is the same structure as P54's doomed-ask result, where
+the arm making the most guaranteed-failure asks was also the best, reached by a
+second and independent mechanism: the under-investment is a **by-product of a
+preference that earns more than it costs.**
+
+So SESTINA's allocation is **reachable** by our engine — `w_scarce = 0` nearly
+matches it and a negative value would exceed it — and reaching it is measured to
+cost −0.4567 to −0.5800 sets a game. **Imitating the opponent's allocation is
+available, measured, and bad.** That closes "invest more when behind" for good,
+now at the level of choice rather than of asks per ply.
+
+### A correction to the previous entry's characterisation
+
+That entry said the deciding edges are "1–8% per-ask quantities". **The
+behavioural difference is much larger than that and I understated it**: 8% was
+asks per *live* ply, confounded by opportunity. Per opportunity, confound-free,
+we under-select the behind half-suits by 10% of uniform and they over-select them
+by 35%, a **1.50× gap** — and 2.27× in the opening twenty plies. What is small is
+not the difference; it is the *convertibility* of correcting it.
+
+### The residual, and it is now the whole frontier
+
+**Band 3, the even race, is unexplained by anything measured.** On 1,211
+half-suits:
+
+| | ours | theirs |
+|---|---:|---:|
+| selection ratio | 1.0555 [1.019, 1.095] | 1.1242 [1.084, 1.166] |
+| access | **0.6965** | 0.6576 |
+| hit rate | 0.6059 | 0.6135 |
+| take-backs per card taken | 0.4102 | 0.4035 |
+| **half-suits won** | **0.4443** [0.4167, 0.4728] | **0.5557** [0.5272, 0.5835] |
+
+Selection is near-matched, access is **ours**, the hit rate differs by 1.3%, the
+take-back rate by 0.7% — and we lose the even race by **11.1 points**, intervals
+not overlapping. Every ask-level quantity this project can measure is matched or
+in our favour at the position that is 3.03 half-suits a game, and the outcome is
+not.
+
+That is the sharpest statement of the deficit yet, and it points where
+`contested_race` said it would: **which card, and which target, inside a
+half-suit — still not measured at all.**
