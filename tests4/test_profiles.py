@@ -330,10 +330,10 @@ def _post(base, op, body):
         return e.code, json.loads(e.read())
 
 
-def test_routes_make_a_profile_and_carry_it_to_a_quick_play_seat(server):
-    st, out = _post(server, "p_new", {"name": "Ada"})
-    assert st == 200 and out["profile"]["rating"] == 1500
-    pid, sec = out["id"], out["secret"]
+def test_routes_carry_a_profile_to_a_quick_play_seat(server):
+    # (Signing up is tests4/test_accounts.py; here the profile is made
+    # directly, and the table routes must accept it and refuse a bad secret.)
+    pid, sec = _profile("Ada")
     st, t = _post(server, "t_quick", {"name": "x", "pid": pid, "psecret": sec})
     assert st == 200
     me = t["table"]["me"]

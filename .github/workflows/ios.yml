@@ -135,7 +135,7 @@ jobs:
           echo "APP_ID=$BID" >> "$GITHUB_ENV"
           echo "APP_SIZE=$(du -sh "$APP" | cut -f1)" >> "$GITHUB_ENV"
 
-      - name: Check the home screen actually drew
+      - name: Check the first screen actually drew
         run: |
           set -euo pipefail
           "$PY" - <<'PY'
@@ -145,11 +145,11 @@ jobs:
           w, h = im.size
           px = (im.get_flattened_data() if hasattr(im, "get_flattened_data")
                 else im.getdata())
-          # The Quick Play tile is a large sky-blue block (#1aa7e6 to #134e9b).
-          # The splash screen is dark navy with one small fish, so a blank or
-          # stuck-on-splash launch has almost none of this colour. Calibrated
-          # before the first run: the home screen scores 7.8%, the launch
-          # splash 0.1%, so 1% separates them with room on both sides.
+          # The first screen's big sky-blue button (#1aa7e6 to #134e9b): on a
+          # fresh install that is the welcome screen's Create account (5.0%
+          # measured), for a returning player the Quick Play tile (7.6-7.8%).
+          # The splash is dark navy with one small fish and a blank web view
+          # is flat, both 0.0-0.1%, so 1% separates them on every side.
           blue = sum(1 for r, g, b in px if b > 150 and r < 90 and 80 < g < 200)
           frac = blue / (w * h)
           lit = sum(1 for r, g, b in px if r + g + b > 600) / (w * h)

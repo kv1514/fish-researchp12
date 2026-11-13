@@ -176,3 +176,25 @@ grant execute on function public.fish_profile_delete(text, text) to anon, authen
 grant execute on function public.fish_profile_top(text, integer) to anon, authenticated;
 grant execute on function public.fish_profile_review(text, integer) to anon, authenticated;
 grant execute on function public.fish_profile_rank(text, double precision) to anon, authenticated;
+
+-- Account deletion (App Review Guideline 5.1.1(v)): deleting a profile in the
+-- app also deletes the Supabase Auth user behind it -- email, phone and every
+-- sign-in identity -- which the publishable key alone cannot do. Same key gate
+-- as everything above; the server calls it only for the account whose own
+-- device secret it has just checked (api/_profiles.py, delete()).
+create or replace function public.fish_auth_delete(p_key text, p_uid uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not fish_private.key_ok(p_key) then
+    raise exception 'denied' using errcode = '42501';
+  end if;
+  delete from auth.users where id = p_uid;
+  return found;
+end;
+$$;
+revoke execute on function public.fish_auth_delete(text, uuid) from public;
+grant execute on function public.fish_auth_delete(text, uuid) to anon, authenticated;

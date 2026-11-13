@@ -28,6 +28,7 @@ from api import _rooms                                         # noqa: E402
 from api import _room_game as RG                               # noqa: E402
 from api import _tables as T                                   # noqa: E402
 from api import _profiles as P                                 # noqa: E402
+from api import _auth as A                                     # noqa: E402
 
 MAX_BODY = 512 * 1024
 
@@ -221,6 +222,9 @@ class handler(BaseHTTPRequestHandler):
 
             if op.startswith("p_"):
                 return self._profile(op, body)
+
+            if op.startswith("a_"):
+                return self._account(op, body)
 
             # Every other route restores the session from the sealed token plus
             # the client's copy of the public action log.
@@ -425,10 +429,6 @@ class handler(BaseHTTPRequestHandler):
         try:
             pid = str(body.get("id") or "")
             psec = str(body.get("secret") or "")
-            if op == "p_new":
-                pid, secret, doc = P.create(body.get("name", ""))
-                return self._send({"id": pid, "secret": secret,
-                                   "profile": P.public(doc)})
             if op == "p_get":
                 return self._send({"profile": P.get(pid)})
             if op == "p_top":
@@ -436,6 +436,11 @@ class handler(BaseHTTPRequestHandler):
             if op == "p_rename":
                 return self._send({"profile": P.rename(pid, psec,
                                                        body.get("name"))})
+            if op == "p_me":
+                return self._send({"profile": P.me(pid, psec)})
+            if op == "p_logout":
+                P.logout(pid, psec)
+                return self._send({"logged_out": True})
             if op == "p_delete":
                 P.delete(pid, psec)
                 return self._send({"deleted": True})
@@ -458,6 +463,69 @@ class handler(BaseHTTPRequestHandler):
         except _rooms.NotFound:
             return self._send({"error": "no such player"}, 404)
         except ValueError as e:
+            return self._send({"error": str(e)}, 400)
+        except RuntimeError as e:
+            return self._send({"error": str(e)}, 503)
+
+    # -- accounts ------------------------------------------------------------
+
+    #: Where a Google sign-in may return to: the web app, or the iOS app's own
+    #: link. Supabase checks its own allowlist too; this one keeps the server
+    #: from minting sign-in links that land anywhere else.
+    OAUTH_RETURNS = ("https://fish-engine.vercel.app/play/", "fish://auth",
+                     "http://127.0.0.1:8420/play/")
+
+    def _account(self, op: str, body: dict):
+        """Every /api/a_* route: sign up, sign in, and the sign-in options.
+
+        Each successful sign-in ends the same way -- the account's profile,
+        and a fresh secret for THIS device -- so the rest of the app never
+        needs to know how someone signed in.
+        """
+        def done(user):
+            pid, secret, doc = P.sign_in(user, body.get("name"),
+                                         A.login_label(user)
+                                         if isinstance(user, dict) else "")
+            return self._send({"id": pid, "secret": secret,
+                               "profile": dict(P.public(doc),
+                                               login=doc.get("login", ""))})
+        try:
+            if op == "a_config":
+                return self._send({"accounts": A.config()})
+            if op == "a_signup":
+                # The name first: checked after the account exists, a blank
+                # one would leave an account with no profile behind it.
+                if not _rooms.clean_name(body.get("name"), ""):
+                    return self._send({"error": "pick a name"}, 400)
+                user = A.signup_email(body.get("email"), body.get("password"))
+                if user is None:
+                    return self._send({"confirm": True})
+                return done(user)
+            if op == "a_login":
+                user = A.login_email(body.get("email"), body.get("password"))
+                if not body.get("name"):
+                    body = dict(body, name=A.suggested_name(user))
+                return done(user)
+            if op == "a_phone_start":
+                A.phone_start(body.get("phone"))
+                return self._send({"sent": True})
+            if op == "a_phone_verify":
+                return done(A.phone_verify(body.get("phone"), body.get("code")))
+            if op == "a_oauth":
+                back = str(body.get("redirect_to") or "")
+                if back not in self.OAUTH_RETURNS:
+                    return self._send({"error": "unknown return address"}, 400)
+                return self._send({"url": A.oauth_url(
+                    str(body.get("provider") or ""), back)})
+            if op == "a_token":
+                user = A.from_token(body.get("access_token"))
+                if not body.get("name"):
+                    body = dict(body, name=A.suggested_name(user))
+                return done(user)
+            return self._send({"error": "not found"}, 404)
+        except (A.AuthUnavailable, P.ProfilesUnavailable) as e:
+            return self._send({"error": str(e)}, 503)
+        except ValueError as e:                 # includes A.AuthError
             return self._send({"error": str(e)}, 400)
         except RuntimeError as e:
             return self._send({"error": str(e)}, 503)

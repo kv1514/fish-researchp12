@@ -46,44 +46,56 @@ const ADJ = ['Swift', 'Lucky', 'Sly', 'Bold', 'Quiet', 'Clever', 'Salty', 'Sharp
 const NOUN = ['Pike', 'Marlin', 'Trout', 'Shark', 'Tuna', 'Squid', 'Eel', 'Perch', 'Cod', 'Orca'];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const prefs = {
-  name: LS.get('name') || `${pick(ADJ)} ${pick(NOUN)}`,
+  name: LS.get('name') || '',          // chosen at sign-up, or as a guest
   sound: LS.get('sound', true),
   haptics: LS.get('haptics', true),
 };
-LS.set('name', prefs.name);
 const stats = LS.get('stats', { played: 0, won: 0 });
 
-// ------------------------------------------------------------- profile ----
-// Made on first use: a public id and a secret that stays on this device. No
-// email, no password -- the secret IS the account, so deleting the app loses
-// it, and "Delete my profile" in settings removes it from the server.
+// ------------------------------------------------------------- account ----
+// An account is made by signing up (email, Google or phone -- whichever this
+// server has switched on) and proved on this device by a secret the server
+// handed out at sign-in. Guests have no account: a name, and unrated play.
 const ME = { id: null, secret: null, profile: null };
 (() => { const m = LS.get('me'); if (m && m.id && m.secret) { ME.id = m.id; ME.secret = m.secret; } })();
-async function ensureProfile() {
-  if (ME.id) return true;
-  if (ME.off) return false;            // this server said ratings are off
-  try {
-    const d = await api('p_new', { name: prefs.name });
-    ME.id = d.id; ME.secret = d.secret; ME.profile = d.profile;
-    LS.set('me', { id: d.id, secret: d.secret });
-    return true;
-  } catch (e) { if (e.status === 503) ME.off = true; return false; }   // play unrated
+let AUTH = null;                         // which ways to sign in are on here
+let authLoaded = null;
+function loadAuthConfig() {
+  if (!authLoaded) {
+    authLoaded = api('a_config').then((d) => { AUTH = d.accounts; return AUTH; })
+      .catch(() => { AUTH = null; return null; });
+  }
+  return authLoaded;
 }
+const isGuest = () => !ME.id;
 function forgetProfile() { LS.del('me'); ME.id = ME.secret = ME.profile = null; }
+function storeAccount(d) {
+  ME.id = d.id; ME.secret = d.secret; ME.profile = d.profile;
+  LS.set('me', { id: d.id, secret: d.secret });
+  LS.del('guest');
+  prefs.name = d.profile.name; LS.set('name', prefs.name);
+}
 async function refreshMe() {
   if (!ME.id) return;
-  try { ME.profile = (await api('p_get', { id: ME.id })).profile; renderHome(); }
-  catch (e) { if (e.status === 404) forgetProfile(); }
+  try { ME.profile = (await api('p_me', { id: ME.id, secret: ME.secret })).profile; renderHome(); }
+  catch (e) {
+    if (e.status === 400 || e.status === 404) {      // logged out or deleted elsewhere
+      forgetProfile(); renderHome();
+    }
+  }
 }
-// Table calls carry the profile, and recover once if the server no longer
-// knows it (deleted elsewhere). A profile closed for fair play stays closed.
+// Table calls carry the account. If the server no longer knows this device
+// (logged out elsewhere, account deleted) it says so, and we drop to guest.
 async function tableCall(op, body) {
-  await ensureProfile();
+  if (isGuest() && !prefs.name) { openGuest(); throw new Error('Pick a name first'); }
   const go = () => api(op, Object.assign({}, body, ME.id ? { pid: ME.id, psecret: ME.secret } : {}));
   try { return await go(); }
   catch (e) {
-    if (e.status === 403 && e.data && e.data.profile_invalid && !/fair-play/.test(e.message)) {
-      forgetProfile(); await ensureProfile(); return go();
+    if (e.status === 403 && e.data && e.data.profile_invalid) {
+      if (/fair-play/.test(e.message)) throw e;
+      forgetProfile(); renderHome();
+      toast('Signed out — log in again to play rated', true, 3200);
+      return go();
     }
     throw e;
   }
@@ -249,9 +261,9 @@ function renderHome() {
   $('#home-avatar').outerHTML = avatarHTML({ kind: 'human', name: prefs.name }, 'sm')
     .replace('class="avatar sm"', 'class="avatar sm" id="home-avatar"');
   const p = ME.profile;
-  $('#home-stats').textContent = p
-    ? `Rating ${p.rating} · ${p.wins}–${p.losses}`
-    : stats.played ? `${stats.won} wins · ${stats.played} games` : 'Tap to see your profile';
+  $('#home-name').textContent = (p && p.name) || prefs.name || 'Guest';
+  $('#home-stats').textContent = p ? `Rating ${p.rating} · ${p.wins}–${p.losses}`
+    : ME.id ? 'Signed in' : 'Guest · tap to sign up for a rating';
 }
 
 async function refreshList() {
@@ -351,7 +363,7 @@ async function joinByCode(code) {
 }
 $('#bots-btn').onclick = () => startSolo();
 
-$('#profile-btn').onclick = () => openProfile(null);
+$('#profile-btn').onclick = () => (ME.id ? openProfile(null) : openAuth('signup'));
 $('#board-btn').onclick = () => openBoard();
 $('#settings-btn').onclick = () => openSettings(false);
 $('#rules-btn').onclick = () => openRules();
@@ -365,15 +377,7 @@ function openSettings(focusName) {
     <div class="toggle-row"><span>Vibration</span><button class="switch ${prefs.haptics ? 'on' : ''}" id="set-hap" aria-label="Vibration"></button></div>
     <p class="muted small" style="margin-top:14px">Names show to other players at your table. Keep it friendly.
       · <a href="${SITE}/play/privacy.html" target="_blank" rel="noopener" style="color:var(--us)">Privacy</a></p>
-    <button class="btn btn-primary btn-block" id="set-done">Done</button>
-    ${ME.id ? '<button class="btn btn-ghost btn-block danger-text" id="set-delete" style="margin-top:8px">Delete my profile</button>' : ''}`, (m) => {
-    const del = $('#set-delete', m);
-    if (del) del.onclick = () => confirmBox('Delete your profile?',
-      'Your rating, record and history are removed from the server for good. You can keep playing; a new profile starts at 1500.',
-      'Delete', async () => {
-        try { await api('p_delete', { id: ME.id, secret: ME.secret }); } catch (e) { if (e.status !== 404) { toast(e.message, true); return; } }
-        forgetProfile(); closeSheet(); renderHome(); toast('Profile deleted');
-      });
+    <button class="btn btn-primary btn-block" id="set-done">Done</button>`, (m) => {
     const inp = $('#set-name', m);
     if (focusName) setTimeout(() => inp.focus(), 250);
     $('#set-sound', m).onclick = (e) => { prefs.sound = !prefs.sound; LS.set('sound', prefs.sound); e.target.classList.toggle('on', prefs.sound); };
@@ -388,6 +392,149 @@ function openSettings(focusName) {
       closeSheet(); renderHome();
     };
   });
+}
+
+// ------------------------------------------------- welcome & sign-in ----
+function showWelcome() { stopListPolling(); show('welcome'); }
+function enterHome() {
+  renderHome(); show('home'); startListPolling();
+  const j = LS.get('pending_join');
+  if (j) { LS.del('pending_join'); joinByCode(j); }
+}
+$('#w-signup').onclick = () => openAuth('signup');
+$('#w-login').onclick = () => openAuth('login');
+$('#w-guest').onclick = () => openGuest();
+
+function openGuest() {
+  openSheet('guest', `<h3>Play as a guest</h3>
+    <p class="hint">Guests play every table, unrated. You can make an account any time.</p>
+    <div class="sheet-section"><div class="sheet-label">Your name</div>
+      <input class="field" id="g-name" maxlength="18" value="${esc(prefs.name)}" placeholder="What should the table call you?" autocomplete="nickname"></div>
+    <button class="btn btn-primary btn-block" id="g-go">Play</button>`, (m) => {
+    const inp = $('#g-name', m);
+    setTimeout(() => inp.focus(), 250);
+    const go = () => {
+      const n = inp.value.replace(/\s+/g, ' ').trim().slice(0, 18);
+      if (!n) { toast('Pick a name', true); return; }
+      prefs.name = n; LS.set('name', n); LS.set('guest', true);
+      closeSheet(); enterHome();
+    };
+    $('#g-go', m).onclick = go;
+    inp.onkeydown = (e) => { if (e.key === 'Enter') go(); };
+  });
+}
+
+async function openAuth(mode) {
+  await loadAuthConfig();
+  const up = mode === 'signup';
+  if (!AUTH) {
+    openSheet('auth', `<h3>${up ? 'Create account' : 'Log in'}</h3>
+      <p class="hint">Accounts aren't switched on for this server yet. Play as a guest for now — nothing you do as a guest is lost.</p>
+      <button class="btn btn-primary btn-block" id="a-guest">Play as guest</button>`, (m) => {
+      $('#a-guest', m).onclick = () => openGuest();
+    });
+    return;
+  }
+  // App Review 4.8: an iPhone app offering Google sign-in must also offer
+  // Sign in with Apple, so the app shows Google only once Apple is on too.
+  const google = AUTH.google && (!NATIVE || AUTH.apple);
+  const alt = [
+    AUTH.apple ? '<button class="btn btn-ghost btn-block" data-oauth="apple">Continue with Apple</button>' : '',
+    google ? '<button class="btn btn-ghost btn-block" data-oauth="google">Continue with Google</button>' : '',
+    AUTH.phone ? '<button class="btn btn-ghost btn-block" id="a-phone">Use your phone number</button>' : '',
+  ].join('');
+  openSheet('auth', `<h3>${up ? 'Create account' : 'Log in'}</h3>
+    <p class="hint">${up ? 'An account keeps your rating, record and place on the leaderboard.' : 'Welcome back.'}</p>
+    <form id="a-form" autocomplete="on">
+      ${up ? `<div class="sheet-section"><div class="sheet-label">Name others will see</div>
+        <input class="field" id="a-name" maxlength="18" value="${esc(prefs.name)}" autocomplete="nickname" required></div>` : ''}
+      ${AUTH.email ? `<div class="sheet-section"><div class="sheet-label">Email</div>
+        <input class="field" id="a-email" type="email" inputmode="email" autocomplete="email" placeholder="you@gmail.com" required></div>
+      <div class="sheet-section"><div class="sheet-label">Password</div>
+        <input class="field" id="a-pass" type="password" minlength="8" autocomplete="${up ? 'new-password' : 'current-password'}" placeholder="${up ? 'At least 8 characters' : ''}" required></div>
+      <button class="btn btn-primary btn-block" type="submit" id="a-go">${up ? 'Create account' : 'Log in'}</button>` : ''}
+    </form>
+    ${alt ? `<div class="or"><span>or</span></div>${alt}` : ''}
+    <button class="btn btn-link btn-block" id="a-switch">${up ? 'Have an account? Log in' : 'New here? Create an account'}</button>`, (m) => {
+    $('#a-switch', m).onclick = () => openAuth(up ? 'login' : 'signup');
+    const form = $('#a-form', m);
+    if (form && AUTH.email) {
+      form.onsubmit = async (ev) => {
+        ev.preventDefault();
+        const body = { email: $('#a-email', m).value.trim(), password: $('#a-pass', m).value };
+        if (up) body.name = $('#a-name', m).value.replace(/\s+/g, ' ').trim();
+        if (up && !body.name) { toast('Pick a name', true); return; }
+        const btn = $('#a-go', m); btn.disabled = true;
+        try {
+          const d = await api(up ? 'a_signup' : 'a_login', body);
+          if (d.confirm) {
+            openSheet('auth', `<h3>Check your email</h3>
+              <p class="hint">We sent a link to ${esc(body.email)}. Open it, then come back and log in.</p>
+              <button class="btn btn-primary btn-block" id="a-ok">Log in</button>`, (m2) => {
+              $('#a-ok', m2).onclick = () => openAuth('login');
+            });
+            return;
+          }
+          storeAccount(d); closeSheet(); enterHome();
+          toast(up ? `Welcome, ${d.profile.name}` : `Signed in as ${d.profile.name}`);
+        } catch (e) { toast(e.message, true); btn.disabled = false; }
+      };
+    }
+    $$('[data-oauth]', m).forEach((g) => {
+      g.onclick = async () => {
+        if (up) { const n = $('#a-name', m) && $('#a-name', m).value.trim(); if (n) LS.set('pending_name', n); }
+        try {
+          const back = NATIVE ? 'fish://auth' : `${location.origin}/play/`;
+          const d = await api('a_oauth', { provider: g.dataset.oauth, redirect_to: back });
+          location.href = d.url;        // the native shell hands this to Safari
+        } catch (e) { toast(e.message, true); }
+      };
+    });
+    const ph = $('#a-phone', m);
+    if (ph) ph.onclick = () => openPhone(up);
+  });
+}
+
+function openPhone(up) {
+  openSheet('auth', `<h3>Your phone number</h3>
+    <p class="hint">We'll text you a code. Include your country code.</p>
+    ${up ? `<div class="sheet-section"><div class="sheet-label">Name others will see</div>
+      <input class="field" id="p-name" maxlength="18" value="${esc(prefs.name)}" autocomplete="nickname"></div>` : ''}
+    <div class="sheet-section"><div class="sheet-label">Phone</div>
+      <input class="field" id="p-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 555 123 4567"></div>
+    <div class="sheet-section" id="p-code-row" hidden><div class="sheet-label">Code</div>
+      <input class="field" id="p-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10"></div>
+    <button class="btn btn-primary btn-block" id="p-go">Text me a code</button>`, (m) => {
+    let sent = false;
+    $('#p-go', m).onclick = async () => {
+      const phone = $('#p-phone', m).value.trim();
+      try {
+        if (!sent) {
+          await api('a_phone_start', { phone });
+          sent = true; $('#p-code-row', m).hidden = false; $('#p-go', m).textContent = 'Sign in';
+          $('#p-code', m).focus(); return;
+        }
+        const body = { phone, code: $('#p-code', m).value.trim() };
+        const n = $('#p-name', m); if (n && n.value.trim()) body.name = n.value.trim();
+        const d = await api('a_phone_verify', body);
+        storeAccount(d); closeSheet(); enterHome(); toast(`Signed in as ${d.profile.name}`);
+      } catch (e) { toast(e.message, true); }
+    };
+  });
+}
+
+// The way back from Google: the access token arrives in the URL fragment, on
+// the web page or in a fish://auth link. It is spent at once and never kept.
+async function finishTokenSignIn(hash) {
+  const q = new URLSearchParams(String(hash || '').replace(/^#/, ''));
+  const tok = q.get('access_token');
+  if (!tok) return false;
+  const name = LS.get('pending_name'); LS.del('pending_name');
+  try {
+    const d = await api('a_token', Object.assign({ access_token: tok }, name ? { name } : {}));
+    storeAccount(d); enterHome(); toast(`Signed in as ${d.profile.name}`);
+  } catch (e) { toast(e.message, true); }
+  return true;
 }
 
 // ------------------------------------------------- profiles & leaderboard ----
@@ -422,29 +569,43 @@ function profileHTML(p, mine) {
 }
 async function openProfile(pid) {
   const mine = !pid || pid === ME.id;
-  if (mine && !(await ensureProfile())) { openSettings(true); return; }
+  if (mine && !ME.id) { openAuth('signup'); return; }
   const id = mine ? ME.id : pid;
   openSheet('profile', '<p class="muted">Loading…</p>');
   let p;
-  try { p = (await api('p_get', { id })).profile; } catch (e) {
+  try { p = (mine ? await api('p_me', { id, secret: ME.secret }) : await api('p_get', { id })).profile; } catch (e) {
     if (mine && e.status === 404) forgetProfile();
     openSheet('profile', `<p class="muted">${esc(e.status === 404 ? 'That profile no longer exists.' : e.message)}</p>`);
     return;
   }
   if (mine) { ME.profile = p; renderHome(); }
   const buttons = mine
-    ? `<button class="btn btn-ghost btn-block" id="pf-name">Change name</button>
-       <button class="btn btn-ghost btn-block" id="pf-board">Leaderboard</button>`
+    ? `${p.login ? `<p class="muted small">Signed in with ${esc(p.login)}</p>` : ''}
+       <button class="btn btn-ghost btn-block" id="pf-name">Change name</button>
+       <button class="btn btn-ghost btn-block" id="pf-board">Leaderboard</button>
+       <button class="btn btn-ghost btn-block" id="pf-out">Log out</button>
+       <button class="btn btn-ghost btn-block danger-text" id="pf-del">Delete account</button>`
     : `<button class="btn btn-ghost btn-block" id="pf-cheat">Report cheating</button>
        <button class="btn btn-ghost btn-block" id="pf-namebad">Report offensive name</button>`;
   openSheet('profile', `${profileHTML(p, mine)}<div class="pf-actions">${buttons}</div>`, (m) => {
     if (mine) {
       $('#pf-name', m).onclick = () => openSettings(true);
       $('#pf-board', m).onclick = () => openBoard();
+      $('#pf-out', m).onclick = async () => {
+        try { await api('p_logout', { id: ME.id, secret: ME.secret }); } catch (_) {}
+        forgetProfile(); closeSheet(); LS.del('guest'); showWelcome();
+      };
+      $('#pf-del', m).onclick = () => confirmBox('Delete your account?',
+        'Your account, rating, record and sign-in are removed from our server for good. This can’t be undone.',
+        'Delete', async () => {
+          try { await api('p_delete', { id: ME.id, secret: ME.secret }); }
+          catch (e) { if (e.status !== 404) { toast(e.message, true); return; } }
+          forgetProfile(); closeSheet(); LS.del('guest'); showWelcome(); toast('Account deleted');
+        });
       return;
     }
     const report = async (reason) => {
-      if (!(await ensureProfile())) { toast('Reports need a profile', true); return; }
+      if (!ME.id) { toast('Sign in to report a player', true); return; }
       try {
         await api('p_report', { id: ME.id, secret: ME.secret, target: pid, reason });
         closeSheet(); toast('Thanks — a person will look at it');
@@ -1272,6 +1433,7 @@ $('#log-btn').onclick = () => {
 function ratingLine(vm) {
   if (vm.mode !== 'online') return '<p class="muted small">Practice games are not rated.</p>';
   if (!vm.rated) return '<p class="muted small">Private tables are not rated.</p>';
+  if (!ME.id) return '<p class="muted small">Guests aren’t rated — create an account to get a rating.</p>';
   const mine = vm.result && vm.result.ratings && vm.result.ratings[String(vm.me)];
   if (!mine) return '<p class="muted small">Rated game · updating ratings…</p>';
   if (mine.rating == null) return '';
@@ -1333,8 +1495,12 @@ window.addEventListener('resize', () => { if (G.vm) renderHand(G.vm); });
 // ----------------------------------------------------------------- boot ----
 async function boot() {
   renderHome();
-  show('home');
-  if (ME.id) refreshMe(); else ensureProfile().then(renderHome);
+  loadAuthConfig();
+  if (location.hash.includes('access_token')) {
+    const h = location.hash;
+    history.replaceState(null, '', location.pathname + location.search);
+    await finishTokenSignIn(h);
+  }
   const params = new URLSearchParams(location.search);
   const join = (params.get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
   // ?play=bots|watch on the web. FISH_AUTOPLAY is never set in the shipped
@@ -1342,6 +1508,18 @@ async function boot() {
   // game, because iOS asks "Open in Fish?" before following a fish:// link
   // and nothing on a build machine can tap Open.
   const autoplay = params.get('play') || window.FISH_AUTOPLAY;
+  if (ME.id) { show('home'); refreshMe(); }
+  else if (LS.get('guest') && prefs.name) show('home');
+  else if (autoplay === 'bots' || autoplay === 'watch') {
+    // A practice or watch game needs no account and no name; it is not saved.
+    prefs.name = prefs.name || 'You';
+    show('home');
+  } else {
+    // An invite link waits until they have chosen guest or account.
+    if (join.length === 4) { LS.set('pending_join', join); history.replaceState(null, '', location.pathname); }
+    showWelcome();
+    return;
+  }
   const saved = LS.get('seat');
   if (saved && Date.now() - saved.at < 6 * 3600 * 1000) {
     try {
@@ -1363,6 +1541,7 @@ const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacit
 if (AppPlugin && AppPlugin.addListener) {
   AppPlugin.addListener('appUrlOpen', (ev) => {
     const url = ev.url || '';
+    if (/^fish:\/\/auth/.test(url)) { finishTokenSignIn(url.split('#')[1] || ''); return; }
     const m = /join[/=]([A-Za-z0-9]{4})/.exec(url);
     if (m) joinByCode(m[1].toUpperCase());
     else if (/^fish:\/\/watch\b/.test(url)) startSolo(true);
