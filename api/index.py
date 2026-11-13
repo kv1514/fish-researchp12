@@ -27,6 +27,7 @@ from api._engine import (Session, new_session, parse_action,  # noqa: E402
 from api import _rooms                                         # noqa: E402
 from api import _room_game as RG                               # noqa: E402
 from api import _tables as T                                   # noqa: E402
+from api import _profiles as P                                 # noqa: E402
 
 MAX_BODY = 512 * 1024
 
@@ -218,6 +219,9 @@ class handler(BaseHTTPRequestHandler):
             if op.startswith("t_"):
                 return self._table(op, body)
 
+            if op.startswith("p_"):
+                return self._profile(op, body)
+
             # Every other route restores the session from the sealed token plus
             # the client's copy of the public action log.
             token = body.get("token")
@@ -311,8 +315,21 @@ class handler(BaseHTTPRequestHandler):
                 return self._send({"tables": T.open_tables()})
 
             name = body.get("name", "")
+            card = None
+            if op in ("t_quick", "t_create", "t_join") and body.get("pid"):
+                # A profile rides along when the app has one. A bad one is
+                # refused rather than silently dropped, so the app can make a
+                # fresh profile instead of playing unrated without knowing.
+                try:
+                    if P.profiles() is not None:
+                        prof = P.auth(body.get("pid"), body.get("psecret"))
+                        card, name = P.seat_card(prof), prof.get("name", name)
+                except ValueError as e:
+                    return self._send({"error": str(e),
+                                       "profile_invalid": True}, 403)
+
             if op == "t_quick":
-                code, seat, secret, doc, v = T.quick_play(name)
+                code, seat, secret, doc, v = T.quick_play(name, card=card)
                 return self._send({"code": code, "secret": secret,
                                    "table": T.view(doc, code, seat, v)})
 
@@ -320,7 +337,7 @@ class handler(BaseHTTPRequestHandler):
                 code, seat, secret, doc = T.create(
                     name, bool(body.get("public", False)),
                     body.get("turn", T.TURN_DEFAULT),
-                    body.get("pace", T.PACE_DEFAULT))
+                    body.get("pace", T.PACE_DEFAULT), card=card)
                 return self._send({"code": code, "secret": secret,
                                    "table": T.view(doc, code, seat, 1)})
 
@@ -331,7 +348,7 @@ class handler(BaseHTTPRequestHandler):
             if op == "t_join":
                 def _join(d):
                     T.tick(d, now)
-                    return T.join(d, name, now=now), True
+                    return T.join(d, name, now=now, card=card), True
                 doc, out, v = T.mutate(code, _join)
                 return self._send({"code": code, "secret": out["secret"],
                                    "table": T.view(doc, code, out["seat"], v)})
@@ -347,6 +364,7 @@ class handler(BaseHTTPRequestHandler):
                     moved = T.tick(d, now)
                     return me, (seen or moved)
                 doc, me, v = T.mutate(code, _poll)
+                doc, v = T.maybe_settle(code, doc, v)
                 return self._send({"table": T.view(doc, code, me, v)})
 
             if op == "t_leave":
@@ -355,7 +373,9 @@ class handler(BaseHTTPRequestHandler):
 
             if op == "t_act":
                 action = parse_action(body.get("action") or {})
-                fn = lambda d: (T.act(d, secret, action, now=now), True)  # noqa: E731
+                lost = bool(body.get("focus_lost"))
+                fn = lambda d: (T.act(d, secret, action, now=now,  # noqa: E731
+                                      focus_lost=lost), True)
             elif op == "t_start":
                 fn = lambda d: (T.start(d, secret, now=now), True)  # noqa: E731
             elif op == "t_rematch":
@@ -383,6 +403,7 @@ class handler(BaseHTTPRequestHandler):
                 return self._send({"error": "not found"}, 404)
 
             doc, _, v = T.mutate(code, fn)
+            doc, v = T.maybe_settle(code, doc, v)
             return self._send({"table": T.view(doc, code,
                                                T.seat_of(doc, secret), v)})
         except _rooms.NotFound:
@@ -390,6 +411,55 @@ class handler(BaseHTTPRequestHandler):
         except RuntimeError as e:
             # Raised only with messages written to be shown: a lost race
             # ("the table is busy") or the store being unreachable.
+            return self._send({"error": str(e)}, 503)
+
+    # -- profiles ------------------------------------------------------------
+
+    def _profile(self, op: str, body: dict):
+        """Every /api/p_* route: profiles, the leaderboard, and fair-play review.
+
+        A profile is identified by its public id and proved by its secret, the
+        same shape as a table seat. The review routes need FISH_ADMIN_KEY and
+        are a plain 404 without it, so their existence is not advertised.
+        """
+        try:
+            pid = str(body.get("id") or "")
+            psec = str(body.get("secret") or "")
+            if op == "p_new":
+                pid, secret, doc = P.create(body.get("name", ""))
+                return self._send({"id": pid, "secret": secret,
+                                   "profile": P.public(doc)})
+            if op == "p_get":
+                return self._send({"profile": P.get(pid)})
+            if op == "p_top":
+                return self._send({"players": P.leaderboard(50)})
+            if op == "p_rename":
+                return self._send({"profile": P.rename(pid, psec,
+                                                       body.get("name"))})
+            if op == "p_delete":
+                P.delete(pid, psec)
+                return self._send({"deleted": True})
+            if op == "p_report":
+                P.report(pid, psec, str(body.get("target") or ""),
+                         body.get("reason"))
+                return self._send({"reported": True})
+            if op in ("p_review", "p_clear", "p_ban"):
+                if not P.admin_ok(body.get("admin")):
+                    return self._send({"error": "not found"}, 404)
+                if op == "p_review":
+                    return self._send({"queue": P.review_queue(50)})
+                if op == "p_clear":
+                    P.clear(pid)
+                    return self._send({"cleared": True})
+                return self._send(P.ban(pid))
+            return self._send({"error": "not found"}, 404)
+        except P.ProfilesUnavailable as e:
+            return self._send({"error": str(e)}, 503)
+        except _rooms.NotFound:
+            return self._send({"error": "no such player"}, 404)
+        except ValueError as e:
+            return self._send({"error": str(e)}, 400)
+        except RuntimeError as e:
             return self._send({"error": str(e)}, 503)
 
     # -- rooms ---------------------------------------------------------------

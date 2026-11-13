@@ -9,7 +9,8 @@ What's already done here:
 - `ios/` — a real Xcode project (Swift Package Manager, no CocoaPods needed)
 - the app icon (1024×1024, no transparency, as Apple requires) and launch screen
 - native **haptics**, the native **share sheet** for invite codes, and
-  `fish://join/ABCD` **deep links**
+  `fish://join/ABCD` **deep links** (plus `fish://play` for a game against the
+  bots and `fish://watch` for one the bots play by themselves)
 - portrait-only on iPhone, dark status bar, and the export-compliance flag set
   (the app only uses HTTPS, which is exempt — so App Store Connect won't stall
   on the encryption question)
@@ -50,6 +51,22 @@ update fish_private.store_key set key_sha256 = '<sha256 hex of the new key>' whe
 then set `FISH_DB_KEY` in Vercel to the new value and redeploy.
 
 ---
+
+## No Mac? GitHub builds it for you
+
+`.github/workflows/ios.yml` builds the app on one of GitHub's Macs (free, because
+the repository is public) every time `app/` or `public/play/` changes. It
+launches the app in an iPhone simulator, screenshots the home screen and checks
+it actually drew, then opens `fish://watch` and films a whole game the bots play
+against each other on the live server. Find it under the repository's
+**Actions** tab → **ios**; the screenshots and the video (`game.mp4`) are
+attached to each run.
+
+That covers building and testing. **Uploading to the App Store still needs the
+Apple Developer account** (step 1 below), and then either a Mac for the steps
+that follow, or that workflow extended with your signing certificate and an App
+Store Connect API key stored as repository secrets — ask for that once the
+account exists.
 
 ## 1. What you need
 
@@ -107,11 +124,19 @@ In App Store Connect, on your app's page:
   turn timers, or practice against the bots."
 - **Privacy Policy URL**: `https://fish-engine.vercel.app/play/privacy.html`
 - **Support URL**: `https://fish-engine.vercel.app/` (or any page you control)
-- **App Privacy** questionnaire: the honest answers are — no tracking; the only
-  data is the **display name** the player types, which is shown to other players
-  and deleted with the table within 6 hours; not linked to identity. (Category:
-  *User Content → Other User Content*, used for *App Functionality*.)
+- **App Privacy** questionnaire: the honest answers are — **no tracking**. Data
+  collected, all **linked to the user** (to their in-app profile, not to a real
+  identity) and all used for **App Functionality** (which Apple defines to
+  include fraud prevention):
+  - *Identifiers → User ID*: the random profile id.
+  - *User Content → Other User Content*: the display name.
+  - *User Content → Gameplay Content*: rating, results, recent games.
+  - *Usage Data → Product Interaction*: move timing and whether the app left
+    the screen during the player's turn, kept for fair-play checks.
+  Account deletion is in the app (Settings → Delete my profile), which Apple
+  requires of any app that creates an account (guideline 5.1.1(v)).
 - **Age rating**: no gambling, no chat, no violence → it should come out 4+.
+  Ratings and a leaderboard are not gambling: nothing is bet or won.
   Answer "No" to simulated gambling: there are no bets or chips, only sets won.
 - **App Review notes**: "Online tables: press Quick Play. If no one else is
   online, the table fills with bots after 30 seconds. To test a private table,
@@ -126,7 +151,7 @@ Then **Add for Review → Submit**. Review usually takes a day or two.
 |---|---|---|
 | Online play down during review | 2.1 | **Your step** — see the top of this file |
 | "It's just a website" | 4.2 | UI is bundled in the app, not loaded from a URL; native haptics, share sheet and deep links; real-time multiplayer |
-| Strangers talking to each other | 1.2 | No free-text chat at all — only preset emoji reactions. Names are cleaned of invisible characters. If a reviewer asks about offensive names, add a word filter or a "report player" button |
+| Strangers talking to each other | 1.2 | No free-text chat at all — only preset emoji reactions. Names are cleaned of invisible characters. Any player can be reported (cheating or offensive name) from their profile; reports go to the review queue |
 | Copying another app's look | 5.2 | Layout is the general poker-table style; name, colours, icon and art are original. Don't use another app's name or screenshots in the listing |
 | Gambling | 5.3 | No money, chips or betting — make sure the description doesn't say "poker" |
 

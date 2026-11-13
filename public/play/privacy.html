@@ -21,19 +21,40 @@
   <p class="muted">Fish — the team card game</p>
 
   <h2>The short version</h2>
-  <p>Fish has no accounts, no ads, no analytics and no tracking. We never ask for your email,
-  phone number, contacts, location or photos.</p>
+  <p>Fish has no ads, no analytics and no tracking, and never asks for your email, phone number,
+  contacts, location or photos. The app makes you a <b>profile</b> the first time you open it — a
+  random id, the name you choose, and your rating — so your record follows you between games.
+  You can delete it at any time in Settings.</p>
 
-  <h2>What we store, and for how long</h2>
+  <h2>Your profile</h2>
   <ul>
-    <li><b>The name you choose</b> is shown to the other players at your table. It is stored with
-      that table on our server and deleted when the table expires, at most 6 hours after it was
-      last used.</li>
-    <li><b>The moves of the game</b> (which card was asked for, who declared what) are stored with
-      the table for the same period, so every player sees the same game.</li>
-    <li><b>On your device only</b>: your name, sound and vibration settings, and your win/loss
-      count are kept in the app's local storage. They never leave your device unless you join a
-      table, and then only your name is sent.</li>
+    <li><b>What it holds</b>: a random id, your display name, your rating and best rating, your
+      wins and losses, and a short record of your last 30 rated games (the score and how your
+      rating changed).</li>
+    <li><b>How it knows it's you</b>: a secret made on your device and kept there. Our server
+      stores only a one-way hash of it. There is no password and nothing to recover — if you
+      delete the app without deleting your profile first, the profile can no longer be used, and
+      stays on our server unless you contact us.</li>
+    <li><b>Who sees it</b>: other players can see your name, rating, record and recent results.</li>
+    <li><b>Deleting it</b>: Settings → <i>Delete my profile</i> removes it from our server
+      immediately and permanently.</li>
+  </ul>
+
+  <h2>Fair play</h2>
+  <p>To catch cheating in rated (Quick Play) games, the server keeps statistics about how your
+  moves turned out compared with what the cards you could see made likely, how long you took over
+  each move, and whether the app went to the background during your turn. These numbers are
+  never shown to other players. If they, or reports from other players, look unusual, a person
+  reviews them. Private tables and practice games against the bots are not analysed.</p>
+  <p>If you report another player, the report is stored with their profile, and your identity
+  is stored only as a one-way hash, so we can count one report per person.</p>
+
+  <h2>Tables</h2>
+  <ul>
+    <li><b>The moves of the game</b> (which card was asked for, who declared what) are stored
+      with the table on our server so every player sees the same game, and deleted when the
+      table expires, at most 6 hours after it was last used.</li>
+    <li><b>On your device only</b>: your sound and vibration settings.</li>
   </ul>
 
   <h2>What we don't do</h2>
@@ -45,7 +66,8 @@
 
   <h2>Children</h2>
   <p>Fish does not knowingly collect personal information from anyone, including children. The
-  only thing a player types is a display name, which they can make up.</p>
+  only thing a player types is a display name, which they can make up; the profile holds no real
+  name, contact details or location.</p>
 
   <h2>Changes</h2>
   <p>If this policy changes, the new version will be posted on this page.</p>

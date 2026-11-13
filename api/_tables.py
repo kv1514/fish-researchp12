@@ -51,6 +51,7 @@ import time
 from fish.cards import NUM_PLAYERS, team_of
 from fish.rules import RuleConfig
 
+from api import _fairplay as F
 from api._engine import CHAMPION_GAMMA, Session, _action_of, narrate
 from api._rooms import Conflict, NotFound, clean_name, store
 
@@ -86,6 +87,14 @@ PUBLIC_WAIT = 30.0
 PUBLIC_JOIN_GRACE = 12.0
 PUBLIC_MAX_WAIT = 90.0
 
+#: Moves of history a seat is SENT. Fish is a memory game: who asked whom for
+#: what is public when it happens, and keeping track of it is the skill. So a
+#: table shows the last two moves and no more -- enforced here, in what the
+#: server sends, because a limit that only the client applied would be one
+#: line of devtools away from a full transcript. The end of the game still
+#: gets its full ledger (declarations, reveal, ask tally): it is over.
+HISTORY_VISIBLE = 2
+
 #: Preset reactions. No free text, on purpose: open chat between strangers is
 #: user-generated content, which an App Store build would then need reporting,
 #: blocking and moderation for.
@@ -113,7 +122,11 @@ RETRIES = 5
 def _seat(i: int) -> dict:
     return {"seat": i, "kind": "open", "name": "", "secret": None,
             "joined": 0.0, "seen": 0.0, "bank": BANK_SECONDS,
-            "timeouts": 0, "away": False, "emote": None, "emote_t": 0.0}
+            "timeouts": 0, "away": False, "emote": None, "emote_t": 0.0,
+            # The player's profile, if they have one: public id, and the
+            # rating and games count as of joining (refreshed after each
+            # rated game). Shown to the table; used to rate the game.
+            "pid": None, "rating": None, "games": 0}
 
 
 def _clean_turn(turn, public: bool) -> int:
@@ -131,7 +144,7 @@ def _clean_pace(pace) -> str:
 
 
 def new_table(host_name: str, public: bool, turn=TURN_DEFAULT,
-              pace=PACE_DEFAULT, now: float = None) -> tuple:
+              pace=PACE_DEFAULT, now: float = None, card=None) -> tuple:
     """A seating table with its creator in the first seat.
 
     Returns ``(doc, seat, secret)``. The creator is seated immediately, so a
@@ -158,7 +171,7 @@ def new_table(host_name: str, public: bool, turn=TURN_DEFAULT,
         "clock": None,
         "result": None,
     }
-    out = join(doc, host_name, now=now)
+    out = join(doc, host_name, now=now, card=card)
     return doc, out["seat"], out["secret"]
 
 
@@ -185,15 +198,20 @@ def _reassign_host(doc: dict) -> None:
     doc["host"] = people[0]["seat"] if people else None
 
 
-def join(doc: dict, name: str, now: float = None) -> dict:
+def join(doc: dict, name: str, now: float = None, card=None) -> dict:
     """Take an open seat. Returns ``{"seat", "secret"}``.
 
     The secret is the player's proof that they are that seat, returned once and
-    carried on every later request.
+    carried on every later request. ``card`` is the player's verified profile
+    (``_profiles.seat_card``), or None; one profile sits once per table, so
+    nobody can take two seats -- or both sides -- under one rating.
     """
     now = time.time() if now is None else now
     if doc.get("phase") != "lobby":
         raise ValueError("that table has already started")
+    if card and any(s.get("pid") == card["pid"] for s in doc["seats"]
+                    if s["kind"] == "human"):
+        raise ValueError("you're already at that table")
     order = PUBLIC_ORDER if doc.get("public") else PRIVATE_ORDER
     for i in order:
         s = doc["seats"][i]
@@ -203,6 +221,9 @@ def join(doc: dict, name: str, now: float = None) -> dict:
             s["secret"] = secrets.token_urlsafe(16)
             s["name"] = clean_name(name, "") or f"Player {i + 1}"
             s["joined"] = s["seen"] = now
+            if card:
+                s["pid"], s["rating"] = card["pid"], card["rating"]
+                s["games"] = int(card.get("games", 0))
             _reassign_host(doc)
             if doc.get("public"):
                 _extend_public_wait(doc, now)
@@ -290,6 +311,12 @@ def leave(doc: dict, secret, now: float = None) -> None:
     if doc["phase"] == "lobby":
         doc["seats"][me] = _seat(me)
     else:
+        # Written down so leaving cannot dodge a rated loss: see _profiles.
+        if doc["phase"] == "playing" and str(me) in (
+                (doc.get("rated") or {}).get("seats") or {}):
+            left = doc.setdefault("left", [])
+            if me not in left:
+                left.append(me)
         s["kind"] = "bot"
         s["secret"] = None
         s["away"] = False
@@ -395,6 +422,23 @@ def _deal(doc: dict, now: float) -> None:
         s["away"] = False
     doc["nonce"] = secrets.token_urlsafe(12)
     doc["log"] = []
+    #: Who made each move: [seat, "h"] for the person, [seat, "e"] for the
+    #: engine standing in (timeout, away, gone, or a bot seat).
+    doc["by"] = []
+    #: Per-move fair-play rows for rated seats; see _fairplay.
+    doc["fair"] = []
+    doc["left"] = []
+    doc["settled"] = None
+    # Rated: a public table, and the profiled people at it as of now. Their
+    # ratings are written down here because Elo uses the rating at the start
+    # of a game, and because a seat that leaves must still be charged.
+    seats = {str(s["seat"]): {"pid": s["pid"], "rating": float(s["rating"]),
+                              "games": int(s.get("games") or 0)}
+             for s in doc["seats"]
+             if s["kind"] == "human" and s.get("pid")
+             and s.get("rating") is not None}
+    doc["rated"] = ({"key": "g" + secrets.token_hex(8), "seats": seats}
+                    if doc.get("public") and seats else None)
     doc["game"] = int(doc.get("game") or 0) + 1
     doc["phase"] = "playing"
     doc["result"] = None
@@ -416,6 +460,12 @@ def rematch(doc: dict, secret, now: float = None) -> None:
     """Deal again at the same table. The first seat moves one place left."""
     now = time.time() if now is None else now
     _need(doc, secret, host=True, phases=("over",))
+    key = (doc.get("rated") or {}).get("key")
+    if key and doc.get("settled") != key:
+        # Dealing again replaces the record of the game just played; a rated
+        # one has to reach the profiles first. maybe_settle runs in the same
+        # request that ends a game, so this only waits out a store hiccup.
+        raise ValueError("still saving ratings -- try again in a moment")
     doc["start_seat"] = (int(doc["start_seat"]) + 1) % NUM_PLAYERS
     _deal(doc, now)
 
@@ -463,10 +513,17 @@ def _engine_move(doc: dict, seat: int) -> None:
     s = session_for(doc, seat)
     s.play(s.suggest(), max_moves=0)
     doc["log"] = list(s.wire_log)
+    doc.setdefault("by", []).append([seat, "e"])
 
 
-def act(doc: dict, secret, action, now: float = None) -> None:
-    """A person's own move. Charges the bank for any time past their clock."""
+def act(doc: dict, secret, action, now: float = None,
+        focus_lost: bool = False) -> None:
+    """A person's own move. Charges the bank for any time past their clock.
+
+    On a rated table the move is also scored for fair play from this seat's
+    own information (see _fairplay), BEFORE it is played. ``focus_lost`` is
+    the app's report that it went to the background during this turn.
+    """
     now = time.time() if now is None else now
     me = _need(doc, secret, phases=("playing",))
     s = session_for(doc, me)
@@ -474,9 +531,24 @@ def act(doc: dict, secret, action, now: float = None) -> None:
         raise ValueError("that game is over")
     if s.state.turn != me:
         raise ValueError("not your turn")
+    rated = str(me) in ((doc.get("rated") or {}).get("seats") or {})
+    row = None
+    if rated:
+        try:
+            row = F.assess(s, action)    # reads the position; changes nothing
+        except Exception:                 # pragma: no cover - never block a move
+            row = None
     s.play(action, max_moves=0)          # raises on an illegal action
-    seat = doc["seats"][me]
     c = doc.get("clock") or {}
+    if row is not None:
+        row["o"] = F.outcome(s.log[-1])
+        row["s"] = me
+        row["f"] = int(bool(focus_lost))
+        if c.get("seat") == me and c.get("start"):
+            row["t"] = round(max(0.0, now - float(c["start"])), 1)
+        doc.setdefault("fair", []).append(row)
+    doc.setdefault("by", []).append([me, "h"])
+    seat = doc["seats"][me]
     if c.get("seat") == me and not c.get("auto") and c.get("main_end"):
         seat["bank"] = max(0.0, float(seat["bank"])
                            - max(0.0, now - float(c["main_end"])))
@@ -582,6 +654,10 @@ def _public_seats(doc: dict, me, now: float, counts=None) -> list:
             "bank": round(float(s.get("bank") or 0), 1),
             "emote": ({"id": e, "at": float(s["emote_t"])} if fresh else None),
             "cards": (counts[s["seat"]] if counts else None),
+            # A person's public profile id and rating, for the profile sheet.
+            "pid": s.get("pid") if s["kind"] == "human" else None,
+            "rating": (round(float(s["rating"])) if s["kind"] == "human"
+                       and s.get("rating") is not None else None),
         })
     return out
 
@@ -602,11 +678,16 @@ def view(doc: dict, code: str, me, version: int, now: float = None) -> dict:
         # client tells which entries are new since its last poll -- and so
         # which ones to animate.
         "plies": len(doc.get("log") or []),
+        # Public tables are rated; this says whether THIS game is.
+        "rated": bool(doc.get("rated")) if phase != "lobby"
+        else bool(doc.get("public")),
     }
     counts = None
     if phase in ("playing", "over") and me is not None:
         snap = session_for(doc, me).snapshot()
         snap.pop("token", None)
+        snap["log"] = list(snap.get("log") or [])[-HISTORY_VISIBLE:]
+        snap["history_visible"] = HISTORY_VISIBLE
         counts = snap["hand_counts"]
         out["game"] = snap
         c = doc.get("clock")
@@ -620,11 +701,13 @@ def view(doc: dict, code: str, me, version: int, now: float = None) -> dict:
 def lobby_summary(code: str, doc: dict, now: float) -> dict:
     """What the public list may show about a table: no seat secrets, no deal."""
     people = _humans(doc)
+    rated = [float(s["rating"]) for s in people if s.get("rating") is not None]
     return {"code": code,
             "players": len(people),
             "open": sum(1 for s in doc["seats"] if s["kind"] == "open"),
             "names": [s["name"] for s in people],
             "turn": doc["settings"].get("turn"),
+            "rating": round(sum(rated) / len(rated)) if rated else None,
             "starts_in": max(0.0, float(doc.get("start_at") or now) - now)}
 
 
@@ -658,8 +741,8 @@ def mutate(code: str, fn) -> tuple:
 
 
 def create(name: str, public: bool, turn=TURN_DEFAULT,
-           pace=PACE_DEFAULT) -> tuple:
-    doc, seat, secret = new_table(name, public, turn, pace)
+           pace=PACE_DEFAULT, card=None) -> tuple:
+    doc, seat, secret = new_table(name, public, turn, pace, card=card)
     code = store().create(doc)
     return code, seat, secret, doc
 
@@ -684,28 +767,76 @@ def open_tables(limit: int = 20) -> list:
     return out[:limit]
 
 
-def quick_play(name: str) -> tuple:
+def quick_play(name: str, card=None) -> tuple:
     """Join the fullest public table that still has room, or open a new one.
 
     Fullest first, because the point of matching is to get a table to six
     people, and spreading arrivals across many half-empty tables does the
-    opposite. A table about to deal is skipped: joining one with a second left
-    would seat the newcomer straight into a hand they never saw coming.
+    opposite. Among equally full tables, the one whose players are rated
+    closest to you. A table about to deal is skipped: joining one with a second
+    left would seat the newcomer straight into a hand they never saw coming.
     Returns ``(code, seat, secret, doc, version)``.
     """
     now = time.time()
+    mine = float(card["rating"]) if card else None
     cands = [t for t in open_tables(limit=12) if t["starts_in"] > 4.0]
-    cands.sort(key=lambda t: (-t["players"], t["starts_in"]))
+    cands.sort(key=lambda t: (
+        -t["players"],
+        abs(t["rating"] - mine) if (mine is not None and t.get("rating"))
+        else 0.0,
+        t["starts_in"]))
     for t in cands[:6]:
         def _join(d):
             tick(d, now)
             if d.get("phase") != "lobby":
                 raise ValueError("started")
-            return join(d, name, now=now), True
+            return join(d, name, now=now, card=card), True
         try:
             doc, out, version = mutate(t["code"], _join)
             return t["code"], out["seat"], out["secret"], doc, version
         except (ValueError, NotFound, RuntimeError):
             continue
-    code, seat, secret, doc = create(name, public=True)
+    code, seat, secret, doc = create(name, public=True, card=card)
     return code, seat, secret, doc, 1
+
+
+def maybe_settle(code: str, doc: dict, version: int) -> tuple:
+    """Rate a finished game, once. Returns the (possibly updated) doc, version.
+
+    Whoever polls a finished rated table first applies the result to every
+    rated profile -- idempotently, per game -- and then marks the table
+    settled with each seat's rating change for the results screen. If a
+    profile cannot be reached the table stays unsettled and the next poll
+    tries again; nothing is half-applied, because each profile records the
+    games it has taken.
+    """
+    rated = doc.get("rated") or {}
+    key = rated.get("key")
+    if doc.get("phase") != "over" or not key or doc.get("settled") == key:
+        return doc, version
+    from api import _profiles as P
+    try:
+        if P.profiles() is None:
+            return doc, version
+        changes = P.settle(doc)
+    except Exception:                     # pragma: no cover - retried next poll
+        return doc, version
+
+    def fn(d):
+        if (d.get("rated") or {}).get("key") != key or d.get("settled") == key:
+            return None, False
+        d["settled"] = key
+        res = d.get("result") or {}
+        res["ratings"] = {str(k): v for k, v in changes.items()}
+        d["result"] = res
+        for k, v in changes.items():
+            st = d["seats"][int(k)]
+            if v.get("rating") is not None and st.get("pid"):
+                st["rating"] = float(v["rating"])
+                st["games"] = int(st.get("games") or 0) + 1
+        return None, True
+    try:
+        doc, _, version = mutate(code, fn)
+    except Exception:                     # pragma: no cover
+        pass
+    return doc, version

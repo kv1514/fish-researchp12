@@ -569,3 +569,37 @@ input { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* ---- ratings, profiles, leaderboard ---- */
+.plate .sub .rt { margin-left: 6px; color: var(--gold); font-weight: 800; }
+.plate .sub .rt:only-child { margin-left: 0; }
+.rating-delta { margin: 4px 0 14px; font-size: 15px; color: var(--text2); }
+.rating-delta b { font-size: 22px; margin-right: 4px; color: var(--text); }
+.rating-delta.up b, .pf-game b.up { color: var(--ok); }
+.rating-delta.down b, .pf-game b.down { color: var(--bad); }
+.danger-text { color: var(--bad); }
+.pf-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.pf-head h3 { margin: 0 0 2px; }
+.pf-rating { font-size: 44px; font-weight: 900; letter-spacing: -1px; line-height: 1; margin: 6px 0 14px; color: var(--gold); }
+.pf-rating small { font-size: 13px; font-weight: 700; letter-spacing: 0; color: var(--text3); margin-left: 8px; }
+.pf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+.pf-grid div { background: var(--panel2); border-radius: 12px; padding: 10px 6px; text-align: center; }
+.pf-grid b { display: block; font-size: 16px; }
+.pf-grid span { font-size: 11px; color: var(--text3); }
+.pf-dots { display: flex; gap: 6px; margin-bottom: 10px; }
+.pf-dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--text3); }
+.pf-dots i.w { background: var(--ok); }
+.pf-dots i.l { background: var(--bad); }
+.pf-dots i.ab { background: transparent; box-shadow: inset 0 0 0 2px var(--bad); }
+.pf-game { display: flex; justify-content: space-between; }
+.sheet .btn-block + .btn-block { margin-top: 8px; }
+.lb { display: flex; flex-direction: column; gap: 4px; max-height: 55vh; overflow-y: auto; }
+.lb-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--panel2); text-align: left; width: 100%; }
+.lb-row.me { box-shadow: inset 0 0 0 1px var(--us); }
+.lb-rank { width: 26px; font-weight: 900; color: var(--text3); }
+.lb-name { flex: 1; min-width: 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-games { font-size: 12px; color: var(--text3); }
+.lb-rt { font-weight: 900; color: var(--gold); width: 48px; text-align: right; }
+.pf-head .avatar { width: 52px; height: 52px; flex: 0 0 52px; font-size: 18px; }
+.profile-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-actions { margin-top: 16px; }
