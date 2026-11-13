@@ -76,9 +76,34 @@ jobs:
             2>&1 | tee build.log | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)" || true
           grep -q "BUILD SUCCEEDED" build.log
 
+      - name: Pillow, in its own environment
+        run: |
+          # The runner's Python is Homebrew's, which refuses a system-wide
+          # pip install (PEP 668), so the image checks get a venv.
+          python3 -m venv "$RUNNER_TEMP/py"
+          "$RUNNER_TEMP/py/bin/pip" install --quiet pillow
+          echo "PY=$RUNNER_TEMP/py/bin/python" >> "$GITHUB_ENV"
+
       - name: Launch in a simulator and screenshot the home screen
         run: |
           set -euo pipefail
+          # How much of a screenshot is one colour family: "blue" is the Quick
+          # Play tile, "felt" the game table. Used to wait until a screen has
+          # DRAWN rather than for a fixed time: on a busy runner the simulator
+          # took 1m43s to boot and 2m30s to install, and a screenshot taken a
+          # fixed 25s after launch caught the web view before its first paint.
+          cat > "$RUNNER_TEMP/frac.py" <<'PY'
+          import sys
+          from PIL import Image
+          im = Image.open(sys.argv[1]).convert("RGB").resize((201, 437))
+          px = list(im.getdata())
+          if sys.argv[2] == "blue":
+              n = sum(1 for r, g, b in px if b > 150 and r < 90 and 80 < g < 200)
+          else:
+              n = sum(1 for r, g, b in px if g > 40 and g > r + 25 and g > b + 8 and r < 60)
+          print(f"{n / len(px):.4f}")
+          PY
+          echo "FRAC=$RUNNER_TEMP/frac.py" >> "$GITHUB_ENV"
           APP=$(find app/ios/App/build/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' | head -1)
           BID=$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$APP/Info.plist")
           UDID=$(xcrun simctl list devices available -j | python3 -c "
@@ -92,21 +117,23 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b
           xcrun simctl install "$UDID" "$APP"
           xcrun simctl launch "$UDID" "$BID"
-          sleep 25
-          xcrun simctl io "$UDID" screenshot home.png
+          # Wait for the home screen to draw (up to 3 minutes), not a fixed time.
+          waited=0
+          while [ "$waited" -lt 180 ]; do
+            sleep 5; waited=$((waited + 5))
+            xcrun simctl io "$UDID" screenshot home.png >/dev/null 2>&1 || continue
+            f=$("$PY" "$RUNNER_TEMP/frac.py" home.png blue)
+            echo "t=${waited}s blue=$f"
+            if "$PY" -c "import sys; sys.exit(0 if float('$f') >= 0.01 else 1)"; then
+              sleep 3; xcrun simctl io "$UDID" screenshot home.png; break
+            fi
+          done
+          echo "HOME_SECONDS=$waited" >> "$GITHUB_ENV"
           echo "DEVICE_NAME=$NAME" >> "$GITHUB_ENV"
           echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
           echo "APP_PATH=$APP" >> "$GITHUB_ENV"
           echo "APP_ID=$BID" >> "$GITHUB_ENV"
           echo "APP_SIZE=$(du -sh "$APP" | cut -f1)" >> "$GITHUB_ENV"
-
-      - name: Pillow, in its own environment
-        run: |
-          # The runner's Python is Homebrew's, which refuses a system-wide
-          # pip install (PEP 668), so the image checks get a venv.
-          python3 -m venv "$RUNNER_TEMP/py"
-          "$RUNNER_TEMP/py/bin/pip" install --quiet pillow
-          echo "PY=$RUNNER_TEMP/py/bin/python" >> "$GITHUB_ENV"
 
       - name: Check the home screen actually drew
         run: |
@@ -158,8 +185,17 @@ jobs:
           REC=$!
           sleep 3
           xcrun simctl launch "$SIM_UDID" "$APP_ID"
-          sleep 20
-          xcrun simctl io "$SIM_UDID" screenshot game.png
+          # Wait for the table to draw (up to 3 minutes), not a fixed time.
+          waited=0
+          while [ "$waited" -lt 180 ]; do
+            sleep 4; waited=$((waited + 4))
+            xcrun simctl io "$SIM_UDID" screenshot game.png >/dev/null 2>&1 || continue
+            f=$("$PY" "$FRAC" game.png felt)
+            echo "t=${waited}s felt=$f"
+            if "$PY" -c "import sys; sys.exit(0 if float('$f') >= 0.10 else 1)"; then
+              break
+            fi
+          done
           cp game.png prev.png; still=0; t=23
           while [ "$t" -lt 330 ]; do
             sleep 8; t=$((t + 8))
@@ -207,7 +243,7 @@ jobs:
           # 0.5%, so 10% separates a table from a screen that never left home.
           felt = sum(1 for r, g, b in px if g > 40 and g > r + 25 and g > b + 8 and r < 60)
           frac = felt / (w * h)
-          msg = (f"{frac:.1%} felt green 20 s after launching into watch mode; "
+          msg = (f"{frac:.1%} felt green after launching into watch mode; "
                  f"filmed {os.environ.get('GAME_SECONDS', '?')} s of play")
           print(msg)
           if frac < 0.10:
