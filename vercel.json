@@ -6,6 +6,13 @@
       "includeFiles": "{fish,fish4,api,external_v07,paper}/**"
     }
   },
+  "redirects": [
+    {
+      "source": "/play",
+      "destination": "/play/",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/paper.pdf",

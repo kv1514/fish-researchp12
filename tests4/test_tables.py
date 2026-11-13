@@ -534,3 +534,24 @@ def test_tables_refuse_like_rooms_when_deployed_without_a_shared_store(
     monkeypatch.setenv("VERCEL", "1")
     st, out, _ = _post(server, "t_quick", {"name": "Ada"})
     assert st == 503 and "SUPABASE_URL" in out["error"]
+
+
+def test_solo_step_zero_means_zero_engine_moves(server):
+    """`step: 0` must cap the engine at zero moves, not lift the cap.
+
+    The app paces the bots itself, one request per move, so that each move can
+    be shown. `step not in (None, "", False)` read 0 as False -- 0 == False in
+    Python -- and played every engine move up to the person's turn in the same
+    response, so the whole possession arrived at once.
+    """
+    st, d, _ = _post(server, "new", {"step": 0})
+    assert st == 200 and d["your_turn"], "the person opens a solo game"
+    hs = d["hand"][0]["hs"]
+    card = next(c["id"] for c in d["half_suits"][hs]["cards"] if not c["mine"])
+    target = next(p for p in range(1, 6, 2) if d["hand_counts"][p] > 0)
+    st, out, _ = _post(server, "act", {
+        "token": d["token"], "actions": d["actions"], "step": 0,
+        "action": {"type": "ask", "target": target, "card": card}})
+    assert st == 200
+    assert len(out["actions"]) == 1, (
+        f"step 0 played {len(out['actions'])} moves, not just the person's own")

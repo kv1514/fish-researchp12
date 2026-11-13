@@ -598,6 +598,10 @@ def view(doc: dict, code: str, me, version: int, now: float = None) -> dict:
         "start_at": doc.get("start_at"),
         "game_no": int(doc.get("game") or 0),
         "clock": None, "game": None, "result": doc.get("result"),
+        # Moves made so far. The game's log is only its tail, so this is how a
+        # client tells which entries are new since its last poll -- and so
+        # which ones to animate.
+        "plies": len(doc.get("log") or []),
     }
     counts = None
     if phase in ("playing", "over") and me is not None:

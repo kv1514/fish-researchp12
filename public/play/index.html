@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#070b14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Fish, the six-player team card game. Quick-play public tables, private tables with a join code, or practice against the bots.">
+<title>Fish</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="play.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============================== HOME ============================== -->
+  <section id="home" class="screen active" aria-label="Home">
+    <header class="home-top">
+      <button class="profile" id="profile-btn" aria-label="Edit your name">
+        <span class="avatar sm" id="home-avatar"></span>
+        <span class="profile-text">
+          <span class="profile-name" id="home-name">Player</span>
+          <span class="profile-sub" id="home-stats">Tap to change name</span>
+        </span>
+      </button>
+      <button class="icon-btn" id="rules-btn" aria-label="How to play">?</button>
+      <button class="icon-btn" id="settings-btn" aria-label="Settings">⚙</button>
+    </header>
+
+    <div class="brand">
+      <img class="brand-mark" src="icon.svg" alt="" width="84" height="84">
+      <h1>FISH</h1>
+      <p class="tagline">The team card game · 3 vs 3</p>
+    </div>
+
+    <div class="menu">
+      <button class="tile tile-primary" id="quick-btn">
+        <span class="tile-icon">⚡</span>
+        <span class="tile-text"><b>Quick Play</b><small>Join a public table</small></span>
+        <span class="tile-go">›</span>
+      </button>
+      <button class="tile" id="bots-btn">
+        <span class="tile-icon">🤖</span>
+        <span class="tile-text"><b>Play vs Bots</b><small>Practice against the engine</small></span>
+        <span class="tile-go">›</span>
+      </button>
+      <button class="tile" id="private-btn">
+        <span class="tile-icon">🔒</span>
+        <span class="tile-text"><b>Private Table</b><small>Invite friends with a code</small></span>
+        <span class="tile-go">›</span>
+      </button>
+      <form class="join-row" id="join-form" autocomplete="off">
+        <input id="join-code" maxlength="4" placeholder="CODE" aria-label="Table code"
+               autocapitalize="characters" spellcheck="false" inputmode="text">
+        <button class="btn btn-ghost" type="submit">Join</button>
+      </form>
+    </div>
+
+    <section class="lobby-list" aria-label="Open tables">
+      <div class="list-head"><h2>Open tables</h2><span class="live-dot" id="list-dot"></span></div>
+      <div id="open-tables" class="tables"><p class="muted small">Looking…</p></div>
+    </section>
+    <p class="online-note" id="online-note" hidden></p>
+  </section>
+
+  <!-- ============================== GAME ============================== -->
+  <section id="game" class="screen" aria-label="Table">
+    <header class="topbar">
+      <button class="icon-btn" id="leave-btn" aria-label="Leave table">✕</button>
+      <button class="table-chip" id="code-chip" aria-label="Share table code">
+        <span id="table-title">Table</span>
+        <span class="chip-code" id="table-code"></span>
+      </button>
+      <button class="icon-btn" id="log-btn" aria-label="Game history">☰</button>
+    </header>
+
+    <div class="scoreboard" id="scoreboard">
+      <div class="score us"><span class="score-label">US</span><span class="score-num" id="score-us">0</span></div>
+      <div class="sets" id="sets"></div>
+      <div class="score them"><span class="score-label">THEM</span><span class="score-num" id="score-them">0</span></div>
+    </div>
+
+    <div class="table-wrap" id="table-wrap">
+      <div class="felt">
+        <div class="felt-inner">
+          <div class="felt-logo">FISH</div>
+          <div class="center" id="center"></div>
+        </div>
+      </div>
+      <div id="seats"></div>
+      <div id="fx" aria-hidden="true"></div>
+    </div>
+
+    <div class="hand-wrap">
+      <div class="hand" id="hand" aria-label="Your hand"></div>
+    </div>
+
+    <footer class="actions" id="actions"></footer>
+  </section>
+
+  <!-- ============================== OVERLAYS ============================== -->
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden>
+    <div class="sheet-grab"></div>
+    <div id="sheet-body"></div>
+  </div>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" hidden>
+    <div class="modal-card" id="modal-card"></div>
+  </div>
+  <div class="emote-pop" id="emote-pop" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="play.js"></script>
+</body>
+</html>

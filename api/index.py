@@ -188,7 +188,11 @@ class handler(BaseHTTPRequestHandler):
             # waiting itself; one that omits the field gets the whole possession
             # in a single response, as before.
             step = body.get("step")
-            cap = int(step) if step not in (None, "", False) else None
+            # Identity checks, not `in`: membership uses ==, and 0 == False in
+            # Python, so `step: 0` used to mean NO cap -- a request for zero
+            # engine moves played every engine move up to the person's turn.
+            cap = (None if step is None or step is False or step == ""
+                   else int(step))
             capkw = {"max_moves": cap} if cap is not None else {}
 
             if op == "new":
