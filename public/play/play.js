@@ -21,6 +21,9 @@ const API_BASE = window.FISH_API || (NATIVE ? SITE : '');
 const SHARE_BASE = NATIVE ? SITE : location.origin;
 const POLL_MS = 1000;
 const SOLO_PACE_MS = 1300;
+// Fish is a memory game: a seat sees the last two moves and no more. Online the
+// server enforces it (it sends only two); practice games trim to match.
+const HISTORY_VISIBLE = 2;
 const BOT_NAMES = ['Marlin', 'Nori', 'Coral', 'Reef', 'Tide'];
 
 // ---------------------------------------------------------------- utils ----
@@ -49,6 +52,42 @@ const prefs = {
 };
 LS.set('name', prefs.name);
 const stats = LS.get('stats', { played: 0, won: 0 });
+
+// ------------------------------------------------------------- profile ----
+// Made on first use: a public id and a secret that stays on this device. No
+// email, no password -- the secret IS the account, so deleting the app loses
+// it, and "Delete my profile" in settings removes it from the server.
+const ME = { id: null, secret: null, profile: null };
+(() => { const m = LS.get('me'); if (m && m.id && m.secret) { ME.id = m.id; ME.secret = m.secret; } })();
+async function ensureProfile() {
+  if (ME.id) return true;
+  if (ME.off) return false;            // this server said ratings are off
+  try {
+    const d = await api('p_new', { name: prefs.name });
+    ME.id = d.id; ME.secret = d.secret; ME.profile = d.profile;
+    LS.set('me', { id: d.id, secret: d.secret });
+    return true;
+  } catch (e) { if (e.status === 503) ME.off = true; return false; }   // play unrated
+}
+function forgetProfile() { LS.del('me'); ME.id = ME.secret = ME.profile = null; }
+async function refreshMe() {
+  if (!ME.id) return;
+  try { ME.profile = (await api('p_get', { id: ME.id })).profile; renderHome(); }
+  catch (e) { if (e.status === 404) forgetProfile(); }
+}
+// Table calls carry the profile, and recover once if the server no longer
+// knows it (deleted elsewhere). A profile closed for fair play stays closed.
+async function tableCall(op, body) {
+  await ensureProfile();
+  const go = () => api(op, Object.assign({}, body, ME.id ? { pid: ME.id, psecret: ME.secret } : {}));
+  try { return await go(); }
+  catch (e) {
+    if (e.status === 403 && e.data && e.data.profile_invalid && !/fair-play/.test(e.message)) {
+      forgetProfile(); await ensureProfile(); return go();
+    }
+    throw e;
+  }
+}
 
 // ---------------------------------------------------------------- cards ----
 const SUIT = { C: '♣', D: '♦', H: '♥', S: '♠' };
@@ -157,7 +196,7 @@ async function api(op, body = {}) {
   let data = {};
   try { data = await r.json(); } catch (_) { data = { error: `Server error (${r.status})` }; }
   if (!r.ok || data.error) {
-    const e = new Error(data.error || `Server error (${r.status})`); e.status = r.status; throw e;
+    const e = new Error(data.error || `Server error (${r.status})`); e.status = r.status; e.data = data; throw e;
   }
   const t = data.table;
   if (t && typeof t.now === 'number') syncClock(t.now, sent, Date.now());
@@ -209,8 +248,10 @@ function renderHome() {
   $('#home-name').textContent = prefs.name;
   $('#home-avatar').outerHTML = avatarHTML({ kind: 'human', name: prefs.name }, 'sm')
     .replace('class="avatar sm"', 'class="avatar sm" id="home-avatar"');
-  $('#home-stats').textContent = stats.played
-    ? `${stats.won} wins · ${stats.played} games` : 'Tap to change your name';
+  const p = ME.profile;
+  $('#home-stats').textContent = p
+    ? `Rating ${p.rating} · ${p.wins}–${p.losses}`
+    : stats.played ? `${stats.won} wins · ${stats.played} games` : 'Tap to see your profile';
 }
 
 async function refreshList() {
@@ -228,7 +269,7 @@ async function refreshList() {
       <button class="trow" data-code="${esc(t.code)}">
         <span class="trow-seats">${Array.from({ length: 6 }, (_, i) => `<i class="${i < t.players ? 'f' : ''}"></i>`).join('')}</span>
         <span class="trow-main"><b>Table ${esc(t.code)} · ${t.players}/6</b>
-          <span>${esc(t.names.join(', '))} · ${t.turn}s turns · starts in ${Math.ceil(t.starts_in)}s</span></span>
+          <span>${esc(t.names.join(', '))}${t.rating ? ` · avg ${t.rating}` : ''} · ${t.turn}s turns · starts in ${Math.ceil(t.starts_in)}s</span></span>
         <span class="trow-join">Join ›</span>
       </button>`).join('');
     $$('.trow', el).forEach((b) => { b.onclick = () => joinByCode(b.dataset.code); });
@@ -259,7 +300,7 @@ $('#quick-btn').onclick = async () => {
   if (!needOnline()) return;
   try {
     toast('Finding a table…');
-    const d = await api('t_quick', { name: prefs.name });
+    const d = await tableCall('t_quick', { name: prefs.name });
     enterOnline(d.code, d.secret, d.table);
   } catch (e) { toast(e.message, true); }
 };
@@ -280,7 +321,7 @@ $('#private-btn').onclick = () => {
       const turn = +$('#cr-turn .on', m).dataset.v;
       const pace = $('#cr-pace .on', m).dataset.v;
       try {
-        const d = await api('t_create', { name: prefs.name, public: false, turn, pace });
+        const d = await tableCall('t_create', { name: prefs.name, public: false, turn, pace });
         closeSheet(); enterOnline(d.code, d.secret, d.table);
       } catch (e) { toast(e.message, true); }
     };
@@ -303,14 +344,15 @@ $('#join-code').oninput = (ev) => { ev.target.value = ev.target.value.toUpperCas
 async function joinByCode(code) {
   if (!needOnline()) return;
   try {
-    const d = await api('t_join', { code, name: prefs.name });
+    const d = await tableCall('t_join', { code, name: prefs.name });
     $('#join-code').value = '';
     enterOnline(d.code, d.secret, d.table);
   } catch (e) { toast(e.status === 404 ? `No table called ${code}` : e.message, true); }
 }
 $('#bots-btn').onclick = () => startSolo();
 
-$('#profile-btn').onclick = () => openSettings(true);
+$('#profile-btn').onclick = () => openProfile(null);
+$('#board-btn').onclick = () => openBoard();
 $('#settings-btn').onclick = () => openSettings(false);
 $('#rules-btn').onclick = () => openRules();
 
@@ -323,16 +365,110 @@ function openSettings(focusName) {
     <div class="toggle-row"><span>Vibration</span><button class="switch ${prefs.haptics ? 'on' : ''}" id="set-hap" aria-label="Vibration"></button></div>
     <p class="muted small" style="margin-top:14px">Names show to other players at your table. Keep it friendly.
       · <a href="${SITE}/play/privacy.html" target="_blank" rel="noopener" style="color:var(--us)">Privacy</a></p>
-    <button class="btn btn-primary btn-block" id="set-done">Done</button>`, (m) => {
+    <button class="btn btn-primary btn-block" id="set-done">Done</button>
+    ${ME.id ? '<button class="btn btn-ghost btn-block danger-text" id="set-delete" style="margin-top:8px">Delete my profile</button>' : ''}`, (m) => {
+    const del = $('#set-delete', m);
+    if (del) del.onclick = () => confirmBox('Delete your profile?',
+      'Your rating, record and history are removed from the server for good. You can keep playing; a new profile starts at 1500.',
+      'Delete', async () => {
+        try { await api('p_delete', { id: ME.id, secret: ME.secret }); } catch (e) { if (e.status !== 404) { toast(e.message, true); return; } }
+        forgetProfile(); closeSheet(); renderHome(); toast('Profile deleted');
+      });
     const inp = $('#set-name', m);
     if (focusName) setTimeout(() => inp.focus(), 250);
     $('#set-sound', m).onclick = (e) => { prefs.sound = !prefs.sound; LS.set('sound', prefs.sound); e.target.classList.toggle('on', prefs.sound); };
     $('#set-hap', m).onclick = (e) => { prefs.haptics = !prefs.haptics; LS.set('haptics', prefs.haptics); e.target.classList.toggle('on', prefs.haptics); buzz(); };
     $('#set-done', m).onclick = () => {
       const n = inp.value.replace(/\s+/g, ' ').trim().slice(0, 18);
-      if (n) { prefs.name = n; LS.set('name', n); }
+      if (n && n !== prefs.name) {
+        prefs.name = n; LS.set('name', n);
+        if (ME.id) api('p_rename', { id: ME.id, secret: ME.secret, name: n })
+          .then((d) => { ME.profile = d.profile; renderHome(); }).catch(() => {});
+      }
       closeSheet(); renderHome();
     };
+  });
+}
+
+// ------------------------------------------------- profiles & leaderboard ----
+const RECENT_DOTS = (rec) => rec.slice(0, 10).map((g) =>
+  `<i class="${g.abandoned ? 'ab' : g.won === 1 ? 'w' : g.won === 0 ? 'l' : 'd'}" title="${g.delta > 0 ? '+' : ''}${Math.round(g.delta)}"></i>`).join('');
+function signed(d) {
+  const r = Math.round(d);
+  return `${r > 0 ? '+' : r < 0 ? '−' : '±'}${Math.abs(r)}`;
+}
+function profileHTML(p, mine) {
+  const pct = p.win_rate == null ? '–' : `${Math.round(p.win_rate * 100)}%`;
+  const status = p.closed ? 'Closed for a fair-play violation'
+    : p.rank ? `#${p.rank} on the leaderboard`
+    : p.provisional ? 'New player — rating settling in' : 'Not on the leaderboard yet';
+  const recent = p.recent.length
+    ? `<div class="sheet-label">Last ${Math.min(10, p.recent.length)} rated games</div>
+      <div class="pf-dots">${RECENT_DOTS(p.recent)}</div>
+      <div class="log-list">${p.recent.slice(0, 5).map((g) => `<div class="log-item pf-game">
+        <span>${g.abandoned ? 'Left early' : g.won === 1 ? 'Won' : g.won === 0 ? 'Lost' : 'Tie'} ${g.score ? g.score.join('–') : ''}</span>
+        <b class="${g.delta > 0 ? 'up' : g.delta < 0 ? 'down' : ''}">${signed(g.delta)}</b></div>`).join('')}</div>`
+    : '<p class="muted small">No rated games yet. Quick Play tables are rated; private tables and bot practice are not.</p>';
+  return `<div class="pf-head">${avatarHTML({ kind: 'human', name: p.name }, 'sm')}
+      <div><h3>${esc(p.name)}${mine ? ' <span class="muted small">(you)</span>' : ''}</h3>
+      <div class="muted small">${status}</div></div></div>
+    <div class="pf-rating">${p.rating}<small>rating</small></div>
+    <div class="pf-grid">
+      <div><b>${p.games}</b><span>games</span></div>
+      <div><b>${p.wins}–${p.losses}${p.draws ? '–' + p.draws : ''}</b><span>won–lost</span></div>
+      <div><b>${pct}</b><span>win rate</span></div>
+      <div><b>${p.peak}</b><span>best</span></div>
+    </div>${recent}`;
+}
+async function openProfile(pid) {
+  const mine = !pid || pid === ME.id;
+  if (mine && !(await ensureProfile())) { openSettings(true); return; }
+  const id = mine ? ME.id : pid;
+  openSheet('profile', '<p class="muted">Loading…</p>');
+  let p;
+  try { p = (await api('p_get', { id })).profile; } catch (e) {
+    if (mine && e.status === 404) forgetProfile();
+    openSheet('profile', `<p class="muted">${esc(e.status === 404 ? 'That profile no longer exists.' : e.message)}</p>`);
+    return;
+  }
+  if (mine) { ME.profile = p; renderHome(); }
+  const buttons = mine
+    ? `<button class="btn btn-ghost btn-block" id="pf-name">Change name</button>
+       <button class="btn btn-ghost btn-block" id="pf-board">Leaderboard</button>`
+    : `<button class="btn btn-ghost btn-block" id="pf-cheat">Report cheating</button>
+       <button class="btn btn-ghost btn-block" id="pf-namebad">Report offensive name</button>`;
+  openSheet('profile', profileHTML(p, mine) + buttons, (m) => {
+    if (mine) {
+      $('#pf-name', m).onclick = () => openSettings(true);
+      $('#pf-board', m).onclick = () => openBoard();
+      return;
+    }
+    const report = async (reason) => {
+      if (!(await ensureProfile())) { toast('Reports need a profile', true); return; }
+      try {
+        await api('p_report', { id: ME.id, secret: ME.secret, target: pid, reason });
+        closeSheet(); toast('Thanks — a person will look at it');
+      } catch (e) { toast(e.message, true); }
+    };
+    $('#pf-cheat', m).onclick = () => report('cheating');
+    $('#pf-namebad', m).onclick = () => report('name');
+  });
+}
+async function openBoard() {
+  openSheet('board', '<h3>Leaderboard</h3><p class="muted">Loading…</p>');
+  let rows;
+  try { rows = (await api('p_top')).players; } catch (e) {
+    openSheet('board', `<h3>Leaderboard</h3><p class="muted">${esc(e.message)}</p>`);
+    return;
+  }
+  const list = rows.length
+    ? `<div class="lb">${rows.map((r) => `<button class="lb-row ${r.id === ME.id ? 'me' : ''}" data-id="${esc(r.id)}">
+      <span class="lb-rank">${r.rank}</span><span class="lb-name">${esc(r.name)}</span>
+      <span class="lb-games">${r.games} games</span><span class="lb-rt">${r.rating}</span></button>`).join('')}</div>`
+    : '<p class="muted small">Nobody yet — play 5 Quick Play games to be the first.</p>';
+  openSheet('board', `<h3>Leaderboard</h3>
+    <p class="hint">Rated on Quick Play tables. Shows players with 5+ games.</p>${list}`, (m) => {
+    $$('.lb-row', m).forEach((b) => { b.onclick = () => openProfile(b.dataset.id); });
   });
 }
 
@@ -367,6 +503,7 @@ const G = {
   lastPlies: 0, lastGame: -1, lastTurnMine: false, lastHand: new Set(),
   resultShown: -1, ticked: -1,
   // solo
+  focusLost: false,      // the app left the screen during this turn
   token: null, actions: [], snap: null, soloTimer: null, soloBusy: false,
   soloEmote: null, soloGame: 0,
   watch: false,         // solo game where the engine plays your seat too
@@ -417,7 +554,8 @@ function normaliseSolo(s) {
     mode: 'solo', phase: over ? 'over' : 'playing', code: null, public: false,
     me, host: me, isHost: true, settings: { turn: 0, pace: 'normal' }, startAt: null,
     clock: over ? null : { seat: s.turn, auto: s.turn !== me, start: null, main_end: null, end: null },
-    seats, game: s, result, plies: G.actions.length, gameNo: G.soloGame, v: G.actions.length,
+    seats, game: Object.assign({}, s, { log: (s.log || []).slice(-HISTORY_VISIBLE) }),
+    result, plies: G.actions.length, gameNo: G.soloGame, v: G.actions.length,
   };
 }
 
@@ -548,7 +686,10 @@ async function soloAct(action) {
 function play(action) {
   closeSheet();
   buzz('medium');
-  if (G.mode === 'online') return send('t_act', { action });
+  if (G.mode === 'online') {
+    const lost = G.focusLost; G.focusLost = false;
+    return send('t_act', { action, focus_lost: lost });
+  }
   return soloAct(action);
 }
 
@@ -573,7 +714,7 @@ function applyVM(vm, force = false) {
   if (fresh.length) animateEvents(fresh.slice(-3));
 
   const mine = !!(vm.game && vm.game.your_turn);
-  if (mine && !G.lastTurnMine && vm.phase === 'playing') { sfx.turn(); buzz('heavy'); }
+  if (mine && !G.lastTurnMine && vm.phase === 'playing') { sfx.turn(); buzz('heavy'); G.focusLost = false; }
   G.lastTurnMine = mine;
   if (!mine && ['ask', 'declare', 'pass'].includes(sheetKind)) closeSheet();
 
@@ -654,9 +795,10 @@ function renderSeats(vm) {
       : !s.connected ? '<span class="tag off">OFFLINE</span>'
       : (s.host && vm.mode === 'online' && vm.phase === 'lobby') ? '<span class="tag host">HOST</span>' : '';
     const name = s.kind === 'open' ? 'Open seat' : s.name;
+    const rt = s.kind === 'human' && s.rating ? `<span class="rt">${s.rating}</span>` : '';
     const sub = vm.phase === 'lobby'
-      ? (s.kind === 'open' ? 'Tap to sit' : s.kind === 'bot' ? 'Bot' : (s.team === mt ? 'Your team' : 'Other team'))
-      : `<i class="cards-ic"></i>${s.cards == null ? '–' : s.cards}`;
+      ? (s.kind === 'open' ? 'Tap to sit' : s.kind === 'bot' ? 'Bot' : (rt || (s.team === mt ? 'Your team' : 'Other team')))
+      : `<i class="cards-ic"></i>${s.cards == null ? '–' : s.cards}${rt}`;
     $('.seat-core', el).innerHTML = `
       <div class="avatar-wrap">${avatarHTML(s)}
         ${showRing ? '<svg class="ring" viewBox="0 0 64 64"><circle class="track" cx="32" cy="32" r="30"/><circle class="prog" cx="32" cy="32" r="30" stroke-dasharray="188.5" stroke-dashoffset="0"/></svg>' : ''}
@@ -722,7 +864,7 @@ function renderCenter(vm) {
   if (vm.phase === 'lobby') {
     const people = vm.seats.filter((s) => s.kind === 'human').length;
     if (vm.public) {
-      c.innerHTML = `<div class="label">Public table</div>
+      c.innerHTML = `<div class="label">Public table · rated</div>
         <div class="count" id="lobby-count">0:30</div>
         <div class="note">${people}/6 players · starts automatically,<br>open seats become bots</div>`;
     } else {
@@ -818,20 +960,21 @@ function onSeatTap(seat) {
   if (!vm) return;
   const s = vm.seats[seat];
   if (vm.phase === 'lobby' && vm.mode === 'online') {
-    if (s.me) return;
+    if (s.me) { if (s.pid) openProfile(null); return; }
     if (s.kind === 'open' && !vm.isHost) { send('t_sit', { seat }); return; }
-    if (!vm.isHost) return;
+    if (!vm.isHost) { if (s.pid) openProfile(s.pid); return; }
     const opts = s.kind === 'open'
       ? [['Sit here', () => send('t_sit', { seat })], ['Add a bot', () => send('t_seat', { seat, kind: 'bot' })]]
       : s.kind === 'bot' ? [['Remove bot (open seat)', () => send('t_seat', { seat, kind: 'open' })]]
-      : [[`Remove ${s.name}`, () => send('t_kick', { seat })]];
+      : [[`Remove ${s.name}`, () => send('t_kick', { seat })]].concat(s.pid ? [['View profile', () => openProfile(s.pid)]] : []);
     openSheet('seat', `<h3>${s.kind === 'open' ? 'Open seat' : esc(s.name)}</h3>
       ${opts.map((o, i) => `<button class="btn ${i ? 'btn-ghost' : 'btn-primary'} btn-block" data-i="${i}" style="margin-bottom:8px">${esc(o[0])}</button>`).join('')}`, (m) => {
       $$('button[data-i]', m).forEach((b) => { b.onclick = () => { closeSheet(); opts[+b.dataset.i][1](); }; });
     });
     return;
   }
-  if (pickable(vm, s)) openAsk(seat);
+  if (pickable(vm, s)) { openAsk(seat); return; }
+  if (s.kind === 'human' && s.pid) openProfile(s.me ? null : s.pid);
 }
 
 // ---------------------------------------------------------------- ask ----
@@ -1118,10 +1261,25 @@ async function shareCode(code) {
 $('#log-btn').onclick = () => {
   const g = G.vm && G.vm.game;
   const log = g && g.log ? g.log.slice().reverse() : [];
-  openSheet('log', `<h3>History</h3>${log.length
-    ? `<div class="log-list">${log.map((e) => `<div class="log-item">${narrate(e)}</div>`).join('')}</div>`
+  openSheet('log', `<h3>Last ${HISTORY_VISIBLE} moves</h3>
+    <p class="muted small">Fish is a memory game: only the last ${HISTORY_VISIBLE} moves are shown. Keep track of the rest yourself.</p>
+    ${log.length
+    ? `<div class="log-list">${log.slice(0, HISTORY_VISIBLE).map((e) => `<div class="log-item">${narrate(e)}</div>`).join('')}</div>`
     : '<p class="muted">No moves yet.</p>'}`);
 };
+
+// The rating change for this seat, once the server has settled the game.
+function ratingLine(vm) {
+  if (vm.mode !== 'online') return '<p class="muted small">Practice games are not rated.</p>';
+  if (!vm.rated) return '<p class="muted small">Private tables are not rated.</p>';
+  const mine = vm.result && vm.result.ratings && vm.result.ratings[String(vm.me)];
+  if (!mine) return '<p class="muted small">Rated game · updating ratings…</p>';
+  if (mine.rating == null) return '';
+  const d = Math.round(mine.delta);
+  refreshMe();
+  return `<div class="rating-delta ${d > 0 ? 'up' : d < 0 ? 'down' : ''}">
+    <b>${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)}</b> rating · now ${mine.rating}</div>`;
+}
 
 function showResult(vm) {
   if (!vm || !vm.result) return;
@@ -1141,6 +1299,7 @@ function showResult(vm) {
     <div class="result-score"><span class="u">${us}</span> : <span class="t">${them}</span></div>
     <div class="result-sets">${HS.map((h, i) => `<div class="set ${sw[i] === 'ours' ? 'us' : sw[i] === 'theirs' ? 'them' : sw[i] === 'null' ? 'null' : ''}">${h.s}<span class="lh">${h.lh}</span></div>`).join('')}</div>
     ${r.stopped ? '<p>The game was called — too many moves without a declaration.</p>' : ''}
+    ${ratingLine(vm)}
     ${canRematch ? `<button class="btn btn-primary btn-block" id="rs-again">${vm.mode === 'solo' ? 'Play again' : 'Rematch'}</button>`
       : '<p>Waiting for the host to start a rematch…</p>'}
     <button class="btn btn-ghost btn-block" id="rs-leave">Leave table</button>`, (m) => {
@@ -1160,14 +1319,22 @@ function showResult(vm) {
 }
 
 document.addEventListener('visibilitychange', () => {
+  if (document.hidden) noteFocusLost();
   if (!document.hidden && G.mode === 'online') schedulePoll(50);
 });
+// Fair play: did the app leave the screen during your own turn? Sent with the
+// move, and used only to compare those moves with the rest (see _fairplay).
+function noteFocusLost() {
+  if (G.mode === 'online' && G.vm && G.vm.game && G.vm.game.your_turn) G.focusLost = true;
+}
+window.addEventListener('blur', noteFocusLost);
 window.addEventListener('resize', () => { if (G.vm) renderHand(G.vm); });
 
 // ----------------------------------------------------------------- boot ----
 async function boot() {
   renderHome();
   show('home');
+  if (ME.id) refreshMe(); else ensureProfile().then(renderHome);
   const params = new URLSearchParams(location.search);
   const join = (params.get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
   // ?play=bots|watch on the web. FISH_AUTOPLAY is never set in the shipped

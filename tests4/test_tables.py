@@ -425,6 +425,27 @@ def test_a_seat_sees_its_own_hand_and_only_counts_for_the_others():
     assert v["seats"][2]["cards"] == len(theirs)
 
 
+def test_a_seat_is_sent_only_the_last_two_moves_of_history():
+    # Fish is a memory game. The limit is in what the SERVER sends, so no
+    # client -- ours or a modified one -- can show an older move.
+    doc, secs = _private(1)
+    T.start(doc, secs[0], now=T0)
+    for _ in range(12):
+        T._engine_move(doc, _turn(doc))
+    full = T.session_for(doc, 0).log
+    assert len(full) == 12
+    for me in (0,):
+        g = T.view(doc, "ABCD", me, 1, now=T0)["game"]
+        assert g["log"] == full[-T.HISTORY_VISIBLE:]
+        assert len(g["log"]) == T.HISTORY_VISIBLE == 2
+        blob = json.dumps(g)
+        older = [json.dumps(e) for e in full[:-T.HISTORY_VISIBLE]]
+        assert not any(o in blob for o in older if o not in
+                       [json.dumps(e) for e in g["log"]])
+    # the move counter is still whole, so the client can tell what is new
+    assert T.view(doc, "ABCD", 0, 1, now=T0)["plies"] == 12
+
+
 # ---------------------------------------------------------------------------
 # The store: a quiet poll writes nothing, a lost race is retried
 # ---------------------------------------------------------------------------

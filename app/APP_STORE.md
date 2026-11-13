@@ -124,11 +124,19 @@ In App Store Connect, on your app's page:
   turn timers, or practice against the bots."
 - **Privacy Policy URL**: `https://fish-engine.vercel.app/play/privacy.html`
 - **Support URL**: `https://fish-engine.vercel.app/` (or any page you control)
-- **App Privacy** questionnaire: the honest answers are — no tracking; the only
-  data is the **display name** the player types, which is shown to other players
-  and deleted with the table within 6 hours; not linked to identity. (Category:
-  *User Content → Other User Content*, used for *App Functionality*.)
+- **App Privacy** questionnaire: the honest answers are — **no tracking**. Data
+  collected, all **linked to the user** (to their in-app profile, not to a real
+  identity) and all used for **App Functionality** (which Apple defines to
+  include fraud prevention):
+  - *Identifiers → User ID*: the random profile id.
+  - *User Content → Other User Content*: the display name.
+  - *User Content → Gameplay Content*: rating, results, recent games.
+  - *Usage Data → Product Interaction*: move timing and whether the app left
+    the screen during the player's turn, kept for fair-play checks.
+  Account deletion is in the app (Settings → Delete my profile), which Apple
+  requires of any app that creates an account (guideline 5.1.1(v)).
 - **Age rating**: no gambling, no chat, no violence → it should come out 4+.
+  Ratings and a leaderboard are not gambling: nothing is bet or won.
   Answer "No" to simulated gambling: there are no bets or chips, only sets won.
 - **App Review notes**: "Online tables: press Quick Play. If no one else is
   online, the table fills with bots after 30 seconds. To test a private table,
@@ -143,7 +151,7 @@ Then **Add for Review → Submit**. Review usually takes a day or two.
 |---|---|---|
 | Online play down during review | 2.1 | **Your step** — see the top of this file |
 | "It's just a website" | 4.2 | UI is bundled in the app, not loaded from a URL; native haptics, share sheet and deep links; real-time multiplayer |
-| Strangers talking to each other | 1.2 | No free-text chat at all — only preset emoji reactions. Names are cleaned of invisible characters. If a reviewer asks about offensive names, add a word filter or a "report player" button |
+| Strangers talking to each other | 1.2 | No free-text chat at all — only preset emoji reactions. Names are cleaned of invisible characters. Any player can be reported (cheating or offensive name) from their profile; reports go to the review queue |
 | Copying another app's look | 5.2 | Layout is the general poker-table style; name, colours, icon and art are original. Don't use another app's name or screenshots in the listing |
 | Gambling | 5.3 | No money, chips or betting — make sure the description doesn't say "poker" |
 

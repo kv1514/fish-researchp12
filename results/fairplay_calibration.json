@@ -1,0 +1,259 @@
+{
+ "seat_games": {
+  "engine": 200,
+  "dylan": 200,
+  "peek50": 200,
+  "peek15": 200,
+  "share": 200
+ },
+ "unfinished_games": 0,
+ "per_game": {
+  "engine": {
+   "ask_excess_mean": 0.0186,
+   "ask_excess_ci95": [
+    0.0038,
+    0.0334
+   ],
+   "ask_z_mean": 0.2427,
+   "ask_z_sd": 1.085,
+   "asks_per_game": 15.4,
+   "claims_per_game": 1.45,
+   "engine_match_rate": 0.469
+  },
+  "dylan": {
+   "ask_excess_mean": 0.033,
+   "ask_excess_ci95": [
+    0.0173,
+    0.0487
+   ],
+   "ask_z_mean": 0.3471,
+   "ask_z_sd": 1.131,
+   "asks_per_game": 15.0,
+   "claims_per_game": 1.54,
+   "engine_match_rate": 0.315
+  },
+  "peek50": {
+   "ask_excess_mean": 0.3147,
+   "ask_excess_ci95": [
+    0.2972,
+    0.3323
+   ],
+   "ask_z_mean": 3.7774,
+   "ask_z_sd": 1.5679,
+   "asks_per_game": 18.4,
+   "claims_per_game": 1.85,
+   "engine_match_rate": 0.309
+  },
+  "peek15": {
+   "ask_excess_mean": 0.0995,
+   "ask_excess_ci95": [
+    0.0836,
+    0.1155
+   ],
+   "ask_z_mean": 1.1356,
+   "ask_z_sd": 1.2736,
+   "asks_per_game": 15.6,
+   "claims_per_game": 1.38,
+   "engine_match_rate": 0.394
+  },
+  "share": {
+   "ask_excess_mean": 0.0501,
+   "ask_excess_ci95": [
+    0.0322,
+    0.0681
+   ],
+   "ask_z_mean": 0.5263,
+   "ask_z_sd": 1.2007,
+   "asks_per_game": 14.2,
+   "claims_per_game": 2.37,
+   "engine_match_rate": 0.375
+  }
+ },
+ "careers": {
+  "5": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.002,
+    "flag_rate_asks": 0.002,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.473,
+    "match_rate_p99": 0.639
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.0065,
+    "flag_rate_asks": 0.006,
+    "flag_rate_declarations": 0.0005,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.317,
+    "match_rate_p99": 0.535
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 0.9995,
+    "flag_rate_asks": 0.9995,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.305,
+    "match_rate_p99": 0.463
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.151,
+    "flag_rate_asks": 0.151,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.395,
+    "match_rate_p99": 0.55
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 0.749,
+    "flag_rate_asks": 0.0115,
+    "flag_rate_declarations": 0.749,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.375,
+    "match_rate_p99": 0.524
+   }
+  },
+  "10": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.0015,
+    "flag_rate_asks": 0.0015,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.471,
+    "match_rate_p99": 0.593
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.012,
+    "flag_rate_asks": 0.009,
+    "flag_rate_declarations": 0.003,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.316,
+    "match_rate_p99": 0.451
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 1.0,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.307,
+    "match_rate_p99": 0.417
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.4115,
+    "flag_rate_asks": 0.4115,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.393,
+    "match_rate_p99": 0.505
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 0.039,
+    "flag_rate_declarations": 1.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.374,
+    "match_rate_p99": 0.485
+   }
+  },
+  "25": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.004,
+    "flag_rate_asks": 0.004,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.468,
+    "match_rate_p99": 0.553
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.0775,
+    "flag_rate_asks": 0.0295,
+    "flag_rate_declarations": 0.0505,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.314,
+    "match_rate_p99": 0.397
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 1.0,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.308,
+    "match_rate_p99": 0.374
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.8815,
+    "flag_rate_asks": 0.8815,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.395,
+    "match_rate_p99": 0.465
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 0.1485,
+    "flag_rate_declarations": 1.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.375,
+    "match_rate_p99": 0.447
+   }
+  },
+  "50": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.47,
+    "match_rate_p99": 0.525
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.3255,
+    "flag_rate_asks": 0.0045,
+    "flag_rate_declarations": 0.324,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.315,
+    "match_rate_p99": 0.378
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 1.0,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.308,
+    "match_rate_p99": 0.355
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.952,
+    "flag_rate_asks": 0.952,
+    "flag_rate_declarations": 0.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.394,
+    "match_rate_p99": 0.438
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 0.0755,
+    "flag_rate_declarations": 1.0,
+    "flag_rate_engine": 0.0,
+    "match_rate_p50": 0.375,
+    "match_rate_p99": 0.425
+   }
+  }
+ },
+ "rules": {
+  "1_calibration_engine_inside_pm003": false,
+  "1_dylan_upper_ci": 0.0487,
+  "1_raise_ask_excess_to": 0.089,
+  "2_false_positive_ok": false,
+  "2_false_positive_max": 0.3255,
+  "3_peek50_power_k10": 1.0,
+  "3_peek50_ok": true,
+  "3_k_for_90pct": {
+   "peek50": 5,
+   "peek15": 50,
+   "share": 10
+  },
+  "4_dylan_match_p99_k10": 0.451,
+  "4_keep_match_rate_090": true,
+  "4_engine_match_p50_k10": 0.471
+ }
+}
