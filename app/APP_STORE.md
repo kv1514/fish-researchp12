@@ -9,7 +9,8 @@ What's already done here:
 - `ios/` — a real Xcode project (Swift Package Manager, no CocoaPods needed)
 - the app icon (1024×1024, no transparency, as Apple requires) and launch screen
 - native **haptics**, the native **share sheet** for invite codes, and
-  `fish://join/ABCD` **deep links**
+  `fish://join/ABCD` **deep links** (plus `fish://play` for a game against the
+  bots and `fish://watch` for one the bots play by themselves)
 - portrait-only on iPhone, dark status bar, and the export-compliance flag set
   (the app only uses HTTPS, which is exempt — so App Store Connect won't stall
   on the encryption question)
@@ -56,8 +57,10 @@ then set `FISH_DB_KEY` in Vercel to the new value and redeploy.
 `.github/workflows/ios.yml` builds the app on one of GitHub's Macs (free, because
 the repository is public) every time `app/` or `public/play/` changes. It
 launches the app in an iPhone simulator, screenshots the home screen and checks
-it actually drew. Find it under the repository's **Actions** tab → **ios**; the
-screenshot is attached to each run.
+it actually drew, then opens `fish://watch` and films a whole game the bots play
+against each other on the live server. Find it under the repository's
+**Actions** tab → **ios**; the screenshots and the video (`game.mp4`) are
+attached to each run.
 
 That covers building and testing. **Uploading to the App Store still needs the
 Apple Developer account** (step 1 below), and then either a Mac for the steps

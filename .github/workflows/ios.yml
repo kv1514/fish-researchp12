@@ -5,6 +5,9 @@
 # screen -- the web client in public/play/, bundled into the app, rendering
 # inside the native shell. "It compiled" alone would not say that: a shell
 # whose bundled pages fail to load still compiles, and shows a blank screen.
+# Then it opens fish://watch, which plays a whole game against the bots with
+# the engine in your seat too, films it, and checks the table drew. That game
+# runs on the live server, so it also proves the app can reach it.
 #
 # WHAT IT DOES NOT DO. Sign or upload anything. That needs an Apple Developer
 # account ($99/year) and its certificates stored as repository secrets; until
@@ -92,13 +95,21 @@ jobs:
           sleep 25
           xcrun simctl io "$UDID" screenshot home.png
           echo "DEVICE_NAME=$NAME" >> "$GITHUB_ENV"
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
           echo "APP_SIZE=$(du -sh "$APP" | cut -f1)" >> "$GITHUB_ENV"
+
+      - name: Pillow, in its own environment
+        run: |
+          # The runner's Python is Homebrew's, which refuses a system-wide
+          # pip install (PEP 668), so the image checks get a venv.
+          python3 -m venv "$RUNNER_TEMP/py"
+          "$RUNNER_TEMP/py/bin/pip" install --quiet pillow
+          echo "PY=$RUNNER_TEMP/py/bin/python" >> "$GITHUB_ENV"
 
       - name: Check the home screen actually drew
         run: |
           set -euo pipefail
-          python3 -m pip install --quiet pillow
-          python3 - <<'PY'
+          "$PY" - <<'PY'
           import os
           from PIL import Image
           im = Image.open("home.png").convert("RGB")
@@ -123,20 +134,96 @@ jobs:
           print(f"::notice title=iOS app built, launched and drew its home screen::{msg}")
           PY
 
+      - name: Film a whole game (fish://watch)
+        run: |
+          set -euo pipefail
+          # Stop filming once the screen has stood still for two looks in a
+          # row: the game is over and the results card is up. A game in play
+          # never stands still that long -- even on your own turn the engine
+          # moves after under two seconds.
+          xcrun simctl io "$SIM_UDID" recordVideo --codec=h264 --force game.mp4 &
+          REC=$!
+          sleep 3
+          xcrun simctl openurl "$SIM_UDID" "fish://watch"
+          sleep 12
+          xcrun simctl io "$SIM_UDID" screenshot game.png
+          cp game.png prev.png; still=0; t=15
+          while [ "$t" -lt 330 ]; do
+            sleep 8; t=$((t + 8))
+            xcrun simctl io "$SIM_UDID" screenshot now.png >/dev/null 2>&1
+            moved=$("$PY" -c "
+          from PIL import Image, ImageChops
+          a = Image.open('prev.png').convert('L').resize((201, 437))
+          b = Image.open('now.png').convert('L').resize((201, 437))
+          d = ImageChops.difference(a, b).point(lambda v: 255 if v > 24 else 0)
+          print(sum(1 for v in d.getdata() if v) / (201 * 437))")
+            echo "t=${t}s  changed ${moved}"
+            if [ "$t" -gt 120 ] && [ "$t" -lt 140 ]; then cp now.png middle.png; fi
+            if "$PY" -c "import sys; sys.exit(0 if float('$moved') < 0.004 else 1)"; then
+              still=$((still + 1)); [ "$still" -ge 2 ] && break
+            else
+              still=0
+            fi
+            cp now.png prev.png
+          done
+          cp now.png end.png
+          # SIGINT is what makes simctl finish writing the file. Bash starts a
+          # background job with SIGINT ignored, and while simctl's own handler
+          # should still see it, the wait is bounded so a recorder that does
+          # not stop cannot hang the job: TERM after 20 s (that video may be
+          # unplayable; the screenshots and checks do not depend on it).
+          kill -INT "$REC" || true
+          for _ in $(seq 1 20); do kill -0 "$REC" 2>/dev/null || break; sleep 1; done
+          kill -TERM "$REC" 2>/dev/null || true
+          wait "$REC" || true
+          echo "GAME_SECONDS=$t" >> "$GITHUB_ENV"
+          ls -la game.mp4 *.png
+
+      - name: Check the game table drew
+        run: |
+          set -euo pipefail
+          "$PY" - <<'PY'
+          import os
+          from PIL import Image
+          im = Image.open("game.png").convert("RGB")
+          w, h = im.size
+          px = (im.get_flattened_data() if hasattr(im, "get_flattened_data")
+                else im.getdata())
+          # The felt (#17805f to #073528) is green-dominant. Calibrated on the
+          # web client at phone size: the game table 31.5%, the home screen
+          # 0.5%, so 10% separates a table from a screen that never left home.
+          felt = sum(1 for r, g, b in px if g > 40 and g > r + 25 and g > b + 8 and r < 60)
+          frac = felt / (w * h)
+          msg = (f"{frac:.1%} felt green 12 s after fish://watch; "
+                 f"filmed {os.environ.get('GAME_SECONDS', '?')} s of play")
+          print(msg)
+          if frac < 0.10:
+              print(f"::error title=Game table did not render::{msg}")
+              raise SystemExit(1)
+          print(f"::notice title=A game played itself in the iOS app::{msg}")
+          PY
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ios-simulator-screenshot
-          path: home.png
+          path: |
+            home.png
+            game.png
+            middle.png
+            end.png
+            game.mp4
           if-no-files-found: ignore
 
       - name: Surface build errors as annotations
         if: failure()
         working-directory: app/ios/App
         run: |
+          set +o pipefail
           if [ -f build.log ]; then
             grep -E "error:" build.log | sort -u | head -10 | while IFS= read -r line; do
               echo "::error title=xcodebuild::${line:0:400}"
             done
             tail -5 build.log | while IFS= read -r line; do echo "::warning title=build log tail::${line:0:300}"; done
           fi
+          true

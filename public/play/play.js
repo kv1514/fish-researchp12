@@ -369,6 +369,7 @@ const G = {
   // solo
   token: null, actions: [], snap: null, soloTimer: null, soloBusy: false,
   soloEmote: null, soloGame: 0,
+  watch: false,         // solo game where the engine plays your seat too
   // sheet selections
   sel: { target: null, card: null },
 };
@@ -479,11 +480,11 @@ function leaveToHome(msg) {
 
 // --------------------------------------------------------- solo control ----
 function stopSolo() { clearTimeout(G.soloTimer); G.soloTimer = null; }
-async function startSolo() {
+async function startSolo(watch = false) {
   clearTimeout(G.pollTimer);
   stopSolo();
   closeModal();
-  G.mode = 'solo'; G.code = null; G.secret = null;
+  G.mode = 'solo'; G.code = null; G.secret = null; G.watch = !!watch;
   G.actions = []; G.token = null; G.soloGame += 1;
   G.lastPlies = 0; G.lastGame = -1; G.resultShown = -1; G.lastHand = new Set();
   show('game');
@@ -504,7 +505,13 @@ function soloApply(d) {
 function soloLoop() {
   stopSolo();
   const s = G.snap;
-  if (G.mode !== 'solo' || !s || s.terminal || s.stopped || s.your_turn) return;
+  if (G.mode !== 'solo' || !s || s.terminal || s.stopped) return;
+  if (s.your_turn) {
+    // Watch mode: the engine takes your seat as well, at a readable pace, so a
+    // whole game plays itself (fish://watch). Otherwise wait for the player.
+    if (G.watch) G.soloTimer = setTimeout(soloAuto, SOLO_PACE_MS * 1.4);
+    return;
+  }
   G.soloTimer = setTimeout(async () => {
     if (G.mode !== 'solo') return;
     try {
@@ -515,6 +522,17 @@ function soloLoop() {
       G.soloTimer = setTimeout(soloLoop, 2500);
     }
   }, SOLO_PACE_MS);
+}
+async function soloAuto() {
+  if (G.mode !== 'solo' || !G.watch || G.soloBusy) return;
+  G.soloBusy = true;
+  try {
+    const d = await api('auto', { token: G.token, actions: G.actions, step: 0 });
+    if (G.mode === 'solo') soloApply(d);
+  } catch (e) {
+    toast(e.message, true);
+    G.soloTimer = setTimeout(soloLoop, 2500);
+  } finally { G.soloBusy = false; }
 }
 async function soloAct(action) {
   if (G.soloBusy) return;
@@ -1162,14 +1180,21 @@ async function boot() {
   if (join.length === 4) {
     history.replaceState(null, '', location.pathname);
     joinByCode(join);
+  } else if (params.get('play') === 'bots' || params.get('play') === 'watch') {
+    history.replaceState(null, '', location.pathname);
+    startSolo(params.get('play') === 'watch');
   }
 }
-// The native shell can open fish://join/ABCD links.
+// The native shell opens fish://join/ABCD (a table), fish://play (a game
+// against the bots) and fish://watch (a game the bots play by themselves).
 const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
 if (AppPlugin && AppPlugin.addListener) {
   AppPlugin.addListener('appUrlOpen', (ev) => {
-    const m = /join[/=]([A-Za-z0-9]{4})/.exec(ev.url || '');
+    const url = ev.url || '';
+    const m = /join[/=]([A-Za-z0-9]{4})/.exec(url);
     if (m) joinByCode(m[1].toUpperCase());
+    else if (/^fish:\/\/watch\b/.test(url)) startSolo(true);
+    else if (/^fish:\/\/play\b/.test(url)) startSolo(false);
   });
 }
 boot();
