@@ -1,0 +1,47 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "n_games": 1200,
+ "margin": -0.525,
+ "ci95": [
+  -0.6885749533395079,
+  -0.36142504666049213
+ ],
+ "sd": 2.891021734997307,
+ "kv_sets": 5085,
+ "dylan_sets": 5715,
+ "kv_set_share": 0.4708333333333333,
+ "wins": 520,
+ "ties": 0,
+ "losses": 680,
+ "win_rate": 0.43333333333333335,
+ "win_rate_ci95": [
+  0.40529576594268435,
+  0.46137090072398235
+ ],
+ "ask_hit_kv": 0.5297737556561086,
+ "ask_hit_dylan": 0.5492866972077549,
+ "declare_right_kv": 0.9758675708017551,
+ "declare_right_dylan": 0.9668164535084687,
+ "allocation_misdeclares_kv": 116,
+ "allocation_misdeclares_dylan": 135,
+ "wrong_declarations_kv": 121,
+ "wrong_declarations_dylan": 192,
+ "bridge_rev": 3,
+ "anchorless_kv": 185,
+ "anchorless_dylan": 179,
+ "bridge_fallbacks": 0,
+ "margin_distribution": {
+  "-9": 5,
+  "-7": 30,
+  "-5": 98,
+  "-3": 229,
+  "-1": 318,
+  "1": 297,
+  "3": 159,
+  "5": 52,
+  "7": 11,
+  "9": 1
+ }
+}

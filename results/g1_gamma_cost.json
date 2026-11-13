@@ -1,0 +1,34 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 2,
+ "n_games": 1600,
+ "n_deals": 800,
+ "min_interesting": 0.15,
+ "margin_A": 2.36125,
+ "arms": {
+  "B_none": {
+   "gamma": 0.0,
+   "effect": -0.405,
+   "ci95": [
+    -0.5910709272528359,
+    -0.21892907274716408
+   ],
+   "margin": 1.95625,
+   "verdict": "WORSE than shipped"
+  },
+  "C_measured": {
+   "gamma": -1.0,
+   "effect": -1.1025,
+   "ci95": [
+    -1.2896877908328892,
+    -0.915312209167111
+   ],
+   "margin": 1.25875,
+   "verdict": "WORSE than shipped"
+  }
+ },
+ "bridge_fallbacks": 0,
+ "unfinished": 0
+}

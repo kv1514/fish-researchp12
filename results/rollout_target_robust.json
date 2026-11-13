@@ -1,0 +1,62 @@
+{
+ "source": "/home/user/fish-researchp12/results/rollout_target.json",
+ "split_at": 40,
+ "full": {
+  "slope": 0.6810178020205941,
+  "se_clustered": 0.14246922731803727,
+  "n_points": 3056,
+  "n_positions": 110,
+  "range": 1.0
+ },
+ "first_block": {
+  "slope": 0.3789168694477069,
+  "se_clustered": 0.1456924050689743,
+  "n_points": 1010,
+  "n_positions": 36,
+  "range": 1.0
+ },
+ "second_block": {
+  "slope": 0.7660141734442732,
+  "se_clustered": 0.17272856859816024,
+  "n_points": 2046,
+  "n_positions": 74,
+  "range": 1.0
+ },
+ "block_gap": {
+  "delta": 0.38709730399656633,
+  "se": 0.22596777492543363,
+  "z": 1.7130641929996582
+ },
+ "max_leave_one_out_move": 0.05881580236536632,
+ "most_influential": [
+  {
+   "position": 88,
+   "slope": 0.6222019996552278
+  },
+  {
+   "position": 86,
+   "slope": 0.6257327513191262
+  },
+  {
+   "position": 87,
+   "slope": 0.6275741458307225
+  },
+  {
+   "position": 53,
+   "slope": 0.6285039620825906
+  },
+  {
+   "position": 89,
+   "slope": 0.6430691279111577
+  }
+ ],
+ "per_position": {
+  "k": 104,
+  "median": 0.3200517188808862,
+  "sd": 1.3563316737750342,
+  "min": -6.361296078014357,
+  "max": 3.653262767869999,
+  "share_positive": 0.6442307692307693,
+  "share_above_paper": 0.5961538461538461
+ }
+}

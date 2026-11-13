@@ -1,0 +1,13 @@
+{
+ "n_games": 25,
+ "seed0": 77000,
+ "screen": 0.35,
+ "threshold": 0.97,
+ "n_screened": 11687,
+ "n_claimable_but_screened": 0,
+ "n_above_screen_but_below_threshold": 24,
+ "largest_true_joint_among_screened": 0.5810810810810814,
+ "gap_mean": -0.006884179827013426,
+ "gap_median": -0.0007125636614921823,
+ "gap_max": 0.25535477085563996
+}

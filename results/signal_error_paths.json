@@ -1,0 +1,45 @@
+{
+ "what": "Why signalling adds an error in 52 games and avoids one in 72 -- the number prereg/deadline_signalling.md names as the ceiling to attack.",
+ "source": "results/signal_gate_journal.jsonl",
+ "baseline": "A_shipped",
+ "arm": "C_measured",
+ "n_games": 1000,
+ "added": 52,
+ "avoided": 72,
+ "path_shift_per_game": {
+  "added": {
+   "voluntary": -0.7884615384615384,
+   "gate": -0.6346153846153846,
+   "forced": 1.3269230769230769,
+   "exact": -0.25
+  },
+  "avoided": {
+   "voluntary": 0.1388888888888889,
+   "gate": -0.8472222222222222,
+   "forced": -0.1388888888888889,
+   "exact": 0.1111111111111111
+  }
+ },
+ "path_error_rate": {
+  "voluntary": {
+   "declarations": 3692,
+   "wrong": 2,
+   "rate": 0.0005417118093174431
+  },
+  "gate": {
+   "declarations": 78,
+   "wrong": 8,
+   "rate": 0.10256410256410256
+  },
+  "forced": {
+   "declarations": 307,
+   "wrong": 142,
+   "rate": 0.46254071661237783
+  },
+  "exact": {
+   "declarations": 796,
+   "wrong": 0,
+   "rate": 0.0
+  }
+ }
+}

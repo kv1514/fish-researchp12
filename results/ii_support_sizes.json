@@ -1,0 +1,31 @@
+{
+ "n_games": 25,
+ "by_live": {
+  "1": {
+   "decisions": 79,
+   "median": 1,
+   "mean": 4.151898734177215,
+   "share_le_24": 0.9620253164556962,
+   "share_le_200": 1.0,
+   "un_enumerable": 0
+  },
+  "2": {
+   "decisions": 153,
+   "median": 12,
+   "mean": 142.91946308724832,
+   "share_le_24": 0.6577181208053692,
+   "share_le_200": 0.8590604026845637,
+   "un_enumerable": 4
+  },
+  "3": {
+   "decisions": 180,
+   "median": 66,
+   "mean": 504.66037735849056,
+   "share_le_24": 0.3584905660377358,
+   "share_le_200": 0.6226415094339622,
+   "un_enumerable": 74
+  }
+ },
+ "product_cap": 400000,
+ "count_cap": 5000
+}

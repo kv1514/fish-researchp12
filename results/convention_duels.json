@@ -1,0 +1,110 @@
+{
+  "note": "Duel results for the convention direction. See prereg/convention_duel.md and prereg/convention_freeread.md.",
+  "arms": [
+    {
+      "label": "convention as registered (mis-priced gate, aimed, beta=0.8)",
+      "n_pairs": 40,
+      "diff_x_minus_y": 1.75,
+      "ci": [
+        0.645,
+        2.855
+      ]
+    },
+    {
+      "label": "encoder only, mis-priced gate",
+      "n_pairs": 120,
+      "diff_x_minus_y": 1.467,
+      "ci": [
+        0.818,
+        2.116
+      ]
+    },
+    {
+      "label": "decoder only, nothing on the wire",
+      "n_pairs": 120,
+      "diff_x_minus_y": 0.033,
+      "ci": [
+        -0.646,
+        0.712
+      ]
+    },
+    {
+      "label": "both, mis-priced gate",
+      "n_pairs": 120,
+      "diff_x_minus_y": 1.267,
+      "ci": [
+        0.526,
+        2.008
+      ]
+    },
+    {
+      "label": "RE-PRICED free-message gate, both",
+      "n_pairs": 200,
+      "diff_x_minus_y": -0.02,
+      "ci": [
+        -0.515,
+        0.475
+      ]
+    },
+    {
+      "label": "RE-PRICED free-message gate, encoder only",
+      "n_pairs": 200,
+      "diff_x_minus_y": -0.07,
+      "ci": [
+        -0.527,
+        0.387
+      ]
+    },
+    {
+      "label": "RE-PRICED 0.05 objective units, both",
+      "n_pairs": 200,
+      "diff_x_minus_y": 0.14,
+      "ci": [
+        -0.397,
+        0.677
+      ]
+    },
+    {
+      "label": "free-read (no encoder), beta=0.23, interim",
+      "n_pairs": 1200,
+      "diff_x_minus_y": -0.055,
+      "ci": [
+        -0.25,
+        0.14
+      ]
+    },
+    {
+      "label": "free-read (no encoder), beta=0.23, FINAL",
+      "n_pairs": 3000,
+      "diff_x_minus_y": 0.002,
+      "ci": [
+        -0.123,
+        0.127
+      ],
+      "record": "1158W/683T/1159L"
+    }
+  ],
+  "carry_rate_by_gate_objective_units": {
+    "0.0 (no encoder)": 0.353,
+    "1e-9": 0.401,
+    "0.01": 0.435,
+    "0.05": 0.575,
+    "0.15": 0.756,
+    "0.4": 0.864
+  },
+  "moves_per_game_by_gate": {
+    "0.0": 108.6,
+    "1e-9": 103.2,
+    "0.01": 103.0,
+    "0.05": 108.2,
+    "0.15": 118.0,
+    "0.4": 122.4
+  },
+  "swap_cost_objective_units_wide_open_gate": {
+    "median": 0.3596,
+    "p75": 0.6865,
+    "p90": 1.2503,
+    "max": 1.5,
+    "caveat": "measured with the gate at 1e9, a degraded population; the carry rates above are measured per gate on its own games"
+  }
+}

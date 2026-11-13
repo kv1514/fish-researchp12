@@ -1,0 +1,43 @@
+{
+ "n_pairs": 500,
+ "n_blocks": 20,
+ "estimate": 2.412,
+ "ci": [
+  2.0878749806702497,
+  2.73612501932975
+ ],
+ "se": 0.1653699078213011,
+ "rules": {
+  "allow_bluff_asks": false,
+  "claims_any_time": false,
+  "mandatory_claim_known": false,
+  "starting_player": 0,
+  "variant": "54",
+  "wrong_distribution_outcome": "opponent"
+ },
+ "engine": "0679f6d1d222",
+ "x_misdeclares": 125,
+ "y_misdeclares": 146,
+ "labels": [
+  "R1-award-00",
+  "R1-award-01",
+  "R1-award-02",
+  "R1-award-03",
+  "R1-award-04",
+  "R1-award-05",
+  "R1-award-06",
+  "R1-award-07",
+  "R1-award-08",
+  "R1-award-09",
+  "R1-award-10",
+  "R1-award-11",
+  "R1-award-12",
+  "R1-award-13",
+  "R1-award-14",
+  "R1-award-15",
+  "R1-award-16",
+  "R1-award-17",
+  "R1-award-18",
+  "R1-award-19"
+ ]
+}

@@ -1,0 +1,14 @@
+# OPTIONAL. What fitting the learned models requires, beyond requirements.txt.
+#
+# Nothing in the engine needs this. The champion, every duel, the exact solver,
+# the endgame tablebases and every number in the strength ladder run on numpy
+# alone -- which is why torch was never declared anywhere and why
+# `scripts4/fit_hsvalue.py`, a command the paper's reproduction section hands
+# the reader, died on a bare ModuleNotFoundError from inside
+# `fish4/hsvalue.py`. CI knows: .github/workflows/tests.yml skips
+# tests4/test_learn.py::test_fit_multinomial for exactly this reason.
+#
+# Needed only by:
+#   scripts4/fit_hsvalue.py     the half-suit value model
+#   fish4/learn/fit.py          the ask-objective fit
+torch>=2

@@ -1,0 +1,87 @@
+{
+ "script": "scripts4/symmetry_value.py",
+ "model_only": true,
+ "no_games_played": true,
+ "blocks": {
+  "18300000": {
+   "p3_now": 0.47809596055376447,
+   "ship_fraction_of_residual": 0.20472774268139765,
+   "p3_needed_for_ship_bar": 0.48258032510519655,
+   "n_games": 400,
+   "by_band": [
+    {
+     "band": 2,
+     "half_suits_per_game": 2.1675,
+     "observed": 0.28604382929642447,
+     "chain_now": 0.24643576965673955,
+     "chain_symmetric": 0.29137547820399246,
+     "gain_per_half_suit": 0.044939708547252905
+    },
+    {
+     "band": 3,
+     "half_suits_per_game": 3.0275,
+     "observed": 0.44426094137076794,
+     "chain_now": 0.44437317231005263,
+     "chain_symmetric": 0.5,
+     "gain_per_half_suit": 0.05562682768994737
+    },
+    {
+     "band": 4,
+     "half_suits_per_game": 2.1175,
+     "observed": 0.6292798110979929,
+     "chain_now": 0.6604476396253711,
+     "chain_symmetric": 0.7086245217960075,
+     "gain_per_half_suit": 0.048176882170636426
+    }
+   ],
+   "declarations_in_contested_bands_now": 3.277987186806391,
+   "declarations_if_symmetric": 3.6458187739101997,
+   "declarations_observed": 3.2975,
+   "margin_gain_sets": 0.7356631742076178,
+   "margin_gain_ci": [
+    0.49755069532391755,
+    0.9682976216772978
+   ]
+  },
+  "18900000": {
+   "p3_now": 0.47540346101497183,
+   "ship_fraction_of_residual": 0.19445497304741116,
+   "p3_needed_for_ship_bar": 0.4801863803403651,
+   "n_games": 400,
+   "by_band": [
+    {
+     "band": 2,
+     "half_suits_per_game": 2.1925,
+     "observed": 0.2862029646522235,
+     "chain_now": 0.24112051147261443,
+     "chain_symmetric": 0.28816394785811444,
+     "gain_per_half_suit": 0.047043436385500015
+    },
+    {
+     "band": 3,
+     "half_suits_per_game": 2.9925,
+     "observed": 0.44862155388471175,
+     "chain_now": 0.440777384276297,
+     "chain_symmetric": 0.4999999999999999,
+     "gain_per_half_suit": 0.05922261572370291
+    },
+    {
+     "band": 4,
+     "half_suits_per_game": 2.11,
+     "observed": 0.6090047393364929,
+     "chain_now": 0.6610940480081315,
+     "chain_symmetric": 0.7118360521418855,
+     "gain_per_half_suit": 0.05074200413375396
+    }
+   ],
+   "declarations_in_contested_bands_now": 3.2425914851476834,
+   "declarations_if_symmetric": 3.6300235256982942,
+   "declarations_observed": 3.255,
+   "margin_gain_sets": 0.7748640811012217,
+   "margin_gain_ci": [
+    0.5331060686586127,
+    1.0131155212656306
+   ]
+  }
+ }
+}

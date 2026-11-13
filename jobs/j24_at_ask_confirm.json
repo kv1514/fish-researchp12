@@ -1,0 +1,116 @@
+[
+ {
+  "label": "AT_ASK g1.0 vs champion block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 15000000,
+  "agent_seed": 9900
+ },
+ {
+  "label": "AT_ASK g1.0 vs champion block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 15200000,
+  "agent_seed": 9901
+ },
+ {
+  "label": "AT_ASK g1.0 vs champion block 2",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 15400000,
+  "agent_seed": 9902
+ },
+ {
+  "label": "AT_ASK g1.0 vs champion block 3",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 15600000,
+  "agent_seed": 9903
+ },
+ {
+  "label": "AT_ASK g1.0 vs champion block 4",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 15800000,
+  "agent_seed": 9904
+ },
+ {
+  "label": "AT_ASK g1.0 vs champion block 5",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 1.0,
+    "depth_mode": "at_ask"
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 16000000,
+  "agent_seed": 9905
+ }
+]

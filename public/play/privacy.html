@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fish · Privacy</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #070b14; color: #e5e9f5; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 32px 20px 60px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 28px 0 6px; }
+  p, li { color: #b6bfd8; }
+  a { color: #38bdf8; }
+  .muted { color: #6c7695; font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy</h1>
+  <p class="muted">Fish — the team card game</p>
+
+  <h2>The short version</h2>
+  <p>Fish has no ads, no analytics and no tracking, and never asks for your contacts, location or
+  photos. You can <b>play as a guest</b> with just a name, or <b>create an account</b> to keep a
+  rating. You can delete your account at any time from your profile.</p>
+
+  <h2>If you play as a guest</h2>
+  <p>We keep only the name you type, with the table you play at, for at most 6 hours after the
+  table was last used. Guests have no account and no rating, and nothing about them is kept after
+  that.</p>
+
+  <h2>If you create an account</h2>
+  <ul>
+    <li><b>How you sign in</b>: an email address and password, a phone number, or your Google or
+      Apple account — whichever you choose. Sign-in is handled by our sign-in provider, Supabase
+      Auth, which stores your email or phone number and only a one-way hash of your password. Your
+      password passes through our server over an encrypted connection on its way there and is
+      never stored by us. If you use Google or Apple, we receive your name and email from them.</li>
+    <li><b>Your profile</b>: the name you chose, your rating and best rating, your wins and losses,
+      and a short record of your last 30 rated games. Each device you sign in on gets its own key;
+      our server stores only a one-way hash of it, and logging out forgets that device.</li>
+    <li><b>Who sees what</b>: other players can see your name, rating, record and recent results.
+      Your email or phone number is never shown to anyone; your own profile shows it to you,
+      partly hidden.</li>
+    <li><b>Deleting it</b>: Profile → <i>Delete account</i> removes your profile and your sign-in
+      account (email or phone included) from our servers immediately and permanently.</li>
+  </ul>
+
+  <h2>Fair play</h2>
+  <p>To catch cheating in rated (Quick Play) games, the server keeps statistics about how your
+  moves turned out compared with what the cards you could see made likely, how long you took over
+  each move, and whether the app went to the background during your turn. These numbers are
+  never shown to other players. If they, or reports from other players, look unusual, a person
+  reviews them. Private tables and practice games against the bots are not analysed.</p>
+  <p>If you report another player, the report is stored with their profile, and your identity
+  is stored only as a one-way hash, so we can count one report per person.</p>
+
+  <h2>Tables</h2>
+  <ul>
+    <li><b>The moves of the game</b> (which card was asked for, who declared what) are stored
+      with the table on our server so every player sees the same game, and deleted when the
+      table expires, at most 6 hours after it was last used.</li>
+    <li><b>On your device only</b>: your sound and vibration settings.</li>
+  </ul>
+
+  <h2>What we don't do</h2>
+  <ul>
+    <li>We don't sell or share data with anyone.</li>
+    <li>We don't use advertising identifiers or third-party SDKs that collect data.</li>
+    <li>There is no free-text chat; reactions are a fixed set of emoji.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>Fish does not knowingly collect personal information from anyone, including children. The
+  only thing a player types is a display name, which they can make up; the profile holds no real
+  name, contact details or location.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes, the new version will be posted on this page.</p>
+</main>
+</body>
+</html>

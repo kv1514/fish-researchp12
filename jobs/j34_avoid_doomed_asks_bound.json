@@ -1,0 +1,40 @@
+[
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 6",
+  "n_pairs": 1000,
+  "base_seed": 68000000,
+  "agent_seed": 68001,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ },
+ {
+  "label": "DOOMED avoid_doomed_asks vs champion block 7",
+  "n_pairs": 1000,
+  "base_seed": 68200000,
+  "agent_seed": 68002,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "avoid_doomed_asks": true
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ]
+ }
+]

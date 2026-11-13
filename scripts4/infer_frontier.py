@@ -90,6 +90,7 @@ def harvest(n_games: int, target: int, seed: int = 20240) -> list[dict]:
 
 def position_stats(snaps: list[dict]) -> dict:
     free, groups, ors, orsize, states, blocks = [], [], [], [], [], []
+    gstates = []
     for s in snaps:
         bel = restore_belief(s)
         fs = FreeSystem(bel)
@@ -101,6 +102,16 @@ def position_stats(snaps: list[dict]) -> dict:
         for q in fs.quotas:
             ss *= q + 1
         states.append(ss)
+        # The DP of eq:dp carries RESIDUAL GROUP COUNTS between player steps,
+        # so its state space is prod_g (n_g + 1) -- a product over groups, not
+        # over players. `states` above is the quota lattice, a different
+        # quantity that was stored under a name close enough to be mistaken for
+        # this one; the paper quoted 272/577 for the group product with nothing
+        # behind it. Measure the thing the formula names.
+        gs = 1
+        for sz in fs.sizes:
+            gs *= int(sz) + 1
+        gstates.append(gs)
         blocks.append(len({fs.hs_of[l[0]] for l, _ in fs.ors}))
 
     def d(name, xs):
@@ -113,7 +124,9 @@ def position_stats(snaps: list[dict]) -> dict:
 
     return {"free_cards": d("free", free), "mask_groups": d("g", groups),
             "active_ors": d("o", ors), "or_size": d("s", orsize),
-            "quota_state_space": d("q", states), "or_half_suits": d("b", blocks),
+            "quota_state_space": d("q", states),
+            "group_state_space": d("gq", gstates),
+            "or_half_suits": d("b", blocks),
             "frac_or_free": sum(1 for x in ors if x == 0) / len(ors)}
 
 

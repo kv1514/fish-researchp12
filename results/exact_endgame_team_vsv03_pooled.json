@@ -1,0 +1,38 @@
+{
+ "arm": "team",
+ "opponent": "v03",
+ "blocks": [
+  {
+   "seed_block": 0,
+   "mean": 0.075,
+   "se": 0.0331841901542056,
+   "n_pairs": 400,
+   "fired": 251
+  },
+  {
+   "seed_block": 1,
+   "mean": 0.0725,
+   "se": 0.02588018227498541,
+   "n_pairs": 400,
+   "fired": 174
+  },
+  {
+   "seed_block": 2,
+   "mean": 0.0425,
+   "se": 0.030066498979799006,
+   "n_pairs": 400,
+   "fired": 177
+  }
+ ],
+ "pooled_mean": 0.0636853778228567,
+ "pooled_se": 0.016885416002494786,
+ "pooled_ci95": [
+  0.03058996245796692,
+  0.09678079318774649
+ ],
+ "cochran_q": 0.7287462097550713,
+ "q_df": 2,
+ "nulls_policy": 407,
+ "nulls_control": 443,
+ "n_pairs_total": 1200
+}

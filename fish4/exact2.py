@@ -719,8 +719,11 @@ class Exact2Solver:
 
         Under perfect information the only claims worth generating are TRUE
         ones: mis-splitting a half-suit your team wholly owns leads to the very
-        same continuation and banks 0 instead of +1, so it is strictly
-        dominated. Handing a half-suit to the opponents is NOT dominated a
+        same continuation and banks 0 (legacy null variant) or -1
+        (opponent-award baseline) instead of +1, so it is strictly dominated
+        under either rule -- the action set, and with it every
+        perfect-information value here, is invariant to the misdeclaration
+        rule. Handing a half-suit to the opponents is NOT dominated a
         priori - it strips cards off the table, which can matter once a second
         half-suit is live - so it is available behind
         ``include_giveaway_claims``. EXACT2.md section 5 reports the measured

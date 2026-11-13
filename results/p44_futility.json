@@ -1,0 +1,19 @@
+{
+ "games": 400,
+ "asks": 18515,
+ "d1_fire_rate": 0.04947339994598974,
+ "d1_bar": 0.02,
+ "d1_pass": true,
+ "d2_per_game": 0.235,
+ "d2_bar": 0.25,
+ "d2_pass": false,
+ "counts": {
+  "asks": 18515,
+  "d1_fired": 916,
+  "declares": 1625,
+  "d2_fired": 94,
+  "games": 400
+ },
+ "seconds": 129.2,
+ "prereg": "prereg/kraken_v12_declaration_latency.md"
+}

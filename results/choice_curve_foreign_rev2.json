@@ -1,0 +1,59 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "n_games": 150,
+ "n_records": 6090,
+ "alpha": -1.0040992172874228,
+ "ci95": [
+  -1.1433506813682923,
+  -0.8648477532065533
+ ],
+ "se_clustered": 0.07104666534738242,
+ "nll": 7827.3940434971,
+ "clustered": true,
+ "assumed_gamma": 0.35,
+ "verdict": "OPPOSITE SIGN -- our model re-weights his worlds backwards",
+ "curve": {
+  "1": {
+   "offered": 14109,
+   "picked": 3990,
+   "expected": 3171.77023809518,
+   "rate": 0.28279821390601745,
+   "relative": 1.2579725832840312,
+   "se": 0.017756163695854824
+  },
+  "2": {
+   "offered": 8830,
+   "picked": 1755,
+   "expected": 2302.1250000000337,
+   "rate": 0.19875424688561721,
+   "relative": 0.7623391431829176,
+   "se": 0.02084181561589356
+  },
+  "3": {
+   "offered": 1974,
+   "picked": 304,
+   "expected": 554.7880952380938,
+   "rate": 0.1540020263424519,
+   "relative": 0.5479569634051625,
+   "se": 0.04245574179308604
+  },
+  "4": {
+   "offered": 195,
+   "picked": 40,
+   "expected": 60.98333333333341,
+   "rate": 0.20512820512820512,
+   "relative": 0.6559169171904884,
+   "se": 0.12805437489505078
+  },
+  "5": {
+   "offered": 1,
+   "picked": 1,
+   "expected": 0.3333333333333333,
+   "rate": 1.0,
+   "relative": 3.0,
+   "se": 1.7320508075688772
+  }
+ }
+}

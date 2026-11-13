@@ -632,3 +632,69 @@ def test_published_calibration_is_internally_consistent():
     for row in d["mde_table"]:
         want = math.ceil((z * sd / row["effect_sets_per_pair"]) ** 2)
         assert row["pairs_for_80pct_power"] == want
+
+
+# ---------------------------------------------------------------------------
+# The harness has to be able to measure its own null
+# ---------------------------------------------------------------------------
+
+def test_an_A_A_is_degenerate_under_the_default_seat_seeding():
+    """Documents the limitation the independent-seeds option exists for.
+
+    With seat-based seeding, one spec against a copy of itself plays a
+    bit-identical game in both halves of a pair, so the differential is
+    (a - b) + (b - a) = 0 for every deal. That is not a small effect correctly
+    measured as zero - it is a point mass, and no amount of sampling learns
+    anything from it about how much a cell's estimate moves run to run.
+    """
+    from fish4.match import play_matchup
+    spec = ("fishbot4", {"opponent_gamma": 0.35})
+    res = play_matchup(spec, spec, n_deals=6, n_jobs=1, base_seed=5000,
+                       agent_seed_base=77)
+    assert res.diffs == [0] * 6
+
+
+def test_independent_seeds_make_the_null_measurable():
+    """The same A/A becomes a real random variable, centred on zero."""
+    from fish4.match import play_matchup
+    spec = ("fishbot4", {"opponent_gamma": 0.35})
+    res = play_matchup(spec, spec, n_deals=10, n_jobs=1, base_seed=5000,
+                       agent_seed_base=77, independent_seeds=True)
+    assert any(d != 0 for d in res.diffs), "still degenerate"
+    assert any(d > 0 for d in res.diffs) and any(d < 0 for d in res.diffs)
+
+
+def test_independent_seeds_are_off_by_default():
+    """Turning this on changes every number the harness produces.
+
+    ``results/v04_duels.jsonl`` was built without it, so the default has to stay
+    put or the archive stops being comparable with anything measured later.
+    """
+    import inspect
+    from fish4.match import play_matchup
+    sig = inspect.signature(play_matchup)
+    assert sig.parameters["independent_seeds"].default is False
+
+
+def test_a_side_carries_its_seeds_into_both_halves_of_the_pair():
+    """Seeded by position within the side, not by seat.
+
+    A policy must meet both halves of a duplicate deal with the same randomness,
+    or the pairing that the whole design rests on is broken.
+    """
+    from fish4.match import side_seeds
+    a, b = side_seeds(12345, 0), side_seeds(12345, 1)
+    assert len(a) == len(b) == 3
+    assert not (set(a) & set(b)), "the two sides drew a common seed"
+    assert side_seeds(12345, 0) == a, "not reproducible"
+
+
+def test_per_pair_differentials_survive_serialisation():
+    """Without these a run's raw observations cannot be re-analysed at all."""
+    from fish4.match import play_matchup
+    spec = ("fishbot4", {"opponent_gamma": 0.35})
+    res = play_matchup(spec, spec, n_deals=5, n_jobs=1, base_seed=5100,
+                       agent_seed_base=9, independent_seeds=True)
+    d = json.loads(json.dumps(res.to_dict()))
+    assert d["diffs"] == list(res.diffs)
+    assert len(d["diffs"]) == d["n_pairs"]

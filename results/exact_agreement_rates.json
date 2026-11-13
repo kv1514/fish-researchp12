@@ -1,0 +1,204 @@
+{
+ "n_positions": 988,
+ "n_resolved": 278,
+ "agents": {
+  "random": {
+   "label": "random",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 171,
+    "res_prog": 169,
+    "unc_total": 710,
+    "unc_opt": 256,
+    "unc_prog": 232,
+    "m1_total": 212,
+    "m1_prog": 60,
+    "m2_total": 776,
+    "m2_prog": 341
+   },
+   "rates": {
+    "resolved": 0.6079136690647482,
+    "uncertain": 0.3267605633802817,
+    "m1": 0.2830188679245283,
+    "m2": 0.43943298969072164,
+    "resolved_value_optimal": 0.6151079136690647,
+    "uncertain_value_optimal": 0.36056338028169016
+   }
+  },
+  "heuristic": {
+   "label": "heuristic",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 200,
+    "res_prog": 199,
+    "unc_total": 710,
+    "unc_opt": 396,
+    "unc_prog": 332,
+    "m1_total": 212,
+    "m1_prog": 73,
+    "m2_total": 776,
+    "m2_prog": 458
+   },
+   "rates": {
+    "resolved": 0.7158273381294964,
+    "uncertain": 0.4676056338028169,
+    "m1": 0.3443396226415094,
+    "m2": 0.5902061855670103,
+    "resolved_value_optimal": 0.7194244604316546,
+    "uncertain_value_optimal": 0.5577464788732395
+   }
+  },
+  "memory": {
+   "label": "memory",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 278,
+    "res_prog": 278,
+    "unc_total": 710,
+    "unc_opt": 497,
+    "unc_prog": 438,
+    "m1_total": 212,
+    "m1_prog": 172,
+    "m2_total": 776,
+    "m2_prog": 544
+   },
+   "rates": {
+    "resolved": 1.0,
+    "uncertain": 0.6169014084507042,
+    "m1": 0.8113207547169812,
+    "m2": 0.7010309278350515,
+    "resolved_value_optimal": 1.0,
+    "uncertain_value_optimal": 0.7
+   }
+  },
+  "probabilistic": {
+   "label": "probabilistic",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 278,
+    "res_prog": 278,
+    "unc_total": 710,
+    "unc_opt": 545,
+    "unc_prog": 475,
+    "m1_total": 212,
+    "m1_prog": 184,
+    "m2_total": 776,
+    "m2_prog": 569
+   },
+   "rates": {
+    "resolved": 1.0,
+    "uncertain": 0.6690140845070423,
+    "m1": 0.8679245283018868,
+    "m2": 0.7332474226804123,
+    "resolved_value_optimal": 1.0,
+    "uncertain_value_optimal": 0.7676056338028169
+   }
+  },
+  "v03_champion": {
+   "label": "v0.3 champion",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 278,
+    "res_prog": 278,
+    "unc_total": 710,
+    "unc_opt": 546,
+    "unc_prog": 480,
+    "m1_total": 212,
+    "m1_prog": 184,
+    "m2_total": 776,
+    "m2_prog": 574
+   },
+   "rates": {
+    "resolved": 1.0,
+    "uncertain": 0.676056338028169,
+    "m1": 0.8679245283018868,
+    "m2": 0.7396907216494846,
+    "resolved_value_optimal": 1.0,
+    "uncertain_value_optimal": 0.7690140845070422
+   }
+  },
+  "v04_no_gamma": {
+   "label": "v0.4 no-gamma",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 278,
+    "res_prog": 278,
+    "unc_total": 710,
+    "unc_opt": 546,
+    "unc_prog": 479,
+    "m1_total": 212,
+    "m1_prog": 181,
+    "m2_total": 776,
+    "m2_prog": 576
+   },
+   "rates": {
+    "resolved": 1.0,
+    "uncertain": 0.6746478873239437,
+    "m1": 0.8537735849056604,
+    "m2": 0.7422680412371134,
+    "resolved_value_optimal": 1.0,
+    "uncertain_value_optimal": 0.7690140845070422
+   }
+  },
+  "v04_champion": {
+   "label": "v0.4 champion",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 278,
+    "res_prog": 278,
+    "unc_total": 710,
+    "unc_opt": 585,
+    "unc_prog": 515,
+    "m1_total": 212,
+    "m1_prog": 182,
+    "m2_total": 776,
+    "m2_prog": 611
+   },
+   "rates": {
+    "resolved": 1.0,
+    "uncertain": 0.7253521126760564,
+    "m1": 0.8584905660377359,
+    "m2": 0.7873711340206185,
+    "resolved_value_optimal": 1.0,
+    "uncertain_value_optimal": 0.823943661971831
+   }
+  },
+  "v04_no_tablebase": {
+   "label": "v0.4 no-tablebase",
+   "counts": {
+    "errors": 0,
+    "res_total": 278,
+    "res_opt": 278,
+    "res_prog": 278,
+    "unc_total": 710,
+    "unc_opt": 585,
+    "unc_prog": 515,
+    "m1_total": 212,
+    "m1_prog": 182,
+    "m2_total": 776,
+    "m2_prog": 611
+   },
+   "rates": {
+    "resolved": 1.0,
+    "uncertain": 0.7253521126760564,
+    "m1": 0.8584905660377359,
+    "m2": 0.7873711340206185,
+    "resolved_value_optimal": 1.0,
+    "uncertain_value_optimal": 0.823943661971831
+   }
+  }
+ },
+ "abstract_contrast": {
+  "v03_uncertain": 0.676056338028169,
+  "v04_uncertain": 0.7253521126760564,
+  "delta": 0.04929577464788737
+ },
+ "no_opponent_model_uncertain": 0.6746478873239437
+}

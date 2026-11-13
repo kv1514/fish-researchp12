@@ -1,0 +1,143 @@
+{
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "bridge_rev": 2,
+ "n_games": 1000,
+ "min_interesting": 0.15,
+ "conditional": 0.05,
+ "margin_A": 2.122,
+ "arms": {
+  "B_free": {
+   "params": {
+    "turn_free_below": 0.5,
+    "turn_free_scale": 0.0
+   },
+   "effect": 0.228,
+   "ci95": [
+    0.007566086602411509,
+    0.44843391339758853
+   ],
+   "margin": 2.35,
+   "verdict": "positive but under the conditional floor -- does not ship"
+  },
+  "C_half": {
+   "params": {
+    "turn_free_below": 0.5,
+    "turn_free_scale": 0.5
+   },
+   "effect": 0.084,
+   "ci95": [
+    -0.12160342029459724,
+    0.28960342029459724
+   ],
+   "margin": 2.206,
+   "verdict": "no detectable difference"
+  }
+ },
+ "ledger": {
+  "A_shipped": {
+   "exact": {
+    "n": 773,
+    "per_game": 0.773,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 3732,
+    "per_game": 3.732,
+    "wrong": 3,
+    "err": 0.0008
+   },
+   "gate": {
+    "n": 269,
+    "per_game": 0.269,
+    "wrong": 71,
+    "err": 0.2639
+   },
+   "forced": {
+    "n": 186,
+    "per_game": 0.186,
+    "wrong": 102,
+    "err": 0.5484
+   },
+   "_wrong_per_game": 0.176
+  },
+  "B_free": {
+   "exact": {
+    "n": 762,
+    "per_game": 0.762,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 3810,
+    "per_game": 3.81,
+    "wrong": 1,
+    "err": 0.0003
+   },
+   "gate": {
+    "n": 265,
+    "per_game": 0.265,
+    "wrong": 81,
+    "err": 0.3057
+   },
+   "forced": {
+    "n": 186,
+    "per_game": 0.186,
+    "wrong": 85,
+    "err": 0.457
+   },
+   "_wrong_per_game": 0.167
+  },
+  "C_half": {
+   "exact": {
+    "n": 772,
+    "per_game": 0.772,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "voluntary": {
+    "n": 3778,
+    "per_game": 3.778,
+    "wrong": 0,
+    "err": 0.0
+   },
+   "gate": {
+    "n": 266,
+    "per_game": 0.266,
+    "wrong": 77,
+    "err": 0.2895
+   },
+   "forced": {
+    "n": 183,
+    "per_game": 0.183,
+    "wrong": 98,
+    "err": 0.5355
+   },
+   "_wrong_per_game": 0.175
+  }
+ },
+ "tempo": {
+  "A_shipped": {
+   "turns_per_game": 56.522,
+   "asks_per_game": 51.235,
+   "landed_per_game": 26.775,
+   "hit_rate": 0.5226
+  },
+  "B_free": {
+   "turns_per_game": 58.565,
+   "asks_per_game": 53.201,
+   "landed_per_game": 27.364,
+   "hit_rate": 0.5144
+  },
+  "C_half": {
+   "turns_per_game": 57.016,
+   "asks_per_game": 51.678,
+   "landed_per_game": 26.926,
+   "hit_rate": 0.521
+  }
+ },
+ "bridge_fallbacks": 0,
+ "unfinished": 0
+}

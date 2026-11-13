@@ -1,0 +1,16 @@
+[
+ {"label": "REPLICATE lookahead d3 w0.25 vs champion (fresh seeds)", "n_pairs": 500,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 3110000, "agent_seed": 8801},
+
+ {"label": "REPLICATE lookahead d3 w0.25 vs champion (second fresh set)", "n_pairs": 500,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 3220000, "agent_seed": 8802},
+
+ {"label": "REPLICATE coupling ablation d3 (fresh seeds)", "n_pairs": 500,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4, "lookahead_couple": false}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 3330000, "agent_seed": 8803}
+]

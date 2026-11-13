@@ -1,0 +1,28 @@
+{
+ "n_harvested": 1023,
+ "window": 80,
+ "prefix_bite": {
+  "mean": 10.159335288367547,
+  "median": 8,
+  "max": 64,
+  "share_untouched": 0.08113391984359726
+ },
+ "arms": {
+  "v04": {
+   "acts": 13290,
+   "stalled": 0,
+   "changed": 0,
+   "positions": 60,
+   "seconds": 53.0
+  },
+  "rollout-public": {
+   "acts": 73011,
+   "stalled": 743,
+   "changed": 743,
+   "positions": 60,
+   "seconds": 3.8
+  }
+ },
+ "decisions_changed": 743,
+ "decisions_total": 86301
+}

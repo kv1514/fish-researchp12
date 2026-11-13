@@ -10,7 +10,14 @@ class RuleConfig:
     variant: str = "54"                       # "54" (main) or "48"
     claims_any_time: bool = False             # baseline: claim only on your own turn
     allow_bluff_asks: bool = False            # baseline: may not ask for a card you hold
-    wrong_distribution_outcome: str = "null"  # "null" or "opponent"
+    #: What a claim that is wrong ONLY in its within-team split scores. The
+    #: baseline is "opponent": a misdeclared half-suit is awarded to the
+    #: opposing team, exactly as when the claim names a card the opponents
+    #: hold. "null" (the set is voided, nobody scores) was this engine's
+    #: default through the v0.4 measurement era and remains supported so that
+    #: every result from that era is reproducible; it is a variant, not the
+    #: game.
+    wrong_distribution_outcome: str = "opponent"
     mandatory_claim_known: bool = False       # reserved for house-rule experiments
     starting_player: int = 0
 

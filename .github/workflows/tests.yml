@@ -1,0 +1,157 @@
+# The suite this repository actually has, run automatically.
+#
+# WHY THIS EXISTS. Every guard in tests4/ -- the cheat guard on the arena
+# roster, the brand/version guards, the result-path rule, the cluster-robust
+# intervals -- only guards if somebody runs pytest. Nothing did. And until
+# 2026-08-31 a bare `pytest` collected 193 of 878 tests, because `testpaths`
+# was written before tests4/ existed: it printed "193 passed" and looked green
+# while skipping three quarters of the suite. Both halves are named explicitly
+# below so this workflow cannot inherit that failure a second time.
+#
+# WHAT IS DELIBERATELY NOT HERE. The paper. `paper/build.sh` needs four LaTeX
+# packages a clean runner lacks (multirow and cm-super among them) and takes
+# three passes; paper/kraken.pdf is committed for exactly that reason. Adding
+# a TeX install here would trade fifteen minutes per run for a check the
+# committed artefact already answers.
+#
+# WHY THERE IS NO `pip install -e .`. There is no [build-system] in
+# pyproject.toml and the layout is flat -- fish/, fish4/, arena/, kraken/,
+# scripts4/, tests/, tests4/ all sit at the top level -- so setuptools
+# auto-discovery would refuse it. More to the point, nobody installs this
+# project: conftest.py puts the repository root on sys.path and every entry
+# point runs from the checkout. CI that installs what developers never install
+# is testing a different thing from the one that ships.
+
+name: tests
+
+on:
+  pull_request:
+  push:
+    # Only the base branch. A PR branch would otherwise run twice per push.
+    branches: [engine-v2, main]
+
+# CONCURRENCY IS PER JOB, and the split is the point.
+#
+# This started as one workflow-level group with cancel-in-progress: true --
+# correct-looking, and it meant the long job never finished once. Three pushes
+# in a row killed tests4/ at five, eight and eleven minutes, so the only job
+# that actually needed verifying was the only one never verified. A superseded
+# three-minute job is waste worth cancelling; a superseded thirty-minute job is
+# the answer you were waiting for.
+#
+# So the quick jobs still cancel: newest push wins, fast signal, nothing paid
+# twice. tests4/ instead QUEUES -- cancel-in-progress: false makes a new run
+# wait for the one in flight rather than kill it -- so every push eventually
+# gets a real tests4/ result instead of a cancellation.
+
+jobs:
+  fast:
+    concurrency:
+      group: tests-quick-${{ github.ref }}
+      cancel-in-progress: true
+    # tests/ is the v0.3 engine: rules, fuzz, leakage proofs. Three minutes,
+    # so a broken commit says so before the long job has finished starting.
+    name: engine (tests/)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'      # pyproject requires >=3.11
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: python -m pytest tests -q
+
+  full:
+    concurrency:
+      group: tests-full-${{ github.ref }}
+      cancel-in-progress: false
+    # tests4/ is everything since the rebuild: the award rule, the exact
+    # solver, the opponent model, the packages. ~17 minutes locally, and a
+    # two-core runner is slower, so budget rather more.
+    #
+    # IF THIS GOES RED INTERMITTENTLY, look at the wall clock before looking
+    # at the diff. Two places in tests4/ are sensitive to a slow machine and
+    # neither was written with a shared runner in mind:
+    #   * test_lobby.py asserts a poll lands within 0.2s of now -- true unless
+    #     the process is descheduled between two adjacent statements;
+    #   * test_regret_specs.py gives its subprocesses 180s, which is ample
+    #     here and may not be on a loaded runner.
+    # Both are left exactly as they are. Widening a passing assertion on a
+    # guess is how a real timing bug gets papered over; if one of them fails,
+    # that failure is the evidence to fix it with.
+    name: research engine (tests4/)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: python -m pytest tests4 -q
+        # WHAT SKIPS HERE, and it is not what an earlier version of this
+        # comment claimed. tests4/ holds 689 tests. Two skip anywhere:
+        # test_learn.py:347 (torch is not a declared dependency) and
+        # test_opp_lambda.py:135 (the scalar sampler does not apply
+        # opp_lambda, recorded rather than silently tolerated).
+        #
+        # A third skips only here. test_browser_panels.py gates on whether
+        # NODE can require('playwright') -- not the Python package -- so it
+        # runs on a machine with the browser stack installed and skips on a
+        # stock runner. That is a real gap and worth naming: the one test
+        # that drives a browser against the live panels is not exercised by
+        # CI. Installing the browser stack would cost minutes per run for one
+        # test; running it where a browser already exists is the trade taken.
+        # If the panels start regressing unseen, that is the trade to revisit.
+
+  guards:
+    concurrency:
+      group: tests-guards-${{ github.ref }}
+      cancel-in-progress: false
+    # The standing checks that are scripts rather than tests. Each exits
+    # non-zero on a real problem, which is the whole point of running them.
+    name: standing guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: every finished run has a verdict, and none is stale
+        run: python scripts4/check_verdicts.py
+      - name: no two pooled cells share a deal
+        run: python scripts4/check_seeds.py
+      - name: every bolded number in the paper is watched or exempt
+        run: python scripts4/unwatched_claims.py
+      # ...and its other half. unwatched_claims says every bolded figure is
+      # WATCHED; this says every watched figure is RIGHT. Shipping one without
+      # the other leaves the half that catches a number drifting away from the
+      # result file it came from, which is the failure that actually happened
+      # -- error_value.py overwrote a result the paper cited twice, and every
+      # check in the repository passed.
+      - name: every watched number in the paper matches its result file
+        run: python scripts4/check_paper_numbers.py
+      # One layer below the paper. unwatched_claims asks whether a figure the
+      # paper asserts is watched; this asks whether the pre-registration that
+      # SETTLED it left a file to watch at all. f8abe6d recorded two outcomes
+      # and committed the direction's DUEL records but not its belief results,
+      # so four figures gating the convention direction existed only as prose
+      # for two days -- in a commit that touched results/ and looked recorded.
+      - name: every prereg outcome names a results file that exists
+        run: python scripts4/check_prereg_backing.py --strict
+      - name: no fragile command inside a LaTeX caption
+        run: python scripts4/check_tex.py
+      - name: every job file is waited on or excluded with a reason
+        run: python scripts4/queue_state.py

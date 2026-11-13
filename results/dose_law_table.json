@@ -1,0 +1,56 @@
+{
+ "what": "prereg/signal_dose_law.md, the supporting table",
+ "reference": "dylan_v07",
+ "rows": [
+  {
+   "opponent": "ev_claim",
+   "baseline": 0.0796,
+   "declares_per_game": 3.7281,
+   "observed": 0.0172,
+   "ci95": [
+    0.0048,
+    0.0296
+   ],
+   "baseline_from": "signal_generality_ev_claim_12100000.json",
+   "effect_from": "matched_dose_scored.json",
+   "predicted_reference_fit": 0.0188,
+   "predicted_refit": 0.0185,
+   "refit_inside_interval": true
+  },
+  {
+   "opponent": "dylan_v07",
+   "baseline": 0.2108,
+   "declares_per_game": 3.9983,
+   "observed": 0.0454,
+   "ci95": [
+    0.0326,
+    0.0582
+   ],
+   "baseline_from": "signal_budget_11700000.json",
+   "effect_from": "matched_dose_scored.json",
+   "predicted_reference_fit": 0.0454,
+   "predicted_refit": 0.0448,
+   "refit_inside_interval": true
+  },
+  {
+   "opponent": "heuristic",
+   "baseline": 0.6201,
+   "declares_per_game": 1.166,
+   "observed": 0.0178,
+   "ci95": [
+    0.0048,
+    0.0308
+   ],
+   "baseline_from": "heuristic_baseline.json",
+   "effect_from": "signal_dose_law.json",
+   "predicted_reference_fit": 0.0182,
+   "predicted_refit": 0.018,
+   "refit_inside_interval": true
+  }
+ ],
+ "shift_reference_fit": 0.0669,
+ "shift_refit_all": 0.066,
+ "refit_moves_shift_by": 0.0138,
+ "baseline_spread": 7.79,
+ "all_refit_inside_interval": true
+}

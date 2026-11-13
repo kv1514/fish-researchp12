@@ -1,0 +1,94 @@
+{
+  "summary": {
+    "n_games": 32,
+    "n_decisions": 3236,
+    "mean_n_asks": 48.222805933250925,
+    "agreement_rate": 0.40822002472187885,
+    "turn_flips_rate": 0.24721878862793573,
+    "p_success_of_pick": {
+      "heuristic": [
+        0.5511041338503849,
+        0.005893772691518917
+      ],
+      "value": [
+        0.4565200231181332,
+        0.0039754467670478025
+      ],
+      "value_without_turn_term": [
+        0.4743828833052795,
+        0.0037512227646406696
+      ],
+      "best_available": 0.5980444504215267,
+      "paired_diff_heur_minus_value": [
+        0.09458411073225177,
+        0.0042552194308727665,
+        [
+          0.08624388064774115,
+          0.1029243408167624
+        ]
+      ]
+    },
+    "spreads": {
+      "value_term": 0.15136263973296615,
+      "turn_term": 0.05223260030998556,
+      "heuristic_total": 0.7040357706450633,
+      "turn_share_of_value_objective": 0.2565511860639092
+    },
+    "delta_magnitudes": {
+      "mean_abs_ds": 0.10094922373391184,
+      "mean_abs_df": 0.04088111406029425
+    },
+    "value_turn_weight": 0.15,
+    "keep_sweep": [
+      {
+        "keep": 0.0,
+        "p_success_of_pick": 0.4565200231181332,
+        "se": 0.0039754467670478025,
+        "agreement_with_champion": 0.40822002472187885
+      },
+      {
+        "keep": 0.1,
+        "p_success_of_pick": 0.5106861456440416,
+        "se": 0.004435406476497227,
+        "agreement_with_champion": 0.48393077873918416
+      },
+      {
+        "keep": 0.2,
+        "p_success_of_pick": 0.5469037184101334,
+        "se": 0.004800012703518707,
+        "agreement_with_champion": 0.534301606922126
+      },
+      {
+        "keep": 0.3,
+        "p_success_of_pick": 0.5660894422229683,
+        "se": 0.004971831610927984,
+        "agreement_with_champion": 0.569221260815822
+      },
+      {
+        "keep": 0.5,
+        "p_success_of_pick": 0.5819666228734366,
+        "se": 0.005087996935628506,
+        "agreement_with_champion": 0.5905438813349815
+      },
+      {
+        "keep": 0.8,
+        "p_success_of_pick": 0.5924775428581699,
+        "se": 0.005171333621438315,
+        "agreement_with_champion": 0.6069221260815822
+      },
+      {
+        "keep": 1.2,
+        "p_success_of_pick": 0.5957521655243453,
+        "se": 0.005179896651973332,
+        "agreement_with_champion": 0.6140296662546354
+      },
+      {
+        "keep": 2.0,
+        "p_success_of_pick": 0.5971075312990906,
+        "se": 0.0051767242969253625,
+        "agreement_with_champion": 0.6127935723114957
+      }
+    ],
+    "seconds": 34.3
+  }
+}
