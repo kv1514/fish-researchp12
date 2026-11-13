@@ -341,7 +341,9 @@ def test_a_whole_game_ends_with_a_result_and_rematch_rotates_the_opener():
             break
     assert doc["phase"] == "over", "the game must end"
     r = doc["result"]
-    assert sum(r["score"]) + r["nulled"] == 9 or r["stopped"]
+    # First to five: the game ends the moment a team has five of the nine,
+    # so a finished table is decided at exactly five (or was stopped).
+    assert r["stopped"] or (r["decided"] and max(r["score"]) == T.FIRST_TO)
     old_nonce, old_start = doc["nonce"], doc["start_seat"]
     with pytest.raises(ValueError, match="host"):
         T.rematch(doc, secs[1], now=t)
@@ -591,3 +593,66 @@ def test_one_malformed_row_does_not_take_down_the_public_list():
     codes = [t["code"] for t in T.open_tables()]
     assert codes == [good]
     assert T.quick_play("Bo")[0] == good
+
+
+# ---------------------------------------------------------------------------
+# First to five
+# ---------------------------------------------------------------------------
+
+def test_an_app_game_ends_the_moment_a_team_has_five():
+    doc, secs = _private(1)
+    T.start(doc, secs[0], now=T0)
+    assert doc["first_to"] == T.FIRST_TO == 5
+    for _ in range(600):
+        s = T.session_for(doc, 0)
+        if s.over:
+            break
+        before = max(s.state.scores()[:2])
+        assert before < 5, "play continued after a team had five"
+        T._engine_move(doc, _turn(doc))
+    T._set_clock(doc, T0)
+    s = T.session_for(doc, 0)
+    a, b, _ = s.state.scores()
+    assert doc["phase"] == "over" and s.decided and max(a, b) == 5
+    # the rest were never played -- unless it went 4-4 into the last set
+    assert not s.state.is_terminal or sorted((a, b)) == [4, 5]
+    assert doc["result"]["winner"] == (0 if a > b else 1)
+    # nothing is hidden once it is over: the reveal covers all 54 cards
+    v = T.view(doc, "ABCD", 0, 1, now=T0)
+    assert sum(len(row) for row in v["game"]["reveal"]) == 54
+    # and nobody can move after it
+    from fish.engine import Ask
+    with pytest.raises(ValueError):
+        T.act(doc, secs[0], Ask(1, 0), now=T0)
+
+
+def test_first_to_rides_in_the_token_and_full_games_are_unchanged():
+    from api._engine import Session, new_session, clean_first_to
+    s = new_session({"first_to": 5})
+    assert s.first_to == 5
+    r = Session.restore(s.token(), [])
+    assert r.first_to == 5
+    full = new_session({})
+    assert full.first_to is None
+    assert Session.restore(full.token(), []).first_to is None
+    # a rule that could name two winners is refused, not honoured
+    assert clean_first_to(4) is None and clean_first_to("x") is None
+    assert clean_first_to(9) == 9
+
+
+def test_a_practice_game_dealt_first_to_five_stops_at_five():
+    from api._engine import new_session, Session
+    s = new_session({"first_to": 5})
+    for _ in range(400):
+        if s.over:
+            break
+        if s.state.turn == s.seat:
+            s.play(s.suggest(), max_moves=0)
+        else:
+            s.advance(1)
+        # every request rebuilds the game from the token: so must this
+        s = Session.restore(s.token(), s.wire_log)
+    snap = s.snapshot()
+    assert snap["terminal"] and snap["decided"] and snap["first_to"] == 5
+    assert max(snap["score"]["you"], snap["score"]["them"]) == 5
+    assert not snap["your_turn"]
