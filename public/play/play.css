@@ -602,3 +602,4 @@ input { font: inherit; }
 .lb-rt { font-weight: 900; color: var(--gold); width: 48px; text-align: right; }
 .pf-head .avatar { width: 52px; height: 52px; flex: 0 0 52px; font-size: 18px; }
 .profile-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-actions { margin-top: 16px; }

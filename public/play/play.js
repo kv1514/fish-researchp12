@@ -403,7 +403,7 @@ function profileHTML(p, mine) {
     : p.rank ? `#${p.rank} on the leaderboard`
     : p.provisional ? 'New player — rating settling in' : 'Not on the leaderboard yet';
   const recent = p.recent.length
-    ? `<div class="sheet-label">Last ${Math.min(10, p.recent.length)} rated games</div>
+    ? `<div class="sheet-label">${p.recent.length === 1 ? 'Last rated game' : `Last ${Math.min(10, p.recent.length)} rated games`}</div>
       <div class="pf-dots">${RECENT_DOTS(p.recent)}</div>
       <div class="log-list">${p.recent.slice(0, 5).map((g) => `<div class="log-item pf-game">
         <span>${g.abandoned ? 'Left early' : g.won === 1 ? 'Won' : g.won === 0 ? 'Lost' : 'Tie'} ${g.score ? g.score.join('–') : ''}</span>
@@ -437,7 +437,7 @@ async function openProfile(pid) {
        <button class="btn btn-ghost btn-block" id="pf-board">Leaderboard</button>`
     : `<button class="btn btn-ghost btn-block" id="pf-cheat">Report cheating</button>
        <button class="btn btn-ghost btn-block" id="pf-namebad">Report offensive name</button>`;
-  openSheet('profile', profileHTML(p, mine) + buttons, (m) => {
+  openSheet('profile', `${profileHTML(p, mine)}<div class="pf-actions">${buttons}</div>`, (m) => {
     if (mine) {
       $('#pf-name', m).onclick = () => openSettings(true);
       $('#pf-board', m).onclick = () => openBoard();
