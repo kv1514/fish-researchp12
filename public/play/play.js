@@ -321,7 +321,8 @@ function openSettings(focusName) {
       <input class="field" id="set-name" maxlength="18" value="${esc(prefs.name)}" autocomplete="off"></div>
     <div class="toggle-row"><span>Sound</span><button class="switch ${prefs.sound ? 'on' : ''}" id="set-sound" aria-label="Sound"></button></div>
     <div class="toggle-row"><span>Vibration</span><button class="switch ${prefs.haptics ? 'on' : ''}" id="set-hap" aria-label="Vibration"></button></div>
-    <p class="muted small" style="margin-top:14px">Names show to other players at your table. Keep it friendly.</p>
+    <p class="muted small" style="margin-top:14px">Names show to other players at your table. Keep it friendly.
+      · <a href="${SITE}/play/privacy.html" target="_blank" rel="noopener" style="color:var(--us)">Privacy</a></p>
     <button class="btn btn-primary btn-block" id="set-done">Done</button>`, (m) => {
     const inp = $('#set-name', m);
     if (focusName) setTimeout(() => inp.focus(), 250);
