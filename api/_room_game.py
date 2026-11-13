@@ -260,6 +260,14 @@ def session_for(doc: dict, seat: int) -> Session:
         for a in log:
             ev = s.state.apply(s.state.turn, _action_of(a))
             s.log.append(narrate(ev))
+            s.note_reveal(ev)
+    # The livelock fix Session.restore already carries, and this replay did
+    # not: without it every engine move here is decided from a stream reset to
+    # ply 0, so a position that recurs reproduces the move that produced it.
+    # Measured on the solo path as 56 of 2,000 games failing to end
+    # (results/web_termination_r0_1000.json). note_reveal above is the same
+    # parity gap -- without it the end-of-game reveal panel came back empty.
+    s.seed_at(len(s.wire_log))
     return s
 
 

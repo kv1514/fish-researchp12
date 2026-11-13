@@ -163,6 +163,25 @@ class MemoryStore:
             self._rooms[code] = (version + 1, doc)
             return version + 1
 
+    def list_lobbies(self, limit: int = 20,
+                     fresh_within: float = 45.0) -> list:
+        """Public tables still seating, most recently active first.
+
+        Returns ``(code, version, doc)``. The doc is the server's full copy,
+        nonce included -- callers reduce it to a public summary before anything
+        leaves the process.
+        """
+        now = time.time()
+        with self._lock:
+            self._sweep()
+            rows = [(c, v, json.loads(json.dumps(d)))
+                    for c, (v, d) in self._rooms.items()
+                    if d.get("kind") == "table" and d.get("public")
+                    and d.get("phase") == "lobby"
+                    and now - float(d.get("touched", 0)) <= fresh_within]
+        rows.sort(key=lambda r: -float(r[2].get("touched", 0)))
+        return rows[:limit]
+
     def _sweep(self) -> None:
         now = time.time()
         for code in [c for c, (_, d) in self._rooms.items()
@@ -244,6 +263,23 @@ class PostgrestStore:
         if time.time() - float(row.get("touched") or 0) > ROOM_TTL:
             raise NotFound(code)
         return int(row["version"]), row["doc"]
+
+    def list_lobbies(self, limit: int = 20,
+                     fresh_within: float = 45.0) -> list:
+        """Public tables still seating, most recently active first.
+
+        Filtered on the jsonb document with PostgREST's arrow operators, so the
+        existing one-table schema serves it with no migration. ``touched`` is a
+        real column, and a seated player's poll refreshes it every few seconds,
+        so the freshness bound drops tables whose players have all gone.
+        """
+        since = time.time() - float(fresh_within)
+        rows = self._req(
+            "GET",
+            "?select=code,version,touched,doc"
+            "&doc->>kind=eq.table&doc->>public=eq.true&doc->>phase=eq.lobby"
+            f"&touched=gt.{since:.3f}&order=touched.desc&limit={int(limit)}")
+        return [(r["code"], int(r["version"]), r["doc"]) for r in rows]
 
     def write(self, code: str, version: int, doc: dict) -> int:
         # The version predicate is what makes this compare-and-set: PATCH with
