@@ -20,30 +20,34 @@ is below.
 
 ---
 
-## Before anything: online play has to be switched on
+## Online play: already switched on
 
-The app talks to `https://fish-engine.vercel.app`. **Apple's reviewers will tap
-Quick Play.** If online tables aren't running, they see "Online tables aren't
-switched on", and an app with a dead main button gets rejected (guideline 2.1,
-incomplete functionality). So first:
+The app talks to `https://fish-engine.vercel.app`, and **Apple's reviewers will
+tap Quick Play** — an app whose main button doesn't work is rejected under
+guideline 2.1. This is set up:
 
-1. **Merge the pull request** so the live site has the new `/api/t_*` routes
-   and the CORS rule that lets the app call it. Until then the iOS app is
-   talking to a server that doesn't know about tables.
-2. **Unpause your Supabase project `fish-rooms`** (supabase.com → the project
-   → *Restore*). Free organizations can only have two active projects, and you
-   currently have two (SideSpace Marketplace, hedgeos), so you may need to
-   pause one or upgrade.
-3. In the Supabase **SQL editor**, run `scripts4/room_schema.sql` from this
-   repo (safe to run twice — skip if the `fish_rooms` table is already there).
-4. In **Vercel → fish-engine → Settings → Environment Variables**, add for
-   Production *and* Preview:
-   - `SUPABASE_URL` = `https://guqeesmrveijysuveuke.supabase.co`
-   - `SUPABASE_SERVICE_KEY` = Supabase → Project Settings → API Keys → the
-     **secret / service_role** key. Paste it only into Vercel. Never commit it
-     or put it in the app — it bypasses every database rule.
-5. Redeploy (Vercel → Deployments → ⋯ → Redeploy), then open
-   `/play/` and press Quick Play. If you get a table, you're live.
+- Supabase project **fish-rooms** is active, with `scripts4/room_schema.sql`
+  and `scripts4/room_rpc.sql` applied.
+- Vercel (fish-engine, Production + Preview) has `SUPABASE_URL`,
+  `SUPABASE_PUBLISHABLE_KEY` and `FISH_DB_KEY`. The last is a narrow key that
+  only reaches the four `fish_store_*` room functions; the database stores only
+  its SHA-256. It is *not* the Supabase service key, which is never needed.
+- The live site needs PR #6 merged so it has the `/api/t_*` routes.
+
+Check it any time: `https://fish-engine.vercel.app/api/health` should say
+`"room_backend": "postgres-rpc"`.
+
+**Free Supabase projects pause after a week with no traffic.** If online play
+stops working after a quiet spell, open supabase.com → fish-rooms → Restore.
+
+**To rotate the key:** make a new random value of 32+ characters, put its
+SHA-256 (hex) into the database:
+
+```sql
+update fish_private.store_key set key_sha256 = '<sha256 hex of the new key>' where id = 1;
+```
+
+then set `FISH_DB_KEY` in Vercel to the new value and redeploy.
 
 ---
 

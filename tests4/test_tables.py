@@ -555,3 +555,18 @@ def test_solo_step_zero_means_zero_engine_moves(server):
     assert st == 200
     assert len(out["actions"]) == 1, (
         f"step 0 played {len(out['actions'])} moves, not just the person's own")
+
+
+def test_one_malformed_row_does_not_take_down_the_public_list():
+    """The store is shared, so the list must survive a row it cannot read.
+
+    Found for real: a probe row written while switching the live database on
+    carried kind/public/phase but no seats, and every t_list and Quick Play
+    raised KeyError summarising it.
+    """
+    good, _, _, _ = T.create("Ada", public=True)
+    _rooms.store().create({"kind": "table", "public": True, "phase": "lobby",
+                           "touched": __import__("time").time()})
+    codes = [t["code"] for t in T.open_tables()]
+    assert codes == [good]
+    assert T.quick_play("Bo")[0] == good

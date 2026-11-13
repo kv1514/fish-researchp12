@@ -671,7 +671,14 @@ def open_tables(limit: int = 20) -> list:
     for code, _v, doc in rows:
         if doc.get("kind") != KIND:
             continue
-        summ = lobby_summary(code, doc, now)
+        # One malformed row in a SHARED store must not take the public list
+        # down for every player at once. A probe row written while switching
+        # the database on had a table's markers and no seats, and summarising
+        # it raised KeyError -- a 500 for every Quick Play until it aged out.
+        try:
+            summ = lobby_summary(code, doc, now)
+        except (KeyError, TypeError, ValueError, AttributeError):
+            continue
         if summ["open"] > 0 and summ["players"] > 0:
             out.append(summ)
     return out[:limit]
