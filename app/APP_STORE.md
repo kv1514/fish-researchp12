@@ -51,6 +51,20 @@ then set `FISH_DB_KEY` in Vercel to the new value and redeploy.
 
 ---
 
+## No Mac? GitHub builds it for you
+
+`.github/workflows/ios.yml` builds the app on one of GitHub's Macs (free, because
+the repository is public) every time `app/` or `public/play/` changes. It
+launches the app in an iPhone simulator, screenshots the home screen and checks
+it actually drew. Find it under the repository's **Actions** tab → **ios**; the
+screenshot is attached to each run.
+
+That covers building and testing. **Uploading to the App Store still needs the
+Apple Developer account** (step 1 below), and then either a Mac for the steps
+that follow, or that workflow extended with your signing certificate and an App
+Store Connect API key stored as repository secrets — ask for that once the
+account exists.
+
 ## 1. What you need
 
 - A **Mac** with **Xcode 16 or newer** (free, Mac App Store)
