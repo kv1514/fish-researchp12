@@ -525,7 +525,7 @@ function normaliseTable(t) {
     me: t.me, host: t.host, isHost: t.host === t.me && t.me != null,
     settings: t.settings, startAt: t.start_at, clock: t.clock,
     seats: t.seats, game: t.game, result: t.result,
-    plies: t.plies || 0, gameNo: t.game_no || 0, v: t.v,
+    plies: t.plies || 0, gameNo: t.game_no || 0, v: t.v, rated: !!t.rated,
   };
 }
 
