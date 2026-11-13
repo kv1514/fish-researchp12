@@ -16,10 +16,25 @@
 <body>
 <div id="app">
 
+  <!-- ============================ WELCOME ============================= -->
+  <section id="welcome" class="screen" aria-label="Welcome">
+    <div class="brand welcome-brand">
+      <img class="brand-mark" src="icon.svg" alt="" width="96" height="96">
+      <h1>FISH</h1>
+      <p class="tagline">The team card game · 3 vs 3</p>
+    </div>
+    <div class="welcome-menu">
+      <button class="btn btn-primary btn-block" id="w-signup">Create account</button>
+      <button class="btn btn-ghost btn-block" id="w-login">Log in</button>
+      <button class="btn btn-link btn-block" id="w-guest">Play as guest</button>
+      <p class="muted small welcome-note">Accounts get a rating and a place on the leaderboard. Guests play every table, unrated.</p>
+    </div>
+  </section>
+
   <!-- ============================== HOME ============================== -->
   <section id="home" class="screen active" aria-label="Home">
     <header class="home-top">
-      <button class="profile" id="profile-btn" aria-label="Your profile">
+      <button class="profile" id="profile-btn" aria-label="Your account">
         <span class="avatar sm" id="home-avatar"></span>
         <span class="profile-text">
           <span class="profile-name" id="home-name">Player</span>

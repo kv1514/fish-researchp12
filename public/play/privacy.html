@@ -21,23 +21,30 @@
   <p class="muted">Fish — the team card game</p>
 
   <h2>The short version</h2>
-  <p>Fish has no ads, no analytics and no tracking, and never asks for your email, phone number,
-  contacts, location or photos. The app makes you a <b>profile</b> the first time you open it — a
-  random id, the name you choose, and your rating — so your record follows you between games.
-  You can delete it at any time in Settings.</p>
+  <p>Fish has no ads, no analytics and no tracking, and never asks for your contacts, location or
+  photos. You can <b>play as a guest</b> with just a name, or <b>create an account</b> to keep a
+  rating. You can delete your account at any time from your profile.</p>
 
-  <h2>Your profile</h2>
+  <h2>If you play as a guest</h2>
+  <p>We keep only the name you type, with the table you play at, for at most 6 hours after the
+  table was last used. Guests have no account and no rating, and nothing about them is kept after
+  that.</p>
+
+  <h2>If you create an account</h2>
   <ul>
-    <li><b>What it holds</b>: a random id, your display name, your rating and best rating, your
-      wins and losses, and a short record of your last 30 rated games (the score and how your
-      rating changed).</li>
-    <li><b>How it knows it's you</b>: a secret made on your device and kept there. Our server
-      stores only a one-way hash of it. There is no password and nothing to recover — if you
-      delete the app without deleting your profile first, the profile can no longer be used, and
-      stays on our server unless you contact us.</li>
-    <li><b>Who sees it</b>: other players can see your name, rating, record and recent results.</li>
-    <li><b>Deleting it</b>: Settings → <i>Delete my profile</i> removes it from our server
-      immediately and permanently.</li>
+    <li><b>How you sign in</b>: an email address and password, a phone number, or your Google or
+      Apple account — whichever you choose. Sign-in is handled by our sign-in provider, Supabase
+      Auth, which stores your email or phone number and only a one-way hash of your password. Your
+      password passes through our server over an encrypted connection on its way there and is
+      never stored by us. If you use Google or Apple, we receive your name and email from them.</li>
+    <li><b>Your profile</b>: the name you chose, your rating and best rating, your wins and losses,
+      and a short record of your last 30 rated games. Each device you sign in on gets its own key;
+      our server stores only a one-way hash of it, and logging out forgets that device.</li>
+    <li><b>Who sees what</b>: other players can see your name, rating, record and recent results.
+      Your email or phone number is never shown to anyone; your own profile shows it to you,
+      partly hidden.</li>
+    <li><b>Deleting it</b>: Profile → <i>Delete account</i> removes your profile and your sign-in
+      account (email or phone included) from our servers immediately and permanently.</li>
   </ul>
 
   <h2>Fair play</h2>

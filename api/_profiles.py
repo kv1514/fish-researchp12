@@ -1,16 +1,21 @@
 """Player profiles: an identity that outlives a table, a rating, and a record.
 
-IDENTITY WITHOUT AN ACCOUNT
----------------------------
-A profile is made the first time the app opens: a public id (shown to other
-players, used in links) and a secret (kept on the device, never shown to
-anyone). There is no email and no password, so there is nothing to leak and
-nothing to recover -- lose the device and the profile is gone, which is the
-honest trade for collecting nothing. The database stores a SHA-256 of the
-secret, not the secret.
+ACCOUNTS, AND GUESTS
+-------------------
+A profile belongs to an ACCOUNT: someone who signed up through Supabase Auth
+(email and password, Google, or a phone code -- see api/_auth.py). Its id is
+derived from the account's id, so signing in again on any device finds the
+same profile with no lookup table. Each signed-in device gets its own secret;
+the database keeps only their SHA-256s, so logging out of one phone forgets
+that phone and nothing else.
+
+Guests have no profile at all. They choose a name and play, unrated, which is
+also what stops a closed account from simply starting over as a stranger with
+a fresh rating.
 
 Apple requires an app that creates an account to let the person delete it
-(App Review Guideline 5.1.1(v)); ``delete`` does, completely.
+(App Review Guideline 5.1.1(v)); ``delete`` removes the profile AND the sign-in
+account behind it.
 
 RATING
 ------
@@ -63,6 +68,7 @@ REPORTERS_KEEP = 200
 AUTOPILOT_LIMIT = 1 / 3
 ID_ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"
 ID_LEN = 10
+DEVICES_KEEP = 10      # signed-in devices per account
 
 
 class ProfilesUnavailable(Exception):
@@ -162,6 +168,11 @@ class MemoryProfiles:
         with self._lock:
             return self._d.pop(pid, None) is not None
 
+    def delete_account(self, uid: str) -> bool:
+        """No sign-in system in memory; recorded so tests can see the call."""
+        self.deleted_accounts = getattr(self, "deleted_accounts", []) + [uid]
+        return True
+
     def _where(self, col: str) -> list:
         with self._lock:
             return [json.loads(json.dumps(d)) for _, d in self._d.values()
@@ -226,6 +237,10 @@ class RpcProfiles:
 
     def delete(self, pid: str) -> bool:
         return bool(self._rpc("fish_profile_delete", {"p_id": pid}))
+
+    def delete_account(self, uid: str) -> bool:
+        """Remove the Supabase Auth user too; see scripts4/profile_rpc.sql."""
+        return bool(self._rpc("fish_auth_delete", {"p_uid": uid}))
 
     def top(self, limit: int = 50) -> list:
         return [r["doc"] for r in
@@ -296,37 +311,115 @@ def _update(pid: str, fn, retries: int = 6):
 # Profile lifecycle
 # ---------------------------------------------------------------------------
 
+def _new_doc(pid: str, name: str, now: float) -> dict:
+    return {"v": 2, "id": pid, "name": name, "devices": [],
+            "created": now, "seen": now,
+            "rating": START_RATING, "peak": START_RATING, "games": 0,
+            "wins": 0, "losses": 0, "draws": 0, "recent": [], "applied": [],
+            "fair": F.empty(), "status": "ok", "reports": {},
+            "reporters": [], "cleared": {}}
+
+
 def create(name: str, now: float = None) -> tuple[str, str, dict]:
+    """A profile with no sign-in account behind it. Tests and tools only:
+    the app makes profiles through ``sign_in``."""
     now = time.time() if now is None else now
     p = _need()
     secret = secrets.token_urlsafe(24)
-    doc = {"v": 1, "name": clean_name(name, "") or "Player",
-           "secret_sha": _sha(secret), "created": now, "seen": now,
-           "rating": START_RATING, "peak": START_RATING, "games": 0,
-           "wins": 0, "losses": 0, "draws": 0, "recent": [], "applied": [],
-           "fair": F.empty(), "status": "ok", "reports": {},
-           "reporters": [], "cleared": {}}
     for _ in range(20):
         pid = _new_id()
-        doc["id"] = pid
+        doc = _new_doc(pid, clean_name(name, "") or "Player", now)
+        doc["devices"] = [_sha(secret)]
         if p.create(pid, doc):
             return pid, secret, doc
     raise RuntimeError("could not allocate a profile id")
 
 
+def account_pid(uid: str) -> str:
+    """The profile id of a sign-in account: derived, so no lookup is needed."""
+    return hashlib.sha256(f"fish-account:{uid}".encode()).hexdigest()[:12]
+
+
+def sign_in(user: dict, name=None, login: str = "",
+            now: float = None) -> tuple[str, str, dict]:
+    """Turn a proven sign-in into this device's profile id and secret.
+
+    The first sign-in makes the profile and needs a name -- the one typed at
+    sign-up, or the one Google supplied. Later sign-ins add this device and
+    leave the name alone. Returns ``(pid, secret, profile_doc)``.
+    """
+    now = time.time() if now is None else now
+    uid = str(user.get("id") or "")
+    if not uid:
+        raise ValueError("sign-in failed; try again")
+    pid = account_pid(uid)
+    secret = secrets.token_urlsafe(24)
+    p = _need()
+    try:
+        p.read(pid)
+    except NotFound:
+        nm = clean_name(name, "")
+        if not nm:
+            raise ValueError("pick a name to finish signing up") from None
+        doc = _new_doc(pid, nm, now)
+        doc["auth_uid"], doc["login"] = uid, login
+        doc["devices"] = [_sha(secret)]
+        if p.create(pid, doc):
+            return pid, secret, doc
+        # Two first sign-ins raced; the other made it. Fall through and join.
+
+    def add_device(d):
+        if d.get("status") == "banned":
+            raise ValueError("this account was closed for a fair-play violation")
+        devs = d.setdefault("devices", [])
+        devs.append(_sha(secret))
+        del devs[:-DEVICES_KEEP]
+        d["seen"] = now
+        if login:
+            d["login"] = login
+        return True
+    doc = _update(pid, add_device)
+    return pid, secret, doc
+
+
 def auth(pid, secret) -> dict:
-    """The profile, if ``secret`` is its secret. Raises ValueError otherwise."""
+    """The profile, if ``secret`` is one of its devices'. ValueError otherwise."""
     if not pid or not secret:
         raise ValueError("no profile")
     try:
         _, doc = _need().read(str(pid))
     except NotFound:
         raise ValueError("profile not recognised") from None
-    if not secrets.compare_digest(doc.get("secret_sha", ""), _sha(secret)):
+    want = _sha(secret)
+    known = list(doc.get("devices") or [])
+    if doc.get("secret_sha"):
+        known.append(doc["secret_sha"])          # profiles from before accounts
+    if not any(secrets.compare_digest(k, want) for k in known):
         raise ValueError("profile not recognised")
     if doc.get("status") == "banned":
-        raise ValueError("this profile was closed for a fair-play violation")
+        raise ValueError("this account was closed for a fair-play violation")
     return doc
+
+
+def me(pid, secret) -> dict:
+    """The profile as its owner sees it: public, plus how they sign in."""
+    doc = auth(pid, secret)
+    return dict(public(doc, rank=True), login=doc.get("login", ""))
+
+
+def logout(pid, secret) -> None:
+    """Forget this device. The account and the other devices are untouched."""
+    auth(pid, secret)
+    gone = _sha(secret)
+
+    def fn(d):
+        before = len(d.get("devices") or [])
+        d["devices"] = [x for x in d.get("devices") or [] if x != gone]
+        if d.get("secret_sha") == gone:
+            d.pop("secret_sha")
+            return True
+        return len(d["devices"]) != before
+    _update(str(pid), fn)
 
 
 def public(doc: dict, rank: bool = False) -> dict:
@@ -376,8 +469,12 @@ def rename(pid, secret, name, now: float = None) -> dict:
 
 
 def delete(pid, secret) -> None:
-    auth(pid, secret)
-    _need().delete(str(pid))
+    """Delete the profile and the sign-in account behind it, for good."""
+    doc = auth(pid, secret)
+    p = _need()
+    if doc.get("auth_uid"):
+        p.delete_account(str(doc["auth_uid"]))
+    p.delete(str(pid))
 
 
 def report(pid, secret, target, reason, now: float = None) -> None:

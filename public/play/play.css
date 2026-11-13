@@ -603,3 +603,14 @@ input { font: inherit; }
 .pf-head .avatar { width: 52px; height: 52px; flex: 0 0 52px; font-size: 18px; }
 .profile-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pf-actions { margin-top: 16px; }
+
+/* ---- welcome & sign-in ---- */
+#welcome { display: none; flex-direction: column; justify-content: center; padding: calc(var(--safe-t) + 24px) 22px calc(var(--safe-b) + 28px); }
+#welcome.active { display: flex; }
+.welcome-brand { margin-bottom: 28px; }
+.welcome-menu { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 420px; margin: 0 auto; }
+.welcome-note { text-align: center; margin-top: 6px; }
+.btn-link { background: none; color: var(--text2); font-weight: 700; padding: 12px; }
+.or { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; color: var(--text3); font-size: 12px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+#a-form .btn { margin-top: 4px; }

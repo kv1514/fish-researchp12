@@ -128,13 +128,22 @@ In App Store Connect, on your app's page:
   collected, all **linked to the user** (to their in-app profile, not to a real
   identity) and all used for **App Functionality** (which Apple defines to
   include fraud prevention):
-  - *Identifiers → User ID*: the random profile id.
+  - *Contact Info → Email Address* and/or *Phone Number*: how an account
+    signs in (guests give neither).
+  - *Identifiers → User ID*: the account's profile id.
   - *User Content → Other User Content*: the display name.
   - *User Content → Gameplay Content*: rating, results, recent games.
   - *Usage Data → Product Interaction*: move timing and whether the app left
     the screen during the player's turn, kept for fair-play checks.
-  Account deletion is in the app (Settings → Delete my profile), which Apple
-  requires of any app that creates an account (guideline 5.1.1(v)).
+  Account deletion is in the app (Profile → Delete account), which Apple
+  requires of any app that creates an account (guideline 5.1.1(v)). It
+  deletes the Supabase Auth user too.
+- **Sign in with Apple (guideline 4.8)**: an app that offers Google sign-in
+  must also offer Sign in with Apple. The app enforces this itself: in the
+  iPhone build the Google button only appears once the Apple provider is
+  switched on in Supabase. Email/password and phone need nothing extra.
+- **Guest mode (guideline 5.1.1)**: Apple prefers that people can try an app
+  without an account. Guests can play every table, unrated.
 - **Age rating**: no gambling, no chat, no violence → it should come out 4+.
   Ratings and a leaderboard are not gambling: nothing is bet or won.
   Answer "No" to simulated gambling: there are no bets or chips, only sets won.
