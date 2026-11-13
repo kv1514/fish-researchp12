@@ -114,6 +114,10 @@ BOT_NAMES = ("Marlin", "Nori", "Coral", "Reef", "Tide", "Kelp", "Wave",
 
 RETRIES = 5
 
+#: App tables end as soon as a team has won this many half-suits: five of
+#: nine is a majority, so the rest cannot change the result.
+FIRST_TO = 5
+
 
 # ---------------------------------------------------------------------------
 # Construction and seating
@@ -401,7 +405,8 @@ def session_for(doc: dict, seat: int) -> Session:
     """
     rules = RuleConfig(variant="54", starting_player=int(doc["start_seat"]),
                        wrong_distribution_outcome="opponent")
-    s = Session(int(seat), str(doc["nonce"]), rules, CHAMPION_GAMMA)
+    s = Session(int(seat), str(doc["nonce"]), rules, CHAMPION_GAMMA,
+                first_to=doc.get("first_to"))
     log = list(doc.get("log") or [])
     s.wire_log = log
     for a in log:
@@ -422,6 +427,9 @@ def _deal(doc: dict, now: float) -> None:
         s["away"] = False
     doc["nonce"] = secrets.token_urlsafe(12)
     doc["log"] = []
+    # Set per deal, so a game already running when this rule shipped keeps
+    # the rule it was dealt under.
+    doc["first_to"] = FIRST_TO
     #: Who made each move: [seat, "h"] for the person, [seat, "e"] for the
     #: engine standing in (timeout, away, gone, or a bot seat).
     doc["by"] = []
@@ -487,7 +495,8 @@ def _set_clock(doc: dict, now: float, s: Session = None) -> None:
         doc["clock"] = None
         doc["result"] = {"score": [a, b], "nulled": nulls,
                          "winner": 0 if a > b else 1 if b > a else None,
-                         "stopped": bool(s.stopped)}
+                         "stopped": bool(s.stopped),
+                         "decided": bool(s.decided)}
         return
     seat = int(s.state.turn)
     st = doc["seats"][seat]

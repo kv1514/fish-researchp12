@@ -24,6 +24,10 @@ const SOLO_PACE_MS = 1300;
 // Fish is a memory game: a seat sees the last two moves and no more. Online the
 // server enforces it (it sends only two); practice games trim to match.
 const HISTORY_VISIBLE = 2;
+// First team to this many half-suits wins, and the game ends there: five of
+// nine is a majority, so the rest could not change the result. The server
+// enforces it for tables; practice games ask for it when they are dealt.
+const FIRST_TO = 5;
 const BOT_NAMES = ['Marlin', 'Nori', 'Coral', 'Reef', 'Tide'];
 
 // ---------------------------------------------------------------- utils ----
@@ -638,7 +642,7 @@ function openRules() {
     <h3>How to play Fish</h3>
     <p><b>Six players, two teams of three</b>, sitting alternately. The deck is 54 cards split into
     <b>9 sets of 6</b>: Low (2–7) and High (9–A) of each suit, plus the four 8s with both jokers.</p>
-    <p><b>Win more sets than the other team</b> — five of the nine.</p>
+    <p><b>First team to win ${FIRST_TO} sets wins</b> — the game ends the moment one team has ${FIRST_TO} of the nine.</p>
     <h4>On your turn</h4>
     <ul>
       <li><b>Ask</b> an opponent for one specific card. You must already hold a card from that card's set, and you can't ask for a card you hold.</li>
@@ -788,7 +792,7 @@ async function startSolo(watch = false) {
   G.lastPlies = 0; G.lastGame = -1; G.resultShown = -1; G.lastHand = new Set();
   show('game');
   try {
-    const d = await api('new', { step: 0 });
+    const d = await api('new', { step: 0, first_to: FIRST_TO });
     soloApply(d);
   } catch (e) {
     leaveToHome(e.message);
