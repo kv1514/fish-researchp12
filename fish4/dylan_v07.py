@@ -140,7 +140,16 @@ _OURS_TO_THEIRS, _THEIRS_TO_OURS = _build_maps()
 #:          their own driver does. See DylanV07._forced_half_suit. Priced at
 #:          -0.0792 sets/game against us; results/BRIDGE_REVISIONS.md lists
 #:          which stored journals are which.
-BRIDGE_REV = 2
+#:   rev 3  HAND is the hand AS DEALT, which is what their Agent::reset means,
+#:          instead of the hand held now. See _feed. Found by Nguyen's
+#:          independent re-measurement and confirmed here at
+#:          results/bridge_dealt_hand_price.json: worth +3.0833
+#:          [+2.7917, +3.3749] sets/game to us, with their ownership errors
+#:          falling 0.593 -> 0.060 a game. EVERY cross-engine number this
+#:          project took through rev 1 or rev 2 is measured against an opponent
+#:          whose posterior we corrupted, and is withdrawn rather than
+#:          adjusted.
+BRIDGE_REV = 3
 
 
 #: The frozen v0.7 spec (their engine/fishbot_v07.json, "allparamsSpec"),
@@ -185,6 +194,9 @@ class DylanV07(Agent):
         self._spec = spec or _load_spec()
         self._bin = str(_find_binary())
         self._seed = 1
+        #: See `_feed`. None on every shipped path, so the bridge is
+        #: bit-identical unless a study assigns it.
+        self.dealt_override = None
 
     def begin_game(self, player: int, rules, seed: int) -> None:
         super().begin_game(player, rules, seed)
@@ -192,9 +204,78 @@ class DylanV07(Agent):
 
     # -- protocol assembly ---------------------------------------------------
     def _feed(self, obs: Observation) -> list[str]:
+        # THE HAND AS DEALT, not the hand held now. Their shim passes this
+        # straight to Agent::reset, and in their arbiter reset() is called once
+        # by Game::setup with the dealt hand; the agent learns every movement
+        # afterwards from the events it observes. Their Knowledge::init marks
+        # every card in the reset hand as owned by this seat since the deal and
+        # excludes this seat from every other card, so sending the CURRENT hand
+        # tells it that a card this seat has since taken was always its own and
+        # that a card it has since lost was never its own. Replaying the history
+        # then builds every ask-legality certificate over the wrong candidate
+        # set, and a certificate with one surviving candidate pins a card the
+        # asker never held -- a constraint set no deal satisfies. It surfaces as
+        # ownership errors: half-suits declared whole while an opponent holds
+        # one. That was this bridge until rev 3, it was worth +3.0833
+        # [+2.7917, +3.3749] sets/game to us, and it is why this project's
+        # cross-engine headline was withdrawn.
+        # SCREENING HOOK, inert on every shipped path. `dealt_override` is
+        # None unless a study sets it, and then the reconstruction below is
+        # skipped because the study has already computed the dealt hand from a
+        # COUNTERFACTUAL world. `Observation.initial_hand` cannot do that job:
+        # it restores resolved half-suits from `ev.revealed`, the true holder
+        # at resolution, so it reconciles a counterfactual current hand against
+        # a real historical fact and fails the nine-card check for that reason
+        # alone -- which is what rejected three quarters of the draws in
+        # scripts4/policy_inversion_bite.py before this existed.
+        # getattr, not attribute access: an INERT hook must not add a
+        # dependency. Reading `self.dealt_override` directly made `_feed`
+        # require an attribute only `begin_game` sets, which broke every caller
+        # that exercises `_feed` on its own -- the bridge's own regression tests
+        # among them. "Inert" has to mean inert for callers that have never
+        # heard of the hook, not merely that no shipped path assigns it.
+        dealt = getattr(self, "dealt_override", None)
+        if dealt is None:
+            dealt = obs.initial_hand()
+        # Check it. A PURE round trip is worthless here and it took a failing
+        # test to notice: `initial_hand` walks the transfers backwards and
+        # replaying them forwards is its exact inverse, so the two always agree
+        # and the check would assert a tautology while reading like Nguyen's
+        # check 2. What actually binds is (a) a dealt hand is nine cards, and
+        # (b) the forward replay must never give away a card the seat does not
+        # hold at that moment. Both fail loudly on the case that matters -- a
+        # foreign arbiter that retires a half-suit without publishing holders,
+        # where the backward walk cannot name what this seat was holding and
+        # silently returns a short hand.
+        want = obs.deck_size // 6
+        if bin(dealt).count("1") != want:
+            raise RuntimeError(
+                f"dealt-hand reconstruction gave {bin(dealt).count('1')} cards "
+                f"for seat {obs.player}, not {want}; the history does not "
+                "determine this seat's dealt hand (see "
+                "Observation.unknown_own_cards) and their engine must not be "
+                "reset on a hand no deal produced")
+        live = dealt
+        for ev in obs.history:
+            if isinstance(ev, AskEvent) and ev.success:
+                if ev.asker == obs.player:
+                    live |= 1 << ev.card
+                elif ev.target == obs.player:
+                    if not live >> ev.card & 1:
+                        raise RuntimeError(
+                            f"replay: seat {obs.player} gave away card "
+                            f"{ev.card} it was not holding; the reconstruction "
+                            "is not this seat's dealt hand")
+                    live &= ~(1 << ev.card)
+            elif isinstance(ev, ClaimEvent):
+                live &= ~half_suit_mask(ev.half_suit)
+        if live != obs.hand:
+            raise RuntimeError(
+                f"replay: seat {obs.player} ends holding {live:#x}, arbiter "
+                f"holds {obs.hand:#x}")
         their_hand = 0
         for c in range(54):
-            if obs.hand >> c & 1:
+            if dealt >> c & 1:
                 their_hand |= 1 << _OURS_TO_THEIRS[c]
         lines = [f"SPEC {self._spec}",
                  "RULES 9 0 1",

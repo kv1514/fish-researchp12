@@ -751,3 +751,374 @@ errors falling, and concentration at declaration time rising -- is a
 **withdrawal condition** rather than a secondary: a margin that rises without
 them means the term is being paid for something other than the reason it was
 reinstated, and shipping it would put the wrong explanation in the paper.
+
+---
+
+## Session 2026-09-07 — the other arbiter, and three defects the trip through it found
+
+Upstream released FishBot v0.7 as **SESTINA v1.0**, and in the same window gave
+their engine an external-bot protocol (`docs/BOT_PACKAGE.md`, `extbot.hpp`,
+`botpkg.hpp`, `fish bots add`). That protocol is the thing this project's
+bridge design has been missing since it was written: the paper argues that if
+only one side can host, "our engine is stronger" and "our arbiter favours us"
+are not separable claims, and then measures every cross-engine number with our
+engine hosting, because there was no way to seat our policy in a batch run of
+theirs. There now is.
+
+### The pin moved and nothing under it did
+
+Five commits landed under our pin, one of them 124 new lines in the factory
+function our shim calls. `scripts4/v07_upstream_parity.py` captures the exact
+stdin script the bridge sends for every decision of real games and replays each
+through a binary built at each end. **6,329 decisions (5,817 asks, 472
+declarations), 0 mismatches.** Their freeze artifact is byte-identical over the
+same range. The pin moves to `f9b4743` with the published margin intact.
+
+Their full history is published now too, which retires a caveat this project
+has carried since it bridged them. `scripts4/dylan_ladder_provenance.py` builds
+THEIR engine at each release commit and at our pin and compares every field of
+the identical match: **five rungs, three seeds, 240 games a cell, zero play
+differences.** Only their bootstrap interval moved.
+
+### Their repository contains two bridges to US, and both are stale
+
+`engine/src/kv.hpp` ports "KV's sampled-world search policy" from
+`fish-researchp12 @ 0676737` — this project's **v0.1**, the pre-rebuild engine
+that shares no history with the current tree. `engine/src/kv6.hpp` bridges our
+deployed package and looks for it at `fishbot_v06/`, which is now `fishlab/`.
+Neither appears in their technical report, so nothing published rests on them.
+The consequence for us is only that a KV-versus-SESTINA number from their side
+is a number about our v0.1 unless it says otherwise.
+
+### Three defects on our side, found by their conformance check and by the trip
+
+1. **`fish bots check kraken` refused to run us.** `BeliefContradiction: player
+   0 count infeasible`. The adapter dropped a failed declaration entirely,
+   arguing that the only alternative was to pass the claimed split as revealed
+   — true, and the wrong conclusion. Six cards leave the table, a seat's dealt
+   hand is reconstructed by replaying what left it, and with the event gone the
+   reconstruction is short by however many were ours. The arbiter publishes
+   `counts`, so HOW MANY each seat surrendered is public even when which is
+   not; `ClaimEvent` now carries that as `surrendered` with
+   `revealed_known=False`.
+
+2. **KRAKEN's declaration policy was unreachable through the package.**
+   `declare_poll` used the deduction-only rule at both turn states and `ask`
+   discarded any declaration the policy returned. The tell was a number too
+   good: 4.10 declarations a game at **100.00%** accuracy. Never wrong, and two
+   thirds of a half-suit a game short. Now split by turn state.
+
+3. **The reverse ladder was playing a `v07` that was never released.** Their
+   factory builds a V07Responder with default coordinates from the bare base;
+   the frozen configuration is the long option string. In their arbiter the
+   frozen spec beats the bare base by **+0.39 sets a game** over 360 games, all
+   of it in our favour. Spec strings now come from `fish4/dylan_ladder.py`, the
+   same source the forward ladder uses.
+
+### The finding, so far
+
+Fixing (2) moved the margin by less than its own interval: −0.3950 before,
+−0.4600 after, win rate 44.42% → 43.50% on identical deals. The result did not
+depend on the defect. Fixing (3) moved it further and in the expected
+direction, the released configuration being the stronger one: the settled
+figure against the frozen spec is **−0.6200 sets a game, 40.08% of games won
+[37.33, 42.83] over 1,200 games** (`results/reverse_arbiter_v07.json`).
+
+What does move, and by an order of magnitude, is **where each engine's
+declarations go wrong, and it moves with the dialect rather than with the
+opponent**:
+
+| wrong declarations / game | in OUR arbiter | in THEIRS |
+|---|---|---|
+| theirs | 0.8442 | 0.1008 |
+| ours | 0.1759 | 0.0350 |
+
+The gap between the two engines is 17.6 points of declaration accuracy in our
+dialect and 1.2 in theirs. The paper's own decomposition puts **57% of the
++2.3466 margin in declaration accounting**, so most of the headline lives in
+the channel the dialect controls — and our dialect has no out-of-turn
+declaration, which their policy routes about 3.4 declarations a game through
+and which our bridge therefore never polls.
+
+Neither number is a ranking. Together they bracket one, and that is the honest
+statement.
+
+### The control ran, and it found more than a control
+
+The package is not crippling us: our champion beats their v0.3 by **+1.2972**
+inside their own arbiter. But the ladder run to establish that returned the
+sharpest result of the session — **the ladder inverts.**
+
+| their version | our margin (ours) | their err (ours) | our margin (theirs) | their err (theirs) |
+|---|---:|---:|---:|---:|
+| v0.3 | +0.6133 | **4.71%** | +1.2972 | **13.65%** |
+| v0.5 | +2.1233 | 15.06% | −0.3528 | 2.00% |
+| v0.6 | +1.8850 | 15.72% | −0.4806 | 1.53% |
+| v0.7 | +2.3600 | **20.71%** | −0.6200 | **2.09%** |
+
+Spearman against their version number: our margin **+0.771** in our arbiter,
+**−1.000** in theirs; their declaration error **+0.771** in ours, −0.400 in
+theirs. `results/ladder_shape_comparison.json`.
+
+In their arbiter each release beats us by more than the last, which is what a
+version ladder should look like. In ours their later releases do *worse*, and
+their declaration error climbs monotonically with their own version number. The
+rungs are sharper than the correlations: their v0.3 is their best declarer in
+our arbiter and their worst in their own; their v0.7 is the reverse. The two
+arbiters disagree about an **order**, not a level.
+
+A project's successive releases getting monotonically worse at the one thing
+this game scores, and only through our bridge, is not a shape improving
+strength produces. The place to look is what their v0.4 introduced and every
+later version built on — their fitted belief — and how it fares on the event
+stream our bridge replays into it. That is now the first experiment in
+`RESEARCH_FRONTIER.md`, ahead of the two that were there before it.
+
+
+---
+
+## Session 2026-09-08 — the bridge was the finding, and the headline is withdrawn
+
+`scripts4/shim_statefulness_parity.py` and
+`scripts4/bridge_statefulness_price.py`.
+
+`external_v07/shim_decide.cpp` is stateless BY DESIGN: a fresh process per
+decision, replaying the whole public log into a freshly `reset()` agent. That
+is what the website needs and it is what every published cross-engine number
+went through. Their arbiter builds one agent per seat per deal and feeds it
+events as they happen. Those are the same thing only if their agent is a pure
+function of (reset state, event sequence).
+
+| rung | decisions | divergent | rate | DECL→ASK | ASK→DECL |
+|---|---:|---:|---:|---:|---:|
+| v0.2 | 323 | **0** | 0.00% | 0 | 0 |
+| v0.3 | 338 | **0** | 0.00% | 0 | 0 |
+| v0.4 | 415 | 81 | 19.52% | 5 | 1 |
+| v0.5 | 336 | 137 | 40.77% | 4 | 0 |
+| v0.6 | 292 | 36 | 12.33% | 2 | 1 |
+| v0.7 | 296 | 84 | 28.38% | 9 | 0 |
+
+Zero on both scripted baselines; nonzero on every release from v0.4, where
+their fitted belief arrives. Candidates: a warm-started Sinkhorn/IPF fit, and a
+determinized search (`det=12`) off an RNG a fresh process re-seeds every
+decision.
+
+### The price, and it is larger than the thing it explains
+
+2,000 pairings (1,000 deals at each of two seat assignments), every
+pairing played twice on identical cards, seats and agent seeds, our champion
+unchanged, only their transport differing:
+
+    our margin, stateless bridge     +2.4800
+    our margin, persistent bridge    -0.6960
+    the bridge was worth to us       +3.1760 [+3.0142, +3.3378]
+    their wrong declarations/game     0.8800 stateless -> 0.0925 persistent
+
+Zero fallbacks, zero unfinished. The stateless arm reproduces the published
++2.3466 on fresh deals, which is what makes the other column believable rather
+than a harness artifact.
+
+### Two independent routes agree, and neither is the published one
+
+    our arbiter, stateless bridge (published)   +2.3466   10,000 games
+    our arbiter, persistent bridge             -0.6960     2,000 games
+    their arbiter, our bot package             -0.6200     1,200 games
+
+The two that do not reset their engine every decision agree to within 0.08 sets
+a game. They share no host, no rules, no deal generator and no code path. The
+one that does reset is out by three.
+
+**Corrected: KRAKEN v1.1 loses to SESTINA v1.0 by roughly 0.6–0.7 sets/game
+under this project's dialect.** The +2.3466 is withdrawn in the paper's
+abstract, at §"The head-to-head", and in Limitations.
+
+### What survives, and the lesson that is actually transferable
+
+Every PAIRED contrast that shares the bridge, because both arms were
+handicapped identically — a defect common to both halves of a pair is invisible
+to the pairing and also harmless to it. Every internal result that never
+crossed the bridge. And the negative results, which are contrasts against our
+own champion.
+
+The transferable part is not "we had a bug". It is that the paper's bridges
+appendix already contained the sentence that predicts this — *an absolute
+measured through a bridge is a statement about the bridge as well as about the
+engines* — written before there was any reason to think it applied here, and
+that every precaution the head-to-head did take (10,000 games, duplicate deals,
+seat rotation, zero substituted moves, a bridge revision priced and disclosed)
+was powerless against it. None of them can see a defect that is common-mode
+across both arms, and an absolute is not paired against anything.
+
+## Post-P43: the ask deficit is a declaration latency, and the programme stops
+
+The corrected head-to-head leaves one channel: they hit 54.93% of their asks
+and we hit 52.98%. P43 put three registered candidates at that 1.95 points and
+moved none. What follows is the search for a fourth. It ends by withdrawing the
+candidate instead of registering it, and the sequence is worth recording
+because each instrument overturned the one before it.
+
+### Three instruments, two reversals
+
+**1. Oaxaca–Blinder on the ask hit rate** (`scripts4/ask_deficit_anatomy.py`,
+38,212 asks, 400 games). Five of six stratifiers put essentially the whole
+2.25-point gap in EXECUTION: we choose the same half-suits and are worse inside
+them. The sixth — conditioning on our own team's holding in the named half-suit
+— put two thirds of it in SELECTION, and it was the one that was right.
+
+The instrument is why that took two more runs to see. That stratifier's top
+bucket (team holds all six) has a hit rate of exactly zero on BOTH sides,
+because an ask there cannot land. A stratum with r_t = r_o = 0 contributes
+exactly zero to both terms of the identity however far apart the two shares
+are — ours 12.61%, theirs 9.52%. **The decomposition is structurally blind to
+the stratum the deficit lives in.** Not an arithmetic error: a property of
+using the opponent's rate as the reference price.
+
+**2. Miss anatomy** (`scripts4/ask_miss_anatomy.py`, 28,513 asks). Classify each
+miss by what was legally available instead. 30.64% of our misses are
+UNAVOIDABLE — nothing in that half-suit was legally askable from anyone —
+against 21.94% of theirs. Per ask, 14.5% against 10.1%: a 4.4-point gap in a
+channel whose whole size is 1.3 points in that block.
+
+**3. The kill-check** (`scripts4/ask_deadness_signal.py`, 1,200 games, 98,326
+decisions, 128 sampled worlds each). Before proposing a p(dead) term, ask
+whether the objective HAD the information.
+
+It does. p(dead) separates dead from live half-suits at AUC 0.9518, and a proxy
+costing no draws at all reaches 0.8883. On our 6,519 asks into a dead half-suit
+an alternative scored strictly lower 96.63% of the time.
+
+And that is not the finding, because the same measurement at SESTINA's seats
+says the engine beating us uses the signal LESS. In ground truth, per decision:
+
+                   chosen dead    menu      selection
+    KRAKEN v1.1       0.1327     0.1428    -0.0101 [-0.0139, -0.0063]
+    SESTINA v1.0      0.0945     0.0746    +0.0198 [+0.0171, +0.0226]
+    ours - theirs    +0.0382    +0.0682    -0.0299
+
+Our menu is 6.82 points worse; our selection from it is 2.99 points BETTER. A
+p(dead) term would push harder on the one channel where we are already ahead of
+the engine we are behind.
+
+On the BELIEF scale the sides look the other way round (+0.0166 ours, +0.0268
+theirs). That comparison is confounded: p(dead) is an estimate and the
+estimator is not equally sharp at the two sets of seats (AUC 0.9518 ours,
+0.8819 theirs), so a cross-side reading prices the estimator too. Within a side
+it is paired and sound. Adding the truth column is the whole reason the run was
+repeated, and it reversed the conclusion.
+
+### What a dead ask is
+
+Under the no-bluff rule an ask is legal only for a card of a half-suit the
+asker holds another of. So every legal ask in a half-suit misses exactly when
+no opponent holds any card of it — and the six cards of an unclaimed half-suit
+are all in someone's hand. **A half-suit is dead for us if and only if our own
+team holds all six.** A dead ask is an ask into a half-suit we have already won
+and not yet declared. The instrument asserts the equivalence at every decision
+rather than arguing it.
+
+Completion is absorbing: once a team holds all six, no opponent holds a card of
+it, so none can legally ask into it, so no card can leave. It persists until
+the owner declares. `scripts4/completion_latency.py`, 1,200 games, 10,724
+completions:
+
+                                     KRAKEN v1.1   SESTINA v1.0
+    half-suits completed per game          4.208          4.728
+    mean plies to declare it               16.80           7.84
+    median plies to declare it               3.0            1.0
+    never declared                         0.00%          0.00%
+    asks spent into it meanwhile           1.520          0.996
+    those, as a share of all asks         13.79%          9.81%
+    completions sat on 10+ plies          34.63%         20.92%
+    share of dead asks from those         87.38%         75.99%
+
+A tail, not a general slowness: a third of our completions account for seven
+eighths of our dead asks, and everything is declared eventually on both sides.
+
+**Size.** The excess is +1.689 dead asks a game. At this project's own measured
+price of one donated turn (+0.2713 [+0.0922, +0.4505]), with both
+uncertainties propagated, that is +0.458 [+0.157, +0.793] sets a game against a
+measured deficit of -0.5250 [-0.6886, -0.3614]. The deficit sits inside the
+interval. This is difference accounting, not a counterfactual — removing a dead
+ask changes every later ply, and their 4.7 a game are not zero.
+
+### The closure
+
+The ask deficit is real, worth about half a set a game, and is not an ask
+problem. It is the visible cost of a declaration latency, which puts it
+downstream of the residue this project has reported since v1.0: 95.3% of our
+wrong declarations are allocation errors, where the team held all six and named
+the wrong split. The team has the answer and no member of it does, so it waits;
+while it waits it asks into its own half-suits.
+
+**No registration is produced.** The candidate — a p(dead) penalty in the ask
+objective — is refuted by its own kill-check, and the nearest knob already run
+agrees: `avoid_doomed_asks` fires only where the posterior is CERTAIN, 1.5% of
+decisions against the 13.79% measured here, and scored -0.0933 / -0.0900 in
+P43. What the analysis licenses instead is a registration in the declaration
+channel aimed at the LATENCY rather than the accuracy — the accuracy is already
+97.59% — and concentrated on the third of completions that sit ten plies or
+more. That registration is not written, and none of these three instruments
+licenses an arm on its own.
+
+## P44: both ends of the latency, and the metric that was not worth chasing
+
+The post-P43 analysis said the deficit is a declaration latency, not an ask
+problem, and explicitly licensed no arm. P44 is what it did license: a
+registration, written before anything ran, with its predicted outcome recorded.
+
+### The defect it attacks
+
+Every doomed-ask mechanism in this engine — the stuck claim gate, the
+signalling ask, `avoid_doomed_asks` — is conditioned on `p[order[0]] <= 0.0`,
+the agent being CERTAIN the best ask cannot land. That is 1.5% of decisions. On
+the asks that actually are dead the belief's estimate averages 0.3377, so none
+of it opens. The apparatus is aimed at the right idea through a gate that
+almost never fires. Both arms replace the certainty test with a graded one.
+
+### D2 was stopped by the futility screen, and that is the result
+
+Fired on 0.235 declarations/game against a 0.250 bar fixed in advance. It misses
+by 6% and does not reach a duel; D3, licensed only if both arms cleared, is not
+built. Re-running until it clears, or widening the bar now the number is
+visible, is the forking-paths failure the appendix argues against.
+
+**Why it fires so rarely matters more than the stop.** D2 gates on
+`p_team >= 0.99` — knowing the set is ours and being unable to place the split.
+The belief puts 0.3120 on a genuinely dead half-suit being entirely ours,
+0.3377 on the ones we go on to ask into. **We
+sit on completed half-suits because we do not know we own them.** The 95.3%
+allocation-error figure counts declarations we made and got wrong, not the ones
+we never made, and reading it as the cause of the latency is a mistake this arm
+had to fire to expose.
+
+### D1 reached the duel, and improving the metric made the engine worse
+
+600 pairings, 1,800 games, zero fallbacks:
+
+    D1  dead_ask_threshold=0.5   vs SESTINA  -0.3233 [-0.527, -0.119]
+                                 self-play   -0.2300 [-0.448, -0.012]
+    ask hit rate: candidate 0.5245, champion 0.5184, same deals
+
+Not a null — a significant negative in both populations, and the candidate
+landed MORE asks than the champion. D1 did exactly what it was built to do and
+cost a third of a set a game doing it.
+
+Under the no-bluff rule a failed ask publicly proves the asker holds another
+card of that half-suit, which is the fact a partner needs to place a split. An
+ask into a half-suit our team wholly owns is not waste: it is the engine's own
+mechanism for resolving the ownership it does not yet know it has. D1 removed
+it, the hit rate rose, the score fell.
+
+**So the ask hit rate is not a quantity to maximise.** The corrected
+head-to-head puts us 1.95 points behind on it and calls it the only channel in
+which the two engines differ. Closing it directly makes us weaker. A measured
+deficit in a metric is not necessarily a deficit to close — and no amount of
+further anatomy would have said so. Only a duel with a bar fixed in advance did.
+
+### Where this leaves the engine
+
+Nothing ships. `V06_DEPLOYED` is unchanged, there is no v1.2, and KRAKEN v1.1
+still loses to SESTINA v1.0 by -0.5250 through the repaired bridge. What is
+left standing is the ownership inference itself — the 0.3120 — which no
+registration in this project has attacked, and for which we do not have a
+candidate.

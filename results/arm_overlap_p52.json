@@ -1,0 +1,55 @@
+{
+ "script": "scripts4/arm_overlap.py",
+ "descriptive": true,
+ "sources": [
+  "results/p52_claim_term.json"
+ ],
+ "arms": [
+  "A1_claim_p10",
+  "A2_claim_p30",
+  "A3_claim_p60",
+  "A4_claim_m20"
+ ],
+ "fields_compared": [
+  "sestina_cand",
+  "self"
+ ],
+ "pairs": {
+  "A1_claim_p10 vs A2_claim_p30": {
+   "shared": 600,
+   "identical": 75,
+   "differ": 525,
+   "identical_share": 0.125
+  },
+  "A1_claim_p10 vs A3_claim_p60": {
+   "shared": 600,
+   "identical": 57,
+   "differ": 543,
+   "identical_share": 0.095
+  },
+  "A1_claim_p10 vs A4_claim_m20": {
+   "shared": 600,
+   "identical": 38,
+   "differ": 562,
+   "identical_share": 0.06333333333333334
+  },
+  "A2_claim_p30 vs A3_claim_p60": {
+   "shared": 600,
+   "identical": 89,
+   "differ": 511,
+   "identical_share": 0.14833333333333334
+  },
+  "A2_claim_p30 vs A4_claim_m20": {
+   "shared": 600,
+   "identical": 24,
+   "differ": 576,
+   "identical_share": 0.04
+  },
+  "A3_claim_p60 vs A4_claim_m20": {
+   "shared": 600,
+   "identical": 30,
+   "differ": 570,
+   "identical_share": 0.05
+  }
+ }
+}

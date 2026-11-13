@@ -1,0 +1,148 @@
+# Getting Fish onto the App Store
+
+This folder is the iOS app. It is a [Capacitor](https://capacitorjs.com) shell
+around the web client in `public/play/` — the website and the app ship the exact
+same files, so a change to the game is made once.
+
+What's already done here:
+
+- `ios/` — a real Xcode project (Swift Package Manager, no CocoaPods needed)
+- the app icon (1024×1024, no transparency, as Apple requires) and launch screen
+- native **haptics**, the native **share sheet** for invite codes, and
+  `fish://join/ABCD` **deep links**
+- portrait-only on iPhone, dark status bar, and the export-compliance flag set
+  (the app only uses HTTPS, which is exempt — so App Store Connect won't stall
+  on the encryption question)
+- a privacy policy at `/play/privacy.html`
+
+What you have to do yourself, because it needs your Mac and your Apple account,
+is below.
+
+---
+
+## Online play: already switched on
+
+The app talks to `https://fish-engine.vercel.app`, and **Apple's reviewers will
+tap Quick Play** — an app whose main button doesn't work is rejected under
+guideline 2.1. This is set up:
+
+- Supabase project **fish-rooms** is active, with `scripts4/room_schema.sql`
+  and `scripts4/room_rpc.sql` applied.
+- Vercel (fish-engine, Production + Preview) has `SUPABASE_URL`,
+  `SUPABASE_PUBLISHABLE_KEY` and `FISH_DB_KEY`. The last is a narrow key that
+  only reaches the four `fish_store_*` room functions; the database stores only
+  its SHA-256. It is *not* the Supabase service key, which is never needed.
+- The live site needs PR #6 merged so it has the `/api/t_*` routes.
+
+Check it any time: `https://fish-engine.vercel.app/api/health` should say
+`"room_backend": "postgres-rpc"`.
+
+**Free Supabase projects pause after a week with no traffic.** If online play
+stops working after a quiet spell, open supabase.com → fish-rooms → Restore.
+
+**To rotate the key:** make a new random value of 32+ characters, put its
+SHA-256 (hex) into the database:
+
+```sql
+update fish_private.store_key set key_sha256 = '<sha256 hex of the new key>' where id = 1;
+```
+
+then set `FISH_DB_KEY` in Vercel to the new value and redeploy.
+
+---
+
+## 1. What you need
+
+- A **Mac** with **Xcode 16 or newer** (free, Mac App Store)
+- **Node.js 20+** (nodejs.org)
+- An **Apple Developer Program** membership — $99/year,
+  developer.apple.com/programs. Enrolment can take a day or two.
+
+## 2. Build it on your Mac
+
+```bash
+git clone https://github.com/kv1514/fish-researchp12
+cd fish-researchp12/app
+npm install
+npm run ios          # copies public/play into the app, syncs, opens Xcode
+```
+
+In Xcode:
+
+1. Click **App** in the left sidebar, then the **App** target.
+2. **Signing & Capabilities** → *Team*: pick your developer team.
+3. **Bundle Identifier**: change `com.example.fish` to something you own,
+   like `com.yourname.fish`. It's permanent once the app is live, so pick
+   carefully. Put the same value in `capacitor.config.json` → `appId`.
+4. Pick an iPhone simulator at the top and press **▶ Run**. Play a game.
+5. Plug in your own iPhone, select it, press ▶ again. (First time: on the
+   phone, Settings → General → VPN & Device Management → trust yourself.)
+
+## 3. TestFlight first — play it with your friends
+
+1. App Store Connect (appstoreconnect.apple.com) → **My Apps → +  → New App**.
+   - Name: must be unique on the whole store. "Fish" is certainly taken;
+     try something like **"Fish: Team Card Game"** or **"Fish Table"**.
+   - Bundle ID: the one you chose above. SKU: anything, e.g. `fish-1`.
+2. In Xcode: top bar device → **Any iOS Device (arm64)**, then
+   **Product → Archive**. When it finishes: **Distribute App → App Store
+   Connect → Upload**.
+3. After ~15 minutes the build appears under **TestFlight**. Add yourself and
+   friends as testers (up to 100 by email, no review needed for internal
+   testers). They install the TestFlight app and play.
+
+Every new build: bump the **Build** number (App target → General), then
+Archive again.
+
+## 4. Submit for review
+
+In App Store Connect, on your app's page:
+
+- **Screenshots**: iPhone 6.9" (1320×2868) is required. Take them in the
+  iPhone 16 Pro Max simulator with ⌘S. Good ones: the home screen, a lobby with
+  a code, a table mid-game with the countdown ring, the ask sheet, the win
+  screen.
+- **Description / keywords**: e.g. "Fish (also called Literature) is a 6-player
+  team card game. Quick-play public tables, private tables with a join code,
+  turn timers, or practice against the bots."
+- **Privacy Policy URL**: `https://fish-engine.vercel.app/play/privacy.html`
+- **Support URL**: `https://fish-engine.vercel.app/` (or any page you control)
+- **App Privacy** questionnaire: the honest answers are — no tracking; the only
+  data is the **display name** the player types, which is shown to other players
+  and deleted with the table within 6 hours; not linked to identity. (Category:
+  *User Content → Other User Content*, used for *App Functionality*.)
+- **Age rating**: no gambling, no chat, no violence → it should come out 4+.
+  Answer "No" to simulated gambling: there are no bets or chips, only sets won.
+- **App Review notes**: "Online tables: press Quick Play. If no one else is
+  online, the table fills with bots after 30 seconds. To test a private table,
+  press Private Table, then join its 4-letter code from a second device or the
+  simulator."
+
+Then **Add for Review → Submit**. Review usually takes a day or two.
+
+## What could get it rejected, and what's been done about it
+
+| Risk | Guideline | Status |
+|---|---|---|
+| Online play down during review | 2.1 | **Your step** — see the top of this file |
+| "It's just a website" | 4.2 | UI is bundled in the app, not loaded from a URL; native haptics, share sheet and deep links; real-time multiplayer |
+| Strangers talking to each other | 1.2 | No free-text chat at all — only preset emoji reactions. Names are cleaned of invisible characters. If a reviewer asks about offensive names, add a word filter or a "report player" button |
+| Copying another app's look | 5.2 | Layout is the general poker-table style; name, colours, icon and art are original. Don't use another app's name or screenshots in the listing |
+| Gambling | 5.3 | No money, chips or betting — make sure the description doesn't say "poker" |
+
+## Updating the app later
+
+- **Server changes** (anything in `api/`) go live when merged — no new app
+  build needed.
+- **Game screen changes** (anything in `public/play/`) need `npm run sync`,
+  a new build number, Archive, and a new review.
+
+## Android (later)
+
+```bash
+npm install @capacitor/android
+npx cap add android
+npx cap open android      # needs Android Studio
+```
+
+Google Play costs $25 once. The same web files and the same API work there.

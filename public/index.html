@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fish — play KRAKEN v1.1</title>
-<meta name="description" content="Play six-player Literature against KRAKEN v1.1, a research engine with exact combinatorial belief tracking. Play solo against five bots, watch it battle Dylan's FishBot v0.7, or play with friends in a room.">
+<meta name="description" content="Play six-player Literature against KRAKEN v1.1, a research engine with exact combinatorial belief tracking. Play solo against five bots, watch it battle the external engine, or play with friends in a room.">
 <!-- Share card. The image path is RELATIVE on purpose: this page is served
      from a per-branch preview URL as well as from production, and an absolute
      og:image would point a preview's link preview at a host that 404s until
@@ -11,7 +11,7 @@
      For the same reason there is no canonical and no og:url. -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Fish — play KRAKEN v1.1">
-<meta property="og:description" content="Six-player Literature against a research engine with exact combinatorial belief tracking. Play it, watch it fight another engine, or read the 118-page paper behind it.">
+<meta property="og:description" content="Six-player Literature against a research engine with exact combinatorial belief tracking. Play it, watch it fight another engine, or read the 171-page paper behind it.">
 <meta property="og:image" content="/share.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Fish — play KRAKEN v1.1">
@@ -27,8 +27,9 @@
   <nav class="topbar">
     <span class="brandmark">Fish <b>KRAKEN v1.1</b></span>
     <div class="spacer"></div>
+    <a class="toplink paper" href="/play/" style="background:#1597d3;color:#fff">Play the app<span class="pgs">quick play &amp; private tables</span></a>
     <a class="toplink paper" href="/paper.pdf" target="_blank"
-       rel="noopener">Read the paper<span class="pgs">118&nbsp;pages,
+       rel="noopener">Read the paper<span class="pgs">171&nbsp;pages,
        PDF</span></a>
     <a class="toplink" href="https://github.com/kv1514/fish-researchp12"
        target="_blank" rel="noopener">Source</a>
@@ -84,10 +85,9 @@
         </details>
 
         <button id="s-go" class="primary big">Ready — deal me in</button>
-        <button id="s-watch" class="big">Watch: Dylan&rsquo;s FishBot vs KRAKEN</button>
-        <p class="note" id="s-watchnote">A 3v3 exhibition — Dylan&rsquo;s FishBot v0.7
-        (<a href="https://github.com/dylann4500/fishbot" target="_blank" rel="noopener">dylann4500/fishbot</a>,
-        running its own C++ engine) on three seats against this site&rsquo;s engine on the
+        <button id="s-watch" class="big">Watch: the external engine vs KRAKEN</button>
+        <p class="note" id="s-watchnote">A 3v3 exhibition — the external engine
+        (running its own C++ engine) on three seats against this site&rsquo;s engine on the
         other three, under identical scoring — a misdeclared set goes to the
         other team, in both engines&rsquo; native rules. Games play out live at the
         table pace; the next one deals automatically.</p>
@@ -145,7 +145,7 @@
           hold another card of that set — the only signal in the game, and your
           opponents read it too.</li>
       </ul>
-      <p class="note">One engine, the strongest one measured: 480-draw exact
+      <p class="note">One engine, the strongest of this project's lineage: 480-draw exact
         belief tracking plus depth-3 search over the posterior. Nothing is
         stored; a solo game lives in your browser tab.</p>
 
@@ -167,7 +167,7 @@
       <h2>The paper</h2>
       <p>Everything the engine does, why, and what was measured rather than
         assumed &mdash; including the results that <em>failed</em> their own
-        pre-registered thresholds and were not shipped. 118 pages, with the
+        pre-registered thresholds and were not shipped. 171 pages, with the
         pre-registrations and the corrections in full.</p>
     </div>
     <a class="paperbtn" href="/paper.pdf" target="_blank"
@@ -178,9 +178,6 @@
     <a href="/paper.pdf" target="_blank" rel="noopener">Paper</a>
     <span class="fsep">&middot;</span>
     <a href="https://github.com/kv1514/fish-researchp12" rel="noopener">Source</a>
-    <span class="fsep">&middot;</span>
-    <a href="https://github.com/dylann4500/fishbot" target="_blank"
-       rel="noopener">The opponent</a>
   </footer>
 </section>
 

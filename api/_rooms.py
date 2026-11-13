@@ -163,6 +163,25 @@ class MemoryStore:
             self._rooms[code] = (version + 1, doc)
             return version + 1
 
+    def list_lobbies(self, limit: int = 20,
+                     fresh_within: float = 45.0) -> list:
+        """Public tables still seating, most recently active first.
+
+        Returns ``(code, version, doc)``. The doc is the server's full copy,
+        nonce included -- callers reduce it to a public summary before anything
+        leaves the process.
+        """
+        now = time.time()
+        with self._lock:
+            self._sweep()
+            rows = [(c, v, json.loads(json.dumps(d)))
+                    for c, (v, d) in self._rooms.items()
+                    if d.get("kind") == "table" and d.get("public")
+                    and d.get("phase") == "lobby"
+                    and now - float(d.get("touched", 0)) <= fresh_within]
+        rows.sort(key=lambda r: -float(r[2].get("touched", 0)))
+        return rows[:limit]
+
     def _sweep(self) -> None:
         now = time.time()
         for code in [c for c, (_, d) in self._rooms.items()
@@ -245,6 +264,23 @@ class PostgrestStore:
             raise NotFound(code)
         return int(row["version"]), row["doc"]
 
+    def list_lobbies(self, limit: int = 20,
+                     fresh_within: float = 45.0) -> list:
+        """Public tables still seating, most recently active first.
+
+        Filtered on the jsonb document with PostgREST's arrow operators, so the
+        existing one-table schema serves it with no migration. ``touched`` is a
+        real column, and a seated player's poll refreshes it every few seconds,
+        so the freshness bound drops tables whose players have all gone.
+        """
+        since = time.time() - float(fresh_within)
+        rows = self._req(
+            "GET",
+            "?select=code,version,touched,doc"
+            "&doc->>kind=eq.table&doc->>public=eq.true&doc->>phase=eq.lobby"
+            f"&touched=gt.{since:.3f}&order=touched.desc&limit={int(limit)}")
+        return [(r["code"], int(r["version"]), r["doc"]) for r in rows]
+
     def write(self, code: str, version: int, doc: dict) -> int:
         # The version predicate is what makes this compare-and-set: PATCH with
         # `version=eq.<read>` updates nothing if another writer already moved
@@ -258,6 +294,84 @@ class PostgrestStore:
             raise Conflict(code)
         return version + 1
 
+
+class RpcStore:
+    """Rooms in Postgres through four key-gated functions, not the service key.
+
+    See scripts4/room_rpc.sql. The table stays exactly as locked as before --
+    RLS on, no policies -- and the server reaches it through SECURITY DEFINER
+    functions that check ``FISH_DB_KEY`` against a hash only the database
+    holds. The request itself carries the project's PUBLISHABLE key, which is
+    public by design and on its own gets no further than that check.
+
+    Preferred over the service key because it is the smaller credential: it can
+    create, read and compare-and-set rooms and list open lobbies, and nothing
+    else in the project. Same semantics as :class:`PostgrestStore`, so callers
+    cannot tell them apart.
+    """
+
+    def __init__(self, url: str, public_key: str, db_key: str) -> None:
+        self.base = url.rstrip("/") + "/rest/v1/rpc/"
+        self.public_key = public_key
+        self.db_key = db_key
+
+    def _rpc(self, fn: str, args: dict):
+        import urllib.error
+        import urllib.request
+        headers = {"apikey": self.public_key,
+                   "Content-Type": "application/json",
+                   "Accept": "application/json"}
+        # A legacy anon key is a JWT and may ride in Authorization; the newer
+        # sb_publishable_ keys are not JWTs and must not.
+        if self.public_key.startswith("eyJ"):
+            headers["Authorization"] = f"Bearer {self.public_key}"
+        body = json.dumps(dict(args, p_key=self.db_key)).encode()
+        req = urllib.request.Request(self.base + fn, data=body,
+                                     headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=8) as r:
+                raw = r.read()
+                return json.loads(raw) if raw else None
+        except urllib.error.HTTPError as e:
+            # Same rule as PostgrestStore: never surface the database's text.
+            raise RuntimeError(f"room store error ({e.code})") from None
+        except Exception:
+            raise RuntimeError("room store unreachable") from None
+
+    def create(self, doc: dict) -> str:
+        for _ in range(40):
+            code = new_code()
+            if self._rpc("fish_store_create",
+                         {"p_code": code, "p_touched": doc.get("touched", 0),
+                          "p_doc": doc}):
+                return code
+        raise RuntimeError("could not allocate a room code")
+
+    def read(self, code: str) -> tuple[int, dict]:
+        rows = self._rpc("fish_store_read", {"p_code": code}) or []
+        if not rows:
+            raise NotFound(code)
+        row = rows[0]
+        if time.time() - float(row.get("touched") or 0) > ROOM_TTL:
+            raise NotFound(code)
+        return int(row["version"]), row["doc"]
+
+    def write(self, code: str, version: int, doc: dict) -> int:
+        if not self._rpc("fish_store_write",
+                         {"p_code": code, "p_version": int(version),
+                          "p_touched": doc.get("touched", 0), "p_doc": doc}):
+            raise Conflict(code)
+        return version + 1
+
+    def list_lobbies(self, limit: int = 20,
+                     fresh_within: float = 45.0) -> list:
+        rows = self._rpc("fish_store_lobbies",
+                         {"p_since": time.time() - float(fresh_within),
+                          "p_limit": int(limit)}) or []
+        return [(r["code"], int(r["version"]), r["doc"]) for r in rows]
+
+
+SHARED_STORES = (PostgrestStore, RpcStore)
 
 _STORE = None
 _STORE_LOCK = threading.Lock()
@@ -275,15 +389,27 @@ def store():
     global _STORE
     with _STORE_LOCK:
         if _STORE is None:
-            url = os.environ.get("SUPABASE_URL", "").strip()
-            key = (os.environ.get("SUPABASE_SERVICE_KEY")
-                   or os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
-            _STORE = PostgrestStore(url, key) if url and key else MemoryStore()
+            env = os.environ
+            url = env.get("SUPABASE_URL", "").strip()
+            key = (env.get("SUPABASE_SERVICE_KEY")
+                   or env.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
+            pub = (env.get("SUPABASE_PUBLISHABLE_KEY")
+                   or env.get("SUPABASE_ANON_KEY") or "").strip()
+            dbk = env.get("FISH_DB_KEY", "").strip()
+            if url and key:
+                _STORE = PostgrestStore(url, key)
+            elif url and pub and dbk:
+                _STORE = RpcStore(url, pub, dbk)
+            else:
+                _STORE = MemoryStore()
         return _STORE
 
 
 def backend_name() -> str:
-    return "postgres" if isinstance(store(), PostgrestStore) else "memory"
+    st = store()
+    if isinstance(st, RpcStore):
+        return "postgres-rpc"
+    return "postgres" if isinstance(st, PostgrestStore) else "memory"
 
 
 def serverless() -> bool:
@@ -307,11 +433,13 @@ def require_shared_store() -> None:
     rather than a missing environment variable -- so this refuses up front,
     and says which two variables are missing.
     """
-    if serverless() and not isinstance(store(), PostgrestStore):
+    if serverless() and not isinstance(store(), SHARED_STORES):
         raise RoomsUnavailable(
             "Rooms need a shared store, and this deployment has none. Set "
             "SUPABASE_URL and SUPABASE_SERVICE_KEY (see "
-            "scripts4/room_schema.sql), or play the bots -- solo games need "
+            "scripts4/room_schema.sql) -- or SUPABASE_URL, "
+            "SUPABASE_PUBLISHABLE_KEY and FISH_DB_KEY (see "
+            "scripts4/room_rpc.sql) -- or play the bots; solo games need "
             "no setup and are unaffected.")
 
 

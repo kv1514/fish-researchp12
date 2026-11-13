@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import traceback
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -25,8 +26,22 @@ from api._engine import (Session, new_session, parse_action,  # noqa: E402
                          wire_action)
 from api import _rooms                                         # noqa: E402
 from api import _room_game as RG                               # noqa: E402
+from api import _tables as T                                   # noqa: E402
 
 MAX_BODY = 512 * 1024
+
+#: Origins allowed to call the API from another origin: the native app shells.
+#: A Capacitor build serves its bundled pages from these, not from this site,
+#: so every request it makes is cross-origin. Nothing here uses cookies -- a
+#: seat is identified by a secret in the request body -- so this widens no
+#: credentialed surface; it is an allowlist rather than "*" only so the API
+#: does not quietly become everybody's backend.
+APP_ORIGINS = frozenset({
+    "capacitor://localhost",     # iOS
+    "ionic://localhost",         # older iOS shells
+    "https://localhost",         # Android
+    "http://localhost",          # Android, cleartext dev builds
+})
 
 
 def route_of(path: str, query: str) -> str:
@@ -59,14 +74,31 @@ class handler(BaseHTTPRequestHandler):
 
     # -- plumbing -------------------------------------------------------------
 
+    def _cors(self) -> None:
+        origin = (self.headers.get("Origin") or "").strip()
+        if origin in APP_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+
     def _send(self, obj, code: int = 200):
         body = json.dumps(obj).encode()
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        self._cors()
         self.end_headers()
         self.wfile.write(body)
+
+    def do_OPTIONS(self):
+        """CORS preflight. A JSON POST from the app shell triggers one."""
+        self.send_response(204)
+        self._cors()
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "86400")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def _send_file(self, path: Path, ctype: str, cache: str):
         """Stream a file from the deployment bundle.
@@ -156,7 +188,11 @@ class handler(BaseHTTPRequestHandler):
             # waiting itself; one that omits the field gets the whole possession
             # in a single response, as before.
             step = body.get("step")
-            cap = int(step) if step not in (None, "", False) else None
+            # Identity checks, not `in`: membership uses ==, and 0 == False in
+            # Python, so `step: 0` used to mean NO cap -- a request for zero
+            # engine moves played every engine move up to the person's turn.
+            cap = (None if step is None or step is False or step == ""
+                   else int(step))
             capkw = {"max_moves": cap} if cap is not None else {}
 
             if op == "new":
@@ -178,6 +214,9 @@ class handler(BaseHTTPRequestHandler):
             # token" before it reached the handler.
             if op.startswith("room_"):
                 return self._room(op, body)
+
+            if op.startswith("t_"):
+                return self._table(op, body)
 
             # Every other route restores the session from the sealed token plus
             # the client's copy of the public action log.
@@ -254,6 +293,104 @@ class handler(BaseHTTPRequestHandler):
             # engine can carry hidden state in its message just as readily.
             traceback.print_exc()
             return self._send({"error": "internal error"}, 500)
+
+    # -- tables (the poker-style app) -----------------------------------------
+
+    def _table(self, op: str, body: dict):
+        """Every /api/t_* route: public quick play, join codes, turn clocks.
+
+        Each route identifies the caller by their seat secret and hands back
+        that seat's view and nothing else. Polling (`t_state`) also drives the
+        table -- bot moves and expired clocks happen on being looked at -- and
+        writes only when something actually changed.
+        """
+        _rooms.require_shared_store()
+        now = time.time()
+        try:
+            if op == "t_list":
+                return self._send({"tables": T.open_tables()})
+
+            name = body.get("name", "")
+            if op == "t_quick":
+                code, seat, secret, doc, v = T.quick_play(name)
+                return self._send({"code": code, "secret": secret,
+                                   "table": T.view(doc, code, seat, v)})
+
+            if op == "t_create":
+                code, seat, secret, doc = T.create(
+                    name, bool(body.get("public", False)),
+                    body.get("turn", T.TURN_DEFAULT),
+                    body.get("pace", T.PACE_DEFAULT))
+                return self._send({"code": code, "secret": secret,
+                                   "table": T.view(doc, code, seat, 1)})
+
+            code = str(body.get("code") or "").strip().upper()[:8]
+            if not code:
+                return self._send({"error": "missing table code"}, 400)
+
+            if op == "t_join":
+                def _join(d):
+                    T.tick(d, now)
+                    return T.join(d, name, now=now), True
+                doc, out, v = T.mutate(code, _join)
+                return self._send({"code": code, "secret": out["secret"],
+                                   "table": T.view(doc, code, out["seat"], v)})
+
+            secret = str(body.get("secret") or "")
+
+            if op == "t_state":
+                def _poll(d):
+                    me = T.seat_of(d, secret)
+                    if me is None:
+                        raise ValueError("you are not seated at that table")
+                    seen = T.touch(d, me, now)
+                    moved = T.tick(d, now)
+                    return me, (seen or moved)
+                doc, me, v = T.mutate(code, _poll)
+                return self._send({"table": T.view(doc, code, me, v)})
+
+            if op == "t_leave":
+                T.mutate(code, lambda d: (T.leave(d, secret, now=now), True))
+                return self._send({"left": True})
+
+            if op == "t_act":
+                action = parse_action(body.get("action") or {})
+                fn = lambda d: (T.act(d, secret, action, now=now), True)  # noqa: E731
+            elif op == "t_start":
+                fn = lambda d: (T.start(d, secret, now=now), True)  # noqa: E731
+            elif op == "t_rematch":
+                fn = lambda d: (T.rematch(d, secret, now=now), True)  # noqa: E731
+            elif op == "t_sit":
+                fn = lambda d: (T.sit(d, secret, body.get("seat", -1),  # noqa: E731
+                                      now=now), True)
+            elif op == "t_seat":
+                fn = lambda d: (T.set_seat_kind(  # noqa: E731
+                    d, secret, body.get("seat", -1), body.get("kind"),
+                    now=now), True)
+            elif op == "t_kick":
+                fn = lambda d: (T.kick(d, secret, body.get("seat", -1),  # noqa: E731
+                                       now=now), True)
+            elif op == "t_settings":
+                fn = lambda d: (T.update_settings(  # noqa: E731
+                    d, secret, body.get("turn"), body.get("pace"),
+                    now=now), True)
+            elif op == "t_emote":
+                fn = lambda d: (T.emote(d, secret, str(body.get("emote")),  # noqa: E731
+                                        now=now), True)
+            elif op == "t_back":
+                fn = lambda d: (T.back(d, secret, now=now), True)  # noqa: E731
+            else:
+                return self._send({"error": "not found"}, 404)
+
+            doc, _, v = T.mutate(code, fn)
+            return self._send({"table": T.view(doc, code,
+                                               T.seat_of(doc, secret), v)})
+        except _rooms.NotFound:
+            return self._send({"error": "no such table"}, 404)
+        except RuntimeError as e:
+            # Raised only with messages written to be shown: a lost race
+            # ("the table is busy") or the store being unreachable.
+            return self._send({"error": str(e)}, 503)
 
     # -- rooms ---------------------------------------------------------------
 

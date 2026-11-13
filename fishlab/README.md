@@ -84,7 +84,8 @@ never to declare — much harder to debug than an error.
 | request | what KRAKEN does |
 |---|---|
 | `ask` | the full policy: exact inference, opponent model, belief-space lookahead |
-| `declare_poll` | **only certain declarations** — when the public record alone pins all six cards to named teammates. A speculative off-turn declaration gambles a whole set under the award rule; a merely-confident seat can wait for its turn and use the full policy. This project measured the off-turn channel at **+0.8 sets/game**, so it is answered on every poll rather than switched off. |
+| `declare_poll`, **off** turn | **only certain declarations** — when the public record alone pins all six cards to named teammates. Our rules have no out-of-turn channel, so the policy has never been developed against one, and a speculative declaration there gambles a whole half-suit under the award rule. This project measured the off-turn channel at **+0.8 sets/game**, so it is answered on every poll rather than switched off. |
+| `declare_poll`, **on** turn | the full claim policy — this is the ordinary declare-or-ask decision our own engine makes every game, and nothing about it is out-of-turn. |
 | `pass` | the scored pass, constrained to the offered candidates |
 | `forced` | the best split for **the set asked about**, with a real `confidence` rather than a clamped 1.0 — the engine compares it against its own sweeping threshold, so reporting the number is the whole point. **Never declines at `last_resort`.** |
 
@@ -92,6 +93,34 @@ That last line was not free. An early version constructed the claim evaluator
 with the wrong arity, so the forced path failed *closed*: it declined at every
 last resort, and FishLab would then have booked its own all-to-one-seat
 fallback as **our** declaration. `scripts4/fishlab_check.py` caught it.
+
+Neither was the row above it. The on-turn split is a repair, and the version
+before it made KRAKEN's declaration policy **unreachable through this
+package**. `declare_poll` used the deduction-only rule at *both* turn states,
+and its comment defended that by saying a merely-confident seat could "wait for
+its own turn and use the full policy" — which was false, because on our turn
+this very method ran first and answered `none`, and `ask` then *discarded* any
+declaration the policy returned in favour of the first legal ask. The shape of
+the loss is visible in the 1,200-game record it produced in FishLab's own
+arbiter:
+
+| | declarations/game | accuracy |
+|---|---|---|
+| KRAKEN, before the repair | 4.10 | **100.00%** |
+| FishBot v0.7 | 4.73 | 98.41% |
+
+Never wrong, and two thirds of a half-suit a game short. A bot that is never
+wrong about anything is not a bot playing well; it is a bot that has been
+prevented from deciding, and the only reason it was caught is that the number
+it produced was too good.
+
+Two states stay out of the on-turn path, because FishLab covers each with its
+own op and the policy must not be asked about either: a cardless seat on turn
+goes to `pass`, and `act()` on that observation takes the pass branch, whose
+fallback is `max(legal_passes())` — which raises on an empty sequence when the
+teammates are cardless too, and stopped a 1,200-game run doing exactly that. A
+seat holding only complete half-suits has no legal ask and goes to `forced`.
+Both still fall through to the deduction, so a certainty is offered in either.
 
 ## Checking it here
 

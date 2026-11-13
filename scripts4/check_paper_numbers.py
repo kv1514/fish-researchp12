@@ -33,10 +33,29 @@ PAPER = ROOT / "paper" / "kraken.tex"
 
 
 def _get(d, path):
-    for k in path.split("."):
+    """Walk a dotted key path; list indices are integers.
+
+    A key may itself contain a dot -- ``ownership_estimators.json`` names
+    its thresholds ``share_over_0.99_when_ours`` -- and a plain split then
+    asks a dict for ``share_over_0`` and reports the key gone, which reads
+    exactly like a results file that no longer holds the figure. So when a
+    segment is not a key, the following segments are joined back on to it
+    one at a time until one is; only if none is does the lookup fail.
+    """
+    parts = path.split(".")
+    i = 0
+    while i < len(parts):
         if isinstance(d, list):
-            k = int(k)
+            d = d[int(parts[i])]
+            i += 1
+            continue
+        j = i
+        k = parts[i]
+        while k not in d and j + 1 < len(parts):
+            j += 1
+            k = k + "." + parts[j]
         d = d[k]
+        i = j + 1
     return d
 
 
@@ -871,9 +890,9 @@ WATCH = [
     ("foreign_m2_check.json", "n_pairs", "{:d}",
      "foreign-opponent paired games", "games per arm, the statistic being"),
     ("foreign_m2_check.json", "kv_margin_on", "{:+.3f}",
-     "margin over v0.7, correction on", "beats v0.7 by"),
+     "margin over v0.7, correction on", "beats the external engine by"),
     ("foreign_m2_check.json", "kv_margin_off", "{:+.3f}",
-     "margin over v0.7, correction off", "beats v0.7 by"),
+     "margin over v0.7, correction off", "beats the external engine by"),
     ("foreign_m2_check.json", "kv_set_share", "{:.1%}",
      "share of decided sets vs v0.7", "of decided sets across"),
     # The rule-matched rerun (R2) and the standard-scoring headline (R1) of
@@ -974,9 +993,11 @@ WATCH = [
     # on the two partial arms being told nearly the SAME number of cards, so a
     # drift in either pinned-per-game figure would silently dissolve it.
     ("ceiling_split.json", "arms.T_team.ceiling", "{:+.4f}",
-     "teammate-knowledge ceiling", "its \\textbf{teammates'} cards"),
+     "teammate-knowledge ceiling",
+     "its \\textbf{teammates'} cards & $40.7$"),
     ("ceiling_split.json", "arms.O_opp.ceiling", "{:+.4f}",
-     "opponent-knowledge ceiling", "its \\textbf{opponents'} cards"),
+     "opponent-knowledge ceiling",
+     "its \\textbf{opponents'} cards & $40.4$"),
     ("ceiling_split.json", "arms.T_team.pinned_by_cheat_per_game", "{:.1f}",
      "teammate arm, cards pinned per game", "cards pinned/game"),
     ("ceiling_split.json", "arms.O_opp.pinned_by_cheat_per_game", "{:.1f}",
@@ -1065,23 +1086,23 @@ WATCH = [
     # The foreign choice curve: the opponent model measured against a policy
     # that is not a copy of ourselves. Watched in full because the whole point
     # is a sign, and a sign that drifts silently is the worst kind of stale.
-    ("choice_curve_foreign.json", "alpha", "{:+.4f}",
+    ("choice_curve_foreign_rev2.json", "alpha", "{:+.4f}",
      "foreign choice-model exponent", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
-    ("choice_curve_foreign.json", "ci95.0", "{:+.4f}",
+    ("choice_curve_foreign_rev2.json", "ci95.0", "{:+.4f}",
      "foreign exponent CI low", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
-    ("choice_curve_foreign.json", "ci95.1", "{:+.4f}",
+    ("choice_curve_foreign_rev2.json", "ci95.1", "{:+.4f}",
      "foreign exponent CI high", "and a fitted $\\alpha = \\mathbf{-1.0041}$"),
-    ("choice_curve_foreign.json", "n_records", "{:,d}",
-     "foreign asks in the corpus", "against v0.7 over"),
-    ("choice_curve_foreign.json", "n_games", "{:d}",
+    ("choice_curve_foreign_rev2.json", "n_records", "{:,d}",
+     "foreign asks in the corpus", "against the external engine over"),
+    ("choice_curve_foreign_rev2.json", "n_games", "{:d}",
      "foreign cross-engine games", "cross-engine games gives"),
-    ("choice_curve_foreign.json", "curve.1.relative", "{:.3f}",
+    ("choice_curve_foreign_rev2.json", "curve.1.relative", "{:.3f}",
      "foreign O/E at depth 1", "observed / expected"),
-    ("choice_curve_foreign.json", "curve.2.relative", "{:.3f}",
+    ("choice_curve_foreign_rev2.json", "curve.2.relative", "{:.3f}",
      "foreign O/E at depth 2", "observed / expected"),
-    ("choice_curve_foreign.json", "curve.3.relative", "{:.3f}",
+    ("choice_curve_foreign_rev2.json", "curve.3.relative", "{:.3f}",
      "foreign O/E at depth 3", "observed / expected"),
-    ("choice_curve_foreign.json", "curve.4.relative", "{:.3f}",
+    ("choice_curve_foreign_rev2.json", "curve.4.relative", "{:.3f}",
      "foreign O/E at depth 4", "observed / expected"),
     ("bridge_bug_price.json", "paired_difference", "{:+.4f}",
      "price of the bridge defect", "sets per game: real, and about"),
@@ -1093,26 +1114,166 @@ WATCH = [
      "deals replayed under both bridges", "deals replayed under both bridge"),
     # The corrected head-to-head itself -- the one figure in this paper taken
     # through bridge revision 2, and the one the abstract now leads with.
-    ("mega_match.json", "margin", "{:+.4f}",
-     "corrected margin over v0.7", "margin & $\\mathbf{+2.3466}$"),
-    ("mega_match.json", "ci95.0", "{:+.4f}",
-     "corrected margin CI low", "margin & $\\mathbf{+2.3466}$"),
-    ("mega_match.json", "ci95.1", "{:+.4f}",
-     "corrected margin CI high", "margin & $\\mathbf{+2.3466}$"),
-    ("mega_match.json", "n_games", "{:,d}",
+    ("mega_match_rev2_retracted.json", "margin", "{:+.4f}",
+     "corrected margin over v0.7", "margin (withdrawn, \\S\\ref{sec:otherarbiter}) &"),
+    ("mega_match_rev2_retracted.json", "ci95.0", "{:+.4f}",
+     "corrected margin CI low", "margin (withdrawn, \\S\\ref{sec:otherarbiter}) &"),
+    ("mega_match_rev2_retracted.json", "ci95.1", "{:+.4f}",
+     "corrected margin CI high", "margin (withdrawn, \\S\\ref{sec:otherarbiter}) &"),
+    ("mega_match_rev2_retracted.json", "n_games", "{:,d}",
      "games in the corrected head-to-head", "games on the same deals the retracted"),
-    ("mega_match.json", "kv_set_share", "{:.2%}",
+    ("mega_match_rev2_retracted.json", "kv_set_share", "{:.2%}",
      "corrected set share", "of decided) \\\\"),
-    ("mega_match.json", "declare_right_kv", "{:.2%}",
+    ("mega_match_rev2_retracted.json", "declare_right_kv", "{:.2%}",
      "our declaration accuracy, corrected", "declaration accuracy &"),
-    ("mega_match.json", "declare_right_dylan", "{:.2%}",
+    ("mega_match_rev2_retracted.json", "declare_right_dylan", "{:.2%}",
      "their declaration accuracy, corrected", "declaration accuracy &"),
-    ("mega_match.json", "ask_hit_kv", "{:.2%}",
+    ("mega_match_rev2_retracted.json", "ask_hit_kv", "{:.2%}",
      "our ask hit rate, corrected", "ask hit rate &"),
-    ("mega_match.json", "ask_hit_dylan", "{:.2%}",
+    ("mega_match_rev2_retracted.json", "ask_hit_dylan", "{:.2%}",
      "their ask hit rate, corrected", "ask hit rate &"),
-    ("mega_match.json", "bridge_rev", "{:d}",
-     "bridge revision of the head-to-head", "through bridge\nrevision~"),
+    ("mega_match_rev2_retracted.json", "bridge_rev", "{:d}",
+     "bridge revision of the retracted head-to-head",
+     "through bridge\nrevision~"),
+    # The CORRECTED head-to-head, at rev 3. Separate rows from the retracted
+    # ones above and pinned to a separate artifact, so neither can drift into
+    # the other's table.
+    ("mega_match.json", "margin", "{:+.4f}",
+     "corrected margin over SESTINA", "corrected margin &"),
+    ("mega_match.json", "ci95.0", "{:+.4f}",
+     "corrected margin CI low", "corrected margin &"),
+    ("mega_match.json", "ci95.1", "{:+.4f}",
+     "corrected margin CI high", "corrected margin &"),
+    ("mega_match.json", "n_games", "{:,d}",
+     "games in the corrected head-to-head", "corrected margin &"),
+    ("mega_match.json", "ask_hit_kv", "{:.2%}",
+     "our ask hit rate at rev 3", "hit rate, ours / theirs &"),
+    ("mega_match.json", "ask_hit_dylan", "{:.2%}",
+     "their ask hit rate at rev 3", "hit rate, ours / theirs &"),
+    ("mega_match.json", "declare_right_kv", "{:.2%}",
+     "our declaration accuracy at rev 3", "declaring right, ours / theirs &"),
+    ("mega_match.json", "declare_right_dylan", "{:.2%}",
+     "their declaration accuracy at rev 3",
+     "declaring right, ours / theirs &"),
+    # The same pairing measured in THEIR arbiter. Watched for the same reason
+    # every other cross-engine figure is: it is the counterweight to the
+    # headline, and a counterweight that drifts is worse than none.
+    ("reverse_arbiter_v07.json", "cells.0.winRateA", "{:.2%}",
+     "our win rate in their arbiter", "our games won & $80.41\\%$ &"),
+    ("reverse_arbiter_v07.json", "cells.0.declPerGameA", "{:.3f}",
+     "our declarations a game in their arbiter", "ours declared right &"),
+    ("reverse_arbiter_v07.json", "cells.0.declPerGameB", "{:.3f}",
+     "their declarations a game in their arbiter", "theirs declared right &"),
+    ("reverse_arbiter_v07.json", "cells.0.declAccA", "{:.2%}",
+     "our declaration accuracy in their arbiter", "ours declared right &"),
+    ("reverse_arbiter_v07.json", "cells.0.declAccB", "{:.2%}",
+     "their declaration accuracy in their arbiter", "theirs declared right &"),
+    ("reverse_arbiter_v07.json", "cells.0.games", "{:,d}",
+     "games in their arbiter", "games & $10{,}000$ &"),
+    ("dialect_declaration_probe.json", "their_wrong_per_game_with_channel",
+     "{:.4f}", "their wrong declarations a game, channel on",
+     "their dialect & $3.28$ &"),
+    ("dialect_declaration_probe.json", "their_wrong_per_game_without_channel",
+     "{:.4f}", "their wrong declarations a game, channel off",
+     "no-out-of-turn} & $0.00$ &"),
+    # The ladder shape, which is the control that excluded our own package as
+    # the explanation. Watched rung by rung: the ARGUMENT is the ORDER of these
+    # numbers, so one drifting breaks the claim rather than blurring it.
+    ("ladder_shape_comparison.json", "rungs.v03.their_arbiter.their_err",
+     "{:.2%}", "their v0.3 declaration error, their arbiter",
+     "release 3 & $+0.6133$ &"),
+    ("ladder_shape_comparison.json", "rungs.v05.their_arbiter.their_err",
+     "{:.2%}", "their v0.5 declaration error, their arbiter",
+     "release 5 & $+2.1233$ &"),
+    ("ladder_shape_comparison.json", "rungs.v06.their_arbiter.their_err",
+     "{:.2%}", "their v0.6 declaration error, their arbiter",
+     "release 6 & $+1.8850$ &"),
+    ("ladder_shape_comparison.json", "rungs.v07.their_arbiter.their_err",
+     "{:.2%}", "their v0.7 declaration error, their arbiter",
+     "release 7 & $+2.3600$ &"),
+    ("ladder_shape_comparison.json", "rungs.v03.our_arbiter.their_err",
+     "{:.2%}", "their v0.3 declaration error, our arbiter",
+     "release 3 & $+0.6133$ &"),
+    ("ladder_shape_comparison.json", "rungs.v07.our_arbiter.their_err",
+     "{:.2%}", "their v0.7 declaration error, our arbiter",
+     "release 7 & $+2.3600$ &"),
+    # The statefulness sweep, which identified the mechanism. Watched rung by
+    # rung because the ARGUMENT is that the rate is exactly zero on the two
+    # scripted baselines and nonzero from v0.4: a single row drifting does not
+    # blur that claim, it breaks it.
+    ("statefulness_dylan_v02.json", "divergent", "{:d}",
+     "v0.2 divergent decisions", "release 2 & $323$ &"),
+    ("statefulness_dylan_v03.json", "divergent", "{:d}",
+     "v0.3 divergent decisions", "release 3 & $338$ &"),
+    ("statefulness_dylan_v04.json", "divergence_rate", "{:.2%}",
+     "v0.4 divergence rate", "release 4 & $415$ & $81$ &"),
+    ("statefulness_dylan_v05.json", "divergence_rate", "{:.2%}",
+     "v0.5 divergence rate", "release 5 & $336$ & $137$ &"),
+    ("statefulness_dylan_v06.json", "divergence_rate", "{:.2%}",
+     "v0.6 divergence rate", "release 6 & $292$ & $36$ &"),
+    ("statefulness_dylan_v07.json", "divergence_rate", "{:.2%}",
+     "v0.7 divergence rate", "release 7 & $296$ & $84$ &"),
+    ("statefulness_dylan_v07.json", "decisions", "{:d}",
+     "v0.7 decisions compared", "release 7 & $296$ &"),
+    # The retraction's own numbers. If any of these drift the retraction stops
+    # matching the evidence for it, which is worse than the original error.
+    ("bridge_statefulness_price.json", "margin_stateless", "{:+.4f}",
+     "margin through the stateless bridge",
+     "our margin, stateless bridge &"),
+    ("bridge_statefulness_price.json", "margin_persistent", "{:+.4f}",
+     "margin through the persistent bridge",
+     "our margin, persistent bridge &"),
+    ("bridge_statefulness_price.json", "cost_to_them", "{:+.4f}",
+     "what the stateless bridge was worth to us",
+     "the bridge was worth, to us &"),
+    ("bridge_statefulness_price.json", "ci95.0", "{:+.4f}",
+     "bridge price CI low", "the bridge was worth, to us &"),
+    ("bridge_statefulness_price.json", "ci95.1", "{:+.4f}",
+     "bridge price CI high", "the bridge was worth, to us &"),
+    ("bridge_statefulness_price.json", "their_wrong_declarations_stateless",
+     "{:.4f}", "their wrong declarations, stateless bridge",
+     "their wrong declarations/game, stateless &"),
+    ("bridge_statefulness_price.json", "their_wrong_declarations_persistent",
+     "{:.4f}", "their wrong declarations, persistent bridge",
+     "their wrong declarations/game, persistent &"),
+    ("bridge_statefulness_price.json", "pairs", "{:,d}",
+     "pairs in the bridge price", "The paired contrast prices it: $"),
+    # The persistent route's own game count, which is one per pairing. This
+    # went unpinned and drifted to the paired design's total across both arms,
+    # crediting the corrected figure with twice the games behind it -- an error
+    # in the direction that flatters the retraction, which is the direction
+    # that gets checked least.
+    ("bridge_statefulness_price.json", "pairs", "{:,d}",
+     "games behind the corrected margin",
+     "our arbiter, \\emph{persistent} bridge &"),
+    # The mechanism decomposition. Watched arm by arm, and in both bands,
+    # because the finding is which band DOESN'T move: a drift that closed the
+    # declaration gate would reverse the section's conclusion, and a pooled
+    # rate would hide it.
+    ("statefulness_mechanism.json", "arms.s1=1,rtie=1.divergence_rate",
+     "{:.2%}", "mechanism baseline, overall",
+     "the frozen release            &"),
+    ("statefulness_mechanism.json", "bands.s1=1,rtie=1.ask_ordering_rate",
+     "{:.2%}", "mechanism baseline, ask ordering",
+     "the frozen release            &"),
+    ("statefulness_mechanism.json",
+     "bands.s1=1,rtie=1.declaration_gate_rate", "{:.2%}",
+     "mechanism baseline, declaration gate",
+     "the frozen release            &"),
+    ("statefulness_mechanism.json", "arms.s1=0,rtie=1.divergence_rate",
+     "{:.2%}", "with their search off", "their search off              &"),
+    ("statefulness_mechanism.json", "arms.s1=1,rtie=0.divergence_rate",
+     "{:.2%}", "with their tie-breaking off",
+     "their tie-breaking off        &"),
+    ("statefulness_mechanism.json", "arms.+w12=0.divergence_rate", "{:.2%}",
+     "the residual with everything testable off",
+     "\\quad and \\texttt{w12}${=}0$  &"),
+    ("statefulness_mechanism.json", "bands.+w12=0.ask_ordering_rate",
+     "{:.2%}", "residual ask ordering",
+     "\\quad and \\texttt{w12}${=}0$  &"),
+    ("statefulness_mechanism.json", "bands.+w12=0.declaration_gate_rate",
+     "{:.2%}", "residual declaration gate",
+     "\\quad and \\texttt{w12}${=}0$  &"),
     ("bridge_bug_price.json", "their_declare_acc_rev1", "{:.2%}",
      "their declaration accuracy, defective bridge",
      "their declaration accuracy rises from"),
@@ -1206,12 +1367,12 @@ WATCH = [
     # figures stay watched below, because the section quotes both and says
     # they agree.
     ("margin_decomposition.json", "headline_block.margin.mean", "{:+.4f}",
-     "decomposed margin", "Fifty-seven per cent of the margin"),
+     "decomposed margin", "measured margin & --- &"),
     ("margin_decomposition.json", "headline_block.residual.mean", "{:+.4f}",
-     "margin residual after declarations", "Fifty-seven per cent of the margin"),
+     "margin residual after declarations", "everything else & --- &"),
     ("margin_decomposition.json", "headline_block.their_ownership_per_game",
      "{:.4f}", "their ownership-class error rate",
-     "Fifty-seven per cent of the margin"),
+     "their ownership-class errors &"),
     ("margin_decomposition.json", "headline_block.their_per_game", "{:.3f}",
      "their wrong declarations per game", "times a game against their"),
     ("margin_decomposition.json", "decomposition.their_errors.total_per_game",
@@ -1237,6 +1398,414 @@ WATCH = [
      "gate deferral, margin", "so the deferral is"),
     ("stuck_gate_confirm.json", "ledger.B_defer.gate.err", "{:.3f}",
      "gate error rate once deferred", "falls from $0.281$ to"),
+    # The post-P43 ask-deficit analysis. Three exploratory instruments whose
+    # whole point is that they DISAGREE with each other, so each one's figures
+    # are pinned separately: quoting the first without the third would be the
+    # superseded reading, and that is exactly the failure mode this manifest
+    # exists for.
+    ("ask_deficit_anatomy.json", "our_hit", "{:.2%}",
+     "our ask hit rate, anatomy block", "our hit rate is"),
+    ("ask_deficit_anatomy.json", "their_hit", "{:.2%}",
+     "their ask hit rate, anatomy block", "our hit rate is"),
+    ("ask_deficit_anatomy.json", "asks", "{:,d}",
+     "asks in the anatomy block", "asks in $400$ games"),
+    ("ask_deficit_anatomy.json",
+     "strata.our team's cards in the named half-suit.selection", "{:+.4f}",
+     "the one stratifier that says selection",
+     "our team's cards in the named half-suit} &"),
+    ("ask_miss_anatomy.json", "by_side.ours.why.unavoidable in this "
+     "half-suit.share", "{:.2%}",
+     "our unavoidable share of misses", "of our misses are unavoidable"),
+    ("ask_miss_anatomy.json", "by_side.theirs.why.unavoidable in this "
+     "half-suit.share", "{:.2%}",
+     "their unavoidable share of misses", "of our misses are unavoidable"),
+    # The kill-check. The TRUTH rows are the load-bearing ones -- the
+    # belief-scale rows say the opposite and the paper says why -- so both are
+    # watched, and a swap between them cannot pass unnoticed.
+    ("ask_deadness_signal.json", "pairs.auc", "{:.4f}",
+     "AUC of p(dead) at our seats", "separates dead half-suits from live"),
+    ("ask_deadness_signal.json", "naive_auc", "{:.4f}",
+     "AUC of the no-sampling proxy",
+     "already accounted for on our own side"),
+    ("ask_deadness_signal.json", "kraken_v11.truth_dead_chosen", "{:.4f}",
+     "our dead rate, chosen half-suit", "KRAKEN v1.1 & $0.1327$"),
+    ("ask_deadness_signal.json", "kraken_v11.truth_dead_random", "{:.4f}",
+     "our dead rate, menu", "KRAKEN v1.1 & $0.1327$"),
+    ("ask_deadness_signal.json", "kraken_v11.truth_chosen_minus_random",
+     "{:+.4f}", "our selection on deadness", "KRAKEN v1.1 & $0.1327$"),
+    ("ask_deadness_signal.json", "sestina_v10.truth_dead_chosen", "{:.4f}",
+     "their dead rate, chosen half-suit", "The external engine & $0.0945$"),
+    ("ask_deadness_signal.json", "sestina_v10.truth_dead_random", "{:.4f}",
+     "their dead rate, menu", "The external engine & $0.0945$"),
+    ("ask_deadness_signal.json", "sestina_v10.truth_chosen_minus_random",
+     "{:+.4f}", "their selection on deadness", "The external engine & $0.0945$"),
+    ("ask_deadness_signal.json", "sestina_v10.auc_at_these_seats", "{:.4f}",
+     "AUC of p(dead) at their seats", "at ours,"),
+    ("ask_deadness_signal.json", "dead_asks.n", "{:,d}",
+     "our asks into a dead half-suit", "asks into a truly dead half-suit"),
+    # Two different quantities that a first draft quoted as one: the belief's
+    # estimate over EVERY dead half-suit on the menu, and over the ones we go
+    # on to ask into. Both pinned so the pair cannot silently collapse again.
+    ("ask_deadness_signal.json", "pairs.mean_p_dead_when_dead", "{:.4f}",
+     "p(dead) over all dead half-suits", "averaged over every dead half-suit"),
+    ("ask_deadness_signal.json", "dead_asks.mean_p_dead_chosen", "{:.4f}",
+     "p(dead) on the ones we ask into", "averaged over every dead half-suit"),
+    # The latency, and the size check that makes it worth reporting.
+    ("completion_latency.json", "kraken_v11.mean_latency_plies", "{:.2f}",
+     "our plies from completion to declaration", "mean plies to declare it &"),
+    ("completion_latency.json", "sestina_v10.mean_latency_plies", "{:.2f}",
+     "their plies from completion to declaration",
+     "mean plies to declare it &"),
+    ("completion_latency.json", "kraken_v11.dead_ask_share_of_asks", "{:.2%}",
+     "our dead asks as a share of asks", "those, as a share of all asks &"),
+    ("completion_latency.json", "sestina_v10.dead_ask_share_of_asks",
+     "{:.2%}", "their dead asks as a share of asks",
+     "those, as a share of all asks &"),
+    ("completion_latency.json", "kraken_v11.stuck_share", "{:.2%}",
+     "our completions sat on 10+ plies", "completions sat on $10+$ plies &"),
+    ("completion_latency.json", "excess_dead_asks_per_game", "{:+.3f}",
+     "our excess dead asks per game", "The excess is"),
+    ("completion_latency.json", "excess_priced_sets_per_game.point", "{:+.3f}",
+     "that excess, priced in sets", "puts the excess at"),
+    ("completion_latency.json", "excess_priced_sets_per_game.ci95.0",
+     "{:+.3f}", "priced excess, CI low", "puts the excess at"),
+    ("completion_latency.json", "excess_priced_sets_per_game.ci95.1",
+     "{:+.3f}", "priced excess, CI high", "puts the excess at"),
+    # P44. The duel that overturned the reading its own analysis invited, so
+    # the arm's margins AND the hit rate it improved are both pinned: quoting
+    # the margin without the hit rate loses the entire point of the result.
+    ("p44_futility.json", "d1_fire_rate", "{:.2%}",
+     "D1 firing rate", "it fires at"),
+    ("p44_futility.json", "d2_per_game", "{:.3f}",
+     "D2 firing rate", "It fired on"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.vs_sestina.mean", "{:+.4f}",
+     "D1 against SESTINA", "dead\\_ask\\_threshold} $=0.5$ &"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.self_play.mean", "{:+.4f}",
+     "D1 in self-play", "dead\\_ask\\_threshold} $=0.5$ &"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.cand_ask_hit", "{:.4f}",
+     "D1's ask hit rate", "the candidate's ask hit rate is"),
+    ("p44_screen.json", "arms.D1_dead_ask_050.champ_ask_hit", "{:.4f}",
+     "the champion's ask hit rate", "the candidate's ask hit rate is"),
+    # The ownership closure. P44 explained D2's starvation as "we do not know
+    # we own them"; the sweep in this file says the opposite -- the gate is
+    # flat from 0.77 down to 0.20 and bound by the exactness band, not by
+    # ownership. That reading depends on every row of the sweep table
+    # standing together (a single relaxed cell would read as a trend), and on
+    # the three estimators agreeing at 0.99, so the table, the 4.17% and the
+    # weighted-versus-product contrast that names the sharpest estimator the
+    # worst are all pinned. A paper that kept the sweep and lost the 4.17%
+    # would be arguing from half the closure.
+    ("ownership_estimators.json", "prod.mean_when_ours", "{:.4f}",
+     "product, mean when ours", "independence product &"),
+    ("ownership_estimators.json", "prod.auc", "{:.4f}",
+     "product AUC", "independence product &"),
+    ("ownership_estimators.json", "prod.brier", "{:.4f}",
+     "product Brier", "independence product &"),
+    ("ownership_estimators.json", "joint_u.mean_when_ours", "{:.4f}",
+     "uniform joint, mean when ours", "uniform joint &"),
+    ("ownership_estimators.json", "joint_w.mean_when_ours", "{:.4f}",
+     "weighted joint, mean when ours", "weighted joint &"),
+    ("ownership_estimators.json", "contrasts.weighted_minus_product.delta",
+     "{:+.4f}", "weighted minus product",
+     "the weighted joint against the product is"),
+    ("ownership_estimators.json", "contrasts.weighted_minus_product.lo",
+     "{:+.4f}", "weighted minus product, CI low",
+     "the weighted joint against the product is"),
+    ("ownership_estimators.json", "contrasts.weighted_minus_product.hi",
+     "{:+.4f}", "weighted minus product, CI high",
+     "the weighted joint against the product is"),
+    ("ownership_estimators.json", "prod.share_over_0.99_when_ours", "{:.2%}",
+     "owned half-suits crossing 0.99", "All three cross"),
+    # ``gate`` is a list ordered by owned_p_team: index 6 is 0.77, 7 is 0.85,
+    # 8 is 0.90, 10 is 0.99. Indices 0--6 hold the same row, which is the
+    # finding -- the paper collapses them into "0.77 down to 0.20".
+    ("ownership_estimators.json", "gate.6.new_per_game", "{:.4f}",
+     "new declarations/game, 0.77 down to 0.20", "down to $0.20$ &"),
+    ("ownership_estimators.json", "gate.6.precision", "{:.4f}",
+     "precision at 0.77", "down to $0.20$ &"),
+    ("ownership_estimators.json", "gate.10.new_per_game", "{:.4f}",
+     "new declarations/game at 0.99", "(P44's) &"),
+    ("ownership_estimators.json", "gate.8.new_per_game", "{:.4f}",
+     "new declarations/game at 0.90", "$0.90$ &"),
+    ("ownership_estimators.json", "gate.7.new_per_game", "{:.4f}",
+     "new declarations/game at 0.85", "$0.85$ &"),
+    # P45. The same shape as P44 and pinned for the same reason: the arm's
+    # margins and the hit rate it raised are one finding, not two. F1 loses in
+    # both populations WHILE raising the ask hit rate, which is what makes it
+    # a replication of P44's D1 on an independent channel rather than one more
+    # negative. Quoting the margins alone would leave the replication
+    # unpinned, and quoting the hit rate alone would read as a success. The
+    # futility screen's carry figures are pinned too, because the duel is only
+    # a duel of THIS gate if the encoder reached the code path, and the
+    # +5.80 points is the evidence that it did.
+    ("p45_futility.json", "carry_gain", "{:+.2%}",
+     "F1 carry gain", "with a carry gain of"),
+    ("p45_futility.json", "arm_carry_rate", "{:.1%}",
+     "F1 carry rate", "with a carry gain of"),
+    ("p45_futility.json", "champion_carry_rate", "{:.1%}",
+     "champion carry rate", "with a carry gain of"),
+    # The arm's row in the verdict table. ``convention\_max\_cost} $=10^{-9}$
+    # &`` alone recurs in the hit-rate table further down, so the row is
+    # anchored with its arm label, which is unique to the verdict table.
+    ("p45_screen.json", "arms.F1_free_message.vs_sestina.mean", "{:+.4f}",
+     "F1 against SESTINA",
+     "F1 \\texttt{convention\\_max\\_cost} $=10^{-9}$ &"),
+    ("p45_screen.json", "arms.F1_free_message.self_play.mean", "{:+.4f}",
+     "F1 in self-play",
+     "F1 \\texttt{convention\\_max\\_cost} $=10^{-9}$ &"),
+    ("p45_screen.json", "arms.F1_free_message.cand_ask_hit", "{:.4f}",
+     "F1's ask hit rate", "F1's ask hit rate is"),
+    ("p45_screen.json", "arms.F1_free_message.champ_ask_hit", "{:.4f}",
+     "the champion's ask hit rate against F1", "F1's ask hit rate is"),
+    # P46 Stage 0, the belief grid (results/p46_belief_grid.json). The
+    # licensed cell's four opp-pool contrasts are bold in the matrix and in
+    # the text, and the prediction they falsify is quoted next to them, so
+    # each is pinned to the row the instrument wrote.
+    ("p46_belief_grid.json", "meta.n_decisions.A", "{:,d}",
+     "P46 frozen decisions, block A", "frozen decisions, of which"),
+    ("p46_belief_grid.json", "meta.n_decisions.B", "{:d}",
+     "P46 frozen decisions, block B", "frozen decisions, of which"),
+    ("p46_belief_grid.json", "summary.validity.incumbent_480_mean_ess_over_n",
+     "{:.3f}", "P46 incumbent ESS/n at 480",
+     "reproduces the live champion's mean ESS"),
+    ("p46_belief_grid.json", "summary.validity.live_champion_mean_ess_over_n",
+     "{:.3f}", "P46 live champion ESS/n",
+     "reproduces the live champion's mean ESS"),
+    ("p46_belief_grid.json", "summary.validity.relative_gap", "{:.1%}",
+     "P46 validity gap", "reproduces the live champion's mean ESS"),
+    ("p46_belief_grid.json",
+     "grid.A.-1.1055,0.35,0.budgets.720.pools.opp.paired_vs_incumbent.nll.mean",
+     "{:+.4f}", "C1c twin, opp-pool NLL at 720", "four times the prediction"),
+    ("p46_belief_grid.json", "summary.verdicts.-1.1055,0.35,0.ess_ratio.A:720",
+     "{:.2f}", "C1c twin, ESS ratio at 720", "four times the prediction"),
+    ("p46_belief_grid.json",
+     "grid.A.0,0.35,0.budgets.720.pools.opp.paired_vs_incumbent.nll.mean",
+     "{:+.4f}", "model off on their seats only, opp-pool NLL at 720",
+     "seats alone, $(0, 0.35)$, was predicted a"),
+    ("p46_belief_grid.json",
+     "summary.verdicts.0.35,0.35,0.9.budget_robustness.A.mean_720", "{:+.4f}",
+     "opp_lambda 0.9, opp-pool NLL at 720", "a hair worse"),
+    ("p46_belief_grid.json", "summary.opp_lambda_calibration.truth_no.mean",
+     "{:.3f}", "opp_lambda calibration mean on truth-no half-suits",
+     "under the $0.10$ bar"),
+    ("p46_belief_grid.json",
+     "grid.A.0.7,0.7,0.budgets.720.pools.opp.paired_vs_incumbent.nll.mean",
+     "{:+.4f}", "licensed cell, opp-pool NLL, block A at 720",
+     "the one cell the registration allowed to become an arm"),
+    ("p46_belief_grid.json",
+     "grid.A.0.7,0.7,0.budgets.2880.pools.opp.paired_vs_incumbent.nll.mean",
+     "{:+.4f}", "licensed cell, opp-pool NLL, block A at 2,880",
+     "the one cell the registration allowed to become an arm"),
+    ("p46_belief_grid.json",
+     "grid.B.0.7,0.7,0.budgets.720.pools.opp.paired_vs_incumbent.nll.mean",
+     "{:+.4f}", "licensed cell, opp-pool NLL, block B at 720",
+     "the team pool better by a similar amount"),
+    ("p46_belief_grid.json",
+     "grid.B.0.7,0.7,0.budgets.2880.pools.opp.paired_vs_incumbent.nll.mean",
+     "{:+.4f}", "licensed cell, opp-pool NLL, block B at 2,880",
+     "the team pool better by a similar amount"),
+    ("p46_belief_grid.json", "summary.verdicts.0.7,0.7,0.ess_ratio.A:720",
+     "{:.2f}", "licensed cell, ESS ratio, block A", "Its price is the sample"),
+    ("p46_belief_grid.json", "summary.verdicts.0.7,0.7,0.ess_ratio.B:720",
+     "{:.2f}", "licensed cell, ESS ratio, block B", "Its price is the sample"),
+    # P46 Stage 1 (results/p46_screen.json, results/p46_screen_G.json): the
+    # bold rows of the four-arm table and the two hit rates.
+    ("p46_screen.json", "arms.E1_off_on_sestina.vs_sestina.mean", "{:+.4f}",
+     "E1 against SESTINA", "off on their three seats only &"),
+    ("p46_screen.json", "arms.E2_off_on_teammates.vs_sestina.mean", "{:+.4f}",
+     "E2 against SESTINA", "off on our two teammates only &"),
+    ("p46_screen.json", "arms.E2_off_on_teammates.self_play.mean", "{:+.4f}",
+     "E2 in self-play", "off on our two teammates only &"),
+    ("p46_screen_G.json", "arms.G_gamma_07.vs_sestina.mean", "{:+.4f}",
+     "G against SESTINA", "$=0.7$, their seats and ours &"),
+    ("p46_screen_G.json", "arms.G_gamma_07.self_play.mean", "{:+.4f}",
+     "G in self-play", "$=0.7$, their seats and ours &"),
+    ("p46_screen.json", "contrasts.E2_minus_E0.vs_sestina.mean", "{:+.4f}",
+     "E2 minus E0 against SESTINA", "their seats' model, ours off &"),
+    ("p46_screen.json", "contrasts.E2_minus_E0.self_play.mean", "{:+.4f}",
+     "E2 minus E0 in self-play", "their seats' model, ours off &"),
+    ("p46_screen_G.json", "arms.G_gamma_07.cand_ask_hit", "{:.4f}",
+     "G's ask hit rate", "G's ask hit rate is"),
+    ("p46_screen_G.json", "arms.G_gamma_07.champ_ask_hit", "{:.4f}",
+     "the champion's ask hit rate against G", "G's ask hit rate is"),
+    # P47, the confirm of G (results/p47_confirm.json).
+    ("p47_confirm.json", "arms.G_gamma_07.vs_sestina.mean", "{:+.4f}",
+     "G at confirm against SESTINA", "their seats and ours, at confirm &"),
+    ("p47_confirm.json", "arms.G_gamma_07.self_play.mean", "{:+.4f}",
+     "G at confirm in self-play", "their seats and ours, at confirm &"),
+    ("p47_confirm.json", "arms.G_gamma_07.cand_ask_hit", "{:.4f}",
+     "G's ask hit rate at confirm", "did not replicate:"),
+    ("p47_confirm.json", "arms.G_gamma_07.champ_ask_hit", "{:.4f}",
+     "the champion's ask hit rate against G at confirm", "did not replicate:"),
+    # P48, the signalling protocol through the repaired bridge
+    # (results/p48_screen.json): the bold rows of the two tables and the dose.
+    ("p48_screen.json", "arms.S1_signal_stuck_05.vs_sestina.mean", "{:+.4f}",
+     "S1 against SESTINA at rev 3", "\\texttt{signal\\_max\\_p} $=0.5$ &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.self_play.mean", "{:+.4f}",
+     "S1 in self-play at rev 3", "\\texttt{signal\\_max\\_p} $=0.5$ &"),
+    ("p48_screen.json", "arms.S2_signal_budget6.vs_sestina.mean", "{:+.4f}",
+     "S2 against SESTINA at rev 3", "S1 $+$ \\texttt{signal\\_budget} $=6$ &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.channels.vs_sestina.ours.mean",
+     "{:+.4f}", "S1's ours channel against SESTINA",
+     "our wrong declarations, sign flipped) &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.channels.vs_sestina.theirs.mean",
+     "{:+.4f}", "S1's theirs channel against SESTINA",
+     "their wrong declarations) &"),
+    ("p48_screen.json", "arms.S1_signal_stuck_05.signals_per_game.vs_sestina",
+     "{:.3f}", "S1's signals a game against SESTINA",
+     "signals a game against the external engine, not"),
+    # The revision-3 channel decomposition (\S sec:res-rev3channels). The
+    # withdrawn rev-2 decomposition was arithmetically exact on corrupted
+    # inputs, which is precisely the shape a stale figure has, so its
+    # replacement is watched from the day it enters the paper rather than
+    # added to the list after something drifts.
+    ("margin_channels_rev3.json", "race", "{:+.4f}",
+     "rev-3 RACE channel", "half-suits we declare at all"),
+    ("margin_channels_rev3.json", "ours", "{:+.4f}",
+     "rev-3 OURS channel",
+     "\\textsc{ours}, our own wrong declarations"),
+    ("margin_channels_rev3.json", "theirs", "{:+.4f}",
+     "rev-3 THEIRS channel",
+     "\\textsc{theirs}, their wrong declarations"),
+    ("margin_channels_rev3.json", "headroom.ours", "{:+.4f}",
+     "what perfect declaration is worth", "and it still loses"),
+    ("margin_channels_rev3.json", "d_us", "{:.3f}",
+     "our declarations a game at rev 3", "half-suits we declare at all"),
+    # The revision-3 assembly race (\S sec:res-assembly). The table it
+    # replaces was rev-2, carried no marker of its own, and inverted; both of
+    # its bolded cells are watched here so the replacement cannot repeat it.
+    ("completion_ledger_12500000.json", "paired.completed.mean", "{:+.4f}",
+     "rev-3 assembly gap", "half-suits assembled and named right"),
+    ("completion_ledger_12500000.json", "paired.hits_wasted.mean", "{:+.3f}",
+     "rev-3 wasted-hit gap", "hits \\emph{wasted}"),
+    ("completion_ledger_12500000.json", "paired.turns.mean", "{:+.3f}",
+     "rev-3 turn-acquisition gap", "turn acquisitions &"),
+    ("completion_ledger_12500000.json", "sides.kv.wasted_share", "{:.4f}",
+     "our wasted share of hits", "wasted share of hits"),
+    ("completion_ledger_12500000.json", "sides.dy.wasted_share", "{:.4f}",
+     "their wasted share of hits", "wasted share of hits"),
+    # The pure half-suit-value objective, quoted in sec:res-assembly as the
+    # reason its instinct is not a plan. The paper had block 0's -7.191; the
+    # pooled estimate over both blocks is what the file holds.
+    ("value_baseline_verdict.json", "estimate", "{:.3f}",
+     "pure value objective vs champion", "and it lost by"),
+    # The abstract's allocation share. It was quoted from the rev-2
+    # decomposition the paper withdraws in full; re-taken on the 1,200-game
+    # revision-3 block it is 95.9%, so the claim survives and the number that
+    # carried it does not.
+    ("margin_channels_rev3.json", "our_allocation_share", "{:.1%}",
+     "allocation share of our wrong declarations",
+     "are \\emph{allocation} errors"),
+    ("margin_channels_rev3.json", "our_allocation_per_game", "{:.4f}",
+     "our allocation errors a game", "$116$ of $121$ over the"),
+    ("margin_channels_rev3.json", "our_ownership_per_game", "{:.4f}",
+     "our ownership errors a game", "ownership errors --- $116$"),
+    # The dialect table's last row, which is a marked revision-2 figure.
+    ("dialect_declaration_probe.json", "comparison_our_arbiter.their_wrong_per_game",
+     "{:.4f}", "their wrong declarations in our arbiter, rev 2",
+     "\\emph{our arbiter, our dialect}"),
+    # The conversion profile (\S sec:res-conversion). Every bolded cell of
+    # that table, because the claim it supports -- that the two engines are
+    # stronger in different places -- lives entirely in the signs.
+    ("contest_ledger_12700000.json", "matched_by_deal.6-0.edge", "{:+.3f}",
+     "our edge given all six dealt", "$6$--$0$ & $99$"),
+    ("contest_ledger_12700000.json", "matched_by_deal.5-1.edge", "{:+.3f}",
+     "our edge given five of six", "$5$--$1$ & $607$"),
+    ("contest_ledger_12700000.json", "matched_by_deal.3-3.edge", "{:+.3f}",
+     "our edge at an even deal", "$3$--$3$ & $2{,}354$"),
+    ("contest_ledger_12700000.json", "matched_by_deal.1-5.edge", "{:+.3f}",
+     "our edge given one of six", "$1$--$5$ & $607$"),
+    ("contest_ledger_12700000.json", "cost_per_game", "{:+.4f}",
+     "half-suits a game at their conversion rate", "fixed and moving only"),
+    ("contest_ledger_12700000.json", "cost_middle", "{:+.4f}",
+     "the contested middle's share of it", "of which the contested middle"),
+    ("contest_ledger_12700000.json", "margin_swing", "{:+.2f}",
+     "margin swing at their conversion rate", "that is a margin swing of"),
+    ("contest_ledger_12700000.json", "middle_share", "{:.1%}",
+     "the contested band's share of all half-suits",
+     "The contested band is"),
+    # The replication block and the seat-shape refutation. Watched from the
+    # day they enter, and the replication's own figures are watched too --
+    # a second block quoted to weaken a first claim is exactly the kind of
+    # number that must not be allowed to drift back.
+    ("contest_ledger_13100000.json", "matched_by_deal.1-5.edge", "{:+.3f}",
+     "our edge given one of six, replication", "falls from $+0.043$ to"),
+    ("contest_ledger_13100000.json", "cost_per_game", "{:+.4f}",
+     "half-suits a game, replication", "the total within four thousandths"),
+    ("contest_ledger_13100000.json",
+     "coordination_shape_3_3.1-1-1.edge", "{:+.3f}",
+     "our edge at the 1-1-1 seat shape", "$1$--$1$--$1$ & $0.477$"),
+    ("contest_ledger_13100000.json",
+     "coordination_shape_3_3.3-0-0.edge", "{:+.3f}",
+     "our edge at the 3-0-0 seat shape", "$3$--$0$--$0$ & $0.351$"),
+    # The revision-3 information ceilings. The rev-2 pair they replace sat in
+    # the abstract for the life of the paper and nothing checked it, because
+    # both figures were \mathbf and the sweep saw only \textbf.
+    ("ceiling_rev3.json", "arms.T_team.ceiling", "{:+.4f}",
+     "rev-3 teammate ceiling", "its \\textbf{teammates'} cards & $40.5$"),
+    ("ceiling_rev3.json", "arms.O_opp.ceiling", "{:+.4f}",
+     "rev-3 opponent ceiling", "its \\textbf{opponents'} cards & $40.9$"),
+    ("ceiling_rev3.json", "arms.F_all.ceiling", "{:+.4f}",
+     "rev-3 omniscience ceiling", "everything & $60.2$"),
+    ("ceiling_rev3.json", "teammate_over_opponent", "{:.2f}",
+     "rev-3 teammate/opponent ceiling ratio",
+     "times apart where they are"),
+    # The legality audit and the measured choice profile. Both are quoted with
+    # \mathbf, which the bolded-number sweep now reads as well as \textbf.
+    ("belief_legality_audit_14600000.json", "all.n", "{:,d}",
+     "worlds validated against the record", "posteriors and"),
+    ("belief_legality_audit_14600000.json", "all.rate", "{:.4f}",
+     "share of sampled worlds the record permits", "every world is valid"),
+    ("belief_legality_audit_14600000.json", "own_decision.n", "{:,d}",
+     "worlds validated at a seat's own decision", "decision ($"),
+    ("belief_legality_audit_14600000.json", "as_watcher.n", "{:,d}",
+     "worlds validated as a watcher", "as a watcher at someone"),
+    ("partner_choice_likelihood_14800000.json", "n_partner_asks", "{:,d}",
+     "partner asks behind the measured choice profile", "partner asks"),
+    ("partner_choice_likelihood_14800000.json", "counts_seen.5", "{:,d}",
+     "pairs at the count the power law overshoots",
+     "$1{,}249$ & $943$"),
+    ("partner_choice_likelihood_14800000.json", "p_chosen_given_k.5", "{:.4f}",
+     "P(chosen | k=5)", "$1{,}249$ & $943$"),
+    ("partner_choice_likelihood_14800000.json", "p_chosen_given_k.0", "{:.4f}",
+     "P(chosen | k=0), which the rules force to zero",
+     "$31{,}022$ & $0$"),
+    ("partner_choice_likelihood_14800000.json", "power_law_relative_error.5",
+     "{:+.1%}", "how far the power law overshoots at k=5",
+     # NOT "because the measurement flattens": the anchor search runs on the
+     # raw file and that phrase straddles a line break, so it was never going
+     # to be found however true it is of the paragraph.
+     "residual error is not spread evenly"),
+    ("partner_choice_likelihood_14800000.json", "power_law_best_exponent",
+     "{:.2f}", "best-fit exponent of the shipped functional form",
+     "The best-fit power law is"),
+    # The weaker reachability check the legality audit supersedes, quoted so
+    # the comparison between the two is checkable rather than remembered.
+    ("world_reachability_14300000.json", "n_worlds", "{:,d}",
+     "worlds in the reachability check", "walking the public transfers"),
+    # How much an arm actually CHANGES. A verdict table cannot show this: two
+    # arms can differ in every game and land on the same mean, or agree in every
+    # game and look like independent evidence.
+    ("arm_overlap.json", "pairs.D1_flat4 vs R_gamma_team_14.differ", "{:d}",
+     "deals where the flattened arm differs from gamma_team=1.4",
+     # line-safe: the longer phrase straddles a line break in the source, and
+     # the anchor search reads the raw file
+     "engine does in"),
+    ("arm_overlap.json", "pairs.D1_flat4 vs R_gamma_team_14.shared", "{:d}",
+     "deals the two were compared on", "engine does in"),
+    ("arm_overlap.json", "pairs.D1_flat4 vs D2_measured.differ", "{:d}",
+     "deals the measured table differs from the flattened arm",
+     "whole table differs in"),
+    # WHAT IT TAKES TO WIN, solved from the identity rather than quoted. The
+    # give-back is included: a half-suit moved into RACE leaves THEIRS behind.
+    ("split_partner_model_12000000.json", "needed_per_game", "{:.3f}",
+     "extra declarations a game needed to clear the bar",
+     # 'declarations a game' alone occurs 18 times in the paper
+     "text{ declarations"),
+    ("split_partner_model_12000000.json", "needed_derivation.d_us_required",
+     "{:.3f}", "declarations a game the bar requires", "D_{\\text{us}} \\;\\ge\\;"),
+    ("split_partner_model_12000000.json", "needed_derivation.d_us", "{:.3f}",
+     "declarations a game we make now", "a game, our error rate"),
 ]
 
 

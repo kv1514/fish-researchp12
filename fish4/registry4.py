@@ -162,6 +162,12 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 #: pending a refit of scripts4/ii_ask_fit.py against award-rule targets
 #: (the ii journals are rule-fingerprinted for exactly that). V04_COMBINED
 #: keeps its void-era definition and numbers; this name is the live one.
+#: The v0.7 half of that evidence went through the stateless bridge too, and
+#: here the bias runs the other way: the bridge is worth +3.18 sets/game TO US
+#: (results/bridge_statefulness_price.json), so a correction that only managed
+#: a tie through it would be expected to do worse without it. The withdrawal
+#: does not rest on that arm in any case -- the R4 self-sibling interval
+#: contains zero on its own -- but the arm points the same way, harder.
 #: `claim_forced_exhaustive=1` is the one addition, shipped 2026-08-28 under
 #: prereg/forced_exhaustive.md. When a seat is FORCED to declare -- it holds
 #: cards but no legal ask exists -- and at most one half-suit is still live,
@@ -174,6 +180,17 @@ V04_COMBINED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
 #: paired +0.0090 [+0.0031, +0.0149] with accuracy in every other bucket
 #: unmoved (guard 2 passed exactly). It fires on 0.9% of games, which is why
 #: the paired interval is so tight -- see sec:dealluck of the paper.
+#:
+#: The SECOND of those two populations is worth less than it was when this
+#: comment was written, and the addendum of 2026-09-08 to
+#: prereg/forced_exhaustive.md says so: the v0.7 arm was played through the
+#: STATELESS bridge, which results/bridge_statefulness_price.json prices at
+#: +3.18 [+3.01, +3.34] sets/game in our favour -- an opponent handicapped by
+#: our own instrument. The ship is unaffected, because the criterion this
+#: registration fixed in advance is the primary and the primary is the
+#: self-play arm, where both sides are ours and no bridge is in the loop. What
+#: is downgraded is the corroboration, not the decision, and nothing here
+#: changes value.
 V06_DEPLOYED = ("fishbot4", {"opponent_gamma": 0.35, "n_draws": 480,
                              "w_lookahead": 0.25, "lookahead_depth": 3,
                              "lookahead_beam": 4, "endgame_m": 0,

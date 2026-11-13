@@ -497,7 +497,8 @@ def narrate(ev) -> dict:
                     f"{card_name(c)} was P{h}"
                     for c, h in zip(half_suit_cards(ev.half_suit),
                                     ev.revealed))}
-    return {"t": "pass", "text": f"P{ev.player} passed to P{ev.teammate}",
+    return {"t": "pass", "player": ev.player, "teammate": ev.teammate,
+            "text": f"P{ev.player} passed to P{ev.teammate}",
             "proved": f"P{ev.player} is out of cards."}
 
 

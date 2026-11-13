@@ -57,6 +57,23 @@ N_HALF_SUITS = 9
 TOL = 1e-9
 
 
+def _boot_mean(xs, reps: int = 4000, seed: int = 20_250_920):
+    """A percentile bootstrap of a mean over GAMES.
+
+    Deliberately not a normal-approximation standard error. These per-game
+    channel values are small integers on a bounded support -- RACE takes nine
+    values, OURS and THEIRS are counts that are zero most of the time -- and
+    the normal interval on a zero-inflated count is the one this project has
+    already had to widen once.
+    """
+    import numpy as np
+    a = np.asarray(xs, dtype=float)
+    rng = np.random.default_rng(seed)
+    m = a[rng.integers(0, len(a), (reps, len(a)))].mean(1)
+    lo, hi = np.percentile(m, [2.5, 97.5])
+    return float(lo), float(hi)
+
+
 def our_counts(ledger: dict, games: int) -> tuple[float, float]:
     """(declarations, wrong declarations) a game, from the raw integers.
 
@@ -110,6 +127,12 @@ def verify(payload: dict) -> list[str]:
     if payload.get("unfinished"):
         bad.append(f"{payload['unfinished']} games never finished, so their "
                    f"nine half-suits were not all awarded")
+    for arm, fails in (payload.get("integrality_failures") or {}).items():
+        i, deal, du, wt, m, wu = fails[0]
+        bad.append(f"{arm}: {len(fails)} of {payload['n_games']} games solve "
+                   f"to a non-integral or out-of-range count of OUR wrong "
+                   f"declarations; first is row {i} (deal {deal}) with "
+                   f"d_us={du}, w_them={wt}, margin={m} giving w_us={wu:.4f}")
     games = payload["n_games"]
     for arm in payload["margins"]:
         c = channels(payload, arm)
@@ -194,6 +217,146 @@ def decompose(payload: dict, base: str, arm: str) -> dict:
             **rates(payload, base, arm)}
 
 
+def absolute(payload: dict, arm: str) -> dict:
+    """The three channels of the MARGIN ITSELF, against a parity reference.
+
+    `decompose` splits the DIFFERENCE between two arms. That is the right
+    object when asking what an arm changed, and the wrong one when asking
+    where a standing deficit lives -- which is the question a retraction
+    leaves behind, because after a retraction there is no base arm to
+    difference against. The reference here is parity: nine half-suits split
+    4.5/4.5 with nobody ever wrong, which scores 0.
+
+        margin = 2*(d_us - w_us + w_them) - 9
+               = 2*(d_us - 4.5)  +  (-2*w_us)  +  (2*w_them)
+               =      RACE       +     OURS    +   THEIRS
+
+    exactly, with no residual, because it is the identity rearranged. The
+    same warning applies as everywhere else in this file: the channels are an
+    accounting and they co-move. A half-suit we do not declare is one they
+    do, so it leaves RACE and arrives in THEIRS carrying their error rate.
+    """
+    c = channels(payload, arm)
+    race = 2 * (c["d_us"] - N_HALF_SUITS / 2)
+    ours = -2 * c["w_us"]
+    theirs = 2 * c["w_them"]
+    return {"arm": arm, "margin": c["margin"], "race": race, "ours": ours,
+            "theirs": theirs, "residual": c["margin"] - (race + ours + theirs),
+            "d_us": c["d_us"], "w_us": c["w_us"], "w_them": c["w_them"]}
+
+
+def _bridge_arm(rows: list[dict], arm: str) -> dict:
+    """One bridge arm's per-game counters, solved and checked per game.
+
+    The bridge instruments record the OPPONENT's side -- how many half-suits
+    they declared and how many of those were wrong -- and the margin. Our own
+    wrong count is then not free: the identity determines it,
+
+        w_us = d_us + w_them - (margin + 9)/2
+
+    game by game. In the canonical ledger shape it is the other way round and
+    `verify` cross-checks a measured opponent count against a solved one.
+    Here that cross-check would be vacuous, because the only opponent numbers
+    available are the ones the solve already used. The check that is NOT
+    vacuous is integrality: `w_us` counts declarations, so per game it must
+    come out a non-negative whole number no larger than `d_us`. A transport
+    that drops a declaration, a game that did not finish, or the wrong award
+    rule all break that, and nothing else in this shape would catch them.
+    """
+    d_us, w_us, w_them, margin, bad = [], [], [], [], []
+    for i, r in enumerate(rows):
+        a = r[arm]
+        du = N_HALF_SUITS - a["their_declarations"]
+        wt = a["their_ownership_errors"] + a["their_allocation_errors"]
+        wu = du + wt - (a["margin"] + N_HALF_SUITS) / 2
+        if abs(wu - round(wu)) > 1e-9 or wu < -1e-9 or wu > du + 1e-9:
+            bad.append((i, r.get("deal"), du, wt, a["margin"], wu))
+        d_us.append(du)
+        w_us.append(wu)
+        w_them.append(wt)
+        margin.append(a["margin"])
+    return {"d_us": d_us, "w_us": w_us, "w_them": w_them, "margin": margin,
+            "integrality_failures": bad}
+
+
+def from_match(payload: dict) -> dict | None:
+    """Normalise a `mega_match` run into the canonical margins+ledger shape.
+
+    This is the shape the paper's HEADLINE cross-engine figure is in, and it
+    was the last one the identity could not reach -- so the decomposition of
+    the number the abstract quotes was being done, when it was done at all, by
+    hand. It stores per-side rates rather than counts, and the counts follow:
+
+        d = wrong / (1 - declare_right)
+
+    Unlike the bridge shape, BOTH checks here bite. `d_us` and `d_them` are
+    recovered from four numbers that were measured independently of each
+    other, so `d_us + d_them = 9` is a real constraint rather than a
+    definition, and the margin identity then has to close on top of it. A run
+    that dropped a declaration, or reported a rate over the wrong
+    denominator, fails one or the other.
+    """
+    need = ("margin", "n_games", "wrong_declarations_kv",
+            "wrong_declarations_dylan", "declare_right_kv",
+            "declare_right_dylan")
+    if not all(k in payload for k in need):
+        return None
+    n = payload["n_games"]
+    out = {}
+    for who, side in (("us", "kv"), ("them", "dylan")):
+        w = payload[f"wrong_declarations_{side}"]
+        r = payload[f"declare_right_{side}"]
+        if not 0.0 <= r < 1.0:
+            return None
+        out[who] = (w / (1.0 - r) / n, w / n)       # (declarations, wrong)
+    d_us, w_us = out["us"]
+    d_them, w_them = out["them"]
+    return dict(payload, rules=REQUIRED_RULE,
+                ledger={"match": {"identity": {"n": d_us * n,
+                                               "wrong": w_us * n}}},
+                margins={"match": {"mean": payload["margin"]}},
+                both_sides={"match": {"their_wrong": w_them * n,
+                                      "their_declares": d_them * n}},
+                vs="dylan_v07")
+
+
+def from_bridge(payload: dict) -> dict | None:
+    """Normalise a `bridge_*_price` run into the canonical margins+ledger shape.
+
+    These runs predate this file's shape and carry `per_pair`, one row per
+    (deal, seating) with each arm's counters on it. They are the only record
+    of how the corrected transport actually plays, so the identity has to
+    reach them or the post-retraction picture stays a hand calculation across
+    two files -- which is exactly how it was being read.
+    """
+    rows = payload.get("per_pair")
+    arms = payload.get("margins")
+    if not isinstance(rows, list) or not isinstance(arms, dict) or not rows:
+        return None
+    if not all(isinstance(r, dict) and "margin" in r
+               for r in rows[0].values() if isinstance(r, dict)):
+        return None
+    n = len(rows)
+    ledger, both, margins, per_game, failures = {}, {}, {}, {}, {}
+    for arm in arms:
+        if not all(arm in r for r in rows):
+            return None
+        c = _bridge_arm(rows, arm)
+        if c["integrality_failures"]:
+            failures[arm] = c["integrality_failures"]
+        ledger[arm] = {"identity": {"n": sum(c["d_us"]),
+                                    "wrong": sum(c["w_us"])}}
+        both[arm] = {"their_wrong": sum(c["w_them"]),
+                     "their_declares": sum(N_HALF_SUITS - d
+                                           for d in c["d_us"])}
+        margins[arm] = {"mean": sum(c["margin"]) / n}
+        per_game[arm] = c
+    return dict(payload, n_games=n, rules=REQUIRED_RULE, ledger=ledger,
+                margins=margins, both_sides=both, per_game=per_game,
+                integrality_failures=failures, vs="dylan_v07",
+                _w_us_is_solved=True)
+
+
 def adapt(payload: dict) -> dict | None:
     """Normalise the shapes this project has stored margins-plus-ledger in.
 
@@ -216,8 +379,10 @@ def adapt(payload: dict) -> dict | None:
     of asking whether an effect measured in the opponent's counters survives a
     change of opponent.
     """
-    if not isinstance(payload, dict) or "ledger" not in payload:
+    if not isinstance(payload, dict):
         return None
+    if "ledger" not in payload:
+        return from_bridge(payload) or from_match(payload)
     if "margins" in payload:
         return payload
     if payload.get("vs") == "self":
@@ -233,7 +398,7 @@ def adapt(payload: dict) -> dict | None:
     return dict(payload, margins=margins)
 
 
-def report(path: Path) -> int:
+def report(path: Path, base: str | None = None) -> int:
     payload = adapt(json.loads(path.read_text()))
     if payload is None:
         print(f"{path.name}: not a margins-plus-ledger run, skipping")
@@ -249,8 +414,42 @@ def report(path: Path) -> int:
         c = channels(payload, arm)
         print(f"  {arm:<14}{c['margin']:>+9.4f}{c['d_us']:>11.4f}"
               f"{c['w_us']:>12.4f}{c['w_them']:>14.4f}  {c['w_them_source']}")
-    base = next(iter(payload["margins"]))
-    print(f"\n  --- where each arm's effect lives, in margin units ---")
+    print(f"\n  --- where each arm's MARGIN lives, against parity ---")
+    print(f"  (RACE = 2*(d_us - 4.5), OURS = -2*w_us, THEIRS = +2*w_them;")
+    print(f"   they sum to the margin exactly, and they co-move)")
+    pg = payload.get("per_game")
+    ci = "  [95% over games]" if pg else ""
+    print(f"  {'arm':<14}{'margin':>9}{'race':>9}{'ours':>9}{'theirs':>9}"
+          f"{'resid':>8}{ci}")
+    for arm in payload["margins"]:
+        ab = absolute(payload, arm)
+        tail = ""
+        if pg:
+            c = pg[arm]
+            per = [2 * (d - N_HALF_SUITS / 2) - 2 * wu + 2 * wt
+                   for d, wu, wt in zip(c["d_us"], c["w_us"], c["w_them"])]
+            lo, hi = _boot_mean(per)
+            tail = f"  [{lo:+.3f}, {hi:+.3f}]"
+        print(f"  {arm:<14}{ab['margin']:>+9.4f}{ab['race']:>+9.4f}"
+              f"{ab['ours']:>+9.4f}{ab['theirs']:>+9.4f}"
+              f"{ab['residual']:>+8.4f}{tail}")
+    if payload.get("_w_us_is_solved"):
+        print("  w_us is SOLVED from the identity here, not counted: these")
+        print("  runs record the opponent's declarations and not ours. The")
+        print("  check that bites in this shape is per-game integrality, and")
+        print("  it is run above.")
+
+    # WHICH ARM IS THE BASE MATTERS, and defaulting to the first one is how
+    # a retracted transport came to anchor a headroom table. `published` in
+    # the bridge runs is the withdrawn stateless bridge; reading headroom off
+    # it describes a game this project no longer claims to have played.
+    if base is not None and base not in payload["margins"]:
+        print(f"  no arm named {base!r}; have "
+              f"{', '.join(payload['margins'])}")
+        return 1
+    base = base or next(iter(payload["margins"]))
+    print(f"\n  --- where each arm's effect lives, in margin units, "
+          f"vs {base} ---")
     print(f"  (an accounting, not a causal split: the channels co-move)")
     print(f"  {'arm':<14}{'effect':>9}{'race':>9}{'ours':>9}{'theirs':>9}"
           f"{'resid':>9}")
@@ -336,14 +535,65 @@ def sweep(paths: list[Path]) -> list[dict]:
     return rows
 
 
+def emit(path: Path, arm: str, dest: Path) -> int:
+    """Write one arm's absolute channels and headroom to a results file.
+
+    The paper quotes these, and a figure the paper quotes has to come from a
+    file `scripts4/check_paper_numbers.py` can read. Computing them in a
+    report and typing the answer into the manuscript is the exact failure the
+    guard exists to catch, so the instrument writes them instead.
+    """
+    payload = adapt(json.loads(path.read_text()))
+    if payload is None or arm not in payload.get("margins", {}):
+        print(f"{path.name}: no arm {arm!r} to emit")
+        return 1
+    bad = verify(payload)
+    if bad:
+        #: A broken identity must not reach a results file the paper reads.
+        for line in bad:
+            print(f"  IDENTITY BROKEN  {line}")
+        return 1
+    ab = absolute(payload, arm)
+    h = headroom(payload, arm)
+    # The allocation share of our own wrong declarations, when the source run
+    # recorded the split. The paper's abstract quotes it, and quoted it from
+    # the WITHDRAWN rev-2 decomposition for want of a live file holding it.
+    extra = {}
+    aw, w = (payload.get("allocation_misdeclares_kv"),
+             payload.get("wrong_declarations_kv"))
+    if aw is not None and w:
+        extra["our_allocation_share"] = aw / w
+        extra["our_allocation_per_game"] = aw / payload["n_games"]
+        extra["our_ownership_per_game"] = (w - aw) / payload["n_games"]
+    out = dict(ab, **extra, headroom=h, source=path.name,
+               n_games=payload["n_games"],
+               bridge_rev=payload.get("bridge_rev"),
+               script="scripts4/margin_identity.py", descriptive=True,
+               note="RACE+OURS+THEIRS sum to the margin exactly; they are an "
+                    "accounting and they co-move. Headroom values are bounds, "
+                    "not targets, and are not simultaneously reachable.")
+    dest.write_text(json.dumps(out, indent=1) + "\n")
+    print(f"wrote {dest}")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     args = [a for a in argv if not a.startswith("--")]
+    base = next((a.split("=", 1)[1] for a in argv
+                 if a.startswith("--base=")), None)
+    emit_to = next((a.split("=", 1)[1] for a in argv
+                    if a.startswith("--emit=")), None)
+    if emit_to:
+        if len(args) != 1 or base is None:
+            print("--emit needs exactly one input file and --base=<arm>")
+            return 1
+        return emit(Path(args[0]), base, ROOT / "results" / emit_to)
     paths = [Path(a) for a in args] or sorted(
         (ROOT / "results").glob("*.json"))
     if "--sweep" in argv:
         sweep(paths)
         return 0
-    return max([report(p) for p in paths] or [0])
+    return max([report(p, base) for p in paths] or [0])
 
 
 if __name__ == "__main__":

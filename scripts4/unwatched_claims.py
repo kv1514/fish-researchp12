@@ -74,10 +74,32 @@ def sweep() -> tuple[list, list]:
     watched = watched_values()
     unexplained, exempt = [], []
     seen = set()
-    for body in re.findall(r"\\textbf\{([^{}]*)\}", text):
+    # BOTH bold macros. This swept only \textbf for its whole life and
+    # printed "every bolded number in the paper is pinned or exempt", while
+    # 153 of the paper's bolded figures are \mathbf inside math mode and were
+    # never looked at. That is how a table taken through the retracted bridge
+    # survived the retraction sweep: its bolded cell was in math mode, so the
+    # guard that exists to catch exactly this could not see it.
+    for mac, body in re.findall(r"\\((?:text|math)bf)\{([^{}]*)\}",
+                                text):
         ctx = " ".join(body.split())
         why = next((r for k, r in EXEMPT.items() if _norm(k) in body), None)
-        for m in re.findall(r"[-+]?\d+(?:\.\d+)?%?", body):
+        # The lookbehind is load-bearing. Without it \textbf{revision-2}
+        # yields the "number" -2, and a bolded WORD containing a digit is
+        # reported as an unbacked measurement -- noise that trains a reader
+        # to skim this list, which is the one thing it cannot survive. A
+        # match may not start immediately after a letter, digit, dot or
+        # hyphen, so a figure glued to a word is not one.
+        # THOUSANDS SEPARATORS ARE PART OF THE NUMBER. Without the group
+        # below, \mathbf{129{,}600} yields "129" and "600" -- two figures
+        # nothing can match, reported as unbacked, while the actual value IS
+        # watched. That inflated this list by two entries per grouped figure
+        # and taught the reader that entries here are noise. `{,}` is how the
+        # paper writes the separator inside math mode, so `_norm` has already
+        # turned it into a plain comma by the time the body is scanned.
+        for m in re.findall(
+                r"(?<![A-Za-z0-9.,-])[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?%?"
+                r"|(?<![A-Za-z0-9.,-])[-+]?\d+(?:\.\d+)?%?", body):
             val = m.lstrip("+")
             key = (val, ctx)
             if key in seen:
@@ -85,8 +107,96 @@ def sweep() -> tuple[list, list]:
             seen.add(key)
             if val in watched:
                 continue
-            (exempt if why else unexplained).append((val, ctx, why))
+            (exempt if why else unexplained).append(
+                (val, ctx, why, mac))
     return unexplained, exempt
+
+
+#: THE DEBT THIS SWEEP UNCOVERED WHEN IT WAS WIDENED TO \mathbf.
+#:
+#: For its whole life this file swept `\textbf` only and printed "every
+#: bolded number in the paper is either pinned or exempt". The paper has 226
+#: `\textbf` numbers and 153 `\mathbf` ones -- every bolded figure inside
+#: math mode, which is where a table cell that wants emphasis ends up. The
+#: claim was false, and widening the sweep made 46 figures visible at once. Two have
+#: since been paid off and the list is 44.
+#:
+#: THIS IS NOT AN ALLOW-LIST AND IT MUST NOT BECOME ONE. It is a baseline
+#: with a ratchet, and the ratchet is enforced in both directions by
+#: `tests4/test_paper_numbers.py`:
+#:
+#:   * nothing outside this set may be unexplained -- so no NEW unguarded
+#:     bolded figure can enter the paper, which is the property the old
+#:     sweep was supposed to give and did not;
+#:   * nothing IN this set may still be here once it is watched or exempted
+#:     -- the test fails on a stale entry, so paying a figure off forces its
+#:     removal and the list can only shrink;
+#:   * `\textbf` is held at zero outright. It was genuinely clean when the
+#:     sweep widened, and that is a property, not a baseline.
+#:
+#: Each entry is (value, macro). Values, not contexts, because the same
+#: figure is quoted in several places and pinning the context would let a
+#: figure move to a new sentence and escape.
+BASELINE = frozenset([
+    ("-0.0640", "mathbf"),
+    ("-0.0660", "mathbf"),
+    ("-0.890", "mathbf"),
+    ("-1.00", "mathbf"),
+    ("-1.015", "mathbf"),
+    ("-2.0000", "mathbf"),
+    ("-3.5", "mathbf"),
+    ("-7.355", "mathbf"),
+    ("0.000", "mathbf"),
+    ("0.0422", "mathbf"),
+    ("0.045", "mathbf"),
+    ("0.071", "mathbf"),
+    ("0.0711", "mathbf"),
+    ("0.1040", "mathbf"),
+    ("0.1108", "mathbf"),
+    ("0.111", "mathbf"),
+    ("0.118", "mathbf"),
+    ("0.139", "mathbf"),
+    ("0.1729", "mathbf"),
+    ("0.184", "mathbf"),
+    ("0.1997", "mathbf"),
+    ("0.2400", "mathbf"),
+    ("0.241", "mathbf"),
+    ("0.307", "mathbf"),
+    ("0.386", "mathbf"),
+    ("0.415", "mathbf"),
+    ("0.490", "mathbf"),
+    ("0.508", "mathbf"),
+    ("0.570", "mathbf"),
+    ("0.676", "mathbf"),
+    ("0.796", "mathbf"),
+    ("1.327", "mathbf"),
+    ("1.92", "mathbf"),
+    ("1.920", "mathbf"),
+    ("3.18", "mathbf"),
+    ("4.688", "mathbf"),
+    ("601", "mathbf"),
+    ("99.96%", "mathbf"),
+    # The two search speedups, as GROUPED figures. They were on this list as
+    # ("43", ...), ("000", ...), ("10", ...), ("900", ...) -- four entries for
+    # two numbers -- because the sweep read a thousands separator as the end of
+    # one number and the start of another. Recombining them is the same debt
+    # under a truer name, not new debt, and it pays four list entries down to
+    # two. Both are speedup ratios against an exact solver and neither has a
+    # results key; they come off this list when one is given one.
+    ("43,000", "mathbf"),
+    ("10,900", "mathbf"),
+])
+
+
+def regressions(unexplained):
+    """Unexplained figures that are NOT in the recorded baseline."""
+    return [t for t in unexplained if (t[0], t[3]) not in BASELINE]
+
+
+def stale_baseline(unexplained):
+    """Baseline entries that are no longer unexplained, so must be removed."""
+    live = {(v, m) for v, _c, _w, m in unexplained}
+    return sorted(BASELINE - live)
 
 
 def main(argv: list[str]) -> int:
@@ -94,7 +204,7 @@ def main(argv: list[str]) -> int:
     print("which of the paper's bolded numbers does nothing check?\n")
     if exempt:
         print(f"{len(exempt)} exempt (not measurements):")
-        for val, ctx, why in exempt:
+        for val, ctx, why, _mac in exempt:
             print(f"  {val:>9}  {ctx[:40]:<42} {why[:44]}")
         print()
     if not unexplained:
@@ -103,8 +213,8 @@ def main(argv: list[str]) -> int:
               "reason. That is the property that failed three times.")
         return 0
     print(f"{len(unexplained)} bolded number(s) with NOTHING behind them:\n")
-    for val, ctx, _ in unexplained:
-        print(f"  {val:>9}   in  \\textbf{{{ctx[:58]}}}")
+    for val, ctx, _, mac in unexplained:
+        print(f"  {val:>9}   in  \\{mac}{{{ctx[:52]}}}")
     print("\nEach is either a measurement that should be watched, a value that "
           "should be\nexempted with a reason, or a claim that should stop "
           "being asserted. It is not\nautomatically an error -- but a bolded "
