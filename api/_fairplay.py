@@ -77,7 +77,7 @@ from fish.engine import Ask, Claim
 #: engine-match rate.
 OPEN_BELOW = 0.99
 
-#: The flag rules: ROUND 2 of prereg/fairplay_detector.md.
+#: The flag rules: ROUND 2 of prereg_app/fairplay_detector.md.
 #:
 #: Round 1 tested against the plain expectation and failed its own false-
 #: positive bar: the posterior is slightly under-confident, honest players

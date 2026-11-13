@@ -1,5 +1,11 @@
 # Pre-registration: is the fair-play detector fair, and does it catch anyone?
 
+> Kept in `prereg_app/`, not `prereg/`, on purpose. `prereg/` is the research
+> record the paper counts ("fifty-five pre-registrations produced exactly one
+> change to the engine"); this one is about the app's cheat detector and
+> changes nothing in the engine, so it must not move that count. It is held to
+> the same rules: written before the run, results appended, never edited.
+
 **Registered 2026-11-13, before `scripts4/fairplay_calibration.py` has been
 run.** What has been read: one engine-vs-engine game timed in scratch, where
 the asking seats landed 71 of 114 asks against 70.7 expected. Nothing else.

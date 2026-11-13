@@ -1,6 +1,6 @@
 """Calibrate the fair-play detector: honest players, cheaters, and the rules.
 
-Registered in prereg/fairplay_detector.md before the first run; read that for
+Registered in prereg_app/fairplay_detector.md before the first run; read that for
 the players, the quantities and the decision rules. This script plays the
 games and writes per-seat-game rows; ``--analyse`` reads them back and applies
 the registered rules.
