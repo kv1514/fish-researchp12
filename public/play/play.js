@@ -1170,6 +1170,11 @@ async function boot() {
   show('home');
   const params = new URLSearchParams(location.search);
   const join = (params.get('join') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  // ?play=bots|watch on the web. FISH_AUTOPLAY is never set in the shipped
+  // app: the iOS CI run writes it into a copy of the built bundle to film a
+  // game, because iOS asks "Open in Fish?" before following a fish:// link
+  // and nothing on a build machine can tap Open.
+  const autoplay = params.get('play') || window.FISH_AUTOPLAY;
   const saved = LS.get('seat');
   if (saved && Date.now() - saved.at < 6 * 3600 * 1000) {
     try {
@@ -1180,9 +1185,9 @@ async function boot() {
   if (join.length === 4) {
     history.replaceState(null, '', location.pathname);
     joinByCode(join);
-  } else if (params.get('play') === 'bots' || params.get('play') === 'watch') {
+  } else if (autoplay === 'bots' || autoplay === 'watch') {
     history.replaceState(null, '', location.pathname);
-    startSolo(params.get('play') === 'watch');
+    startSolo(autoplay === 'watch');
   }
 }
 // The native shell opens fish://join/ABCD (a table), fish://play (a game

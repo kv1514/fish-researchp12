@@ -5,8 +5,8 @@
 # screen -- the web client in public/play/, bundled into the app, rendering
 # inside the native shell. "It compiled" alone would not say that: a shell
 # whose bundled pages fail to load still compiles, and shows a blank screen.
-# Then it opens fish://watch, which plays a whole game against the bots with
-# the engine in your seat too, films it, and checks the table drew. That game
+# Then it relaunches into watch mode -- a whole game against the bots with the
+# engine in your seat too -- films it, and checks the table drew. That game
 # runs on the live server, so it also proves the app can reach it.
 #
 # WHAT IT DOES NOT DO. Sign or upload anything. That needs an Apple Developer
@@ -96,6 +96,8 @@ jobs:
           xcrun simctl io "$UDID" screenshot home.png
           echo "DEVICE_NAME=$NAME" >> "$GITHUB_ENV"
           echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+          echo "APP_PATH=$APP" >> "$GITHUB_ENV"
+          echo "APP_ID=$BID" >> "$GITHUB_ENV"
           echo "APP_SIZE=$(du -sh "$APP" | cut -f1)" >> "$GITHUB_ENV"
 
       - name: Pillow, in its own environment
@@ -134,9 +136,20 @@ jobs:
           print(f"::notice title=iOS app built, launched and drew its home screen::{msg}")
           PY
 
-      - name: Film a whole game (fish://watch)
+      - name: Film a whole game (watch mode)
         run: |
           set -euo pipefail
+          # Not `simctl openurl fish://watch`: iOS answers that with an "Open
+          # in Fish?" alert, and nothing here can tap Open. Instead, a copy of
+          # the built app gets one line that starts watch mode at launch, and
+          # replaces the installed one. The shipped bundle never has it.
+          DEMO="$RUNNER_TEMP/demo"; rm -rf "$DEMO"; mkdir -p "$DEMO"
+          cp -R "$APP_PATH" "$DEMO/"
+          DEMO_APP="$DEMO/$(basename "$APP_PATH")"
+          sed -i '' 's|</head>|<script>window.FISH_AUTOPLAY="watch"</script></head>|' "$DEMO_APP/public/index.html"
+          grep -q 'FISH_AUTOPLAY="watch"' "$DEMO_APP/public/index.html"
+          xcrun simctl terminate "$SIM_UDID" "$APP_ID" || true
+          xcrun simctl install "$SIM_UDID" "$DEMO_APP"
           # Stop filming once the screen has stood still for two looks in a
           # row: the game is over and the results card is up. A game in play
           # never stands still that long -- even on your own turn the engine
@@ -144,10 +157,10 @@ jobs:
           xcrun simctl io "$SIM_UDID" recordVideo --codec=h264 --force game.mp4 &
           REC=$!
           sleep 3
-          xcrun simctl openurl "$SIM_UDID" "fish://watch"
-          sleep 12
+          xcrun simctl launch "$SIM_UDID" "$APP_ID"
+          sleep 20
           xcrun simctl io "$SIM_UDID" screenshot game.png
-          cp game.png prev.png; still=0; t=15
+          cp game.png prev.png; still=0; t=23
           while [ "$t" -lt 330 ]; do
             sleep 8; t=$((t + 8))
             xcrun simctl io "$SIM_UDID" screenshot now.png >/dev/null 2>&1
@@ -194,7 +207,7 @@ jobs:
           # 0.5%, so 10% separates a table from a screen that never left home.
           felt = sum(1 for r, g, b in px if g > 40 and g > r + 25 and g > b + 8 and r < 60)
           frac = felt / (w * h)
-          msg = (f"{frac:.1%} felt green 12 s after fish://watch; "
+          msg = (f"{frac:.1%} felt green 20 s after launching into watch mode; "
                  f"filmed {os.environ.get('GAME_SECONDS', '?')} s of play")
           print(msg)
           if frac < 0.10:
