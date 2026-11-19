@@ -39,4 +39,4 @@ if ! wait_for game.png felt 0.10 180; then
   exit 1
 fi
 sleep 20; shoot game.png
-echo "::notice title=Android app installed, launched, drew its first screen, and opened a game from a fish:// link::$(adb shell getprop ro.build.version.release | tr -d '\r') emulator"
+echo "::notice title=Android app ran in the emulator::installed; drew its first screen; a fish://watch link opened a game on the live server; Android $(adb shell getprop ro.build.version.release | tr -d '\r') emulator"
