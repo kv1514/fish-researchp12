@@ -435,6 +435,12 @@ input { font: inherit; }
   background: linear-gradient(180deg, #17213b, #0f172a);
   border-radius: 24px 24px 0 0; border: 1px solid var(--line); border-bottom: 0;
   padding: 8px 16px calc(var(--safe-b) + 16px);
+  /* Above the iPhone keyboard when one is open, and sized to the visible
+     screen (dvh) so Safari's toolbar can't hide the bottom of it. */
+  bottom: var(--kb, 0px);
+  max-height: calc(86vh - var(--kb, 0px));
+  max-height: calc(86dvh - var(--kb, 0px));
+  transition: bottom .2s ease;
   box-shadow: 0 -20px 50px rgba(0,0,0,.5);
   animation: up .28s cubic-bezier(.2,.9,.3,1);
 }
@@ -614,3 +620,8 @@ input { font: inherit; }
 .or { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; color: var(--text3); font-size: 12px; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 #a-form .btn { margin-top: 4px; }
+
+/* Text fields must stay selectable and editable: the page turns selection off
+   (so taps on cards don't highlight text), and iOS WebKit can carry that into
+   inputs, leaving a field you can't type into or paste into. */
+input, textarea { -webkit-user-select: text; user-select: text; }

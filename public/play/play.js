@@ -24,6 +24,22 @@ const SOLO_PACE_MS = 1300;
 // Fish is a memory game: a seat sees the last two moves and no more. Online the
 // server enforces it (it sends only two); practice games trim to match.
 const HISTORY_VISIBLE = 2;
+
+// On iPhone the keyboard covers the bottom of the page rather than shrinking
+// it, so a bottom sheet with a text field (sign up, log in, name) would sit
+// behind it. --kb is the keyboard's height, from the visual viewport; sheets
+// sit on top of it.
+(() => {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const fit = () => {
+    const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    document.documentElement.style.setProperty('--kb', `${Math.round(kb)}px`);
+  };
+  vv.addEventListener('resize', fit);
+  vv.addEventListener('scroll', fit);
+  fit();
+})();
 // First team to this many half-suits wins, and the game ends there: five of
 // nine is a majority, so the rest could not change the result. The server
 // enforces it for tables; practice games ask for it when they are dealt.
@@ -157,10 +173,23 @@ function avatarHTML(seat, cls = '') {
 
 // ------------------------------------------------------ sound & haptics ----
 let actx = null;
+// iOS starts web audio only inside a tap: a context first made when a card
+// lands (no tap) stays suspended and every sound is silent. So the first touch
+// anywhere makes and resumes it, and each sound nudges it awake again in case
+// iOS suspended it while the app was in the background.
+function unlockAudio() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+  } catch (_) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach((ev) =>
+  document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
 function tone(freq, dur = 0.12, type = 'sine', vol = 0.07, delay = 0) {
   if (!prefs.sound) return;
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
     const t = actx.currentTime + delay;
     const o = actx.createOscillator();
     const g = actx.createGain();
