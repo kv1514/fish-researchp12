@@ -88,9 +88,11 @@ In Xcode:
 
 1. Click **App** in the left sidebar, then the **App** target.
 2. **Signing & Capabilities** → *Team*: pick your developer team.
-3. **Bundle Identifier**: change `com.example.fish` to something you own,
-   like `com.yourname.fish`. It's permanent once the app is live, so pick
-   carefully. Put the same value in `capacitor.config.json` → `appId`.
+3. **Bundle Identifier**: it is set to `com.fishengine.fish`, the same ID
+   the Android app uses on Google Play. Register it in your developer account
+   (developer.apple.com → Certificates, IDs & Profiles → Identifiers → +).
+   It's permanent once the app is live. To use a different one, change it
+   here and in `capacitor.config.json` → `appId`, before the first upload.
 4. Pick an iPhone simulator at the top and press **▶ Run**. Play a game.
 5. Plug in your own iPhone, select it, press ▶ again. (First time: on the
    phone, Settings → General → VPN & Device Management → trust yourself.)

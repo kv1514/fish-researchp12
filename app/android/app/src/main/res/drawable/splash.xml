@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch screen before Android 12: the Fish emblem on the app background. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/fish_bg" />
+    <item android:width="160dp" android:height="160dp" android:gravity="center"
+        android:drawable="@drawable/fish_emblem" />
+</layer-list>

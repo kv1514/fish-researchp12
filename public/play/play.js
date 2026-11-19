@@ -15,6 +15,7 @@
 // --------------------------------------------------------------- config ----
 const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform
                   && window.Capacitor.isNativePlatform());
+const PLATFORM = NATIVE && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web';
 const SITE = 'https://fish-engine.vercel.app';
 // Inside the iOS/Android shell the pages are bundled, so the API is remote.
 const API_BASE = window.FISH_API || (NATIVE ? SITE : '');
@@ -493,8 +494,9 @@ async function openAuth(mode) {
     return;
   }
   // App Review 4.8: an iPhone app offering Google sign-in must also offer
-  // Sign in with Apple, so the app shows Google only once Apple is on too.
-  const google = AUTH.google && (!NATIVE || AUTH.apple);
+  // Sign in with Apple, so the iPhone app shows Google only once Apple is on
+  // too. Android and the website have no such rule.
+  const google = AUTH.google && (PLATFORM !== 'ios' || AUTH.apple);
   const alt = [
     AUTH.apple ? '<button class="btn btn-ghost btn-block" data-oauth="apple">Continue with Apple</button>' : '',
     google ? '<button class="btn btn-ghost btn-block" data-oauth="google">Continue with Google</button>' : '',
@@ -1634,6 +1636,15 @@ if (AppPlugin && AppPlugin.addListener) {
     if (m) joinByCode(m[1].toUpperCase());
     else if (/^fish:\/\/watch\b/.test(url)) startSolo(true);
     else if (/^fish:\/\/play\b/.test(url)) startSolo(false);
+  });
+  // Android's back button walks back one step at a time: a sheet or dialog
+  // closes, a game asks before leaving, and only home leaves the app.
+  AppPlugin.addListener('backButton', () => {
+    if (!$('#modal').hidden) { closeModal(); return; }
+    if (sheetKind || !$('#sheet').hidden) { closeSheet(); return; }
+    const on = document.querySelector('.screen.active');
+    if (on && on.id === 'game') { $('#leave-btn').click(); return; }
+    if (AppPlugin.minimizeApp) AppPlugin.minimizeApp(); else AppPlugin.exitApp();
   });
 }
 boot();

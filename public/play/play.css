@@ -565,7 +565,10 @@ input { font: inherit; }
   .brand { margin: 10px 0 10px; }
   .brand-mark { width: 56px; height: 56px; }
   .brand h1 { font-size: 34px; }
-  .table-wrap { margin: 42px 30px 22px; }
+  /* Your own seat sits on the bottom rail and its name tag hangs below the
+     table, so on a short screen (a small Android phone, an iPhone SE) the
+     table gives up height and leaves the tag room above your hand. */
+  .table-wrap { margin: 42px 30px 40px; min-height: 230px; }
   .hand-wrap { height: 92px; }
   .card { width: 44px; height: 64px; }
 }
