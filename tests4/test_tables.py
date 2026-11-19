@@ -38,8 +38,12 @@ def _mem_store(monkeypatch):
     _rooms.reset_store_for_tests(None)
 
 
-def _private(n=1, turn=20, now=T0):
-    doc, seat, sec = T.new_table("Ada", public=False, turn=turn, now=now)
+BANK = 30
+
+
+def _private(n=1, turn=20, now=T0, bank=BANK):
+    doc, seat, sec = T.new_table("Ada", public=False, turn=turn, now=now,
+                                 bank=bank)
     secs = [sec]
     for i in range(1, n):
         secs.append(T.join(doc, f"P{i}", now=now)["secret"])
@@ -233,12 +237,12 @@ def test_a_persons_clock_is_the_turn_plus_their_whole_bank():
     c = doc["clock"]
     assert c["seat"] == 0 and not c["auto"]
     assert c["main_end"] == pytest.approx(T0 + 15)
-    assert c["end"] == pytest.approx(T0 + 15 + T.BANK_SECONDS)
+    assert c["end"] == pytest.approx(T0 + 15 + BANK)
 
 
 def test_nothing_happens_before_the_clock_and_bank_run_out():
     doc, _ = _started(turn=10)
-    t = T0 + 10 + T.BANK_SECONDS - 0.5
+    t = T0 + 10 + BANK - 0.5
     _keep_alive(doc, t)
     assert not T.tick(doc, t)
     assert doc["log"] == []
@@ -246,7 +250,7 @@ def test_nothing_happens_before_the_clock_and_bank_run_out():
 
 def test_an_expired_clock_plays_one_move_for_them_and_counts_a_timeout():
     doc, _ = _started(turn=10)
-    t = T0 + 10 + T.BANK_SECONDS + 0.1
+    t = T0 + 10 + BANK + 0.1
     _keep_alive(doc, t)
     assert T.tick(doc, t)
     assert len(doc["log"]) == 1
@@ -260,7 +264,7 @@ def test_acting_late_spends_bank_and_acting_at_all_resets_timeouts():
     s = T.session_for(doc, 0)
     T.act(doc, secs[0], s.suggest(), now=T0 + 10 + 7.5)
     me = doc["seats"][0]
-    assert me["bank"] == pytest.approx(T.BANK_SECONDS - 7.5)
+    assert me["bank"] == pytest.approx(BANK - 7.5)
     assert me["timeouts"] == 0
 
 
@@ -351,7 +355,7 @@ def test_a_whole_game_ends_with_a_result_and_rematch_rotates_the_opener():
     assert doc["phase"] == "playing" and doc["game"] == 2
     assert doc["nonce"] != old_nonce, "a rematch must be a new deal"
     assert doc["start_seat"] == (old_start + 1) % NUM_PLAYERS
-    assert all(s["bank"] == T.BANK_SECONDS for s in doc["seats"])
+    assert all(s["bank"] == BANK for s in doc["seats"])
 
 
 def _helper_seeds(session_for, doc, moves=6):
@@ -656,3 +660,137 @@ def test_a_practice_game_dealt_first_to_five_stops_at_five():
     assert snap["terminal"] and snap["decided"] and snap["first_to"] == 5
     assert max(snap["score"]["you"], snap["score"]["them"]) == 5
     assert not snap["your_turn"]
+
+
+# ---------------------------------------------------------------------------
+# Only the last two moves, in solo games too
+# ---------------------------------------------------------------------------
+
+def _solo_play(server, d, moves):
+    """Drive a hidden-log solo game through the real routes, as the app does."""
+    for _ in range(moves):
+        if d["terminal"]:
+            break
+        body = {"token": d["token"], "actions": [], "step": 0 if d["your_turn"] else 1}
+        if d["your_turn"]:
+            st, d, _ = _post(server, "auto", body)
+        else:
+            st, d, _ = _post(server, "step", body)
+        assert st == 200, d
+        assert d["actions"] == [], "a memory-rule game must not hand out its moves"
+        assert len(d["log"]) <= 2
+    return d
+
+
+def test_a_solo_app_game_never_sends_more_than_two_moves(server):
+    st, d, _ = _post(server, "new", {"step": 0, "first_to": 5, "history": 2})
+    assert st == 200 and d["history_visible"] == 2 and d["actions"] == []
+    d = _solo_play(server, d, 30)
+    assert d["plies"] > 2 and len(d["log"]) == 2
+    # the token is opaque: no card, seat or move is readable in it
+    import base64
+    body = d["token"].split(".")[0]
+    raw = json.loads(base64.urlsafe_b64decode(body + "=" * (-len(body) % 4)))
+    assert set(raw) >= {"x", "k", "h"} and raw["k"] == 2
+    import zlib
+    x = raw["x"]
+    blob = base64.urlsafe_b64decode(x + "=" * (-len(x) % 4))
+    for skip in (0, 12):
+        with pytest.raises(zlib.error):
+            zlib.decompress(blob[skip:])
+    # and whatever log a client sends is ignored, so it cannot feed one in
+    st, same, _ = _post(server, "state", {"token": d["token"],
+                                          "actions": [["junk"]]})
+    assert st == 200 and same["plies"] == d["plies"]
+
+
+def test_whole_record_helpers_are_closed_during_a_memory_rule_game(server):
+    st, d, _ = _post(server, "new", {"step": 0, "history": 2})
+    for op in ("deduce", "analyse"):
+        st, out, _ = _post(server, op, {"token": d["token"]})
+        assert st == 400 and "last 2 moves" in out["error"], op
+    st, out, _ = _post(server, "claimcheck", {"token": d["token"],
+                                              "half_suit": 0,
+                                              "assignment": [0] * 6})
+    assert st == 400 and "last 2 moves" in out["error"]
+
+
+def test_a_tampered_hidden_log_is_refused(server):
+    st, d, _ = _post(server, "new", {"step": 0, "history": 2})
+    body, sig = d["token"].split(".")
+    flipped = body[:-3] + ("A" if body[-3] != "A" else "B") + body[-2:]
+    st, out, _ = _post(server, "state", {"token": flipped + "." + sig})
+    assert st == 400 and "expired" in out["error"]
+
+
+def test_the_research_site_still_gets_the_whole_record(server):
+    st, d, _ = _post(server, "new", {"step": 0})
+    assert st == 200 and d["history_visible"] is None
+    hs = d["hand"][0]["hs"]
+    card = next(c["id"] for c in d["half_suits"][hs]["cards"] if not c["mine"])
+    target = next(p for p in range(1, 6, 2) if d["hand_counts"][p] > 0)
+    st, out, _ = _post(server, "act", {
+        "token": d["token"], "actions": d["actions"], "step": 0,
+        "action": {"type": "ask", "target": target, "card": card}})
+    assert st == 200 and len(out["actions"]) == 1
+
+
+def test_hidden_log_round_trips_a_whole_game():
+    from api._engine import Session, new_session
+    s = new_session({"history": 2, "first_to": 5})
+    for _ in range(400):
+        if s.over:
+            break
+        if s.state.turn == s.seat:
+            s.play(s.suggest(), max_moves=0)
+        else:
+            s.advance(1)
+        s = Session.restore(s.token(), [])      # the client sends nothing back
+    snap = s.snapshot()
+    assert snap["terminal"] and len(snap["log"]) == 2 and snap["plies"] > 2
+    assert sum(len(r) for r in snap["reveal"]) == 54
+
+
+# ---------------------------------------------------------------------------
+# The clock: 20 seconds a move in public; the host's choice in private
+# ---------------------------------------------------------------------------
+
+def test_a_public_table_is_twenty_seconds_a_move_with_no_bank():
+    doc, secs = None, []
+    doc, _, sec = T.new_table("Ada", public=True, turn=90, bank=60, now=T0)
+    assert doc["settings"]["turn"] == 20 and doc["settings"]["bank"] == 0
+    with pytest.raises(ValueError):
+        T.update_settings(doc, "not the host", turn=60, now=T0)
+    T.update_settings(doc, sec, turn=60, bank=30, now=T0)
+    assert doc["settings"]["turn"] == 20 and doc["settings"]["bank"] == 0
+    T.start(doc, sec, now=T0)
+    c = doc["clock"]
+    if not c["auto"]:
+        assert c["main_end"] == pytest.approx(c["start"] + 20)
+        assert c["end"] == c["main_end"], "no time bank on a public table"
+    assert all(s["bank"] == 0 for s in doc["seats"])
+
+
+def test_a_private_table_defaults_to_twenty_seconds_and_no_bank():
+    doc, secs = _private(1, bank=T.BANK_DEFAULT)
+    assert doc["settings"] == {"turn": 20, "bank": 0, "pace": T.PACE_DEFAULT}
+    T.start(doc, secs[0], now=T0)
+    c = doc["clock"]
+    assert c["main_end"] == pytest.approx(T0 + 20) and c["end"] == c["main_end"]
+
+
+def test_the_private_host_sets_the_turn_time_and_bank_between_games():
+    doc, secs = _private(2, bank=0)
+    with pytest.raises(ValueError, match="host"):
+        T.update_settings(doc, secs[1], turn=45, bank=30, now=T0)
+    T.update_settings(doc, secs[0], turn=45, bank=60, now=T0)
+    assert doc["settings"]["turn"] == 45 and doc["settings"]["bank"] == 60
+    T.update_settings(doc, secs[0], bank=7, now=T0)       # not a choice
+    assert doc["settings"]["bank"] == T.BANK_DEFAULT
+    T.update_settings(doc, secs[0], bank=60, now=T0)
+    T.start(doc, secs[0], now=T0)
+    c = doc["clock"]
+    assert c["main_end"] == pytest.approx(T0 + 45)
+    assert c["end"] == pytest.approx(T0 + 45 + 60)
+    with pytest.raises(ValueError):
+        T.update_settings(doc, secs[0], turn=10, now=T0), "not mid-game"

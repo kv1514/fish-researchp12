@@ -69,7 +69,19 @@ const prefs = {
   name: LS.get('name') || '',          // chosen at sign-up, or as a guest
   sound: LS.get('sound', true),
   haptics: LS.get('haptics', true),
+  // Seconds a move against the bots (0 = no limit). Online tables have their
+  // own: 20 seconds in public, the host's choice in private.
+  soloTurn: LS.get('solo_turn', 20),
 };
+const TURN_CHOICES = [10, 15, 20, 30, 45, 60, 90, 0];
+const BANK_CHOICES = [0, 15, 30, 60];
+const turnLabel = (t) => (t ? `${t}s` : 'No limit');
+const bankLabel = (b) => (b ? `${b}s` : 'None');
+function timerSummary(st) {
+  if (!st) return '';
+  if (!st.turn) return 'No time limit';
+  return `${st.turn}s a move${st.bank ? ` + ${st.bank}s bank` : ''}`;
+}
 const stats = LS.get('stats', { played: 0, won: 0 });
 
 // ------------------------------------------------------------- account ----
@@ -314,7 +326,7 @@ async function refreshList() {
       <button class="trow" data-code="${esc(t.code)}">
         <span class="trow-seats">${Array.from({ length: 6 }, (_, i) => `<i class="${i < t.players ? 'f' : ''}"></i>`).join('')}</span>
         <span class="trow-main"><b>Table ${esc(t.code)} · ${t.players}/6</b>
-          <span>${esc(t.names.join(', '))}${t.rating ? ` · avg ${t.rating}` : ''} · ${t.turn}s turns · starts in ${Math.ceil(t.starts_in)}s</span></span>
+          <span>${esc(t.names.join(', '))}${t.rating ? ` · avg ${t.rating}` : ''} · ${t.turn}s a move · starts in ${Math.ceil(t.starts_in)}s</span></span>
         <span class="trow-join">Join ›</span>
       </button>`).join('');
     $$('.trow', el).forEach((b) => { b.onclick = () => joinByCode(b.dataset.code); });
@@ -354,9 +366,13 @@ $('#private-btn').onclick = () => {
   openSheet('create', `
     <h3>Private table</h3>
     <p class="hint">You'll get a 4-letter code to share. Empty seats become bots when you start.</p>
-    <div class="sheet-section"><div class="sheet-label">Turn timer</div>
-      <div class="seg" id="cr-turn">${[10, 15, 20, 30, 45, 60, 90, 0].map((t) =>
-        `<button data-v="${t}" class="${t === 20 ? 'on' : ''}">${t ? t + 's' : 'No limit'}</button>`).join('')}</div></div>
+    <div class="sheet-section"><div class="sheet-label">Time per move</div>
+      <div class="seg" id="cr-turn">${TURN_CHOICES.map((t) =>
+        `<button data-v="${t}" class="${t === 20 ? 'on' : ''}">${turnLabel(t)}</button>`).join('')}</div></div>
+    <div class="sheet-section"><div class="sheet-label">Time bank</div>
+      <div class="seg" id="cr-bank">${BANK_CHOICES.map((b) =>
+        `<button data-v="${b}" class="${b === 0 ? 'on' : ''}">${bankLabel(b)}</button>`).join('')}</div>
+      <p class="hint" style="margin-top:8px">Extra seconds each player can dip into once a move's time is up, per game.</p></div>
     <div class="sheet-section"><div class="sheet-label">Bot speed</div>
       <div class="seg" id="cr-pace">${['fast', 'normal', 'slow'].map((p) =>
         `<button data-v="${p}" class="${p === 'normal' ? 'on' : ''}">${p[0].toUpperCase() + p.slice(1)}</button>`).join('')}</div></div>
@@ -364,9 +380,10 @@ $('#private-btn').onclick = () => {
     segHandlers(m);
     $('#cr-go', m).onclick = async () => {
       const turn = +$('#cr-turn .on', m).dataset.v;
+      const bank = +$('#cr-bank .on', m).dataset.v;
       const pace = $('#cr-pace .on', m).dataset.v;
       try {
-        const d = await tableCall('t_create', { name: prefs.name, public: false, turn, pace });
+        const d = await tableCall('t_create', { name: prefs.name, public: false, turn, bank, pace });
         closeSheet(); enterOnline(d.code, d.secret, d.table);
       } catch (e) { toast(e.message, true); }
     };
@@ -408,11 +425,18 @@ function openSettings(focusName) {
       <input class="field" id="set-name" maxlength="18" value="${esc(prefs.name)}" autocomplete="off"></div>
     <div class="toggle-row"><span>Sound</span><button class="switch ${prefs.sound ? 'on' : ''}" id="set-sound" aria-label="Sound"></button></div>
     <div class="toggle-row"><span>Vibration</span><button class="switch ${prefs.haptics ? 'on' : ''}" id="set-hap" aria-label="Vibration"></button></div>
+    <div class="sheet-section"><div class="sheet-label">Time per move vs bots</div>
+      <div class="seg" id="set-turn">${TURN_CHOICES.map((t) =>
+        `<button data-v="${t}" class="${t === +prefs.soloTurn ? 'on' : ''}">${turnLabel(t)}</button>`).join('')}</div></div>
     <p class="muted small" style="margin-top:14px">Names show to other players at your table. Keep it friendly.
       · <a href="${SITE}/play/privacy.html" target="_blank" rel="noopener" style="color:var(--us)">Privacy</a></p>
     <button class="btn btn-primary btn-block" id="set-done">Done</button>`, (m) => {
     const inp = $('#set-name', m);
     if (focusName) setTimeout(() => inp.focus(), 250);
+    segHandlers(m);
+    $('#set-turn', m).addEventListener('seg', (e) => {
+      prefs.soloTurn = +e.target.dataset.v; LS.set('solo_turn', prefs.soloTurn);
+    });
     $('#set-sound', m).onclick = (e) => { prefs.sound = !prefs.sound; LS.set('sound', prefs.sound); e.target.classList.toggle('on', prefs.sound); };
     $('#set-hap', m).onclick = (e) => { prefs.haptics = !prefs.haptics; LS.set('haptics', prefs.haptics); e.target.classList.toggle('on', prefs.haptics); buzz(); };
     $('#set-done', m).onclick = () => {
@@ -682,7 +706,8 @@ function openRules() {
     <h4>Reading the table</h4>
     <p>Every ask is public. Asking for a card <b>proves you hold a card in its set</b> — so watch what everyone asks for.</p>
     <h4>The clock</h4>
-    <p>Each turn has a timer. When it runs out your <b>time bank</b> kicks in (red ring). When that's gone too, the game plays a move for you. Miss two turns in a row and the table plays for you until you tap “I'm back”.</p>
+    <p>Every move has a clock: <b>20 seconds</b> on public tables. When it runs out, the game plays a move for you. Miss two turns in a row and the table plays for you until you tap “I'm back”.</p>
+    <p>On a <b>private table</b> the host picks the time per move (or no limit) and can add a <b>time bank</b>: extra seconds each player dips into once a move's time is up (red ring). Against the bots, set your own time in Settings.</p>
     <button class="btn btn-primary btn-block" id="rules-ok">Got it</button></div>`, (m) => {
     $('#rules-ok', m).onclick = closeSheet;
   });
@@ -699,6 +724,7 @@ const G = {
   // solo
   focusLost: false,      // the app left the screen during this turn
   token: null, actions: [], snap: null, soloTimer: null, soloBusy: false,
+  soloClock: null,       // {start, end} of the person's current move, or null
   soloEmote: null, soloGame: 0,
   watch: false,         // solo game where the engine plays your seat too
   // sheet selections
@@ -747,9 +773,15 @@ function normaliseSolo(s) {
   return {
     mode: 'solo', phase: over ? 'over' : 'playing', code: null, public: false,
     me, host: me, isHost: true, settings: { turn: 0, pace: 'normal' }, startAt: null,
-    clock: over ? null : { seat: s.turn, auto: s.turn !== me, start: null, main_end: null, end: null },
+    clock: over ? null
+      : (s.turn === me && G.soloClock)
+        ? { seat: me, auto: false, start: G.soloClock.start, main_end: G.soloClock.end, end: G.soloClock.end }
+        : { seat: s.turn, auto: s.turn !== me, start: null, main_end: null, end: null },
     seats, game: Object.assign({}, s, { log: (s.log || []).slice(-HISTORY_VISIBLE) }),
-    result, plies: G.actions.length, gameNo: G.soloGame, v: G.actions.length,
+    // The server keeps the move list and sends only the last two moves, so
+    // the count of moves comes from it too.
+    result, plies: s.plies != null ? s.plies : G.actions.length, gameNo: G.soloGame,
+    v: (s.plies != null ? s.plies : G.actions.length) * 2 + (G.soloClock ? 1 : 0),
   };
 }
 
@@ -817,11 +849,13 @@ async function startSolo(watch = false) {
   stopSolo();
   closeModal();
   G.mode = 'solo'; G.code = null; G.secret = null; G.watch = !!watch;
-  G.actions = []; G.token = null; G.soloGame += 1;
+  G.actions = []; G.token = null; G.soloGame += 1; G.soloClock = null;
   G.lastPlies = 0; G.lastGame = -1; G.resultShown = -1; G.lastHand = new Set();
   show('game');
   try {
-    const d = await api('new', { step: 0, first_to: FIRST_TO });
+    // history: the server sends only the last two moves and keeps the
+    // rest of the game sealed inside the token, out of the app's reach.
+    const d = await api('new', { step: 0, first_to: FIRST_TO, history: HISTORY_VISIBLE });
     soloApply(d);
   } catch (e) {
     leaveToHome(e.message);
@@ -831,6 +865,10 @@ function soloApply(d) {
   G.token = d.token;
   if (d.actions && d.actions.length) G.actions.push(...d.actions);
   G.snap = d;
+  // A fresh clock for every move the person makes (a good ask goes again).
+  const limit = +prefs.soloTurn || 0;
+  G.soloClock = (d.your_turn && !d.terminal && !d.stopped && !G.watch && limit > 0)
+    ? { start: serverNow(), end: serverNow() + limit } : null;
   applyVM(normaliseSolo(d));
   soloLoop();
 }
@@ -842,6 +880,9 @@ function soloLoop() {
     // Watch mode: the engine takes your seat as well, at a readable pace, so a
     // whole game plays itself (fish://watch). Otherwise wait for the player.
     if (G.watch) G.soloTimer = setTimeout(soloAuto, SOLO_PACE_MS * 1.4);
+    else if (G.soloClock) {
+      G.soloTimer = setTimeout(soloTimeUp, Math.max(0, (G.soloClock.end - serverNow()) * 1000));
+    }
     return;
   }
   G.soloTimer = setTimeout(async () => {
@@ -855,8 +896,15 @@ function soloLoop() {
     }
   }, SOLO_PACE_MS);
 }
-async function soloAuto() {
-  if (G.mode !== 'solo' || !G.watch || G.soloBusy) return;
+// Out of time: the engine plays this one move for the person, as at a table.
+function soloTimeUp() {
+  if (G.mode !== 'solo' || !G.snap || !G.snap.your_turn || G.soloBusy) return;
+  closeSheet();
+  toast('Time’s up — a move was played for you', true, 2600);
+  soloAuto(true);
+}
+async function soloAuto(timeUp = false) {
+  if (G.mode !== 'solo' || (!G.watch && !timeUp) || G.soloBusy) return;
   G.soloBusy = true;
   try {
     const d = await api('auto', { token: G.token, actions: G.actions, step: 0 });
@@ -1060,11 +1108,11 @@ function renderCenter(vm) {
     if (vm.public) {
       c.innerHTML = `<div class="label">Public table · rated</div>
         <div class="count" id="lobby-count">0:30</div>
-        <div class="note">${people}/6 players · starts automatically,<br>open seats become bots</div>`;
+        <div class="note">${people}/6 players · 20s a move<br>starts automatically, open seats become bots</div>`;
     } else {
       c.innerHTML = `<div class="label">Table code</div>
         <div class="big-code">${esc(vm.code)}</div>
-        <div class="note">${people}/6 players · ${vm.settings.turn ? vm.settings.turn + 's' : 'no limit'} turns<br>
+        <div class="note">${people}/6 players · ${esc(timerSummary(vm.settings))}<br>
         ${vm.isHost ? 'Share the code, then start' : 'Waiting for the host to start'}</div>`;
     }
     return;
@@ -1111,18 +1159,23 @@ function renderActions(vm) {
   const g = vm.game;
   const emoteBtn = '<button class="emote-btn" id="emote-btn" aria-label="React">😀</button>';
   if (vm.phase === 'lobby') {
+    const timer = timerSummary(vm.settings);
     if (vm.isHost) {
       el.innerHTML = `<div class="act-row">${emoteBtn}
-        ${vm.public ? '' : '<button class="btn btn-ghost" id="tbl-settings" style="flex:0 0 auto;padding:0 18px">⏱ Timer</button>'}
+        ${vm.public ? '' : `<button class="btn btn-ghost" id="tbl-settings" style="flex:0 0 auto;padding:0 14px">⏱ ${esc(vm.settings.turn ? vm.settings.turn + 's' : '∞')}</button>`}
         <button class="btn btn-gold" id="start-btn">${vm.public ? 'Start now' : 'Start game'}</button></div>`;
       $('#start-btn').onclick = () => send('t_start');
       const ts = $('#tbl-settings');
       if (ts) ts.onclick = openTableSettings;
     } else {
-      el.innerHTML = `<div class="act-row">${emoteBtn}<div class="status-line" style="flex:1">Waiting for the host…</div></div>`;
+      el.innerHTML = `<div class="act-row">${emoteBtn}<div class="status-line" style="flex:1">Waiting for the host… · ${esc(timer)}</div></div>`;
     }
   } else if (vm.phase === 'over') {
-    el.innerHTML = `<div class="act-row">${emoteBtn}<div class="status-line" style="flex:1">Game over</div></div>`;
+    const canSet = vm.mode === 'online' && vm.isHost && !vm.public;
+    el.innerHTML = `<div class="act-row">${emoteBtn}<div class="status-line" style="flex:1">Game over</div>
+      ${canSet ? `<button class="btn btn-ghost" id="tbl-settings" style="flex:0 0 auto;padding:0 14px">⏱ Timer</button>` : ''}</div>`;
+    const ts = $('#tbl-settings');
+    if (ts) ts.onclick = openTableSettings;
   } else if (vm.mode === 'online' && vm.seats[vm.me] && vm.seats[vm.me].away) {
     el.innerHTML = `<div class="act-row"><div class="status-line" style="flex:1">The table is playing for you</div>
       <button class="btn btn-gold" id="back-btn" style="flex:0 0 auto">I'm back</button></div>`;
@@ -1278,18 +1331,20 @@ function openPass() {
 // --------------------------------------------------------- table settings --
 function openTableSettings() {
   const vm = G.vm;
-  const turns = vm.public ? [10, 15, 20, 30, 45, 60, 90] : [10, 15, 20, 30, 45, 60, 90, 0];
+  const bankNow = vm.settings.bank || 0;
   openSheet('tsettings', `<h3>Table settings</h3>
-    <div class="sheet-section"><div class="sheet-label">Turn timer</div>
-      <div class="seg" id="ts-turn">${turns.map((t) => `<button data-v="${t}" class="${t === vm.settings.turn ? 'on' : ''}">${t ? t + 's' : 'No limit'}</button>`).join('')}</div>
-      <p class="hint" style="margin-top:8px">Plus a 30s time bank each game.</p></div>
+    <div class="sheet-section"><div class="sheet-label">Time per move</div>
+      <div class="seg" id="ts-turn">${TURN_CHOICES.map((t) => `<button data-v="${t}" class="${t === vm.settings.turn ? 'on' : ''}">${turnLabel(t)}</button>`).join('')}</div></div>
+    <div class="sheet-section"><div class="sheet-label">Time bank</div>
+      <div class="seg" id="ts-bank">${BANK_CHOICES.map((b) => `<button data-v="${b}" class="${b === bankNow ? 'on' : ''}">${bankLabel(b)}</button>`).join('')}</div>
+      <p class="hint" style="margin-top:8px">Extra seconds each player can dip into once a move's time is up, per game. Changes apply from the next game.</p></div>
     <div class="sheet-section"><div class="sheet-label">Bot speed</div>
       <div class="seg" id="ts-pace">${['fast', 'normal', 'slow'].map((p) => `<button data-v="${p}" class="${p === vm.settings.pace ? 'on' : ''}">${p[0].toUpperCase() + p.slice(1)}</button>`).join('')}</div></div>
     <button class="btn btn-primary btn-block" id="ts-done">Done</button>`, (m) => {
     segHandlers(m);
     $('#ts-done', m).onclick = () => {
       closeSheet();
-      send('t_settings', { turn: +$('#ts-turn .on', m).dataset.v, pace: $('#ts-pace .on', m).dataset.v });
+      send('t_settings', { turn: +$('#ts-turn .on', m).dataset.v, bank: +$('#ts-bank .on', m).dataset.v, pace: $('#ts-pace .on', m).dataset.v });
     };
   });
 }

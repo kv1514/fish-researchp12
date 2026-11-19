@@ -22,9 +22,11 @@ second, so a 20-second clock expires within about a second of 20 seconds. The
 deadlines are stored as absolute times and each client draws its own countdown
 from them, so every seat sees the same clock.
 
-Each person also has a TIME BANK, as in a poker room: when their turn clock runs
-out the bank starts draining, and only when that is empty too does the table
-move for them. The bank is per game, so a long declaration costs once.
+Public tables are 20 seconds a move, the same for everyone, so every rated
+game is played to one clock. A private table's host chooses the turn time and
+may add a TIME BANK, as in a poker room: when a person's turn clock runs out
+the bank starts draining, and only when that is empty too does the table move
+for them. The bank is per game, so a long declaration costs once.
 
 WHAT A TIMEOUT DOES
 -------------------
@@ -57,12 +59,16 @@ from api._rooms import Conflict, NotFound, clean_name, store
 
 KIND = "table"
 
-#: Turn clock choices, in seconds. 0 is "no limit", offered on private tables
-#: only: a public table cannot let one stranger hold five others hostage.
+#: Turn clock choices for private tables, in seconds, plus 0 for "no limit".
 TURN_CHOICES = (10, 15, 20, 30, 45, 60, 90)
+#: Every public table, and the starting choice for a private one. Public tables
+#: do not take a choice at all: one clock for every rated game.
 TURN_DEFAULT = 20
-#: Seconds of time bank per person per game, drawn only after the clock ends.
-BANK_SECONDS = 30.0
+#: Time bank choices for private tables: seconds per person per game, drawn
+#: only after the turn clock ends. Public tables have none, so a move there is
+#: 20 seconds, full stop.
+BANK_CHOICES = (0, 15, 30, 60)
+BANK_DEFAULT = 0
 #: Seconds between engine moves, so a person can follow what the bots do.
 PACE_CHOICES = {"fast": 0.9, "normal": 1.6, "slow": 3.0}
 PACE_DEFAULT = "normal"
@@ -125,7 +131,7 @@ FIRST_TO = 5
 
 def _seat(i: int) -> dict:
     return {"seat": i, "kind": "open", "name": "", "secret": None,
-            "joined": 0.0, "seen": 0.0, "bank": BANK_SECONDS,
+            "joined": 0.0, "seen": 0.0, "bank": 0.0,
             "timeouts": 0, "away": False, "emote": None, "emote_t": 0.0,
             # The player's profile, if they have one: public id, and the
             # rating and games count as of joining (refreshed after each
@@ -134,13 +140,31 @@ def _seat(i: int) -> dict:
 
 
 def _clean_turn(turn, public: bool) -> int:
+    if public:
+        return TURN_DEFAULT
     try:
         t = int(turn)
     except (TypeError, ValueError):
         return TURN_DEFAULT
-    if t == 0 and not public:
+    if t == 0:
         return 0
     return t if t in TURN_CHOICES else TURN_DEFAULT
+
+
+def _clean_bank(bank, public: bool) -> int:
+    if public:
+        return 0
+    try:
+        b = int(bank)
+    except (TypeError, ValueError):
+        return BANK_DEFAULT
+    return b if b in BANK_CHOICES else BANK_DEFAULT
+
+
+def _bank_of(doc: dict) -> float:
+    """This table's time bank in seconds (none on a public table)."""
+    return float(_clean_bank(doc["settings"].get("bank", BANK_DEFAULT),
+                             bool(doc.get("public"))))
 
 
 def _clean_pace(pace) -> str:
@@ -148,7 +172,8 @@ def _clean_pace(pace) -> str:
 
 
 def new_table(host_name: str, public: bool, turn=TURN_DEFAULT,
-              pace=PACE_DEFAULT, now: float = None, card=None) -> tuple:
+              pace=PACE_DEFAULT, now: float = None, card=None,
+              bank=BANK_DEFAULT) -> tuple:
     """A seating table with its creator in the first seat.
 
     Returns ``(doc, seat, secret)``. The creator is seated immediately, so a
@@ -162,6 +187,7 @@ def new_table(host_name: str, public: bool, turn=TURN_DEFAULT,
         "public": public,
         "host": None,
         "settings": {"turn": _clean_turn(turn, public),
+                     "bank": _clean_bank(bank, public),
                      "pace": _clean_pace(pace)},
         "seats": [_seat(i) for i in range(NUM_PLAYERS)],
         # Never sent to a client: it derives every hand.
@@ -336,12 +362,16 @@ def leave(doc: dict, secret, now: float = None) -> None:
 
 
 def update_settings(doc: dict, secret, turn=None, pace=None,
-                    now: float = None) -> None:
+                    now: float = None, bank=None) -> None:
+    """The host's choices, between games. A public table's clock is fixed."""
     now = time.time() if now is None else now
     _need(doc, secret, host=True, phases=("lobby", "over"))
     st = doc["settings"]
+    public = bool(doc.get("public"))
     if turn is not None:
-        st["turn"] = _clean_turn(turn, bool(doc.get("public")))
+        st["turn"] = _clean_turn(turn, public)
+    if bank is not None:
+        st["bank"] = _clean_bank(bank, public)
     if pace is not None:
         st["pace"] = _clean_pace(pace)
     doc["touched"] = now
@@ -422,7 +452,7 @@ def _deal(doc: dict, now: float) -> None:
         if s["kind"] == "open":
             s["kind"] = "bot"
             s["name"] = _bot_name(doc, s["seat"])
-        s["bank"] = BANK_SECONDS
+        s["bank"] = _bank_of(doc)
         s["timeouts"] = 0
         s["away"] = False
     doc["nonce"] = secrets.token_urlsafe(12)
@@ -716,6 +746,7 @@ def lobby_summary(code: str, doc: dict, now: float) -> dict:
             "open": sum(1 for s in doc["seats"] if s["kind"] == "open"),
             "names": [s["name"] for s in people],
             "turn": doc["settings"].get("turn"),
+            "bank": _bank_of(doc),
             "rating": round(sum(rated) / len(rated)) if rated else None,
             "starts_in": max(0.0, float(doc.get("start_at") or now) - now)}
 
@@ -750,8 +781,9 @@ def mutate(code: str, fn) -> tuple:
 
 
 def create(name: str, public: bool, turn=TURN_DEFAULT,
-           pace=PACE_DEFAULT, card=None) -> tuple:
-    doc, seat, secret = new_table(name, public, turn, pace, card=card)
+           pace=PACE_DEFAULT, card=None, bank=BANK_DEFAULT) -> tuple:
+    doc, seat, secret = new_table(name, public, turn, pace, card=card,
+                                  bank=bank)
     code = store().create(doc)
     return code, seat, secret, doc
 
