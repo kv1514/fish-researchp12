@@ -1,0 +1,23 @@
+{
+ "n_games": 25,
+ "kv_margin_mean": 2.12,
+ "wins": {
+  "dylan": 3,
+  "kv": 22,
+  "tie": 0
+ },
+ "tallies": {
+  "dylan": {
+   "futile": 204,
+   "askback": 256,
+   "askback_hit": 256,
+   "asks": 1350
+  },
+  "kv": {
+   "futile": 136,
+   "askback": 281,
+   "askback_hit": 281,
+   "asks": 1428
+  }
+ }
+}

@@ -1,0 +1,127 @@
+{
+ "runs": [
+  {
+   "journal": "g1_gamma_cost_journal.jsonl",
+   "n_games": 1600,
+   "base": "A_shipped",
+   "pairs": {
+    "B_none": {
+     "effect": -0.405,
+     "se_paired": 0.09493414655756936,
+     "se_unpaired": 0.09945940298635203,
+     "corr": 0.08898857049557035,
+     "same_margin_share": 0.19875,
+     "efficiency": 1.0976068152918346
+    },
+    "C_measured": {
+     "effect": -1.1025,
+     "se_paired": 0.09550397491473932,
+     "se_unpaired": 0.10000014657587744,
+     "corr": 0.08800148304619002,
+     "same_margin_share": 0.2125,
+     "efficiency": 1.0963731171676938
+    }
+   }
+  },
+  {
+   "journal": "stuck_gate_journal.jsonl",
+   "n_games": 1000,
+   "base": "A_shipped",
+   "pairs": {
+    "B_defer": {
+     "effect": 0.058,
+     "se_paired": 0.038602151832846175,
+     "se_unpaired": 0.12153174879827049,
+     "corr": 0.8993311263715639,
+     "same_margin_share": 0.881,
+     "efficiency": 9.91188981053805
+    },
+    "B2_mid": {
+     "effect": 0.04,
+     "se_paired": 0.040596158045412056,
+     "se_unpaired": 0.12171543306683277,
+     "corr": 0.8889166013799119,
+     "same_margin_share": 0.861,
+     "efficiency": 8.989207968901706
+    }
+   }
+  },
+  {
+   "journal": "signal_gate_journal.jsonl",
+   "n_games": 1000,
+   "base": "A_shipped",
+   "pairs": {
+    "B_incumbent": {
+     "effect": 0.118,
+     "se_paired": 0.043634619053911944,
+     "se_unpaired": 0.12411281961180301,
+     "corr": 0.8765051328068373,
+     "same_margin_share": 0.834,
+     "efficiency": 8.09041699700731
+    },
+    "C_measured": {
+     "effect": 0.122,
+     "se_paired": 0.047406364165198014,
+     "se_unpaired": 0.12380285597330566,
+     "corr": 0.8534232033838146,
+     "same_margin_share": 0.798,
+     "efficiency": 6.8200574046062075
+    }
+   }
+  },
+  {
+   "journal": "forced_exhaustive_v07_journal.jsonl",
+   "n_games": 1000,
+   "base": "A_shipped",
+   "pairs": {
+    "B_full": {
+     "effect": 0.018,
+     "se_paired": 0.005975927686285307,
+     "se_unpaired": 0.12164779564869334,
+     "corr": 0.9975963166177736,
+     "same_margin_share": 0.991,
+     "efficiency": 414.3790783720219
+    }
+   }
+  },
+  {
+   "journal": "forced_exhaustive_journal.jsonl",
+   "n_games": 2400,
+   "base": "A_shipped",
+   "pairs": {
+    "B_full": {
+     "effect": 0.023333333333333334,
+     "se_paired": 0.005115949807192769,
+     "se_unpaired": 0.08380652094882246,
+     "corr": 0.9962769141064872,
+     "same_margin_share": 0.9841666666666666,
+     "efficiency": 268.3509113431272
+    }
+   }
+  },
+  {
+   "journal": "tempo_journal.jsonl",
+   "n_games": 1000,
+   "base": "A_shipped",
+   "pairs": {
+    "B_free": {
+     "effect": 0.228,
+     "se_paired": 0.11246628234570842,
+     "se_unpaired": 0.1236685485881915,
+     "corr": 0.17298884133405612,
+     "same_margin_share": 0.239,
+     "efficiency": 1.2091323721020963
+    },
+    "C_half": {
+     "effect": 0.084,
+     "se_paired": 0.10489970423193737,
+     "se_unpaired": 0.12269365808277824,
+     "corr": 0.2691802370395239,
+     "same_margin_share": 0.232,
+     "efficiency": 1.3680302564990756
+    }
+   }
+  }
+ ],
+ "median_efficiency": 8.09041699700731
+}

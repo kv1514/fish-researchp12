@@ -1,0 +1,117 @@
+{
+ "what": "KRAKEN vs Dylan's released ladder",
+ "descriptive": true,
+ "prereg": null,
+ "opponents": {
+  "dylan_v02": {
+   "margin": 1.5283,
+   "half_width": 0.1548,
+   "ci95": [
+    1.3735,
+    1.6832
+   ],
+   "n_clusters": 600,
+   "their_declares": 4798,
+   "their_err": 0.0913,
+   "our_declares": 6002,
+   "our_err": 0.0205,
+   "fallbacks": 0,
+   "unfinished": 0,
+   "identity_residual_max": 0,
+   "games": 1200
+  },
+  "dylan_v03": {
+   "margin": 0.6133,
+   "half_width": 0.1537,
+   "ci95": [
+    0.4597,
+    0.767
+   ],
+   "n_clusters": 600,
+   "their_declares": 5058,
+   "their_err": 0.0471,
+   "our_declares": 5742,
+   "our_err": 0.0369,
+   "fallbacks": 0,
+   "unfinished": 0,
+   "identity_residual_max": 0,
+   "games": 1200
+  },
+  "dylan_v04": {
+   "margin": 1.9867,
+   "half_width": 0.1495,
+   "ci95": [
+    1.8371,
+    2.1362
+   ],
+   "n_clusters": 600,
+   "their_declares": 4389,
+   "their_err": 0.1636,
+   "our_declares": 6411,
+   "our_err": 0.0838,
+   "fallbacks": 0,
+   "unfinished": 0,
+   "identity_residual_max": 0,
+   "games": 1200
+  },
+  "dylan_v05": {
+   "margin": 2.1233,
+   "half_width": 0.157,
+   "ci95": [
+    1.9663,
+    2.2803
+   ],
+   "n_clusters": 600,
+   "their_declares": 4574,
+   "their_err": 0.1506,
+   "our_declares": 6226,
+   "our_err": 0.0387,
+   "fallbacks": 0,
+   "unfinished": 0,
+   "identity_residual_max": 0,
+   "games": 1200
+  },
+  "dylan_v06": {
+   "margin": 1.885,
+   "half_width": 0.1517,
+   "ci95": [
+    1.7333,
+    2.0367
+   ],
+   "n_clusters": 600,
+   "their_declares": 4765,
+   "their_err": 0.1572,
+   "our_declares": 6035,
+   "our_err": 0.0419,
+   "fallbacks": 0,
+   "unfinished": 0,
+   "identity_residual_max": 0,
+   "games": 1200
+  },
+  "dylan_v07": {
+   "margin": 2.36,
+   "half_width": 0.1583,
+   "ci95": [
+    2.2017,
+    2.5183
+   ],
+   "n_clusters": 600,
+   "their_declares": 4800,
+   "their_err": 0.2071,
+   "our_declares": 6000,
+   "our_err": 0.0297,
+   "fallbacks": 0,
+   "unfinished": 0,
+   "identity_residual_max": 0,
+   "games": 1200
+  }
+ },
+ "seed_deal": 16100000,
+ "seed_agent": 161000,
+ "n_deals": 600,
+ "n_games": 7200,
+ "vs": "dylan_v02|dylan_v03|dylan_v04|dylan_v05|dylan_v06|dylan_v07",
+ "smoke": false,
+ "v04_v06_spread": 0.2383,
+ "minutes": 38.9
+}

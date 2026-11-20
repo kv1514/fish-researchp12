@@ -1020,5 +1020,30 @@
       "agent_seed_base": 8123,
       "wall_seconds": 138.51363134384155
     }
-  ]
+  ],
+  "harvest": {
+    "config": {
+      "n_games": 200,
+      "n_worlds": 16,
+      "n_eval": 6,
+      "n_top": 3,
+      "sample_rate": 0.05,
+      "max_per_game": 8,
+      "seed": 20260821,
+      "base_deal_seed": 4100000,
+      "agent_seed_base": 771,
+      "variant": "54"
+    },
+    "summary": {
+      "games_requested": 200,
+      "games_skipped": 0,
+      "games_played": 200,
+      "positions": 1023,
+      "timeouts": 0,
+      "actions": 22842,
+      "seconds": 105.85832691192627,
+      "positions_total": 1023
+    },
+    "run": "v2"
+  }
 }

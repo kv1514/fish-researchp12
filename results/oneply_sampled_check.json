@@ -1,0 +1,23 @@
+{
+ "n_positions": 60,
+ "by_worlds": {
+  "16": {
+   "n": 60,
+   "same": 42,
+   "mean_regret": 0.03064814814814815,
+   "worst_regret": 0.5
+  },
+  "64": {
+   "n": 60,
+   "same": 43,
+   "mean_regret": 0.012037037037037039,
+   "worst_regret": 0.5
+  },
+  "128": {
+   "n": 60,
+   "same": 41,
+   "mean_regret": 0.003333333333333335,
+   "worst_regret": 0.20000000000000004
+  }
+ }
+}

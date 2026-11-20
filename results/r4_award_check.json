@@ -1,0 +1,21 @@
+{
+ "n_pairs": 500,
+ "n_blocks": 20,
+ "estimate": -0.104,
+ "ci": [
+  -0.21844094708424516,
+  0.010440947084245172
+ ],
+ "se": 0.058388238308288355,
+ "engine": "0679f6d1d222",
+ "rules": {
+  "allow_bluff_asks": false,
+  "claims_any_time": false,
+  "mandatory_claim_known": false,
+  "starting_player": 0,
+  "variant": "54",
+  "wrong_distribution_outcome": "opponent"
+ },
+ "x_misdeclares": 123,
+ "y_misdeclares": 106
+}

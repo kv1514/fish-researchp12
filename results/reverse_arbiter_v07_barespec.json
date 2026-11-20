@@ -1,0 +1,84 @@
+{
+ "question": "how does KRAKEN measure inside their arbiter and dialect",
+ "host": "theirs",
+ "bot": "KRAKEN v1.1 via fishlab-json-v1 package",
+ "dialect": "theirs: out-of-turn declarations, cardless may declare, misdeclaration awards to the opponents",
+ "confounds": [
+  "arbiter",
+  "rule dialect (out-of-turn channel)",
+  "the package"
+ ],
+ "deals": 200,
+ "rotations": 6,
+ "seed": 90210,
+ "cells": [
+  {
+   "a": "bot:kraken",
+   "b": "v07",
+   "deals": 200,
+   "games": 1200,
+   "winRateA": 0.435,
+   "ci": [
+    0.4075,
+    0.4625
+   ],
+   "wilsonCI": [
+    0.407202,
+    0.463213
+   ],
+   "meanSetsA": 4.27,
+   "meanSetsB": 4.73,
+   "askAccA": 0.556845,
+   "askAccB": 0.569374,
+   "declAccA": 0.988762,
+   "declAccB": 0.98427,
+   "asksPerGameA": 43.4292,
+   "asksPerGameB": 44.7217,
+   "nAsksA": 52115,
+   "nDeclA": 4983,
+   "nAsksB": 53666,
+   "nDeclB": 5658,
+   "allocErrRateA": 0.0106362,
+   "allocErrRateB": 0.0120184,
+   "declPerGameA": 4.1525,
+   "declPerGameB": 4.715,
+   "forcedAccA": 0.683544,
+   "forcedAccB": 1,
+   "forcedPerGameA": 0.131667,
+   "outOfTurnA": 2.8975,
+   "outOfTurnB": 3.44083,
+   "lockHoldA": 9.82185,
+   "lockHoldB": 4.59066,
+   "eventsPerGame": 97.4383,
+   "limitHitRate": 0,
+   "auditViolations": 0,
+   "auditChecks": 0,
+   "seconds": 648.235,
+   "gamesPerSec": 1.85118,
+   "threads": 4,
+   "power": {
+    "games": 1200,
+    "deals": 200,
+    "rotations": 6,
+    "mirror": false,
+    "halfWidth98Games": 2.829,
+    "halfWidth98Deals": 6.9296,
+    "gamesFor1pt": 9604,
+    "gamesFor0.5pt": 38416,
+    "gamesFor0.25pt": 153664
+   },
+   "argv": [
+    "/home/user/dylann4500/fishbot/engine/fish",
+    "match",
+    "--a=bot:kraken",
+    "--b=v07",
+    "--games=200",
+    "--rotations=6",
+    "--seed=90210",
+    "--json"
+   ],
+   "wall_seconds": 648.3,
+   "fallbacks": 0
+  }
+ ]
+}

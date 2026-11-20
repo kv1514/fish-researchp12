@@ -263,7 +263,7 @@ class Handler(BaseHTTPRequestHandler):
             claims_any_time=bool(body.get("claims_any_time", False)),
             allow_bluff_asks=bool(body.get("allow_bluff_asks", False)),
             wrong_distribution_outcome=body.get(
-                "wrong_distribution_outcome", "null"),
+                "wrong_distribution_outcome", "opponent"),
             starting_player=int(body.get("starting_player", 0)),
         )
         kwargs = [{"model_path": str(ROOT / "checkpoints" / "pi_value_v1.pt")}

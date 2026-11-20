@@ -1,0 +1,20 @@
+{
+ "script": "scripts4/web_cap_check.py",
+ "descriptive": true,
+ "fish_secret": "web-termination-study-2026-09-12",
+ "cap": 600,
+ "idle_cap": 200,
+ "seeding": "ply",
+ "lifted_to": 1200,
+ "stride": 1,
+ "restore_every": 1,
+ "n_games": 300,
+ "n_per_mode": 150,
+ "n_finished_both": 300,
+ "n_identical": 300,
+ "n_diverged": 0,
+ "n_livelocked_without_cap": 0,
+ "livelocks": [],
+ "diverged": [],
+ "secs": 213.8
+}

@@ -1,0 +1,40 @@
+[
+ {
+  "label": "RETAKE BONUS w-0.30 vs champion block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_retake": -0.3
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 26000000,
+  "agent_seed": 9910
+ },
+ {
+  "label": "RETAKE BONUS w-0.30 vs champion block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_retake": -0.3
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 26200000,
+  "agent_seed": 9911
+ }
+]

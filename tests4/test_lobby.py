@@ -239,8 +239,13 @@ def test_a_voided_claim_is_not_reported_as_a_win():
     assert d["winner"] not in (0, 1), "a void is indistinguishable from a win"
 
 
-def test_a_real_voided_claim_survives_the_round_trip():
-    """As above, but through an actual game rather than a synthetic event."""
+def test_a_real_wrong_claim_survives_the_round_trip():
+    """As above, but through an actual game rather than a synthetic event.
+
+    The declaration below spans both teams, so it awards the opponents under
+    EITHER misdeclaration rule -- this exercises the wrong-claim wire path,
+    not the void flag, which only the synthetic test above can drive now
+    that the baseline produces no voids."""
     from fish.cards import half_suit_cards
     from fish.engine import Claim
 

@@ -1,0 +1,140 @@
+[
+ {
+  "label": "STACK lookahead on top of n_draws 480 block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "base_seed": 13000000,
+  "agent_seed": 9800
+ },
+ {
+  "label": "STACK lookahead on top of n_draws 480 block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "base_seed": 13200000,
+  "agent_seed": 9801
+ },
+ {
+  "label": "STACK lookahead on top of n_draws 480 block 2",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "base_seed": 13400000,
+  "agent_seed": 9802
+ },
+ {
+  "label": "STACK lookahead on top of n_draws 480 block 3",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "base_seed": 13600000,
+  "agent_seed": 9803
+ },
+ {
+  "label": "STACK lookahead on top of n_draws 480 block 4",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "base_seed": 13800000,
+  "agent_seed": 9804
+ },
+ {
+  "label": "STACK lookahead on top of n_draws 480 block 5",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "base_seed": 14000000,
+  "agent_seed": 9805
+ }
+]

@@ -1,0 +1,10 @@
+[
+ {"label": "DECISIVE lookahead d3 w0.25 vs champion (A)", "n_pairs": 700,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 5210000, "agent_seed": 9301},
+ {"label": "DECISIVE lookahead d3 w0.25 vs champion (B)", "n_pairs": 700,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "w_lookahead": 0.25, "lookahead_depth": 3, "lookahead_beam": 4}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}],
+  "base_seed": 5220000, "agent_seed": 9302}
+]

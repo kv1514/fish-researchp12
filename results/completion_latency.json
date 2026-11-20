@@ -1,0 +1,46 @@
+{
+ "games": 1200,
+ "completions": 10724,
+ "kraken_v11": {
+  "completions_per_game": 4.208333333333333,
+  "undeclared_share": 0.0,
+  "mean_latency_plies": 16.80237623762376,
+  "median_latency_plies": 3.0,
+  "dead_asks_per_completion": 1.5203960396039604,
+  "dead_asks": 7678,
+  "asks": 55698,
+  "dead_ask_share_of_asks": 0.13785055118675715,
+  "stuck_share": 0.3463366336633663,
+  "dead_asks_from_stuck": 0.8737952591820787,
+  "label": "KRAKEN v1.1"
+ },
+ "sestina_v10": {
+  "completions_per_game": 4.7283333333333335,
+  "undeclared_share": 0.0,
+  "mean_latency_plies": 7.840676771237223,
+  "median_latency_plies": 1.0,
+  "dead_asks_per_completion": 0.9959464222770532,
+  "dead_asks": 5651,
+  "asks": 57619,
+  "dead_ask_share_of_asks": 0.09807528766552699,
+  "stuck_share": 0.20919985900599225,
+  "dead_asks_from_stuck": 0.7598655105291099,
+  "label": "SESTINA v1.0"
+ },
+ "excess_dead_asks_per_game": 1.6891666666666667,
+ "turn_price_used": {
+  "mean": 0.2713333333333333,
+  "se": 0.09139680859554851,
+  "source": "results/turn_price.json"
+ },
+ "excess_priced_sets_per_game": {
+  "point": 0.4583272222222222,
+  "ci95": [
+   0.15700922074889745,
+   0.7929217360653524
+  ]
+ },
+ "not_a_counterfactual": "difference accounting only; removing a dead ask changes every subsequent ply and the price was not measured against SESTINA",
+ "seconds": 888.5,
+ "exploratory": "prices a mechanism; licenses no arm"
+}

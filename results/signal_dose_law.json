@@ -1,0 +1,42 @@
+{
+ "what": "prereg/signal_dose_law.md",
+ "prereg": "signal_dose_law",
+ "abandoned": false,
+ "params": {
+  "signal_mode": "stuck",
+  "signal_max_p": 0.5,
+  "signal_budget": 6
+ },
+ "dose_table": {
+  "0.5": 3.8,
+  "0.7": 4.345,
+  "0.85": 4.633,
+  "1.0": 5.675
+ },
+ "common_dose_D": 3.1,
+ "dose": 3.093,
+ "dose_off_by": 0.0023,
+ "predictions": {
+  "multiplicative": 0.0426,
+  "logistic": 0.0143
+ },
+ "their_wrong_effect": {
+  "mean": 0.0178,
+  "half_width": 0.013,
+  "ci95": [
+   0.0048,
+   0.0308
+  ],
+  "n_clusters": 2500
+ },
+ "identity_residual_max": 0,
+ "verdict": "LOGISTIC: covers +0.0143, excludes +0.0426",
+ "withdrawn": [],
+ "seed_deal": 14900000,
+ "seed_agent": 149000,
+ "n_deals": 2500,
+ "n_games": 10000,
+ "vs": "heuristic",
+ "smoke": false,
+ "minutes": 96.0
+}

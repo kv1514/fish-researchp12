@@ -1,0 +1,56 @@
+{
+ "question": "does our stateless replay ask their engine the same question their arbiter asks it",
+ "spec": "dylan_v03",
+ "games": 6,
+ "decisions": 338,
+ "divergent": 0,
+ "divergence_rate": 0.0,
+ "verdict": "PURE -- statelessness is free",
+ "kind_changes": {},
+ "per_game": [
+  {
+   "deal": 7400000,
+   "kv_even": true,
+   "decisions": 53,
+   "divergent": 0,
+   "first_divergence": null
+  },
+  {
+   "deal": 7400000,
+   "kv_even": false,
+   "decisions": 57,
+   "divergent": 0,
+   "first_divergence": null
+  },
+  {
+   "deal": 7400001,
+   "kv_even": true,
+   "decisions": 64,
+   "divergent": 0,
+   "first_divergence": null
+  },
+  {
+   "deal": 7400001,
+   "kv_even": false,
+   "decisions": 56,
+   "divergent": 0,
+   "first_divergence": null
+  },
+  {
+   "deal": 7400002,
+   "kv_even": true,
+   "decisions": 58,
+   "divergent": 0,
+   "first_divergence": null
+  },
+  {
+   "deal": 7400002,
+   "kv_even": false,
+   "decisions": 50,
+   "divergent": 0,
+   "first_divergence": null
+  }
+ ],
+ "examples": [],
+ "seconds": 12.3
+}

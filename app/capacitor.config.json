@@ -1,0 +1,14 @@
+{
+  "appId": "com.fishengine.fish",
+  "appName": "Fish",
+  "webDir": "www",
+  "backgroundColor": "#070b14",
+  "android": {
+    "backgroundColor": "#070b14"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#070b14",
+    "scheme": "Fish"
+  }
+}

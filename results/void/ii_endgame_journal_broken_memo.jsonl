@@ -1,0 +1,440 @@
+{"game": 0, "kind": "solved", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 2925}
+{"game": 0, "kind": "solved", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 1783}
+{"game": 0, "kind": "solved", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 1194}
+{"game": 0, "kind": "solved", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 107}
+{"game": 0, "kind": "solved", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 32}
+{"game": 0, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 0, "kind": "game_done"}
+{"game": 1, "kind": "skipped", "support": 36}
+{"game": 1, "kind": "solved", "support": 18, "value": 0.5555555555555557, "champion": -0.3333333333333333, "gain": 0.8888888888888891, "nodes": 27212}
+{"game": 1, "kind": "solved", "support": 6, "value": -0.3333333333333333, "champion": 0.0, "gain": -0.3333333333333333, "nodes": 203}
+{"game": 1, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 0.6666666666666666, "gain": 0.6666666666666666, "nodes": 26}
+{"game": 1, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 1, "kind": "game_done"}
+{"game": 2, "kind": "skipped", "support": 40}
+{"game": 2, "kind": "skipped", "support": 30}
+{"game": 2, "kind": "solved", "support": 6, "value": 0.5, "champion": 0.3333333333333333, "gain": 0.16666666666666669, "nodes": 519}
+{"game": 2, "kind": "solved", "support": 4, "value": 1.5, "champion": 1.5, "gain": 0.0, "nodes": 261}
+{"game": 2, "kind": "solved", "support": 2, "value": 0.5, "champion": 0.0, "gain": 0.5, "nodes": 130}
+{"game": 2, "kind": "game_done"}
+{"game": 3, "kind": "skipped", "support": 1980}
+{"game": 3, "kind": "skipped", "support": 5850}
+{"game": 3, "kind": "skipped", "support": 930}
+{"game": 3, "kind": "skipped", "support": 372}
+{"game": 3, "kind": "skipped", "support": 165}
+{"game": 3, "kind": "skipped", "support": 84}
+{"game": 3, "kind": "skipped", "support": 183}
+{"game": 3, "kind": "skipped", "support": 183}
+{"game": 3, "kind": "skipped", "support": 183}
+{"game": 3, "kind": "timeout", "support": 24, "nodes": 35803}
+{"game": 3, "kind": "timeout", "support": 24, "nodes": 33277}
+{"game": 3, "kind": "solved", "support": 24, "value": 0.45833333333333337, "champion": 0.04166666666666666, "gain": 0.41666666666666674, "nodes": 4282}
+{"game": 3, "kind": "solved", "support": 24, "value": 0.12499999999999997, "champion": 0.04166666666666666, "gain": 0.08333333333333331, "nodes": 1919}
+{"game": 3, "kind": "solved", "support": 6, "value": 1.1666666666666665, "champion": 1.1666666666666667, "gain": -2.220446049250313e-16, "nodes": 239}
+{"game": 3, "kind": "solved", "support": 2, "value": 1.5, "champion": 1.5, "gain": 0.0, "nodes": 12}
+{"game": 3, "kind": "game_done"}
+{"game": 4, "kind": "skipped", "support": 330}
+{"game": 4, "kind": "game_done"}
+{"game": 5, "kind": "solved", "support": 4, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 680}
+{"game": 5, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 163}
+{"game": 5, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 5, "kind": "game_done"}
+{"game": 6, "kind": "skipped", "support": 492}
+{"game": 6, "kind": "skipped", "support": 60}
+{"game": 6, "kind": "solved", "support": 6, "value": 0.6666666666666666, "champion": 0.6666666666666666, "gain": 0.0, "nodes": 679}
+{"game": 6, "kind": "solved", "support": 6, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 500}
+{"game": 6, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 236}
+{"game": 6, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 107}
+{"game": 6, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 6, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 6, "kind": "solved", "support": 3, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 210}
+{"game": 6, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 6, "kind": "game_done"}
+{"game": 7, "kind": "skipped", "support": 240}
+{"game": 7, "kind": "skipped", "support": 228}
+{"game": 7, "kind": "skipped", "support": 26}
+{"game": 7, "kind": "solved", "support": 2, "value": 2.0, "champion": 1.0, "gain": 1.0, "nodes": 13543}
+{"game": 7, "kind": "game_done"}
+{"game": 8, "kind": "solved", "support": 3, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 164}
+{"game": 8, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 8, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 8, "kind": "game_done"}
+{"game": 9, "kind": "solved", "support": 6, "value": 0.6666666666666666, "champion": -0.3333333333333333, "gain": 1.0, "nodes": 78}
+{"game": 9, "kind": "solved", "support": 4, "value": 1.0, "champion": 0.5, "gain": 0.5, "nodes": 2706}
+{"game": 9, "kind": "solved", "support": 4, "value": 1.0, "champion": 0.5, "gain": 0.5, "nodes": 1679}
+{"game": 9, "kind": "game_done"}
+{"game": 10, "kind": "skipped", "support": 450}
+{"game": 10, "kind": "skipped", "support": 150}
+{"game": 10, "kind": "skipped", "support": 210}
+{"game": 10, "kind": "skipped", "support": 210}
+{"game": 10, "kind": "skipped", "support": 60}
+{"game": 10, "kind": "solved", "support": 2, "value": 2.0, "champion": 1.0, "gain": 1.0, "nodes": 15223}
+{"game": 10, "kind": "game_done"}
+{"game": 11, "kind": "solved", "support": 6, "value": 1.1666666666666665, "champion": -0.5, "gain": 1.6666666666666665, "nodes": 1073}
+{"game": 11, "kind": "game_done"}
+{"game": 12, "kind": "skipped", "support": 2460}
+{"game": 12, "kind": "skipped", "support": 720}
+{"game": 12, "kind": "skipped", "support": 180}
+{"game": 12, "kind": "skipped", "support": 180}
+{"game": 12, "kind": "solved", "support": 5, "value": 0.2, "champion": 0.0, "gain": 0.2, "nodes": 11882}
+{"game": 12, "kind": "solved", "support": 5, "value": 0.2, "champion": 0.0, "gain": 0.2, "nodes": 6973}
+{"game": 12, "kind": "solved", "support": 5, "value": 0.4, "champion": 0.0, "gain": 0.4, "nodes": 1120}
+{"game": 12, "kind": "solved", "support": 4, "value": 0.25, "champion": 0.0, "gain": 0.25, "nodes": 342}
+{"game": 12, "kind": "game_done"}
+{"game": 13, "kind": "skipped", "support": 1380}
+{"game": 13, "kind": "skipped", "support": 234}
+{"game": 13, "kind": "timeout", "support": 12, "nodes": 56067}
+{"game": 13, "kind": "game_done"}
+{"game": 14, "kind": "timeout", "support": 18, "nodes": 37010}
+{"game": 14, "kind": "solved", "support": 18, "value": 0.6111111111111109, "champion": 0.0, "gain": 0.6111111111111109, "nodes": 7686}
+{"game": 14, "kind": "solved", "support": 18, "value": -1.1102230246251565e-16, "champion": 0.0, "gain": -1.1102230246251565e-16, "nodes": 1843}
+{"game": 14, "kind": "solved", "support": 12, "value": 0.4166666666666667, "champion": 0.5, "gain": -0.08333333333333331, "nodes": 388}
+{"game": 14, "kind": "solved", "support": 6, "value": -0.16666666666666666, "champion": -0.3333333333333333, "gain": 0.16666666666666666, "nodes": 97}
+{"game": 14, "kind": "solved", "support": 4, "value": 0.5, "champion": 0.25, "gain": 0.25, "nodes": 432}
+{"game": 14, "kind": "game_done"}
+{"game": 15, "kind": "skipped", "support": 13440}
+{"game": 15, "kind": "skipped", "support": 6720}
+{"game": 15, "kind": "skipped", "support": 6720}
+{"game": 15, "kind": "skipped", "support": 1260}
+{"game": 15, "kind": "skipped", "support": 360}
+{"game": 15, "kind": "skipped", "support": 60}
+{"game": 15, "kind": "game_done"}
+{"game": 16, "kind": "solved", "support": 2, "value": 0.0, "champion": -1.0, "gain": 1.0, "nodes": 2319}
+{"game": 16, "kind": "solved", "support": 2, "value": 0.0, "champion": -1.0, "gain": 1.0, "nodes": 1846}
+{"game": 16, "kind": "solved", "support": 2, "value": -1.0, "champion": -1.0, "gain": 0.0, "nodes": 443}
+{"game": 16, "kind": "solved", "support": 2, "value": -1.0, "champion": -1.0, "gain": 0.0, "nodes": 73}
+{"game": 16, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 16, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 16, "kind": "game_done"}
+{"game": 17, "kind": "skipped", "support": 3330}
+{"game": 17, "kind": "skipped", "support": 6810}
+{"game": 17, "kind": "skipped", "support": 284}
+{"game": 17, "kind": "skipped", "support": 284}
+{"game": 17, "kind": "skipped", "support": 284}
+{"game": 17, "kind": "skipped", "support": 204}
+{"game": 17, "kind": "skipped", "support": 60}
+{"game": 17, "kind": "skipped", "support": 126}
+{"game": 17, "kind": "skipped", "support": 126}
+{"game": 17, "kind": "skipped", "support": 30}
+{"game": 17, "kind": "solved", "support": 12, "value": 1.1666666666666667, "champion": 0.9999999999999999, "gain": 0.16666666666666685, "nodes": 525}
+{"game": 17, "kind": "game_done"}
+{"game": 18, "kind": "skipped", "support": 420}
+{"game": 18, "kind": "skipped", "support": 140}
+{"game": 18, "kind": "skipped", "support": 140}
+{"game": 18, "kind": "skipped", "support": 140}
+{"game": 18, "kind": "skipped", "support": 140}
+{"game": 18, "kind": "skipped", "support": 60}
+{"game": 18, "kind": "solved", "support": 20, "value": 1.3000000000000005, "champion": 1.3, "gain": 4.440892098500626e-16, "nodes": 1697}
+{"game": 18, "kind": "game_done"}
+{"game": 19, "kind": "skipped", "support": 2175}
+{"game": 19, "kind": "timeout", "support": 9, "nodes": 63651}
+{"game": 19, "kind": "game_done"}
+{"game": 20, "kind": "skipped", "support": 1800}
+{"game": 20, "kind": "skipped", "support": 1080}
+{"game": 20, "kind": "skipped", "support": 360}
+{"game": 20, "kind": "skipped", "support": 360}
+{"game": 20, "kind": "skipped", "support": 120}
+{"game": 20, "kind": "skipped", "support": 270}
+{"game": 20, "kind": "skipped", "support": 84}
+{"game": 20, "kind": "skipped", "support": 180}
+{"game": 20, "kind": "skipped", "support": 30}
+{"game": 20, "kind": "solved", "support": 4, "value": 0.25, "champion": 0.75, "gain": -0.5, "nodes": 154}
+{"game": 20, "kind": "skipped", "support": 93}
+{"game": 20, "kind": "solved", "support": 4, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 138}
+{"game": 20, "kind": "skipped", "support": 44}
+{"game": 20, "kind": "solved", "support": 4, "value": 0.0, "champion": 0.5, "gain": -0.5, "nodes": 72}
+{"game": 20, "kind": "solved", "support": 19, "value": 0.8421052631578944, "champion": 0.2631578947368421, "gain": 0.5789473684210522, "nodes": 1681}
+{"game": 20, "kind": "solved", "support": 4, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 30}
+{"game": 20, "kind": "solved", "support": 4, "value": 0.5, "champion": 0.0, "gain": 0.5, "nodes": 244}
+{"game": 20, "kind": "solved", "support": 2, "value": 0.5, "champion": 0.5, "gain": 0.0, "nodes": 178}
+{"game": 20, "kind": "game_done"}
+{"game": 21, "kind": "skipped", "support": 10080}
+{"game": 21, "kind": "skipped", "support": 8400}
+{"game": 21, "kind": "skipped", "support": 480}
+{"game": 21, "kind": "skipped", "support": 192}
+{"game": 21, "kind": "skipped", "support": 264}
+{"game": 21, "kind": "skipped", "support": 144}
+{"game": 21, "kind": "timeout", "support": 24, "nodes": 32863}
+{"game": 21, "kind": "solved", "support": 24, "value": -0.2083333333333333, "champion": -1.0, "gain": 0.7916666666666667, "nodes": 25240}
+{"game": 21, "kind": "solved", "support": 6, "value": -0.3333333333333333, "champion": -0.8333333333333333, "gain": 0.49999999999999994, "nodes": 548}
+{"game": 21, "kind": "timeout", "support": 4, "nodes": 67302}
+{"game": 21, "kind": "game_done"}
+{"game": 22, "kind": "skipped", "support": 260}
+{"game": 22, "kind": "skipped", "support": 160}
+{"game": 22, "kind": "skipped", "support": 80}
+{"game": 22, "kind": "solved", "support": 4, "value": 2.0, "champion": 1.5, "gain": 0.5, "nodes": 18570}
+{"game": 22, "kind": "solved", "support": 4, "value": 2.0, "champion": 1.0, "gain": 1.0, "nodes": 4794}
+{"game": 22, "kind": "solved", "support": 4, "value": 2.0, "champion": 1.5, "gain": 0.5, "nodes": 1718}
+{"game": 22, "kind": "solved", "support": 4, "value": 2.0, "champion": 1.5, "gain": 0.5, "nodes": 977}
+{"game": 22, "kind": "solved", "support": 4, "value": 2.0, "champion": 1.5, "gain": 0.5, "nodes": 329}
+{"game": 22, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 22, "kind": "game_done"}
+{"game": 23, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 23, "kind": "game_done"}
+{"game": 24, "kind": "solved", "support": 8, "value": 1.5, "champion": 0.375, "gain": 1.125, "nodes": 1600}
+{"game": 24, "kind": "solved", "support": 8, "value": 1.25, "champion": 0.375, "gain": 0.875, "nodes": 847}
+{"game": 24, "kind": "solved", "support": 8, "value": 1.25, "champion": 0.375, "gain": 0.875, "nodes": 458}
+{"game": 24, "kind": "timeout", "support": 22, "nodes": 40094}
+{"game": 24, "kind": "timeout", "support": 22, "nodes": 32666}
+{"game": 24, "kind": "solved", "support": 22, "value": 0.7272727272727275, "champion": -0.590909090909091, "gain": 1.3181818181818186, "nodes": 26923}
+{"game": 24, "kind": "solved", "support": 22, "value": 0.04545454545454519, "champion": -0.590909090909091, "gain": 0.6363636363636362, "nodes": 4264}
+{"game": 24, "kind": "solved", "support": 7, "value": 0.4285714285714288, "champion": 0.42857142857142855, "gain": 2.7755575615628914e-16, "nodes": 461}
+{"game": 24, "kind": "solved", "support": 6, "value": 0.8333333333333331, "champion": 0.8333333333333333, "gain": -1.1102230246251565e-16, "nodes": 8}
+{"game": 24, "kind": "game_done"}
+{"game": 25, "kind": "solved", "support": 10, "value": 1.1, "champion": 0.5, "gain": 0.6000000000000001, "nodes": 144}
+{"game": 25, "kind": "game_done"}
+{"game": 26, "kind": "timeout", "support": 3, "nodes": 57447}
+{"game": 26, "kind": "solved", "support": 3, "value": 2.0, "champion": 1.3333333333333333, "gain": 0.6666666666666667, "nodes": 32997}
+{"game": 26, "kind": "game_done"}
+{"game": 27, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 746}
+{"game": 27, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 434}
+{"game": 27, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 281}
+{"game": 27, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 133}
+{"game": 27, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 19}
+{"game": 27, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 4}
+{"game": 27, "kind": "game_done"}
+{"game": 28, "kind": "skipped", "support": 90}
+{"game": 28, "kind": "solved", "support": 18, "value": -0.5000000000000002, "champion": -1.3333333333333337, "gain": 0.8333333333333335, "nodes": 863}
+{"game": 28, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 28, "kind": "game_done"}
+{"game": 29, "kind": "skipped", "support": 810}
+{"game": 29, "kind": "skipped", "support": 210}
+{"game": 29, "kind": "skipped", "support": 102}
+{"game": 29, "kind": "solved", "support": 15, "value": 0.4, "champion": 0.1333333333333334, "gain": 0.2666666666666666, "nodes": 7537}
+{"game": 29, "kind": "solved", "support": 15, "value": 0.26666666666666644, "champion": 0.1333333333333334, "gain": 0.13333333333333305, "nodes": 2364}
+{"game": 29, "kind": "solved", "support": 15, "value": 0.10370370370370378, "champion": 5.551115123125783e-17, "gain": 0.10370370370370373, "nodes": 1156}
+{"game": 29, "kind": "solved", "support": 15, "value": 0.10370370370370369, "champion": 5.551115123125783e-17, "gain": 0.10370370370370363, "nodes": 365}
+{"game": 29, "kind": "timeout", "support": 1, "nodes": 63971}
+{"game": 29, "kind": "timeout", "support": 1, "nodes": 60350}
+{"game": 29, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 29, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 29, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 29, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 29, "kind": "game_done"}
+{"game": 30, "kind": "solved", "support": 24, "value": 1.0833333333333328, "champion": 0.8333333333333334, "gain": 0.24999999999999944, "nodes": 495}
+{"game": 30, "kind": "game_done"}
+{"game": 31, "kind": "skipped", "support": 180}
+{"game": 31, "kind": "skipped", "support": 27}
+{"game": 31, "kind": "skipped", "support": 27}
+{"game": 31, "kind": "timeout", "support": 18, "nodes": 55564}
+{"game": 31, "kind": "solved", "support": 9, "value": 0.8888888888888888, "champion": -0.6666666666666666, "gain": 1.5555555555555554, "nodes": 6907}
+{"game": 31, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 1584}
+{"game": 31, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 888}
+{"game": 31, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 514}
+{"game": 31, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 127}
+{"game": 31, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 71}
+{"game": 31, "kind": "solved", "support": 2, "value": 2.0, "champion": 2.0, "gain": 0.0, "nodes": 12}
+{"game": 31, "kind": "game_done"}
+{"game": 32, "kind": "timeout", "support": 22, "nodes": 33034}
+{"game": 32, "kind": "solved", "support": 22, "value": 0.09090909090909105, "champion": -0.9090909090909094, "gain": 1.0000000000000004, "nodes": 31574}
+{"game": 32, "kind": "solved", "support": 22, "value": 0.09090909090909097, "champion": -0.9090909090909094, "gain": 1.0000000000000004, "nodes": 16455}
+{"game": 32, "kind": "solved", "support": 22, "value": 0.1363636363636364, "champion": -0.9090909090909094, "gain": 1.0454545454545459, "nodes": 6712}
+{"game": 32, "kind": "solved", "support": 12, "value": 0.41666666666666674, "champion": -0.5833333333333333, "gain": 1.0, "nodes": 1058}
+{"game": 32, "kind": "solved", "support": 5, "value": 0.4, "champion": 0.4, "gain": 0.0, "nodes": 7}
+{"game": 32, "kind": "game_done"}
+{"game": 33, "kind": "solved", "support": 15, "value": 0.8666666666666666, "champion": 0.5333333333333333, "gain": 0.33333333333333326, "nodes": 256}
+{"game": 33, "kind": "game_done"}
+{"game": 34, "kind": "skipped", "support": 39}
+{"game": 34, "kind": "skipped", "support": 81}
+{"game": 34, "kind": "skipped", "support": 60}
+{"game": 34, "kind": "skipped", "support": 54}
+{"game": 34, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 775}
+{"game": 34, "kind": "solved", "support": 11, "value": 0.7272727272727275, "champion": 0.6363636363636364, "gain": 0.09090909090909116, "nodes": 853}
+{"game": 34, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 34, "kind": "solved", "support": 14, "value": 0.14285714285714285, "champion": -0.42857142857142855, "gain": 0.5714285714285714, "nodes": 1023}
+{"game": 34, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 34, "kind": "solved", "support": 8, "value": 0.375, "champion": 0.375, "gain": 0.0, "nodes": 562}
+{"game": 34, "kind": "game_done"}
+{"game": 35, "kind": "skipped", "support": 2625}
+{"game": 35, "kind": "skipped", "support": 240}
+{"game": 35, "kind": "skipped", "support": 27}
+{"game": 35, "kind": "solved", "support": 9, "value": 1.5555555555555562, "champion": 0.7777777777777779, "gain": 0.7777777777777783, "nodes": 2024}
+{"game": 35, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.0, "gain": 0.33333333333333326, "nodes": 28}
+{"game": 35, "kind": "game_done"}
+{"game": 36, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 36, "kind": "game_done"}
+{"game": 37, "kind": "solved", "support": 19, "value": 2.77555756156289e-17, "champion": 0.0, "gain": 2.77555756156289e-17, "nodes": 493}
+{"game": 37, "kind": "game_done"}
+{"game": 38, "kind": "solved", "support": 9, "value": 1.0000000000000004, "champion": 1.0000000000000002, "gain": 2.220446049250313e-16, "nodes": 17}
+{"game": 38, "kind": "timeout", "support": 9, "nodes": 35650}
+{"game": 38, "kind": "solved", "support": 9, "value": 1.0000000000000007, "champion": 1.0000000000000002, "gain": 4.440892098500626e-16, "nodes": 32604}
+{"game": 38, "kind": "solved", "support": 9, "value": 1.0000000000000007, "champion": 1.0000000000000002, "gain": 4.440892098500626e-16, "nodes": 13693}
+{"game": 38, "kind": "solved", "support": 9, "value": 1.0000000000000002, "champion": 1.0000000000000002, "gain": 0.0, "nodes": 4759}
+{"game": 38, "kind": "solved", "support": 9, "value": 1.0000000000000004, "champion": 1.0000000000000002, "gain": 2.220446049250313e-16, "nodes": 1725}
+{"game": 38, "kind": "solved", "support": 9, "value": 1.0000000000000004, "champion": 1.0000000000000002, "gain": 2.220446049250313e-16, "nodes": 11}
+{"game": 38, "kind": "game_done"}
+{"game": 39, "kind": "skipped", "support": 54}
+{"game": 39, "kind": "skipped", "support": 54}
+{"game": 39, "kind": "solved", "support": 18, "value": 1.027777777777778, "champion": 0.6666666666666667, "gain": 0.36111111111111116, "nodes": 1279}
+{"game": 39, "kind": "skipped", "support": 60}
+{"game": 39, "kind": "skipped", "support": 60}
+{"game": 39, "kind": "skipped", "support": 60}
+{"game": 39, "kind": "solved", "support": 2, "value": 1.5, "champion": 1.5, "gain": 0.0, "nodes": 247}
+{"game": 39, "kind": "solved", "support": 2, "value": 1.5, "champion": 1.5, "gain": 0.0, "nodes": 123}
+{"game": 39, "kind": "solved", "support": 2, "value": 1.5, "champion": 1.5, "gain": 0.0, "nodes": 49}
+{"game": 39, "kind": "solved", "support": 2, "value": 1.5, "champion": 1.5, "gain": 0.0, "nodes": 12}
+{"game": 39, "kind": "game_done"}
+{"game": 40, "kind": "skipped", "support": 60}
+{"game": 40, "kind": "skipped", "support": 40}
+{"game": 40, "kind": "solved", "support": 24, "value": 1.0000000000000007, "champion": 0.8749999999999997, "gain": 0.125000000000001, "nodes": 22620}
+{"game": 40, "kind": "game_done"}
+{"game": 41, "kind": "skipped", "support": 810}
+{"game": 41, "kind": "skipped", "support": 27}
+{"game": 41, "kind": "skipped", "support": 27}
+{"game": 41, "kind": "timeout", "support": 3, "nodes": 44601}
+{"game": 41, "kind": "timeout", "support": 3, "nodes": 43720}
+{"game": 41, "kind": "solved", "support": 3, "value": 2.0, "champion": 1.3333333333333333, "gain": 0.6666666666666667, "nodes": 1379}
+{"game": 41, "kind": "solved", "support": 3, "value": 2.0, "champion": 2.0, "gain": 0.0, "nodes": 982}
+{"game": 41, "kind": "solved", "support": 3, "value": 2.0, "champion": 2.0, "gain": 0.0, "nodes": 685}
+{"game": 41, "kind": "solved", "support": 3, "value": 2.0, "champion": 2.0, "gain": 0.0, "nodes": 497}
+{"game": 41, "kind": "solved", "support": 3, "value": 2.0, "champion": 2.0, "gain": 0.0, "nodes": 281}
+{"game": 41, "kind": "game_done"}
+{"game": 42, "kind": "solved", "support": 24, "value": 0.29166666666666663, "champion": -0.0833333333333333, "gain": 0.37499999999999994, "nodes": 15015}
+{"game": 42, "kind": "skipped", "support": 25}
+{"game": 42, "kind": "game_done"}
+{"game": 43, "kind": "solved", "support": 6, "value": 0.49999999999999994, "champion": 0.5, "gain": -5.551115123125783e-17, "nodes": 10}
+{"game": 43, "kind": "solved", "support": 6, "value": 0.5, "champion": 0.5, "gain": 0.0, "nodes": 778}
+{"game": 43, "kind": "solved", "support": 6, "value": 0.49999999999999994, "champion": 0.5, "gain": -5.551115123125783e-17, "nodes": 8}
+{"game": 43, "kind": "game_done"}
+{"game": 44, "kind": "skipped", "support": 10500}
+{"game": 44, "kind": "skipped", "support": 4980}
+{"game": 44, "kind": "skipped", "support": 1110}
+{"game": 44, "kind": "skipped", "support": 222}
+{"game": 44, "kind": "skipped", "support": 228}
+{"game": 44, "kind": "skipped", "support": 108}
+{"game": 44, "kind": "skipped", "support": 36}
+{"game": 44, "kind": "game_done"}
+{"game": 45, "kind": "skipped", "support": 168}
+{"game": 45, "kind": "skipped", "support": 156}
+{"game": 45, "kind": "skipped", "support": 120}
+{"game": 45, "kind": "skipped", "support": 60}
+{"game": 45, "kind": "skipped", "support": 36}
+{"game": 45, "kind": "skipped", "support": 36}
+{"game": 45, "kind": "solved", "support": 18, "value": -0.11111111111111119, "champion": -0.8888888888888891, "gain": 0.7777777777777779, "nodes": 2755}
+{"game": 45, "kind": "solved", "support": 18, "value": -0.22222222222222227, "champion": -0.8888888888888891, "gain": 0.6666666666666667, "nodes": 1467}
+{"game": 45, "kind": "solved", "support": 18, "value": -0.3333333333333334, "champion": -0.8888888888888891, "gain": 0.5555555555555556, "nodes": 347}
+{"game": 45, "kind": "solved", "support": 2, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 24}
+{"game": 45, "kind": "solved", "support": 2, "value": 1.0, "champion": 0.0, "gain": 1.0, "nodes": 763}
+{"game": 45, "kind": "game_done"}
+{"game": 46, "kind": "solved", "support": 6, "value": 0.0, "champion": 0.0, "gain": 0.0, "nodes": 250}
+{"game": 46, "kind": "solved", "support": 2, "value": 0.5, "champion": 0.0, "gain": 0.5, "nodes": 49}
+{"game": 46, "kind": "game_done"}
+{"game": 47, "kind": "solved", "support": 5, "value": 1.2000000000000002, "champion": 1.0, "gain": 0.20000000000000018, "nodes": 56}
+{"game": 47, "kind": "game_done"}
+{"game": 48, "kind": "solved", "support": 12, "value": 1.083333333333333, "champion": 1.0833333333333333, "gain": -2.220446049250313e-16, "nodes": 813}
+{"game": 48, "kind": "solved", "support": 18, "value": 0.09090909090909083, "champion": -0.2777777777777778, "gain": 0.3686868686868686, "nodes": 750}
+{"game": 48, "kind": "skipped", "support": 69}
+{"game": 48, "kind": "solved", "support": 4, "value": -0.25, "champion": -1.25, "gain": 1.0, "nodes": 432}
+{"game": 48, "kind": "skipped", "support": 39}
+{"game": 48, "kind": "solved", "support": 4, "value": -0.25, "champion": -1.25, "gain": 1.0, "nodes": 355}
+{"game": 48, "kind": "solved", "support": 12, "value": 1.5, "champion": 0.9166666666666667, "gain": 0.5833333333333333, "nodes": 7504}
+{"game": 48, "kind": "solved", "support": 3, "value": 0.0, "champion": -1.0, "gain": 1.0, "nodes": 34}
+{"game": 48, "kind": "solved", "support": 5, "value": 1.0, "champion": 0.6000000000000001, "gain": 0.3999999999999999, "nodes": 2154}
+{"game": 48, "kind": "game_done"}
+{"game": 49, "kind": "skipped", "support": 50}
+{"game": 49, "kind": "solved", "support": 22, "value": 0.9090909090909093, "champion": 0.36363636363636365, "gain": 0.5454545454545456, "nodes": 17020}
+{"game": 49, "kind": "solved", "support": 9, "value": 0.6666666666666666, "champion": -0.2222222222222222, "gain": 0.8888888888888888, "nodes": 676}
+{"game": 49, "kind": "solved", "support": 10, "value": 1.0, "champion": 0.8, "gain": 0.19999999999999996, "nodes": 4013}
+{"game": 49, "kind": "solved", "support": 6, "value": 0.33333333333333337, "champion": 0.3333333333333334, "gain": -5.551115123125783e-17, "nodes": 447}
+{"game": 49, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.3333333333333333, "gain": 0.0, "nodes": 576}
+{"game": 49, "kind": "solved", "support": 2, "value": 1.0, "champion": 1.0, "gain": 0.0, "nodes": 100}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 49, "kind": "game_done"}
+{"game": 50, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.0, "gain": 0.33333333333333326, "nodes": 28}
+{"game": 50, "kind": "game_done"}
+{"game": 51, "kind": "skipped", "support": 384}
+{"game": 51, "kind": "skipped", "support": 63}
+{"game": 51, "kind": "skipped", "support": 138}
+{"game": 51, "kind": "skipped", "support": 43}
+{"game": 51, "kind": "skipped", "support": 32}
+{"game": 51, "kind": "game_done"}
+{"game": 52, "kind": "solved", "support": 15, "value": 0.876190476190476, "champion": 0.0, "gain": 0.876190476190476, "nodes": 231}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "kind": "solved", "support": 5, "value": 1.6, "champion": 1.6, "gain": 0.0, "nodes": 154}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 52, "kind": "game_done"}
+{"game": 53, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 53, "kind": "game_done"}
+{"game": 54, "kind": "solved", "support": 3, "value": -1.3333333333333333, "champion": -1.3333333333333333, "gain": 0.0, "nodes": 22}
+{"game": 54, "kind": "solved", "support": 3, "value": -1.3333333333333333, "champion": -1.3333333333333333, "gain": 0.0, "nodes": 1325}
+{"game": 54, "kind": "solved", "support": 3, "value": -1.3333333333333333, "champion": -1.3333333333333333, "gain": 0.0, "nodes": 633}
+{"game": 54, "kind": "solved", "support": 3, "value": -1.3333333333333333, "champion": -1.3333333333333333, "gain": 0.0, "nodes": 298}
+{"game": 54, "kind": "solved", "support": 2, "value": -1.0, "champion": -1.0, "gain": 0.0, "nodes": 99}
+{"game": 54, "exact": 2.0, "closed_form": 2, "kind": "pinned_ok"}
+{"game": 54, "kind": "game_done"}
+{"game": 55, "kind": "solved", "support": 4, "value": 1.5, "champion": 1.5, "gain": 0.0, "nodes": 68}
+{"game": 55, "exact": 0.0, "closed_form": 0, "kind": "pinned_ok"}
+{"game": 55, "kind": "game_done"}
+{"game": 56, "kind": "solved", "support": 3, "value": 1.3333333333333333, "champion": 1.0, "gain": 0.33333333333333326, "nodes": 28}
+{"game": 56, "kind": "game_done"}
+{"game": 57, "kind": "solved", "support": 16, "value": -0.875, "champion": -0.8125, "gain": -0.0625, "nodes": 86}
+{"game": 57, "kind": "solved", "support": 8, "value": 0.24999999999999978, "champion": -0.875, "gain": 1.1249999999999998, "nodes": 338}
+{"game": 57, "kind": "solved", "support": 2, "value": 0.5, "champion": 0.0, "gain": 0.5, "nodes": 71}
+{"game": 57, "kind": "game_done"}
+{"game": 58, "kind": "skipped", "support": 7560}
+{"game": 58, "kind": "skipped", "support": 5880}
+{"game": 58, "kind": "skipped", "support": 1260}
+{"game": 58, "kind": "skipped", "support": 1260}
+{"game": 58, "kind": "skipped", "support": 270}
+{"game": 58, "kind": "skipped", "support": 5040}
+{"game": 58, "kind": "skipped", "support": 5040}
+{"game": 58, "kind": "skipped", "support": 1680}
+{"game": 58, "kind": "skipped", "support": 630}
+{"game": 58, "kind": "skipped", "support": 30}
+{"game": 58, "kind": "skipped", "support": 30}
+{"game": 58, "kind": "skipped", "support": 30}
+{"game": 58, "kind": "skipped", "support": 30}
+{"game": 58, "kind": "skipped", "support": 30}
+{"game": 58, "kind": "solved", "support": 12, "value": 1.6666666666666667, "champion": 0.9999999999999999, "gain": 0.6666666666666669, "nodes": 1055}
+{"game": 58, "kind": "game_done"}
+{"game": 59, "kind": "skipped", "support": 810}
+{"game": 59, "kind": "skipped", "support": 122}
+{"game": 59, "kind": "skipped", "support": 122}
+{"game": 59, "kind": "skipped", "support": 122}
+{"game": 59, "kind": "skipped", "support": 66}
+{"game": 59, "kind": "solved", "support": 21, "value": 1.1904761904761907, "champion": 0.9047619047619047, "gain": 0.28571428571428603, "nodes": 31371}
+{"game": 59, "kind": "solved", "support": 6, "value": 1.8333333333333333, "champion": 0.8333333333333333, "gain": 1.0, "nodes": 510}
+{"game": 59, "kind": "game_done"}
+{"game": 0, "solver": "7e1cd136ef0d", "exact": 1.0, "closed_form": 1, "kind": "pinned_ok"}
+{"game": 0, "solver": "7e1cd136ef0d", "exact": 1.0, "closed_form": 1, "kind": "pinned_ok"}
+{"game": 0, "kind": "game_done", "solver": "7e1cd136ef0d"}
+{"game": 1, "solver": "7e1cd136ef0d", "exact": 1.0, "closed_form": 1, "kind": "pinned_ok"}
+{"game": 1, "solver": "7e1cd136ef0d", "exact": 1.0, "closed_form": 1, "kind": "pinned_ok"}
+{"game": 1, "solver": "7e1cd136ef0d", "exact": 1.0, "closed_form": 1, "kind": "pinned_ok"}
+{"game": 1, "kind": "game_done", "solver": "7e1cd136ef0d"}
+{"game": 2, "solver": "7e1cd136ef0d", "exact": 1.0, "closed_form": 1, "kind": "pinned_ok"}
+{"game": 2, "kind": "game_done", "solver": "7e1cd136ef0d"}

@@ -1,0 +1,299 @@
+{
+ "script": "scripts4/policy_inversion_bite.py",
+ "descriptive": true,
+ "rules": {
+  "wrong_distribution_outcome": "opponent"
+ },
+ "seed_deal": 14100000,
+ "seed_agent": 141000,
+ "n_games": 30,
+ "n_decisions": 831,
+ "worlds_per_decision": 32,
+ "worlds_drawn": 26592,
+ "selftest_n": 831,
+ "selftest_ok": 831,
+ "selftest_rate": 1.0,
+ "selftest_failures": [],
+ "decisions_without_a_pool": 0,
+ "world_source": "FishBot4.build_posterior(...).worlds()",
+ "worlds_dropped_sampler": 0,
+ "worlds_dropped_bridge": 0,
+ "drop_reasons": {},
+ "worlds_scored": 26592,
+ "consistent_all": 0.4568667268351384,
+ "consistent_legal": 0.5912209839894885,
+ "legal_share": 0.7727512033694344,
+ "bits_all": 1.1301547186091239,
+ "bits_beyond_legality": 0.758230619448759,
+ "ceiling_rev3_opponent": 4.596,
+ "per_game": [
+  {
+   "game": 0,
+   "decisions": 28,
+   "worlds": 896,
+   "same_all": 481,
+   "legal": 754,
+   "same_legal": 481
+  },
+  {
+   "game": 1,
+   "decisions": 21,
+   "worlds": 672,
+   "same_all": 300,
+   "legal": 499,
+   "same_legal": 300
+  },
+  {
+   "game": 2,
+   "decisions": 31,
+   "worlds": 992,
+   "same_all": 374,
+   "legal": 708,
+   "same_legal": 374
+  },
+  {
+   "game": 3,
+   "decisions": 34,
+   "worlds": 1088,
+   "same_all": 562,
+   "legal": 869,
+   "same_legal": 562
+  },
+  {
+   "game": 4,
+   "decisions": 33,
+   "worlds": 1056,
+   "same_all": 426,
+   "legal": 744,
+   "same_legal": 426
+  },
+  {
+   "game": 5,
+   "decisions": 34,
+   "worlds": 1088,
+   "same_all": 504,
+   "legal": 862,
+   "same_legal": 504
+  },
+  {
+   "game": 6,
+   "decisions": 25,
+   "worlds": 800,
+   "same_all": 248,
+   "legal": 614,
+   "same_legal": 248
+  },
+  {
+   "game": 7,
+   "decisions": 22,
+   "worlds": 704,
+   "same_all": 268,
+   "legal": 530,
+   "same_legal": 268
+  },
+  {
+   "game": 8,
+   "decisions": 32,
+   "worlds": 1024,
+   "same_all": 404,
+   "legal": 834,
+   "same_legal": 404
+  },
+  {
+   "game": 9,
+   "decisions": 35,
+   "worlds": 1120,
+   "same_all": 495,
+   "legal": 840,
+   "same_legal": 495
+  },
+  {
+   "game": 10,
+   "decisions": 37,
+   "worlds": 1184,
+   "same_all": 674,
+   "legal": 940,
+   "same_legal": 674
+  },
+  {
+   "game": 11,
+   "decisions": 31,
+   "worlds": 992,
+   "same_all": 414,
+   "legal": 724,
+   "same_legal": 414
+  },
+  {
+   "game": 12,
+   "decisions": 27,
+   "worlds": 864,
+   "same_all": 454,
+   "legal": 670,
+   "same_legal": 454
+  },
+  {
+   "game": 13,
+   "decisions": 29,
+   "worlds": 928,
+   "same_all": 444,
+   "legal": 673,
+   "same_legal": 444
+  },
+  {
+   "game": 14,
+   "decisions": 29,
+   "worlds": 928,
+   "same_all": 378,
+   "legal": 697,
+   "same_legal": 378
+  },
+  {
+   "game": 15,
+   "decisions": 21,
+   "worlds": 672,
+   "same_all": 366,
+   "legal": 526,
+   "same_legal": 366
+  },
+  {
+   "game": 16,
+   "decisions": 24,
+   "worlds": 768,
+   "same_all": 398,
+   "legal": 624,
+   "same_legal": 398
+  },
+  {
+   "game": 17,
+   "decisions": 20,
+   "worlds": 640,
+   "same_all": 221,
+   "legal": 424,
+   "same_legal": 221
+  },
+  {
+   "game": 18,
+   "decisions": 29,
+   "worlds": 928,
+   "same_all": 496,
+   "legal": 744,
+   "same_legal": 496
+  },
+  {
+   "game": 19,
+   "decisions": 29,
+   "worlds": 928,
+   "same_all": 418,
+   "legal": 785,
+   "same_legal": 418
+  },
+  {
+   "game": 20,
+   "decisions": 17,
+   "worlds": 544,
+   "same_all": 237,
+   "legal": 436,
+   "same_legal": 237
+  },
+  {
+   "game": 21,
+   "decisions": 35,
+   "worlds": 1120,
+   "same_all": 562,
+   "legal": 931,
+   "same_legal": 562
+  },
+  {
+   "game": 22,
+   "decisions": 22,
+   "worlds": 704,
+   "same_all": 213,
+   "legal": 477,
+   "same_legal": 213
+  },
+  {
+   "game": 23,
+   "decisions": 33,
+   "worlds": 1056,
+   "same_all": 509,
+   "legal": 855,
+   "same_legal": 509
+  },
+  {
+   "game": 24,
+   "decisions": 20,
+   "worlds": 640,
+   "same_all": 267,
+   "legal": 469,
+   "same_legal": 267
+  },
+  {
+   "game": 25,
+   "decisions": 27,
+   "worlds": 864,
+   "same_all": 347,
+   "legal": 624,
+   "same_legal": 347
+  },
+  {
+   "game": 26,
+   "decisions": 24,
+   "worlds": 768,
+   "same_all": 379,
+   "legal": 605,
+   "same_legal": 379
+  },
+  {
+   "game": 27,
+   "decisions": 30,
+   "worlds": 960,
+   "same_all": 477,
+   "legal": 793,
+   "same_legal": 477
+  },
+  {
+   "game": 28,
+   "decisions": 18,
+   "worlds": 576,
+   "same_all": 255,
+   "legal": 393,
+   "same_legal": 255
+  },
+  {
+   "game": 29,
+   "decisions": 34,
+   "worlds": 1088,
+   "same_all": 578,
+   "legal": 905,
+   "same_legal": 578
+  }
+ ],
+ "ci": {
+  "boot": 2000,
+  "boot_seed": 20260923,
+  "n_clusters": 30,
+  "cluster": "game",
+  "degenerate_replicates": 0,
+  "consistent_all_ci": [
+   0.43034409257003653,
+   0.4809478183962264
+  ],
+  "consistent_legal_ci": [
+   0.5641257741781801,
+   0.6150909605052314
+  ],
+  "legal_share_ci": [
+   0.7539360687022901,
+   0.7902055622732769
+  ],
+  "bits_all_ci": [
+   1.0560908191518936,
+   1.2166146447720319
+  ],
+  "bits_beyond_legality_ci": [
+   0.7011453061104772,
+   0.8260026832858495
+  ]
+ },
+ "note": "bits are a bound on information, not sets; this screen can say the channel is empty and cannot say what a full one is worth"
+}

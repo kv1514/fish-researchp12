@@ -1,0 +1,319 @@
+{
+ "seat_games": {
+  "engine": 200,
+  "dylan": 200,
+  "peek50": 200,
+  "peek15": 200,
+  "share": 200
+ },
+ "unfinished_games": 0,
+ "per_game": {
+  "engine": {
+   "ask_excess_mean": 0.0202,
+   "ask_excess_ci95": [
+    0.0042,
+    0.0363
+   ],
+   "ask_z_mean": 0.2481,
+   "ask_z_sd": 1.0946,
+   "asks_per_game": 14.7,
+   "claims_per_game": 1.44,
+   "engine_match_rate": 0.45
+  },
+  "dylan": {
+   "ask_excess_mean": 0.0072,
+   "ask_excess_ci95": [
+    -0.0081,
+    0.0225
+   ],
+   "ask_z_mean": 0.1543,
+   "ask_z_sd": 1.1173,
+   "asks_per_game": 15.6,
+   "claims_per_game": 1.5,
+   "engine_match_rate": 0.313
+  },
+  "peek50": {
+   "ask_excess_mean": 0.3026,
+   "ask_excess_ci95": [
+    0.2838,
+    0.3214
+   ],
+   "ask_z_mean": 3.6366,
+   "ask_z_sd": 1.6581,
+   "asks_per_game": 18.3,
+   "claims_per_game": 1.85,
+   "engine_match_rate": 0.325
+  },
+  "peek15": {
+   "ask_excess_mean": 0.1177,
+   "ask_excess_ci95": [
+    0.1001,
+    0.1354
+   ],
+   "ask_z_mean": 1.3492,
+   "ask_z_sd": 1.3024,
+   "asks_per_game": 16.7,
+   "claims_per_game": 1.59,
+   "engine_match_rate": 0.404
+  },
+  "share": {
+   "ask_excess_mean": 0.035,
+   "ask_excess_ci95": [
+    0.0192,
+    0.0508
+   ],
+   "ask_z_mean": 0.3947,
+   "ask_z_sd": 1.0759,
+   "asks_per_game": 14.5,
+   "claims_per_game": 2.37,
+   "engine_match_rate": 0.389
+  }
+ },
+ "careers": {
+  "5": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.452,
+    "match_rate_p99": 0.644
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.314,
+    "match_rate_p99": 0.489
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 0.966,
+    "flag_rate_asks": 0.966,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.324,
+    "match_rate_p99": 0.48
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.0475,
+    "flag_rate_asks": 0.0475,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.404,
+    "match_rate_p99": 0.568
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 0.172,
+    "flag_rate_asks": 0.0005,
+    "flag_rate_declarations": 0.1715,
+    "match_rate_p50": 0.383,
+    "match_rate_p99": 0.574
+   }
+  },
+  "10": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.452,
+    "match_rate_p99": 0.6
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.311,
+    "match_rate_p99": 0.44
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 1.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.325,
+    "match_rate_p99": 0.435
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.1175,
+    "flag_rate_asks": 0.1175,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.404,
+    "match_rate_p99": 0.52
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 0.6335,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.6335,
+    "match_rate_p50": 0.389,
+    "match_rate_p99": 0.515
+   }
+  },
+  "25": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.451,
+    "match_rate_p99": 0.536
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.313,
+    "match_rate_p99": 0.39
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 1.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.324,
+    "match_rate_p99": 0.39
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.5015,
+    "flag_rate_asks": 0.5015,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.405,
+    "match_rate_p99": 0.475
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 0.9865,
+    "flag_rate_asks": 0.0005,
+    "flag_rate_declarations": 0.9865,
+    "match_rate_p50": 0.387,
+    "match_rate_p99": 0.462
+   }
+  },
+  "50": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.449,
+    "match_rate_p99": 0.511
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.314,
+    "match_rate_p99": 0.365
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 1.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.325,
+    "match_rate_p99": 0.373
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.9135,
+    "flag_rate_asks": 0.9135,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.405,
+    "match_rate_p99": 0.456
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 1.0,
+    "match_rate_p50": 0.388,
+    "match_rate_p99": 0.446
+   }
+  },
+  "100": {
+   "engine": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.451,
+    "match_rate_p99": 0.492
+   },
+   "dylan": {
+    "flag_rate_any_ask_or_claim": 0.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.314,
+    "match_rate_p99": 0.352
+   },
+   "peek50": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 1.0,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.325,
+    "match_rate_p99": 0.358
+   },
+   "peek15": {
+    "flag_rate_any_ask_or_claim": 0.9995,
+    "flag_rate_asks": 0.9995,
+    "flag_rate_declarations": 0.0,
+    "match_rate_p50": 0.405,
+    "match_rate_p99": 0.441
+   },
+   "share": {
+    "flag_rate_any_ask_or_claim": 1.0,
+    "flag_rate_asks": 0.0,
+    "flag_rate_declarations": 1.0,
+    "match_rate_p50": 0.389,
+    "match_rate_p99": 0.425
+   }
+  }
+ },
+ "rules": {
+  "round": 2,
+  "honest_flag_rates": {
+   "K10_engine": 0.0,
+   "K10_dylan": 0.0,
+   "K25_engine": 0.0,
+   "K25_dylan": 0.0,
+   "K50_engine": 0.0,
+   "K50_dylan": 0.0,
+   "K100_engine": 0.0,
+   "K100_dylan": 0.0
+  },
+  "honest_ok_le_1pct": true,
+  "peek50_k10": 1.0,
+  "share_k25": 0.9865,
+  "power_ok": true,
+  "k_for_90pct": {
+   "peek50": 5,
+   "peek15": 50,
+   "share": 25
+  },
+  "flag_rate_by_K": {
+   "engine": {
+    "5": 0.0,
+    "10": 0.0,
+    "25": 0.0,
+    "50": 0.0,
+    "100": 0.0
+   },
+   "dylan": {
+    "5": 0.0,
+    "10": 0.0,
+    "25": 0.0,
+    "50": 0.0,
+    "100": 0.0
+   },
+   "peek50": {
+    "5": 0.966,
+    "10": 1.0,
+    "25": 1.0,
+    "50": 1.0,
+    "100": 1.0
+   },
+   "peek15": {
+    "5": 0.0475,
+    "10": 0.1175,
+    "25": 0.5015,
+    "50": 0.9135,
+    "100": 0.9995
+   },
+   "share": {
+    "5": 0.172,
+    "10": 0.6335,
+    "25": 0.9865,
+    "50": 1.0,
+    "100": 1.0
+   }
+  },
+  "ships": true
+ }
+}

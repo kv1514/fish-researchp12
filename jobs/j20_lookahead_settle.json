@@ -1,0 +1,128 @@
+[
+ {
+  "label": "SETTLE lookahead d3 w0.25 block 0",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 6100000,
+  "agent_seed": 9500
+ },
+ {
+  "label": "SETTLE lookahead d3 w0.25 block 1",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 6300000,
+  "agent_seed": 9501
+ },
+ {
+  "label": "SETTLE lookahead d3 w0.25 block 2",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 6500000,
+  "agent_seed": 9502
+ },
+ {
+  "label": "SETTLE lookahead d3 w0.25 block 3",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 6700000,
+  "agent_seed": 9503
+ },
+ {
+  "label": "SETTLE lookahead d3 w0.25 block 4",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 6900000,
+  "agent_seed": 9504
+ },
+ {
+  "label": "SETTLE lookahead d3 w0.25 block 5",
+  "n_pairs": 1000,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "w_lookahead": 0.25,
+    "lookahead_depth": 3,
+    "lookahead_beam": 4
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 7100000,
+  "agent_seed": 9505
+ }
+]

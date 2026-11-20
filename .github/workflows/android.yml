@@ -1,0 +1,169 @@
+# Build the Android app, and prove it runs.
+#
+# BUILD. The Capacitor project in app/android, with the web client from
+# public/play bundled in: a debug APK (installs on any Android phone), and the
+# release App Bundle (.aab) that Google Play takes, plus a release APK.
+#
+# SIGNING. Google Play only takes a bundle signed with the app's UPLOAD KEY.
+# That key is never in the repository. With the two repository secrets below
+# set, release builds here are signed and ready to upload; without them they
+# are built unsigned (which still proves they build). app/PLAY_STORE.md says
+# how to add them.
+#   ANDROID_UPLOAD_KEYSTORE_BASE64   the .jks file, base64-encoded
+#   ANDROID_UPLOAD_KEYSTORE_PASSWORD its password (the key's is the same)
+# Every run gets a higher versionCode than the last (100 + run number), which
+# Play requires of each new upload.
+#
+# RUN. The debug APK is installed in an Android emulator, launched, and must
+# draw its first screen; then a fish://watch link must open a game the bots
+# play on the live server -- so this also proves deep links and that the app
+# reaches the server. Results are annotations, readable without the logs.
+
+name: android
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['app/**', 'public/play/**', '.github/workflows/android.yml', '.github/scripts/android-smoke.sh']
+  push:
+    branches: [main]
+    paths: ['app/**', 'public/play/**', '.github/workflows/android.yml', '.github/scripts/android-smoke.sh']
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Android build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Bundle the web client and sync the native project
+        working-directory: app
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: The upload key, if the repository has one
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          KEYSTORE_PW: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PW" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            {
+              echo "FISH_UPLOAD_KEYSTORE=$RUNNER_TEMP/upload.jks"
+              echo "FISH_UPLOAD_STORE_PASSWORD=$KEYSTORE_PW"
+              echo "FISH_UPLOAD_KEY_PASSWORD=$KEYSTORE_PW"
+              echo "FISH_UPLOAD_KEY_ALIAS=upload"
+              echo "SIGNED=yes"
+            } >> "$GITHUB_ENV"
+          else
+            echo "SIGNED=no" >> "$GITHUB_ENV"
+            echo "::notice title=Release builds are unsigned::add ANDROID_UPLOAD_KEYSTORE_BASE64 and ANDROID_UPLOAD_KEYSTORE_PASSWORD to sign them (app/PLAY_STORE.md)"
+          fi
+
+      - name: Build (debug APK, release bundle, release APK)
+        working-directory: app/android
+        run: |
+          set -euo pipefail
+          export FISH_VERSION_CODE=$((100 + GITHUB_RUN_NUMBER))
+          echo "versionCode $FISH_VERSION_CODE"
+          ./gradlew --no-daemon assembleDebug bundleRelease assembleRelease
+
+      - name: Check what was built
+        working-directory: app/android/app/build/outputs
+        run: |
+          set -euo pipefail
+          AAPT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/aapt2
+          BADGE=$("$AAPT" dump badging apk/debug/app-debug.apk)
+          echo "$BADGE" | grep -E "^package|targetSdkVersion"
+          echo "$BADGE" | grep -q "name='com.fishengine.fish'"
+          # Google Play has required API 36 (Android 16) since 31 Aug 2026.
+          echo "$BADGE" | grep -q "targetSdkVersion:'36'"
+          if [ "$SIGNED" = yes ]; then jarsigner -verify bundle/release/app-release.aab | tail -1; fi
+          ls -la apk/debug apk/release bundle/release
+          echo "::notice title=Android app built (signed: $SIGNED)::$(du -h bundle/release/app-release.aab | cut -f1) bundle, target API 36"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fish-android
+          path: |
+            app/android/app/build/outputs/apk/debug/app-debug.apk
+            app/android/app/build/outputs/apk/release/*.apk
+            app/android/app/build/outputs/bundle/release/app-release.aab
+
+  emulator:
+    name: Android emulator run
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: fish-android
+          path: out
+
+      - name: Hardware acceleration for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Pillow, in its own environment
+        run: |
+          python3 -m venv "$RUNNER_TEMP/py"
+          "$RUNNER_TEMP/py/bin/pip" install --quiet pillow
+          echo "PY=$RUNNER_TEMP/py/bin/python" >> "$GITHUB_ENV"
+          # How much of a screenshot is one colour family: "blue" is the first
+          # screen's big button, "felt" the game table.
+          cat > "$RUNNER_TEMP/frac.py" <<'PY'
+          import sys
+          from PIL import Image
+          im = Image.open(sys.argv[1]).convert("RGB").resize((216, 480))
+          px = list(im.getdata())
+          if sys.argv[2] == "blue":
+              n = sum(1 for r, g, b in px if b > 150 and r < 90 and 80 < g < 200)
+          else:
+              n = sum(1 for r, g, b in px if g > 40 and g > r + 25 and g > b + 8 and r < 60)
+          print(f"{n / len(px):.4f}")
+          PY
+          echo "FRAC=$RUNNER_TEMP/frac.py" >> "$GITHUB_ENV"
+
+      - name: Install, launch, and play (Android 16 emulator)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash .github/scripts/android-smoke.sh out/apk/debug/app-debug.apk com.fishengine.fish "$PY" "$FRAC"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-emulator-screenshots
+          path: |
+            home.png
+            game.png
+          if-no-files-found: ignore

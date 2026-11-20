@@ -1,0 +1,25 @@
+{
+ "arm": "match",
+ "margin": -0.525,
+ "race": -0.6433333333333202,
+ "ours": -0.20166666666666666,
+ "theirs": 0.3199999999999865,
+ "residual": 3.3306690738754696e-16,
+ "d_us": 4.17833333333334,
+ "w_us": 0.10083333333333333,
+ "w_them": 0.15999999999999326,
+ "our_allocation_share": 0.9586776859504132,
+ "our_allocation_per_game": 0.09666666666666666,
+ "our_ownership_per_game": 0.004166666666666667,
+ "headroom": {
+  "ours": 0.20166666666666666,
+  "race": 9.090616274431591,
+  "theirs": 9.323333333333334
+ },
+ "source": "mega_match.json",
+ "n_games": 1200,
+ "bridge_rev": 3,
+ "script": "scripts4/margin_identity.py",
+ "descriptive": true,
+ "note": "RACE+OURS+THEIRS sum to the margin exactly; they are an accounting and they co-move. Headroom values are bounds, not targets, and are not simultaneously reachable."
+}

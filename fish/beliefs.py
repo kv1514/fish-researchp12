@@ -144,10 +144,17 @@ class BeliefState:
             if obs.player != self.observer:
                 raise ValueError("observation is for a different seat")
             initial = obs.initial_hand()
+            # Cards a foreign arbiter retired without saying who held them.
+            # Ours to neither claim nor disclaim: excluding them would assert
+            # that we did not hold a card we may well have, and asserting a
+            # false exclusion is how a sound propagator reaches a contradiction
+            # on a legal position. Left open, the quota arithmetic below
+            # recovers the count, which is the part that was published.
+            unknown, _ = obs.unknown_own_cards()
             for c in range(self.n):
                 if initial & (1 << c):
                     self._pin(c, self.observer)
-                else:
+                elif not unknown & (1 << c):
                     self._exclude(c, self.observer)
             self._observer_initialized = True
         events = obs.history
@@ -161,11 +168,20 @@ class BeliefState:
             self._ingest_ask(ev)
         elif isinstance(ev, ClaimEvent):
             base = ev.half_suit * CARDS_PER_HALF_SUIT
-            for i, holder in enumerate(ev.revealed):
-                c = base + i
-                if self.public_loc[c] is None:
-                    self._pin(c, holder)
-                self.public_loc[c] = RESOLVED
+            if ev.revealed_known:
+                for i, holder in enumerate(ev.revealed):
+                    c = base + i
+                    if self.public_loc[c] is None:
+                        self._pin(c, holder)
+                    self.public_loc[c] = RESOLVED
+            else:
+                # The half-suit left play and that is all the arbiter said.
+                # Retire the cards without pinning an owner: whatever the ask
+                # history already established about them stands, and nothing
+                # is added. Their deal-time owners still carry the per-seat
+                # quota, which is why they keep their candidate masks.
+                for i in range(CARDS_PER_HALF_SUIT):
+                    self.public_loc[base + i] = RESOLVED
             self._version += 1
         elif isinstance(ev, PassEvent):
             pass  # passing carries no hidden-card information
@@ -557,9 +573,27 @@ def validate_deal_against_history(rules: RuleConfig, initial_hands: list[int],
                     return False       # target had it but said no
         elif isinstance(ev, ClaimEvent):
             base = ev.half_suit * CARDS_PER_HALF_SUIT
-            for i, holder in enumerate(ev.revealed):
-                if not hands[holder] & (1 << (base + i)):
-                    return False       # revealed location wrong
+            if ev.revealed_known:
+                for i, holder in enumerate(ev.revealed):
+                    if not hands[holder] & (1 << (base + i)):
+                        return False   # revealed location wrong
+            elif ev.surrendered:
+                # No holders were published, but the hand-size change was, and
+                # a candidate deal has to reproduce it or it is not a deal this
+                # game could have had.
+                #
+                # The missing `else` is deliberate and not a silent hole: an
+                # unrevealed resolution carrying no counts is refused by name
+                # in `Observation.unknown_own_cards`, which every belief path
+                # runs first, so such an event cannot arrive here. This
+                # function returns a verdict rather than raising, and turning a
+                # malformed event into "no deal is consistent" would be a
+                # different and worse answer than the error already given.
+                hs_mask = half_suit_mask(ev.half_suit)
+                for p in range(NUM_PLAYERS):
+                    if p < len(ev.surrendered):
+                        if bin(hands[p] & hs_mask).count("1") != ev.surrendered[p]:
+                            return False
             for p in range(NUM_PLAYERS):
                 hands[p] &= ~half_suit_mask(ev.half_suit)
         elif isinstance(ev, PassEvent):

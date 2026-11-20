@@ -1,0 +1,78 @@
+[
+ {
+  "label": "SCREEN precision half n_draws 80 vs 160",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 80
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 8100000,
+  "agent_seed": 9600
+ },
+ {
+  "label": "SCREEN measured gamma profile 0.5",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 0.5
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 8900000,
+  "agent_seed": 9604
+ },
+ {
+  "label": "SCREEN measured gamma profile 1.0",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "gamma_schedule": 1.0
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 9100000,
+  "agent_seed": 9605
+ },
+ {
+  "label": "SCREEN precision triple n_draws 480 vs 160",
+  "n_pairs": 400,
+  "x": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35,
+    "n_draws": 480
+   }
+  ],
+  "y": [
+   "fishbot4",
+   {
+    "opponent_gamma": 0.35
+   }
+  ],
+  "base_seed": 8700000,
+  "agent_seed": 9603
+ }
+]

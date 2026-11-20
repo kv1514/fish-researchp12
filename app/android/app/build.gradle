@@ -1,0 +1,75 @@
+apply plugin: 'com.android.application'
+
+// The Play upload key. It is NEVER in the repository: locally it is named in
+// android/keystore.properties (git-ignored), and in CI it comes from the
+// repository's secrets. Without either, release builds come out unsigned.
+def uploadKey = new Properties()
+def uploadKeyFile = rootProject.file('keystore.properties')
+if (uploadKeyFile.exists()) uploadKeyFile.withInputStream { uploadKey.load(it) }
+def keyValue = { String prop, String env -> uploadKey.getProperty(prop) ?: System.getenv(env) }
+
+android {
+    namespace "com.fishengine.fish"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.fishengine.fish"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        // Every upload to Play needs a higher versionCode than the last.
+        versionCode((System.getenv("FISH_VERSION_CODE") ?: "1").toInteger())
+        versionName "1.0.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            def store = keyValue('storeFile', 'FISH_UPLOAD_KEYSTORE')
+            if (store) {
+                storeFile rootProject.file(store)
+                storePassword keyValue('storePassword', 'FISH_UPLOAD_STORE_PASSWORD')
+                keyAlias keyValue('keyAlias', 'FISH_UPLOAD_KEY_ALIAS')
+                keyPassword keyValue('keyPassword', 'FISH_UPLOAD_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (signingConfigs.release.storeFile) signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

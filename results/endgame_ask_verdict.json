@@ -1,0 +1,54 @@
+{
+ "n_pairs": 2000,
+ "n_blocks": 8,
+ "engine": "87884824023f",
+ "diff_mean": 0.0835,
+ "ci95": [
+  0.03375745822305351,
+  0.1332425417769465
+ ],
+ "half_width": 0.049742541776946494,
+ "verdict": "pays",
+ "blocks": [
+  {
+   "label": "endgame-info-b0",
+   "n": 250,
+   "diff": 0.064
+  },
+  {
+   "label": "endgame-info-b1",
+   "n": 250,
+   "diff": 0.148
+  },
+  {
+   "label": "endgame-info-b2",
+   "n": 250,
+   "diff": 0.02
+  },
+  {
+   "label": "endgame-info-b3",
+   "n": 250,
+   "diff": 0.044
+  },
+  {
+   "label": "endgame-info-b4",
+   "n": 250,
+   "diff": 0.264
+  },
+  {
+   "label": "endgame-info-b5",
+   "n": 250,
+   "diff": 0.084
+  },
+  {
+   "label": "endgame-info-b6",
+   "n": 250,
+   "diff": 0.068
+  },
+  {
+   "label": "endgame-info-b7",
+   "n": 250,
+   "diff": -0.024
+  }
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "decisions": 49136,
+ "decisions_all_seats": 98326,
+ "worlds_per_decision": 128,
+ "naive_auc": 0.8882640466138028,
+ "pairs": {
+  "dead": 25429,
+  "live": 184179,
+  "mean_p_dead_when_dead": 0.31196726670337016,
+  "mean_p_dead_when_live": 0.024087640284723013,
+  "auc": 0.9518331609759928
+ },
+ "dead_asks": {
+  "n": 6519,
+  "mean_p_dead_chosen": 0.3376500421843841,
+  "mean_gap": 0.3038905506979598,
+  "alt_strictly_lower": 6299,
+  "alt_lower_by_05": 5867,
+  "alt_lower_by_10": 5301,
+  "argmin_live": 6112,
+  "random_live": 5525,
+  "argmin_minus_random_ci": [
+   0.08298818837244976,
+   0.09710078232857801
+  ]
+ },
+ "kraken_v11": {
+  "label": "KRAKEN v1.1",
+  "decisions": 49136,
+  "truth_dead_chosen": 0.132672582220775,
+  "truth_dead_random": 0.14278736567893194,
+  "truth_chosen_minus_random": -0.010114783458156952,
+  "truth_chosen_minus_random_ci": [
+   -0.013879843699120807,
+   -0.00630901986323673
+  ],
+  "auc_at_these_seats": 0.9518331609759928,
+  "mean_menu_size": 4.265874308042982,
+  "mean_p_dead_chosen": 0.08614737666883751,
+  "mean_p_dead_random": 0.06957665967925757,
+  "mean_p_dead_argmin": 0.007048358128459785,
+  "chosen_minus_random": 0.01657071698957994,
+  "chosen_minus_random_ci": [
+   0.01492318513920547,
+   0.018168800624796484
+  ]
+ },
+ "sestina_v10": {
+  "label": "SESTINA v1.0",
+  "decisions": 49190,
+  "truth_dead_chosen": 0.09447042081723928,
+  "truth_dead_random": 0.07464931896726977,
+  "truth_chosen_minus_random": 0.019821101849969505,
+  "truth_chosen_minus_random_ci": [
+   0.017076641593819882,
+   0.022626550111811344
+  ],
+  "auc_at_these_seats": 0.8819311822236481,
+  "mean_menu_size": 4.11128278105306,
+  "mean_p_dead_chosen": 0.08177252744460256,
+  "mean_p_dead_random": 0.054974810683065665,
+  "mean_p_dead_argmin": 0.006282558700955479,
+  "chosen_minus_random": 0.0267977167615369,
+  "chosen_minus_random_ci": [
+   0.025426757216914005,
+   0.028107053008741615
+  ]
+ },
+ "seconds": 800.8,
+ "exploratory": "decides whether the program continues; licenses no arm"
+}

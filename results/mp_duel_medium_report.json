@@ -1,0 +1,27 @@
+{
+ "script": "scripts4/mp_duel_report.py",
+ "source": "results/mp_duel_medium.json",
+ "opponent": "medium",
+ "spec": "KRAKEN_V1",
+ "n_games": 500,
+ "margin_per_game": 2.364,
+ "margin_ci": [
+  2.142,
+  2.58
+ ],
+ "books_ours": 5.028,
+ "books_theirs": 2.664,
+ "win_rate_all": 0.744,
+ "win_rate_ci": [
+  0.706,
+  0.782
+ ],
+ "win_rate_decided": 0.8857142857142857,
+ "wins": 372,
+ "losses": 48,
+ "ties": 80,
+ "voids_per_game": 0.308,
+ "illegal": 0,
+ "errors": 0,
+ "capped": 0
+}

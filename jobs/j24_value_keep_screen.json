@@ -1,0 +1,36 @@
+[
+ {"label": "SCREEN value_keep 0.10 vs champion", "n_pairs": 400,
+  "base_seed": 31000000, "agent_seed": 31001,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "objective": "value",
+                     "value_turn": 0.15, "value_keep": 0.10,
+                     "hsvalue_path": "checkpoints/hsvalue_v1.json"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+
+ {"label": "SCREEN value_keep 0.20 vs champion", "n_pairs": 400,
+  "base_seed": 31100000, "agent_seed": 31002,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "objective": "value",
+                     "value_turn": 0.15, "value_keep": 0.20,
+                     "hsvalue_path": "checkpoints/hsvalue_v1.json"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+
+ {"label": "SCREEN value_keep 0.30 vs champion", "n_pairs": 400,
+  "base_seed": 31200000, "agent_seed": 31003,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "objective": "value",
+                     "value_turn": 0.15, "value_keep": 0.30,
+                     "hsvalue_path": "checkpoints/hsvalue_v1.json"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+
+ {"label": "SCREEN value_keep 0.50 vs champion", "n_pairs": 400,
+  "base_seed": 31300000, "agent_seed": 31004,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "objective": "value",
+                     "value_turn": 0.15, "value_keep": 0.50,
+                     "hsvalue_path": "checkpoints/hsvalue_v1.json"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]},
+
+ {"label": "SCREEN value_keep 0.80 vs champion", "n_pairs": 400,
+  "base_seed": 31400000, "agent_seed": 31005,
+  "x": ["fishbot4", {"opponent_gamma": 0.35, "objective": "value",
+                     "value_turn": 0.15, "value_keep": 0.80,
+                     "hsvalue_path": "checkpoints/hsvalue_v1.json"}],
+  "y": ["fishbot4", {"opponent_gamma": 0.35}]}
+]
