@@ -6338,3 +6338,404 @@ reducing concentration. That was a loose reading: `concent` prices how our
 holding is spread **across our own seats**, while `suit` and `scarce` price
 **which half-suit** to ask in. Different quantities, and the `concent` result is
 not evidence about these knobs either way.
+
+## OUTCOME 2026-09-24: the entire margin is the contested bands, and no single edge carries it
+
+`results/contested_race_18300000.json`, 400 games. The band is our team's count
+of a half-suit **at the deal**, so it is exogenous — nothing a policy did can
+move which band a half-suit started in.
+
+### The whole margin, accounted for
+
+| | |
+|---|---:|
+| contested half-suits (bands 2–4) a game | **7.312** |
+| we win | 3.297 |
+| symmetry would give | 3.656 |
+| **short by** | **0.359 a game = −0.718 sets** |
+
+The measured margin is **−0.710**. **Bands 2–4 are not where most of the deficit
+is; they are all of it**, to within the precision of the estimate. Bands 0, 1, 5
+and 6 net out.
+
+### And within them, no single edge is large enough to be the cause
+
+Comparing our behaviour holding *k* against theirs holding the same *k* (their
+band is 6−*k*):
+
+| holding | our asks/ply | their asks/ply | our hit rate | their hit rate |
+|---:|---:|---:|---:|---:|
+| 2 | 0.05752 | **0.06964** | 0.6494 | **0.6680** |
+| 3 | 0.08181 | **0.08829** | 0.6059 | **0.6135** |
+| 4 | **0.09084** | 0.08831 | 0.4841 | **0.6680**→0.4901 |
+
+At the **even race** — band 3, both teams dealt three, 3.03 half-suits a game —
+we win **0.4443** against their 0.5557. And the two factors that could cause it
+are nearly equal: they send **8%** more asks per ply into it and hit **1.3%**
+better. Neither is remotely the size of the outcome gap.
+
+The one clear asymmetry: **they invest more when behind.** Holding two, they send
+21% more asks per ply than we do in the same position. We invest slightly more
+when ahead. And we lose the behind positions (0.2860) by more than we win the
+ahead ones (0.6293) — the pair sums to 0.9153 rather than 1.0.
+
+### Why this explains every failed arm this session
+
+**Investing more when behind in a half-suit is exactly what P53, P54 and P55
+tested** — flattening `w_suit`, lowering `w_scarce`, and the joint grid. Nineteen
+thousand two hundred duel games, both signs on both knobs, and every downward
+step loses, `w_suit = −0.06` by **−1.17** in self-play.
+
+So the difference is **not a parameter of the ask objective**. The edges that
+decide the contested bands are 1–8% per-ask quantities compounding in
+winner-take-all races to six, and no single weight moves them by enough without
+moving something else by more. That is the coherent account of five consecutive
+null or negative registrations, and it is a stronger statement than any of them
+alone: the deficit is real, it is fully localised, and it is **not in the part of
+the engine this project has been tuning.**
+
+## OUTCOME 2026-10-01: access is not the constraint, and imitating their allocation is reachable, measured, and bad
+
+`results/access_depletion_18300000.json` and
+`results/access_depletion_timed_18300000.json` (400 games each),
+`results/access_depletion_scarce000_18300000.json` and
+`results/access_depletion_scarce040_18300000.json` (400 games each). Same deal
+and agent seeds as `contested_race`, so no part of any difference is a seed
+block.
+
+### The hypothesis, and why it was worth a run
+
+The previous entry put the whole margin in bands 2–4, found no per-ask edge
+inside them large enough to be the cause, and concluded the deficit is "not in
+the part of the engine this project has been tuning." An ask is legal only if
+the **acting seat** holds a card of the half-suit, so a team's ability to
+contest one is not how many cards the *team* holds but whether the seat *with
+the turn* holds one — two cards in one seat gives access on a third of the
+team's plies, two in two seats on two thirds. The champion's entire live
+objective is three weights (`suit` 0.06, `turn` 0.6, `scarce` 0.2) and **not one
+is a seat-level quantity**. Access is also symmetric at the deal and **strictly
+depleting** after it: a seat can only come to hold a card of a half-suit by
+asking for one, which requires holding one already, so the set of seats with
+access can only ever shrink.
+
+That monotonicity is asserted on every event, not assumed. Across 1,200 games in
+three arms the access set **never grew once**.
+
+### It is refuted, and the correction runs the wrong way
+
+| holding | side | access | asks/live ply | asks/access ply |
+|---:|---|---:|---:|---:|
+| 2 | ours | **0.5774** [0.5640, 0.5901] | 0.11829 | 0.22181 |
+| 2 | theirs | 0.5197 [0.5058, 0.5335] | 0.13439 | **0.31311** |
+| 3 | ours | **0.6965** | 0.16811 | 0.24844 |
+| 3 | theirs | 0.6576 | 0.17199 | 0.27496 |
+| 4 | ours | **0.7744** | 0.18853 | 0.24633 |
+| 4 | theirs | 0.7639 | 0.17189 | 0.22749 |
+
+**We have more access than they do at every holding**, and at holding two the
+intervals do not overlap. So dividing ability out does not shrink the
+behind-investment gap — it **widens** it, from +13.6% per live ply to **+41.2%**
+per access ply. Whatever decides the contested bands, it is not that we cannot
+reach them.
+
+The instrument reproduces `contested_race`'s published **0.28604 / 0.44426 /
+0.62928** and its hit rates **0.6494 / 0.6059 / 0.4841** to every digit on
+867 / 1211 / 847 half-suits, and `seats@deal` comes out 1.714/1.679,
+2.153/2.181, 2.460/2.495 against a hypergeometric 1.6923 — symmetric, as a deal
+property must be.
+
+### The obvious version of this was degenerate, and the smoke test said so
+
+"Did the team reach zero cards in the half-suit" is **not a mechanism**. Reaching
+zero means the opponents hold all six, and every half-suit is eventually
+declared by whoever assembles it, so lockout is losing the half-suit restated:
+`P(win | retained access)` came out **1.0000** in every band for both sides and
+the lockout rate summed with the win rate to 1. It is reported as the
+near-tautology it is. Its one genuine residual is real but small — under
+`wrong_distribution_outcome="opponent"` a team holding none of a half-suit still
+takes it when the opponents declare with the split wrong, **43** half-suits in
+400 games. The first draft asserted that residual was *impossible*, as a
+self-test. It fired on the first six games.
+
+### What survived: the first confound-free allocation measure
+
+Asks per access ply has two confounds, and this project has already lost a
+hypothesis to the first. **Duration** — a half-suit resolves *out* of the
+denominator and they declare 4.832 a game against our 4.100, so a faster winner
+accrues fewer plies exactly where it wins. **Breadth**, its mirror — asks per
+access ply is a share of attention, a seat with access to *k* half-suits can ask
+in one, so the per-half-suit rate falls as roughly 1/*k* whatever the policy, and
+*we* have the wider access.
+
+The **selection ratio** removes both: conditional on an ask happening, and among
+exactly the half-suits that seat could legally have asked in, the asks that went
+to a band against what uniform choice would send there. Invariant to the access
+level, to *k*, and to band abundance.
+
+| holding | ours | 95% CI | theirs | 95% CI |
+|---:|---:|---|---:|---|
+| 2 | **0.8983** | [0.8561, 0.9445] | **1.3493** | [1.2779, 1.4282] |
+| 3 | 1.0555 | [1.0190, 1.0950] | 1.1242 | [1.0843, 1.1661] |
+| 4 | **1.0685** | [1.0256, 1.1164] | **0.8721** | [0.8387, 0.9105] |
+
+A **mirror image**. We over-select the half-suits we are ahead in and
+under-select the ones we are behind in; they do the exact opposite. Every
+interval is clear of 1.0 and the two sides do not overlap at either shoulder.
+Their profile is **monotone decreasing** in own holding, 1.3493 → 1.1242 →
+0.8721; ours is a hump.
+
+**The time control strengthens it rather than dissolving it.** At holding two the
+gap is widest in the first 20 plies — **2.27×**, on near-equal denominators of
+4,344 and 4,046 access plies — and decays to 1.18× past ply 60. A duration
+artifact does the opposite: it concentrates late, where the denominators
+diverge. (And when *we* win a band-2 half-suit it takes until ply 77.0; when
+they win one, ply 60.2.)
+
+### And the mechanism check closes the direction
+
+Whether `scarce` *produces* that profile is a separate question from whether the
+profile exists, and it decides whether any of this licenses an arm. Our
+`w_scarce` overridden, theirs never touched:
+
+| arm | holding 2 | holding 3 | holding 4 |
+|---|---:|---:|---:|
+| `w_scarce` 0.00 | 0.9888 [0.944, 1.037] | 1.1075 | 1.0312 |
+| **0.20 shipped** | **0.8983** [0.856, 0.945] | 1.0555 | 1.0685 |
+| `w_scarce` 0.40 | 0.7843 [0.746, 0.828] | 0.9945 | 1.1351 |
+| *SESTINA, untouched* | *1.3493* | *1.1242* | *0.8721* |
+
+**Monotone in both shoulders, and at `w_scarce = 0` our profile flattens to near
+symmetry.** So the setting that removes the asymmetry is exactly the setting
+**P54 already dueled**: `w_scarce = 0.00` is **−0.4567 [−0.723, −0.191]** against
+SESTINA, and −0.10 is **−0.5800 [−0.858, −0.302]**. Both withdrawn, monotone
+across four doses.
+
+**And the arm that makes the asymmetry WORSE is the best arm.** `w_scarce = 0.40`
+drives our holding-two selection down to 0.7843 — further from their 1.3493 than
+the shipped value — and it is the only positive figure either sweep produced
+(+0.1200 self-play). That is the same structure as P54's doomed-ask result, where
+the arm making the most guaranteed-failure asks was also the best, reached by a
+second and independent mechanism: the under-investment is a **by-product of a
+preference that earns more than it costs.**
+
+So SESTINA's allocation is **reachable** by our engine — `w_scarce = 0` nearly
+matches it and a negative value would exceed it — and reaching it is measured to
+cost −0.4567 to −0.5800 sets a game. **Imitating the opponent's allocation is
+available, measured, and bad.** That closes "invest more when behind" for good,
+now at the level of choice rather than of asks per ply.
+
+### A correction to the previous entry's characterisation
+
+That entry said the deciding edges are "1–8% per-ask quantities". **The
+behavioural difference is much larger than that and I understated it**: 8% was
+asks per *live* ply, confounded by opportunity. Per opportunity, confound-free,
+we under-select the behind half-suits by 10% of uniform and they over-select them
+by 35%, a **1.50× gap** — and 2.27× in the opening twenty plies. What is small is
+not the difference; it is the *convertibility* of correcting it.
+
+### The residual, and it is now the whole frontier
+
+**Band 3, the even race, is unexplained by anything measured.** On 1,211
+half-suits:
+
+| | ours | theirs |
+|---|---:|---:|
+| selection ratio | 1.0555 [1.019, 1.095] | 1.1242 [1.084, 1.166] |
+| access | **0.6965** | 0.6576 |
+| hit rate | 0.6059 | 0.6135 |
+| take-backs per card taken | 0.4102 | 0.4035 |
+| **half-suits won** | **0.4443** [0.4167, 0.4728] | **0.5557** [0.5272, 0.5835] |
+
+Selection is near-matched, access is **ours**, the hit rate differs by 1.3%, the
+take-back rate by 0.7% — and we lose the even race by **11.1 points**, intervals
+not overlapping. Every ask-level quantity this project can measure is matched or
+in our favour at the position that is 3.03 half-suits a game, and the outcome is
+not.
+
+That is the sharpest statement of the deficit yet, and it points where
+`contested_race` said it would: **which card, and which target, inside a
+half-suit — still not measured at all.**
+
+## OUTCOME 2026-10-01: the margin is one number at one symmetric state — and the ship bar is half a percentage point of it
+
+`results/within_halfsuit_choice_18300000.json` and `_18900000.json`,
+`results/race_walk_18300000.json` and `_18900000.json` (400 games each),
+`results/symmetry_value.json`. Two independent blocks throughout, chosen before
+any result was seen.
+
+### The last unmeasured dimension is measured, and it is matched
+
+`contested_race` left one thing open: "which card, and which target, inside a
+half-suit has not been measured at all." An ask is (card, target) and succeeds
+only if both are right, so
+
+$$P(\text{hit}) = P(\text{card right}) \cdot P(\text{target right} \mid \text{card right})$$
+
+exactly, and each factor is scored against uniform choice over the options that
+seat actually had. At band 3, both blocks:
+
+| | ours A | theirs A | ours B | theirs B |
+|---|---:|---:|---:|---:|
+| card skill | 1.1034 | 1.1495 | 1.1138 | 1.1550 |
+| target accuracy | 0.7583 | 0.7730 | 0.7554 | 0.7689 |
+| hit skill | 2.3544 | 2.4839 | 2.3731 | 2.4774 |
+
+**About 5% better, replicated, and that is all.** The hit rates reproduce
+`contested_race`'s 0.6494 / 0.6059 / 0.4841 and 0.6680 / 0.6135 / 0.4901 to
+every digit on its own block.
+
+So **every ask-level channel in the contested bands is now measured and each is
+a few percent**, against eleven points of outcome. Compounding is the whole
+remaining explanation.
+
+### A vacuous test, caught before it was written down
+
+A live half-suit's two team counts sum to six, so every transfer is a ±1 step on
+our count: a contested half-suit is a **gambler's ruin** absorbing at 6 and 0.
+Fitting the walk from the observed transitions and asking whether it reproduces
+the observed win rate looks like a closure test. **It cannot fail.** Across the
+cut between counts $c$ and $c{+}1$, up-steps from $c$ minus down-steps from
+$c{+}1$ is the net flow, and a trajectory crosses every cut above its start
+exactly once net, so the transition counts *algebraically* determine the
+absorption counts. The chain reproduces the outcome by Kirchhoff's identity,
+not by being right.
+
+It is kept as an arithmetic check on the solver — which is how a real bug
+surfaced: the solver returned $h_3$ for every band instead of $h_{\text{band}}$,
+and its spurious misses of +0.08 and +0.11 were the only reason the identity was
+not obvious at a glance. Two further things the walk **cannot** say, recorded so
+they are not reached for later: there is only one transition process per
+half-suit, so their step profile is identically $1 - p_{6-j}$ and "is our ladder
+steeper than theirs" is one profile read twice.
+
+And the walk description is *adequate*: **99.1–99.8%** of contested half-suits
+absorb at 0 or 6. The rest resolve off the absorbing states through a
+declaration with the split wrong, which is also why the identity is now broken
+slightly — the misses (+0.0247, −0.0052, −0.0085) measure that channel and bound
+it.
+
+### What is well posed, and it is the whole deficit
+
+Identical policies make the process invariant under swapping the teams, which
+requires $p_c + p_{6-c} = 1$ at every count — exactly as the outcome pair
+0.2860 + 0.3707 would have summed to 1 and sums to 0.9153. The residual is that
+same deficit **localised by state**, with no reflection degeneracy because it
+compares one profile against its own reflection.
+
+| state | block A | block B |
+|---|---|---|
+| $c{=}1$ vs 5 | **−0.0729** [−0.1002, −0.0433] | **−0.0839** [−0.1140, −0.0540] |
+| $c{=}2$ vs 4 | **−0.0299** [−0.0471, −0.0130] | **−0.0283** [−0.0466, −0.0107] |
+| $c{=}3$ vs 3 | **−0.0438** [−0.0617, −0.0244] | **−0.0492** [−0.0674, −0.0318] |
+
+**Negative at every state, every interval clear of zero, both blocks agreeing.**
+The $c{=}3$ entry is $2p_3 - 1$, so
+
+$$p_3 = \mathbf{0.478}$$
+
+**at the exactly symmetric 3–3 state — a position with no asymmetry of any kind
+in it — we lose the next transfer 52.2% of the time.** That is the deficit
+reduced to a single per-transfer number, free of allocation, of access, and of
+every band-level story.
+
+### Symmetrising recovers the whole margin, which says the description is complete
+
+Re-solving each band with the symmetric part of the profile,
+$\hat p_c = \tfrac12(p_c + 1 - p_{6-c})$:
+
+| band | a game | observed | chain | if symmetric | gain |
+|---:|---:|---:|---:|---:|---:|
+| 2 | 2.167 | 0.2860 | 0.2464 | 0.2914 | +0.0449 |
+| 3 | 3.027 | 0.4443 | 0.4444 | 0.5000 | +0.0556 |
+| 4 | 2.118 | 0.6293 | 0.6604 | 0.7086 | +0.0482 |
+
+**+0.7357 [+0.4976, +0.9683]** sets a game on block A and **+0.7749 [+0.5331,
++1.0131]** on block B, against a measured margin of **−0.710**.
+
+That equally strong policies tie is close to trivial, so the number itself is
+largely a consistency check and is not offered as a new source of gain. **What is
+not a restatement is that the residual is measured only inside contested
+half-suits and still recovers the whole margin** — so bands 0, 1, 5 and 6
+contribute nothing and there is **no fourth channel outside this description.**
+That confirms `contested_race`'s −0.718-of-−0.710 localisation by an entirely
+different route: transition-level rather than outcome-level.
+
+### The ship bar, in the units of one decision
+
+This is the reason the arithmetic was worth doing. Bisecting on how much of the
+residual must close to be worth the bar's +0.15 sets a game:
+
+| | block A | block B |
+|---|---:|---:|
+| $p_3$ now | 0.4781 | 0.4754 |
+| fraction of the residual to close | 0.205 | 0.194 |
+| $p_3$ that pays the ship bar | **0.4826** | **0.4802** |
+| | **+0.0045** | **+0.0048** |
+
+**The ship bar is winning half a percentage point more of the transfers at the
+symmetric state.** Every knob this project has swept moves the policy globally
+and by one to two orders of magnitude more than that, in both directions, with
+side effects — `w_suit` −0.06 costs 1.170 sets in self-play, `w_scarce` 0.00
+costs 0.4567 against SESTINA. **That is the most coherent account yet of why
+nineteen thousand duel games of dose sweeps have found nothing: the target is
+roughly 0.5% on one conditional probability, and the available instruments all
+move it by tens of percent while moving three other things at once.**
+
+None of this is a duel result, an arm, or a ship claim. It is a measurement of
+where the margin is and how large the required change is.
+
+### What this makes the next question
+
+Not "which weight" — that is now closed from two directions. The question is
+what kind of change can move a single conditional probability by half a point
+without moving the rest of the policy: a **state-conditional** intervention
+rather than a global weight, acting at the 3–3 state and nowhere else. Nothing in
+the linear ask basis is state-conditional, and whether anything can be made so
+without the side effects that killed every global knob is untested.
+
+### Postscript, the same day: there is no privileged state, which closes the state-conditional arm
+
+The previous section ended by naming a **state-conditional** intervention as the
+next question, on the reading that the residual is non-monotone — worst at the
+extremes (−0.073) and at the centre (−0.044), smallest in between (−0.029). So
+the obvious arm was a hump in team share peaking at the 3–3 state: not reachable
+by scaling `scarce`, which tilts rather than bumps, and therefore genuinely
+orthogonal to everything P53, P54 and P55 swept.
+
+**Model arithmetic on the fitted chains, before any registration was written,
+says there is no hot spot to aim at.** Symmetrising one state-pair at a time:
+
+| intervention | block A | block B |
+|---|---:|---:|
+| symmetrise every state | +0.7357 | +0.7749 |
+| only the even state $c{=}3$ | +0.2402 | +0.2669 |
+| only $c{=}2$ and $c{=}4$ | +0.2536 | +0.2370 |
+| only $c{=}1$ and $c{=}5$ | +0.2389 | +0.2674 |
+| both shoulders, leaving $c{=}3$ | +0.4936 | +0.5057 |
+
+**Each state-pair is worth about a quarter of a set — within noise of the other
+two, on both blocks.** The per-state residuals differ but the chain's
+sensitivity differs the other way (the central states are visited far more
+often), and the two effects cancel almost exactly. The centre has no special
+claim, so a term shaped to act there has no measured reason to exist, and none
+is registered.
+
+What that leaves is the deflating reading rather than the structural one: **the
+gap is a per-transfer strength difference present at every state**, not a
+mis-shaped preference. A uniform strength difference is precisely what every
+global knob already tries to move, and is the one thing a state-conditional term
+cannot help with.
+
+**The largest measured gap is elsewhere, and it is not a weight at all.** In
+*skill* terms — realised against uniform choice over the same options —
+within-half-suit choice is **2.3544 against 2.4839** and **2.3731 against
+2.4774**, a **5.5%** deficit, far larger than the 1.3% visible in the raw hit
+rate (our raw rate flatters us because our baseline is easier: 0.2573 against
+0.2470). And within a half-suit the ask weights barely matter: `suit`, `scarce`
+and `turn` tilt between *half-suits*, while the choice of which card and which
+opponent is dominated by $P(\text{success}) = M[\text{card}, \text{target}]$,
+which carries weight 1.0 by convention. **So the only channel left pointing
+anywhere is posterior accuracy on (card, target), not preference** — which is
+the same place the 0.76 bits [0.70, 0.83] of un-extracted information in
+opponent asks points, and the same place P51's depth profile aimed and landed
+below the bar.

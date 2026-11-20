@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import traceback
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -25,8 +26,24 @@ from api._engine import (Session, new_session, parse_action,  # noqa: E402
                          wire_action)
 from api import _rooms                                         # noqa: E402
 from api import _room_game as RG                               # noqa: E402
+from api import _tables as T                                   # noqa: E402
+from api import _profiles as P                                 # noqa: E402
+from api import _auth as A                                     # noqa: E402
 
 MAX_BODY = 512 * 1024
+
+#: Origins allowed to call the API from another origin: the native app shells.
+#: A Capacitor build serves its bundled pages from these, not from this site,
+#: so every request it makes is cross-origin. Nothing here uses cookies -- a
+#: seat is identified by a secret in the request body -- so this widens no
+#: credentialed surface; it is an allowlist rather than "*" only so the API
+#: does not quietly become everybody's backend.
+APP_ORIGINS = frozenset({
+    "capacitor://localhost",     # iOS
+    "ionic://localhost",         # older iOS shells
+    "https://localhost",         # Android
+    "http://localhost",          # Android, cleartext dev builds
+})
 
 
 def route_of(path: str, query: str) -> str:
@@ -59,14 +76,31 @@ class handler(BaseHTTPRequestHandler):
 
     # -- plumbing -------------------------------------------------------------
 
+    def _cors(self) -> None:
+        origin = (self.headers.get("Origin") or "").strip()
+        if origin in APP_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+
     def _send(self, obj, code: int = 200):
         body = json.dumps(obj).encode()
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        self._cors()
         self.end_headers()
         self.wfile.write(body)
+
+    def do_OPTIONS(self):
+        """CORS preflight. A JSON POST from the app shell triggers one."""
+        self.send_response(204)
+        self._cors()
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "86400")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def _send_file(self, path: Path, ctype: str, cache: str):
         """Stream a file from the deployment bundle.
@@ -156,7 +190,11 @@ class handler(BaseHTTPRequestHandler):
             # waiting itself; one that omits the field gets the whole possession
             # in a single response, as before.
             step = body.get("step")
-            cap = int(step) if step not in (None, "", False) else None
+            # Identity checks, not `in`: membership uses ==, and 0 == False in
+            # Python, so `step: 0` used to mean NO cap -- a request for zero
+            # engine moves played every engine move up to the person's turn.
+            cap = (None if step is None or step is False or step == ""
+                   else int(step))
             capkw = {"max_moves": cap} if cap is not None else {}
 
             if op == "new":
@@ -167,7 +205,7 @@ class handler(BaseHTTPRequestHandler):
                 # at the moment it matters most.
                 played = s.advance(cap) if cap is not None else s.advance()
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             # Rooms first. A room request is authenticated by its seat
@@ -178,6 +216,15 @@ class handler(BaseHTTPRequestHandler):
             # token" before it reached the handler.
             if op.startswith("room_"):
                 return self._room(op, body)
+
+            if op.startswith("t_"):
+                return self._table(op, body)
+
+            if op.startswith("p_"):
+                return self._profile(op, body)
+
+            if op.startswith("a_"):
+                return self._account(op, body)
 
             # Every other route restores the session from the sealed token plus
             # the client's copy of the public action log.
@@ -209,7 +256,7 @@ class handler(BaseHTTPRequestHandler):
                     return self._send({"error": "not your turn"}, 400)
                 played = s.play(parse_action(body.get("action") or {}), **capkw)
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             if op == "step":
@@ -221,7 +268,7 @@ class handler(BaseHTTPRequestHandler):
                     return self._send(snap)
                 played = s.advance(cap if cap is not None else 1)
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             if op == "auto":
@@ -230,7 +277,7 @@ class handler(BaseHTTPRequestHandler):
                 played = s.play(s.suggest(),
                                 **({"max_moves": cap} if cap is not None else {}))
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             return self._send({"error": "not found"}, 404)
@@ -254,6 +301,235 @@ class handler(BaseHTTPRequestHandler):
             # engine can carry hidden state in its message just as readily.
             traceback.print_exc()
             return self._send({"error": "internal error"}, 500)
+
+    # -- tables (the poker-style app) -----------------------------------------
+
+    def _table(self, op: str, body: dict):
+        """Every /api/t_* route: public quick play, join codes, turn clocks.
+
+        Each route identifies the caller by their seat secret and hands back
+        that seat's view and nothing else. Polling (`t_state`) also drives the
+        table -- bot moves and expired clocks happen on being looked at -- and
+        writes only when something actually changed.
+        """
+        _rooms.require_shared_store()
+        now = time.time()
+        try:
+            if op == "t_list":
+                return self._send({"tables": T.open_tables()})
+
+            name = body.get("name", "")
+            card = None
+            if op in ("t_quick", "t_create", "t_join") and body.get("pid"):
+                # A profile rides along when the app has one. A bad one is
+                # refused rather than silently dropped, so the app can make a
+                # fresh profile instead of playing unrated without knowing.
+                try:
+                    if P.profiles() is not None:
+                        prof = P.auth(body.get("pid"), body.get("psecret"))
+                        card, name = P.seat_card(prof), prof.get("name", name)
+                except ValueError as e:
+                    return self._send({"error": str(e),
+                                       "profile_invalid": True}, 403)
+
+            if op == "t_quick":
+                code, seat, secret, doc, v = T.quick_play(name, card=card)
+                return self._send({"code": code, "secret": secret,
+                                   "table": T.view(doc, code, seat, v)})
+
+            if op == "t_create":
+                code, seat, secret, doc = T.create(
+                    name, bool(body.get("public", False)),
+                    body.get("turn", T.TURN_DEFAULT),
+                    body.get("pace", T.PACE_DEFAULT), card=card,
+                    bank=body.get("bank", T.BANK_DEFAULT))
+                return self._send({"code": code, "secret": secret,
+                                   "table": T.view(doc, code, seat, 1)})
+
+            code = str(body.get("code") or "").strip().upper()[:8]
+            if not code:
+                return self._send({"error": "missing table code"}, 400)
+
+            if op == "t_join":
+                def _join(d):
+                    T.tick(d, now)
+                    return T.join(d, name, now=now, card=card), True
+                doc, out, v = T.mutate(code, _join)
+                return self._send({"code": code, "secret": out["secret"],
+                                   "table": T.view(doc, code, out["seat"], v)})
+
+            secret = str(body.get("secret") or "")
+
+            if op == "t_state":
+                def _poll(d):
+                    me = T.seat_of(d, secret)
+                    if me is None:
+                        raise ValueError("you are not seated at that table")
+                    seen = T.touch(d, me, now)
+                    moved = T.tick(d, now)
+                    return me, (seen or moved)
+                doc, me, v = T.mutate(code, _poll)
+                doc, v = T.maybe_settle(code, doc, v)
+                return self._send({"table": T.view(doc, code, me, v)})
+
+            if op == "t_leave":
+                T.mutate(code, lambda d: (T.leave(d, secret, now=now), True))
+                return self._send({"left": True})
+
+            if op == "t_act":
+                action = parse_action(body.get("action") or {})
+                lost = bool(body.get("focus_lost"))
+                fn = lambda d: (T.act(d, secret, action, now=now,  # noqa: E731
+                                      focus_lost=lost), True)
+            elif op == "t_start":
+                fn = lambda d: (T.start(d, secret, now=now), True)  # noqa: E731
+            elif op == "t_rematch":
+                fn = lambda d: (T.rematch(d, secret, now=now), True)  # noqa: E731
+            elif op == "t_sit":
+                fn = lambda d: (T.sit(d, secret, body.get("seat", -1),  # noqa: E731
+                                      now=now), True)
+            elif op == "t_seat":
+                fn = lambda d: (T.set_seat_kind(  # noqa: E731
+                    d, secret, body.get("seat", -1), body.get("kind"),
+                    now=now), True)
+            elif op == "t_kick":
+                fn = lambda d: (T.kick(d, secret, body.get("seat", -1),  # noqa: E731
+                                       now=now), True)
+            elif op == "t_settings":
+                fn = lambda d: (T.update_settings(  # noqa: E731
+                    d, secret, body.get("turn"), body.get("pace"),
+                    now=now, bank=body.get("bank")), True)
+            elif op == "t_emote":
+                fn = lambda d: (T.emote(d, secret, str(body.get("emote")),  # noqa: E731
+                                        now=now), True)
+            elif op == "t_back":
+                fn = lambda d: (T.back(d, secret, now=now), True)  # noqa: E731
+            else:
+                return self._send({"error": "not found"}, 404)
+
+            doc, _, v = T.mutate(code, fn)
+            doc, v = T.maybe_settle(code, doc, v)
+            return self._send({"table": T.view(doc, code,
+                                               T.seat_of(doc, secret), v)})
+        except _rooms.NotFound:
+            return self._send({"error": "no such table"}, 404)
+        except RuntimeError as e:
+            # Raised only with messages written to be shown: a lost race
+            # ("the table is busy") or the store being unreachable.
+            return self._send({"error": str(e)}, 503)
+
+    # -- profiles ------------------------------------------------------------
+
+    def _profile(self, op: str, body: dict):
+        """Every /api/p_* route: profiles, the leaderboard, and fair-play review.
+
+        A profile is identified by its public id and proved by its secret, the
+        same shape as a table seat. The review routes need FISH_ADMIN_KEY and
+        are a plain 404 without it, so their existence is not advertised.
+        """
+        try:
+            pid = str(body.get("id") or "")
+            psec = str(body.get("secret") or "")
+            if op == "p_get":
+                return self._send({"profile": P.get(pid)})
+            if op == "p_top":
+                return self._send({"players": P.leaderboard(50)})
+            if op == "p_rename":
+                return self._send({"profile": P.rename(pid, psec,
+                                                       body.get("name"))})
+            if op == "p_me":
+                return self._send({"profile": P.me(pid, psec)})
+            if op == "p_logout":
+                P.logout(pid, psec)
+                return self._send({"logged_out": True})
+            if op == "p_delete":
+                P.delete(pid, psec)
+                return self._send({"deleted": True})
+            if op == "p_report":
+                P.report(pid, psec, str(body.get("target") or ""),
+                         body.get("reason"))
+                return self._send({"reported": True})
+            if op in ("p_review", "p_clear", "p_ban"):
+                if not P.admin_ok(body.get("admin")):
+                    return self._send({"error": "not found"}, 404)
+                if op == "p_review":
+                    return self._send({"queue": P.review_queue(50)})
+                if op == "p_clear":
+                    P.clear(pid)
+                    return self._send({"cleared": True})
+                return self._send(P.ban(pid))
+            return self._send({"error": "not found"}, 404)
+        except P.ProfilesUnavailable as e:
+            return self._send({"error": str(e)}, 503)
+        except _rooms.NotFound:
+            return self._send({"error": "no such player"}, 404)
+        except ValueError as e:
+            return self._send({"error": str(e)}, 400)
+        except RuntimeError as e:
+            return self._send({"error": str(e)}, 503)
+
+    # -- accounts ------------------------------------------------------------
+
+    #: Where a Google sign-in may return to: the web app, or the iOS app's own
+    #: link. Supabase checks its own allowlist too; this one keeps the server
+    #: from minting sign-in links that land anywhere else.
+    OAUTH_RETURNS = ("https://fish-engine.vercel.app/play/", "fish://auth",
+                     "http://127.0.0.1:8420/play/")
+
+    def _account(self, op: str, body: dict):
+        """Every /api/a_* route: sign up, sign in, and the sign-in options.
+
+        Each successful sign-in ends the same way -- the account's profile,
+        and a fresh secret for THIS device -- so the rest of the app never
+        needs to know how someone signed in.
+        """
+        def done(user):
+            pid, secret, doc = P.sign_in(user, body.get("name"),
+                                         A.login_label(user)
+                                         if isinstance(user, dict) else "")
+            return self._send({"id": pid, "secret": secret,
+                               "profile": dict(P.public(doc),
+                                               login=doc.get("login", ""))})
+        try:
+            if op == "a_config":
+                return self._send({"accounts": A.config()})
+            if op == "a_signup":
+                # The name first: checked after the account exists, a blank
+                # one would leave an account with no profile behind it.
+                if not _rooms.clean_name(body.get("name"), ""):
+                    return self._send({"error": "pick a name"}, 400)
+                user = A.signup_email(body.get("email"), body.get("password"))
+                if user is None:
+                    return self._send({"confirm": True})
+                return done(user)
+            if op == "a_login":
+                user = A.login_email(body.get("email"), body.get("password"))
+                if not body.get("name"):
+                    body = dict(body, name=A.suggested_name(user))
+                return done(user)
+            if op == "a_phone_start":
+                A.phone_start(body.get("phone"))
+                return self._send({"sent": True})
+            if op == "a_phone_verify":
+                return done(A.phone_verify(body.get("phone"), body.get("code")))
+            if op == "a_oauth":
+                back = str(body.get("redirect_to") or "")
+                if back not in self.OAUTH_RETURNS:
+                    return self._send({"error": "unknown return address"}, 400)
+                return self._send({"url": A.oauth_url(
+                    str(body.get("provider") or ""), back)})
+            if op == "a_token":
+                user = A.from_token(body.get("access_token"))
+                if not body.get("name"):
+                    body = dict(body, name=A.suggested_name(user))
+                return done(user)
+            return self._send({"error": "not found"}, 404)
+        except (A.AuthUnavailable, P.ProfilesUnavailable) as e:
+            return self._send({"error": str(e)}, 503)
+        except ValueError as e:                 # includes A.AuthError
+            return self._send({"error": str(e)}, 400)
+        except RuntimeError as e:
+            return self._send({"error": str(e)}, 503)
 
     # -- rooms ---------------------------------------------------------------
 
