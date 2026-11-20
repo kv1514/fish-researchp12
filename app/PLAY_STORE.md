@@ -124,6 +124,7 @@ PLAY YOUR WAY
 • Quick Play: join a public table in seconds. Every move has a 20-second clock.
 • Private tables: share a four-letter code with friends. The host picks the time per move and an optional time bank, and empty seats are filled by bots.
 • Practice against bots: play the same engine the game was built around, at your own pace.
+• New to Fish? The built-in guide teaches you from zero, then shows you how to win.
 
 RATINGS AND FAIR PLAY
 Create an account to get a rating, a profile and a place on the leaderboard. Public games are rated by team, with built-in fair-play checks. Or play as a guest with just a name.
