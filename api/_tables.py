@@ -40,9 +40,10 @@ because a table of five must not wait on a phone in somebody's pocket.
 THE INFORMATION BOUNDARY IS THE ROOM'S
 --------------------------------------
 Every per-seat view is ``Session.snapshot`` from that seat, the same definition
-the solo build and the room build use. The document's nonce derives every hand
-and never leaves the server; the public lobby list is reduced to names and seat
-counts before it is returned.
+the solo build and the room build use. The document's ``seed`` (or, for a game
+dealt before seeds were stored, its nonce) derives every hand and never leaves
+the server; the public lobby list is reduced to names and seat counts before it
+is returned.
 """
 
 from __future__ import annotations
@@ -54,7 +55,7 @@ from fish.cards import NUM_PLAYERS, team_of
 from fish.rules import RuleConfig
 
 from api import _fairplay as F
-from api._engine import CHAMPION_GAMMA, Session, _action_of, narrate
+from api._engine import CHAMPION_GAMMA, Session, replay_stored
 from api._rooms import Conflict, NotFound, clean_name, store
 
 KIND = "table"
@@ -425,26 +426,35 @@ def _bot_name(doc: dict, seat: int) -> str:
     return f"Bot {seat + 1}"
 
 
+def stored_seed(doc: dict) -> int | None:
+    """The deal's seed as the document stored it, or None for an older game.
+
+    WHY THE SEED IS STORED. It used to be derived from the nonce with
+    FISH_SECRET, which is right for a solo game -- the server keeps nothing, so
+    it has to re-derive the deal from what the client sends back. A table is
+    the other way round: the document already is the authority for the game.
+    Deriving the deal there made every request depend on the instance that
+    served it holding the same key, and with FISH_SECRET unset each instance
+    had its own. A poll that landed on a second instance dealt different
+    cards, the stored log stopped replaying, and the app read the error as
+    "you are no longer at this table". Storing the seed makes the deal a fact
+    about the table rather than about the server, and it survives a key change.
+    """
+    h = doc.get("seed")
+    return int(h, 16) if h else None
+
+
 def session_for(doc: dict, seat: int) -> Session:
     """The game, rebuilt from the document and viewed from ``seat``.
 
-    Mirrors ``Session.restore`` step for step -- replay, record reveals, then
-    reseed at the current ply. The reseed is the livelock fix: without it the
-    engine's stochastic choices restart from ply 0 on every request, and a
-    position that recurs reproduces the move that produced it.
+    Raises ``ReplayError`` (a RuntimeError, so a 503) if the stored log does
+    not replay -- a server fault, not the caller's; see replay_stored.
     """
     rules = RuleConfig(variant="54", starting_player=int(doc["start_seat"]),
                        wrong_distribution_outcome="opponent")
     s = Session(int(seat), str(doc["nonce"]), rules, CHAMPION_GAMMA,
-                first_to=doc.get("first_to"))
-    log = list(doc.get("log") or [])
-    s.wire_log = log
-    for a in log:
-        ev = s.state.apply(s.state.turn, _action_of(a))
-        s.log.append(narrate(ev))
-        s.note_reveal(ev)
-    s.seed_at(len(log))
-    return s
+                first_to=doc.get("first_to"), seed=stored_seed(doc))
+    return replay_stored(s, doc.get("log"))
 
 
 def _deal(doc: dict, now: float) -> None:
@@ -456,6 +466,9 @@ def _deal(doc: dict, now: float) -> None:
         s["timeouts"] = 0
         s["away"] = False
     doc["nonce"] = secrets.token_urlsafe(12)
+    # The deal itself: 256 random bits, kept in the document and never sent.
+    # See stored_seed for why it is stored rather than derived.
+    doc["seed"] = secrets.token_hex(32)
     doc["log"] = []
     # Set per deal, so a game already running when this rule shipped keeps
     # the rule it was dealt under.

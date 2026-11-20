@@ -10,6 +10,7 @@ per endpoint instead of once.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 import traceback
@@ -22,7 +23,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from fish.engine import IllegalAction                          # noqa: E402
-from api._engine import (Session, new_session, parse_action,  # noqa: E402
+from api._engine import (ReplayError, Session,  # noqa: E402
+                         new_session, parse_action, secret_configured,
                          wire_action)
 from api import _rooms                                         # noqa: E402
 from api import _room_game as RG                               # noqa: E402
@@ -31,6 +33,29 @@ from api import _profiles as P                                 # noqa: E402
 from api import _auth as A                                     # noqa: E402
 
 MAX_BODY = 512 * 1024
+
+
+def warn_without_signing_key(env=None, out=None) -> bool:
+    """Say so, once per instance, when a deployment runs without FISH_SECRET.
+
+    Each serverless instance then signs with its own random key, so a solo
+    game's token dies on the first request served by another instance. That
+    shows up as flaky games, not as a missing setting, and it is exactly how
+    the private-table bug stayed hidden. Called at import: one line per cold
+    start, in the function log. Returns whether it warned.
+    """
+    env = os.environ if env is None else env
+    serverless = bool(env.get("VERCEL") or env.get("AWS_LAMBDA_FUNCTION_NAME"))
+    if not serverless or secret_configured():
+        return False
+    print("WARNING: FISH_SECRET is not set (or shorter than 16 bytes). Every "
+          "instance signs with its own random key, so solo games break when "
+          "a request lands on another instance. Set FISH_SECRET and redeploy.",
+          file=out or sys.stderr)
+    return True
+
+
+warn_without_signing_key()
 
 #: Origins allowed to call the API from another origin: the native app shells.
 #: A Capacitor build serves its bundled pages from these, not from this site,
@@ -171,10 +196,18 @@ class handler(BaseHTTPRequestHandler):
                 # which fails at build time -- the first deploy of the route
                 # 404ed on the live site while every local check passed. One
                 # boolean here says which side of that a deployment is on.
+                #
+                # `signing_key` likewise: "ephemeral" means FISH_SECRET is not
+                # set, so each instance signs with its own key and solo games
+                # break across instances. Only the state is reported, never
+                # anything about the key.
                 return self._send({"ok": True,
                                    "room_backend": _rooms.backend_name(),
                                    "paper": (ROOT / "paper"
-                                             / "kraken.pdf").exists()})
+                                             / "kraken.pdf").exists(),
+                                   "signing_key": ("configured"
+                                                   if secret_configured()
+                                                   else "ephemeral")})
             return self._send({"error": "not found"}, 404)
         except Exception:                            # pragma: no cover
             traceback.print_exc()
@@ -287,6 +320,11 @@ class handler(BaseHTTPRequestHandler):
             # request was fine, and retrying will not help until somebody sets
             # the variables. The message is safe to show by construction --
             # see the class docstring.
+            return self._send({"error": str(e)}, 503)
+        except ReplayError as e:
+            # A room's stored log would not replay here: a server fault, so a
+            # 503 the client retries, not a 400 it gives up on. The message is
+            # fixed; the engine's own (about hidden hands) stays in the log.
             return self._send({"error": str(e)}, 503)
         except (ValueError, IllegalAction) as e:
             # IllegalAction is NOT a ValueError, so without naming it here it
