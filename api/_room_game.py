@@ -1,7 +1,8 @@
 """What a room IS, and what each player at it is allowed to see.
 
-A room document is small on purpose. It holds the deal nonce, the public action
-log, the six seats and who has pressed ready -- and nothing derived. Every view
+A room document is small on purpose. It holds the deal (a seed stored when the
+game starts; rooms dealt before that use the nonce), the public action log, the
+six seats and who has pressed ready -- and nothing derived. Every view
 is rebuilt from that by the same ``Session`` the solo build uses, so there is
 one implementation of "what does seat 3 know" rather than two that can drift.
 
@@ -38,7 +39,7 @@ import time
 from fish.cards import NUM_PLAYERS, team_of
 
 from api._rooms import Conflict, NotFound, clean_name, store
-from api._engine import CHAMPION_GAMMA, Session
+from api._engine import CHAMPION_GAMMA, Session, replay_stored
 from fish.rules import RuleConfig
 
 #: Seat fill order. People take one team first ({0,2,4}), then the other, so a
@@ -179,6 +180,10 @@ def maybe_start(doc: dict) -> bool:
     # than on four engine possessions they then have to reconstruct.
     # More than one: the host, who is the first people-seat.
     doc["start_seat"] = humans[0] if humans else 0
+    # The deal: 256 random bits, kept in the document and never sent. Stored
+    # rather than derived from the nonce with FISH_SECRET, so the game does not
+    # depend on every instance holding the same key (see _tables.stored_seed).
+    doc["seed"] = secrets.token_hex(32)
     doc["phase"] = "playing"
     doc["touched"] = time.time()
     # Give the table one pace-length before the first engine move, so a player
@@ -252,23 +257,18 @@ def session_for(doc: dict, seat: int) -> Session:
     """
     rules = RuleConfig(variant="54", starting_player=int(doc["start_seat"]),
                        wrong_distribution_outcome="opponent")
-    s = Session(int(seat), str(doc["nonce"]), rules, CHAMPION_GAMMA)
-    log = list(doc.get("log") or [])
-    if log:
-        from api._engine import _action_of, narrate
-        s.wire_log = log
-        for a in log:
-            ev = s.state.apply(s.state.turn, _action_of(a))
-            s.log.append(narrate(ev))
-            s.note_reveal(ev)
-    # The livelock fix Session.restore already carries, and this replay did
-    # not: without it every engine move here is decided from a stream reset to
-    # ply 0, so a position that recurs reproduces the move that produced it.
-    # Measured on the solo path as 56 of 2,000 games failing to end
-    # (results/web_termination_r0_1000.json). note_reveal above is the same
-    # parity gap -- without it the end-of-game reveal panel came back empty.
-    s.seed_at(len(s.wire_log))
-    return s
+    h = doc.get("seed")
+    s = Session(int(seat), str(doc["nonce"]), rules, CHAMPION_GAMMA,
+                seed=int(h, 16) if h else None)
+    # replay_stored reseeds at the current ply -- the livelock fix
+    # Session.restore already carries, which this replay once did not: without
+    # it every engine move here is decided from a stream reset to ply 0, so a
+    # position that recurs reproduces the move that produced it. Measured on
+    # the solo path as 56 of 2,000 games failing to end
+    # (results/web_termination_r0_1000.json). It also records reveals, the
+    # same parity gap -- without them the end-of-game reveal panel came back
+    # empty. A log that will not replay raises ReplayError (a 503).
+    return replay_stored(s, doc.get("log"))
 
 
 def public_seats(doc: dict, me) -> list:

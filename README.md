@@ -282,6 +282,27 @@ another one — the fallback is deliberately not derived from anything an attack
 can read, and every candidate (the deployment URL, the deployment id) is either
 public or unstable.
 
+`/api/health` reports `"signing_key": "configured"` or `"ephemeral"`, and an
+instance that starts on Vercel without the key logs a warning, so the setting
+is checkable from outside. The app's online tables and rooms no longer depend
+on it: each deal stores its own random seed in the table
+document, so every instance rebuilds the same cards whatever key it holds. Solo
+games still need it, because the server keeps nothing for them.
+
+**Why that changed: "kicked out of a private table after a few asks".** With
+`FISH_SECRET` unset, each instance derived a different deal from the table's
+nonce. A poll that landed on a second instance could not replay the stored log
+on that deal. The API answered the engine's `IllegalAction` with a 400, and the
+app left the table on any 400. Now a log that will not replay is a 503 with a
+fixed message (the engine's own text describes hidden hands), and the app
+leaves only on a 404 or a "not seated" 400. Other 400s get a toast and it keeps
+polling, giving up after ten in a row. Setting `FISH_SECRET` and redeploying
+did not take effect on its own: `vercel.json`'s `ignoreCommand` cancels any
+build whose commit changes nothing the site serves (`api/`, `public/`, the
+engine packages, the paper) since the last deployment, and a redeploy of the
+same commit changes nothing. A change to the environment needs a commit there
+to reach production.
+
 Other v0.4 entry points:
 
 ```bash
