@@ -1,24 +1,31 @@
-// Google Play phone screenshots (1080x1920, 9:16), taken from the real app
-// against a local server. From the repo root run
+// Store screenshots, taken from the real app against a local server. From the
+// repo root run
 //   python3 scripts4/devserve.py 8420
-// and then, from app/,   node store/make-screenshots.js
-// FISH_SHOT_W/H change the phone size (CSS pixels; 1080 px wide either way).
+// and then, from app/:
+//   node store/make-screenshots.js               Google Play, 1080x1920
+//   FISH_SHOT_OS=ios node store/make-screenshots.js
+//                                                App Store, iPhone 6.9" 1320x2868
+// FISH_SHOT_W/H change the phone size in CSS pixels; FISH_SHOT_DIR the folder.
 const path = require('path');
 const fs = require('fs');
 const { chromium } = require('playwright');
 
 const BASE = process.env.FISH_URL || 'http://127.0.0.1:8420/play/';
-const OUT = process.env.FISH_SHOT_DIR || path.join(__dirname, 'play/screenshots');
-const W = +(process.env.FISH_SHOT_W || 432);
-const H = +(process.env.FISH_SHOT_H || 768);
+const IOS = process.env.FISH_SHOT_OS === 'ios';
+const OUT = process.env.FISH_SHOT_DIR || path.join(__dirname, IOS ? 'ios/screenshots' : 'play/screenshots');
+// iPhone 16 Pro Max is 440x956 points at 3x; the Android shots are 9:16.
+const W = +(process.env.FISH_SHOT_W || (IOS ? 440 : 432));
+const H = +(process.env.FISH_SHOT_H || (IOS ? 956 : 768));
+const PX = IOS ? 1320 : 1080;          // width of the saved image
 fs.mkdirSync(OUT, { recursive: true });
 
-// Android draws in Roboto; Inter is the closest font this machine has.
-const FONT = 'html,body,button,input{font-family:Roboto,Inter,sans-serif!important}';
+// Android draws in Roboto, iPhone in SF Pro; Inter is the closest font to
+// either that this machine has.
+const FONT = `html,body,button,input{font-family:${IOS ? '' : 'Roboto,'}Inter,sans-serif!important}`;
 
 async function phone(browser, name, turn = 90) {
   const ctx = await browser.newContext({
-    viewport: { width: W, height: H }, deviceScaleFactor: 1080 / W, isMobile: true, hasTouch: true,
+    viewport: { width: W, height: H }, deviceScaleFactor: PX / W, isMobile: true, hasTouch: true,
   });
   await ctx.addInitScript(([n, t]) => {
     localStorage.setItem('fish.guest', 'true');

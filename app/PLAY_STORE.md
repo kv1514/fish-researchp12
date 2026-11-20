@@ -1,20 +1,21 @@
 # Putting Fish on Google Play
 
+New here? Start with [README.md](README.md). This page is the Android half.
+
 Everything Google asks for is ready: the app bundle, the store graphics, the
 screenshots, and the answers to every form, below, to copy and paste. What only
 you can do is make the account, click through the forms, and find 12 testers.
 
 | What | Where |
 | --- | --- |
-| App bundle to upload (`.aab`) | built by the **android** workflow (Actions → android → *fish-android* artifact), or the signed one from the session that set this up |
+| App bundle to upload (`.aab`) | the signed `fish-1.0.0-upload-to-play.aab` the owner sends you privately, or build your own (see the end of this page) |
 | App ID (package name) | `com.fishengine.fish` (permanent once uploaded) |
 | Store icon, 512×512 | `app/store/play/icon-512.png` |
 | Feature graphic, 1024×500 | `app/store/play/feature-graphic.png` |
 | Phone screenshots, 1080×1920 | `app/store/play/screenshots/` (6) |
 | Privacy policy | https://fish-engine.vercel.app/play/privacy.html |
 | Account deletion page | https://fish-engine.vercel.app/play/delete-account.html |
-
-Both web pages go live when the change that adds them is merged.
+| Support page | https://fish-engine.vercel.app/play/support.html |
 
 ## 1. The developer account (once, $25)
 

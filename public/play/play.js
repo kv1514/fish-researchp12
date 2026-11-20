@@ -430,7 +430,8 @@ function openSettings(focusName) {
       <div class="seg" id="set-turn">${TURN_CHOICES.map((t) =>
         `<button data-v="${t}" class="${t === +prefs.soloTurn ? 'on' : ''}">${turnLabel(t)}</button>`).join('')}</div></div>
     <p class="muted small" style="margin-top:14px">Names show to other players at your table. Keep it friendly.
-      · <a href="${SITE}/play/privacy.html" target="_blank" rel="noopener" style="color:var(--us)">Privacy</a></p>
+      · <a href="${SITE}/play/privacy.html" target="_blank" rel="noopener" style="color:var(--us)">Privacy</a>
+      · <a href="${SITE}/play/support.html" target="_blank" rel="noopener" style="color:var(--us)">Support</a></p>
     <button class="btn btn-primary btn-block" id="set-done">Done</button>`, (m) => {
     const inp = $('#set-name', m);
     if (focusName) setTimeout(() => inp.focus(), 250);
