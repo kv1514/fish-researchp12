@@ -794,3 +794,176 @@ def test_the_private_host_sets_the_turn_time_and_bank_between_games():
     assert c["end"] == pytest.approx(T0 + 45 + 60)
     with pytest.raises(ValueError):
         T.update_settings(doc, secs[0], turn=10, now=T0), "not mid-game"
+
+
+# ---------------------------------------------------------------------------
+# The deal is stored, so a table survives instances that disagree about keys
+# ---------------------------------------------------------------------------
+#
+# The "kicked out of a private table after a few asks" bug. The deal used to be
+# derived from the nonce with FISH_SECRET; with the variable unset every
+# serverless instance had its own key, so a poll served by a second instance
+# rebuilt a different deal, the stored log stopped replaying, the engine's
+# IllegalAction came back as a 400, and the app left the table on any 400.
+
+KEY_A = "a" * 32
+KEY_B = "b" * 32
+
+
+def _hands(doc, seat=0):
+    return list(T.session_for(doc, seat).state.hands)     # one bitmask a seat
+
+
+def test_a_deal_stores_a_random_seed_and_a_rematch_draws_a_new_one():
+    doc, secs = _private(1)
+    assert "seed" not in doc, "a lobby has no deal yet"
+    T.start(doc, secs[0], now=T0)
+    seed = doc["seed"]
+    assert isinstance(seed, str) and len(seed) == 64
+    int(seed, 16)                                       # 256 bits of hex
+    assert T.session_for(doc, 0).seed == int(seed, 16)
+    # A rematch is a new deal, with its own seed.
+    while doc["phase"] == "playing":
+        T._engine_move(doc, _turn(doc))
+        T.tick(doc, now=T0)
+        if T.session_for(doc, 0).over:
+            doc["phase"] = "over"
+    T.rematch(doc, secs[0], now=T0 + 1)
+    assert doc["seed"] != seed
+
+
+def test_the_stored_seed_is_used_so_a_key_change_does_not_change_the_deal(
+        monkeypatch):
+    from api import _engine as E
+    from api import _room_game as RG
+    monkeypatch.setenv("FISH_SECRET", KEY_A)
+    doc, secs = _private(1)
+    T.start(doc, secs[0], now=T0)
+    for _ in range(4):                                  # a few asks in
+        T._engine_move(doc, _turn(doc))
+    before = _hands(doc)
+    assert len(doc["log"]) == 4
+
+    # The instance that serves the next poll holds a different key -- or none.
+    for key in (KEY_B, None):
+        if key is None:
+            monkeypatch.delenv("FISH_SECRET", raising=False)
+        else:
+            monkeypatch.setenv("FISH_SECRET", key)
+        assert _hands(doc) == before, "the deal moved with the key"
+        assert T.session_for(doc, 0).state.turn == _turn(doc)
+        assert RG.session_for(doc, 0).seed == int(doc["seed"], 16)
+        # ...which it would have, had the seed still come from the nonce.
+        assert E.seed_from_nonce(doc["nonce"]) != int(doc["seed"], 16)
+        T.view(doc, "ABCD", 0, 1, now=T0)              # no ReplayError
+
+
+def test_a_game_dealt_before_seeds_were_stored_still_uses_its_nonce(
+        monkeypatch):
+    from api import _engine as E
+    monkeypatch.setenv("FISH_SECRET", KEY_A)
+    doc, secs = _private(1)
+    T.start(doc, secs[0], now=T0)
+    del doc["seed"]                                    # an older document
+    T._engine_move(doc, _turn(doc))
+    s = T.session_for(doc, 0)
+    assert s.seed == E.seed_from_nonce(doc["nonce"])
+    assert len(s.wire_log) == 1
+
+
+def test_a_log_that_will_not_replay_raises_a_runtime_error_not_illegal_action():
+    from api._engine import ReplayError
+    from api import _room_game as RG
+    doc, secs = _private(1)
+    T.start(doc, secs[0], now=T0)
+    turn = _turn(doc)
+    # Asking your own teammate is illegal on every deal there is.
+    doc["log"] = [{"t": "ask", "target": (turn + 2) % NUM_PLAYERS, "card": 0}]
+    for session_for in (T.session_for, RG.session_for):
+        with pytest.raises(ReplayError) as info:
+            session_for(doc, 0)
+        assert isinstance(info.value, RuntimeError)
+        assert info.value.ply == 0
+        assert str(info.value) == ReplayError.MESSAGE, \
+            "the engine's message describes hands; it must not be shown"
+
+
+def test_no_view_or_list_ever_carries_the_seed():
+    doc, secs = _private(3)
+    T.start(doc, secs[0], now=T0)
+    for _ in range(3):
+        T._engine_move(doc, _turn(doc))
+    seed = doc["seed"]
+    leaks = (seed, str(int(seed, 16)), seed[:16])
+    for me in range(NUM_PLAYERS):
+        blob = json.dumps(T.view(doc, "ABCD", me, 1, now=T0))
+        assert not any(x in blob for x in leaks), f"seat {me} saw the seed"
+    pub, _, _ = T.new_table("Bo", public=True, now=T0)
+    T._deal(pub, T0)
+    blob = json.dumps(T.lobby_summary("WXYZ", pub, T0))
+    assert pub["seed"] not in blob and str(int(pub["seed"], 16)) not in blob
+
+
+def _corrupt(code, entry):
+    st = _rooms.store()
+    version, doc = st.read(code)
+    doc["log"] = [entry]
+    st.write(code, version, doc)
+    return doc
+
+
+def test_a_log_that_will_not_replay_is_a_503_the_app_retries(server):
+    st, a, _ = _post(server, "t_create", {"name": "Ada", "public": False})
+    code, sec = a["code"], a["secret"]
+    st, out, _ = _post(server, "t_start", {"code": code, "secret": sec})
+    assert st == 200
+    turn = out["table"]["game"]["turn"]
+    _corrupt(code, {"t": "ask", "target": (turn + 2) % NUM_PLAYERS, "card": 0})
+    st, out, _ = _post(server, "t_state", {"code": code, "secret": sec})
+    assert st == 503, out
+    from api._engine import ReplayError
+    assert out["error"] == ReplayError.MESSAGE
+    # The seat is still there: "not seated" is the only 400 the app leaves on.
+    st, out, _ = _post(server, "t_state", {"code": code, "secret": "forged"})
+    assert st == 400 and "not seated" in out["error"]
+
+
+def test_a_room_log_that_will_not_replay_is_a_503_too(server):
+    st, r, _ = _post(server, "room_new", {"humans": 1, "name": "Ada"})
+    code, sec = r["code"], r["secret"]
+    st, out, _ = _post(server, "room_ready", {"code": code, "secret": sec})
+    assert st == 200 and out.get("phase", "playing") == "playing"
+    _, doc = _rooms.store().read(code)
+    assert len(doc["seed"]) == 64, "a room stores its deal when it starts"
+    turn = int(doc["start_seat"])
+    _corrupt(code, {"t": "ask", "target": (turn + 2) % NUM_PLAYERS, "card": 0})
+    st, out, _ = _post(server, "room_state", {"code": code, "secret": sec})
+    assert st == 503, out
+
+
+def _health(base):
+    with urlopen(f"{base}/api/health", timeout=20) as r:
+        return json.loads(r.read())
+
+
+def test_health_says_whether_the_signing_key_is_configured(server, monkeypatch):
+    monkeypatch.delenv("FISH_SECRET", raising=False)
+    assert _health(server)["signing_key"] == "ephemeral"
+    monkeypatch.setenv("FISH_SECRET", "too-short")
+    assert _health(server)["signing_key"] == "ephemeral", "under 16 bytes"
+    monkeypatch.setenv("FISH_SECRET", KEY_A)
+    h = _health(server)
+    assert h["signing_key"] == "configured"
+    assert KEY_A not in json.dumps(h), "only the state, never the key"
+
+
+def test_a_serverless_instance_without_the_key_warns(monkeypatch):
+    import io
+    from api.index import warn_without_signing_key
+    monkeypatch.delenv("FISH_SECRET", raising=False)
+    out = io.StringIO()
+    assert warn_without_signing_key({"VERCEL": "1"}, out)
+    assert "FISH_SECRET" in out.getvalue()
+    assert not warn_without_signing_key({}, io.StringIO()), "local: no warning"
+    monkeypatch.setenv("FISH_SECRET", KEY_A)
+    assert not warn_without_signing_key({"VERCEL": "1"}, io.StringIO())

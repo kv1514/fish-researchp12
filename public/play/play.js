@@ -794,6 +794,7 @@ function enterOnline(code, secret, table) {
   stopSolo();
   G.mode = 'online'; G.code = code; G.secret = secret;
   G.lastV = -1; G.lastPlies = 0; G.lastGame = -1; G.resultShown = -1; G.lastHand = new Set();
+  badPolls = 0;
   LS.set('seat', { code, secret, at: Date.now() });
   closeSheet(); closeModal();
   show('game');
@@ -805,21 +806,32 @@ function schedulePoll(ms = POLL_MS) {
   G.pollTimer = setTimeout(poll, document.hidden ? Math.max(ms, 4000) : ms);
 }
 let netWarned = false;
+// Only two answers mean "you are not at this table any more": 404 (the table
+// is gone) and the server's "not seated" 400 (removed, or the seat was given
+// up). Any other 400 is treated as a passing fault and polled through: a
+// server that could not rebuild the game once used to answer 400, and leaving
+// on it kicked people out of private tables a few asks in. Ten in a row with
+// no good poll between is not passing, so then the table is left.
+const BAD_POLL_LIMIT = 10;
+let badPolls = 0;
 async function poll() {
   if (G.mode !== 'online') return;
   if (G.inflight) { schedulePoll(); return; }
   G.inflight = true;
   try {
     const d = await api('t_state', { code: G.code, secret: G.secret });
-    netWarned = false;
+    netWarned = false; badPolls = 0;
     applyVM(normaliseTable(d.table));
   } catch (e) {
-    if (e.status === 404 || e.status === 400) {
+    const unseated = e.status === 400 && /not seated/i.test(e.message || '');
+    if (e.status === 404 || unseated || (e.status === 400 && ++badPolls >= BAD_POLL_LIMIT)) {
+      badPolls = 0;
       leaveToHome(e.status === 404 ? 'That table has closed' : e.message);
       G.inflight = false;
       return;
     }
-    if (!netWarned) { toast('Reconnecting…', true); netWarned = true; }
+    if (e.status === 400) { if (badPolls === 1) toast(e.message, true); }
+    else if (!netWarned) { toast('Reconnecting…', true); netWarned = true; }
   } finally {
     G.inflight = false;
   }

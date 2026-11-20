@@ -52,13 +52,14 @@ import json
 import os
 import random
 import secrets
+import sys
 import zlib
 
 from fish.cards import (HALF_SUIT_NAMES, NUM_PLAYERS, card_name,
                         half_suit_cards, is_red, mask_to_cards, team_of,
                         teammates)
-from fish.engine import (Ask, AskEvent, Claim, ClaimEvent, GameState, Pass,
-                         PassEvent)
+from fish.engine import (Ask, AskEvent, Claim, ClaimEvent, GameState,
+                         IllegalAction, Pass, PassEvent)
 from fish.observation import Observation
 from fish.rules import RuleConfig
 from fish4.registry4 import make_agent
@@ -301,10 +302,20 @@ _EPHEMERAL_SECRET = secrets.token_bytes(32)
 MIN_SECRET_BYTES = 16
 
 
-def _secret() -> bytes:
+def secret_configured() -> bool:
+    """Whether FISH_SECRET is set, and long enough to be honoured.
+
+    False means this process signs with `_EPHEMERAL_SECRET`, which no other
+    instance shares. /api/health reports it, because from the outside it looks
+    like flaky games rather than a missing setting.
+    """
     s = os.environ.get("FISH_SECRET")
-    if s and len(s.encode()) >= MIN_SECRET_BYTES:
-        return s.encode()
+    return bool(s) and len(s.encode()) >= MIN_SECRET_BYTES
+
+
+def _secret() -> bytes:
+    if secret_configured():
+        return os.environ["FISH_SECRET"].encode()
     return _EPHEMERAL_SECRET
 
 
@@ -570,7 +581,8 @@ class Session:
 
     def __init__(self, seat: int, nonce: str, rules: RuleConfig, gamma: float,
                  draws: int = WEB_DRAWS, mode: str = "play",
-                 first_to: int | None = None, history: int | None = None):
+                 first_to: int | None = None, history: int | None = None,
+                 seed: int | None = None):
         #: "play" seats a human; "spectate" seats nobody -- all six seats are
         #: engines and the client only steps and watches. Spectate is the 3v3
         #: exhibition: Dylan's FishBot v0.7 (github.com/dylann4500/fishbot,
@@ -592,8 +604,13 @@ class Session:
         #: the research site, which shows the whole record. Play mode only.
         self.history = clean_history(history) if mode == "play" else None
         self.nonce = nonce
-        #: Never sent anywhere. Derived here and used here.
-        seed = self.seed = seed_from_nonce(nonce)
+        #: Never sent anywhere. A solo game derives it from the nonce, because
+        #: the server keeps nothing between requests. A table or room passes
+        #: the seed its document stored at the deal instead, so the deal does
+        #: not depend on every instance sharing FISH_SECRET (see
+        #: _tables.session_for).
+        seed = self.seed = (seed_from_nonce(nonce) if seed is None
+                            else int(seed))
         self.rules = rules
         self.gamma = gamma
         self.draws = draws
@@ -1238,6 +1255,56 @@ class Session:
                       gamma=self.gamma, n_draws=self.draws,
                       seed=self.seed & 0x7FFFFFFF, **_analyser_spec())
         return an.analyse(self.obs()).to_dict()
+
+
+class ReplayError(RuntimeError):
+    """A stored game's log would not replay on the deal it was rebuilt on.
+
+    That is a server fault, never the caller's: the log only ever holds moves
+    the server itself accepted. Before tables stored their seed, it is what an
+    instance with a different FISH_SECRET produced -- a different deal, on
+    which the second ask is illegal -- and the engine's IllegalAction was
+    answered as a 400, which the app read as "you are no longer at this table".
+    A RuntimeError, so the table and room handlers answer 503 ("try again")
+    instead.
+
+    The message is fixed. The engine's own messages describe the on-turn
+    player's hidden hand ("cannot ask for a card you hold"), so they never
+    reach a client; the server log gets only the ply and the exception's type
+    (see replay_stored), and the original stays on ``__cause__``.
+    """
+
+    MESSAGE = "the server could not load this game just now; trying again"
+
+    def __init__(self, ply: int):
+        super().__init__(self.MESSAGE)
+        #: The first log entry that failed, for the server log.
+        self.ply = ply
+
+
+def replay_stored(s: "Session", log) -> "Session":
+    """Apply a server-held log to a freshly dealt ``s``, as the table and room
+    builds do; reseed at the current ply. Raises ReplayError on any failure.
+
+    Mirrors ``Session.restore`` step for step -- replay, record reveals, then
+    reseed. The reseed is the livelock fix: without it the engine's stochastic
+    choices restart from ply 0 on every request, and a position that recurs
+    reproduces the move that produced it.
+    """
+    log = list(log or [])
+    s.wire_log = log
+    for i, a in enumerate(log):
+        try:
+            ev = s.state.apply(s.state.turn, _action_of(a))
+        except (IllegalAction, ValueError, TypeError, KeyError,
+                IndexError) as e:
+            print(f"replay failed at ply {i} of {len(log)}: "
+                  f"{type(e).__name__}", file=sys.stderr)
+            raise ReplayError(i) from e
+        s.log.append(narrate(ev))
+        s.note_reveal(ev)
+    s.seed_at(len(log))
+    return s
 
 
 def new_session(body: dict) -> Session:
