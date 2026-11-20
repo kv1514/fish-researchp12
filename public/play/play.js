@@ -711,6 +711,7 @@ function openRules() {
     <h4>The clock</h4>
     <p>Every move has a clock: <b>20 seconds</b> on public tables. When it runs out, the game plays a move for you. Miss two turns in a row and the table plays for you until you tap “I'm back”.</p>
     <p>On a <b>private table</b> the host picks the time per move (or no limit) and can add a <b>time bank</b>: extra seconds each player dips into once a move's time is up (red ring). Against the bots, set your own time in Settings.</p>
+    ${G.mode ? '' : '<a class="btn btn-ghost btn-block" href="learn.html" style="margin-bottom:10px;text-decoration:none">📘 Full guide and tips</a>'}
     <button class="btn btn-primary btn-block" id="rules-ok">Got it</button></div>`, (m) => {
     $('#rules-ok', m).onclick = closeSheet;
   });
