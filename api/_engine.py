@@ -52,6 +52,7 @@ import json
 import os
 import random
 import secrets
+import zlib
 
 from fish.cards import (HALF_SUIT_NAMES, NUM_PLAYERS, card_name,
                         half_suit_cards, is_red, mask_to_cards, team_of,
@@ -355,6 +356,68 @@ def unseal(token: str) -> dict:
     return json.loads(base64.urlsafe_b64decode(body + pad))
 
 
+# -- the hidden log ----------------------------------------------------------
+#
+# A game played under the app's memory rule ("only the last two moves are
+# shown") cannot hand the client its own action log: the client would then hold
+# every move ever made, and the rule would be a matter of what the page chooses
+# to draw. So for those games the log travels INSIDE the token, encrypted, and
+# the client carries an opaque string it can neither read nor alter. Encryption
+# is HMAC-SHA256 in counter mode with a fresh 96-bit nonce per token, keyed off
+# FISH_SECRET; integrity is the token's own HMAC, which covers this field, and
+# the log_hash check that follows it.
+
+_LOG_NONCE = 12
+#: Hard ceiling on a decrypted log, far above MAX_LOG actions in wire form.
+_LOG_MAX_BYTES = 256 * 1024
+
+
+def _log_key() -> bytes:
+    return hmac.new(_secret(), b"fish-hidden-log", hashlib.sha256).digest()
+
+
+def _keystream(nonce: bytes, n: int) -> bytes:
+    key, out, i = _log_key(), bytearray(), 0
+    while len(out) < n:
+        out += hmac.new(key, nonce + i.to_bytes(4, "big"),
+                        hashlib.sha256).digest()
+        i += 1
+    return bytes(out[:n])
+
+
+def hide_log(actions) -> str:
+    raw = zlib.compress(
+        json.dumps(list(actions), separators=(",", ":")).encode(), 9)
+    nonce = secrets.token_bytes(_LOG_NONCE)
+    ct = bytes(a ^ b for a, b in zip(raw, _keystream(nonce, len(raw))))
+    return base64.urlsafe_b64encode(nonce + ct).decode().rstrip("=")
+
+
+def open_log(blob: str) -> list:
+    try:
+        b = base64.urlsafe_b64decode(blob + "=" * (-len(blob) % 4))
+        nonce, ct = b[:_LOG_NONCE], b[_LOG_NONCE:]
+        raw = bytes(a ^ b for a, b in zip(ct, _keystream(nonce, len(ct))))
+        d = zlib.decompressobj()
+        out = json.loads(d.decompress(raw, _LOG_MAX_BYTES))
+        if d.unconsumed_tail or not isinstance(out, list):
+            raise ValueError
+        return out
+    except Exception:
+        raise ValueError("this game has expired - start a new one")
+
+
+def clean_history(v) -> int | None:
+    """How many past moves a player may see (1 to 10), or None for all."""
+    if v is None or isinstance(v, bool):
+        return None
+    try:
+        n = int(v)
+    except (TypeError, ValueError):
+        return None
+    return n if 1 <= n <= 10 else None
+
+
 def log_hash(actions) -> str:
     """A commitment to the exact action log, for sealing into the token.
 
@@ -506,7 +569,8 @@ class Session:
     """A game rebuilt from a sealed seed plus the public action log."""
 
     def __init__(self, seat: int, nonce: str, rules: RuleConfig, gamma: float,
-                 draws: int = WEB_DRAWS, mode: str = "play"):
+                 draws: int = WEB_DRAWS, mode: str = "play",
+                 first_to: int | None = None, history: int | None = None):
         #: "play" seats a human; "spectate" seats nobody -- all six seats are
         #: engines and the client only steps and watches. Spectate is the 3v3
         #: exhibition: Dylan's FishBot v0.7 (github.com/dylann4500/fishbot,
@@ -517,6 +581,16 @@ class Session:
         #: because Python would silently serve seat 5's hand for -1.
         self.mode = mode
         self.seat = seat if mode == "play" else -1
+        #: The app's "first to N half-suits wins" rule, or None to play all
+        #: nine. Kept here, in the web session, and NOT in fish.engine: the
+        #: engine's terminal state is what every research run and every
+        #: number in the paper is measured on, and it must stay the full game.
+        #: Sealed into the token, so a replay ends where the game did.
+        self.first_to = clean_first_to(first_to)
+        #: The app's memory rule: only the last `history` moves are ever sent,
+        #: and the action log is kept from the client (see hide_log). None for
+        #: the research site, which shows the whole record. Play mode only.
+        self.history = clean_history(history) if mode == "play" else None
         self.nonce = nonce
         #: Never sent anywhere. Derived here and used here.
         seed = self.seed = seed_from_nonce(nonce)
@@ -637,15 +711,34 @@ class Session:
                      or self.idle >= WEB_MAX_IDLE))
 
     @property
+    def decided(self) -> bool:
+        """A team has reached ``first_to`` half-suits: the game is won.
+
+        With nine half-suits, five is a majority, so a team on five has won
+        whatever the rest would have done; playing them out only delays the
+        result. True also when the fifth set was the ninth (4-4 going into the
+        last): measured in 10 of 40 practice deals, and an earlier version that
+        returned False on a finished board labelled those wins wrongly.
+        """
+        if not self.first_to:
+            return False
+        a, b, _ = self.state.scores()
+        return max(a, b) >= self.first_to
+
+    @property
     def over(self) -> bool:
-        """No further move will be made in this game, for either reason."""
-        return self.state.is_terminal or self.stopped
+        """No further move will be made in this game, for any reason."""
+        return self.state.is_terminal or self.stopped or self.decided
 
     # -- reconstruction -------------------------------------------------------
 
     @classmethod
     def restore(cls, token: str, actions) -> "Session":
         d = unseal(token)
+        if "x" in d:
+            # A hidden-log game: the log is the token's, and whatever list
+            # the client sent is ignored -- it should have none to send.
+            actions = open_log(str(d["x"]))
         # starting_player is NOT a separate token field: it is the seated
         # player, which the token already carries as "s". Deriving it here
         # rather than defaulting keeps restore() building the same game
@@ -672,7 +765,8 @@ class Session:
             # for an attacker's benefit.
             raise ValueError("this game has expired - start a new one")
         s = cls(int(d["s"]), str(d["n"]), rules, float(d["g"]),
-                mode=d.get("m", "play"))
+                mode=d.get("m", "play"), first_to=d.get("f"),
+                history=d.get("k"))
         if actions:
             if len(actions) > MAX_LOG:
                 raise ValueError("action log too long")
@@ -701,6 +795,11 @@ class Session:
                      "a": int(bool(self.rules.claims_any_time)),
                      "w": self.rules.wrong_distribution_outcome,
                      "m": self.mode,
+                     # Only when set, so a full-game token is byte-for-byte
+                     # what it was before the rule existed.
+                     **({"f": self.first_to} if self.first_to else {}),
+                     **({"k": self.history, "x": hide_log(self.wire_log)}
+                        if self.history else {}),
                      "h": log_hash(self.wire_log)})
 
     # -- driving --------------------------------------------------------------
@@ -773,7 +872,7 @@ class Session:
         array and threw at every game over.
         """
         known = self.revealed
-        if self.stopped:
+        if self.stopped or self.decided:
             # A stopped game leaves live cards in hands, and those never
             # entered `revealed` because nothing resolved them. The game is
             # over, so there is nothing left to protect and every card can be
@@ -923,7 +1022,11 @@ class Session:
                 for i, n in enumerate(HALF_SUIT_NAMES[:len(st.set_winner)])],
             "hand": [{"id": c, "name": card_name(c), "red": is_red(c),
                       "hs": c // 6} for c in mask_to_cards(hand)],
-            "log": self.log[-LOG_TAIL:],
+            "log": self.log[-(self.history or LOG_TAIL):],
+            # How many moves have been made, so a client that is sent only the
+            # tail can still tell which entries are new since it last looked.
+            "plies": len(self.wire_log),
+            "history_visible": self.history,
             "must_pass": bool(st.turn == self.seat and hand == 0
                               and not self.over),
             # Revealed only once every card is public anyway. Before that the
@@ -933,7 +1036,15 @@ class Session:
             "declarations": (self._declarations()
                              if self.over else None),
             "ask_tally": self._ask_tally() if self.over else None,
+            "first_to": self.first_to,
+            "decided": self.decided,
         }
+
+    def _memory_rule(self) -> None:
+        """Refuse a whole-record helper while a memory-rule game is live."""
+        if self.history and not self.over:
+            raise ValueError(f"only the last {self.history} moves are shown "
+                             "in this game")
 
     def deductions(self) -> dict:
         """What the PUBLIC RECORD alone proves, from this seat's chair.
@@ -952,6 +1063,7 @@ class Session:
         -- so the payload says how many cards remain unresolved rather than
         implying the list is complete.
         """
+        self._memory_rule()
         if self.mode == "spectate":
             # obs() at seat -1 would quietly build seat 5's view, which is the
             # same trap analysis() guards against. A spectator proof sheet is
@@ -1010,6 +1122,7 @@ class Session:
         ordering is a teaching decision, not a security one; anyone reading
         the wire can see both.
         """
+        self._memory_rule()
         if self.mode == "spectate":
             raise ValueError("no claim check in spectate mode")
         if self.over:
@@ -1113,6 +1226,7 @@ class Session:
                 "engine": engine}
 
     def analysis(self) -> dict:
+        self._memory_rule()
         if self.mode == "spectate":
             # There is no "you" to analyse for, and obs() at seat -1 would
             # quietly build seat 5's view.
@@ -1170,7 +1284,21 @@ def new_session(body: dict) -> Session:
     seat = int(body.get("seat", 0)) % NUM_PLAYERS
     rules = RuleConfig(variant="54", starting_player=seat,
                        wrong_distribution_outcome="opponent")
-    return Session(seat, secrets.token_urlsafe(12), rules, CHAMPION_GAMMA)
+    return Session(seat, secrets.token_urlsafe(12), rules, CHAMPION_GAMMA,
+                   first_to=body.get("first_to"), history=body.get("history"))
+
+
+def clean_first_to(v) -> int | None:
+    """A valid "first to N" (5 to 9), or None for the full nine.
+
+    Below five is refused rather than honoured: with nine half-suits both
+    teams could reach four, so "first to 4" could name two winners.
+    """
+    try:
+        n = int(v)
+    except (TypeError, ValueError):
+        return None
+    return n if 5 <= n <= 9 else None
 
 
 def parse_action(body: dict):

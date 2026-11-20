@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b14">
+<title>Learn to play Fish</title>
+<meta name="description" content="How to play Fish (Literature), and how to play it well: the rules, reading every ask, remembering with two moves on screen, choosing asks, and declaring without mistakes.">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg0: #05080f; --bg1: #0b1222; --panel: #121b31; --panel2: rgba(255,255,255,.05);
+    --line: rgba(255,255,255,.09); --text: #eef2ff; --text2: #b6bfd8; --text3: #6c7695;
+    --us: #38bdf8; --them: #fb7185; --gold: #fbbf24; --ok: #34d399; --bad: #f87171;
+    --felt: #0d5a44; --card: #fbfbf8; --card-red: #d61f3c; --card-black: #161a24;
+    --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: calc(64px + var(--safe-t)); }
+  body {
+    margin: 0; color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased;
+    background: radial-gradient(120% 50% at 50% 0%, #15223f 0%, var(--bg1) 40%, var(--bg0) 100%) fixed;
+    background-color: var(--bg0);
+  }
+  a { color: var(--us); }
+  .top {
+    position: sticky; top: 0; z-index: 5; padding: calc(10px + var(--safe-t)) 16px 10px;
+    background: rgba(7, 11, 20, .88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top-in { max-width: 680px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .back {
+    display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 999px;
+    background: var(--panel2); border: 1px solid var(--line); color: var(--text); text-decoration: none;
+    font-weight: 600; font-size: 15px; min-height: 40px;
+  }
+  .top-title { font-weight: 700; font-size: 16px; color: var(--text2); }
+  main { max-width: 680px; margin: 0 auto; padding: 20px 16px calc(48px + var(--safe-b)); }
+  .hero h1 { font-size: 30px; line-height: 1.15; margin: 8px 0 6px; letter-spacing: -.3px; }
+  .hero p { color: var(--text2); margin: 0 0 16px; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; padding: 0; list-style: none; }
+  .toc a {
+    display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 14px; text-decoration: none;
+    color: var(--text); background: var(--panel2); border: 1px solid var(--line);
+  }
+  section { margin-top: 40px; }
+  h2 { font-size: 22px; line-height: 1.25; margin: 0 0 4px; letter-spacing: -.2px; }
+  h2 .n { color: var(--us); margin-right: 8px; font-variant-numeric: tabular-nums; }
+  .lede { color: var(--text2); margin: 0 0 14px; }
+  h3 { font-size: 17px; margin: 22px 0 6px; }
+  p, li { color: var(--text2); }
+  b, strong { color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  li { margin: 6px 0; }
+  .box {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin: 14px 0;
+  }
+  .box > :first-child { margin-top: 0; }
+  .box > :last-child { margin-bottom: 0; }
+  .tip { border-left: 4px solid var(--gold); }
+  .tip .label, .lab .label { font-size: 12px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+  .tip .label { color: var(--gold); }
+  .lab { border-left: 4px solid var(--us); }
+  .lab .label { color: var(--us); }
+  .us { color: var(--us); font-weight: 700; }
+  .them { color: var(--them); font-weight: 700; }
+
+  /* cards, as in the app */
+  .cards { display: inline-flex; gap: 4px; vertical-align: middle; flex-wrap: wrap; }
+  .card {
+    width: 34px; height: 48px; border-radius: 6px; position: relative; flex: none; display: inline-block;
+    background: linear-gradient(180deg, #fff, var(--card)); color: var(--card-black);
+    box-shadow: 0 3px 8px rgba(0,0,0,.4), inset 0 0 0 1px rgba(0,0,0,.08);
+  }
+  .card .r { position: absolute; top: 3px; left: 4px; font-weight: 900; font-size: 13px; line-height: 1; }
+  .card .s { position: absolute; top: 18px; left: 4px; font-size: 12px; line-height: 1; }
+  .card .pip { position: absolute; bottom: 3px; right: 4px; font-size: 16px; line-height: 1; }
+  .card.red { color: var(--card-red); }
+  .card.joker .r { font-size: 8px; letter-spacing: .3px; writing-mode: vertical-rl; top: 4px; }
+  .card.dim { opacity: .3; }
+  .card.hi { box-shadow: 0 0 0 3px var(--gold), 0 3px 8px rgba(0,0,0,.4); }
+  .chip {
+    display: inline-block; padding: 0 5px; border-radius: 5px; background: #fff; color: var(--card-black);
+    font-weight: 800; font-size: 14px; line-height: 1.45;
+  }
+  .chip.red { color: var(--card-red); }
+
+  .sets { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 12px 0; }
+  .set {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px;
+    background: var(--panel2); border: 1px solid var(--line);
+  }
+  .set .nm { width: 92px; flex: none; font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .set .card { width: 26px; height: 36px; }
+  .set .card .r { font-size: 11px; top: 2px; left: 3px; }
+  .set .card .s { font-size: 10px; top: 14px; left: 3px; }
+  .set .card .pip { display: none; }
+  .set .card.joker .r { font-size: 7px; }
+
+  /* a little table diagram */
+  .seats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; text-align: center; }
+  .seat { padding: 8px 4px; border-radius: 12px; background: var(--panel2); border: 1px solid var(--line); font-size: 13px; }
+  .seat b { display: block; font-size: 15px; }
+  .seat.u { border-color: rgba(56,189,248,.5); }
+  .seat.t { border-color: rgba(251,113,133,.5); }
+  .seat.you { background: rgba(56,189,248,.12); }
+  .felt {
+    grid-column: 1 / -1; padding: 10px; border-radius: 999px; font-size: 13px; color: #cde9de;
+    background: radial-gradient(ellipse at center, #17805f, var(--felt) 70%);
+  }
+
+  .play {
+    display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; margin: 8px 0; border-radius: 12px;
+    background: rgba(13, 90, 68, .35); border: 1px solid rgba(52, 211, 153, .2); color: var(--text);
+  }
+  .play .ico { font-size: 18px; line-height: 1.4; }
+  .play p { margin: 0; color: var(--text); }
+  .play .so { color: var(--text2); font-size: 14px; margin-top: 4px; }
+
+  .quiz { border-left: 4px solid #a78bfa; }
+  .quiz .label { color: #a78bfa; font-size: 12px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+  .quiz .q { color: var(--text); font-weight: 600; margin: 6px 0 10px; }
+  .opts { display: grid; gap: 8px; }
+  .opt {
+    text-align: left; font: inherit; font-size: 15px; color: var(--text); padding: 11px 14px; min-height: 44px;
+    border-radius: 12px; border: 1px solid var(--line); background: var(--panel2); cursor: pointer;
+  }
+  .opt:focus-visible { outline: 2px solid var(--us); outline-offset: 2px; }
+  .opt.right { border-color: var(--ok); background: rgba(52,211,153,.12); }
+  .opt.wrong { border-color: var(--bad); background: rgba(248,113,113,.10); }
+  .why { margin-top: 10px; color: var(--text2); }
+  .why b.ok { color: var(--ok); }
+  .why b.no { color: var(--bad); }
+
+  .myth { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .myth:last-child { border-bottom: 0; }
+  .myth .m { color: var(--text); font-weight: 700; }
+  .myth .m::before { content: "✗ "; color: var(--bad); }
+  .myth .r2 { color: var(--text2); }
+
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps li { counter-increment: s; position: relative; padding-left: 40px; margin: 12px 0; }
+  .steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 800; font-size: 14px; color: #04111d; background: var(--us);
+  }
+  .cta { display: grid; gap: 10px; margin: 18px 0 0; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 12px 16px;
+    border-radius: 14px; font-weight: 700; font-size: 16px; text-decoration: none; text-align: center;
+  }
+  .btn-primary { background: linear-gradient(180deg, #4cc7fb, #0ea5e9); color: #04111d; }
+  .btn-ghost { background: var(--panel2); border: 1px solid var(--line); color: var(--text); }
+  .foot { margin-top: 36px; color: var(--text3); font-size: 13px; }
+  .foot a { color: var(--text2); }
+
+  .paths { display: grid; gap: 10px; margin: 18px 0 4px; }
+  .path {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; text-decoration: none;
+    background: var(--panel); border: 1px solid var(--line); color: var(--text); min-height: 64px;
+  }
+  .path:first-child { border-color: rgba(56,189,248,.45); background: linear-gradient(180deg, rgba(56,189,248,.14), rgba(56,189,248,.04)); }
+  .path-ico { font-size: 26px; width: 34px; text-align: center; flex: none; }
+  .path b { display: block; font-size: 16px; }
+  .path small { color: var(--text2); font-size: 14px; }
+  .path .go { margin-left: auto; color: var(--text3); font-size: 24px; }
+  .part { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .part-tag {
+    display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase;
+    color: #04111d; background: var(--us); padding: 2px 10px; border-radius: 999px;
+  }
+  #win-part .part-tag { background: var(--gold); }
+  .part-title { font-size: 28px; margin: 8px 0 10px; }
+  .part .toc { margin-top: 12px; }
+  .part + section { margin-top: 24px; }
+  .play .ico {
+    flex: none; min-width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 15px; font-weight: 800; color: var(--text); background: rgba(255,255,255,.08);
+  }
+  .gloss { margin: 8px 0; display: grid; grid-template-columns: max-content 1fr; gap: 8px 14px; }
+  .gloss dt { color: var(--text); font-weight: 700; }
+  .gloss dd { margin: 0; color: var(--text2); }
+  .faq { display: grid; gap: 8px; margin: 10px 0; }
+  .faq details { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; }
+  .faq summary {
+    cursor: pointer; padding: 12px 0; color: var(--text); font-weight: 600; list-style: none; min-height: 44px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; color: var(--text3); font-size: 20px; font-weight: 400; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq details p { margin: 0 0 12px; }
+  .muted-s { color: var(--text3); font-size: 14px; margin-top: 10px; }
+  @media (max-width: 380px) { .gloss { grid-template-columns: 1fr; gap: 2px; } .gloss dd { margin-bottom: 8px; } }
+  @media (min-width: 560px) {
+    .sets { grid-template-columns: 1fr 1fr; }
+    .hero h1 { font-size: 36px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="back" href="./" aria-label="Back to Fish">‹ Fish</a>
+    <span class="top-title">Learn to play</span>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Learn to play Fish</h1>
+    <p>Never played? Part 1 teaches you from zero in about five minutes. Know the rules already? Part 2 is
+    how to win, with tips tested by Fish's own engine over thousands of games.</p>
+    <div class="paths">
+      <a class="path" href="#start"><span class="path-ico">🌱</span><span><b>Part 1: Beginner's guide</b><small>New to Fish? Start here · 5 min</small></span><span class="go">›</span></a>
+      <a class="path" href="#clues"><span class="path-ico">🏆</span><span><b>Part 2: Play to win</b><small>Know the rules? Get better · 10 min</small></span><span class="go">›</span></a>
+    </div>
+  </div>
+
+  <div class="part" id="start">
+    <span class="part-tag">Part 1</span>
+    <h2 class="part-title">Beginner's guide</h2>
+    <ul class="toc">
+      <li><a href="#what">What is Fish?</a></li>
+      <li><a href="#table">The table</a></li>
+      <li><a href="#cards">The cards</a></li>
+      <li><a href="#win">How to win</a></li>
+      <li><a href="#turn">Your turn</a></li>
+      <li><a href="#declare">Declaring</a></li>
+      <li><a href="#example">A sample game</a></li>
+      <li><a href="#words">Words to know</a></li>
+      <li><a href="#faq">Questions</a></li>
+    </ul>
+  </div>
+
+  <section id="what">
+    <h2><span class="n">1</span>What is Fish?</h2>
+    <p>If you've played <b>Go Fish</b>, you already know the heart of it: you ask other players for cards and
+    try to collect complete sets. Fish adds two twists.</p>
+    <ul>
+      <li><b>You play in teams.</b> Six players, two teams of three. Your team wins sets together.</li>
+      <li><b>You ask for one exact card</b>, like "Coral, give me the Q♠", and you only ask the other team.</li>
+    </ul>
+    <p>Fish is also called <b>Literature</b> or <b>Canadian Fish</b>. No luck with the cards, no betting:
+    the team that pays attention wins.</p>
+  </section>
+
+  <section id="table">
+    <h2><span class="n">2</span>The table</h2>
+    <p>You're always at the bottom of the screen. Teams sit alternately around the table: the players on
+    either side of you are opponents, your two teammates are at the top left and top right, and the third
+    opponent sits at the top.</p>
+
+    <div class="seats" aria-label="Seating: you at the bottom, an opponent on each side, teammates at the top left and top right, and an opponent at the top">
+      <div class="seat u"><b>Maya</b><span class="us">your team</span></div>
+      <div class="seat t"><b>Coral</b><span class="them">them</span></div>
+      <div class="seat u"><b>Jonah</b><span class="us">your team</span></div>
+      <div class="felt">Blue ring = your team · pink ring = the other team</div>
+      <div class="seat t"><b>Tide</b><span class="them">them</span></div>
+      <div class="seat u you"><b>You</b><span class="us">your team</span></div>
+      <div class="seat t"><b>Reef</b><span class="them">them</span></div>
+    </div>
+
+    <ul>
+      <li>In the app, <b>teammates have a blue ring</b> around their picture and <b>opponents a pink one</b>.</li>
+      <li>The number under each player is <b>how many cards they hold</b>. Everyone can see it.</li>
+      <li>Empty seats are filled by <b>bots</b>, so there's always a full table.</li>
+      <li>The strip at the top shows <b>the score</b> (US and THEM) and which of the nine sets are won.</li>
+    </ul>
+  </section>
+
+  <section id="cards">
+    <h2><span class="n">3</span>The cards</h2>
+    <p>Fish uses <b>54 cards</b>: a normal deck plus two jokers. They're split into <b>nine sets of six</b>.
+    Every suit makes two sets, a <b>Low</b> one (2 to 7) and a <b>High</b> one (9 to Ace). The four 8s and
+    the two jokers make the ninth.</p>
+
+    <div class="sets" id="sets"></div>
+
+    <p>Everyone gets <b>nine cards</b>, usually a mix of several sets. Nobody can see anyone else's cards.</p>
+  </section>
+
+  <section id="win">
+    <h2><span class="n">4</span>How to win</h2>
+    <ol>
+      <li><b>Get all six cards of a set onto your team.</b> They can be spread across you and your teammates.</li>
+      <li><b>Declare it:</b> say which teammate holds each of the six. Get it right and your team wins the set.</li>
+      <li><b>First team to win five sets wins the game.</b> Five is a majority of nine, so there's never a tie.</li>
+    </ol>
+  </section>
+
+  <section id="turn">
+    <h2><span class="n">5</span>Your turn, tap by tap</h2>
+    <p>When it's your turn, <b>YOUR TURN</b> lights up on the table. You'll usually ask for a card:</p>
+    <ol class="steps">
+      <li>Tap <b>Ask</b>.</li>
+      <li>Under <b>Who</b>, pick an opponent.</li>
+      <li>Under <b>Which card</b>, pick the card you want. The app only shows cards you're allowed to ask for.</li>
+      <li>Tap <b>Ask [name] for [card]</b>.</li>
+    </ol>
+    <div class="play"><span class="ico">✅</span><div>
+      <p><b>They have it:</b> the card comes to you, and <b>you ask again</b>.</p>
+      <p class="so">Keep going as long as you keep getting cards.</p>
+    </div></div>
+    <div class="play"><span class="ico">❌</span><div>
+      <p><b>They don't:</b> your turn ends, and <b>it becomes their turn</b>.</p>
+      <p class="so">Missing is normal. Even the best players miss a lot.</p>
+    </div></div>
+
+    <h3>The three asking rules</h3>
+    <ul>
+      <li><b>Only ask the other team.</b> You can't ask a teammate.</li>
+      <li><b>Only ask in a set you already have a card of.</b> To ask for the 4♥ you need at least one Low Heart.</li>
+      <li><b>Never ask for a card you hold.</b></li>
+    </ul>
+    <div class="box">
+      <p>Say you hold <span class="cards" data-cards="3H 6H 9S"></span></p>
+      <p>You can ask for <span class="cards" data-cards="2H 4H 5H 7H"></span> or any High Spade except your 9♠.
+      You can't ask for the 9♥: that's <b>High</b> Hearts, and you hold none of those.</p>
+    </div>
+
+    <h3>Out of cards?</h3>
+    <p>You're still in the game. When your turn comes, pick a teammate to take it for you. Your team can
+    still win.</p>
+  </section>
+
+  <section id="declare">
+    <h2><span class="n">6</span>Declaring a set, tap by tap</h2>
+    <p>Do this on your turn, when you're sure your team holds all six cards of a set:</p>
+    <ol class="steps">
+      <li>Tap <b>Declare</b>.</li>
+      <li>Pick the set. Each one shows how many of it you hold.</li>
+      <li>For each card, tap who has it: <b>You</b> or a teammate. Your own cards are filled in for you.</li>
+      <li>Tap <b>Declare [set]</b>.</li>
+    </ol>
+    <div class="box tip">
+      <div class="label">Careful</div>
+      <p><b>If any card is wrong, the other team wins the set</b>, even if your team really had all six.
+      Only declare when you're sure who has each card. Declaring doesn't end your turn.</p>
+    </div>
+  </section>
+
+  <section id="example">
+    <h2><span class="n">7</span>A sample game, move by move</h2>
+    <p>You're at the table above, holding the <span class="chip">9♠</span> <span class="chip">J♠</span>
+    <span class="chip">K♠</span> among other cards. Here's how it might go.</p>
+
+    <div class="play"><span class="ico">1</span><div>
+      <p><b>Coral</b> (them) asks <b>you</b> for the <span class="chip">J♠</span>. You have it, so it goes to
+      Coral, and Coral asks again.</p>
+      <p class="so">💡 Coral holds High Spades, and now has your J♠.</p>
+    </div></div>
+    <div class="play"><span class="ico">2</span><div>
+      <p><b>Coral</b> asks <b>Maya</b> (your team) for the <span class="chip red">4♥</span>. Maya doesn't have
+      it, so it's now Maya's turn.</p>
+      <p class="so">💡 Coral also holds Low Hearts. Neither Coral nor Maya has the 4♥.</p>
+    </div></div>
+    <div class="play"><span class="ico">3</span><div>
+      <p><b>Maya</b> asks <b>Tide</b> for the <span class="chip">10♣</span> and gets it. Maya asks Tide for the
+      <span class="chip">Q♣</span>: no. Now it's Tide's turn.</p>
+      <p class="so">💡 Your teammate Maya is collecting High Clubs. Tide has no Q♣.</p>
+    </div></div>
+    <div class="play"><span class="ico">4</span><div>
+      <p><b>Tide</b> asks <b>you</b> for the <span class="chip">5♣</span>. You don't have it, so it's your turn.</p>
+      <p class="so">💡 Tide holds Low Clubs.</p>
+    </div></div>
+    <div class="play"><span class="ico">5</span><div>
+      <p><b>Your turn.</b> You still hold the 9♠ and K♠. Remember move 1? Coral has the J♠. Ask Coral for the
+      <span class="chip">J♠</span>: a guaranteed hit, and you ask again.</p>
+      <p class="so">💡 That's Fish in one move: you remembered where a card went and turned it into a sure thing.</p>
+    </div></div>
+  </section>
+
+  <section id="words">
+    <h2><span class="n">8</span>Words to know</h2>
+    <dl class="gloss">
+      <dt>Set</dt><dd>Six cards that belong together, like Low ♥ (2 to 7 of Hearts). There are nine.</dd>
+      <dt>Ask</dt><dd>On your turn, asking one opponent for one exact card.</dd>
+      <dt>Declare</dt><dd>Claiming a set by saying which teammate holds each of its six cards.</dd>
+      <dt>Card count</dt><dd>The number under each player: how many cards they hold. Always public.</dd>
+      <dt>Bot</dt><dd>A computer player that fills an empty seat.</dd>
+      <dt>Time per move</dt><dd>How long you have for each move: 20 seconds on public tables; the host decides on private ones.</dd>
+      <dt>Time bank</dt><dd>On some private tables, extra seconds you can use once a move's time runs out.</dd>
+      <dt>Rated game</dt><dd>A Quick Play game that counts toward your rating. Needs a free account.</dd>
+    </dl>
+  </section>
+
+  <section id="faq">
+    <h2><span class="n">9</span>Questions beginners ask</h2>
+    <div class="faq">
+      <details><summary>Can I ask my teammate for a card?</summary>
+        <p>No, only the other team. Teammates can't trade; you win by pulling cards away from the opponents.</p></details>
+      <details><summary>Why can't I ask for some cards?</summary>
+        <p>You can only ask in a set you hold a card of, and never for a card you hold. The app only shows the
+        cards you're allowed to ask for.</p></details>
+      <details><summary>What happens if I declare wrong?</summary>
+        <p>The other team wins that set, even if your team really had all six. When in doubt, wait.</p></details>
+      <details><summary>Does it have to be me who declares?</summary>
+        <p>No. Anyone on your team can declare on their own turn.</p></details>
+      <details><summary>Where do the cards go after a set is declared?</summary>
+        <p>All six are shown to everyone and leave the game.</p></details>
+      <details><summary>I ran out of cards. Am I out?</summary>
+        <p>No. Your team plays on, and on your turn you hand it to a teammate who still has cards.</p></details>
+      <details><summary>Why can I only see the last two moves?</summary>
+        <p>Remembering what happened is the skill, just like at a real table where nobody writes things down.
+        Part 2 shows you how to keep track.</p></details>
+      <details><summary>What if I don't move in time?</summary>
+        <p>The game makes a move for you. Miss two turns in a row and it keeps playing for you until you tap
+        "I'm back".</p></details>
+      <details><summary>Can a game end in a tie?</summary>
+        <p>No. There are nine sets, so one team always reaches five first.</p></details>
+      <details><summary>Do I need an account?</summary>
+        <p>No. Guests can play everything. A free account adds a rating, a profile and a spot on the leaderboard.</p></details>
+    </div>
+
+    <div class="box tip">
+      <div class="label">Your first game: just three things</div>
+      <ol>
+        <li><b>Ask in the set you hold the most of.</b> It's the one you're closest to finishing.</li>
+        <li><b>Watch the asks in your sets:</b> who asked for what, and who got it.</li>
+        <li><b>Only declare when you know who has every card.</b> Otherwise, wait.</li>
+      </ol>
+    </div>
+    <div class="cta">
+      <a class="btn btn-primary" href="./?play=bots">🤖 Play your first game against the bots</a>
+      <a class="btn btn-ghost" href="./?play=watch">👀 Watch the bots play a whole game first</a>
+    </div>
+    <p class="muted-s">Tip: give yourself time at first. In Settings, set Time per move to No limit.</p>
+  </section>
+
+  <div class="part" id="win-part">
+    <span class="part-tag">Part 2</span>
+    <h2 class="part-title">Play to win</h2>
+    <p class="lede">You know the rules. Here's what separates good players from great ones.</p>
+    <ul class="toc">
+      <li><a href="#clues">Every ask is a clue</a></li>
+      <li><a href="#memory">Two moves on screen</a></li>
+      <li><a href="#asking">Choosing an ask</a></li>
+      <li><a href="#declaring">Declaring safely</a></li>
+      <li><a href="#team">Teamwork</a></li>
+      <li><a href="#clock">The clock</a></li>
+      <li><a href="#myths">Myths</a></li>
+      <li><a href="#practice">Practice plan</a></li>
+    </ul>
+  </div>
+
+  <!-- 3 -->
+  <section id="clues">
+    <h2><span class="n">1</span>Every ask is a clue</h2>
+    <p class="lede">This is the whole game. Every ask tells the whole table something, whether it hits or misses.</p>
+
+    <div class="play"><span class="ico">🗣️</span><div>
+      <p><b>Coral</b> asks <b>Maya</b> for the <span class="chip">Q♠</span>.</p>
+      <p class="so">So <b>Coral holds at least one High Spade</b>, and <b>Coral doesn't have the Q♠</b>
+      (you can't ask for your own card). Both are true before Maya even answers.</p>
+    </div></div>
+    <div class="play"><span class="ico">✅</span><div>
+      <p>Maya has it. The Q♠ moves to Coral.</p>
+      <p class="so">Now everyone knows exactly where the Q♠ is, and it stays there until it moves again in front
+      of everyone.</p>
+    </div></div>
+    <div class="play"><span class="ico">❌</span><div>
+      <p>Or Maya doesn't have it. The turn passes to Maya.</p>
+      <p class="so">Then neither Coral nor Maya has the Q♠. It's with one of the other four players.</p>
+    </div></div>
+
+    <p>Put three facts together and you can often pin a card down:</p>
+    <ol>
+      <li><b>Who asked in which set.</b> They hold at least one card of it.</li>
+      <li><b>Who said no to which card.</b> They don't have it.</li>
+      <li><b>Where cards moved.</b> Those locations are certain.</li>
+    </ol>
+    <p>Add <b>hand counts</b>: a player with no cards holds nothing, and a player with one card left can be
+    holding only one of the cards you're wondering about.</p>
+
+    <div class="box lab">
+      <div class="label">What the engine found</div>
+      <p>Careful bookkeeping is most of the game. An engine that only tracked these facts perfectly won
+      <b>every single one</b> of 400 paired deals against one that played on general hunches. The gap between
+      a casual player and a good one is almost entirely "did you track every clue, and chain them together?"</p>
+    </div>
+
+    <div class="box quiz" data-quiz>
+      <div class="label">Try it</div>
+      <p class="q">Coral asks Jonah for the Q♠. Jonah says no. Which of these do you <em>not</em> know for sure?</p>
+      <div class="opts">
+        <button class="opt" data-why="Asking proves it: you can only ask in a set you hold.">Coral holds a High Spade</button>
+        <button class="opt" data-why="True: you can't ask for a card you hold.">Coral doesn't have the Q♠</button>
+        <button class="opt" data-right data-why="Jonah only showed they lack the Q♠. They may hold other High Spades.">Jonah has no High Spades</button>
+        <button class="opt" data-why="True: that's what &quot;no&quot; means.">Jonah doesn't have the Q♠</button>
+      </div>
+      <p class="why" hidden></p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="memory">
+    <h2><span class="n">2</span>Only two moves on screen</h2>
+    <p class="lede">The app shows the last two moves. Everything before that is up to your memory. That's
+    what makes Fish a game of skill.</p>
+
+    <h3>What's worth remembering, in order</h3>
+    <ol>
+      <li><b>Cards you saw move.</b> A card stays with whoever won it until it moves again, and every move
+      happens in front of you. These are your certainties.</li>
+      <li><b>Which sets each player has shown.</b> Anyone who asked in a set holds a card of it.</li>
+      <li><b>Who said no to what.</b> These rule cards out.</li>
+    </ol>
+
+    <h3>How to hold it in your head</h3>
+    <ul>
+      <li><b>Remember by player, not by move.</b> Not "three moves ago Tide asked Maya…" but
+      "Tide: Low Hearts, has the J♥". One short line per opponent.</li>
+      <li><b>Start with the sets you hold.</b> You can only ask in those, so they pay off first. Add
+      the others as you get comfortable.</li>
+      <li><b>Forget declared sets.</b> Once a set is won, all six cards are shown and leave the game. Drop
+      them from your memory.</li>
+      <li><b>Check against hand counts.</b> If your picture says Reef holds four cards you know of but Reef's
+      seat shows three, something in your picture is wrong.</li>
+    </ul>
+
+    <div class="box quiz" data-quiz>
+      <div class="label">Try it</div>
+      <p class="q">Ten moves ago, Tide won the J♥ from Maya. Nobody has asked Tide for it since. Where is the J♥ now?</p>
+      <div class="opts">
+        <button class="opt" data-right data-why="Cards only move by asks and declarations, and you see every one. Nobody has taken it, so it's still with Tide.">With Tide, for sure</button>
+        <button class="opt" data-why="It's no longer on screen, but it hasn't moved. Cards only move in front of everyone.">Can't know, it's off the screen</button>
+        <button class="opt" data-why="Maya gave it up when Tide asked for it.">Back with Maya</button>
+      </div>
+      <p class="why" hidden></p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="asking">
+    <h2><span class="n">3</span>Choosing your ask</h2>
+    <p class="lede">Keeping the turn is how you win. Every hit gives you another ask, so a long turn can
+    gather a whole set.</p>
+
+    <h3>Rule 1: ask for the card you're surest of</h3>
+    <p>A card you watched move to someone is a sure thing, so cash it in. Next best: a card only one player
+    can be holding, given who said no and who has shown that set.</p>
+
+    <h3>Rule 2: if it's close, think about who gets the turn if you miss</h3>
+    <p>A miss hands the turn to the player you asked. A player with lots of cards does more with a turn
+    than one with two. So when two asks look equally likely, <b>ask the opponent with fewer cards.</b></p>
+
+    <h3>Rule 3: if it's still close, push the sets you're winning</h3>
+    <p>Go after the sets your team already holds most of. Finishing nearly-complete sets beats spreading
+    your effort around.</p>
+
+    <div class="box lab">
+      <div class="label">What the engine found</div>
+      <ul>
+        <li><b>Rules 2 and 3 each made the engine stronger, and together they helped more</b> than either alone.</li>
+        <li><b>They only work as tie-breakers.</b> When the engine let them outweigh a clearly better chance of
+        getting the card, it played <b>worse</b>. Rule 1 always comes first.</li>
+        <li><b>Going after the player who's nearly out of cards did nothing.</b> Their low count matters for
+        rule 2, not as a target.</li>
+        <li><b>Misses are normal.</b> Even the strongest engine misses about <b>2 asks in 5</b>. Judge your
+        play by how many cards you win per turn, not by how often you miss.</li>
+        <li><b>Asks are shakiest at the start</b> and most accurate in the middle of the game, once the clues
+        have piled up. Early asks are partly for information.</li>
+        <li><b>Showing a new set costs a little.</b> When two asks are close, ask in a set you've already shown.</li>
+      </ul>
+    </div>
+
+    <div class="box quiz" data-quiz>
+      <div class="label">Try it</div>
+      <p class="q">You hold the 9♦ and K♦. The A♦ is either with Tide (2 cards) or Reef (7 cards), and it's
+      a coin flip which. Who do you ask?</p>
+      <div class="opts">
+        <button class="opt" data-right data-why="Same chance either way, so pick the safer miss. If Tide says no, Tide gets a turn with only two cards. Reef would get one with seven.">Tide</button>
+        <button class="opt" data-why="Same chance either way, but if Reef says no, Reef gets the turn with seven cards to work with. Tide would be a safer miss.">Reef</button>
+      </div>
+      <p class="why" hidden></p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="declaring">
+    <h2><span class="n">4</span>Declaring without blowing it</h2>
+    <p class="lede">A wrong declaration gives the set to the other team. In a race to five, that's a
+    two-set swing.</p>
+
+    <div class="box lab">
+      <div class="label">What the engine found</div>
+      <p><b>95% of the engine's wrong declarations were about its own team:</b> all six cards were on the team,
+      and it named the wrong teammate for one of them. An opponent still holding a card almost never happened.
+      The danger isn't "do we have them all?" but "<b>who</b> has which?"</p>
+    </div>
+
+    <h3>Count the cards nobody has ever asked for</h3>
+    <p>A card that moved in front of you, or that a teammate asked for, has a known place. A card that was dealt
+    to a teammate and has <b>never come up</b> could be with either of them. <b>Each of those is a guess.</b>
+    That count, not how many of the set you hold, is your real risk.</p>
+    <p>Holding five with the sixth never seen <b>feels</b> safe, but it's a coin flip between your two
+    teammates. Holding one while the other five all moved in front of you is completely safe.</p>
+
+    <h3>Once your team holds all six, there's no hurry</h3>
+    <p>An opponent can only ask in a set they hold a card of, so nobody can take these cards from you. The
+    cards in that set will never move again. Hand counts still help, though: <b>a teammate who runs out of
+    cards holds none of the set</b>, and that can settle the guess.</p>
+
+    <h3>But once you know, declare right away</h3>
+    <p>Strong players declare the moment they're sure. There's nothing to gain by sitting on a set you know,
+    and when your team is on four, declaring wins the game.</p>
+
+    <div class="box lab">
+      <div class="label">What the engine found</div>
+      <p>An engine that declared when it was "probably right" (60–70% sure) <b>lost clearly</b> to one that
+      waited until it actually knew. Waiting until it was certain made no difference compared with waiting
+      until it was very nearly sure, because that in-between case hardly ever came up. You either know the
+      split or you don't. <b>If you have to guess, wait.</b></p>
+    </div>
+
+    <div class="box quiz" data-quiz>
+      <div class="label">Try it</div>
+      <p class="q">Your team holds all of Low Clubs. Which declaration is riskier?</p>
+      <div class="opts">
+        <button class="opt" data-right data-why="The 7♣ never came up, so it could be with either teammate: a coin flip that feels certain.">You hold five; the 7♣ was never asked for</button>
+        <button class="opt" data-why="Every one of the five moved in front of you, so you know exactly where each is. This one is safe.">You hold one; you watched the other five go to your teammates</button>
+      </div>
+      <p class="why" hidden></p>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="team">
+    <h2><span class="n">5</span>Playing as a team, without talking</h2>
+    <p class="lede">There's no chat, so your asks do the talking.</p>
+    <ul>
+      <li><b>Your asks speak for you.</b> Asking in a set tells your teammates you hold a card of it, so
+      they'll place cards with you when they declare.</li>
+      <li><b>Read your teammates the same way.</b> What they ask for tells you which sets they hold, and
+      every card they win has a known place. That's exactly what you need to declare correctly.</li>
+      <li><b>Anyone on the team can declare</b>, on their own turn. If a teammate is better placed to
+      know the split, leave it to them.</li>
+      <li><b>Out of cards?</b> Pass to the teammate most likely to keep a long turn going, usually the one
+      with more cards and clearer clues.</li>
+    </ul>
+  </section>
+
+  <!-- 8 -->
+  <section id="clock">
+    <h2><span class="n">6</span>Beating the clock</h2>
+    <ul>
+      <li><b>Public tables give you 20 seconds a move.</b> Private tables use whatever the host sets.</li>
+      <li><b>Plan during other people's turns.</b> By the time it's your turn, know your first ask and your
+      backup.</li>
+      <li><b>If time runs out, the game plays a move for you.</b> Miss two turns in a row and it keeps playing
+      for you until you tap "I'm back".</li>
+      <li><b>Learn without the clock first.</b> Against the bots, Settings → Time per move → No limit.</li>
+    </ul>
+  </section>
+
+  <!-- 9 -->
+  <section id="myths">
+    <h2><span class="n">7</span>Myths the engine busted</h2>
+    <div class="box">
+      <div class="myth"><span class="m">"Good cards win games."</span>
+        <span class="r2">Ten thousand deals were each played twice, with the teams swapping hands. The deal
+        explained none of the results. Fish has no high cards: every set is worth one, and cards keep moving.</span></div>
+      <div class="myth"><span class="m">"Going first is an advantage."</span>
+        <span class="r2">No measurable advantage for any seat.</span></div>
+      <div class="myth"><span class="m">"The 8s and Jokers set plays differently."</span>
+        <span class="r2">It's won as often and as late as any other set. Treat it normally.</span></div>
+      <div class="myth"><span class="m">"Finish off the player with one card left."</span>
+        <span class="r2">No effect. What matters is not handing the turn to an opponent with lots of cards.</span></div>
+      <div class="myth"><span class="m">"One game shows how well I played."</span>
+        <span class="r2">In a single game, luck in which asks happen to land outweighs skill. Your skill shows over many games.</span></div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section id="practice">
+    <h2><span class="n">8</span>Your practice plan</h2>
+    <ol class="steps">
+      <li><b>Watch one game.</b> The bots play every seat, yours included. Follow one set from the deal to its
+      declaration.</li>
+      <li><b>Play the bots with no clock.</b> Track just the sets you hold. Before each ask, say to yourself
+      why that card should be there.</li>
+      <li><b>Add one opponent.</b> Keep a one-line note in your head for them: the sets they've shown and the
+      cards they've won.</li>
+      <li><b>Turn the clock on.</b> 30 seconds, then 20, the speed of public tables.</li>
+      <li><b>Play people.</b> A private table with friends, then Quick Play for a rating.</li>
+    </ol>
+    <div class="cta">
+      <a class="btn btn-primary" href="./?play=bots">🤖 Practice against the bots</a>
+      <a class="btn btn-ghost" href="./?play=watch">👀 Watch the bots play a game</a>
+    </div>
+  </section>
+
+  <p class="foot">The "What the engine found" tips come from Fish's research engine, which measured each
+  one over many paired games.
+  <a href="https://github.com/kv1514/fish-researchp12/blob/main/STRATEGY_BOOK.md">The full numbers</a> ·
+  <a href="support.html">Support</a> · <a href="privacy.html">Privacy</a></p>
+</main>
+
+<script>
+(function () {
+  var SUIT = { S: '♠', H: '♥', D: '♦', C: '♣' };
+  function card(code, extra) {
+    if (code === 'RJ' || code === 'BJ') {
+      return '<span class="card joker ' + (code === 'RJ' ? 'red ' : '') + (extra || '') + '" aria-label="'
+        + (code === 'RJ' ? 'Red' : 'Black') + ' joker"><span class="r">JOKER</span><span class="pip">★</span></span>';
+    }
+    var r = code.slice(0, -1), s = code.slice(-1), red = s === 'H' || s === 'D';
+    return '<span class="card ' + (red ? 'red ' : '') + (extra || '') + '" aria-label="' + r + SUIT[s] + '">'
+      + '<span class="r">' + r + '</span><span class="s">' + SUIT[s] + '</span><span class="pip">' + SUIT[s] + '</span></span>';
+  }
+  document.querySelectorAll('[data-cards]').forEach(function (el) {
+    el.innerHTML = el.getAttribute('data-cards').split(' ').map(function (c) { return card(c); }).join('');
+  });
+  var low = ['2', '3', '4', '5', '6', '7'], high = ['9', '10', 'J', 'Q', 'K', 'A'];
+  var rows = [];
+  [['Low', low], ['High', high]].forEach(function (half) {
+    ['S', 'H', 'D', 'C'].forEach(function (s) {
+      rows.push([half[0] + ' ' + SUIT[s], half[1].map(function (r) { return r + s; })]);
+    });
+  });
+  rows.push(['8s & Jokers', ['8S', '8H', '8D', '8C', 'RJ', 'BJ']]);
+  var sets = document.getElementById('sets');
+  if (sets) {
+    sets.innerHTML = rows.map(function (row) {
+      return '<div class="set"><span class="nm">' + row[0] + '</span><span class="cards">'
+        + row[1].map(function (c) { return card(c); }).join('') + '</span></div>';
+    }).join('');
+  }
+  document.querySelectorAll('[data-quiz]').forEach(function (q) {
+    var why = q.querySelector('.why');
+    q.querySelectorAll('.opt').forEach(function (b) {
+      b.addEventListener('click', function () {
+        q.querySelectorAll('.opt').forEach(function (o) { o.classList.remove('right', 'wrong'); });
+        var ok = b.hasAttribute('data-right');
+        b.classList.add(ok ? 'right' : 'wrong');
+        if (!ok) { var r = q.querySelector('[data-right]'); if (r) r.classList.add('right'); }
+        why.innerHTML = (ok ? '<b class="ok">Right.</b> ' : '<b class="no">Not quite.</b> ') + b.getAttribute('data-why');
+        why.hidden = false;
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

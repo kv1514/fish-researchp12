@@ -17,6 +17,10 @@ stable per-branch preview at
 which follows the branch rather than any one deployment --- useful while work
 is in flight, and not the link to give anybody.
 
+**Phone apps:** the same game as an iPhone and an Android app, in
+[`app/`](app/README.md). Building them, and putting them on the App Store and
+Google Play, starts at [app/README.md](app/README.md).
+
 **In one paragraph.** Built KRAKEN v1.1, a research engine for six-player
 Literature with exact combinatorial belief tracking over the hidden deal: a
 dynamic program returns the exact partition function, marginals, uniform

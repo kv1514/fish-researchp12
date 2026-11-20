@@ -205,7 +205,7 @@ class handler(BaseHTTPRequestHandler):
                 # at the moment it matters most.
                 played = s.advance(cap) if cap is not None else s.advance()
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             # Rooms first. A room request is authenticated by its seat
@@ -256,7 +256,7 @@ class handler(BaseHTTPRequestHandler):
                     return self._send({"error": "not your turn"}, 400)
                 played = s.play(parse_action(body.get("action") or {}), **capkw)
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             if op == "step":
@@ -268,7 +268,7 @@ class handler(BaseHTTPRequestHandler):
                     return self._send(snap)
                 played = s.advance(cap if cap is not None else 1)
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             if op == "auto":
@@ -277,7 +277,7 @@ class handler(BaseHTTPRequestHandler):
                 played = s.play(s.suggest(),
                                 **({"max_moves": cap} if cap is not None else {}))
                 out = s.snapshot()
-                out["actions"] = played
+                out["actions"] = [] if s.history else played
                 return self._send(out)
 
             return self._send({"error": "not found"}, 404)
@@ -341,7 +341,8 @@ class handler(BaseHTTPRequestHandler):
                 code, seat, secret, doc = T.create(
                     name, bool(body.get("public", False)),
                     body.get("turn", T.TURN_DEFAULT),
-                    body.get("pace", T.PACE_DEFAULT), card=card)
+                    body.get("pace", T.PACE_DEFAULT), card=card,
+                    bank=body.get("bank", T.BANK_DEFAULT))
                 return self._send({"code": code, "secret": secret,
                                    "table": T.view(doc, code, seat, 1)})
 
@@ -397,7 +398,7 @@ class handler(BaseHTTPRequestHandler):
             elif op == "t_settings":
                 fn = lambda d: (T.update_settings(  # noqa: E731
                     d, secret, body.get("turn"), body.get("pace"),
-                    now=now), True)
+                    now=now, bank=body.get("bank")), True)
             elif op == "t_emote":
                 fn = lambda d: (T.emote(d, secret, str(body.get("emote")),  # noqa: E731
                                         now=now), True)
